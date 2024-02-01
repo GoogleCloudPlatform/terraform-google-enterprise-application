@@ -18,5 +18,5 @@ module "enterprise_application" {
   source = "../.."
 
   project_id  = var.project_id
-  bucket_name = var.bucket_name
+  bucket_name = "${var.project_id}-bucket"
 }
