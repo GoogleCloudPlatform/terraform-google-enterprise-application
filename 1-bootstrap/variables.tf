@@ -15,5 +15,5 @@
  */
 
 variable "project_id" {
-  description = "Project ID for intiial resources"
+  description = "Project ID for initial resources"
 }
