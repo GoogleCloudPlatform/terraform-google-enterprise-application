@@ -12,14 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package test
+package bootstrap
 
 import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestAll(t *testing.T) {
-	tft.AutoDiscoverAndTest(t)
+func TestBootstrap(t *testing.T) {
+	bootstrap := tft.NewTFBlueprintTest(t,
+		         tft.WithTFDir("../../../1-bootstrap"),
+	)
+
+	bootstrap.DefineVerify(func(assert *assert.Assertions) {
+		bootstrap.DefaultVerify(assert)
+
+	})
+	bootstrap.Test()
 }
