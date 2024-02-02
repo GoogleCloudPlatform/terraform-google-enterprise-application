@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,11 @@ module "project" {
   billing_account   = var.billing_account
 
   activate_apis = [
+    "cloudbuild.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "iam.googleapis.com",
     "storage-api.googleapis.com",
-    "serviceusage.googleapis.com"
+    "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com"
   ]
 }
