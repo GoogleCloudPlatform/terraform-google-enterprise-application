@@ -57,6 +57,6 @@ module "tf_cloudbuild_workspace" {
   create_state_bucket_name = "${each.value.bucket_prefix}-state-${var.project_id}"
   log_bucket_name          = "${each.value.bucket_prefix}-logs-${var.project_id}"
 
-  #   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
-  #   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
+  cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
+  cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
 }
