@@ -34,6 +34,7 @@ locals {
       for role in local.folder_admin_roles : {
         folder_id = module.folders.ids[env]
         role      = role
+        env       = env
       }
     ]
   ])
@@ -70,7 +71,7 @@ module "folders" {
 
 # Admin roles to folders
 resource "google_folder_iam_member" "folder_iam" {
-  for_each = { for mapping in local.folder_role_mapping : "${mapping.folder_id}.${mapping.role}" => mapping }
+  for_each = { for mapping in local.folder_role_mapping : "${mapping.env}.${mapping.role}" => mapping }
 
   folder = each.value.folder_id
   role   = each.value.role
