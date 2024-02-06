@@ -15,6 +15,12 @@
  */
 
 locals {
+  envs = [
+    "development",
+    "non-production",
+    "production",
+  ]
+
   folder_admin_roles = [
     "roles/owner",
     "roles/resourcemanager.folderAdmin",
@@ -22,10 +28,11 @@ locals {
     "roles/compute.networkAdmin",
     "roles/compute.xpnAdmin"
   ]
+
   folder_role_mapping = flatten([
-    for folder_id in module.folders.ids_list : [
+    for env in local.envs : [
       for role in local.folder_admin_roles : {
-        folder_id = folder_id
+        folder_id = module.folders.ids[env]
         role      = role
       }
     ]
@@ -58,11 +65,7 @@ module "folders" {
   version = "~> 4.0"
 
   parent = "folders/${var.folder_id}"
-  names = [
-    "development",
-    "non-production",
-    "production",
-  ]
+  names = local.envs
 }
 
 # Admin roles to folders
