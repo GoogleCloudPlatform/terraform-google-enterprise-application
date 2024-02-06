@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+locals {
+  folder_admin_roles = [
+    "roles/owner",
+    "roles/resourcemanager.folderAdmin",
+    "roles/resourcemanager.projectCreator",
+    "roles/compute.networkAdmin",
+    "roles/compute.xpnAdmin"
+  ]
+  folder_role_mapping = flatten([
+    for folder_id in module.folders.ids_list : [
+      for role in local.folder_admin_roles : {
+        folder_id = folder_id
+        role      = role
+      }
+    ]
+  ])
+}
+
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 14.0"
@@ -31,5 +49,71 @@ module "project" {
     "storage-api.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com"
+  ]
+}
+
+# Create mock environment folders
+module "folders" {
+  source  = "terraform-google-modules/folders/google"
+  version = "~> 4.0"
+
+  parent = "folders/${var.folder_id}"
+  names = [
+    "development",
+    "non-production",
+    "production",
+  ]
+}
+
+# Admin roles to folders
+resource "google_folder_iam_member" "folder_iam" {
+  for_each = { for mapping in local.folder_role_mapping : "${mapping.folder_id}.${mapping.role}" => mapping }
+
+  folder = each.value.folder_id
+  role   = each.value.role
+  member = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+# Create SVPC host projects
+module "vpc_project" {
+  for_each = module.folders.ids
+  source   = "terraform-google-modules/project-factory/google"
+  version  = "~> 14.0"
+
+  name              = "eab-vpc-${each.key}"
+  random_project_id = "true"
+  org_id            = var.org_id
+  folder_id         = each.value
+  billing_account   = var.billing_account
+
+  activate_apis = [
+    "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "iam.googleapis.com",
+    "serviceusage.googleapis.com",
+  ]
+}
+
+# Create VPC networks
+module "vpc" {
+  for_each = module.vpc_project
+  source   = "terraform-google-modules/network/google"
+  version  = "~> 9.0"
+
+  project_id      = each.value.project_id
+  network_name    = "eab-vpc-${each.key}"
+  shared_vpc_host = true
+
+  subnets = [
+    {
+      subnet_name   = "eab-${each.key}-region01"
+      subnet_ip     = "10.10.10.0/24"
+      subnet_region = "us-central1"
+    },
+    {
+      subnet_name   = "eab-${each.key}-region02"
+      subnet_ip     = "10.10.20.0/24"
+      subnet_region = "us-east4"
+    },
   ]
 }

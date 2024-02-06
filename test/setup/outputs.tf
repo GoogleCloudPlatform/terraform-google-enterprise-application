@@ -22,3 +22,16 @@ output "sa_key" {
   value     = google_service_account_key.int_test.private_key
   sensitive = true
 }
+
+output "env_folder_ids" {
+  value       = module.folders.ids
+  description = "Folder IDs for environment folders"
+}
+
+output "vpcs" {
+  value = { for env, vpc in module.vpc : env => {
+    network_self_link  = vpc.network_self_link,
+    subnets_self_links = vpc.subnets_self_links,
+    project_id         = vpc.project_id
+  } }
+}
