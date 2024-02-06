@@ -14,4 +14,48 @@
  * limitations under the License.
  */
 
-#TODO Add GKE cluster definition
+locals {
+  networks_re    = "/networks/([^/]*)$"
+  subnetworks_re = "/subnetworks/([^/]*)$"
+}
+
+data "google_compute_subnetwork" "default" {
+  for_each  = { for value in var.cluster_subnetworks : regex(local.subnetworks_re, value)[0] => value }
+  self_link = each.value
+}
+
+module "gke" {
+  source  = "terraform-google-modules/kubernetes-engine/google"
+  version = "~> 30.0"
+
+  for_each = data.google_compute_subnetwork.default
+  name     = "cluster-${each.value.region}-${var.env}"
+
+  project_id        = each.value.project
+  regional          = true
+  region            = each.value.region
+  network           = regex(local.networks_re, each.value.network)[0]
+  subnetwork        = each.value.name
+  ip_range_pods     = each.value.secondary_ip_range[0].range_name
+  ip_range_services = each.value.secondary_ip_range[1].range_name
+  release_channel   = var.release_channel
+
+  monitoring_enable_managed_prometheus = true
+  monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
+
+  deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
+}
+
+module "hub" {
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-membership"
+  version = "~> 30.0"
+
+  for_each = module.gke
+
+  project_id   = var.project_id
+  cluster_name = each.value.name
+  location     = each.value.region
+
+  # TODO: add after release https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1865
+  # membership_location = each.value.region
+}

@@ -40,6 +40,12 @@ locals {
   ])
 }
 
+resource "random_string" "prefix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 14.0"
@@ -65,6 +71,7 @@ module "folders" {
   source  = "terraform-google-modules/folders/google"
   version = "~> 4.0"
 
+  prefix = random_string.prefix.result
   parent = "folders/${var.folder_id}"
   names  = local.envs
 }
@@ -95,6 +102,8 @@ module "vpc_project" {
     "compute.googleapis.com",
     "iam.googleapis.com",
     "serviceusage.googleapis.com",
+    "container.googleapis.com",
+    "gkehub.googleapis.com"
   ]
 }
 
@@ -120,4 +129,28 @@ module "vpc" {
       subnet_region = "us-east4"
     },
   ]
+
+  secondary_ranges = {
+    "eab-${each.key}-region01" = [
+      {
+        range_name    = "eab-${each.key}-region01-secondary-01"
+        ip_cidr_range = "192.168.0.0/18"
+      },
+      {
+        range_name    = "eab-${each.key}-region01-secondary-02"
+        ip_cidr_range = "192.168.64.0/18"
+      },
+    ]
+
+    "eab-${each.key}-region02" = [
+      {
+        range_name    = "eab-${each.key}-region02-secondary-01"
+        ip_cidr_range = "192.168.128.0/18"
+      },
+      {
+        range_name    = "eab-${each.key}-region02-secondary-02"
+        ip_cidr_range = "192.168.192.0/18"
+      },
+    ]
+  }
 }

@@ -14,3 +14,9 @@
  * limitations under the License.
  */
 
+output "cluster_ids" {
+  description = "GKE cluster IDs"
+  value = [
+    for value in module.gke : value.cluster_id
+  ]
+}

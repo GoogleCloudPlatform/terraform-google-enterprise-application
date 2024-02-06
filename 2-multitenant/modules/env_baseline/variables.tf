@@ -14,3 +14,23 @@
  * limitations under the License.
  */
 
+variable "env" {
+  description = "The environment to prepare (ex. development)"
+  type        = string
+}
+
+variable "project_id" {
+  description = "Project ID for cluster memberships"
+  type        = string
+}
+
+variable "cluster_subnetworks" {
+  description = "The subnetwork self_links for clusters"
+  type        = list(string)
+}
+
+variable "release_channel" {
+  description = "The release channel for the clusters"
+  type        = string
+  default     = "REGULAR"
+}

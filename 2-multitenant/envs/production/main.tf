@@ -14,3 +14,14 @@
  * limitations under the License.
  */
 
+locals {
+  env = "production"
+}
+
+module "env" {
+  source = "../../modules/env_baseline"
+
+  env                 = local.env
+  project_id          = var.vpcs[local.env].project_id
+  cluster_subnetworks = var.vpcs[local.env].subnets_self_links
+}

@@ -20,7 +20,7 @@ Each pipeline has the following associated resources:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| project\_id | Project ID for initial resources | `any` | n/a | yes |
+| project\_id | Project ID for initial resources | `string` | n/a | yes |
 
 ## Outputs
 

@@ -16,4 +16,5 @@
 
 variable "project_id" {
   description = "Project ID for initial resources"
+  type        = string
 }
