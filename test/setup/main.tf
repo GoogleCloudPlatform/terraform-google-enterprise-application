@@ -65,7 +65,7 @@ module "folders" {
   version = "~> 4.0"
 
   parent = "folders/${var.folder_id}"
-  names = local.envs
+  names  = local.envs
 }
 
 # Admin roles to folders
