@@ -29,10 +29,10 @@ func TestMultitenant(t *testing.T) {
 		"production",
 	} {
 		t.Run(envName, func(t *testing.T) {
+			t.Parallel()
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
 			)
-			t.Parallel()
 			multitenant.Test()
 		})
 	}
