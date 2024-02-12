@@ -28,6 +28,7 @@ func TestMultitenant(t *testing.T) {
 		"non-production",
 		"production",
 	} {
+		envName := envName
 		t.Run(envName, func(t *testing.T) {
 			t.Parallel()
 			multitenant := tft.NewTFBlueprintTest(t,
