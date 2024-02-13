@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 0.13"
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:environments/v0.0.1"
-  }
+variable "vpcs" {
+  description = "Cluster VPCs"
+  type        = map(any)
 }

@@ -23,15 +23,27 @@ steps:
   - 'TF_VAR_billing_account=$_BILLING_ACCOUNT'
 
 # Bootstrap
-- id: bootstrap-init
+- id: all-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestBootstrap --stage init --verbose']
+  args: ['/bin/bash', '-c', 'cft test run all --stage init --verbose']
 - id: bootstrap-apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestBootstrap --stage apply --verbose']
 - id: bootstrap-verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestBootstrap --stage verify --verbose']
+- id: multitenant-apply
+  waitFor: [all-init]
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMultitenant --stage apply --verbose']
+- id: multitenant-verify
+  waitFor: [multitenant-apply]
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMultitenant --stage verify --verbose']
+- id: multitenant-teardown
+  waitFor: [multitenant-verify]
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMultitenant --stage teardown --verbose']
 - id: bootstrap-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestBootstrap --stage teardown --verbose']
@@ -41,3 +53,5 @@ tags:
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
   _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.19'
+options:
+  machineType: E2_HIGHCPU_8
