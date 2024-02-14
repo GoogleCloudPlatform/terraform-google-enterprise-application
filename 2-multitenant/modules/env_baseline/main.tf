@@ -19,11 +19,13 @@ locals {
   subnetworks_re = "/subnetworks/([^/]*)$"
 }
 
+// Import the subnetworks
 data "google_compute_subnetwork" "default" {
   for_each  = { for value in var.cluster_subnetworks : regex(local.subnetworks_re, value)[0] => value }
   self_link = each.value
 }
 
+// Create a GKE cluster in each subnetwork
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google"
   version = "~> 30.0"
@@ -46,9 +48,11 @@ module "gke" {
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
 
-module "hub" {
+// TODO(apeabody) replace with https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1878
+// Enable fleet membership on the clusters
+module "fleet" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-membership"
-  version = "~> 30.0"
+  version = "~> 29.0"
 
   for_each = module.gke
 
@@ -58,4 +62,14 @@ module "hub" {
 
   # TODO: add after release https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1865
   # membership_location = each.value.region
+}
+
+// TODO(apeabody) replace with https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1878
+data "google_container_cluster" "primary" {
+  for_each   = module.gke
+  depends_on = [module.fleet.wait]
+
+  project  = var.project_id
+  name     = each.value.name
+  location = each.value.region
 }
