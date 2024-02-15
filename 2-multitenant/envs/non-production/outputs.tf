@@ -14,7 +14,22 @@
  * limitations under the License.
  */
 
+output "project_id" {
+  description = "Project ID"
+  value       = var.vpcs[local.env].project_id
+}
+
+output "env" {
+  description = "Environment"
+  value       = local.env
+}
+
 output "clusters_ids" {
   description = "GKE cluster IDs"
   value       = module.env.cluster_ids
+}
+
+output "cluster_membership_ids" {
+  description = "GKE cluster membership IDs"
+  value       = module.env.cluster_membership_ids
 }

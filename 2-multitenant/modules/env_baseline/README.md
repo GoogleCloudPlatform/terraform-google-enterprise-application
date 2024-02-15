@@ -19,5 +19,6 @@ The following resources are created:
 | Name | Description |
 |------|-------------|
 | cluster\_ids | GKE cluster IDs |
+| cluster\_membership\_ids | GKE cluster membership IDs |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
