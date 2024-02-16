@@ -45,6 +45,15 @@ module "gke" {
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
 
+  node_pools = [
+    {
+      name            = "node-pool-1"
+      strategy        = "SURGE"
+      max_surge       = 1
+      max_unavailable = 0
+    }
+  ]
+
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
 
