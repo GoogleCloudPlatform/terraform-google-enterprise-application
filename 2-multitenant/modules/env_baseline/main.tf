@@ -45,6 +45,8 @@ module "gke" {
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
 
+  remove_default_node_pool = true
+
   node_pools = [
     {
       name            = "node-pool-1"
