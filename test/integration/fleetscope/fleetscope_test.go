@@ -30,6 +30,7 @@ func TestFleetscope(t *testing.T) {
 	} {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
+			t.Parallel()
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
 			)
@@ -42,7 +43,6 @@ func TestFleetscope(t *testing.T) {
 				tft.WithTFDir(fmt.Sprintf("../../../4-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
 			)
-			t.Parallel()
 			fleetscope.Test()
 		})
 	}
