@@ -63,7 +63,7 @@ module "gke" {
 // Enable fleet membership on the clusters
 module "fleet" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-membership"
-  version = "~> 29.0"
+  version = "~> 30.0"
 
   for_each = module.gke
 
