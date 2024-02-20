@@ -14,3 +14,27 @@
  * limitations under the License.
  */
 
+variable "env" {
+  description = "The environment to prepare (ex. development)"
+  type        = string
+}
+
+variable "project_id" {
+  description = "The fleet project ID"
+  type        = string
+}
+
+variable "scope_id" {
+  description = "The fleet scope ID"
+  type        = string
+}
+
+variable "namespace_id" {
+  description = "The fleet namespace ID"
+  type        = string
+}
+
+variable "cluster_membership_ids" {
+  description = "The membership IDs in the scope"
+  type        = list(string)
+}
