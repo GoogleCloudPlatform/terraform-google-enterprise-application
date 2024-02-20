@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-locals {
-  env = "production"
-
-  scope_id     = "frontend"
-  namespace_id = "frontend"
+variable "project_id" {
+  description = "The fleet project ID"
+  type        = string
 }
 
-module "env" {
-  source = "../../modules/env_baseline"
-
-  env                    = local.env
-  project_id             = var.project_id
-  scope_id               = local.scope_id
-  cluster_membership_ids = var.cluster_membership_ids
-  namespace_id           = local.namespace_id
+variable "cluster_membership_ids" {
+  description = "The membership IDs in the scope"
+  type        = list(string)
 }

@@ -103,7 +103,8 @@ module "vpc_project" {
     "iam.googleapis.com",
     "serviceusage.googleapis.com",
     "container.googleapis.com",
-    "gkehub.googleapis.com"
+    "gkehub.googleapis.com",
+    "anthos.googleapis.com"
   ]
 }
 
