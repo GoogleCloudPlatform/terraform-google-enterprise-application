@@ -23,5 +23,5 @@ module "env" {
 
   env                 = local.env
   project_id          = var.vpcs[local.env].project_id
-  cluster_subnetworks = var.vpcs[local.env].subnets_self_links
+  cluster_subnetworks = [var.vpcs[local.env].subnets_self_links[0]]
 }
