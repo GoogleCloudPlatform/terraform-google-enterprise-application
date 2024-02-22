@@ -28,3 +28,8 @@ output "cluster_membership_ids" {
     for value in data.google_container_cluster.primary : value.fleet[0].membership
   ]
 }
+
+output "fleet_project_id" {
+  description = "Project ID"
+  value       = module.eab_fleet_project.project_id
+}

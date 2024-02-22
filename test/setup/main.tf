@@ -62,7 +62,8 @@ module "project" {
     "iam.googleapis.com",
     "storage-api.googleapis.com",
     "serviceusage.googleapis.com",
-    "sourcerepo.googleapis.com"
+    "sourcerepo.googleapis.com",
+    "cloudbilling.googleapis.com"
   ]
 }
 
@@ -101,10 +102,7 @@ module "vpc_project" {
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",
-    "serviceusage.googleapis.com",
-    "container.googleapis.com",
-    "gkehub.googleapis.com",
-    "anthos.googleapis.com"
+    "serviceusage.googleapis.com"
   ]
 }
 

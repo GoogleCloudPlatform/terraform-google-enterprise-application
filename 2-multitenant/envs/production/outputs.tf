@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-output "project_id" {
-  description = "Project ID"
-  value       = var.vpcs[local.env].project_id
+output "fleet_project_id" {
+  description = "Fleet Project ID"
+  value       = module.env.fleet_project_id
 }
-
 output "env" {
   description = "Environment"
   value       = local.env
