@@ -21,6 +21,11 @@ locals {
   namespace_id = "frontend"
 }
 
+import {
+  id = "projects/${var.project_id}/locations/global/features/fleetobservability"
+  to = module.env.google_gke_hub_feature.fleet-o11y
+}
+
 module "env" {
   source = "../../modules/env_baseline"
 
