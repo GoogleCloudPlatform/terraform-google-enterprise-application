@@ -60,7 +60,8 @@ module "eab_fleet_project" {
   activate_apis = [
     "gkehub.googleapis.com",
     "anthos.googleapis.com",
-    "compute.googleapis.com"
+    "compute.googleapis.com",
+    "mesh.googleapis.com"
   ]
 }
 

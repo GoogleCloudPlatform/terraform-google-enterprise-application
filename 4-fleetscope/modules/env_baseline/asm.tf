@@ -14,27 +14,13 @@
  * limitations under the License.
  */
 
-variable "env" {
-  description = "The environment to prepare (ex. development)"
-  type        = string
-}
-
-variable "fleet_project_id" {
-  description = "The fleet project ID"
-  type        = string
-}
-
-variable "scope_id" {
-  description = "The fleet scope ID"
-  type        = string
-}
-
-variable "namespace_id" {
-  description = "The fleet namespace ID"
-  type        = string
-}
-
-variable "cluster_membership_ids" {
-  description = "The membership IDs in the scope"
-  type        = list(string)
+resource "google_gke_hub_feature" "servicemesh" {
+  name     = "servicemesh"
+  location = "global"
+  project  = var.fleet_project_id
+  fleet_default_member_config {
+    mesh {
+      management = "MANAGEMENT_AUTOMATIC"
+    }
+  }
 }
