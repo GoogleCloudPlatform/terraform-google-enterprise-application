@@ -31,7 +31,7 @@ module "gke" {
   // source  = "terraform-google-modules/kubernetes-engine/google"
   // version = "~> 30.0"
 
-  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine?ref=6b267bd91362cd78e06850a267a04c0fd2427b1c"
+  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine?ref=v6.2.0"
 
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
