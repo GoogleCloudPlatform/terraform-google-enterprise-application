@@ -21,10 +21,9 @@ output "cluster_ids" {
   ]
 }
 
-// TODO(apeabody) replace with https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1878
 output "cluster_membership_ids" {
   description = "GKE cluster membership IDs"
   value = [
-    for value in data.google_container_cluster.primary : value.fleet[0].membership
+    for value in module.gke : value.fleet_membership
   ]
 }

@@ -27,8 +27,11 @@ data "google_compute_subnetwork" "default" {
 
 // Create a GKE cluster in each subnetwork
 module "gke" {
-  source  = "terraform-google-modules/kubernetes-engine/google"
-  version = "~> 30.0"
+  // TODO(apeabody) replace when ~> 30.1 released
+  // source  = "terraform-google-modules/kubernetes-engine/google"
+  // version = "~> 30.0"
+
+  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine?ref=6b267bd91362cd78e06850a267a04c0fd2427b1c"
 
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
@@ -41,6 +44,7 @@ module "gke" {
   ip_range_pods     = each.value.secondary_ip_range[0].range_name
   ip_range_services = each.value.secondary_ip_range[1].range_name
   release_channel   = var.release_channel
+  fleet_project     = var.project_id
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
@@ -57,30 +61,4 @@ module "gke" {
   ]
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
-}
-
-// TODO(apeabody) replace with https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1878
-// Enable fleet membership on the clusters
-module "fleet" {
-  source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-membership"
-  version = "~> 30.0"
-
-  for_each = module.gke
-
-  project_id   = var.project_id
-  cluster_name = each.value.name
-  location     = each.value.region
-
-  # TODO: add after release https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1865
-  # membership_location = each.value.region
-}
-
-// TODO(apeabody) replace with https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/pull/1878
-data "google_container_cluster" "primary" {
-  for_each   = module.gke
-  depends_on = [module.fleet.wait]
-
-  project  = var.project_id
-  name     = each.value.name
-  location = each.value.region
 }
