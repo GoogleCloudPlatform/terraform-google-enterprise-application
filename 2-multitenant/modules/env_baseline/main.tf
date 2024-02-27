@@ -63,7 +63,9 @@ module "eab_fleet_project" {
     "compute.googleapis.com",
     "mesh.googleapis.com",
     "multiclusteringress.googleapis.com",
-    "multiclusterservicediscovery.googleapis.com"
+    "multiclusterservicediscovery.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
+    "sourcerepo.googleapis.com"
   ]
 }
 
