@@ -18,9 +18,8 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description |
 |------|-------------|
-| env\_folder\_ids | Folder IDs for environment folders |
+| envs | n/a |
 | project\_id | n/a |
 | sa\_key | n/a |
-| vpcs | n/a |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

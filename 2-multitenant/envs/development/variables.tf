@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-variable "vpcs" {
-  description = "Cluster VPCs"
+variable "envs" {
+  description = "Cluster Env VPCs"
   type        = map(any)
 }

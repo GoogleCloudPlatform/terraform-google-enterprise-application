@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-output "project_id" {
-  description = "Project ID"
-  value       = var.vpcs[local.env].project_id
+output "network_project_id" {
+  description = "Network Project ID"
+  value       = module.env.network_project_id
+}
+
+output "fleet_project_id" {
+  description = "Fleet Project ID"
+  value       = module.env.fleet_project_id
+}
+
+output "cluster_project_id" {
+  description = "Cluster Project ID"
+  value       = module.env.cluster_project_id
 }
 
 output "env" {

@@ -19,8 +19,23 @@ variable "env" {
   type        = string
 }
 
-variable "project_id" {
-  description = "Project ID for cluster memberships"
+variable "org_id" {
+  description = "Organization ID"
+  type        = string
+}
+
+variable "folder_id" {
+  description = "Folder ID"
+  type        = string
+}
+
+variable "network_project_id" {
+  description = "Network Project ID"
+  type        = string
+}
+
+variable "billing_account" {
+  description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
   type        = string
 }
 
