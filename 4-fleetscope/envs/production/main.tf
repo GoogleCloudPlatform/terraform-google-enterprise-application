@@ -30,7 +30,7 @@ module "env" {
   source = "../../modules/env_baseline"
 
   env                    = local.env
-  project_id             = var.project_id
+  project_id             = var.fleet_project_id
   scope_id               = local.scope_id
   cluster_membership_ids = var.cluster_membership_ids
   namespace_id           = local.namespace_id

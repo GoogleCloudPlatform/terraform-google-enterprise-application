@@ -23,15 +23,13 @@ output "sa_key" {
   sensitive = true
 }
 
-output "env_folder_ids" {
-  value       = module.folders.ids
-  description = "Folder IDs for environment folders"
-}
-
-output "vpcs" {
+output "envs" {
   value = { for env, vpc in module.vpc : env => {
+    org_id             = var.org_id
+    folder_id          = module.folders.ids[env]
+    billing_account    = var.billing_account
+    network_project_id = vpc.project_id
     network_self_link  = vpc.network_self_link,
     subnets_self_links = vpc.subnets_self_links,
-    project_id         = vpc.project_id
   } }
 }
