@@ -27,3 +27,18 @@ output "cluster_membership_ids" {
     for value in module.gke : value.fleet_membership
   ]
 }
+
+output "network_project_id" {
+  description = "Network Project ID"
+  value       = var.network_project_id
+}
+
+output "fleet_project_id" {
+  description = "Fleet Project ID"
+  value       = module.eab_fleet_project.project_id
+}
+
+output "cluster_project_id" {
+  description = "Cluster Project ID"
+  value       = module.eab_cluster_project.project_id
+}

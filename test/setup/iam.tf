@@ -37,3 +37,9 @@ resource "google_project_iam_member" "int_test" {
 resource "google_service_account_key" "int_test" {
   service_account_id = google_service_account.int_test.id
 }
+
+resource "google_billing_account_iam_member" "tf_billing_user" {
+  billing_account_id = var.billing_account
+  role               = "roles/billing.admin"
+  member             = "serviceAccount:${google_service_account.int_test.email}"
+}
