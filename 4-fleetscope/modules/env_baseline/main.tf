@@ -26,14 +26,14 @@ resource "random_string" "suffix" {
 
 resource "google_gke_hub_scope" "fleet-scope" {
   scope_id = "${var.scope_id}-${var.env}"
-  project  = var.project_id
+  project  = var.fleet_project_id
 }
 
 resource "google_gke_hub_namespace" "fleet-ns" {
   scope_namespace_id = "${var.namespace_id}-${var.env}"
   scope_id           = google_gke_hub_scope.fleet-scope.scope_id
   scope              = google_gke_hub_scope.fleet-scope.name
-  project            = var.project_id
+  project            = var.fleet_project_id
 }
 
 resource "google_gke_hub_membership_binding" "membership-binding" {
@@ -43,5 +43,5 @@ resource "google_gke_hub_membership_binding" "membership-binding" {
   scope                 = google_gke_hub_scope.fleet-scope.name
   membership_id         = regex(local.membership_re, each.key)[2]
   location              = regex(local.membership_re, each.key)[1]
-  project               = var.project_id
+  project               = var.fleet_project_id
 }
