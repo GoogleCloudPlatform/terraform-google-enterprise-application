@@ -61,6 +61,7 @@ module "eab_fleet_project" {
     "gkehub.googleapis.com",
     "anthos.googleapis.com",
     "compute.googleapis.com",
+    "mesh.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com"
   ]
@@ -109,6 +110,8 @@ module "gke" {
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
 
   remove_default_node_pool = true
+
+  enable_binary_authorization = true
 
   node_pools = [
     {
