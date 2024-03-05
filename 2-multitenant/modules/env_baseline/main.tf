@@ -119,6 +119,8 @@ module "gke" {
       strategy        = "SURGE"
       max_surge       = 1
       max_unavailable = 0
+      autoscaling     = true
+      location_policy = "BALANCED"
     }
   ]
 
