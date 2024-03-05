@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-variable "env" {
-  description = "The environment to prepare (ex. development)"
-  type        = string
+locals {
+  fleet_membership_re = "//gkehub.googleapis.com/(.*)$"
 }
 
-variable "fleet_project_id" {
-  description = "The fleet project ID"
-  type        = string
+resource "google_gke_hub_feature" "mci" {
+  name     = "multiclusteringress"
+  location = "global"
+  project  = var.fleet_project_id
+  spec {
+    multiclusteringress {
+      config_membership = regex(local.fleet_membership_re, var.cluster_membership_ids[0])[0]
+    }
+  }
 }
 
-variable "scope_id" {
-  description = "The fleet scope ID"
-  type        = string
-}
-
-variable "namespace_id" {
-  description = "The fleet namespace ID"
-  type        = string
-}
-
-variable "cluster_membership_ids" {
-  description = "The membership IDs in the scope"
-  type        = list(string)
+resource "google_gke_hub_feature" "mcs" {
+  name     = "multiclusterservicediscovery"
+  location = "global"
+  project  = var.fleet_project_id
 }
