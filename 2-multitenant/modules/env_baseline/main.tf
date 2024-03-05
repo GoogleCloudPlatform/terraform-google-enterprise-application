@@ -61,7 +61,9 @@ module "eab_fleet_project" {
     "gkehub.googleapis.com",
     "anthos.googleapis.com",
     "compute.googleapis.com",
-    "mesh.googleapis.com"
+    "mesh.googleapis.com",
+    "multiclusteringress.googleapis.com",
+    "multiclusterservicediscovery.googleapis.com"
   ]
 }
 
@@ -91,7 +93,7 @@ module "gke" {
   // source  = "terraform-google-modules/kubernetes-engine/google"
   // version = "~> 30.0"
 
-  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine?ref=6b267bd91362cd78e06850a267a04c0fd2427b1c"
+  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine//modules/private-cluster?ref=6b267bd91362cd78e06850a267a04c0fd2427b1c"
 
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
@@ -112,12 +114,16 @@ module "gke" {
 
   remove_default_node_pool = true
 
+  enable_binary_authorization = true
+
   node_pools = [
     {
       name            = "node-pool-1"
       strategy        = "SURGE"
       max_surge       = 1
       max_unavailable = 0
+      autoscaling     = true
+      location_policy = "BALANCED"
     }
   ]
 
