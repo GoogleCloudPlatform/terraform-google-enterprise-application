@@ -111,6 +111,8 @@ module "gke" {
 
   remove_default_node_pool = true
 
+  enable_binary_authorization = true
+
   node_pools = [
     {
       name            = "node-pool-1"
