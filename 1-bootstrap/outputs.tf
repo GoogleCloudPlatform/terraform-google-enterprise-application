@@ -14,6 +14,26 @@
  * limitations under the License.
  */
 
-output "state_buckets" {
+output "project_id" {
+  description = "Project ID"
+  value = var.project_id
+}
+
+output "state_bucket" {
+  description = "Bucket for storing TF state"
   value = { for key, value in module.tf_cloudbuild_workspace : key => value.state_bucket }
+}
+
+output "artifacts_bucket" {
+  description = "Bucket for storing TF plans"
+  value = { for key, value in module.tf_cloudbuild_workspace : key => value.artifacts_bucket }
+}
+
+output "logs_bucket" {
+  description = "Bucket for storing TF logs"
+  value = { for key, value in module.tf_cloudbuild_workspace : key => value.logs_bucket }
+}
+
+output "source_repo_urls" {
+  value = { for repo_id, repo in google_sourcerepo_repository.gcp_repo : repo_id => "https://source.developers.google.com/p/${var.project_id}/r/${repo.name}" }
 }

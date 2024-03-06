@@ -18,3 +18,27 @@ variable "project_id" {
   description = "Project ID for initial resources"
   type        = string
 }
+
+variable "bucket_prefix" {
+  description = "Name prefix to use for state bucket created."
+  type        = string
+  default     = "bkt"
+}
+
+variable "location" {
+  description = "Location for build logs/state bucket"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "trigger_location" {
+  description = "Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool."
+  type        = string
+  default     = "global"
+}
+
+variable "storage_bucket_labels" {
+  description = "Labels to apply to the storage bucket."
+  type        = map(string)
+  default     = {}
+}
