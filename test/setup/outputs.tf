@@ -33,3 +33,7 @@ output "envs" {
     subnets_self_links = vpc.subnets_self_links,
   } }
 }
+
+output "common_folder_id" {
+  value = module.folder_common.ids[0]
+}
