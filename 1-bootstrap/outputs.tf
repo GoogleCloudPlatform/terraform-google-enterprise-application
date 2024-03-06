@@ -21,7 +21,7 @@ output "project_id" {
 
 output "state_bucket" {
   description = "Bucket for storing TF state"
-  value = { for key, value in module.tf_cloudbuild_workspace : key => value.state_bucket }
+  value = module.tfstate_bucket.bucket.self_link
 }
 
 output "artifacts_bucket" {
