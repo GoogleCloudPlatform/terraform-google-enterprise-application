@@ -14,21 +14,3 @@
  * limitations under the License.
  */
 
-variable "folder_id" {
-  type        = string
-  description = "Folder ID in which to create all application admin projects"
-}
-
-variable "org_id" {
-  type        = string
-  description = "Google Cloud Organization ID."
-}
-
-variable "billing_account" {
-  type        = string
-  description = "Billing Account ID for application admin project resources."
-}
-
-variable "envs" {
-  type = map(any)
-}

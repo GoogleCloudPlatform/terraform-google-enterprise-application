@@ -99,10 +99,10 @@ resource "google_folder_iam_member" "folder_iam" {
 
 # Admin roles to common folder
 resource "google_folder_iam_member" "common_folder_iam" {
-  for_each = local.folder_admin_roles
-  folder = module.folder_common.ids[0]
-  role   = each.value.role
-  member = "serviceAccount:${google_service_account.int_test.email}"
+  for_each = toset(local.folder_admin_roles)
+  folder   = module.folder_common.ids["common"]
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.int_test.email}"
 }
 
 # Create SVPC host projects

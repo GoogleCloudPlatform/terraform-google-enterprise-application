@@ -18,6 +18,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description |
 |------|-------------|
+| common\_folder\_id | n/a |
 | envs | n/a |
 | project\_id | n/a |
 | sa\_key | n/a |
