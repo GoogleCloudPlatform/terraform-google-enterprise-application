@@ -16,22 +16,22 @@
 
 output "project_id" {
   description = "Project ID"
-  value = var.project_id
+  value       = var.project_id
 }
 
 output "state_bucket" {
   description = "Bucket for storing TF state"
-  value = module.tfstate_bucket.bucket.self_link
+  value       = module.tfstate_bucket.bucket.self_link
 }
 
 output "artifacts_bucket" {
   description = "Bucket for storing TF plans"
-  value = { for key, value in module.tf_cloudbuild_workspace : key => value.artifacts_bucket }
+  value       = { for key, value in module.tf_cloudbuild_workspace : key => value.artifacts_bucket }
 }
 
 output "logs_bucket" {
   description = "Bucket for storing TF logs"
-  value = { for key, value in module.tf_cloudbuild_workspace : key => value.logs_bucket }
+  value       = { for key, value in module.tf_cloudbuild_workspace : key => value.logs_bucket }
 }
 
 output "source_repo_urls" {

@@ -17,20 +17,20 @@
 locals {
   cb_config = {
     "multitenant" = {
-      repo_name     = "eab-multitenant",
+      repo_name    = "eab-multitenant",
       bucket_infix = "mt"
       roles = [
         "roles/container.admin"
       ]
     }
     "applicationfactory" = {
-      repo_name     = "eab-applicationfactory",
+      repo_name    = "eab-applicationfactory",
       bucket_infix = "af"
       roles = [
       ]
     }
     "fleetscope" = {
-      repo_name     = "eab-fleetscope",
+      repo_name    = "eab-fleetscope",
       bucket_infix = "fs"
       roles = [
       ]
@@ -72,8 +72,8 @@ module "tf_cloudbuild_workspace" {
   tf_repo_type          = "CLOUD_SOURCE_REPOSITORIES"
   trigger_location      = var.trigger_location
   artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-build" # bucket para armazenar artefatos de build
-  log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-logs" # bucket para armazenar logs do Cloud Build
-  
+  log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-logs"  # bucket para armazenar logs do Cloud Build
+
   create_state_bucket    = false
   state_bucket_self_link = module.tfstate_bucket.bucket.self_link # bucket para armazenar o state terraform
   # create_state_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-state" 
