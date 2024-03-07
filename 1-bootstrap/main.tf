@@ -49,7 +49,7 @@ module "tfstate_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
   version = "~> 5.0"
 
-  name          = "${var.bucket_prefix}-${var.project_id}-tfstate"
+  name          = "${var.bucket_prefix}-${var.project_id}-tf-state"
   project_id    = var.project_id
   location      = var.location
   force_destroy = var.bucket_force_destroy
@@ -73,10 +73,10 @@ module "tf_cloudbuild_workspace" {
   trigger_location      = var.trigger_location
   artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-build" # bucket para armazenar artefatos de build
   log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-logs" # bucket para armazenar logs do Cloud Build
-  
+
   create_state_bucket    = false
   state_bucket_self_link = module.tfstate_bucket.bucket.self_link # bucket para armazenar o state terraform
-  # create_state_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-state" 
+  # create_state_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-state"
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
