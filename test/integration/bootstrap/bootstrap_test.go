@@ -16,7 +16,6 @@ package bootstrap
 
 import (
 	"fmt"
-	// "strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
