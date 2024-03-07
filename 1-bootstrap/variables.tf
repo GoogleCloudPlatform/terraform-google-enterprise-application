@@ -42,9 +42,3 @@ variable "trigger_location" {
   type        = string
   default     = "global"
 }
-
-variable "storage_bucket_labels" {
-  description = "Labels to apply to the storage bucket."
-  type        = map(string)
-  default     = {}
-}

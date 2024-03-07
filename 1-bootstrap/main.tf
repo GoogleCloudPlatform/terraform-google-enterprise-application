@@ -26,14 +26,12 @@ locals {
     "applicationfactory" = {
       repo_name    = "eab-applicationfactory",
       bucket_infix = "af"
-      roles = [
-      ]
+      roles        = []
     }
     "fleetscope" = {
       repo_name    = "eab-fleetscope",
       bucket_infix = "fs"
-      roles = [
-      ]
+      roles        = []
     }
   }
 }
@@ -53,10 +51,6 @@ module "tfstate_bucket" {
   project_id    = var.project_id
   location      = var.location
   force_destroy = var.bucket_force_destroy
-
-  # encryption = {
-  #   default_kms_key_name = local.state_bucket_kms_key
-  # }
 }
 
 module "tf_cloudbuild_workspace" {
@@ -71,12 +65,11 @@ module "tf_cloudbuild_workspace" {
   tf_repo_uri           = google_sourcerepo_repository.gcp_repo[each.key].url
   tf_repo_type          = "CLOUD_SOURCE_REPOSITORIES"
   trigger_location      = var.trigger_location
-  artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-build" # bucket para armazenar artefatos de build
-  log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-logs" # bucket para armazenar logs do Cloud Build
+  artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-build"
+  log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-logs"
 
   create_state_bucket    = false
-  state_bucket_self_link = module.tfstate_bucket.bucket.self_link # bucket para armazenar o state terraform
-  # create_state_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-state"
+  state_bucket_self_link = module.tfstate_bucket.bucket.self_link
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"

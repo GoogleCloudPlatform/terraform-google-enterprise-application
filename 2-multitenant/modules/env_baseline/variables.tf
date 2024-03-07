@@ -49,8 +49,3 @@ variable "release_channel" {
   type        = string
   default     = "REGULAR"
 }
-
-variable "tfstate_bucket_selflink" {
-  description = "The selflink for tfstate remote bucket."
-  type        = string
-}

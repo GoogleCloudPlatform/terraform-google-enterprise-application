@@ -21,8 +21,8 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
-	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
 )
 
 func TestBootstrap(t *testing.T) {
@@ -75,19 +75,19 @@ func TestBootstrap(t *testing.T) {
 
 		//source repositories
 		repos := []string{
-		"eab-applicationfactory",
-		"eab-fleetscope",
-		"eab-multitenant",
+			"eab-applicationfactory",
+			"eab-fleetscope",
+			"eab-multitenant",
 		}
 		for _, repo := range repos {
-		url := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", projectID, repo)
-		repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repo, projectID)
-		repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repo, projectID)
-		repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
-		repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s", repo), repoIamOpts).Array()[0]
-		listMembers := utils.GetResultStrSlice(repoIamPolicyOp.Get("bindings.members").Array())
-		assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role roles/viewer on repo %s", repoSa, repo))
-		assert.Equal(url, repoOP.Get("url").String(), "source repo %s should have url %s", repo, url)
+			url := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", projectID, repo)
+			repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repo, projectID)
+			repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repo, projectID)
+			repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
+			repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s", repo), repoIamOpts).Array()[0]
+			listMembers := utils.GetResultStrSlice(repoIamPolicyOp.Get("bindings.members").Array())
+			assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role roles/viewer on repo %s", repoSa, repo))
+			assert.Equal(url, repoOP.Get("url").String(), "source repo %s should have url %s", repo, url)
 		}
 
 		//cloudbuild_triggers
