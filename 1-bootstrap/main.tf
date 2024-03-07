@@ -17,20 +17,20 @@
 locals {
   cb_config = {
     "multitenant" = {
-      repo_name     = "eab-multitenant",
+      repo_name    = "eab-multitenant",
       bucket_infix = "mt"
       roles = [
         "roles/container.admin"
       ]
     }
     "applicationfactory" = {
-      repo_name     = "eab-applicationfactory",
+      repo_name    = "eab-applicationfactory",
       bucket_infix = "af"
       roles = [
       ]
     }
     "fleetscope" = {
-      repo_name     = "eab-fleetscope",
+      repo_name    = "eab-fleetscope",
       bucket_infix = "fs"
       roles = [
       ]
