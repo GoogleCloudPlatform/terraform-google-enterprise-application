@@ -79,7 +79,7 @@ module "gke" {
   // TODO(apeabody) replace when beta-private-cluster ~> 30.2 released
   // source  = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   // version = "~> 30.1"
-  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine//modules/beta-private-cluster?ref=b706737f52db669d0c822da3973eb541fe58a6aa"
+  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine//modules/beta-private-cluster?ref=cfc07e84716b388f9f525b9b276666e778765744"
 
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
@@ -93,7 +93,9 @@ module "gke" {
   ip_range_pods      = each.value.secondary_ip_range[0].range_name
   ip_range_services  = each.value.secondary_ip_range[1].range_name
   release_channel    = var.release_channel
-  fleet_project      = module.eab_fleet_project.project_id
+
+  fleet_project                     = module.eab_fleet_project.project_id
+  fleet_project_grant_service_agent = true
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
