@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-variable "fleet_project_id" {
-  description = "The fleet project ID"
-  type        = string
-}
-
-variable "cluster_membership_ids" {
-  description = "The membership IDs in the scope"
-  type        = list(string)
+terraform {
+  backend "gcs" {
+    bucket = "UPDATE_ME"
+    prefix = "terraform/fleet_scope/development"
+  }
 }

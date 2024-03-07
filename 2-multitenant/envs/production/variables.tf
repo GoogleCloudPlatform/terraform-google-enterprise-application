@@ -18,8 +18,3 @@ variable "envs" {
   description = "Cluster Env VPCs"
   type        = map(any)
 }
-
-variable "tfstate_bucket_selflink" {
-  description = "The selflink for tfstate remote bucket."
-  type        = string
-}

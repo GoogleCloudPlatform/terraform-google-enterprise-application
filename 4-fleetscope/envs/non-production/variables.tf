@@ -23,8 +23,3 @@ variable "cluster_membership_ids" {
   description = "The membership IDs in the scope"
   type        = list(string)
 }
-
-variable "tfstate_bucket_selflink" {
-  description = "The selflink for tfstate remote bucket."
-  type        = string
-}
