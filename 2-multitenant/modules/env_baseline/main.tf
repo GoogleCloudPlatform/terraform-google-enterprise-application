@@ -79,7 +79,7 @@ module "gke" {
   // TODO(apeabody) replace when beta-private-cluster ~> 30.2 released
   // source  = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   // version = "~> 30.1"
-  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine//modules/beta-private-cluster?ref=63c2e12076cf32ccca90f515d423ab7a615924f4"
+  source = "github.com/terraform-google-modules/terraform-google-kubernetes-engine//modules/beta-private-cluster?ref=deab8d2023df82b508c1dce0d58358492ecb844f"
 
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
