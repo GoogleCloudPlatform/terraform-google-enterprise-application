@@ -17,8 +17,7 @@
 locals {
   env = "development"
 
-  scope_id     = "frontend"
-  namespace_id = "frontend"
+  namespace_ids = ["frontend", "accounts", "transactions"]
 }
 
 module "env" {
@@ -26,7 +25,6 @@ module "env" {
 
   env                    = local.env
   fleet_project_id       = var.fleet_project_id
-  scope_id               = local.scope_id
+  namespace_ids          = local.namespace_ids
   cluster_membership_ids = var.cluster_membership_ids
-  namespace_id           = local.namespace_id
 }

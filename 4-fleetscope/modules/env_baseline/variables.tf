@@ -24,14 +24,9 @@ variable "fleet_project_id" {
   type        = string
 }
 
-variable "scope_id" {
-  description = "The fleet scope ID"
-  type        = string
-}
-
-variable "namespace_id" {
-  description = "The fleet namespace ID"
-  type        = string
+variable "namespace_ids" {
+  description = "The fleet namespace IDs"
+  type        = list(string)
 }
 
 variable "cluster_membership_ids" {
