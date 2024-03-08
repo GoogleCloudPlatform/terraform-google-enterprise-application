@@ -36,7 +36,6 @@ func TestBootstrap(t *testing.T) {
 		projectID := bootstrap.GetStringOutput("project_id")
 		gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", projectID, "--json"})
 
-		//Build bucket
 		bucketReposBuild := []string{
 			"mt-build",
 			"af-build",
@@ -49,7 +48,6 @@ func TestBootstrap(t *testing.T) {
 			assert.True(opBucket[0].Exists(), "Bucket %s should exist.", urlBucket)
 		}
 
-		//Logs buckets
 		bucketReposLogs := []string{
 			"mt-logs",
 			"af-logs",
@@ -62,7 +60,6 @@ func TestBootstrap(t *testing.T) {
 			assert.True(opBucket[0].Exists(), "Bucket %s should exist.", urlBucket)
 		}
 
-		//state bucket
 		bucketRepoState := []string{
 			"tf-state",
 		}
@@ -73,7 +70,6 @@ func TestBootstrap(t *testing.T) {
 			assert.True(opBucket[0].Exists(), "Bucket %s should exist.", urlBucket)
 		}
 
-		//source repositories
 		repos := []string{
 			"eab-applicationfactory",
 			"eab-fleetscope",
@@ -90,7 +86,6 @@ func TestBootstrap(t *testing.T) {
 			assert.Equal(url, repoOP.Get("url").String(), "source repo %s should have url %s", repo, url)
 		}
 
-		//cloudbuild_triggers
 		triggerRepos := []string{
 			"eab-applicationfactory",
 			"eab-fleetscope",
@@ -110,7 +105,6 @@ func TestBootstrap(t *testing.T) {
 			}
 		}
 
-		//service account
 		serviceAccounts := []string{
 			"tf-cb-eab-fleetscope",
 			"tf-cb-eab-applicationfactory",
