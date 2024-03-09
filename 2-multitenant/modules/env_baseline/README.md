@@ -24,6 +24,7 @@ The following resources are created:
 | cluster\_ids | GKE cluster IDs |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
+| cluster\_regions | Regions where Cluster were deployed |
 | fleet\_project\_id | Fleet Project ID |
 | network\_project\_id | Network Project ID |
 
