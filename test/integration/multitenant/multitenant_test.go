@@ -18,7 +18,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMultitenant(t *testing.T) {
@@ -34,6 +38,41 @@ func TestMultitenant(t *testing.T) {
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
 			)
+
+			multitenant.DefineVerify(func(assert *assert.Assertions) {
+				multitenant.DefaultVerify(assert)
+
+				// Project IDs
+				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
+				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
+				// networkProjectID := multitenant.GetStringOutput("network_project_id")
+
+				// GKE Cluster
+				clusterRegions := terraform.OutputMap(t, multitenant.GetTFOptions(), "clusters_ids")
+				clusterIds := terraform.OutputMap(t, multitenant.GetTFOptions(), "clusters_ids")
+				listMonitoringEnabledComponents := []string{
+					"SYSTEM_COMPONENTS",
+					"DEPLOYMENT",
+				}
+
+				for _, region := range clusterRegions {
+					for _, id := range clusterIds {
+						clusterOp := gcloud.Runf(t, "container clusters describe %s --region %s --project %s", id, region, clusterProjectID)
+						// NodePool
+						assert.Equal("node-pool-1", clusterOp.Get("nodePools.0.name").String(), "NodePool name should be node-pool-1")
+						assert.Equal("SURGE", clusterOp.Get("nodePools.0.upgradeSettings.strategy").String(), "NodePool strategy should SURGE")
+						assert.Equal("1", clusterOp.Get("nodePools.0.upgradeSettings.maxSurge").String(), "NodePool max surge should be 1")
+						assert.Equal("BALANCED", clusterOp.Get("nodePools.0.autoscaling.locationPolicy").String(), "NodePool auto scaling location prolicy should be BALANCED")
+						assert.True(clusterOp.Get("nodePools.0.autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
+						// Cluster
+						assert.Equal(fleetProjectID, clusterOp.Get("fleet.project").String(), fmt.Sprintf("Cluster %s Fleet Project should be %s", id, fleetProjectID))
+						clusterEnabledComponents := utils.GetResultStrSlice(clusterOp.Get("monitoringConfig.componentConfig.enableComponents").Array())
+						assert.Contains(listMonitoringEnabledComponents, clusterEnabledComponents, fmt.Sprintf("Cluster %s should have Monitoring Enabled Components: SYSTEM_COMPONENTS and DEPLOYMENT", id))
+						assert.True(clusterOp.Get("monitoringConfig.componentConfig.managedPrometheusConfig").Bool(), fmt.Sprintf("Cluster %s should have Managed Prometheus Config equals True", id))
+					}
+				}
+			})
+
 			multitenant.Test()
 		})
 	}

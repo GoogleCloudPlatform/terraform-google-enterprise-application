@@ -34,6 +34,11 @@ output "env" {
   value       = local.env
 }
 
+output "cluster_regions" {
+  description = "Regions where Cluster were deployed"
+  value       = module.env.cluster_regions
+}
+
 output "clusters_ids" {
   description = "GKE cluster IDs"
   value       = module.env.cluster_ids

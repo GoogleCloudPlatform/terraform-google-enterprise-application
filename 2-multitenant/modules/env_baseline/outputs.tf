@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+output "cluster_regions" {
+  description = "Regions where Cluster were deployed"
+  value       = [
+    for value in data.google_compute_subnetwork.default : value.region
+  ]
+}
+
 output "cluster_ids" {
   description = "GKE cluster IDs"
   value = [
