@@ -107,6 +107,20 @@ func TestMultitenant(t *testing.T) {
 						assert.True(clusterOp.Get("monitoringConfig.componentConfig.managedPrometheusConfig").Bool(), fmt.Sprintf("Cluster %s should have Managed Prometheus Config equals True", id))
 					}
 				}
+
+				// Service Identity
+				clusterProjectNumber := gcloud.Runf(t, "projects describe %s", clusterProjectID).Get("projectNumber").String()
+				gkeServiceAgent := fmt.Sprintf("service-%s@gcp-sa-gkehub.iam.gserviceaccount.com", clusterProjectNumber)
+				gke_sa_roles := []string{
+					"roles/gkehub.serviceAgent",
+					"roles/gkehub.crossProjectServiceAgent",
+				}
+
+				gkeIamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", gkeServiceAgent)
+				gkeIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", gkeIamFilter, "--format", "json"})
+				gkeProjectPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", clusterProjectID), gkeIamCommonArgs).Array()
+				gkeSaListRoles := testutils.GetResultFieldStrSlice(gkeProjectPolicy, "bindings.role")
+				assert.Subset(gkeSaListRoles, gke_sa_roles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 			})
 
 			multitenant.Test()
