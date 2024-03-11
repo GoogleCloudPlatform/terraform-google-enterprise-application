@@ -35,11 +35,6 @@ output "cluster_membership_ids" {
   ]
 }
 
-output "network_project_id" {
-  description = "Network Project ID"
-  value       = var.network_project_id
-}
-
 output "fleet_project_id" {
   description = "Fleet Project ID"
   value       = module.eab_fleet_project.project_id
