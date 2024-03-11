@@ -23,6 +23,8 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
 )
 
 func TestMultitenant(t *testing.T) {
@@ -45,10 +47,44 @@ func TestMultitenant(t *testing.T) {
 				// Project IDs
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
-				// networkProjectID := multitenant.GetStringOutput("network_project_id")
+
+				// Projects creation
+				for _, projectOutput := range []struct {
+					projectId string
+					apis      []string
+				}{
+					{
+						projectId: clusterProjectID,
+						apis: []string{
+							"cloudresourcemanager.googleapis.com",
+							"compute.googleapis.com",
+							"iam.googleapis.com",
+							"serviceusage.googleapis.com",
+							"container.googleapis.com",
+						},
+					},
+					{
+						projectId: fleetProjectID,
+						apis: []string{
+							"gkehub.googleapis.com",
+							"anthos.googleapis.com",
+							"compute.googleapis.com",
+							"mesh.googleapis.com",
+							"multiclusteringress.googleapis.com",
+							"multiclusterservicediscovery.googleapis.com",
+						},
+					},
+				} {
+					prj := gcloud.Runf(t, "projects describe %s", projectOutput.projectId)
+					assert.Equal("ACTIVE", prj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", projectOutput.projectId))
+
+					enabledAPIS := gcloud.Runf(t, "services list --project %s", projectOutput.projectId).Array()
+					listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
+					assert.Subset(listApis, projectOutput.apis, "APIs should have been enabled")
+				}
 
 				// GKE Cluster
-				clusterRegions := terraform.OutputMap(t, multitenant.GetTFOptions(), "clusters_ids")
+				clusterRegions := terraform.OutputMap(t, multitenant.GetTFOptions(), "cluster_regions")
 				clusterIds := terraform.OutputMap(t, multitenant.GetTFOptions(), "clusters_ids")
 				listMonitoringEnabledComponents := []string{
 					"SYSTEM_COMPONENTS",
