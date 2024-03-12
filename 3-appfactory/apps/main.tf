@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 module "app_01" {
   source = "../modules/app-group-baseline"
 
@@ -23,7 +22,7 @@ module "app_01" {
 
   org_id          = var.org_id
   billing_account = var.billing_account
-  folder_id       = var.folder_id
+  folder_id       = var.common_folder_id
   envs            = var.envs
   cloudbuild_sa_roles = {
     development = {

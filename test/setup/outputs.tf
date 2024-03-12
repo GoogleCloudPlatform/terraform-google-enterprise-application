@@ -37,3 +37,11 @@ output "envs" {
 output "common_folder_id" {
   value = module.folder_common.ids["common"]
 }
+
+output "org_id" {
+  value = var.org_id
+}
+
+output "billing_account" {
+  value = var.billing_account
+}

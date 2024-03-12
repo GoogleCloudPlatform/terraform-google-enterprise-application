@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-variable "folder_id" {
+variable "common_folder_id" {
   type        = string
   description = "Folder ID in which to create all application admin projects"
 }
