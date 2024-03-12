@@ -38,7 +38,8 @@ module "app_admin_project" {
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "apikeys.googleapis.com"
+    "apikeys.googleapis.com",
+    "sourcerepo.googleapis.com"
   ]
 }
 
