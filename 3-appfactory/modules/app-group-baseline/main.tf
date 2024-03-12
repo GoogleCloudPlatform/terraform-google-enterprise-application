@@ -15,7 +15,7 @@
  */
 
 locals {
-  cloudbuild_sa_roles = { for env in var.envs : env => {
+  cloudbuild_sa_roles = { for env in keys(var.envs) : env => {
     project_id = module.app_env_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
   } }
@@ -54,9 +54,9 @@ module "tf_cloudbuild_workspace" {
   project_id               = module.app_admin_project.project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
   tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
-  artifacts_bucket_name    = "${each.value.bucket_prefix}-build-${module.app_admin_project.project_id}"
-  create_state_bucket_name = "${each.value.bucket_prefix}-state-${module.app_admin_project.project_id}"
-  log_bucket_name          = "${each.value.bucket_prefix}-logs-${module.app_admin_project.project_id}"
+  artifacts_bucket_name    = "${var.application_name}-build-${module.app_admin_project.project_id}"
+  create_state_bucket_name = "${var.application_name}-state-${module.app_admin_project.project_id}"
+  log_bucket_name          = "${var.application_name}-logs-${module.app_admin_project.project_id}"
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
