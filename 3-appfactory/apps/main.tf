@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module "app_01" {
+module "app1" {
   source = "../modules/app-group-baseline"
 
   application_name    = "app1"
