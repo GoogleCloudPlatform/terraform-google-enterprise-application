@@ -68,7 +68,7 @@ module "tf_cloudbuild_workspace" {
 module "app_env_project" {
   for_each          = var.create_env_projects ? var.envs : {}
   source            = "terraform-google-modules/project-factory/google"
-  version           = "11.3.0"
+  version           = "~> 14.5"
   random_project_id = true
   billing_account   = each.value.billing_account
   name              = "${var.application_name}-${each.key}"
