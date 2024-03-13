@@ -24,7 +24,7 @@ locals {
 // Create admin project
 module "app_admin_project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "11.3.0"
+  version           = "~> 14.5"
   random_project_id = true
   billing_account   = var.billing_account
   name              = "${var.application_name}-admin"
