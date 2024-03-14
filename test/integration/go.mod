@@ -2,8 +2,6 @@ module bootstrap
 
 go 1.21.1
 
-replace github.com/terraform-google-modules/enterprise-application/test/integration/testutils => /{pwd}/terraform-google-enterprise-application/test/integration/testutils
-
 require (
 	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.13.0
 	github.com/stretchr/testify v1.9.0

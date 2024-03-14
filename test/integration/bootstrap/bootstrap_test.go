@@ -26,7 +26,6 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
-
 func TestBootstrap(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
