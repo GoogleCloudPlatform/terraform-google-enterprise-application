@@ -12,26 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bootstrap
+package testutils
 
-import (
-	"testing"
-	"time"
-
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/stretchr/testify/assert"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+var (
+	RetryableTransientErrors = map[string]string{
+		// Error 409: unable to queue the operation
+		".*Error 409.*unable to queue the operation": "Unable to queue operation.",
+	}
 )
-
-func TestBootstrap(t *testing.T) {
-	bootstrap := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../1-bootstrap"),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-	)
-
-	bootstrap.DefineVerify(func(assert *assert.Assertions) {
-		bootstrap.DefaultVerify(assert)
-
-	})
-	bootstrap.Test()
-}

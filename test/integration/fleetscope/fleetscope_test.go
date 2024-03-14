@@ -17,8 +17,10 @@ package fleetscope
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
 func TestFleetscope(t *testing.T) {
@@ -42,6 +44,7 @@ func TestFleetscope(t *testing.T) {
 			fleetscope := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../4-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
+				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
 			fleetscope.Test()
 		})

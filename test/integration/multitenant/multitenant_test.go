@@ -17,8 +17,10 @@ package multitenant
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
 func TestMultitenant(t *testing.T) {
@@ -33,6 +35,7 @@ func TestMultitenant(t *testing.T) {
 			t.Parallel()
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
+				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
 			multitenant.Test()
 		})
