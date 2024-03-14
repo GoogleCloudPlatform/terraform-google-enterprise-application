@@ -67,20 +67,6 @@ module "eab_fleet_project" {
   ]
 }
 
-resource "google_project_service_identity" "fleet_gkehub_sa" {
-  provider = google-beta
-  project  = module.eab_fleet_project.project_id
-  service  = "gkehub.googleapis.com"
-}
-
-// Grant fleet gkehub service identity access to cluster project
-resource "google_project_iam_member" "cluster_service_agent_gkehub" {
-  for_each = toset(["roles/gkehub.serviceAgent", "roles/gkehub.crossProjectServiceAgent"])
-  project  = module.eab_cluster_project.project_id
-  role     = each.value
-  member   = "serviceAccount:${google_project_service_identity.fleet_gkehub_sa.email}"
-}
-
 // Retrieve the subnetworks
 data "google_compute_subnetwork" "default" {
   for_each  = { for value in var.cluster_subnetworks : regex(local.subnetworks_re, value)[0] => value }
@@ -89,8 +75,8 @@ data "google_compute_subnetwork" "default" {
 
 // Create a GKE cluster in each subnetwork
 module "gke" {
-  source  = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
-  version = "~> 30.1"
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
+  version = "~> 30.2"
 
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
@@ -104,7 +90,9 @@ module "gke" {
   ip_range_pods      = each.value.secondary_ip_range[0].range_name
   ip_range_services  = each.value.secondary_ip_range[1].range_name
   release_channel    = var.release_channel
-  fleet_project      = module.eab_fleet_project.project_id
+
+  fleet_project                     = module.eab_fleet_project.project_id
+  fleet_project_grant_service_agent = true
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
@@ -126,8 +114,7 @@ module "gke" {
 
   depends_on = [
     module.eab_cluster_project,
-    module.eab_fleet_project,
-    google_project_iam_member.cluster_service_agent_gkehub
+    module.eab_fleet_project
   ]
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy

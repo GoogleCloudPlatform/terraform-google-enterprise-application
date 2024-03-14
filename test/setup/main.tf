@@ -68,6 +68,16 @@ module "project" {
   ]
 }
 
+# Create mock common folder
+module "folder_common" {
+  source  = "terraform-google-modules/folders/google"
+  version = "~> 4.0"
+
+  prefix = random_string.prefix.result
+  parent = "folders/${var.folder_id}"
+  names  = ["common"]
+}
+
 # Create mock environment folders
 module "folders" {
   source  = "terraform-google-modules/folders/google"
@@ -85,6 +95,14 @@ resource "google_folder_iam_member" "folder_iam" {
   folder = each.value.folder_id
   role   = each.value.role
   member = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+# Admin roles to common folder
+resource "google_folder_iam_member" "common_folder_iam" {
+  for_each = toset(local.folder_admin_roles)
+  folder   = module.folder_common.ids["common"]
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.int_test.email}"
 }
 
 # Create SVPC host projects
