@@ -22,8 +22,10 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
-	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
+
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
+
 
 func TestBootstrap(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,

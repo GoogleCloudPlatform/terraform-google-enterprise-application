@@ -75,5 +75,5 @@ module "tf_cloudbuild_workspace" {
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
 
   # Branches to run the build
-  tf_apply_branches = ["development", "non\\-production", "production"]
+  tf_apply_branches = var.tf_apply_branches
 }

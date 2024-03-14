@@ -24,6 +24,7 @@ Each pipeline has the following associated resources:
 | bucket\_prefix | Name prefix to use for state bucket created. | `string` | `"bkt"` | no |
 | location | Location for build logs/state bucket | `string` | `"us-central1"` | no |
 | project\_id | Project ID for initial resources | `string` | n/a | yes |
+| tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "non\\-production",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"global"` | no |
 
 ## Outputs
