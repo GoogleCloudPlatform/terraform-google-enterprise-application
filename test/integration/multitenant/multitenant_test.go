@@ -86,8 +86,8 @@ func TestMultitenant(t *testing.T) {
 				}
 
 				// GKE Cluster
-				clusterRegions := terraform.OutputMap(t, multitenant.GetTFOptions(), "cluster_regions")
-				clusterIds := terraform.OutputMap(t, multitenant.GetTFOptions(), "clusters_ids")
+				clusterRegions := terraform.OutputList(t, multitenant.GetTFOptions(), "cluster_regions")
+				clusterIds := terraform.OutputList(t, multitenant.GetTFOptions(), "clusters_ids")
 				listMonitoringEnabledComponents := []string{
 					"SYSTEM_COMPONENTS",
 					"DEPLOYMENT",
