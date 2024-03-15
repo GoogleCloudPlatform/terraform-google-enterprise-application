@@ -15,7 +15,7 @@
  */
 
 output "cluster_regions" {
-  description = "Regions where Cluster were deployed"
+  description = "Regions with clusters"
   value = [
     for value in data.google_compute_subnetwork.default : value.region
   ]

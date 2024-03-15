@@ -30,7 +30,7 @@ output "env" {
 }
 
 output "cluster_regions" {
-  description = "Regions where Cluster were deployed"
+  description = "Regions with clusters"
   value       = module.env.cluster_regions
 }
 
