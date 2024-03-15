@@ -24,7 +24,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
 
 func TestMultitenant(t *testing.T) {
