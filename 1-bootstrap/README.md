@@ -21,8 +21,8 @@ Each pipeline has the following associated resources:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
-| bucket\_prefix | Name prefix to use for state bucket created. | `string` | `"bkt"` | no |
-| location | Location for build logs/state bucket | `string` | `"us-central1"` | no |
+| bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |
+| location | Location for build buckets. | `string` | `"us-central1"` | no |
 | project\_id | Project ID for initial resources | `string` | n/a | yes |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "non\\-production",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"global"` | no |

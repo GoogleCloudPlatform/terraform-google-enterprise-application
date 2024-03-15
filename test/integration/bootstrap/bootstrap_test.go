@@ -22,9 +22,17 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	// "github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
+	"github.com/tidwall/gjson"
 )
+
+func GetResultFieldStrSlice(rs []gjson.Result, field string) []string {
+	s := make([]string, 0)
+	for _, r := range rs {
+		s = append(s, r.Get(field).String())
+	}
+	return s
+}
 
 func TestBootstrap(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -34,48 +42,40 @@ func TestBootstrap(t *testing.T) {
 	bootstrap.DefineVerify(func(assert *assert.Assertions) {
 		bootstrap.DefaultVerify(assert)
 
+		// Outputs
 		projectID := bootstrap.GetStringOutput("project_id")
+
+		// Buckets
 		gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", projectID, "--json"})
+		bucketInfix := []string{
+			"mt",
+			"af",
+			"fs",
+		}
+		for _, infix := range bucketInfix {
+			urlBuildBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s-build", projectID, infix)
+			opBuildBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-%s-build", projectID, infix), gcloudArgsBucket).Array()
+			assert.True(opBuildBucket[0].Exists(), "Bucket %s should exist.", urlBuildBucket)
+			assert.Equal(urlBuildBucket, opBuildBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlBuildBucket))
 
-		bucketReposBuild := []string{
-			"mt-build",
-			"af-build",
-			"fs-build",
-		}
-		for _, bucket := range bucketReposBuild {
-			urlBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s", projectID, bucket)
-			opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-%s", projectID, bucket), gcloudArgsBucket).Array()
-			assert.Equal(urlBucket, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlBucket))
-			assert.True(opBucket[0].Exists(), "Bucket %s should exist.", urlBucket)
-		}
-
-		bucketReposLogs := []string{
-			"mt-logs",
-			"af-logs",
-			"fs-logs",
-		}
-		for _, bucket := range bucketReposLogs {
-			urlBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s", projectID, bucket)
-			opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-%s", projectID, bucket), gcloudArgsBucket).Array()
-			assert.Equal(urlBucket, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlBucket))
-			assert.True(opBucket[0].Exists(), "Bucket %s should exist.", urlBucket)
+			urlLogsBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s-logs", projectID, infix)
+			opLogsBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-%s-logs", projectID, infix), gcloudArgsBucket).Array()
+			assert.True(opLogsBucket[0].Exists(), "Bucket %s should exist.", urlLogsBucket)
+			assert.Equal(urlLogsBucket, opLogsBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlLogsBucket))
 		}
 
-		bucketRepoState := []string{
-			"tf-state",
-		}
-		for _, bucket := range bucketRepoState {
-			urlBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s", projectID, bucket)
-			opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-%s", projectID, bucket), gcloudArgsBucket).Array()
-			assert.Equal(urlBucket, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlBucket))
-			assert.True(opBucket[0].Exists(), "Bucket %s should exist.", urlBucket)
-		}
+		urlStateBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-tf-state", projectID)
+		opStateBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-tf-state", projectID), gcloudArgsBucket).Array()
+		assert.True(opStateBucket[0].Exists(), "Bucket %s should exist.", urlStateBucket)
+		assert.Equal(urlStateBucket, opStateBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlStateBucket))
 
+		// Source Repo
 		repos := []string{
 			"eab-applicationfactory",
 			"eab-fleetscope",
 			"eab-multitenant",
 		}
+
 		for _, repo := range repos {
 			url := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", projectID, repo)
 			repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repo, projectID)
@@ -87,18 +87,12 @@ func TestBootstrap(t *testing.T) {
 			assert.Equal(url, repoOP.Get("url").String(), "source repo %s should have url %s", repo, url)
 		}
 
-		triggerRepos := []string{
-			"eab-applicationfactory",
-			"eab-fleetscope",
-			"eab-multitenant",
-		}
-
+		// Builds
 		branchesRegex := `^(development|non\\-production|production)$`
-
-		for _, triggerRepo := range triggerRepos {
+		for _, repo := range repos {
 			for _, filter := range []string{
-				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-apply'", branchesRegex, triggerRepo, triggerRepo),
-				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-plan'", branchesRegex, triggerRepo, triggerRepo),
+				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-apply'", branchesRegex, repo, repo),
+				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-plan'", branchesRegex, repo, repo),
 			} {
 				cbOpts := gcloud.WithCommonArgs([]string{"--project", projectID, "--filter", filter, "--format", "json"})
 				cbTriggers := gcloud.Run(t, "beta builds triggers list", cbOpts).Array()
@@ -106,21 +100,17 @@ func TestBootstrap(t *testing.T) {
 			}
 		}
 
-		serviceAccounts := []string{
-			"tf-cb-eab-fleetscope",
-			"tf-cb-eab-applicationfactory",
-			"tf-cb-eab-multitenant",
-		}
-		for _, sa := range serviceAccounts {
-			terraformSAEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", sa, projectID)
+		// Service Account
+		for _, repo := range repos {
+			terraformSAEmail := fmt.Sprintf("tf-cb-%s@%s.iam.gserviceaccount.com", repo, projectID)
 			terraformSAName := fmt.Sprintf("projects/%s/serviceAccounts/%s", projectID, terraformSAEmail)
 			terraformSA := gcloud.Runf(t, "iam service-accounts describe %s --project %s", terraformSAEmail, projectID)
 			saRole := []string{"roles/logging.logWriter"}
 			iamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", terraformSAEmail)
 			iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamFilter, "--format", "json"})
 			projectPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", projectID), iamOpts).Array()
-			listRoles := testutils.GetResultFieldStrSlice(projectPolicy, "bindings.role")
-			assert.Equal(terraformSAName, terraformSA.Get("name").String(), fmt.Sprintf("service account %s should exist", sa))
+			listRoles := GetResultFieldStrSlice(projectPolicy, "bindings.role")
+			assert.Equal(terraformSAName, terraformSA.Get("name").String(), fmt.Sprintf("service account %s should exist", repo))
 			assert.Subset(listRoles, saRole, fmt.Sprintf("service account %s should have project level roles", terraformSAEmail))
 		}
 	})

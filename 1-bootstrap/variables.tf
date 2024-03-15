@@ -20,7 +20,7 @@ variable "project_id" {
 }
 
 variable "bucket_prefix" {
-  description = "Name prefix to use for state bucket created."
+  description = "Name prefix to use for buckets created."
   type        = string
   default     = "bkt"
 }
@@ -32,7 +32,7 @@ variable "bucket_force_destroy" {
 }
 
 variable "location" {
-  description = "Location for build logs/state bucket"
+  description = "Location for build buckets."
   type        = string
   default     = "us-central1"
 }

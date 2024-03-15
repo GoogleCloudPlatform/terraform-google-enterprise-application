@@ -1,11 +1,11 @@
 module bootstrap
 
-go 1.21.1
+go 1.21
 
 require (
 	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.13.0
 	github.com/stretchr/testify v1.9.0
-	github.com/terraform-google-modules/enterprise-application/test/integration/testutils v0.0.0-00010101000000-000000000000
+	github.com/tidwall/gjson v1.17.1
 )
 
 require (
@@ -54,7 +54,6 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.2-0.20210821155943-2d9075ca8770 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/tidwall/gjson v1.17.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
