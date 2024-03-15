@@ -81,7 +81,7 @@ func TestBootstrap(t *testing.T) {
 			repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repo, projectID)
 			repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repo, projectID)
 			repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
-			repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s", repo), repoIamOpts).Array()[0]
+			repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s --project %s", repo, projectID), repoIamOpts).Array()[0]
 			listMembers := utils.GetResultStrSlice(repoIamPolicyOp.Get("bindings.members").Array())
 			assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role roles/viewer on repo %s", repoSa, repo))
 			assert.Equal(url, repoOP.Get("url").String(), "source repo %s should have url %s", repo, url)
