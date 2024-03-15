@@ -17,26 +17,19 @@ package bootstrap
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
-	// "github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
-	"github.com/tidwall/gjson"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
-
-func GetResultFieldStrSlice(rs []gjson.Result, field string) []string {
-	s := make([]string, 0)
-	for _, r := range rs {
-		s = append(s, r.Get(field).String())
-	}
-	return s
-}
 
 func TestBootstrap(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
 	bootstrap.DefineVerify(func(assert *assert.Assertions) {
@@ -109,7 +102,7 @@ func TestBootstrap(t *testing.T) {
 			iamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", terraformSAEmail)
 			iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamFilter, "--format", "json"})
 			projectPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", projectID), iamOpts).Array()
-			listRoles := GetResultFieldStrSlice(projectPolicy, "bindings.role")
+			listRoles := testutils.GetResultFieldStrSlice(projectPolicy, "bindings.role")
 			assert.Equal(terraformSAName, terraformSA.Get("name").String(), fmt.Sprintf("service account %s should exist", repo))
 			assert.Subset(listRoles, saRole, fmt.Sprintf("service account %s should have project level roles", terraformSAEmail))
 		}

@@ -16,14 +16,17 @@ package appfactory
 
 import (
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/stretchr/testify/assert"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
 func TestAppfactory(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
-		         tft.WithTFDir("../../../3-appfactory/apps"),
+		tft.WithTFDir("../../../3-appfactory/apps"),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
 	bootstrap.DefineVerify(func(assert *assert.Assertions) {
