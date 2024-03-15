@@ -38,7 +38,7 @@ func TestFleetscope(t *testing.T) {
 			)
 
 			vars := map[string]interface{}{
-				"fleet_project_id":             multitenant.GetStringOutput("fleet_project_id"),
+				"fleet_project_id":       multitenant.GetStringOutput("fleet_project_id"),
 				"cluster_membership_ids": multitenant.GetStringOutputList("cluster_membership_ids"),
 			}
 			fleetscope := tft.NewTFBlueprintTest(t,
