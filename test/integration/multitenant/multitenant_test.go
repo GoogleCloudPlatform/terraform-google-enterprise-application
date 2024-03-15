@@ -25,6 +25,15 @@ import (
 
 func TestMultitenant(t *testing.T) {
 
+	bootstrap := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../1-bootstrap"),
+	)
+
+	backend_bucket := bootstrap.GetStringOutput("state_bucket")
+	backendConfig := map[string]interface{}{
+		"bucket": backend_bucket,
+	}
+
 	for _, envName := range []string{
 		"development",
 		"non-production",
@@ -36,6 +45,7 @@ func TestMultitenant(t *testing.T) {
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+				tft.WithBackendConfig(backendConfig),
 			)
 			multitenant.Test()
 		})
