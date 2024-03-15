@@ -14,8 +14,7 @@ The following resources are created:
 | cluster\_membership\_ids | The membership IDs in the scope | `list(string)` | n/a | yes |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | fleet\_project\_id | The fleet project ID | `string` | n/a | yes |
-| namespace\_id | The fleet namespace ID | `string` | n/a | yes |
-| scope\_id | The fleet scope ID | `string` | n/a | yes |
+| namespace\_ids | The fleet namespace IDs | `list(string)` | n/a | yes |
 
 ## Outputs
 
