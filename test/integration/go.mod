@@ -1,4 +1,4 @@
-module bootstrap
+module  github.com/terraform-google-modules/enterprise-application/test/integration
 
 go 1.21
 
