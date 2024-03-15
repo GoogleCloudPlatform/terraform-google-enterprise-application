@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration
+module github.com/terraform-google-modules/enterprise-application/test/integration
 
 go 1.21
 
