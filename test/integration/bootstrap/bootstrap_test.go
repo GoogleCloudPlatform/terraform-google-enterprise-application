@@ -16,8 +16,6 @@ package bootstrap
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"path"
 	"testing"
 	"time"
