@@ -68,11 +68,11 @@ func TestBootstrap(t *testing.T) {
 			// create backend file
 			cwd, err := os.Getwd()
 			require.NoError(t, err)
-			destFile := path.Join(cwd, "../../../0-bootstrap/backend.tf")
+			destFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
 			fExists, err2 := fileExists(destFile)
 			require.NoError(t, err2)
 			if !fExists {
-				srcFile := path.Join(cwd, "../../../0-bootstrap/backend.tf.example")
+				srcFile := path.Join(cwd, "../../../1-bootstrap/backend.tf.example")
 				_, err3 := exec.Command("cp", srcFile, destFile).CombinedOutput()
 				require.NoError(t, err3)
 			}
