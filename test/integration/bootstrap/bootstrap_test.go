@@ -16,6 +16,7 @@ package bootstrap
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"testing"
 	"time"
@@ -28,18 +29,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
-
-// fileExists check if a give file exists
-func fileExists(filePath string) (bool, error) {
-	_, err := os.Stat(filePath)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
 
 func TestBootstrap(t *testing.T) {
 
