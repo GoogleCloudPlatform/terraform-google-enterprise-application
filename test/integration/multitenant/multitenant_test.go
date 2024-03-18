@@ -30,9 +30,6 @@ func TestMultitenant(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
-	terraformSA := bootstrap.GetTFSetupStringOutput("ci_service_account")
-	utils.SetEnv(t, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", terraformSA)
-
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,

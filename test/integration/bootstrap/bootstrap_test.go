@@ -17,6 +17,7 @@ package bootstrap
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -29,6 +30,18 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
+
+// fileExists check if a give file exists
+func fileExists(filePath string) (bool, error) {
+	_, err := os.Stat(filePath)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
 
 func TestBootstrap(t *testing.T) {
 
@@ -48,10 +61,23 @@ func TestBootstrap(t *testing.T) {
 
 			// configure options to push state to GCS bucket
 			tempOptions := bootstrap.GetTFOptions()
+			tempOptions.MigrateState = true
 			tempOptions.BackendConfig = map[string]interface{}{
 				"bucket": bootstrap.GetStringOutput("state_bucket"),
 			}
-			tempOptions.MigrateState = true
+
+			// create backend file
+			cwd, err := os.Getwd()
+			require.NoError(t, err)
+			destFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
+			fExists, err2 := fileExists(destFile)
+			require.NoError(t, err2)
+			if !fExists {
+				srcFile := path.Join(cwd, "../../../1-bootstrap/backend.tf.example")
+				_, err3 := exec.Command("cp", srcFile, destFile).CombinedOutput()
+				require.NoError(t, err3)
+			}
+
 			terraform.Init(t, tempOptions)
 		})
 
@@ -137,10 +163,20 @@ func TestBootstrap(t *testing.T) {
 		require.NoError(t, err)
 		statePath := path.Join(cwd, "../../../1-bootstrap/local_backend.tfstate")
 		tempOptions := bootstrap.GetTFOptions()
+		tempOptions.MigrateState = true
 		tempOptions.BackendConfig = map[string]interface{}{
 			"path": statePath,
 		}
-		tempOptions.MigrateState = true
+
+		// remove backend file
+		backendFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
+		fExists, err2 := fileExists(backendFile)
+		require.NoError(t, err2)
+		if fExists {
+			_, err3 := exec.Command("rm", backendFile).CombinedOutput()
+			require.NoError(t, err3)
+		}
+
 		terraform.Init(t, tempOptions)
 		bootstrap.DefaultTeardown(assert)
 	})
