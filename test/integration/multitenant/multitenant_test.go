@@ -30,7 +30,7 @@ func TestMultitenant(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
-	terraformSA := "2843445864@cloudbuild.gserviceaccount.com" //Check how to get the real SA  //bootstrap.GetStringOutput("environment_step_terraform_service_account_email")
+	terraformSA := bootstrap.GetTFSetupStringOutput("ci_service_account")
 	utils.SetEnv(t, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", terraformSA)
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")

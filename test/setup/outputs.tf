@@ -45,3 +45,7 @@ output "org_id" {
 output "billing_account" {
   value = var.billing_account
 }
+
+output "ci_service_account" {
+  value = google_service_account.int_test.email
+}
