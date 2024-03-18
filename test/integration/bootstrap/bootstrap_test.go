@@ -159,14 +159,14 @@ func TestBootstrap(t *testing.T) {
 		// configure options to pull state from GCS bucket
 		cwd, err := os.Getwd()
 		require.NoError(t, err)
-		statePath := path.Join(cwd, "../../../0-bootstrap/local_backend.tfstate")
+		statePath := path.Join(cwd, "../../../1-bootstrap/local_backend.tfstate")
 		tempOptions := bootstrap.GetTFOptions()
 		tempOptions.BackendConfig = map[string]interface{}{
 			"path": statePath,
 		}
 		tempOptions.MigrateState = true
 		// remove backend file
-		backendFile := path.Join(cwd, "../../../0-bootstrap/backend.tf")
+		backendFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
 		fExists, err2 := fileExists(backendFile)
 		require.NoError(t, err2)
 		if fExists {
