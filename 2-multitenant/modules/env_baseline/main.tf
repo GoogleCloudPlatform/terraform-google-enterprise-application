@@ -97,6 +97,26 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
+// Create
+module "ip_address" {
+  source  = "terraform-google-modules/address/google"
+  version = "~> 3.2"
+
+  for_each = data.google_compute_subnetwork.default
+
+  project_id = regex(local.projects_re, each.value.id)[0]
+  region     = each.value.region
+
+  subnetwork = each.value.name
+
+  names = [
+    "ip-${each.value.region}-${var.env}-1",
+    "ip-${each.value.region}-${var.env}-2",
+    "ip-${each.value.region}-${var.env}-3"
+  ]
+}
+
+
 // Create a GKE cluster in each subnetwork
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
