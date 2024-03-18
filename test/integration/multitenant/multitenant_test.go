@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
@@ -28,6 +29,9 @@ func TestMultitenant(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
+
+	terraformSA := "2843445864@cloudbuild.gserviceaccount.com" //Check how to get the real SA  //bootstrap.GetStringOutput("environment_step_terraform_service_account_email")
+	utils.SetEnv(t, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", terraformSA)
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
