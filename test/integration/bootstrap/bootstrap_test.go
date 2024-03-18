@@ -16,21 +16,68 @@ package bootstrap
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"path"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
+// fileExists check if a give file exists
+func fileExists(filePath string) (bool, error) {
+	_, err := os.Stat(filePath)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
 func TestBootstrap(t *testing.T) {
+
+	vars := map[string]interface{}{
+		"bucket_force_destroy": true,
+	}
+
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
+		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
+
+	bootstrap.DefineApply(
+		func(assert *assert.Assertions) {
+			bootstrap.DefaultApply(assert)
+
+			// configure options to push state to GCS bucket
+			tempOptions := bootstrap.GetTFOptions()
+			tempOptions.BackendConfig = map[string]interface{}{
+				"bucket": bootstrap.GetStringOutput("state_bucket"),
+			}
+			tempOptions.MigrateState = true
+			// create backend file
+			cwd, err := os.Getwd()
+			require.NoError(t, err)
+			destFile := path.Join(cwd, "../../../0-bootstrap/backend.tf")
+			fExists, err2 := fileExists(destFile)
+			require.NoError(t, err2)
+			if !fExists {
+				srcFile := path.Join(cwd, "../../../0-bootstrap/backend.tf.example")
+				_, err3 := exec.Command("cp", srcFile, destFile).CombinedOutput()
+				require.NoError(t, err3)
+			}
+			terraform.Init(t, tempOptions)
+		})
 
 	bootstrap.DefineVerify(func(assert *assert.Assertions) {
 		bootstrap.DefaultVerify(assert)
@@ -107,5 +154,28 @@ func TestBootstrap(t *testing.T) {
 			assert.Subset(listRoles, saRole, fmt.Sprintf("service account %s should have project level roles", terraformSAEmail))
 		}
 	})
+
+	bootstrap.DefineTeardown(func(assert *assert.Assertions) {
+		// configure options to pull state from GCS bucket
+		cwd, err := os.Getwd()
+		require.NoError(t, err)
+		statePath := path.Join(cwd, "../../../0-bootstrap/local_backend.tfstate")
+		tempOptions := bootstrap.GetTFOptions()
+		tempOptions.BackendConfig = map[string]interface{}{
+			"path": statePath,
+		}
+		tempOptions.MigrateState = true
+		// remove backend file
+		backendFile := path.Join(cwd, "../../../0-bootstrap/backend.tf")
+		fExists, err2 := fileExists(backendFile)
+		require.NoError(t, err2)
+		if fExists {
+			_, err3 := exec.Command("rm", backendFile).CombinedOutput()
+			require.NoError(t, err3)
+		}
+		terraform.Init(t, tempOptions)
+		bootstrap.DefaultTeardown(assert)
+	})
+
 	bootstrap.Test()
 }
