@@ -65,17 +65,6 @@ func TestBootstrap(t *testing.T) {
 				"bucket": bootstrap.GetStringOutput("state_bucket"),
 			}
 			tempOptions.MigrateState = true
-			// create backend file
-			cwd, err := os.Getwd()
-			require.NoError(t, err)
-			destFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
-			fExists, err2 := fileExists(destFile)
-			require.NoError(t, err2)
-			if !fExists {
-				srcFile := path.Join(cwd, "../../../1-bootstrap/backend.tf.example")
-				_, err3 := exec.Command("cp", srcFile, destFile).CombinedOutput()
-				require.NoError(t, err3)
-			}
 			terraform.Init(t, tempOptions)
 		})
 
@@ -165,14 +154,6 @@ func TestBootstrap(t *testing.T) {
 			"path": statePath,
 		}
 		tempOptions.MigrateState = true
-		// remove backend file
-		backendFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
-		fExists, err2 := fileExists(backendFile)
-		require.NoError(t, err2)
-		if fExists {
-			_, err3 := exec.Command("rm", backendFile).CombinedOutput()
-			require.NoError(t, err3)
-		}
 		terraform.Init(t, tempOptions)
 		bootstrap.DefaultTeardown(assert)
 	})
