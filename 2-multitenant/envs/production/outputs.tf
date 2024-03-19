@@ -43,3 +43,8 @@ output "cluster_membership_ids" {
   description = "GKE cluster membership IDs"
   value       = module.env.cluster_membership_ids
 }
+
+output "ip_address_self_links" {
+  description = "IP Address Self Links"
+  value       = module.env.ip_address_self_links
+}
