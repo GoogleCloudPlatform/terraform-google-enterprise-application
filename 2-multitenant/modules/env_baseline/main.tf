@@ -42,6 +42,28 @@ module "eab_cluster_project" {
   ]
 }
 
+// Create Cloud Armor policy
+module "cloud_armor" {
+  source  = "GoogleCloudPlatform/cloud-armor/google"
+  version = "~> 2.0"
+
+  project_id                           = module.eab_cluster_project.project_id
+  name                                 = "eab-cloud-armor-${var.env}"
+  description                          = "EAB Cloud Armor policy"
+  default_rule_action                  = "allow"
+  type                                 = "CLOUD_ARMOR"
+  layer_7_ddos_defense_enable          = true
+  layer_7_ddos_defense_rule_visibility = "STANDARD"
+
+  pre_configured_rules = {
+    "sqli_sensitivity_level_4" = {
+      action          = "deny(502)"
+      priority        = 1
+      target_rule_set = "sqli-v33-stable"
+    }
+  }
+}
+
 // Create fleet project
 module "eab_fleet_project" {
   source  = "terraform-google-modules/project-factory/google"
