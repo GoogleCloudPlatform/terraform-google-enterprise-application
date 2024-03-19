@@ -47,6 +47,7 @@ func TestMultitenant(t *testing.T) {
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
 			)
+
 			multitenant.Test()
 		})
 	}
