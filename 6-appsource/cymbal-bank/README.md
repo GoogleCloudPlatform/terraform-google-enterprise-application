@@ -1,1 +1,0 @@
-# Cymbal Bank deployment example
