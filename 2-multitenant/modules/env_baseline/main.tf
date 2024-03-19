@@ -118,6 +118,8 @@ module "gke" {
   fleet_project                     = module.eab_fleet_project.project_id
   fleet_project_grant_service_agent = true
 
+  identity_namespace = "${module.eab_cluster_project.project_id}.svc.id.goog"
+
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
 
