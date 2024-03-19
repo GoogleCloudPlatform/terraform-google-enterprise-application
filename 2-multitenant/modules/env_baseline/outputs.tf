@@ -42,3 +42,10 @@ output "cluster_project_id" {
   description = "Cluster Project ID"
   value       = module.eab_cluster_project.project_id
 }
+
+output "ip_address_self_links" {
+  description = "IP Address Self Links"
+  value = [
+    for value in module.ip_address : value.self_links
+  ]
+}
