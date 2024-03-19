@@ -21,7 +21,7 @@ output "project_id" {
 
 output "state_bucket" {
   description = "Bucket for storing TF state"
-  value       = module.tfstate_bucket.bucket.self_link
+  value       = module.tfstate_bucket.name
 }
 
 output "artifacts_bucket" {
