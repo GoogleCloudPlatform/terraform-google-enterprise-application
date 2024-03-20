@@ -42,6 +42,28 @@ module "eab_cluster_project" {
   ]
 }
 
+// Create Cloud Armor policy
+module "cloud_armor" {
+  source  = "GoogleCloudPlatform/cloud-armor/google"
+  version = "~> 2.0"
+
+  project_id                           = module.eab_cluster_project.project_id
+  name                                 = "eab-cloud-armor-${var.env}"
+  description                          = "EAB Cloud Armor policy"
+  default_rule_action                  = "allow"
+  type                                 = "CLOUD_ARMOR"
+  layer_7_ddos_defense_enable          = true
+  layer_7_ddos_defense_rule_visibility = "STANDARD"
+
+  pre_configured_rules = {
+    "sqli_sensitivity_level_4" = {
+      action          = "deny(502)"
+      priority        = 1
+      target_rule_set = "sqli-v33-stable"
+    }
+  }
+}
+
 // Create fleet project
 module "eab_fleet_project" {
   source  = "terraform-google-modules/project-factory/google"
@@ -75,6 +97,26 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
+// Create
+module "ip_address" {
+  source  = "terraform-google-modules/address/google"
+  version = "~> 3.2"
+
+  for_each = data.google_compute_subnetwork.default
+
+  project_id = regex(local.projects_re, each.value.id)[0]
+  region     = each.value.region
+
+  subnetwork = each.value.name
+
+  names = [
+    "ip-${each.value.region}-${var.env}-1",
+    "ip-${each.value.region}-${var.env}-2",
+    "ip-${each.value.region}-${var.env}-3"
+  ]
+}
+
+
 // Create a GKE cluster in each subnetwork
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
@@ -95,6 +137,8 @@ module "gke" {
 
   fleet_project                     = module.eab_fleet_project.project_id
   fleet_project_grant_service_agent = true
+
+  identity_namespace = "${module.eab_cluster_project.project_id}.svc.id.goog"
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]

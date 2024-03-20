@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-output "network_project_id" {
-  description = "Network Project ID"
-  value       = module.env.network_project_id
-}
-
 output "fleet_project_id" {
   description = "Fleet Project ID"
   value       = module.env.fleet_project_id
@@ -34,6 +29,11 @@ output "env" {
   value       = local.env
 }
 
+output "cluster_regions" {
+  description = "Regions with clusters"
+  value       = module.env.cluster_regions
+}
+
 output "clusters_ids" {
   description = "GKE cluster IDs"
   value       = module.env.cluster_ids
@@ -42,4 +42,9 @@ output "clusters_ids" {
 output "cluster_membership_ids" {
   description = "GKE cluster membership IDs"
   value       = module.env.cluster_membership_ids
+}
+
+output "ip_address_self_links" {
+  description = "IP Address Self Links"
+  value       = module.env.ip_address_self_links
 }
