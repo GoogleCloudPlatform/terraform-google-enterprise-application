@@ -31,18 +31,6 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
-// fileExists check if a give file exists
-func fileExists(filePath string) (bool, error) {
-	_, err := os.Stat(filePath)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
-
 func TestBootstrap(t *testing.T) {
 
 	vars := map[string]interface{}{
@@ -70,7 +58,7 @@ func TestBootstrap(t *testing.T) {
 			cwd, err := os.Getwd()
 			require.NoError(t, err)
 			destFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
-			fExists, err2 := fileExists(destFile)
+			fExists, err2 := testutils.fileExists(destFile)
 			require.NoError(t, err2)
 			if !fExists {
 				srcFile := path.Join(cwd, "../../../1-bootstrap/backend.tf.example")
@@ -170,7 +158,7 @@ func TestBootstrap(t *testing.T) {
 
 		// remove backend file
 		backendFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
-		fExists, err2 := fileExists(backendFile)
+		fExists, err2 := testutils.fileExists(backendFile)
 		require.NoError(t, err2)
 		if fExists {
 			_, err3 := exec.Command("rm", backendFile).CombinedOutput()
