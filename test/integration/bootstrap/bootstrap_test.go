@@ -28,6 +28,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
@@ -58,7 +59,7 @@ func TestBootstrap(t *testing.T) {
 			cwd, err := os.Getwd()
 			require.NoError(t, err)
 			destFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
-			fExists, err2 := testutils.fileExists(destFile)
+			fExists, err2 := testutils.FileExists(destFile)
 			require.NoError(t, err2)
 			if !fExists {
 				srcFile := path.Join(cwd, "../../../1-bootstrap/backend.tf.example")
@@ -158,7 +159,7 @@ func TestBootstrap(t *testing.T) {
 
 		// remove backend file
 		backendFile := path.Join(cwd, "../../../1-bootstrap/backend.tf")
-		fExists, err2 := testutils.fileExists(backendFile)
+		fExists, err2 := testutils.FileExists(backendFile)
 		require.NoError(t, err2)
 		if fExists {
 			_, err3 := exec.Command("rm", backendFile).CombinedOutput()
