@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+output "cluster_regions" {
+  description = "Regions with clusters"
+  value = [
+    for value in data.google_compute_subnetwork.default : value.region
+  ]
+}
+
 output "cluster_ids" {
   description = "GKE cluster IDs"
   value = [
@@ -26,11 +33,6 @@ output "cluster_membership_ids" {
   value = [
     for value in module.gke : value.fleet_membership
   ]
-}
-
-output "network_project_id" {
-  description = "Network Project ID"
-  value       = var.network_project_id
 }
 
 output "fleet_project_id" {
