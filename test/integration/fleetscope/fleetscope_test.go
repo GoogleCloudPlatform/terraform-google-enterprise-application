@@ -80,6 +80,29 @@ func TestFleetscope(t *testing.T) {
 				policyMembers := fmt.Sprintf("serviceAccount:%s.svc.id.goog[config-management-system/root-reconciler]", fleetProjectID)
 				assert.Contains(listMembers, policyMembers, fmt.Sprintf("Service Account %s should be on iam service-account binding", policyMembers))
 				assert.Equal("roles/iam.workloadIdentityUser", saPolicyOp.Get("bindings.0.role").String(), fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" service account policy", rootReconcilerSa))
+
+				// GKE Feature
+				for _, feature := range []string{
+					"configmanagement",
+					"servicemesh",
+					"multiclusteringress",
+					"multiclusterservicediscovery",
+				} {
+					gkeFilter := fmt.Sprintf("name:'projects/%s/locations/global/features/%s'", fleetProjectID, feature)
+					gkeFeatureCommonArgs := gcloud.WithCommonArgs([]string{"--filter", gkeFilter, "--format", "json"})
+					gkeFeatureOp := gcloud.Run(t, fmt.Sprintf("container hub features list --project %s", fleetProjectID), gkeFeatureCommonArgs).Array()[0]
+					assert.Equal("ACTIVE", gkeFeatureOp.Get("resourceState.state").String(), fmt.Sprintf("Hub Feature %s should have resource state equal to ACTIVE", feature))
+
+					if feature == "servicemesh" {
+						assert.Equal("MANAGEMENT_AUTOMATIC", gkeFeatureOp.Get("fleetDefaultMemberConfig.mesh.management").String(), fmt.Sprintf("Service Mesh Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
+					}
+
+					if feature == "multiclusteringress" {
+						region := multitenant.GetStringOutputList("cluster_regions")[0]
+						membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectID, region, envName)
+						assert.Equal(membershipName, gkeFeatureOp.Get("spec.multiclusteringress.configMembership").String(), fmt.Sprintf("Service Mesh Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
+					}
+				}
 			})
 
 			// ONLY FOR TEST - Remove after finish and before open public PR
