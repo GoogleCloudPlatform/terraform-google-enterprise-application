@@ -47,7 +47,10 @@ output "network_project_id" {
 
 output "ip_address_self_links" {
   description = "IP Address Self Links"
-  value = [
-    for value in module.ip_address : value.self_links
-  ]
+  value       = module.ip_address.self_links
+}
+
+output "ip_addresses" {
+  description = "IP Addresses"
+  value       = module.ip_address.addresses
 }
