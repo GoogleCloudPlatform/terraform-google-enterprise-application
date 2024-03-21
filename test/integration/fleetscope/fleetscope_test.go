@@ -21,6 +21,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
@@ -42,8 +43,6 @@ func TestFleetscope(t *testing.T) {
 			vars := map[string]interface{}{
 				"fleet_project_id":       multitenant.GetStringOutput("fleet_project_id"),
 				"cluster_membership_ids": multitenant.GetStringOutputList("cluster_membership_ids"),
-				//"clusters_ids":           multitenant.GetStringOutputList("clusters_ids"),
-				//"environment":            multitenant.GetStringOutput("env"),
 			}
 
 			fleetscope := tft.NewTFBlueprintTest(t,
@@ -55,12 +54,29 @@ func TestFleetscope(t *testing.T) {
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
 
+				// Project Ids
+				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
+
 				// GKE Scope
-				fleetProjectID := vars["fleet_project_id"].(string)
 				clustersMembership := fleetscope.GetStringOutputList("cluster_membership_ids")
 				membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/us-central1/memberships/cluster-us-central1-%[2]s --project=%[1]s", fleetProjectID, envName)
 				opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
 				assert.Equal(clustersMembership[0], opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership[0]))
+
+				// Service Account
+				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", fleetProjectID)
+
+				iamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", rootReconcilerSa)
+				iamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamFilter, "--format", "json"})
+				projectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", fleetProjectID), iamCommonArgs).Array()
+				saListRoles := testutils.GetResultFieldStrSlice(projectPolicyOp, "bindings.role")
+				assert.Subset(saListRoles, []string{"roles/source.reader"}, fmt.Sprintf("service account %s should have \"roles/source.reader\" project level role", rootReconcilerSa))
+
+				saPolicyOp := gcloud.Runf(t, "iam service-accounts get-iam-policy %s --project %s", rootReconcilerSa, fleetProjectID)
+				listMembers := utils.GetResultStrSlice(saPolicyOp.Get("bindings.0.members").Array())
+				policyMembers := fmt.Sprintf("serviceAccount:%s.svc.id.goog[config-management-system/root-reconciler]", fleetProjectID)
+				assert.Contains(listMembers, policyMembers, fmt.Sprintf("Service Account %s should be on iam service-account binding", policyMembers))
+				assert.Equal("roles/iam.workloadIdentityUser", saPolicyOp.Get("bindings.0.role").String(), fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" service account policy", rootReconcilerSa))
 			})
 
 			fleetscope.Test()
