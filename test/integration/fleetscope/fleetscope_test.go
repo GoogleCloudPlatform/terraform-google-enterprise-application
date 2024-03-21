@@ -51,6 +51,7 @@ func TestFleetscope(t *testing.T) {
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
 
+
 			// ONLY FOR TEST - Remove after finish and before open public PR
 			fleetscope.DefineApply(func(assert *assert.Assertions) {})
 
@@ -60,8 +61,8 @@ func TestFleetscope(t *testing.T) {
 				// Project Ids
 				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
 
-				// GKE Scope
-				clustersMembership := fleetscope.GetStringOutputList("cluster_membership_ids")
+				// GKE Membership
+				clustersMembership := multitenant.GetStringOutputList("cluster_membership_ids")
 				membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/us-central1/memberships/cluster-us-central1-%[2]s --project=%[1]s", fleetProjectID, envName)
 				opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
 				assert.Equal(clustersMembership[0], opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership[0]))
@@ -103,6 +104,26 @@ func TestFleetscope(t *testing.T) {
 						assert.Equal(membershipName, gkeFeatureOp.Get("spec.multiclusteringress.configMembership").String(), fmt.Sprintf("Service Mesh Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
 					}
 				}
+
+				// GKE Scopes Namespaces
+				gkeScopeNamespaces := []string{
+					"frontend",
+					"accounts",
+					"transactions",
+				}
+
+				for _, namespaces := range gkeScopeNamespaces {
+					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", fleetProjectID, namespaces, envName)
+					opGKEScopes := gcloud.Run(t, fmt.Sprintf("container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName))
+					gkeNamespaces := fmt.Sprintf("projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s", fleetProjectID, namespaces, envName)
+					opNamespaces := gcloud.Run(t, fmt.Sprintf("container hub scopes namespaces describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName))
+					assert.Equal(gkeNamespaces, opNamespaces.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeNamespaces))
+					assert.True(opNamespaces.Exists(), "Namespace %s should exist", gkeNamespaces)
+					assert.Equal(gkeScopes, opGKEScopes.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeScopes))
+					assert.True(opGKEScopes.Exists(), "Namespace %s should exist", gkeScopes)
+				}
+
+
 			})
 
 			// ONLY FOR TEST - Remove after finish and before open public PR
