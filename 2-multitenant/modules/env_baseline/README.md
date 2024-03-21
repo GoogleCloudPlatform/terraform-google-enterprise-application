@@ -27,5 +27,6 @@ The following resources are created:
 | cluster\_regions | Regions with clusters |
 | fleet\_project\_id | Fleet Project ID |
 | ip\_address\_self\_links | IP Address Self Links |
+| network\_project\_id | Network Project ID |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -19,6 +19,16 @@ variable "fleet_project_id" {
   type        = string
 }
 
+variable "cluster_project_id" {
+  description = "The cluster project ID"
+  type        = string
+}
+
+variable "network_project_id" {
+  description = "The network project ID"
+  type        = string
+}
+
 variable "cluster_membership_ids" {
   description = "The membership IDs in the scope"
   type        = list(string)
