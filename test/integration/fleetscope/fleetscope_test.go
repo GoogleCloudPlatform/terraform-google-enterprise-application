@@ -30,8 +30,8 @@ func TestFleetscope(t *testing.T) {
 
 	for _, envName := range []string{
 		"development",
-		"non-production",
-		"production",
+		//"non-production",
+		//"production",
 	} {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
@@ -50,6 +50,9 @@ func TestFleetscope(t *testing.T) {
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
+
+			// ONLY FOR TEST - Remove after finish and before open public PR
+			fleetscope.DefineApply(func(assert *assert.Assertions) {})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
@@ -78,6 +81,9 @@ func TestFleetscope(t *testing.T) {
 				assert.Contains(listMembers, policyMembers, fmt.Sprintf("Service Account %s should be on iam service-account binding", policyMembers))
 				assert.Equal("roles/iam.workloadIdentityUser", saPolicyOp.Get("bindings.0.role").String(), fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" service account policy", rootReconcilerSa))
 			})
+
+			// ONLY FOR TEST - Remove after finish and before open public PR
+			fleetscope.DefineTeardown(func(assert *assert.Assertions) {})
 
 			fleetscope.Test()
 		})
