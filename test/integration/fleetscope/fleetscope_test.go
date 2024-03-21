@@ -57,8 +57,9 @@ func TestFleetscope(t *testing.T) {
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
 
-				// Project Ids
+				// Outputs
 				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
+				region := multitenant.GetStringOutputList("cluster_regions")[0]
 
 				// Service Account
 				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", fleetProjectID)
@@ -92,9 +93,22 @@ func TestFleetscope(t *testing.T) {
 					}
 
 					if feature == "multiclusteringress" {
-						region := multitenant.GetStringOutputList("cluster_regions")[0]
 						membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectID, region, envName)
 						assert.Equal(membershipName, gkeFeatureOp.Get("spec.multiclusteringress.configMembership").String(), fmt.Sprintf("Service Mesh Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
+					}
+
+					// GKE Feature Membership
+					if feature == "configmanagement" {
+						fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
+						membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectNumber, region, envName)
+
+						assert.Equal("gcpserviceaccount", gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.configSync.git.secretType").String(), fmt.Sprintf("Hub Feature Membership %s should have git secret type equal to gcpserviceaccount", membershipName))
+						assert.Equal("unstructured", gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
+						assert.Equal("1.17.2", gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.version").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
+						assert.Equal(rootReconcilerSa, gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature Membership %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
+						assert.True(gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.policyController.enabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  policy controler should be enabled", membershipName))
+						assert.True(gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.policyController.referentialRulesEnabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  referencial rule should be enabled", membershipName))
+						assert.True(gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.policyController.templateLibraryInstalled").Bool(), fmt.Sprintf("Hub Feature Membership %s  template library should be installed", membershipName))
 					}
 				}
 
