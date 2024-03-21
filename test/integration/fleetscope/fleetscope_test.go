@@ -51,7 +51,6 @@ func TestFleetscope(t *testing.T) {
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
 
-
 			// ONLY FOR TEST - Remove after finish and before open public PR
 			fleetscope.DefineApply(func(assert *assert.Assertions) {})
 
@@ -60,12 +59,6 @@ func TestFleetscope(t *testing.T) {
 
 				// Project Ids
 				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
-
-				// GKE Membership
-				clustersMembership := multitenant.GetStringOutputList("cluster_membership_ids")
-				membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/us-central1/memberships/cluster-us-central1-%[2]s --project=%[1]s", fleetProjectID, envName)
-				opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
-				assert.Equal(clustersMembership[0], opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership[0]))
 
 				// Service Account
 				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", fleetProjectID)
@@ -105,6 +98,12 @@ func TestFleetscope(t *testing.T) {
 					}
 				}
 
+				// GKE Membership
+				clustersMembership := multitenant.GetStringOutputList("cluster_membership_ids")
+				membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/us-central1/memberships/cluster-us-central1-%[2]s --project=%[1]s", fleetProjectID, envName)
+				opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
+				assert.Equal(clustersMembership[0], opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership[0]))
+
 				// GKE Scopes Namespaces
 				gkeScopeNamespaces := []string{
 					"frontend",
@@ -122,7 +121,6 @@ func TestFleetscope(t *testing.T) {
 					assert.Equal(gkeScopes, opGKEScopes.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeScopes))
 					assert.True(opGKEScopes.Exists(), "Namespace %s should exist", gkeScopes)
 				}
-
 
 			})
 
