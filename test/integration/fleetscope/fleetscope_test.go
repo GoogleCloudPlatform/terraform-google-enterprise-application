@@ -83,9 +83,7 @@ func TestFleetscope(t *testing.T) {
 					"multiclusteringress",
 					"multiclusterservicediscovery",
 				} {
-					gkeFilter := fmt.Sprintf("name:'projects/%s/locations/global/features/%s'", fleetProjectID, feature)
-					gkeFeatureCommonArgs := gcloud.WithCommonArgs([]string{"--filter", gkeFilter, "--format", "json"})
-					gkeFeatureOp := gcloud.Run(t, fmt.Sprintf("container hub features list --project %s", fleetProjectID), gkeFeatureCommonArgs).Array()[0]
+					gkeFeatureOp := gcloud.Runf(t, "container hub features describe %s --project %s", feature, fleetProjectID)
 					assert.Equal("ACTIVE", gkeFeatureOp.Get("resourceState.state").String(), fmt.Sprintf("Hub Feature %s should have resource state equal to ACTIVE", feature))
 
 					if feature == "servicemesh" {
@@ -101,35 +99,34 @@ func TestFleetscope(t *testing.T) {
 					if feature == "configmanagement" {
 						fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
 						membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectNumber, region, envName)
+						configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
 
-						assert.Equal("gcpserviceaccount", gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.configSync.git.secretType").String(), fmt.Sprintf("Hub Feature Membership %s should have git secret type equal to gcpserviceaccount", membershipName))
-						assert.Equal("unstructured", gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
-						assert.Equal("1.17.2", gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.version").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
-						assert.Equal(rootReconcilerSa, gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature Membership %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
-						assert.True(gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.policyController.enabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  policy controler should be enabled", membershipName))
-						assert.True(gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.policyController.referentialRulesEnabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  referencial rule should be enabled", membershipName))
-						assert.True(gkeFeatureOp.Get("membershipSpecs."+membershipName+".configmanagement.policyController.templateLibraryInstalled").Bool(), fmt.Sprintf("Hub Feature Membership %s  template library should be installed", membershipName))
+						assert.Equal("gcpserviceaccount", gkeFeatureOp.Get(configmanagementPath+".configSync.git.secretType").String(), fmt.Sprintf("Hub Feature Membership %s should have git secret type equal to gcpserviceaccount", membershipName))
+						assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
+						assert.Equal("1.17.2", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
+						assert.Equal(rootReconcilerSa, gkeFeatureOp.Get(configmanagementPath+".configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature Membership %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
+						assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.enabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  policy controler should be enabled", membershipName))
+						assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.referentialRulesEnabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  referencial rule should be enabled", membershipName))
+						assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.templateLibraryInstalled").Bool(), fmt.Sprintf("Hub Feature Membership %s  template library should be installed", membershipName))
 					}
 				}
 
-				// GKE Membership
+				// GKE Membership binding
 				clustersMembership := multitenant.GetStringOutputList("cluster_membership_ids")
 				membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/us-central1/memberships/cluster-us-central1-%[2]s --project=%[1]s", fleetProjectID, envName)
 				opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
 				assert.Equal(clustersMembership[0], opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership[0]))
 
-				// GKE Scopes Namespaces
-				gkeScopeNamespaces := []string{
+				// GKE Scopes and Namespaces
+				for _, namespaces := range []string{
 					"frontend",
 					"accounts",
 					"transactions",
-				}
-
-				for _, namespaces := range gkeScopeNamespaces {
+				} {
 					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", fleetProjectID, namespaces, envName)
-					opGKEScopes := gcloud.Run(t, fmt.Sprintf("container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName))
+					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName)
 					gkeNamespaces := fmt.Sprintf("projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s", fleetProjectID, namespaces, envName)
-					opNamespaces := gcloud.Run(t, fmt.Sprintf("container hub scopes namespaces describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName))
+					opNamespaces := gcloud.Runf(t, "container hub scopes namespaces describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName)
 					assert.Equal(gkeNamespaces, opNamespaces.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeNamespaces))
 					assert.True(opNamespaces.Exists(), "Namespace %s should exist", gkeNamespaces)
 					assert.Equal(gkeScopes, opGKEScopes.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeScopes))
