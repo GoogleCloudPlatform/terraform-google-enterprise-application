@@ -29,8 +29,14 @@ import (
 )
 
 func TestAppfactory(t *testing.T) {
+
+	vars := map[string]interface{}{
+		"bucket_force_destroy": "true",
+	}
+
 	appFactory := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../3-appfactory/apps"),
+		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
