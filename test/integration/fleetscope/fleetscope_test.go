@@ -56,7 +56,7 @@ func TestFleetscope(t *testing.T) {
 
 				// Outputs
 				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
-				region := multitenant.GetStringOutputList("cluster_regions")[0]
+				clusterRegions := multitenant.GetStringOutputList("cluster_regions")
 
 				// Service Account
 				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", fleetProjectID)
@@ -88,31 +88,38 @@ func TestFleetscope(t *testing.T) {
 					}
 
 					if feature == "multiclusteringress" {
-						membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectID, region, envName)
-						assert.Equal(membershipName, gkeFeatureOp.Get("spec.multiclusteringress.configMembership").String(), fmt.Sprintf("Service Mesh Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
+						for _, region := range clusterRegions {
+							membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectID, region, envName)
+							assert.Equal(membershipName, gkeFeatureOp.Get("spec.multiclusteringress.configMembership").String(), fmt.Sprintf("Service Mesh Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
+						}
 					}
 
 					// GKE Feature Membership
 					if feature == "configmanagement" {
-						fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
-						membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectNumber, region, envName)
-						configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
+						for _, region := range clusterRegions {
+							fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
+							membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectNumber, region, envName)
+							configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
 
-						assert.Equal("gcpserviceaccount", gkeFeatureOp.Get(configmanagementPath+".configSync.git.secretType").String(), fmt.Sprintf("Hub Feature Membership %s should have git secret type equal to gcpserviceaccount", membershipName))
-						assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
-						assert.Equal("1.17.2", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
-						assert.Equal(rootReconcilerSa, gkeFeatureOp.Get(configmanagementPath+".configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature Membership %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
-						assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.enabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  policy controler should be enabled", membershipName))
-						assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.referentialRulesEnabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  referencial rule should be enabled", membershipName))
-						assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.templateLibraryInstalled").Bool(), fmt.Sprintf("Hub Feature Membership %s  template library should be installed", membershipName))
+							assert.Equal("gcpserviceaccount", gkeFeatureOp.Get(configmanagementPath+".configSync.git.secretType").String(), fmt.Sprintf("Hub Feature Membership %s should have git secret type equal to gcpserviceaccount", membershipName))
+							assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
+							assert.Equal("1.17.2", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature Membership %s should have source format equal to unstructured", membershipName))
+							assert.Equal(rootReconcilerSa, gkeFeatureOp.Get(configmanagementPath+".configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature Membership %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
+							assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.enabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  policy controler should be enabled", membershipName))
+							assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.referentialRulesEnabled").Bool(), fmt.Sprintf("Hub Feature Membership %s  referencial rule should be enabled", membershipName))
+							assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.templateLibraryInstalled").Bool(), fmt.Sprintf("Hub Feature Membership %s  template library should be installed", membershipName))
+						}
 					}
 				}
 
 				// GKE Membership binding
-				clustersMembership := multitenant.GetStringOutputList("cluster_membership_ids")
-				membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/us-central1/memberships/cluster-us-central1-%[2]s --project=%[1]s", fleetProjectID, envName)
-				opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
-				assert.Equal(clustersMembership[0], opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership[0]))
+				for _, region := range clusterRegions {
+					for _, clustersMembership := range multitenant.GetStringOutputList("cluster_membership_ids") {
+						membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/%[3]s/memberships/cluster-%[3]s-%[2]s --project=%[1]s", fleetProjectID, envName, region)
+						opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
+						assert.Equal(clustersMembership, opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership))
+					}
+				}
 
 				// GKE Scopes and Namespaces
 				for _, namespaces := range []string{
