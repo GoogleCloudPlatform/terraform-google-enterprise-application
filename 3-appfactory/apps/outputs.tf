@@ -55,6 +55,6 @@ output "app_cloudbuild_workspace_state_bucket_name" {
 }
 
 output "app_env_project_ids" {
-  description = "Application environment projects IDs"
+  description = "Application environment projects IDs."
   value       = module.app1.app_env_project_ids
 }
