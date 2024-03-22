@@ -30,8 +30,8 @@ func TestFleetscope(t *testing.T) {
 
 	for _, envName := range []string{
 		"development",
-		//"non-production",
-		//"production",
+		"non-production",
+		"production",
 	} {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
@@ -50,9 +50,6 @@ func TestFleetscope(t *testing.T) {
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
-
-			// ONLY FOR TEST - Remove after finish and before open public PR
-			fleetscope.DefineApply(func(assert *assert.Assertions) {})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
@@ -134,9 +131,6 @@ func TestFleetscope(t *testing.T) {
 				}
 
 			})
-
-			// ONLY FOR TEST - Remove after finish and before open public PR
-			fleetscope.DefineTeardown(func(assert *assert.Assertions) {})
 
 			fleetscope.Test()
 		})
