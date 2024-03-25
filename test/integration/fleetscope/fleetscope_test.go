@@ -53,24 +53,26 @@ func TestFleetscope(t *testing.T) {
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
 
-				// Outputs
+				// Multitenant Outputs
 				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
 				clusterRegions := multitenant.GetStringOutputList("cluster_regions")
 
 				// Service Account
+				rootReconcilerRoles := []string{"roles/source.reader"}
 				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", fleetProjectID)
 				iamReconcilerFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", rootReconcilerSa)
 				iamReconcilerCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamReconcilerFilter, "--format", "json"})
 				projectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", fleetProjectID), iamReconcilerCommonArgs).Array()
 				saReconcilerListRoles := testutils.GetResultFieldStrSlice(projectPolicyOp, "bindings.role")
-				assert.Subset(saReconcilerListRoles, []string{"roles/source.reader"}, fmt.Sprintf("service account %s should have \"roles/source.reader\" project level role", rootReconcilerSa))
+				assert.Subset(saReconcilerListRoles, rootReconcilerRoles, fmt.Sprintf("service account %s should have \"roles/source.reader\" project level role", rootReconcilerSa))
 
+				svcRoles := []string{"roles/iam.workloadIdentityUser"}
 				svcSa := fmt.Sprintf("%s.svc.id.goog[config-management-system/root-reconciler]", fleetProjectID)
 				iamSvcFilter := fmt.Sprintf("bindings.members:serviceAccount:'%s'", svcSa)
 				iamSvcCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamSvcFilter, "--format", "json"})
 				svcPolicyOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts get-iam-policy %s --project %s", rootReconcilerSa, fleetProjectID), iamSvcCommonArgs).Array()
 				saSvcListRoles := testutils.GetResultFieldStrSlice(svcPolicyOp, "bindings.role")
-				assert.Subset(saSvcListRoles, []string{"roles/iam.workloadIdentityUser"}, fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" project level role", svcSa))
+				assert.Subset(saSvcListRoles, svcRoles, fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" project level role", svcSa))
 
 				// GKE Feature
 				for _, feature := range []string{
