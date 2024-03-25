@@ -16,6 +16,7 @@ package fleetscope
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 	"time"
 
@@ -56,6 +57,8 @@ func TestFleetscope(t *testing.T) {
 				// Multitenant Outputs
 				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
 				clusterRegions := multitenant.GetStringOutputList("cluster_regions")
+				clusterIds := multitenant.GetStringOutputList("clusters_ids")
+				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 
 				// Service Account
 				rootReconcilerRoles := []string{"roles/source.reader"}
@@ -114,12 +117,13 @@ func TestFleetscope(t *testing.T) {
 				}
 
 				// GKE Membership binding
-				for _, region := range clusterRegions {
-					for _, clustersMembership := range multitenant.GetStringOutputList("cluster_membership_ids") {
-						membershipID := gcloud.Runf(t, "container hub memberships describe projects/%[1]s/locations/%[3]s/memberships/cluster-%[3]s-%[2]s --project=%[1]s", fleetProjectID, envName, region)
-						opmembershipID := fmt.Sprintf("//gkehub.googleapis.com/%s", membershipID.Get("name").String())
-						assert.Equal(clustersMembership, opmembershipID, fmt.Sprintf("membership ID should be %s", clustersMembership))
-					}
+				for _, id := range clusterIds {
+					// Cluster location
+					location := regexp.MustCompile(`\/locations\/([^\/]*)\/`).FindStringSubmatch(id)[1]
+					// Cluster and Membership details
+					clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", id, location, clusterProjectID)
+					membershipOp := gcloud.Runf(t, "container fleet memberships describe %s --location %s --project %s", clusterOp.Get("name").String(), location, fleetProjectID)
+					assert.Equal(fmt.Sprintf("%s.svc.id.goog", fleetProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, fleetProjectID))
 				}
 
 				// GKE Scopes and Namespaces
