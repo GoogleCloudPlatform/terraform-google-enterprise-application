@@ -23,8 +23,9 @@ locals {
 
 // Create admin project
 module "app_admin_project" {
-  source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 14.5"
+  source  = "terraform-google-modules/project-factory/google"
+  version = "~> 14.5"
+
   random_project_id = true
   billing_account   = var.billing_account
   name              = "${var.application_name}-admin"
@@ -55,20 +56,25 @@ module "tf_cloudbuild_workspace" {
   project_id               = module.app_admin_project.project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
   tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
-  artifacts_bucket_name    = "${var.application_name}-build-${module.app_admin_project.project_id}"
-  create_state_bucket_name = "${var.application_name}-state-${module.app_admin_project.project_id}"
-  log_bucket_name          = "${var.application_name}-logs-${module.app_admin_project.project_id}"
+  location                 = var.location
+  trigger_location         = var.trigger_location
+  artifacts_bucket_name    = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.application_name}-build"
+  create_state_bucket_name = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.application_name}-state"
+  log_bucket_name          = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.application_name}-logs"
+  buckets_force_destroy    = var.bucket_force_destroy
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
+  tf_apply_branches         = var.tf_apply_branches
 }
 
 // Create env project
 module "app_env_project" {
-  for_each          = var.create_env_projects ? var.envs : {}
-  source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 14.5"
+  source   = "terraform-google-modules/project-factory/google"
+  version  = "~> 14.5"
+  for_each = var.create_env_projects ? var.envs : {}
+
   random_project_id = true
   billing_account   = each.value.billing_account
   name              = "${var.application_name}-${each.key}"
