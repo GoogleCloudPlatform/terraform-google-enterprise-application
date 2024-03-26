@@ -24,14 +24,26 @@ import (
 )
 
 func TestAppfactory(t *testing.T) {
+
 	bootstrap := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../3-appfactory/apps"),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
-	bootstrap.DefineVerify(func(assert *assert.Assertions) {
-		bootstrap.DefaultVerify(assert)
+	backend_bucket := bootstrap.GetStringOutput("state_bucket")
+	backendConfig := map[string]interface{}{
+		"bucket": backend_bucket,
+	}
+
+	appfactory := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../3-appfactory/apps"),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithBackendConfig(backendConfig),
+	)
+
+	appfactory.DefineVerify(func(assert *assert.Assertions) {
+		appfactory.DefaultVerify(assert)
 
 	})
-	bootstrap.Test()
+
+	appfactory.Test()
 }

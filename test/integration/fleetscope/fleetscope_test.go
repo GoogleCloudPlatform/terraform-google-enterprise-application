@@ -28,6 +28,15 @@ import (
 
 func TestFleetscope(t *testing.T) {
 
+	bootstrap := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../1-bootstrap"),
+	)
+
+	backend_bucket := bootstrap.GetStringOutput("state_bucket")
+	backendConfig := map[string]interface{}{
+		"bucket": backend_bucket,
+	}
+
 	for _, envName := range []string{
 		"development",
 		"non-production",
@@ -38,6 +47,7 @@ func TestFleetscope(t *testing.T) {
 			t.Parallel()
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
+				tft.WithBackendConfig(backendConfig),
 			)
 
 			vars := map[string]interface{}{
@@ -49,6 +59,7 @@ func TestFleetscope(t *testing.T) {
 				tft.WithTFDir(fmt.Sprintf("../../../4-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+				tft.WithBackendConfig(backendConfig),
 			)
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
