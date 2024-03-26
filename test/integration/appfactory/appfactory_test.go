@@ -30,6 +30,15 @@ import (
 
 func TestAppfactory(t *testing.T) {
 
+	bootstrap := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../1-bootstrap"),
+	)
+
+	backend_bucket := bootstrap.GetStringOutput("state_bucket")
+	backendConfig := map[string]interface{}{
+		"bucket": backend_bucket,
+	}
+
 	vars := map[string]interface{}{
 		"bucket_force_destroy": "true",
 	}
@@ -38,6 +47,7 @@ func TestAppfactory(t *testing.T) {
 		tft.WithTFDir("../../../3-appfactory/apps"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithBackendConfig(backendConfig),
 	)
 
 	appFactory.DefineVerify(func(assert *assert.Assertions) {
