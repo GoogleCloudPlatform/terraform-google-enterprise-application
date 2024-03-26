@@ -34,6 +34,7 @@ module "eab_cluster_project" {
   shared_vpc_subnets   = var.cluster_subnetworks
 
   activate_apis = [
+    "certificatemanager.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",
@@ -48,7 +49,7 @@ module "cloud_armor" {
   version = "~> 2.0"
 
   project_id                           = module.eab_cluster_project.project_id
-  name                                 = "eab-cloud-armor-${var.env}"
+  name                                 = "eab-cloud-armor"
   description                          = "EAB Cloud Armor policy"
   default_rule_action                  = "allow"
   type                                 = "CLOUD_ARMOR"
