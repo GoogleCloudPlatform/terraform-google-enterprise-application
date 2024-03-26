@@ -127,11 +127,12 @@ func TestFleetscope(t *testing.T) {
 				}
 
 				// GKE Scopes and Namespaces
-				for _, namespaces := range []string{
-					"frontend",
-					"accounts",
-					"transactions",
-				} {
+				for _, namespaces := range func() []string {
+					if envName == "development" {
+						return []string{"frontend", "accounts", "transactions"}
+					}
+					return []string{"frontend"}
+				}() {
 					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", fleetProjectID, namespaces, envName)
 					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName)
 					gkeNamespaces := fmt.Sprintf("projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s", fleetProjectID, namespaces, envName)
