@@ -18,3 +18,33 @@ variable "project_id" {
   description = "Project ID for initial resources"
   type        = string
 }
+
+variable "bucket_prefix" {
+  description = "Name prefix to use for buckets created."
+  type        = string
+  default     = "bkt"
+}
+
+variable "bucket_force_destroy" {
+  description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
+  type        = bool
+  default     = false
+}
+
+variable "location" {
+  description = "Location for build buckets."
+  type        = string
+  default     = "us-central1"
+}
+
+variable "trigger_location" {
+  description = "Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool."
+  type        = string
+  default     = "global"
+}
+
+variable "tf_apply_branches" {
+  description = "List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default."
+  type        = list(string)
+  default     = ["development", "non\\-production", "production"]
+}
