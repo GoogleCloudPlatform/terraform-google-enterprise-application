@@ -17,23 +17,21 @@
 locals {
   cb_config = {
     "multitenant" = {
-      repo_name     = "eab-multitenant",
-      bucket_prefix = "mt"
+      repo_name    = "eab-multitenant",
+      bucket_infix = "mt"
       roles = [
         "roles/container.admin"
       ]
     }
     "applicationfactory" = {
-      repo_name     = "eab-applicationfactory",
-      bucket_prefix = "af"
-      roles = [
-      ]
+      repo_name    = "eab-applicationfactory",
+      bucket_infix = "af"
+      roles        = []
     }
     "fleetscope" = {
-      repo_name     = "eab-fleetscope",
-      bucket_prefix = "fs"
-      roles = [
-      ]
+      repo_name    = "eab-fleetscope",
+      bucket_infix = "fs"
+      roles        = []
     }
   }
 }
@@ -45,18 +43,37 @@ resource "google_sourcerepo_repository" "gcp_repo" {
   name    = each.value.repo_name
 }
 
-module "tf_cloudbuild_workspace" {
-  for_each = local.cb_config
-  source   = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version  = "~> 7.0"
+module "tfstate_bucket" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 5.0"
 
-  project_id               = var.project_id
-  tf_repo_uri              = google_sourcerepo_repository.gcp_repo[each.key].url
-  tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
-  artifacts_bucket_name    = "${each.value.bucket_prefix}-build-${var.project_id}"
-  create_state_bucket_name = "${each.value.bucket_prefix}-state-${var.project_id}"
-  log_bucket_name          = "${each.value.bucket_prefix}-logs-${var.project_id}"
+  name          = "${var.bucket_prefix}-${var.project_id}-tf-state"
+  project_id    = var.project_id
+  location      = var.location
+  force_destroy = var.bucket_force_destroy
+}
+
+module "tf_cloudbuild_workspace" {
+  source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
+  version = "~> 7.0"
+
+  for_each = local.cb_config
+
+  project_id = var.project_id
+  location   = var.location
+
+  tf_repo_uri           = google_sourcerepo_repository.gcp_repo[each.key].url
+  tf_repo_type          = "CLOUD_SOURCE_REPOSITORIES"
+  trigger_location      = var.trigger_location
+  artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-build"
+  log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-logs"
+
+  create_state_bucket    = false
+  state_bucket_self_link = module.tfstate_bucket.bucket.self_link
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
+
+  # Branches to run the build
+  tf_apply_branches = var.tf_apply_branches
 }

@@ -16,45 +16,45 @@
 
 output "app_admin_project_id" {
   description = "Project ID of the application admin project."
-  value       = module.app_admin_project.project_id
+  value       = module.app1.app_admin_project_id
 }
 
 output "app_infra_repository_name" {
   description = "Name of the application infrastructure repository."
-  value       = google_sourcerepo_repository.app_infra_repo.name
+  value       = module.app1.app_infra_repository_name
 }
 
 output "app_infra_repository_url" {
   description = "URL of the application infrastructure repository."
-  value       = google_sourcerepo_repository.app_infra_repo.url
+  value       = module.app1.app_infra_repository_url
 }
 
 output "app_cloudbuild_workspace_apply_trigger_id" {
   description = "ID of the apply cloud build trigger."
-  value       = module.tf_cloudbuild_workspace.cloudbuild_apply_trigger_id
+  value       = module.app1.app_cloudbuild_workspace_apply_trigger_id
 }
 
 output "app_cloudbuild_workspace_plan_trigger_id" {
   description = "ID of the plan cloud build trigger."
-  value       = module.tf_cloudbuild_workspace.cloudbuild_plan_trigger_id
+  value       = module.app1.app_cloudbuild_workspace_plan_trigger_id
 }
 
 output "app_cloudbuild_workspace_artifacts_bucket_name" {
   description = "Artifacts bucket name for the application workspace."
-  value       = module.tf_cloudbuild_workspace.artifacts_bucket
+  value       = module.app1.app_cloudbuild_workspace_artifacts_bucket_name
 }
 
 output "app_cloudbuild_workspace_logs_bucket_name" {
   description = "Logs bucket name for the application workspace."
-  value       = module.tf_cloudbuild_workspace.logs_bucket
+  value       = module.app1.app_cloudbuild_workspace_logs_bucket_name
 }
 
 output "app_cloudbuild_workspace_state_bucket_name" {
   description = "Terraform state bucket name for the application workspace."
-  value       = module.tf_cloudbuild_workspace.state_bucket
+  value       = module.app1.app_cloudbuild_workspace_state_bucket_name
 }
 
 output "app_env_project_ids" {
   description = "Application environment projects IDs."
-  value       = { for key, value in module.app_env_project : key => value.project_id }
+  value       = module.app1.app_env_project_ids
 }
