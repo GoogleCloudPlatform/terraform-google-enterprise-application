@@ -27,6 +27,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:environments/v0.0.1"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:environments/v0.1.0"
   }
 }
