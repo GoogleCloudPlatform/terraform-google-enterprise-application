@@ -20,10 +20,16 @@ module "app1" {
   application_name    = "app1"
   create_env_projects = true
 
-  org_id          = var.org_id
-  billing_account = var.billing_account
-  folder_id       = var.common_folder_id
-  envs            = var.envs
+  org_id               = var.org_id
+  billing_account      = var.billing_account
+  folder_id            = var.common_folder_id
+  envs                 = var.envs
+  bucket_prefix        = var.bucket_prefix
+  location             = var.location
+  trigger_location     = var.trigger_location
+  bucket_force_destroy = var.bucket_force_destroy
+  tf_apply_branches    = var.tf_apply_branches
+
   cloudbuild_sa_roles = {
     development = {
       roles = ["roles/owner"]
