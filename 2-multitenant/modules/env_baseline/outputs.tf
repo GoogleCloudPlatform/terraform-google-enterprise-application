@@ -45,6 +45,11 @@ output "cluster_project_id" {
   value       = module.eab_cluster_project.project_id
 }
 
+output "network_project_id" {
+  description = "Network Project ID"
+  value       = var.network_project_id
+}
+
 output "ip_address_self_links" {
   description = "IP Address Self Links"
   value = [
