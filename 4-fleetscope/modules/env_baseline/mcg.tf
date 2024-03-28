@@ -34,3 +34,37 @@ resource "google_gke_hub_feature" "mcs" {
   location = "global"
   project  = var.fleet_project_id
 }
+
+resource "google_project_service_identity" "fleet_mci_sa" {
+  provider = google-beta
+  project  = var.fleet_project_id
+  service  = "multiclusteringress.googleapis.com"
+}
+
+// Grant IAM permissions for the Gateway controller in the fleet
+resource "google_project_iam_member" "cluster_admin_mci" {
+  project = var.cluster_project_id
+  role    = "roles/container.admin"
+  member  = "serviceAccount:${google_project_service_identity.fleet_mci_sa.email}"
+}
+
+resource "google_project_service_identity" "fleet_mcs_sa" {
+  provider = google-beta
+  project  = var.fleet_project_id
+  service  = "multiclusterservicediscovery.googleapis.com"
+}
+
+// Grant MCS service account access to the network project
+resource "google_project_iam_member" "network_service_agent_mcs" {
+  project = var.network_project_id
+  role    = "roles/multiclusterservicediscovery.serviceAgent"
+  member  = "serviceAccount:${google_project_service_identity.fleet_mcs_sa.email}"
+}
+
+// Grant MCS controller service account access to the cluster project
+resource "google_project_iam_member" "cluster_network_viewer_mcs" {
+  for_each = toset(["roles/compute.networkViewer", "roles/trafficdirector.client"])
+  project  = var.cluster_project_id
+  role     = each.key
+  member   = "serviceAccount:${var.cluster_project_id}.svc.id.goog[gke-mcs/gke-mcs-importer]"
+}

@@ -38,7 +38,8 @@ module "eab_cluster_project" {
     "compute.googleapis.com",
     "iam.googleapis.com",
     "serviceusage.googleapis.com",
-    "container.googleapis.com"
+    "container.googleapis.com",
+    "mesh.googleapis.com"
   ]
 }
 
@@ -60,6 +61,14 @@ module "cloud_armor" {
       action          = "deny(502)"
       priority        = 1
       target_rule_set = "sqli-v33-stable"
+    }
+
+    "xss-stable_level_2" = {
+      action            = "deny(502)"
+      priority          = 2
+      description       = "XSS Sensitivity Level 2"
+      target_rule_set   = "xss-v33-stable"
+      sensitivity_level = 2
     }
   }
 }
@@ -83,9 +92,11 @@ module "eab_fleet_project" {
     "gkehub.googleapis.com",
     "anthos.googleapis.com",
     "compute.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
     "mesh.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
+    "trafficdirector.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "sourcerepo.googleapis.com"
   ]
@@ -125,15 +136,16 @@ module "gke" {
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
 
-  project_id         = module.eab_cluster_project.project_id
-  regional           = true
-  region             = each.value.region
-  network_project_id = regex(local.projects_re, each.value.id)[0]
-  network            = regex(local.networks_re, each.value.network)[0]
-  subnetwork         = each.value.name
-  ip_range_pods      = each.value.secondary_ip_range[0].range_name
-  ip_range_services  = each.value.secondary_ip_range[1].range_name
-  release_channel    = var.release_channel
+  project_id          = module.eab_cluster_project.project_id
+  regional            = true
+  region              = each.value.region
+  network_project_id  = regex(local.projects_re, each.value.id)[0]
+  network             = regex(local.networks_re, each.value.network)[0]
+  subnetwork          = each.value.name
+  ip_range_pods       = each.value.secondary_ip_range[0].range_name
+  ip_range_services   = each.value.secondary_ip_range[1].range_name
+  release_channel     = var.release_channel
+  gateway_api_channel = "CHANNEL_STANDARD"
 
   fleet_project                     = module.eab_fleet_project.project_id
   fleet_project_grant_service_agent = true
@@ -146,6 +158,10 @@ module "gke" {
   remove_default_node_pool = true
 
   enable_binary_authorization = true
+
+  cluster_resource_labels = {
+    "mesh_id" : "proj-${module.eab_fleet_project.project_number}"
+  }
 
   node_pools = [
     {
