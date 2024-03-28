@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-locals {
-  env = "non-production"
-
-  namespace_ids = ["frontend"]
-}
-
-import {
-  id = "projects/${var.project_id}/locations/global/features/fleetobservability"
-  to = module.env.google_gke_hub_feature.fleet-o11y
-}
-
-module "env" {
-  source = "../../modules/env_baseline"
-
-  env                    = local.env
-  fleet_project_id       = var.fleet_project_id
-  namespace_ids          = local.namespace_ids
-  cluster_membership_ids = var.cluster_membership_ids
+resource "google_gke_hub_feature" "fleet-o11y" {
+  name     = "fleetobservability"
+  project  = var.project_id
+  location = "global"
+  spec {
+    fleetobservability {
+      logging_config {
+        default_config {
+          mode = "COPY"
+        }
+        fleet_scope_logs_config {
+          mode = "MOVE"
+        }
+      }
+    }
+  }
 }
