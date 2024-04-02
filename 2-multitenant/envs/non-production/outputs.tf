@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-output "fleet_project_id" {
-  description = "Fleet Project ID"
-  value       = module.env.fleet_project_id
-}
-
 output "cluster_project_id" {
   description = "Cluster Project ID"
   value       = module.env.cluster_project_id

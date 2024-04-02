@@ -25,7 +25,6 @@ The following resources are created:
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
-| fleet\_project\_id | Fleet Project ID |
 | ip\_address\_self\_links | IP Address Self Links |
 | network\_project\_id | Network Project ID |
 
