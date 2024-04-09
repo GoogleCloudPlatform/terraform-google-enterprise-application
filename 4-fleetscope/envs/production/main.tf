@@ -24,7 +24,6 @@ module "env" {
   source = "../../modules/env_baseline"
 
   env                    = local.env
-  fleet_project_id       = var.fleet_project_id
   cluster_project_id     = var.cluster_project_id
   network_project_id     = var.network_project_id
   namespace_ids          = local.namespace_ids

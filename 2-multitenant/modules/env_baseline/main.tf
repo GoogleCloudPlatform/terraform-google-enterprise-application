@@ -33,13 +33,24 @@ module "eab_cluster_project" {
   svpc_host_project_id = var.network_project_id
   shared_vpc_subnets   = var.cluster_subnetworks
 
+  // Skip disabling APIs for gkehub.googleapis.com
+  // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
+  disable_services_on_destroy = false
+
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",
     "serviceusage.googleapis.com",
     "container.googleapis.com",
-    "mesh.googleapis.com"
+    "mesh.googleapis.com",
+    "gkehub.googleapis.com",
+    "anthos.googleapis.com",
+    "multiclusteringress.googleapis.com",
+    "multiclusterservicediscovery.googleapis.com",
+    "trafficdirector.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
+    "sourcerepo.googleapis.com"
   ]
 }
 
@@ -71,35 +82,6 @@ module "cloud_armor" {
       sensitivity_level = 2
     }
   }
-}
-
-// Create fleet project
-module "eab_fleet_project" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "~> 14.0"
-
-  name              = "eab-fleet-${var.env}"
-  random_project_id = "true"
-  org_id            = var.org_id
-  folder_id         = var.folder_id
-  billing_account   = var.billing_account
-
-  // Skip disabling APIs for gkehub.googleapis.com
-  // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
-  disable_services_on_destroy = false
-
-  activate_apis = [
-    "gkehub.googleapis.com",
-    "anthos.googleapis.com",
-    "compute.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "mesh.googleapis.com",
-    "multiclusteringress.googleapis.com",
-    "multiclusterservicediscovery.googleapis.com",
-    "trafficdirector.googleapis.com",
-    "anthosconfigmanagement.googleapis.com",
-    "sourcerepo.googleapis.com"
-  ]
 }
 
 // Retrieve the subnetworks
@@ -147,8 +129,7 @@ module "gke" {
   release_channel     = var.release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
 
-  fleet_project                     = module.eab_fleet_project.project_id
-  fleet_project_grant_service_agent = true
+  fleet_project = module.eab_cluster_project.project_id
 
   identity_namespace = "${module.eab_cluster_project.project_id}.svc.id.goog"
 
@@ -160,7 +141,7 @@ module "gke" {
   enable_binary_authorization = true
 
   cluster_resource_labels = {
-    "mesh_id" : "proj-${module.eab_fleet_project.project_number}"
+    "mesh_id" : "proj-${module.eab_cluster_project.project_number}"
   }
 
   node_pools = [
@@ -175,8 +156,7 @@ module "gke" {
   ]
 
   depends_on = [
-    module.eab_cluster_project,
-    module.eab_fleet_project
+    module.eab_cluster_project
   ]
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy

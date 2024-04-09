@@ -30,7 +30,7 @@ resource "google_gke_hub_scope" "fleet-scope" {
   for_each = toset(var.namespace_ids)
 
   scope_id = "${each.key}-${var.env}"
-  project  = var.fleet_project_id
+  project  = var.cluster_project_id
 }
 
 resource "google_gke_hub_namespace" "fleet-ns" {
@@ -39,7 +39,7 @@ resource "google_gke_hub_namespace" "fleet-ns" {
   scope_namespace_id = google_gke_hub_scope.fleet-scope[each.key].scope_id
   scope_id           = google_gke_hub_scope.fleet-scope[each.key].scope_id
   scope              = google_gke_hub_scope.fleet-scope[each.key].name
-  project            = var.fleet_project_id
+  project            = var.cluster_project_id
 }
 
 resource "google_gke_hub_membership_binding" "membership-binding" {
@@ -49,5 +49,5 @@ resource "google_gke_hub_membership_binding" "membership-binding" {
   scope                 = google_gke_hub_scope.fleet-scope[each.value[0]].name
   membership_id         = regex(local.membership_re, each.value[1])[2]
   location              = regex(local.membership_re, each.value[1])[1]
-  project               = var.fleet_project_id
+  project               = var.cluster_project_id
 }

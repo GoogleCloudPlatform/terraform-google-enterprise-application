@@ -15,18 +15,18 @@
  */
 
 resource "google_sourcerepo_repository" "acm_repo" {
-  project = var.fleet_project_id
+  project = var.cluster_project_id
   name    = "eab-acm"
 }
 
 resource "google_service_account" "root_reconciler" {
-  project      = var.fleet_project_id
+  project      = var.cluster_project_id
   account_id   = "root-reconciler"
   display_name = "root-reconciler"
 }
 
 resource "google_project_iam_member" "root_reconciler" {
-  project = var.fleet_project_id
+  project = var.cluster_project_id
   role    = "roles/source.reader"
   member  = "serviceAccount:${google_service_account.root_reconciler.email}"
 }
@@ -36,20 +36,20 @@ resource "google_service_account_iam_binding" "workload_identity" {
   role               = "roles/iam.workloadIdentityUser"
 
   members = [
-    "serviceAccount:${var.fleet_project_id}.svc.id.goog[config-management-system/root-reconciler]",
+    "serviceAccount:${var.cluster_project_id}.svc.id.goog[config-management-system/root-reconciler]",
   ]
 }
 
 resource "google_gke_hub_feature" "acm_feature" {
   name     = "configmanagement"
-  project  = var.fleet_project_id
+  project  = var.cluster_project_id
   location = "global"
 }
 
 resource "google_gke_hub_feature_membership" "acm_feature_member" {
   for_each = toset(var.cluster_membership_ids)
 
-  project  = var.fleet_project_id
+  project  = var.cluster_project_id
   location = "global"
 
   feature             = google_gke_hub_feature.acm_feature.name
