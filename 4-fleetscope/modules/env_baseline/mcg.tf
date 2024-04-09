@@ -21,7 +21,7 @@ locals {
 resource "google_gke_hub_feature" "mci" {
   name     = "multiclusteringress"
   location = "global"
-  project  = var.fleet_project_id
+  project  = var.cluster_project_id
   spec {
     multiclusteringress {
       config_membership = regex(local.fleet_membership_re, var.cluster_membership_ids[0])[0]
@@ -32,12 +32,12 @@ resource "google_gke_hub_feature" "mci" {
 resource "google_gke_hub_feature" "mcs" {
   name     = "multiclusterservicediscovery"
   location = "global"
-  project  = var.fleet_project_id
+  project  = var.cluster_project_id
 }
 
 resource "google_project_service_identity" "fleet_mci_sa" {
   provider = google-beta
-  project  = var.fleet_project_id
+  project  = var.cluster_project_id
   service  = "multiclusteringress.googleapis.com"
 }
 
@@ -50,7 +50,7 @@ resource "google_project_iam_member" "cluster_admin_mci" {
 
 resource "google_project_service_identity" "fleet_mcs_sa" {
   provider = google-beta
-  project  = var.fleet_project_id
+  project  = var.cluster_project_id
   service  = "multiclusterservicediscovery.googleapis.com"
 }
 

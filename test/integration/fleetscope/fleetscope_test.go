@@ -51,7 +51,6 @@ func TestFleetscope(t *testing.T) {
 			)
 
 			vars := map[string]interface{}{
-				"fleet_project_id":       multitenant.GetStringOutput("fleet_project_id"),
 				"cluster_project_id":     multitenant.GetStringOutput("cluster_project_id"),
 				"network_project_id":     multitenant.GetStringOutput("network_project_id"),
 				"cluster_membership_ids": multitenant.GetStringOutputList("cluster_membership_ids"),
@@ -68,25 +67,24 @@ func TestFleetscope(t *testing.T) {
 				fleetscope.DefaultVerify(assert)
 
 				// Multitenant Outputs
-				fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
 				clusterRegions := multitenant.GetStringOutputList("cluster_regions")
 				clusterIds := multitenant.GetStringOutputList("clusters_ids")
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 
 				// Service Account
 				rootReconcilerRoles := []string{"roles/source.reader"}
-				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", fleetProjectID)
+				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", clusterProjectID)
 				iamReconcilerFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", rootReconcilerSa)
 				iamReconcilerCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamReconcilerFilter, "--format", "json"})
-				projectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", fleetProjectID), iamReconcilerCommonArgs).Array()
+				projectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", clusterProjectID), iamReconcilerCommonArgs).Array()
 				saReconcilerListRoles := testutils.GetResultFieldStrSlice(projectPolicyOp, "bindings.role")
 				assert.Subset(saReconcilerListRoles, rootReconcilerRoles, fmt.Sprintf("service account %s should have \"roles/source.reader\" project level role", rootReconcilerSa))
 
 				svcRoles := []string{"roles/iam.workloadIdentityUser"}
-				svcSa := fmt.Sprintf("%s.svc.id.goog[config-management-system/root-reconciler]", fleetProjectID)
+				svcSa := fmt.Sprintf("%s.svc.id.goog[config-management-system/root-reconciler]", clusterProjectID)
 				iamSvcFilter := fmt.Sprintf("bindings.members:serviceAccount:'%s'", svcSa)
 				iamSvcCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamSvcFilter, "--format", "json"})
-				svcPolicyOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts get-iam-policy %s --project %s", rootReconcilerSa, fleetProjectID), iamSvcCommonArgs).Array()
+				svcPolicyOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts get-iam-policy %s --project %s", rootReconcilerSa, clusterProjectID), iamSvcCommonArgs).Array()
 				saSvcListRoles := testutils.GetResultFieldStrSlice(svcPolicyOp, "bindings.role")
 				assert.Subset(saSvcListRoles, svcRoles, fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" project level role", svcSa))
 
@@ -97,7 +95,7 @@ func TestFleetscope(t *testing.T) {
 					"multiclusteringress",
 					"multiclusterservicediscovery",
 				} {
-					gkeFeatureOp := gcloud.Runf(t, "container hub features describe %s --project %s", feature, fleetProjectID)
+					gkeFeatureOp := gcloud.Runf(t, "container hub features describe %s --project %s", feature, clusterProjectID)
 					assert.Equal("ACTIVE", gkeFeatureOp.Get("resourceState.state").String(), fmt.Sprintf("Hub Feature %s should have resource state equal to ACTIVE", feature))
 
 					switch feature {
@@ -111,7 +109,7 @@ func TestFleetscope(t *testing.T) {
 						{
 							membershipNames := []string{}
 							for _, region := range clusterRegions {
-								membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectID, region, envName)
+								membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectID, region, envName)
 								membershipNames = append(membershipNames, membershipName)
 							}
 							assert.Contains(membershipNames, gkeFeatureOp.Get("spec.multiclusteringress.configMembership").String(), fmt.Sprintf("Hub Feature %s should have Config Membership in one region", feature))
@@ -120,7 +118,7 @@ func TestFleetscope(t *testing.T) {
 						// GKE Feature Membership
 						{
 							for _, region := range clusterRegions {
-								fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
+								fleetProjectNumber := gcloud.Runf(t, "projects describe %s", clusterProjectID).Get("projectNumber").String()
 								membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectNumber, region, envName)
 								configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
 
@@ -142,8 +140,8 @@ func TestFleetscope(t *testing.T) {
 					location := regexp.MustCompile(`\/locations\/([^\/]*)\/`).FindStringSubmatch(id)[1]
 					// Cluster and Membership details
 					clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", id, location, clusterProjectID)
-					membershipOp := gcloud.Runf(t, "container fleet memberships describe %s --location %s --project %s", clusterOp.Get("name").String(), location, fleetProjectID)
-					assert.Equal(fmt.Sprintf("%s.svc.id.goog", fleetProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, fleetProjectID))
+					membershipOp := gcloud.Runf(t, "container fleet memberships describe %s --location %s --project %s", clusterOp.Get("name").String(), location, clusterProjectID)
+					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
 				}
 
 				// GKE Scopes and Namespaces
@@ -153,10 +151,10 @@ func TestFleetscope(t *testing.T) {
 					}
 					return []string{"frontend"}
 				}() {
-					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", fleetProjectID, namespaces, envName)
-					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName)
-					gkeNamespaces := fmt.Sprintf("projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s", fleetProjectID, namespaces, envName)
-					opNamespaces := gcloud.Runf(t, "container hub scopes namespaces describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s --project=%[1]s", fleetProjectID, namespaces, envName)
+					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", clusterProjectID, namespaces, envName)
+					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)
+					gkeNamespaces := fmt.Sprintf("projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s", clusterProjectID, namespaces, envName)
+					opNamespaces := gcloud.Runf(t, "container hub scopes namespaces describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)
 					assert.Equal(gkeNamespaces, opNamespaces.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeNamespaces))
 					assert.True(opNamespaces.Exists(), "Namespace %s should exist", gkeNamespaces)
 					assert.Equal(gkeScopes, opGKEScopes.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeScopes))

@@ -19,11 +19,6 @@ variable "env" {
   type        = string
 }
 
-variable "fleet_project_id" {
-  description = "The fleet project ID"
-  type        = string
-}
-
 variable "cluster_project_id" {
   description = "The cluster project ID"
   type        = string
