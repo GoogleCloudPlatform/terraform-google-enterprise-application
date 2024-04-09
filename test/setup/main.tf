@@ -62,6 +62,7 @@ module "project" {
     "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com",
     "storage-api.googleapis.com",
+    "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "cloudbilling.googleapis.com"

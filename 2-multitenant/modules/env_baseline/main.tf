@@ -38,6 +38,7 @@ module "eab_cluster_project" {
   disable_services_on_destroy = false
 
   activate_apis = [
+    "certificatemanager.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",
@@ -60,7 +61,7 @@ module "cloud_armor" {
   version = "~> 2.0"
 
   project_id                           = module.eab_cluster_project.project_id
-  name                                 = "eab-cloud-armor-${var.env}"
+  name                                 = "eab-cloud-armor"
   description                          = "EAB Cloud Armor policy"
   default_rule_action                  = "allow"
   type                                 = "CLOUD_ARMOR"
@@ -95,20 +96,12 @@ module "ip_address" {
   source  = "terraform-google-modules/address/google"
   version = "~> 3.2"
 
-  for_each = data.google_compute_subnetwork.default
-
-  project_id = regex(local.projects_re, each.value.id)[0]
-  region     = each.value.region
-
-  subnetwork = each.value.name
-
-  names = [
-    "ip-${each.value.region}-${var.env}-1",
-    "ip-${each.value.region}-${var.env}-2",
-    "ip-${each.value.region}-${var.env}-3"
-  ]
+  project_id   = module.eab_cluster_project.project_id
+  address_type = "EXTERNAL"
+  region       = "global"
+  global       = true
+  names        = ["frontend-ip"]
 }
-
 
 // Create a GKE cluster in each subnetwork
 module "gke" {
