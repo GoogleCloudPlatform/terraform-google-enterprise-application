@@ -51,13 +51,9 @@ resource "google_project_service_identity" "fleet_meshconfig_sa" {
   service  = "meshconfig.googleapis.com"
 }
 
-data "google_project" "project" {
-  project_id = var.cluster_project_id
-}
-
-// Grant service mesh service identity in the fleet project permission to access the cluster project
+// Grant service mesh service identity permission to access the cluster project
 resource "google_project_iam_member" "cluster_service_agent_mesh" {
   project = var.cluster_project_id
   role    = "roles/anthosservicemesh.serviceAgent"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-servicemesh.iam.gserviceaccount.com"
+  member  = "serviceAccount:${google_project_service_identity.fleet_meshconfig_sa.email}"
 }
