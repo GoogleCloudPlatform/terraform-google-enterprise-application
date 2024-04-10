@@ -1,0 +1,102 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: asm-ingress
+  labels:
+    istio-injection: enabled
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: asm-ingressgateway
+  namespace: asm-ingress
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: asm-ingressgateway
+  namespace: asm-ingress
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: asm-ingressgateway
+subjects:
+  - kind: ServiceAccount
+    name: asm-ingressgateway
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: asm-ingressgateway
+  namespace: asm-ingress
+spec:
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http
+    port: 80
+    targetPort: 8080
+    appProtocol: HTTP
+  - name: https
+    port: 443
+    targetPort: 8443
+    appProtocol: HTTP2
+  selector:
+    asm: ingressgateway
+  type: ClusterIP
+
+---
+kind: ServiceExport
+apiVersion: net.gke.io/v1
+metadata:
+  name: asm-ingressgateway
+  namespace: asm-ingress
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: asm-ingressgateway
+  namespace: asm-ingress
+spec:
+  selector:
+    asm: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "*" # IMPORTANT: Must use wildcard here when using SSL, see note below
+    tls:
+      mode: SIMPLE
+      credentialName: cymbal-bank-credential
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*" # IMPORTANT: Must use wildcard here when using SSL, see note below
