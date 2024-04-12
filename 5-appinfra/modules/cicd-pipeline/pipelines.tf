@@ -22,14 +22,14 @@ locals {
 # cloud deploy service account
 resource "google_service_account" "cloud_deploy" {
   project    = var.project_id
-  account_id = "cloud-deploy-${local.service_name}"
+  account_id = "deploy-${local.service_name}"
 }
 
 resource "google_clouddeploy_target" "development" {
   # one CloudDeploy target per target defined in vars
 
   project  = var.project_id
-  name     = "${local.service_name}-development"
+  name     = "${local.service_name}-dev"
   location = var.region
 
   anthos_cluster {
@@ -68,7 +68,7 @@ resource "google_clouddeploy_target" "non_prod" {
   for_each = { for i, v in var.cluster_membership_ids_nonprod : i => v }
 
   project  = var.project_id
-  name     = "${local.service_name}-non-production-${each.key}"
+  name     = "${local.service_name}-nonprod-${each.key}"
   location = var.region
 
   anthos_cluster {
@@ -107,7 +107,7 @@ resource "google_clouddeploy_target" "prod" {
   for_each = { for i, v in var.cluster_membership_ids_prod : i => v }
 
   project  = var.project_id
-  name     = "${local.service_name}-production-${each.key}"
+  name     = "${local.service_name}-prod-${each.key}"
   location = var.region
 
   anthos_cluster {

@@ -30,11 +30,11 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-func TestAppinfraFrontend(t *testing.T) {
-	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
-	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
-	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
-	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps"))
+func TestAppinfraLedgerwriter(t *testing.T) {
+	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/development")))
+	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/non-production")))
+	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/production")))
+	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps")))
 	projectID := appfactory.GetStringOutput("app_admin_project_id")
 
 	vars := map[string]interface{}{
@@ -46,16 +46,16 @@ func TestAppinfraFrontend(t *testing.T) {
 		"buckets_force_destroy":          "true",
 	}
 	frontend := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../5-appinfra/apps/frontend/envs/shared"),
+		tft.WithTFDir(fmt.Sprintf("../../../5-appinfra/apps/ledger-ledgerwriter/envs/shared")),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 	frontend.DefineVerify(func(assert *assert.Assertions) {
 		frontend.DefaultVerify(assert)
 
-		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-cymbal-bank-frontend", projectID)
+		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-cymbal-bank-ledger-ledgerwriter", projectID)
 		region := "us-central1"
-		pipelineName := "frontend"
+		pipelineName := "ledgerwriter"
 		prodTarget := "dev"
 
 		// Push cymbal bank app source code
@@ -76,7 +76,7 @@ func TestAppinfraFrontend(t *testing.T) {
 		gitAppRun("config", "--global", "http.postBuffer", "157286400")
 		gitAppRun("checkout", "-b", "main")
 		gitAppRun("remote", "add", "google", appRepo)
-		datefile, err := os.OpenFile(tmpDirApp+"/src/frontend/date.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		datefile, err := os.OpenFile(tmpDirApp+"/src/ledger/date.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -87,16 +87,15 @@ func TestAppinfraFrontend(t *testing.T) {
 			t.Fatal(err)
 		}
 		gitAppRun("rm", "-r", "src/components")
-		gitAppRun("rm", "-r", "src/frontend/k8s")
 		err = cp.Copy("../../../6-appsource/cymbal-bank/components", fmt.Sprintf("%s/src/components", tmpDirApp))
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = cp.Copy("../../../6-appsource/cymbal-bank/frontend/skaffold.yaml", fmt.Sprintf("%s/src/frontend/skaffold.yaml", tmpDirApp))
+		err = cp.Copy("../../../6-appsource/cymbal-bank/ledger-ledgerwriter/skaffold.yaml", fmt.Sprintf("%s/src/ledger/ledgerwriter/skaffold.yaml", tmpDirApp))
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = cp.Copy("../../../6-appsource/cymbal-bank/frontend/k8s", fmt.Sprintf("%s/src/frontend/k8s", tmpDirApp))
+		err = cp.Copy("../../../6-appsource/cymbal-bank/ledger-db/ledger-db.yaml", fmt.Sprintf("%s/src/ledger/ledger-db/k8s/overlays/development/ledger-db.yaml", tmpDirApp))
 		if err != nil {
 			t.Fatal(err)
 		}

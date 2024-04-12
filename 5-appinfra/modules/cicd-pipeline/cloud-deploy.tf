@@ -22,7 +22,7 @@ resource "google_clouddeploy_delivery_pipeline" "delivery-pipeline" {
       for_each = { for idx, target in local.targets : idx => target }
       content {
         # TODO: use "production" profile once it works.
-        profiles  = [stages.value.name == "${local.service_name}-development" ? "development" : (startswith(stages.value.name, "${local.service_name}-non-production") ? "staging" : "production")]
+        profiles  = [stages.value.name == "${local.service_name}-dev" ? "development" : (startswith(stages.value.name, "${local.service_name}-nonprod") ? "staging" : "production")]
         target_id = stages.value.name
       }
     }
