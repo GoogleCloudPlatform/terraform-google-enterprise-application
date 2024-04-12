@@ -16,13 +16,13 @@
 resource "google_clouddeploy_delivery_pipeline" "delivery-pipeline" {
   project  = var.project_id
   location = var.region
-  name     = var.service
+  name     = local.service_name
   serial_pipeline {
     dynamic "stages" {
       for_each = { for idx, target in local.targets : idx => target }
       content {
         # TODO: use "production" profile once it works.
-        profiles  = [stages.value.name == "development" ? "development" : (startswith(stages.value.name, "non-production") ? "staging" : "production")]
+        profiles  = [stages.value.name == "${local.service_name}-development" ? "development" : (startswith(stages.value.name, "${local.service_name}-non-production") ? "staging" : "production")]
         target_id = stages.value.name
       }
     }

@@ -5,7 +5,6 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| application\_name | application name (e.g. 'cymbal-bank') | `string` | n/a | yes |
 | buckets\_force\_destroy | When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | cluster\_membership\_id\_dev | Fleet membership ID for the cluster in development environment | `string` | n/a | yes |
 | cluster\_membership\_ids\_nonprod | Fleet membership IDs for the cluster in non-production environment | `list(string)` | n/a | yes |

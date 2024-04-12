@@ -16,7 +16,7 @@
 
 locals {
   application_name = "cymbal-bank"
-  service_name     = "frontend"
+  service_name     = "accounts-contacts"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
 }

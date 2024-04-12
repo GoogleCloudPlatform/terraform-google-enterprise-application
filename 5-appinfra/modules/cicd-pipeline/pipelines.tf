@@ -22,14 +22,14 @@ locals {
 # cloud deploy service account
 resource "google_service_account" "cloud_deploy" {
   project    = var.project_id
-  account_id = "cloud-deploy"
+  account_id = "cloud-deploy-${local.service_name}"
 }
 
 resource "google_clouddeploy_target" "development" {
   # one CloudDeploy target per target defined in vars
 
   project  = var.project_id
-  name     = "development"
+  name     = "${local.service_name}-development"
   location = var.region
 
   anthos_cluster {
@@ -49,7 +49,7 @@ resource "google_clouddeploy_target" "development" {
 # GCS bucket used by Cloud Deploy for delivery artifact storage
 resource "google_storage_bucket" "delivery_artifacts_development" {
   project                     = var.project_id
-  name                        = "delivery-artifacts-development-${data.google_project.project.number}"
+  name                        = "delivery-artifacts-development-${data.google_project.project.number}-${local.service_name}"
   uniform_bucket_level_access = true
   location                    = var.region
   force_destroy               = var.buckets_force_destroy
@@ -68,7 +68,7 @@ resource "google_clouddeploy_target" "non_prod" {
   for_each = { for i, v in var.cluster_membership_ids_nonprod : i => v }
 
   project  = var.project_id
-  name     = "non-production-${each.key}"
+  name     = "${local.service_name}-non-production-${each.key}"
   location = var.region
 
   anthos_cluster {
@@ -88,7 +88,7 @@ resource "google_clouddeploy_target" "non_prod" {
 # GCS bucket used by Cloud Deploy for delivery artifact storage
 resource "google_storage_bucket" "delivery_artifacts_non_prod" {
   project                     = var.project_id
-  name                        = "delivery-artifacts-non-prod-${data.google_project.project.number}"
+  name                        = "delivery-artifacts-non-prod-${data.google_project.project.number}-${local.service_name}"
   uniform_bucket_level_access = true
   location                    = var.region
   force_destroy               = var.buckets_force_destroy
@@ -107,7 +107,7 @@ resource "google_clouddeploy_target" "prod" {
   for_each = { for i, v in var.cluster_membership_ids_prod : i => v }
 
   project  = var.project_id
-  name     = "production-${each.key}"
+  name     = "${local.service_name}-production-${each.key}"
   location = var.region
 
   anthos_cluster {
@@ -127,7 +127,7 @@ resource "google_clouddeploy_target" "prod" {
 # GCS bucket used by Cloud Deploy for delivery artifact storage
 resource "google_storage_bucket" "delivery_artifacts_prod" {
   project                     = var.project_id
-  name                        = "delivery-artifacts-prod-${data.google_project.project.number}"
+  name                        = "delivery-artifacts-prod-${data.google_project.project.number}-${local.service_name}"
   uniform_bucket_level_access = true
   location                    = var.region
   force_destroy               = var.buckets_force_destroy
