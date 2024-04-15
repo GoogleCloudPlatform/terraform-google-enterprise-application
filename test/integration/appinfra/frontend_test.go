@@ -43,7 +43,7 @@ func TestAppinfraFrontend(t *testing.T) {
 		"buckets_force_destroy":          "true",
 	}
 	frontend := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir(fmt.Sprintf("../../../5-appinfra/apps/frontend/envs/shared")),
+		tft.WithTFDir("../../../5-appinfra/apps/frontend/envs/shared"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
