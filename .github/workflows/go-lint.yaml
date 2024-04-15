@@ -1,0 +1,43 @@
+name: lint
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/go-lint.yaml"
+      - "test/integration/**"
+permissions:
+  contents: read
+
+concurrency:
+  group: '$${{ github.workflow }}-$${{ github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: [test/integration]
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version-file: ${{ matrix.folder }}/go.mod
+          cache-dependency-path: ${{ matrix.folder }}/go.sum
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: changes
+        with:
+          filters: |
+            src:
+              - ${{ matrix.folder }}/**
+              - ".github/workflows/go-lint.yaml"
+      - if: steps.changes.outputs.src == 'true'
+        name: golangci-lint
+        uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804 # v4.0.0
+        with:
+          version: latest
+          working-directory: ${{ matrix.folder }}
+          args: --timeout=5m
