@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: go-lint
+name: lint
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - ".github/workflows/go-lint.yaml"
       - "test/integration/**"
