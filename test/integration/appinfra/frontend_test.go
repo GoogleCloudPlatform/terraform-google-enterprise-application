@@ -16,6 +16,7 @@ package frontend
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -25,6 +26,8 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+
+	cp "github.com/otiai10/copy"
 )
 
 func TestAppinfraFrontend(t *testing.T) {
@@ -73,7 +76,31 @@ func TestAppinfraFrontend(t *testing.T) {
 		gitAppRun("config", "--global", "http.postBuffer", "157286400")
 		gitAppRun("checkout", "-b", "main")
 		gitAppRun("remote", "add", "google", appRepo)
-		gitAppRun("rm", "src/frontend/README.md")
+		datefile, err := os.OpenFile(tmpDirApp+"/src/frontend/date.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer datefile.Close()
+
+		_, err = datefile.WriteString(time.Now().String() + "\n")
+		if err != nil {
+			t.Fatal(err)
+		}
+		gitAppRun("rm", "-r", "src/components")
+		gitAppRun("rm", "-r", "src/frontend/k8s")
+		err = cp.Copy("../../../6-appsource/cymbal-bank/components", fmt.Sprintf("%s/src/components", tmpDirApp))
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = cp.Copy("../../../6-appsource/cymbal-bank/frontend/skaffold.yaml", fmt.Sprintf("%s/src/frontend/skaffold.yaml", tmpDirApp))
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = cp.Copy("../../../6-appsource/cymbal-bank/frontend/k8s", fmt.Sprintf("%s/src/frontend/k8s", tmpDirApp))
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		gitAppRun("add", ".")
 		gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 		gitAppRun("push", "--all", "google", "-f")
