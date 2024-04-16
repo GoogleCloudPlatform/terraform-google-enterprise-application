@@ -28,10 +28,10 @@ import (
 )
 
 func TestAppinfraFrontend(t *testing.T) {
-	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/development")))
-	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/non-production")))
-	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/production")))
-	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps")))
+	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
+	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
+	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
+	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps"))
 	projectID := appfactory.GetStringOutput("app_admin_project_id")
 
 	vars := map[string]interface{}{
@@ -43,7 +43,7 @@ func TestAppinfraFrontend(t *testing.T) {
 		"buckets_force_destroy":          "true",
 	}
 	frontend := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir(fmt.Sprintf("../../../5-appinfra/apps/frontend/envs/shared")),
+		tft.WithTFDir("../../../5-appinfra/apps/frontend/envs/shared"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
