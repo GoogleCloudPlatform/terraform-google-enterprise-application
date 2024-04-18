@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-commonLabels:
-  tier: web
-  team: frontend
-resources:
-  - frontend.yaml
-  - virtualservice.yaml
-components:
-  - ../../../components/add-tmp-dir
-  - ../../../components/add-public-key-volume
-  - ../../../components/bank-of-anthos
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: frontend
+spec:
+  gateways:
+  - asm-ingress/asm-ingressgateway
+  hosts:
+  - '*'
+  http:
+  - route:
+    - destination:
+        host: frontend
+        port:
+          number: 80
+
