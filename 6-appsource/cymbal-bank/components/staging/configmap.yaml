@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,9 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cloud-sql-admin
 data:
-  connectionName: bank-of-anthos-ci:us-central1:bank-of-anthos-db-staging
+  connectionName: eab-gke-non-production-2cdd:us-central1:db-us-central1-non-production
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-api-config
+data:
+  TRANSACTIONS_API_ADDR: "ledgerwriter.ledger-non-production:8080"
+  BALANCES_API_ADDR: "balancereader.ledger-non-production:8080"
+  HISTORY_API_ADDR: "transactionhistory.ledger-non-production:8080"
+  CONTACTS_API_ADDR: "contacts.accounts-non-production:8080"
+  USERSERVICE_API_ADDR: "userservice.accounts-non-production:8080"
+

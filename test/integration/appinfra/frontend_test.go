@@ -56,7 +56,7 @@ func TestAppinfraFrontend(t *testing.T) {
 		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-cymbal-bank-frontend", projectID)
 		region := "us-central1"
 		pipelineName := "frontend"
-		prodTarget := "development"
+		prodTarget := "dev"
 
 		// Push cymbal bank app source code
 		tmpDirApp := t.TempDir()
@@ -130,7 +130,7 @@ func TestAppinfraFrontend(t *testing.T) {
 		}
 		releaseName := releases[0].Get("name")
 		fmt.Println(releaseName)
-		rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, pipelineName, region, releaseName, prodTarget)
+		rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, pipelineName, region, releaseName, pipelineName, prodTarget)
 		// Poll CD rollouts until rollout is successful
 		pollCloudDeploy := func(cmd string) func() (bool, error) {
 			return func() (bool, error) {

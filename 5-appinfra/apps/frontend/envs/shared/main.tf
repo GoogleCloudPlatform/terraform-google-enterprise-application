@@ -30,10 +30,9 @@ module "app" {
   cluster_membership_ids_nonprod = var.cluster_membership_ids_nonprod
   cluster_membership_ids_prod    = var.cluster_membership_ids_prod
 
-  application_name = local.application_name
-  service          = local.service_name
-  repo_name        = local.repo_name
-  repo_branch      = local.repo_branch
+  service     = local.service_name
+  repo_name   = local.repo_name
+  repo_branch = local.repo_branch
 
   buckets_force_destroy = var.buckets_force_destroy
 }
