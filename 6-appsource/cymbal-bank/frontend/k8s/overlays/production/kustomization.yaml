@@ -21,8 +21,6 @@ resources:
   - namespace.yaml
 components:
   - ../../../../components/production
-patchesStrategicMerge:
-  - frontend-service.yaml
 transformers:
   - |-
     apiVersion: builtin

@@ -37,11 +37,6 @@ variable "cluster_membership_ids_prod" {
   description = "Fleet membership IDs for the cluster in production environment"
 }
 
-variable "application_name" {
-  type        = string
-  description = "application name (e.g. 'cymbal-bank')"
-}
-
 variable "service" {
   type        = string
   description = "service name (e.g. 'frontend')"

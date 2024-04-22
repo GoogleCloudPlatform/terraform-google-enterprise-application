@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,4 +16,16 @@ kind: ConfigMap
 metadata:
   name: cloud-sql-admin
 data:
-  connectionName: bank-of-anthos-ci:us-central1:bank-of-anthos-db-production
+  connectionName: eab-gke-production-0198:us-central1:db-us-central1-production
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-api-config
+data:
+  TRANSACTIONS_API_ADDR: "ledgerwriter.ledger-production:8080"
+  BALANCES_API_ADDR: "balancereader.ledger-production:8080"
+  HISTORY_API_ADDR: "transactionhistory.ledger-production:8080"
+  CONTACTS_API_ADDR: "contacts.accounts-production:8080"
+  USERSERVICE_API_ADDR: "userservice.accounts-production:8080"
+
