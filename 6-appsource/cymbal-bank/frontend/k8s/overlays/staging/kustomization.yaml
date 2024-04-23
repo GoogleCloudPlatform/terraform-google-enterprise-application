@@ -18,6 +18,7 @@ namespace: frontend-non-production
 resources:
   - ../../base
   - namespace.yaml
+  - destinationrule.yaml
 components:
   - ../../../../components/staging
 
