@@ -32,25 +32,6 @@ Deployment: Y mins
 
 ## Usage
 
-Basic usage of this module is as follows:
-
-```hcl
-module "enterprise_application" {
-  source  = "terraform-google-modules/enterprise-application/google"
-  version = "~> 0.1"
-
-  project_id  = "<PROJECT ID>"
-  bucket_name = "gcs-test-bucket"
-}
-```
-
-Functional examples are included in the
-[examples](./examples/) directory.
-
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
 ## Requirements
 
 These sections describe requirements for using this module.
@@ -59,8 +40,8 @@ These sections describe requirements for using this module.
 
 The following dependencies must be available:
 
-- [Terraform][terraform] v0.13
-- [Terraform Provider for GCP][terraform-provider-gcp] plugin v3.53
+- [Terraform][terraform] v1.3
+- [Terraform Provider for GCP][terraform-provider-gcp]
 
 ### Service Account
 
@@ -88,8 +69,6 @@ provision a project with the necessary APIs enabled.
 Refer to the [contribution guidelines](./CONTRIBUTING.md) for
 information on contributing to this module.
 
-[iam-module]: https://registry.terraform.io/modules/terraform-google-modules/iam/google
-[project-factory-module]: https://registry.terraform.io/modules/terraform-google-modules/project-factory/google
 [terraform-provider-gcp]: https://www.terraform.io/docs/providers/google/index.html
 [terraform]: https://www.terraform.io/downloads.html
 

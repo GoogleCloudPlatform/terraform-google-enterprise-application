@@ -3,7 +3,14 @@
 This module defines the per-environment multitenant resources deployed via the multitenant infrastructure pipeline.
 
 The following resources are created:
+- GCP Projects
 - GKE cluster(s)
+- Cloud SQL PostgreSQL
+- Cloud Endpoint
+- Cloud Armor
+- IP addresses
+- Service Accounts
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
