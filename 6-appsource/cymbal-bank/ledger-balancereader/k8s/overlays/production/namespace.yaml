@@ -11,13 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: accounts-production
-resources:
-  - ../../base
-  - namespace.yaml
-components:
-  - ../../../../../components/production
-  - ../../../../../components/cloud-sql
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ledger-production
+  labels:
+    istio-injection: enabled # enable ASM sidecar injection on namespace
