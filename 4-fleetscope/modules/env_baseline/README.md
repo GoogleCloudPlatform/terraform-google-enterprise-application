@@ -1,11 +1,16 @@
 # Fleet-Scope Infrastructure: environment baseline module
 
-This module defines the per-environment multitenant resources deployed via the fleet-scope infrastructure pipeline.
+This module defines the per-environment fleet resources deployed via the fleet-scope infrastructure pipeline.
 
 The following resources are created:
-- GKE fleet and features
-- ASM
-- ACM
+- Fleet scope
+- Fleet namespace
+- Cloud Source Repo
+- Config Management
+- Service Mesh
+- Multicluster Ingress
+- Multicluster Service
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
