@@ -70,10 +70,11 @@ module "cloud_armor" {
   layer_7_ddos_defense_rule_visibility = "STANDARD"
 
   pre_configured_rules = {
-    "sqli_sensitivity_level_4" = {
-      action          = "deny(502)"
-      priority        = 1
-      target_rule_set = "sqli-v33-stable"
+    "sqli_sensitivity_level_1" = {
+      action            = "deny(502)"
+      priority          = 1
+      target_rule_set   = "sqli-v33-stable"
+      sensitivity_level = 1
     }
 
     "xss-stable_level_2" = {
