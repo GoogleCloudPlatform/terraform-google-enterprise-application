@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+output "cluster_regions" {
+  description = "Regions with clusters"
+  value = [
+    for value in data.google_compute_subnetwork.default : value.region
+  ]
+}
+
 output "cluster_ids" {
   description = "GKE cluster IDs"
   value = [
@@ -28,17 +35,22 @@ output "cluster_membership_ids" {
   ]
 }
 
+output "cluster_project_id" {
+  description = "Cluster Project ID"
+  value       = module.eab_cluster_project.project_id
+}
+
 output "network_project_id" {
   description = "Network Project ID"
   value       = var.network_project_id
 }
 
-output "fleet_project_id" {
-  description = "Fleet Project ID"
-  value       = module.eab_fleet_project.project_id
+output "ip_address_self_links" {
+  description = "IP Address Self Links"
+  value       = module.ip_address.self_links
 }
 
-output "cluster_project_id" {
-  description = "Cluster Project ID"
-  value       = module.eab_cluster_project.project_id
+output "ip_addresses" {
+  description = "IP Addresses"
+  value       = module.ip_address.addresses
 }

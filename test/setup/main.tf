@@ -50,21 +50,34 @@ module "project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 14.0"
 
-  name              = "ci-enterprise-application"
-  random_project_id = "true"
-  org_id            = var.org_id
-  folder_id         = var.folder_id
-  billing_account   = var.billing_account
+  name                     = "ci-enterprise-application"
+  random_project_id        = "true"
+  random_project_id_length = 4
+  org_id                   = var.org_id
+  folder_id                = var.folder_id
+  billing_account          = var.billing_account
 
   activate_apis = [
     "cloudbuild.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com",
     "storage-api.googleapis.com",
+    "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
+    "sqladmin.googleapis.com",
     "cloudbilling.googleapis.com"
   ]
+}
+
+# Create mock common folder
+module "folder_common" {
+  source  = "terraform-google-modules/folders/google"
+  version = "~> 4.0"
+
+  prefix = random_string.prefix.result
+  parent = "folders/${var.folder_id}"
+  names  = ["common"]
 }
 
 # Create mock environment folders
@@ -84,6 +97,14 @@ resource "google_folder_iam_member" "folder_iam" {
   folder = each.value.folder_id
   role   = each.value.role
   member = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+# Admin roles to common folder
+resource "google_folder_iam_member" "common_folder_iam" {
+  for_each = toset(local.folder_admin_roles)
+  folder   = module.folder_common.ids["common"]
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.int_test.email}"
 }
 
 # Create SVPC host projects

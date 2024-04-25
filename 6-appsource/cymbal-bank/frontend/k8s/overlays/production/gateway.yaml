@@ -1,0 +1,110 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+kind: Gateway
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: external-http
+  namespace: asm-ingress
+  annotations:
+    networking.gke.io/certmap: mcg-cert-map
+spec:
+  gatewayClassName: gke-l7-global-external-managed-mc
+  listeners:
+  - name: http # list the port only so we can redirect any incoming http requests to https
+    protocol: HTTP
+    port: 80
+  - name: https
+    protocol: HTTPS
+    port: 443
+    allowedRoutes:
+      kinds:
+      - kind: HTTPRoute
+  addresses:
+  - type: NamedAddress
+    value: frontend-ip
+
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: cloud-armor-backendpolicy
+  namespace: asm-ingress
+spec:
+  default:
+    securityPolicy: eab-cloud-armor
+    timeoutSec: 60
+    connectionDraining:
+      drainingTimeoutSec: 60
+    sessionAffinity:
+      type: CLIENT_IP
+  targetRef:
+    group: net.gke.io
+    kind: ServiceImport
+    name: asm-ingressgateway
+
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: ingress-gateway-healthcheck
+  namespace: asm-ingress
+spec:
+  default:
+    config:
+      httpHealthCheck:
+        port: 15021
+        portSpecification: USE_FIXED_PORT
+        requestPath: /healthz/ready
+      type: HTTP
+  targetRef:
+    group: net.gke.io
+    kind: ServiceImport
+    name: asm-ingressgateway
+
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: default-httproute
+  namespace: asm-ingress
+spec:
+  parentRefs:
+  - name: external-http
+    namespace: asm-ingress
+    sectionName: https
+  rules:
+  - backendRefs:
+    - group: net.gke.io
+      kind: ServiceImport
+      name: asm-ingressgateway
+      port: 443
+
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: http-to-https-redirect-httproute
+  namespace: asm-ingress
+spec:
+  parentRefs:
+  - name: external-http
+    namespace: asm-ingress
+    sectionName: http
+  rules:
+  - filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301

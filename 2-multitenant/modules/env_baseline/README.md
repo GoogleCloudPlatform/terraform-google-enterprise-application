@@ -24,7 +24,9 @@ The following resources are created:
 | cluster\_ids | GKE cluster IDs |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
-| fleet\_project\_id | Fleet Project ID |
+| cluster\_regions | Regions with clusters |
+| ip\_address\_self\_links | IP Address Self Links |
+| ip\_addresses | IP Addresses |
 | network\_project\_id | Network Project ID |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

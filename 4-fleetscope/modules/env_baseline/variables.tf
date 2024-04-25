@@ -19,19 +19,19 @@ variable "env" {
   type        = string
 }
 
-variable "project_id" {
-  description = "The fleet project ID"
+variable "cluster_project_id" {
+  description = "The cluster project ID"
   type        = string
 }
 
-variable "scope_id" {
-  description = "The fleet scope ID"
+variable "network_project_id" {
+  description = "The network project ID"
   type        = string
 }
 
-variable "namespace_id" {
-  description = "The fleet namespace ID"
-  type        = string
+variable "namespace_ids" {
+  description = "The fleet namespace IDs"
+  type        = list(string)
 }
 
 variable "cluster_membership_ids" {

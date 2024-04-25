@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-variable "fleet_project_id" {
-  description = "The fleet project ID"
+variable "cluster_project_id" {
+  description = "The cluster project ID"
+  type        = string
+}
+
+variable "network_project_id" {
+  description = "The network project ID"
   type        = string
 }
 
