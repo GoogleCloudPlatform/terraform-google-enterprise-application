@@ -16,7 +16,7 @@ The following resources are created:
 ## Prerequisites
 
 1. Provision of the per-environment folder, network project, network, and subnetwork(s).
-1. 1-bootstrap pgase executed successfully.
+1. 1-bootstrap phase executed successfully.
 
 ## Usage
 
