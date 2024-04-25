@@ -21,7 +21,7 @@ locals {
 }
 
 import {
-  id = "projects/${var.project_id}/locations/global/features/fleetobservability"
+  id = "projects/${var.cluster_project_id}/locations/global/features/fleetobservability"
   to = module.env.google_gke_hub_feature.fleet-o11y
 }
 

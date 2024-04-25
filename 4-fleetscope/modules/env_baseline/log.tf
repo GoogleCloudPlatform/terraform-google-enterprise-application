@@ -16,7 +16,7 @@
 
 resource "google_gke_hub_feature" "fleet-o11y" {
   name     = "fleetobservability"
-  project  = var.project_id
+  project  = var.cluster_project_id
   location = "global"
   spec {
     fleetobservability {
