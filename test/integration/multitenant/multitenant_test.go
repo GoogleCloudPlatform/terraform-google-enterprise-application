@@ -59,6 +59,7 @@ func TestMultitenant(t *testing.T) {
 
 				// Project IDs
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
+				regions := terraform.OutputList(t, multitenant.GetTFOptions(), "cluster_regions")
 
 				// Projects creation
 				for _, projectOutput := range []struct {
@@ -120,19 +121,49 @@ func TestMultitenant(t *testing.T) {
 					assert.True(clusterOp.Get("monitoringConfig.managedPrometheusConfig.enabled").Bool(), fmt.Sprintf("Cluster %s should have Managed Prometheus Config equals True", id))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), clusterOp.Get("workloadIdentityConfig.workloadPool").String(), fmt.Sprintf("Cluster %s workloadPool should be %s.svc.id.goog", id, clusterProjectID))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
+				}
 
+				for _, region := range regions {
 					// Cloud SQL
-					dbName := fmt.Sprintf("db-%s-%s", location, envName)
+					dbName := fmt.Sprintf("db-%s-%s", region, envName)
 					dbOp := gcloud.Run(t, fmt.Sprintf("sql instances describe %s --project %s", dbName, clusterProjectID))
 					assert.Equal("POSTGRES_14", dbOp.Get("databaseVersion").String(), "Data base installed version should be POSTGRES_14.")
 					assert.Equal("db-custom-1-3840", dbOp.Get("settings.tier").String(), "Tier setting should be db-custom-1-3840.")
 					assert.Equal("REGIONAL", dbOp.Get("settings.availabilityType").String(), "Availability Type should be REGIONAL.")
 				}
 
+				// Bank of Anthos SA
+				saName := "bank-of-anthos"
+				sqlSAEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saName, clusterProjectID)
+				saOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts describe %s --project %s", sqlSAEmail, clusterProjectID))
+				assert.False(saOp.Get("disabled").Bool(), "Service account should not be disabled.")
+
+				sqlSaRoles := []string{
+					"roles/cloudsql.client",
+					"roles/cloudsql.instanceUser",
+				}
+				sqlIamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", sqlSAEmail)
+				sqlIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", sqlIamFilter, "--format", "json"})
+				sqlProjectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", clusterProjectID), sqlIamCommonArgs).Array()
+				sqlSaListRoles := testutils.GetResultFieldStrSlice(sqlProjectPolicyOp, "bindings.role")
+				assert.Subset(sqlSaListRoles, sqlSaRoles, fmt.Sprintf("service account %s should have project level roles", sqlSAEmail))
+
+				sqlWorkloadIdentityUsers := []string{
+					fmt.Sprintf("serviceAccount:%s.svc.id.goog[accounts-%s/bank-of-anthos]", clusterProjectID, envName),
+					fmt.Sprintf("serviceAccount:%s.svc.id.goog[ledger-%s/bank-of-anthos]", clusterProjectID, envName),
+				}
+
+				sqlSAIamFilter := "bindings.role:'roles/iam.workloadIdentityUser'"
+				sqlSAIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", sqlSAIamFilter, "--format", "json"})
+				sqlSAPolicyOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts get-iam-policy %s", sqlSAEmail), sqlSAIamCommonArgs).Array()[0]
+				sqlSaListMembers := utils.GetResultStrSlice(sqlSAPolicyOp.Get("bindings.members").Array())
+				assert.Subset(sqlSaListMembers, sqlWorkloadIdentityUsers, fmt.Sprintf("service account %s should have workload identity users", sqlSAEmail))
+				assert.Equal(len(sqlWorkloadIdentityUsers), len(sqlSaListMembers), fmt.Sprintf("service account % should have %d workload identity users", sqlSAEmail, len(sqlWorkloadIdentityUsers)))
+
 				// Service Identity
 				fleetProjectNumber := gcloud.Runf(t, "projects describe %s", clusterProjectID).Get("projectNumber").String()
 				gkeServiceAgent := fmt.Sprintf("service-%s@gcp-sa-gkehub.iam.gserviceaccount.com", fleetProjectNumber)
-				gke_sa_roles := []string{
+				gkeSaRoles := []string{
 					"roles/gkehub.serviceAgent",
 				}
 
@@ -140,7 +171,7 @@ func TestMultitenant(t *testing.T) {
 				gkeIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", gkeIamFilter, "--format", "json"})
 				gkeProjectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", clusterProjectID), gkeIamCommonArgs).Array()
 				gkeSaListRoles := testutils.GetResultFieldStrSlice(gkeProjectPolicyOp, "bindings.role")
-				assert.Subset(gkeSaListRoles, gke_sa_roles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
+				assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
 			})
 
