@@ -73,17 +73,16 @@ func TestMultitenant(t *testing.T) {
 							"iam.googleapis.com",
 							"serviceusage.googleapis.com",
 							"container.googleapis.com",
-						},
-					},
-					{
-						projectId: clusterProjectID,
-						apis: []string{
 							"gkehub.googleapis.com",
 							"anthos.googleapis.com",
 							"compute.googleapis.com",
 							"mesh.googleapis.com",
 							"multiclusteringress.googleapis.com",
 							"multiclusterservicediscovery.googleapis.com",
+							"sqladmin.googleapis.com",
+							"trafficdirector.googleapis.com",
+							"anthosconfigmanagement.googleapis.com",
+							"sourcerepo.googleapis.com",
 						},
 					},
 				} {
@@ -121,6 +120,13 @@ func TestMultitenant(t *testing.T) {
 					assert.True(clusterOp.Get("monitoringConfig.managedPrometheusConfig.enabled").Bool(), fmt.Sprintf("Cluster %s should have Managed Prometheus Config equals True", id))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), clusterOp.Get("workloadIdentityConfig.workloadPool").String(), fmt.Sprintf("Cluster %s workloadPool should be %s.svc.id.goog", id, clusterProjectID))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
+
+					// Cloud SQL
+					dbName := fmt.Sprintf("db-%s-%s", location, envName)
+					dbOp := gcloud.Run(t, fmt.Sprintf("sql instances describe %s --project %s", dbName, clusterProjectID))
+					assert.Equal("POSTGRES_14", dbOp.Get("databaseVersion").String(), "Data base installed version should be POSTGRES_14.")
+					assert.Equal("db-custom-1-3840", dbOp.Get("settings.tier").String(), "Tier setting should be db-custom-1-3840.")
+					assert.Equal("REGIONAL", dbOp.Get("settings.availabilityType").String(), "Availability Type should be REGIONAL.")
 				}
 
 				// Service Identity
@@ -135,6 +141,7 @@ func TestMultitenant(t *testing.T) {
 				gkeProjectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", clusterProjectID), gkeIamCommonArgs).Array()
 				gkeSaListRoles := testutils.GetResultFieldStrSlice(gkeProjectPolicyOp, "bindings.role")
 				assert.Subset(gkeSaListRoles, gke_sa_roles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
+
 			})
 
 			multitenant.Test()
