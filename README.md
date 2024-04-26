@@ -6,7 +6,7 @@ The Enterprise Application blueprint adopts practices defined in the [Enterprise
 ## Architecture 
 For a complete description of the architecture deployed by this repository, refer to the [published guide](https://cloud.google.com/architecture/enterprise-application-blueprint/architecture). See below for a high-level diagram of the architecture:
 
-![Enterprise Application blueprint architecture diagram](docs/images/eab-architecture.svg)
+![Enterprise Application blueprint architecture diagram](assets/eab-architecture.svg)
 
 ## Overview
 This repository contains several distinct deployment stages, each contained in a directory. Each stage subdirectory represents the contents of a customer-owned repo that will trigger a distinct Terraform deployment pipeline.
