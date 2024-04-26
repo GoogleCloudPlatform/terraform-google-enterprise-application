@@ -3,6 +3,8 @@ This example repository shows how to build an enterprise developer platform on G
 
 The Enterprise Application blueprint adopts practices defined in the [Enterprise Foundation blueprint](https://cloud.google.com/architecture/security-foundations), and is meant to be deployed after deploying the foundation. Refer to the [Enterprsie Foundation blueprint repository](https://github.com/terraform-google-modules/terraform-example-foundation) for complete deployment instructions.
 
+![Enterprise Application blueprint architecture diagram](docs/images/eab-architecture.svg)
+
 ## Overview
 This repository contains several distinct deployment stages, each contained in a directory. Each stage subdirectory represents the contents of a customer-owned repo that will trigger a distinct Terraform deployment pipeline.
 
@@ -21,8 +23,7 @@ example-organization
 ```
 
 ### [2. multitenant](/2-multitenant/)
-
-
+The purpose of this stage is to deploy the per-environment multitenant resources via the multitenant infrastructure pipeline. The resulting project hierarchy is as follows:
 ```
 example-organization
 └── fldr-development
@@ -35,7 +36,7 @@ example-organization
 
 ### [3. app-factory](/3-app-factory/)
 
-The purpose of this stage is to set up the application-specific projects. This includes a single project in the common folder, and a project in each of the environment folders. The app-infra pipeline creates the application CI/CD pipeline, responsible for deploying applications to the multitenant infrastructure. The app-infra pipeline also creates any application-specific infrastructure, such as databases or other managed services.
+The purpose of this stage is to set up the application-specific projects. This includes a single project in the common folder, and a project in each of the environment folders. The app-infra pipeline creates the application CI/CD pipeline, responsible for deploying applications to the multitenant infrastructure. The app-infra pipeline also creates any application-specific infrastructure, such as databases or other managed services. The resulting project hierarchy is as follows:
 
 ```
 example-organization
@@ -54,11 +55,13 @@ example-organization
 ```
 
 ### [4. fleet-scope](/4-fleet-scope/)
+The purpose of this stage is to deploy the per-environment fleet resources via the fleetscope infrastructure pipeline. This stage does not create any new projects, but creates resources within the existing multitenant infrastructure projects.
 
 ### [5. appinfra](/5-appinfra/)
+The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. 
 
 ### [6. appsource](/6-appsource/)
-
+The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations.
 
 ## Contributing
 
