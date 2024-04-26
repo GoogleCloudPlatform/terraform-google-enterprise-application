@@ -150,7 +150,8 @@ module "gke" {
   ]
 
   depends_on = [
-    module.eab_cluster_project
+    module.eab_cluster_project,
+    google_gke_hub_feature.fleet-o11y
   ]
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
