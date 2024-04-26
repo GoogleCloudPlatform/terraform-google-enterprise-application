@@ -5,6 +5,7 @@ The Enterprise Application blueprint adopts practices defined in the [Enterprise
 
 ## Architecture 
 For a complete description of the architecture deployed by this repository, refer to the [published guide](https://cloud.google.com/architecture/enterprise-application-blueprint/architecture). See below for a high-level diagram of the architecture:
+
 ![Enterprise Application blueprint architecture diagram](docs/images/eab-architecture.svg)
 
 ## Overview
