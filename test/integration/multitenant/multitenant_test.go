@@ -173,6 +173,36 @@ func TestMultitenant(t *testing.T) {
 				gkeSaListRoles := testutils.GetResultFieldStrSlice(gkeProjectPolicyOp, "bindings.role")
 				assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
+				// Endpoints service
+				endpointName := fmt.Sprintf("frontend.endpoints.%s.cloud.goog", clusterProjectID)
+				endpointOp := gcloud.Run(t, fmt.Sprintf("endpoints services describe %s --project %s", endpointName, clusterProjectID))
+				assert.Equal(endpointOp.Get("producerProjectId").String(), clusterProjectID, fmt.Sprintf("Producer Project ID should be %s.", clusterProjectID))
+
+				// Certificate Manager Certificate
+				certName := "mcg-cert"
+				certOp := gcloud.Run(t, fmt.Sprintf("certificate-manager certificates describe %s --project %s", certName, clusterProjectID))
+				assert.Subset(utils.GetResultStrSlice(certOp.Get("managed.domains").Array()), []string{endpointName}, fmt.Sprintf("Managed Domain should contain %s", endpointName))
+
+				// Certificate Manager Certificate Map
+				certMapName := "mcg-cert-map"
+				certMapOp := gcloud.Run(t, fmt.Sprintf("certificate-manager maps describe %s --project %s", certMapName, clusterProjectID))
+				assert.Equal(certMapOp.Get("description").String(), "gateway certificate map", "Certificate Map description should be 'gateway certificate map'.")
+
+				// Certificate Manager Certificate Map Entry
+				certMapEntryName := "mcg-cert-map-entry"
+				certMapEntryOp := gcloud.Run(t, fmt.Sprintf("certificate-manager maps entries describe %s --map %s --project %s", certMapEntryName, certMapName, clusterProjectID))
+				assert.Equal(certMapEntryOp.Get("hostname").String(), endpointName, fmt.Sprintf("Certificate Map Entry hostname should be %s.", endpointName))
+
+				// Cloud Armor
+				cloudArmorName := "eab-cloud-armor"
+				cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, clusterProjectID)).Array()[0]
+				assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
+
+				// Compute Addresses
+				ipAddressName := "frontend-ip"
+				ipOp := gcloud.Run(t, fmt.Sprintf("compute addresses describe %s --project %s --global", ipAddressName, clusterProjectID))
+				assert.Equal("EXTERNAL", ipOp.Get("addressType").String(), "External IP type should be EXTERNAL.")
+
 			})
 
 			multitenant.Test()
