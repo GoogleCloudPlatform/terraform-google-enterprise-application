@@ -1,87 +1,64 @@
 # Enterprise Application blueprint
+This example repository shows how to build an enterprise developer platform on Google Cloud, follwing the [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint). This repository deploys an internal developer platform that enables cloud platform teams to provide a managed software development and delivery platform for their organization's application development groups.
 
-## Description
-### Tagline
-This is an auto-generated module.
+The Enterprise Application blueprint adopts practices defined in the [Enterprise Foundation blueprint](https://cloud.google.com/architecture/security-foundations), and is meant to be deployed after deploying the foundation. Refer to the [Enterprsie Foundation blueprint repository](https://github.com/terraform-google-modules/terraform-example-foundation) for complete deployment instructions.
 
-### Detailed
-This module was generated from [terraform-google-module-template](https://github.com/terraform-google-modules/terraform-google-module-template/), which by default generates a module that simply creates a GCS bucket. As the module develops, this README should be updated.
+## Overview
+This repository contains several distinct deployment stages, each contained in a directory. Each stage subdirectory represents the contents of a customer-owned repo that will trigger a distinct Terraform deployment pipeline.
 
-The resources/services/activations/deletions that this module will create/trigger are:
+### [1. bootstrap](/1-bootstrap/)
+The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
+- the Multitenant Infrastructure pipeline
+- the Application Factory
+- the Fleet-Scope pipeline
 
-- Create a GCS bucket with the provided name
+These 3 pipelines will be contained in a single project. When deploying on the Enterprise Foundation blueprint, create this project as part of the [projects](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/4-projects) stage in the common folder, and create these resources via the [app-infra](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/5-app-infra) stage.
 
-### PreDeploy
-To deploy this blueprint you must have an active billing account and billing permissions.
-
-## Architecture
-![alt text for diagram](https://www.link-to-architecture-diagram.com)
-1. Architecture description step no. 1
-2. Architecture description step no. 2
-3. Architecture description step no. N
-
-## Documentation
-- [Hosting a Static Website](https://cloud.google.com/storage/docs/hosting-static-website)
-
-## Deployment Duration
-Configuration: X mins
-Deployment: Y mins
-
-## Cost
-[Blueprint cost details](https://cloud.google.com/products/calculator?id=02fb0c45-cc29-4567-8cc6-f72ac9024add)
-
-## Usage
-
-Basic usage of this module is as follows:
-
-```hcl
-module "enterprise_application" {
-  source  = "terraform-google-modules/enterprise-application/google"
-  version = "~> 0.1"
-
-  project_id  = "<PROJECT ID>"
-  bucket_name = "gcs-test-bucket"
-}
+```
+example-organization
+└── fldr-common
+    └── prj-c-eab-bootstrap
 ```
 
-Functional examples are included in the
-[examples](./examples/) directory.
+### [2. multitenant](/2-multitenant/)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+```
+example-organization
+└── fldr-development
+    └── prj-d-eab-multitenant
+└── fldr-nonproduction
+    └── prj-n-eab-multitenant
+└── fldr-production
+    └── prj-p-eab-multitenant
+```
 
-## Requirements
+### [3. app-factory](/3-app-factory/)
 
-These sections describe requirements for using this module.
+The purpose of this stage is to set up the application-specific projects. This includes a single project in the common folder, and a project in each of the environment folders. The app-infra pipeline creates the application CI/CD pipeline, responsible for deploying applications to the multitenant infrastructure. The app-infra pipeline also creates any application-specific infrastructure, such as databases or other managed services.
 
-### Software
+```
+example-organization
+└── fldr-common
+    ├── prj-c-eab-app1
+    └── prj-c-eab-app2
+└── fldr-development
+    ├── prj-d-eab-app1
+    └── prj-d-eab-app2
+└── fldr-nonproduction
+    ├── prj-n-eab-app1
+    └── prj-n-eab-app2
+└── fldr-production
+    ├── prj-p-eab-app1
+    └── prj-p-eab-app2
+```
 
-The following dependencies must be available:
+### [4. fleet-scope](/4-fleet-scope/)
 
-- [Terraform][terraform] v0.13
-- [Terraform Provider for GCP][terraform-provider-gcp] plugin v3.53
+### [5. appinfra](/5-appinfra/)
 
-### Service Account
+### [6. appsource](/6-appsource/)
 
-A service account with the following roles must be used to provision
-the resources of this module:
-
-- Storage Admin: `roles/storage.admin`
-
-The [Project Factory module][project-factory-module] and the
-[IAM module][iam-module] may be used in combination to provision a
-service account with the necessary roles applied.
-
-### APIs
-
-A project with the following APIs enabled must be used to host the
-resources of this module:
-
-- Google Cloud Storage JSON API: `storage-api.googleapis.com`
-
-The [Project Factory module][project-factory-module] can be used to
-provision a project with the necessary APIs enabled.
 
 ## Contributing
 
