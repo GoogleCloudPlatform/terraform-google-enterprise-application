@@ -3,7 +3,7 @@ This example repository shows how to build an enterprise developer platform on G
 
 The Enterprise Application blueprint adopts practices defined in the [Enterprise Foundation blueprint](https://cloud.google.com/architecture/security-foundations), and is meant to be deployed after deploying the foundation. Refer to the [Enterprsie Foundation blueprint repository](https://github.com/terraform-google-modules/terraform-example-foundation) for complete deployment instructions.
 
-## Architecture 
+## Architecture
 For a complete description of the architecture deployed by this repository, refer to the [published guide](https://cloud.google.com/architecture/enterprise-application-blueprint/architecture). See below for a high-level diagram of the architecture:
 
 ![Enterprise Application blueprint architecture diagram](assets/eab-architecture.svg)
@@ -61,7 +61,7 @@ example-organization
 The purpose of this stage is to deploy the per-environment fleet resources via the fleetscope infrastructure pipeline. This stage does not create any new projects, but creates resources within the existing multitenant infrastructure projects.
 
 ### [5. appinfra](/5-appinfra/)
-The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. 
+The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline.
 
 ### [6. appsource](/6-appsource/)
 The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations.
