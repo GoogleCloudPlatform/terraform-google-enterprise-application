@@ -19,6 +19,7 @@ resources:
   - gateway.yaml
   - ingress.yaml
   - namespace.yaml
+  - destinationrule.yaml
 components:
   - ../../../../components/production
 transformers:

@@ -17,6 +17,7 @@ kind: Kustomization
 namespace: accounts-production
 resources:
   - ../../base
+  - namespace.yaml
 components:
   - ../../../../../components/production
   - ../../../../../components/cloud-sql

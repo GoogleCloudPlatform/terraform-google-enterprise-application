@@ -17,6 +17,7 @@ kind: Kustomization
 namespace: ledger-non-production
 resources:
   - ../../base
+  - namespace.yaml
 components:
   - ../../../../../components/staging
   - ../../../../../components/cloud-sql
