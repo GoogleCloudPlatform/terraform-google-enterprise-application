@@ -44,7 +44,7 @@ func TestAppfactory(t *testing.T) {
 	}
 
 	appFactory := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../3-appfactory/apps"),
+		tft.WithTFDir("../../../3-appfactory/apps/cymbal-bank/frontend"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 		tft.WithBackendConfig(backendConfig),
@@ -108,7 +108,7 @@ func TestAppfactory(t *testing.T) {
 			},
 		} {
 			bucketSelfLink := appFactory.GetStringOutput(bucket.output)
-			opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-app1-%s", adminProjectID, bucket.suffix), gcloudArgsBucket).Array()
+			opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-frontend-%s", adminProjectID, bucket.suffix), gcloudArgsBucket).Array()
 			assert.Equal(bucketSelfLink, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket SelfLink should be %s.", bucketSelfLink))
 		}
 		// triggers
