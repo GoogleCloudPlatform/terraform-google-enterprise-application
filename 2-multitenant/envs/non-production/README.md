@@ -17,6 +17,7 @@
 | env | Environment |
 | fleet\_project\_id | Fleet Project ID |
 | ip\_address\_self\_links | IP Address Self Links |
+| ip\_addresses | IP Addresses |
 | network\_project\_id | Network Project ID |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

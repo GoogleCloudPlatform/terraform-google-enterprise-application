@@ -54,6 +54,11 @@ output "ip_address_self_links" {
   value       = module.env.ip_address_self_links
 }
 
+output "ip_addresses" {
+  description = "IP Addresses"
+  value       = module.env.ip_addresses
+}
+
 output "cloudsql_self_links" {
   description = "Cloud SQL Self Links"
   value       = module.env.cloudsql_self_links

@@ -54,13 +54,20 @@ output "fleet_project_id" {
 output "ip_address_self_links" {
   description = "IP Address Self Links"
   value = {
-    for value in module.ip_address : value.name => value.self_links
+    "frontend-ip" = module.ip_address_frontend_ip.self_links[0]
+  }
+}
+
+output "ip_addresses" {
+  description = "IP Addresses"
+  value = {
+    "frontend-ip" = module.ip_address_frontend_ip.addresses[0]
   }
 }
 
 output "cloudsql_self_links" {
   description = "Cloud SQL Self Links"
   value = {
-    for value in module.cloudsql : value.name => value.self_links
+    for value in module.cloudsql : value.instance_name => value.instance_self_link
   }
 }
