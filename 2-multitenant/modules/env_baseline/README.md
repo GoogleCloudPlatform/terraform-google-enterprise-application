@@ -3,13 +3,12 @@
 This module defines the per-environment multitenant resources deployed via the multitenant infrastructure pipeline.
 
 The following resources are created:
-- GCP Projects
+- GCP Project (cluster project)
 - GKE cluster(s)
 - Cloud SQL PostgreSQL
 - Cloud Endpoint
 - Cloud Armor
-- IP addresses
-- Service Accounts
+- IP addresses (frontend-ip)
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
@@ -32,8 +31,8 @@ The following resources are created:
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
+| fleet\_project\_id | Fleet Project ID |
 | ip\_address\_self\_links | IP Address Self Links |
-| ip\_addresses | IP Addresses |
 | network\_project\_id | Network Project ID |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

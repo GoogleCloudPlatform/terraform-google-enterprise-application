@@ -5,13 +5,12 @@
 This phase deploys the per-environment multitenant resources deployed via the multitenant infrastructure pipeline.
 
 The following resources are created:
-- GCP Projects
+- GCP Project (cluster project)
 - GKE cluster(s)
 - Cloud SQL PostgreSQL
 - Cloud Endpoint
 - Cloud Armor
-- IP addresses
-- Service Accounts
+- IP addresses (frontend-ip)
 
 ## Prerequisites
 
