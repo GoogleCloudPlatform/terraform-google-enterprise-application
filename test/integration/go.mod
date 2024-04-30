@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.14.0
-	github.com/gruntwork-io/terratest v0.46.13
+	github.com/gruntwork-io/terratest v0.46.14
 	github.com/stretchr/testify v1.9.0
 	github.com/tidwall/gjson v1.17.1
 )
