@@ -57,3 +57,10 @@ output "ip_address_self_links" {
     for value in module.ip_address : value.name => value.self_links
   }
 }
+
+output "cloudsql_self_links" {
+  description = "Cloud SQL Self Links"
+  value = {
+    for value in module.cloudsql : value.name => value.self_links
+  }
+}

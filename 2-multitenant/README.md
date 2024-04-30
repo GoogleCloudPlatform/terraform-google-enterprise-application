@@ -7,7 +7,7 @@ This phase deploys the per-environment multitenant resources deployed via the mu
 The following resources are created:
 - GCP Project (cluster project)
 - GKE cluster(s)
-- Cloud SQL PostgreSQL
+- Cloud SQL PostgreSQL (accounts-db, ledger-db)
 - Cloud Endpoint
 - Cloud Armor
 - IP addresses (frontend-ip)

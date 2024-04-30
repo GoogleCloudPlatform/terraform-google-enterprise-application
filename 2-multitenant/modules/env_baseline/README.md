@@ -5,7 +5,7 @@ This module defines the per-environment multitenant resources deployed via the m
 The following resources are created:
 - GCP Project (cluster project)
 - GKE cluster(s)
-- Cloud SQL PostgreSQL
+- Cloud SQL PostgreSQL (accounts-db, ledger-db)
 - Cloud Endpoint
 - Cloud Armor
 - IP addresses (frontend-ip)
@@ -27,6 +27,7 @@ The following resources are created:
 
 | Name | Description |
 |------|-------------|
+| cloudsql\_self\_links | Cloud SQL Self Links |
 | cluster\_ids | GKE cluster IDs |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
