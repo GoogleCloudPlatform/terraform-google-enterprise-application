@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-module "app1" {
-  source = "../modules/app-group-baseline"
+module "contacts" {
+  source = "../../../modules/app-group-baseline"
 
-  application_name    = "app1"
+  application_name    = "contacts"
   create_env_projects = true
 
   org_id               = var.org_id
