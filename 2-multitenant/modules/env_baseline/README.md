@@ -27,7 +27,6 @@ The following resources are created:
 
 | Name | Description |
 |------|-------------|
-| cloudsql\_self\_links | Cloud SQL Self Links |
 | cluster\_ids | GKE cluster IDs |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
