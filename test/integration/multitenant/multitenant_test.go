@@ -107,7 +107,7 @@ func TestMultitenant(t *testing.T) {
 					location := regexp.MustCompile(`\/locations\/([^\/]*)\/`).FindStringSubmatch(id)[1]
 					// Cluster and Membership details
 					clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", id, location, clusterProjectID)
-					membershipOp := gcloud.Runf(t, "container fleet memberships describe %s --location %s --project %s", clusterOp.Get("name").String(), location, clusterProjectID)
+					membershipOp := gcloud.Runf(t, "container fleet memberships describe %s --location %s --project %s", clusterOp.Get("name").String(), location, fleetProjectID)
 					// NodePool
 					assert.Equal("node-pool-1", clusterOp.Get("nodePools.0.name").String(), "NodePool name should be node-pool-1")
 					assert.Equal("SURGE", clusterOp.Get("nodePools.0.upgradeSettings.strategy").String(), "NodePool strategy should SURGE")
@@ -115,13 +115,12 @@ func TestMultitenant(t *testing.T) {
 					assert.Equal("BALANCED", clusterOp.Get("nodePools.0.autoscaling.locationPolicy").String(), "NodePool auto scaling location prolicy should be BALANCED")
 					assert.True(clusterOp.Get("nodePools.0.autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
 					// Cluster
-					assert.Equal(clusterProjectID, clusterOp.Get("fleet.project").String(), fmt.Sprintf("Cluster %s Fleet Project should be %s", id, clusterProjectID))
+					assert.Equal(fleetProjectID, clusterOp.Get("fleet.project").String(), fmt.Sprintf("Cluster %s Fleet Project should be %s", id, fleetProjectID))
 					clusterEnabledComponents := utils.GetResultStrSlice(clusterOp.Get("monitoringConfig.componentConfig.enableComponents").Array())
 					assert.Equal(listMonitoringEnabledComponents, clusterEnabledComponents, fmt.Sprintf("Cluster %s should have Monitoring Enabled Components: SYSTEM_COMPONENTS and DEPLOYMENT", id))
 					assert.True(clusterOp.Get("monitoringConfig.managedPrometheusConfig.enabled").Bool(), fmt.Sprintf("Cluster %s should have Managed Prometheus Config equals True", id))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), clusterOp.Get("workloadIdentityConfig.workloadPool").String(), fmt.Sprintf("Cluster %s workloadPool should be %s.svc.id.goog", id, clusterProjectID))
-					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
-				}
+					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))				}
 
 				for _, region := range regions {
 					// Cloud SQL
@@ -161,10 +160,11 @@ func TestMultitenant(t *testing.T) {
 				assert.Equal(len(sqlWorkloadIdentityUsers), len(sqlSaListMembers), fmt.Sprintf("service account % should have %d workload identity users", sqlSAEmail, len(sqlWorkloadIdentityUsers)))
 
 				// Service Identity
-				fleetProjectNumber := gcloud.Runf(t, "projects describe %s", clusterProjectID).Get("projectNumber").String()
+				fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
 				gkeServiceAgent := fmt.Sprintf("service-%s@gcp-sa-gkehub.iam.gserviceaccount.com", fleetProjectNumber)
 				gkeSaRoles := []string{
 					"roles/gkehub.serviceAgent",
+					// TODO: Include if seperate fleet project "roles/gkehub.crossProjectServiceAgent",
 				}
 
 				gkeIamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", gkeServiceAgent)
