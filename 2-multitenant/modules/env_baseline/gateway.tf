@@ -22,7 +22,7 @@ data "template_file" "openapi_spec" {
 
   vars = {
     endpoint_service = local.service_name
-    target           = module.ip_address.addresses[0]
+    target           = module.ip_address_frontend_ip.addresses[0]
   }
 }
 

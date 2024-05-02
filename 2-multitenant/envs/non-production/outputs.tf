@@ -24,6 +24,11 @@ output "network_project_id" {
   value       = module.env.network_project_id
 }
 
+output "fleet_project_id" {
+  description = "Fleet Project ID"
+  value       = module.env.fleet_project_id
+}
+
 output "env" {
   description = "Environment"
   value       = local.env
@@ -47,4 +52,14 @@ output "cluster_membership_ids" {
 output "ip_address_self_links" {
   description = "IP Address Self Links"
   value       = module.env.ip_address_self_links
+}
+
+output "ip_addresses" {
+  description = "IP Addresses"
+  value       = module.env.ip_addresses
+}
+
+output "cloudsql_self_links" {
+  description = "Cloud SQL Self Links"
+  value       = module.env.cloudsql_self_links
 }
