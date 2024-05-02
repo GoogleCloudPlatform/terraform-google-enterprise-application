@@ -15,6 +15,13 @@
  */
 
 variable "envs" {
-  description = "Cluster Env VPCs"
-  type        = map(any)
+  description = "Environments"
+  type = map(object({
+    billing_account    = string
+    folder_id          = string
+    network_project_id = string
+    network_self_link  = string
+    org_id             = string
+    subnets_self_links = list(string)
+  }))
 }

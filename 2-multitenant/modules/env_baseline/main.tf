@@ -95,7 +95,7 @@ data "google_compute_subnetwork" "default" {
 }
 
 // Create
-module "ip_address" {
+module "ip_address_frontend_ip" {
   source  = "terraform-google-modules/address/google"
   version = "~> 3.2"
 
