@@ -9,7 +9,6 @@
 
 | Name | Description |
 |------|-------------|
-| cloudsql\_self\_links | Cloud SQL Self Links |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
