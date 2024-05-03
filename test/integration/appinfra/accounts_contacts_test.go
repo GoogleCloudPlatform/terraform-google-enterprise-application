@@ -34,7 +34,7 @@ func TestAppinfraContacts(t *testing.T) {
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
 	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
-	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps"))
+	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps/cymbal-bank/frontend"))
 	projectID := appfactory.GetStringOutput("app_admin_project_id")
 
 	vars := map[string]interface{}{
