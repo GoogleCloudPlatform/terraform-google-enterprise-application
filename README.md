@@ -60,11 +60,16 @@ example-organization
 ### [4. fleet-scope](/4-fleet-scope/)
 The purpose of this stage is to deploy the per-environment fleet resources via the fleetscope infrastructure pipeline. This stage does not create any new projects, but creates resources within the existing multitenant infrastructure projects.
 
+The fleet-scope pipeline manages configuration and resources related to [GKE Fleets](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). This stage manages the creation of namespaces in the GKE clusters via [team scopes and fleet namespaces](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management#fleet_team_management_overview). This pipeline also enables the [Config Sync](https://cloud.google.com/anthos-config-management/docs/config-sync-overview) and [Service Mesh](https://cloud.google.com/service-mesh/docs) features for the fleet and thus the member clusters.
+
 ### [5. appinfra](/5-appinfra/)
-The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline.
+The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. This stage deploys the application-specific resources for the Cymbal Bank sample application, including service-specific databases. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
 
 ### [6. appsource](/6-appsource/)
-The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations.
+The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up the Cymbal Bank sample application, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
+
+## Cymbal Bank example
+This repo demonstrates setting up the developer platform for the [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) sample application. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
 
 ## Contributing
 
