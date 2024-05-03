@@ -65,9 +65,3 @@ output "ip_addresses" {
   }
 }
 
-output "cloudsql_self_links" {
-  description = "Cloud SQL Self Links"
-  value = {
-    for value in module.cloudsql : value.instance_name => value.instance_self_link
-  }
-}
