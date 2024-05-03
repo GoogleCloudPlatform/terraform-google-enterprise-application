@@ -25,13 +25,14 @@ module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 14.0"
 
-  name                 = "eab-gke-${var.env}"
-  random_project_id    = "true"
-  org_id               = var.org_id
-  folder_id            = var.folder_id
-  billing_account      = var.billing_account
-  svpc_host_project_id = var.network_project_id
-  shared_vpc_subnets   = var.cluster_subnetworks
+  name                     = "eab-gke-${var.env}"
+  random_project_id        = "true"
+  random_project_id_length = 4
+  org_id                   = var.org_id
+  folder_id                = var.folder_id
+  billing_account          = var.billing_account
+  svpc_host_project_id     = var.network_project_id
+  shared_vpc_subnets       = var.cluster_subnetworks
 
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
