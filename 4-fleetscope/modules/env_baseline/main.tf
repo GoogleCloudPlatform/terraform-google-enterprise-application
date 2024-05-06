@@ -31,8 +31,6 @@ resource "google_gke_hub_scope" "fleet-scope" {
 
   scope_id = "${each.key}-${var.env}"
   project  = var.cluster_project_id
-
-  depends_on = [google_gke_hub_feature.fleet-o11y]
 }
 
 resource "google_gke_hub_namespace" "fleet-ns" {
