@@ -16,45 +16,45 @@
 
 output "app_admin_project_id" {
   description = "Project ID of the application admin project."
-  value       = module.app1.app_admin_project_id
+  value       = module.frontend.app_admin_project_id
 }
 
 output "app_infra_repository_name" {
   description = "Name of the application infrastructure repository."
-  value       = module.app1.app_infra_repository_name
+  value       = module.frontend.app_infra_repository_name
 }
 
 output "app_infra_repository_url" {
   description = "URL of the application infrastructure repository."
-  value       = module.app1.app_infra_repository_url
+  value       = module.frontend.app_infra_repository_url
 }
 
 output "app_cloudbuild_workspace_apply_trigger_id" {
   description = "ID of the apply cloud build trigger."
-  value       = module.app1.app_cloudbuild_workspace_apply_trigger_id
+  value       = module.frontend.app_cloudbuild_workspace_apply_trigger_id
 }
 
 output "app_cloudbuild_workspace_plan_trigger_id" {
   description = "ID of the plan cloud build trigger."
-  value       = module.app1.app_cloudbuild_workspace_plan_trigger_id
+  value       = module.frontend.app_cloudbuild_workspace_plan_trigger_id
 }
 
 output "app_cloudbuild_workspace_artifacts_bucket_name" {
   description = "Artifacts bucket name for the application workspace."
-  value       = module.app1.app_cloudbuild_workspace_artifacts_bucket_name
+  value       = module.frontend.app_cloudbuild_workspace_artifacts_bucket_name
 }
 
 output "app_cloudbuild_workspace_logs_bucket_name" {
   description = "Logs bucket name for the application workspace."
-  value       = module.app1.app_cloudbuild_workspace_logs_bucket_name
+  value       = module.frontend.app_cloudbuild_workspace_logs_bucket_name
 }
 
 output "app_cloudbuild_workspace_state_bucket_name" {
   description = "Terraform state bucket name for the application workspace."
-  value       = module.app1.app_cloudbuild_workspace_state_bucket_name
+  value       = module.frontend.app_cloudbuild_workspace_state_bucket_name
 }
 
 output "app_env_project_ids" {
   description = "Application environment projects IDs."
-  value       = module.app1.app_env_project_ids
+  value       = module.frontend.app_env_project_ids
 }

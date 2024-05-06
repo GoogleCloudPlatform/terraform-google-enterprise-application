@@ -45,12 +45,23 @@ output "network_project_id" {
   value       = var.network_project_id
 }
 
+# Provide for future seperate Fleet Project
+output "fleet_project_id" {
+  description = "Fleet Project ID"
+  value       = module.eab_cluster_project.project_id
+}
+
 output "ip_address_self_links" {
   description = "IP Address Self Links"
-  value       = module.ip_address.self_links
+  value = {
+    "frontend-ip" = module.ip_address_frontend_ip.self_links[0]
+  }
 }
 
 output "ip_addresses" {
   description = "IP Addresses"
-  value       = module.ip_address.addresses
+  value = {
+    "frontend-ip" = module.ip_address_frontend_ip.addresses[0]
+  }
 }
+

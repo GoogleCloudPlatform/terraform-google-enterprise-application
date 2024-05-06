@@ -1,95 +1,81 @@
 # Enterprise Application blueprint
+This example repository shows how to build an enterprise developer platform on Google Cloud, following the [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint). This repository deploys an internal developer platform that enables cloud platform teams to provide a managed software development and delivery platform for their organization's application development groups.
 
-## Description
-### Tagline
-This is an auto-generated module.
-
-### Detailed
-This module was generated from [terraform-google-module-template](https://github.com/terraform-google-modules/terraform-google-module-template/), which by default generates a module that simply creates a GCS bucket. As the module develops, this README should be updated.
-
-The resources/services/activations/deletions that this module will create/trigger are:
-
-- Create a GCS bucket with the provided name
-
-### PreDeploy
-To deploy this blueprint you must have an active billing account and billing permissions.
+The Enterprise Application blueprint adopts practices defined in the [Enterprise Foundation blueprint](https://cloud.google.com/architecture/security-foundations), and is meant to be deployed after deploying the foundation. Refer to the [Enterprise Foundation blueprint repository](https://github.com/terraform-google-modules/terraform-example-foundation) for complete deployment instructions.
 
 ## Architecture
-![alt text for diagram](https://www.link-to-architecture-diagram.com)
-1. Architecture description step no. 1
-2. Architecture description step no. 2
-3. Architecture description step no. N
+For a complete description of the architecture deployed by this repository, refer to the [published guide](https://cloud.google.com/architecture/enterprise-application-blueprint/architecture). See below for a high-level diagram of the architecture:
 
-## Documentation
-- [Hosting a Static Website](https://cloud.google.com/storage/docs/hosting-static-website)
+![Enterprise Application blueprint architecture diagram](assets/eab-architecture.svg)
 
-## Deployment Duration
-Configuration: X mins
-Deployment: Y mins
+## Overview
+This repository contains several distinct deployment stages, each contained in a directory. Each stage subdirectory represents the contents of a customer-owned repo that will trigger a distinct Terraform deployment pipeline.
 
-## Cost
-[Blueprint cost details](https://cloud.google.com/products/calculator?id=02fb0c45-cc29-4567-8cc6-f72ac9024add)
+### [1. bootstrap](/1-bootstrap/)
+The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
+- the Multitenant Infrastructure pipeline
+- the Application Factory
+- the Fleet-Scope pipeline
 
-## Usage
+These 3 pipelines will be contained in a single project. When deploying on the Enterprise Foundation blueprint, create this project as part of the [projects](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/4-projects) stage in the common folder, and create these resources via the [app-infra](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/5-app-infra) stage.
 
-Basic usage of this module is as follows:
-
-```hcl
-module "enterprise_application" {
-  source  = "terraform-google-modules/enterprise-application/google"
-  version = "~> 0.1"
-
-  project_id  = "<PROJECT ID>"
-  bucket_name = "gcs-test-bucket"
-}
+```
+example-organization
+└── fldr-common
+    └── prj-c-eab-bootstrap
 ```
 
-Functional examples are included in the
-[examples](./examples/) directory.
+### [2. multitenant](/2-multitenant/)
+The purpose of this stage is to deploy the per-environment multitenant resources via the multitenant infrastructure pipeline. The resulting project hierarchy is as follows:
+```
+example-organization
+└── fldr-development
+    └── prj-d-eab-multitenant
+└── fldr-nonproduction
+    └── prj-n-eab-multitenant
+└── fldr-production
+    └── prj-p-eab-multitenant
+```
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+### [3. app-factory](/3-app-factory/)
 
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+The purpose of this stage is to set up the application-specific projects. This includes a single project in the common folder, and a project in each of the environment folders. The app-infra pipeline creates the application CI/CD pipeline, responsible for deploying applications to the multitenant infrastructure. The app-infra pipeline also creates any application-specific infrastructure, such as databases or other managed services. The resulting project hierarchy is as follows:
 
-## Requirements
+```
+example-organization
+└── fldr-common
+    ├── prj-c-eab-app1
+    └── prj-c-eab-app2
+└── fldr-development
+    ├── prj-d-eab-app1
+    └── prj-d-eab-app2
+└── fldr-nonproduction
+    ├── prj-n-eab-app1
+    └── prj-n-eab-app2
+└── fldr-production
+    ├── prj-p-eab-app1
+    └── prj-p-eab-app2
+```
 
-These sections describe requirements for using this module.
+### [4. fleet-scope](/4-fleet-scope/)
+The purpose of this stage is to deploy the per-environment fleet resources via the fleetscope infrastructure pipeline. This stage does not create any new projects, but creates resources within the existing multitenant infrastructure projects.
 
-### Software
+The fleet-scope pipeline manages configuration and resources related to [GKE Fleets](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). This stage manages the creation of namespaces in the GKE clusters via [team scopes and fleet namespaces](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management#fleet_team_management_overview). This pipeline also enables the [Config Sync](https://cloud.google.com/anthos-config-management/docs/config-sync-overview) and [Service Mesh](https://cloud.google.com/service-mesh/docs) features for the fleet and thus the member clusters.
 
-The following dependencies must be available:
+### [5. appinfra](/5-appinfra/)
+The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. This stage deploys the application-specific resources for the Cymbal Bank sample application, including service-specific databases. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
 
-- [Terraform][terraform] v0.13
-- [Terraform Provider for GCP][terraform-provider-gcp] plugin v3.53
+### [6. appsource](/6-appsource/)
+The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up the Cymbal Bank sample application, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
 
-### Service Account
-
-A service account with the following roles must be used to provision
-the resources of this module:
-
-- Storage Admin: `roles/storage.admin`
-
-The [Project Factory module][project-factory-module] and the
-[IAM module][iam-module] may be used in combination to provision a
-service account with the necessary roles applied.
-
-### APIs
-
-A project with the following APIs enabled must be used to host the
-resources of this module:
-
-- Google Cloud Storage JSON API: `storage-api.googleapis.com`
-
-The [Project Factory module][project-factory-module] can be used to
-provision a project with the necessary APIs enabled.
+## Cymbal Bank example
+This repo demonstrates setting up the developer platform for the [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) sample application. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
 
 ## Contributing
 
 Refer to the [contribution guidelines](./CONTRIBUTING.md) for
 information on contributing to this module.
 
-[iam-module]: https://registry.terraform.io/modules/terraform-google-modules/iam/google
-[project-factory-module]: https://registry.terraform.io/modules/terraform-google-modules/project-factory/google
 [terraform-provider-gcp]: https://www.terraform.io/docs/providers/google/index.html
 [terraform]: https://www.terraform.io/downloads.html
 
