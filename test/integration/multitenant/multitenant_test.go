@@ -74,17 +74,15 @@ func TestMultitenant(t *testing.T) {
 							"iam.googleapis.com",
 							"serviceusage.googleapis.com",
 							"container.googleapis.com",
-						},
-					},
-					{
-						projectId: fleetProjectID,
-						apis: []string{
 							"gkehub.googleapis.com",
 							"anthos.googleapis.com",
 							"compute.googleapis.com",
 							"mesh.googleapis.com",
 							"multiclusteringress.googleapis.com",
 							"multiclusterservicediscovery.googleapis.com",
+							"trafficdirector.googleapis.com",
+							"anthosconfigmanagement.googleapis.com",
+							"sourcerepo.googleapis.com",
 						},
 					},
 				} {
@@ -121,12 +119,31 @@ func TestMultitenant(t *testing.T) {
 					assert.Equal(listMonitoringEnabledComponents, clusterEnabledComponents, fmt.Sprintf("Cluster %s should have Monitoring Enabled Components: SYSTEM_COMPONENTS and DEPLOYMENT", id))
 					assert.True(clusterOp.Get("monitoringConfig.managedPrometheusConfig.enabled").Bool(), fmt.Sprintf("Cluster %s should have Managed Prometheus Config equals True", id))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), clusterOp.Get("workloadIdentityConfig.workloadPool").String(), fmt.Sprintf("Cluster %s workloadPool should be %s.svc.id.goog", id, clusterProjectID))
-					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))				}
+					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
+				}
+
+				// Bank of Anthos SA
+				saName := "bank-of-anthos"
+				workloadIdentitiesSAEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", saName, clusterProjectID)
+				saOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts describe %s --project %s", workloadIdentitiesSAEmail, clusterProjectID))
+				assert.False(saOp.Get("disabled").Bool(), "Service account should not be disabled.")
+
+				workloadIdentitiesUsers := []string{
+					fmt.Sprintf("serviceAccount:%s.svc.id.goog[accounts-%s/bank-of-anthos]", clusterProjectID, envName),
+					fmt.Sprintf("serviceAccount:%s.svc.id.goog[ledger-%s/bank-of-anthos]", clusterProjectID, envName),
+				}
+
+				workloadIdentitiesSAIamFilter := "bindings.role:'roles/iam.workloadIdentityUser'"
+				workloadIdentitiesSAIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", workloadIdentitiesSAIamFilter, "--format", "json"})
+				workloadIdentitiesSAPolicyOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts get-iam-policy %s", workloadIdentitiesSAEmail), workloadIdentitiesSAIamCommonArgs).Array()[0]
+				workloadIdentitiesSaListMembers := utils.GetResultStrSlice(workloadIdentitiesSAPolicyOp.Get("bindings.members").Array())
+				assert.Subset(workloadIdentitiesSaListMembers, workloadIdentitiesUsers, fmt.Sprintf("service account %s should have workload identity users", workloadIdentitiesSAEmail))
+				assert.Equal(len(workloadIdentitiesUsers), len(workloadIdentitiesSaListMembers), fmt.Sprintf("service account % should have %d workload identity users", workloadIdentitiesSAEmail, len(workloadIdentitiesUsers)))
 
 				// Service Identity
 				fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
 				gkeServiceAgent := fmt.Sprintf("service-%s@gcp-sa-gkehub.iam.gserviceaccount.com", fleetProjectNumber)
-				gke_sa_roles := []string{
+				gkeSaRoles := []string{
 					"roles/gkehub.serviceAgent",
 					// TODO: Include if seperate fleet project "roles/gkehub.crossProjectServiceAgent",
 				}
@@ -135,7 +152,38 @@ func TestMultitenant(t *testing.T) {
 				gkeIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", gkeIamFilter, "--format", "json"})
 				gkeProjectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", clusterProjectID), gkeIamCommonArgs).Array()
 				gkeSaListRoles := testutils.GetResultFieldStrSlice(gkeProjectPolicyOp, "bindings.role")
-				assert.Subset(gkeSaListRoles, gke_sa_roles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
+				assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
+
+				// Endpoints service
+				endpointName := fmt.Sprintf("frontend.endpoints.%s.cloud.goog", clusterProjectID)
+				endpointOp := gcloud.Run(t, fmt.Sprintf("endpoints services describe %s --project %s", endpointName, clusterProjectID))
+				assert.Equal(endpointOp.Get("producerProjectId").String(), clusterProjectID, fmt.Sprintf("Producer Project ID should be %s.", clusterProjectID))
+
+				// Certificate Manager Certificate
+				certName := "mcg-cert"
+				certOp := gcloud.Run(t, fmt.Sprintf("certificate-manager certificates describe %s --project %s", certName, clusterProjectID))
+				assert.Subset(utils.GetResultStrSlice(certOp.Get("managed.domains").Array()), []string{endpointName}, fmt.Sprintf("Managed Domain should contain %s", endpointName))
+
+				// Certificate Manager Certificate Map
+				certMapName := "mcg-cert-map"
+				certMapOp := gcloud.Run(t, fmt.Sprintf("certificate-manager maps describe %s --project %s", certMapName, clusterProjectID))
+				assert.Equal(certMapOp.Get("description").String(), "gateway certificate map", "Certificate Map description should be 'gateway certificate map'.")
+
+				// Certificate Manager Certificate Map Entry
+				certMapEntryName := "mcg-cert-map-entry"
+				certMapEntryOp := gcloud.Run(t, fmt.Sprintf("certificate-manager maps entries describe %s --map %s --project %s", certMapEntryName, certMapName, clusterProjectID))
+				assert.Equal(certMapEntryOp.Get("hostname").String(), endpointName, fmt.Sprintf("Certificate Map Entry hostname should be %s.", endpointName))
+
+				// Cloud Armor
+				cloudArmorName := "eab-cloud-armor"
+				cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, clusterProjectID)).Array()[0]
+				assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
+
+				// Compute Addresses
+				ipAddressName := "frontend-ip"
+				ipOp := gcloud.Run(t, fmt.Sprintf("compute addresses describe %s --project %s --global", ipAddressName, clusterProjectID))
+				assert.Equal("EXTERNAL", ipOp.Get("addressType").String(), "External IP type should be EXTERNAL.")
+
 			})
 
 			multitenant.Test()
