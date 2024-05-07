@@ -31,6 +31,7 @@ module "env" {
   env                    = local.env
   cluster_project_id     = var.cluster_project_id
   network_project_id     = var.network_project_id
+  fleet_project_id       = var.fleet_project_id
   namespace_ids          = local.namespace_ids
   cluster_membership_ids = var.cluster_membership_ids
 }

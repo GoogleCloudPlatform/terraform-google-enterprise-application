@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-locals {
-  env = "production"
+resource "google_gke_hub_feature" "feature" {
+  name     = "policycontroller"
+  location = "global"
+  project  = var.fleet_project_id
 
-  namespace_ids = ["frontend", "accounts", "transactions"]
-}
-
-import {
-  id = "projects/${var.cluster_project_id}/locations/global/features/fleetobservability"
-  to = module.env.google_gke_hub_feature.fleet-o11y
-}
-
-module "env" {
-  source = "../../modules/env_baseline"
-
-  env                    = local.env
-  cluster_project_id     = var.cluster_project_id
-  network_project_id     = var.network_project_id
-  fleet_project_id       = var.fleet_project_id
-  namespace_ids          = local.namespace_ids
-  cluster_membership_ids = var.cluster_membership_ids
+  fleet_default_member_config {
+    policycontroller {
+      policy_controller_hub_config {
+        install_spec = "INSTALL_SPEC_ENABLED"
+        policy_content {
+          bundles {
+            bundle = "pss-baseline-v2022"
+          }
+          template_library {
+            installation = "ALL"
+          }
+        }
+      }
+    }
+  }
 }
