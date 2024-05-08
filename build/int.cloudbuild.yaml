@@ -53,10 +53,11 @@ steps:
 - id: appfactory-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage init --verbose']
+  waitFor:
+    - fleetscope-init
 - id: appfactory-apply
   waitFor:
     - appfactory-init
-    - fleetscope-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage apply --verbose']
 - id: appfactory-verify
