@@ -17,6 +17,7 @@ package frontend
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -38,12 +39,12 @@ func TestAppinfraFrontend(t *testing.T) {
 	projectID := appfactory.GetStringOutput("app_admin_project_id")
 
 	vars := map[string]interface{}{
-		"project_id": projectID,
-		"region":     multitenant.GetStringOutputList("cluster_regions")[0],
+		"project_id":                     projectID,
+		"region":                         multitenant.GetStringOutputList("cluster_regions")[0],
 		"cluster_membership_id_dev":      multitenant.GetStringOutputList("cluster_membership_ids")[0],
 		"cluster_membership_ids_nonprod": multitenant_nonprod.GetStringOutputList("cluster_membership_ids"),
-		"cluster_membership_ids_prod": multitenant_prod.GetStringOutputList("cluster_membership_ids"),
-		"buckets_force_destroy":       "true",
+		"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
+		"buckets_force_destroy":          "true",
 	}
 	frontend := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../5-appinfra/apps/frontend/envs/shared"),
@@ -55,7 +56,8 @@ func TestAppinfraFrontend(t *testing.T) {
 
 		serviceName := "frontend"
 		applicationName := "cymbal-bank"
-		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", artifactRepositoryName, projectID)
+		repoName := fmt.Sprintf("eab-%s-%s", applicationName, serviceName)
+		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", repoName, projectID)
 		region := "us-central1"
 		pipelineName := "frontend"
 		prodTarget := "dev"
@@ -149,8 +151,7 @@ func TestAppinfraFrontend(t *testing.T) {
 			}
 		}
 
-		Source Repo Test
-		repoName := fmt.Sprintf("eab-%s-%s", applicationName, serviceName)
+		// Source Repo Test
 		repoPath := fmt.Sprintf("projects/%s/repos/%s", projectID, repoName)
 		sourceOp := gcloud.Runf(t, "source repos describe %s --project %s", repoName, projectID)
 		assert.Equal(sourceOp.Get("name").String(), repoPath, fmt.Sprintf("Full name of repository should be %s.", repoPath))
@@ -202,11 +203,11 @@ func TestAppinfraFrontend(t *testing.T) {
 		cloudDeployTargets := []string{
 			fmt.Sprintf("%s-dev", serviceName),
 		}
-		for i, _ := range multitenant_nonprod.GetStringOutputList("cluster_membership_ids") {
+		for i := range multitenant_nonprod.GetStringOutputList("cluster_membership_ids") {
 			cloudDeployTargets = append(cloudDeployTargets, fmt.Sprintf("%s-nonprod-%d", serviceName, i))
 		}
 
-		for i, _ := range multitenant_prod.GetStringOutputList("cluster_membership_ids") {
+		for i := range multitenant_prod.GetStringOutputList("cluster_membership_ids") {
 			cloudDeployTargets = append(cloudDeployTargets, fmt.Sprintf("%s-prod-%d", serviceName, i))
 		}
 
