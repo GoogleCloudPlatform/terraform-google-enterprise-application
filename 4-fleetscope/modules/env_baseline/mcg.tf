@@ -39,6 +39,8 @@ resource "google_project_service_identity" "fleet_mci_sa" {
   provider = google-beta
   project  = var.cluster_project_id
   service  = "multiclusteringress.googleapis.com"
+
+  depends_on = [google_gke_hub_feature.mci]
 }
 
 // Grant IAM permissions for the Gateway controller in the fleet
@@ -52,6 +54,8 @@ resource "google_project_service_identity" "fleet_mcs_sa" {
   provider = google-beta
   project  = var.cluster_project_id
   service  = "multiclusterservicediscovery.googleapis.com"
+
+  depends_on = [google_gke_hub_feature.mcs]
 }
 
 // Grant MCS service account access to the network project
