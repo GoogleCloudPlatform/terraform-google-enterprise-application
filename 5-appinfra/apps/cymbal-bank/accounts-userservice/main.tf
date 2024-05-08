@@ -16,13 +16,13 @@
 
 locals {
   application_name = "cymbal-bank"
-  service_name     = "ledger-ledgerwriter"
+  service_name     = "accounts-userservice"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
 }
 
 module "app" {
-  source = "../../../../modules/cicd-pipeline"
+  source = "../../../modules/cicd-pipeline"
 
   project_id                     = var.project_id
   region                         = var.region

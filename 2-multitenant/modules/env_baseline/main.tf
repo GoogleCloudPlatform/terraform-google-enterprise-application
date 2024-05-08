@@ -142,12 +142,13 @@ module "gke" {
 
   node_pools = [
     {
-      name            = "node-pool-1"
-      strategy        = "SURGE"
-      max_surge       = 1
-      max_unavailable = 0
-      autoscaling     = true
-      location_policy = "BALANCED"
+      name               = "node-pool-1"
+      initial_node_count = 12
+      strategy           = "SURGE"
+      max_surge          = 1
+      max_unavailable    = 0
+      autoscaling        = true
+      location_policy    = "BALANCED"
     }
   ]
 

@@ -17,12 +17,10 @@ locals {
   membership_re   = "projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
 }
 
-# authoritative project-iam-bindings to increase reproducibility
 module "project-iam-bindings" {
   source   = "terraform-google-modules/iam/google//modules/projects_iam"
   version  = "~> 7.7"
   projects = [var.project_id, regex(local.membership_re, var.cluster_membership_id_dev)[0], regex(local.membership_re, var.cluster_membership_ids_nonprod[0])[0], regex(local.membership_re, var.cluster_membership_ids_prod[0])[0]]
-  mode     = "authoritative"
 
   bindings = {
     "roles/cloudtrace.agent" = [

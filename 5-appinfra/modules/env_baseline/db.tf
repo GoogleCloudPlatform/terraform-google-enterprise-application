@@ -46,10 +46,9 @@ module "cloudsql" {
   user_password = "admin" # this is a security risk - do not do this for real world use-cases!
 }
 
-resource "google_project_iam_member" "bank_of_anthos" {
+resource "google_project_iam_member" "cymbal_bank" {
   for_each = toset(["roles/cloudsql.client", "roles/cloudsql.instanceUser"])
   project  = var.app_project_id
   role     = each.value
   member   = "serviceAccount:bank-of-anthos@${var.cluster_project_id}.iam.gserviceaccount.com"
 }
-
