@@ -65,6 +65,7 @@ func TestAppfactory(t *testing.T) {
 			"cloudfunctions.googleapis.com",
 			"apikeys.googleapis.com",
 			"sourcerepo.googleapis.com",
+			"clouddeploy.googleapis.com",
 		}
 
 		prj := gcloud.Runf(t, "projects describe %s", adminProjectID)
