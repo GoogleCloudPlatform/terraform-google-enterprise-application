@@ -17,6 +17,7 @@ The following resources are created:
 |------|-------------|------|---------|:--------:|
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cluster\_subnetworks | The subnetwork self\_links for clusters | `list(string)` | n/a | yes |
+| create\_cluster\_project | Create Cluster Project ID, otherwise the Network Project ID is used | `bool` | `true` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
