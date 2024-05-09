@@ -57,7 +57,7 @@ func TestAppinfraFrontend(t *testing.T) {
 		serviceName := "frontend"
 		applicationName := "cymbal-bank"
 		repoName := fmt.Sprintf("eab-%s-%s", applicationName, serviceName)
-		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", repoName, projectID)
+		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", projectID, repoName)
 		region := "us-central1"
 		pipelineName := "frontend"
 		prodTarget := "dev"
