@@ -34,8 +34,6 @@ import (
 
 func TestBootstrap(t *testing.T) {
 
-	fmt.Println(os.Environ())
-
 	vars := map[string]interface{}{
 		"bucket_force_destroy": true,
 	}
