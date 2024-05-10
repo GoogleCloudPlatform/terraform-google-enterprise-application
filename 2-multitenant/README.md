@@ -4,6 +4,9 @@
 
 This phase deploys the per-environment multitenant resources deployed via the multitenant infrastructure pipeline.
 
+An overview of the multitenant infrastructure pipeline is shown below.
+![Enterprise Application multitenant infrastructure diagram](assets/eab-multitenant.png)
+
 The following resources are created:
 - GCP Project (cluster project)
 - GKE cluster(s)
@@ -21,10 +24,10 @@ The following resources are created:
 
 ### Running Terraform locally
 
-1. The next instructions assume that you are in the `terraform-google-enterprise-application/2-multitenant` folder.
+1. The next instructions assume that you are in the `terraform-google-enterprise-application/3-appfactory` folder.
 
    ```bash
-   cd terraform-google-enterprise-application/2-multitenant
+   cd terraform-google-enterprise-application/3-appfactory
    ```
 
 1. Rename `terraform.example.tfvars` to `terraform.tfvars`.
