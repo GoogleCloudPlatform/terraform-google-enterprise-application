@@ -26,7 +26,7 @@ The application infrastructure pipeline creates additional resources on a per-en
    ```bash
    cd terraform-google-enterprise-application/5-appinfra
    ```
-Under the `apps` folder are examples for each of the cymbal bank applications. 
+Under the `apps` folder are examples for each of the cymbal bank applications.
 
 1. Change directory into any of these folders to deploy.
 
@@ -34,7 +34,7 @@ Under the `apps` folder are examples for each of the cymbal bank applications.
 cd apps/accounts-userservice
 ```
 
-1. Update the configuration with values for your environment. 
+1. Update the configuration with values for your environment.
 
 Deploy the `shared` environment first, which contains the application CI/CD pipeline.
 
