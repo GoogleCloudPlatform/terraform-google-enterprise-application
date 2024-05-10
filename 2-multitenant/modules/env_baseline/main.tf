@@ -23,7 +23,7 @@ locals {
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 14.0"
+  version = "~> 15.0"
 
   name                     = "eab-gke-${var.env}"
   random_project_id        = "true"
