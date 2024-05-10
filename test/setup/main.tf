@@ -48,7 +48,7 @@ resource "random_string" "prefix" {
 
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 14.0"
+  version = "~> 15.0"
 
   name                     = "ci-enterprise-application"
   random_project_id        = "true"
@@ -111,7 +111,7 @@ resource "google_folder_iam_member" "common_folder_iam" {
 module "vpc_project" {
   for_each = module.folders.ids
   source   = "terraform-google-modules/project-factory/google"
-  version  = "~> 14.0"
+  version  = "~> 15.0"
 
   name              = "eab-vpc-${each.key}"
   random_project_id = "true"
