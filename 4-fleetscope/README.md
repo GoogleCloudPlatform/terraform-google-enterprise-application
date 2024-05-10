@@ -1,9 +1,12 @@
-# Fleet Scope phase
+# 4. Fleet Scope phase
 The Fleet Scope phase defines the resources used to create the GKE Fleet Scopes, Fleet namespaces, and some Fleet features.
 
 ## Purpose
 
 This phase deploys the per-environment fleet resources deployed via the fleetscope infrastructure pipeline.
+
+An overview of the fleet-scope  pipeline is shown below.
+![Enterprise Application fleet-scope  diagram](assets/eab-multitenant.png)
 
 The following resources are created:
 - Fleet scope
