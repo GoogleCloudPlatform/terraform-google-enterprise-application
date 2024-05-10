@@ -13,9 +13,10 @@
 # limitations under the License.
 
 resource "google_service_account" "bank_of_anthos" {
-  project      = local.cluster_project_id
-  account_id   = "bank-of-anthos"
-  display_name = "bank-of-anthos"
+  project                      = local.cluster_project_id
+  account_id                   = "bank-of-anthos"
+  display_name                 = "bank-of-anthos"
+  create_ignore_already_exists = true
 }
 
 resource "google_service_account_iam_binding" "workload_identity" {
