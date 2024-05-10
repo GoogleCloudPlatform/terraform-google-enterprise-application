@@ -17,6 +17,7 @@ package frontend
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -53,10 +54,172 @@ func TestAppinfraFrontend(t *testing.T) {
 	frontend.DefineVerify(func(assert *assert.Assertions) {
 		frontend.DefaultVerify(assert)
 
-		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-cymbal-bank-frontend", projectID)
+		serviceName := "frontend"
+		applicationName := "cymbal-bank"
+		repoName := fmt.Sprintf("eab-%s-%s", applicationName, serviceName)
+		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", projectID, repoName)
 		region := "us-central1"
 		pipelineName := "frontend"
 		prodTarget := "dev"
+
+		prj := gcloud.Runf(t, "projects describe %s", projectID)
+		projectNumber := prj.Get("projectNumber").String()
+		assert.Equal("ACTIVE", prj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", projectID))
+		apis :=
+			[]string{
+				"artifactregistry.googleapis.com",
+				"sourcerepo.googleapis.com",
+				"certificatemanager.googleapis.com",
+				"cloudbuild.googleapis.com",
+				"clouddeploy.googleapis.com",
+				"cloudresourcemanager.googleapis.com",
+				"compute.googleapis.com",
+				"anthos.googleapis.com",
+				"container.googleapis.com",
+				"gkehub.googleapis.com",
+				"gkeconnect.googleapis.com",
+				"anthosconfigmanagement.googleapis.com",
+				"mesh.googleapis.com",
+				"meshconfig.googleapis.com",
+				"meshtelemetry.googleapis.com",
+				"iam.googleapis.com",
+			}
+		enabledAPIS := gcloud.Runf(t, "services list --project %s", projectID).Array()
+		listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
+		assert.Subset(listApis, apis, "APIs should have been enabled")
+
+		art := gcloud.Runf(t, "artifacts repositories describe %s --project %s --location %s", serviceName, projectID, region)
+		assert.Equal("DOCKER", art.Get("format").String(), fmt.Sprintf("Repository %s should have type DOCKER", serviceName))
+
+		arRegistryIAMMembers := []string{
+			fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber),
+			fmt.Sprintf("serviceAccount:deploy-%s@%s.iam.gserviceaccount.com", serviceName, projectID),
+			"allAuthenticatedUsers",
+		}
+		arRegistrySAIamFilter := "bindings.role:'roles/artifactregistry.reader'"
+		arRegistrySAIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", arRegistrySAIamFilter, "--format", "json"})
+		arRegistrySAPolicyOp := gcloud.Run(t, fmt.Sprintf("artifacts repositories get-iam-policy %s --location %s --project %s", serviceName, region, projectID), arRegistrySAIamCommonArgs).Array()[0]
+		arRegistrySaListMembers := utils.GetResultStrSlice(arRegistrySAPolicyOp.Get("bindings.members").Array())
+		assert.Subset(arRegistrySaListMembers, arRegistryIAMMembers, fmt.Sprintf("artifact registry %s should have artifactregistry.reader.", arRegistryIAMMembers))
+
+		cloudDeployServiceAccountEmail := fmt.Sprintf("deploy-%s@%s.iam.gserviceaccount.com", serviceName, projectID)
+		gcloud.Runf(t, "iam service-accounts describe %s --project %s", cloudDeployServiceAccountEmail, projectID)
+
+		ciServiceAccountEmail := fmt.Sprintf("ci-%s@%s.iam.gserviceaccount.com", serviceName, projectID)
+		gcloud.Runf(t, "iam service-accounts describe %s --project %s", ciServiceAccountEmail, projectID)
+
+		cloudBuildBucketNames := []string{
+			fmt.Sprintf("build-cache-%s-%s", serviceName, projectNumber),
+			fmt.Sprintf("release-source-development-%s-%s", serviceName, projectNumber),
+		}
+
+		pipelinebucketNames := []string{
+			fmt.Sprintf("delivery-artifacts-development-%s-%s", projectNumber, serviceName),
+			fmt.Sprintf("delivery-artifacts-non-prod-%s-%s", projectNumber, serviceName),
+			fmt.Sprintf("delivery-artifacts-prod-%s-%s", projectNumber, serviceName),
+		}
+
+		for _, bucketName := range cloudBuildBucketNames {
+			bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, projectID)
+			assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
+			assert.Equal(strings.ToUpper(region), bucketOp.Get("location").String(), fmt.Sprintf("Bucket should be at location %s", region))
+
+			// storage buckets get-iam-policy does not support --filter
+			bucketIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--format", "json"})
+			bucketSAPolicyOp := gcloud.Run(t, fmt.Sprintf("storage buckets get-iam-policy gs://%s", bucketName), bucketIamCommonArgs).Array()
+			bucketSaListStorageAdminMembers := testutils.Filter("bindings.role", "roles/storage.admin", bucketSAPolicyOp)
+			bucketSaListMembers := utils.GetResultStrSlice(bucketSaListStorageAdminMembers[0].Get("bindings.members").Array())
+			assert.Subset(bucketSaListMembers, []string{fmt.Sprintf("serviceAccount:%s", ciServiceAccountEmail)}, fmt.Sprintf("Bucket %s should have storage.admin role for SA %s.", bucketName, ciServiceAccountEmail))
+		}
+
+		for _, bucketName := range pipelinebucketNames {
+			bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, projectID)
+			assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
+			assert.Equal(strings.ToUpper(region), bucketOp.Get("location").String(), fmt.Sprintf("Bucket should be at location %s", region))
+
+			// storage buckets get-iam-policy does not support --filter
+			bucketIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--format", "json"})
+			bucketSAPolicyOp := gcloud.Run(t, fmt.Sprintf("storage buckets get-iam-policy gs://%s", bucketName), bucketIamCommonArgs).Array()
+			bucketSaListStorageAdminMembers := testutils.Filter("bindings.role", "roles/storage.admin", bucketSAPolicyOp)
+			bucketSaListMembers := utils.GetResultStrSlice(bucketSaListStorageAdminMembers[0].Get("bindings.members").Array())
+			assert.Subset(bucketSaListMembers, []string{fmt.Sprintf("serviceAccount:%s", cloudDeployServiceAccountEmail)}, fmt.Sprintf("Bucket %s should have storage.admin role for SA %s.", bucketName, cloudDeployServiceAccountEmail))
+
+			if strings.HasPrefix(bucketName, "release") {
+				bucketSaListStorageObjectViewerMembers := testutils.Filter("bindings.role", "roles/storage.objectViewer", bucketSAPolicyOp)
+				bucketSaListMembers = utils.GetResultStrSlice(bucketSaListStorageObjectViewerMembers[0].Get("bindings.members").Array())
+				assert.Subset(bucketSaListMembers, []string{fmt.Sprintf("serviceAccount:%s", cloudDeployServiceAccountEmail)}, fmt.Sprintf("Bucket %s should have storage.objectViewer role for SA %s.", bucketName, cloudDeployServiceAccountEmail))
+			}
+		}
+
+		// Source Repo Test
+		repoPath := fmt.Sprintf("projects/%s/repos/%s", projectID, repoName)
+		sourceOp := gcloud.Runf(t, "source repos describe %s --project %s", repoName, projectID)
+		assert.Equal(sourceOp.Get("name").String(), repoPath, fmt.Sprintf("Full name of repository should be %s.", repoPath))
+
+		// Project IAM
+		computeSARoles := []string{
+			"roles/cloudtrace.agent",
+			"roles/monitoring.metricWriter",
+			"roles/logging.logWriter",
+		}
+		cbIdentitySARoles := []string{
+			"roles/cloudbuild.builds.builder",
+		}
+		cbSARoles := []string{
+			"roles/cloudbuild.builds.builder",
+			"roles/clouddeploy.releaser",
+			"roles/logging.logWriter",
+			"roles/gkehub.viewer",
+		}
+		cdSARoles := []string{
+			"roles/logging.logWriter",
+			"roles/gkehub.gatewayEditor",
+			"roles/gkehub.viewer",
+			"roles/container.developer",
+		}
+
+		computeSa := fmt.Sprintf("%s-compute@developer.gserviceaccount.com", projectNumber)
+		cbIdentitySa := fmt.Sprintf("%s@cloudbuild.gserviceaccount.com", projectNumber)
+
+		projectIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--format", "json"})
+		projectSAPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", projectID), projectIamCommonArgs).Array()
+
+		filtered := testutils.Filter("bindings.members", fmt.Sprintf("serviceAccount:%s", computeSa), projectSAPolicyOp)
+		projectRoles := testutils.GetResultFieldStrSlice(filtered, "bindings.role")
+		assert.Subset(projectRoles, computeSARoles, fmt.Sprintf("Service Account %s should have %v roles at project %s.", computeSa, computeSARoles, projectID))
+
+		filtered = testutils.Filter("bindings.members", fmt.Sprintf("serviceAccount:%s", cbIdentitySa), projectSAPolicyOp)
+		projectRoles = testutils.GetResultFieldStrSlice(filtered, "bindings.role")
+		assert.Subset(projectRoles, cbIdentitySARoles, fmt.Sprintf("Service Account %s should have %v roles at project %s.", cbIdentitySa, cbIdentitySARoles, projectID))
+
+		filtered = testutils.Filter("bindings.members", fmt.Sprintf("serviceAccount:%s", cloudDeployServiceAccountEmail), projectSAPolicyOp)
+		projectRoles = testutils.GetResultFieldStrSlice(filtered, "bindings.role")
+		assert.Subset(projectRoles, cdSARoles, fmt.Sprintf("Service Account %s should have %v roles at project %s.", cloudDeployServiceAccountEmail, cdSARoles, projectID))
+
+		filtered = testutils.Filter("bindings.members", fmt.Sprintf("serviceAccount:%s", ciServiceAccountEmail), projectSAPolicyOp)
+		projectRoles = testutils.GetResultFieldStrSlice(filtered, "bindings.role")
+		assert.Subset(projectRoles, cbSARoles, fmt.Sprintf("Service Account %s should have %v roles at project %s.", ciServiceAccountEmail, cbSARoles, projectID))
+
+		cloudDeployTargets := []string{
+			fmt.Sprintf("%s-dev", serviceName),
+		}
+		for i := range multitenant_nonprod.GetStringOutputList("cluster_membership_ids") {
+			cloudDeployTargets = append(cloudDeployTargets, fmt.Sprintf("%s-nonprod-%d", serviceName, i))
+		}
+
+		for i := range multitenant_prod.GetStringOutputList("cluster_membership_ids") {
+			cloudDeployTargets = append(cloudDeployTargets, fmt.Sprintf("%s-prod-%d", serviceName, i))
+		}
+
+		for _, targetName := range cloudDeployTargets {
+			deployTargetOp := gcloud.Runf(t, "deploy targets describe %s --project %s --region %s --flatten Target", targetName, projectID, region).Array()[0]
+			assert.Equal(cloudDeployServiceAccountEmail, deployTargetOp.Get("executionConfigs").Array()[0].Get("serviceAccount").String(), fmt.Sprintf("cloud deploy target %s should have service account %s", targetName, cloudDeployServiceAccountEmail))
+		}
+
+		buildTriggerName := fmt.Sprintf("%s-ci", serviceName)
+		ciServiceAccountPath := fmt.Sprintf("projects/%s/serviceAccounts/%s", projectID, ciServiceAccountEmail)
+		buildTriggerOp := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", buildTriggerName, projectID, region)
+		assert.Equal(ciServiceAccountPath, buildTriggerOp.Get("serviceAccount").String(), fmt.Sprintf("cloud build trigger %s should have service account %s", buildTriggerName, ciServiceAccountPath))
 
 		// Push cymbal bank app source code
 		tmpDirApp := t.TempDir()

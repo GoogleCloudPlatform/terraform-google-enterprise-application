@@ -16,6 +16,9 @@ package testutils
 
 import (
 	"os"
+	"strings"
+
+	"github.com/tidwall/gjson"
 )
 
 // fileExists check if a give file exists
@@ -28,4 +31,16 @@ func FileExists(filePath string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+// filter select only values who match the condition for the field
+func Filter(field string, value string, iamList []gjson.Result) []gjson.Result {
+	var filtered []gjson.Result
+
+	for _, iam := range iamList {
+		if strings.Contains(iam.Get(field).String(), value) {
+			filtered = append(filtered, iam)
+		}
+	}
+	return filtered
 }
