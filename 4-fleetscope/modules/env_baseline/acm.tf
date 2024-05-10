@@ -57,7 +57,7 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
   membership_location = regex(local.membership_re, each.key)[1]
 
   configmanagement {
-    version = "1.17.2"
+    version = "1.18.0"
     config_sync {
       source_format = "unstructured"
       git {
@@ -65,11 +65,6 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
         secret_type               = "gcpserviceaccount"
         gcp_service_account_email = google_service_account.root_reconciler.email
       }
-    }
-    policy_controller {
-      enabled                    = true
-      template_library_installed = true
-      referential_rules_enabled  = true
     }
   }
 

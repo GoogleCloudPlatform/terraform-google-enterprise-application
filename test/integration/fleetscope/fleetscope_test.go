@@ -125,7 +125,7 @@ func TestFleetscope(t *testing.T) {
 
 								assert.Equal("gcpserviceaccount", gkeFeatureOp.Get(configmanagementPath+".configSync.git.secretType").String(), fmt.Sprintf("Hub Feature %s should have git secret type equal to gcpserviceaccount", membershipName))
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
-								assert.Equal("1.17.2", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
+								assert.Equal("1.18.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 								assert.Equal(rootReconcilerSa, gkeFeatureOp.Get(configmanagementPath+".configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
 								assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.enabled").Bool(), fmt.Sprintf("Hub Feature %s  policy controler should be enabled", membershipName))
 								assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.referentialRulesEnabled").Bool(), fmt.Sprintf("Hub Feature %s  referencial rule should be enabled", membershipName))
