@@ -34,7 +34,7 @@ resource "google_gke_hub_feature" "poco_feature" {
             installation = "ALL"
           }
         }
-      referential_rules_enabled = true
+        referential_rules_enabled = true
       }
     }
   }
