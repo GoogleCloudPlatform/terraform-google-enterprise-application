@@ -18,6 +18,14 @@ import (
 	"strings"
 )
 
+var (
+	EnvNames = []string{
+		"development",
+		"non-production",
+		"production",
+	}
+)
+
 func GetLastSplitElement(value string, sep string) string {
 	splitted := strings.Split(value, sep)
 	return splitted[len(splitted)-1]
