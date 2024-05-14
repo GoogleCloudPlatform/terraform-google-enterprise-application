@@ -51,6 +51,7 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
 
   policycontroller {
     policy_controller_hub_config {
+      install_spec = "INSTALL_SPEC_ENABLED"
       policy_content {
         bundles {
           bundle_name = "pss-baseline-v2022"
