@@ -61,76 +61,82 @@ steps:
   args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage verify --verbose']
 - id: appinfra-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraFrontend --stage init --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppInfraFrontend --stage init --verbose']
 - id: appinfra-apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraFrontend --stage apply --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppInfraFrontend --stage apply --verbose']
 - id: appinfra-verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraFrontend --stage verify --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppInfraFrontend --stage verify --verbose']
+- id: appsource-init
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceFrontend --stage init --verbose']
+- id: appsource-verify
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceFrontend --stage verify --verbose']
 - id: appinfra-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraFrontend --stage teardown --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppInfraFrontend --stage teardown --verbose']
 - id: appinfracontacts-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraContacts --stage init --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceContacts --stage init --verbose']
 - id: appinfracontacts-apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraContacts --stage apply --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceContacts --stage apply --verbose']
 - id: appinfracontacts-verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraContacts --stage verify --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceContacts --stage verify --verbose']
 - id: appinfracontacts-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraContacts --stage teardown --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceContacts --stage teardown --verbose']
 - id: appinfrauserservice-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraUserservice --stage init --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceUserservice --stage init --verbose']
 - id: appinfrauserservice-apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraUserservice --stage apply --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceUserservice --stage apply --verbose']
 - id: appinfrauserservice-verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraUserservice --stage verify --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceUserservice --stage verify --verbose']
 - id: appinfrauserservice-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraUserservice --stage teardown --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceUserservice --stage teardown --verbose']
 - id: appinfrabalancereader-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraBalancereader --stage init --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceBalancereader --stage init --verbose']
 - id: appinfrabalancereader-apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraBalancereader --stage apply --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceBalancereader --stage apply --verbose']
 - id: appinfrabalancereader-verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraBalancereader --stage verify --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceBalancereader --stage verify --verbose']
 - id: appinfrabalancereader-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraBalancereader --stage teardown --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceBalancereader --stage teardown --verbose']
 - id: appinfraledgerwriter-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraLedgerwriter --stage init --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceLedgerwriter --stage init --verbose']
 - id: appinfraledgerwriter-apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraLedgerwriter --stage apply --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceLedgerwriter --stage apply --verbose']
 - id: appinfraledgerwriter-verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraLedgerwriter --stage verify --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceLedgerwriter --stage verify --verbose']
 - id: appinfraledgerwriter-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraLedgerwriter --stage teardown --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceLedgerwriter --stage teardown --verbose']
 - id: appinfratransactionhistory-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraTransactionHistory --stage init --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceTransactionHistory --stage init --verbose']
 - id: appinfratransactionhistory-apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraTransactionHistory --stage apply --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceTransactionHistory --stage apply --verbose']
 - id: appinfratransactionhistory-verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraTransactionHistory --stage verify --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceTransactionHistory --stage verify --verbose']
 - id: appinfratransactionhistory-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppinfraTransactionHistory --stage teardown --verbose']
+  args: ['/bin/bash', '-c', 'cft test run TestAppSourceTransactionHistory --stage teardown --verbose']
 - id: appfactory-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage teardown --verbose']
