@@ -33,8 +33,8 @@ resource "google_gke_hub_feature" "poco_feature" {
           template_library {
             installation = "ALL"
           }
-          referential_rules_enabled = true
         }
+      referential_rules_enabled = true
       }
     }
   }
@@ -61,8 +61,8 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
         template_library {
           installation = "ALL"
         }
-        referential_rules_enabled = true
       }
+      referential_rules_enabled = true
     }
   }
 
