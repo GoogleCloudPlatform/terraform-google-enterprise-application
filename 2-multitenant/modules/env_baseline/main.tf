@@ -125,6 +125,10 @@ module "gke" {
   release_channel     = var.release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
 
+  security_posture_vulnerability_mode = "VULNERABILITY_ADVANCED"
+  datapath_provider                   = "ADVANCED_DATAPATH"
+  enable_cost_allocation              = true
+
   fleet_project = module.eab_cluster_project.project_id
 
   identity_namespace = "${module.eab_cluster_project.project_id}.svc.id.goog"
