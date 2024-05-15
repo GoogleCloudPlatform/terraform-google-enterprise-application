@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package appinfra
+package appsource
 
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -48,18 +49,18 @@ func TestSourceCymbalBank(t *testing.T) {
 		"buckets_force_destroy":          "true",
 	}
 
-	for _, appName := range utils.ServicesNames {
+	for _, appName := range testutils.ServicesNames {
 		appName := appName
 		t.Run(appName, func(t *testing.T) {
 			t.Parallel()
-			appinfra := tft.NewTFBlueprintTest(t,
+			appsource := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../6-appsource/apps/cymbal-bank/%s", appName)),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
 
-			appinfra.DefineVerify(func(assert *assert.Assertions) {
-				appinfra.DefaultVerify(assert)
+			appsource.DefineVerify(func(assert *assert.Assertions) {
+				appsource.DefaultVerify(assert)
 
 				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-cymbal-bank-%s", projectID, appName)
 				region := "us-central1"
@@ -109,7 +110,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				if strings.HasPreffix(appName, "ledger") {
+				if strings.HasPrefix(appName, "ledger") {
 					err = cp.Copy("../../../6-appsource/cymbal-bank/ledger-db/k8s/overlays/development/ledger-db.yaml", fmt.Sprintf("%s/src/ledger/ledger-db/k8s/overlays/development/ledger-db.yaml", tmpDirApp))
 					if err != nil {
 						t.Fatal(err)
@@ -162,7 +163,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				}
 				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
 			})
-			appinfra.Test()
+			appsource.Test()
 		})
 	}
 }
