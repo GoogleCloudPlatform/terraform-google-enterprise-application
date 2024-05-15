@@ -33,137 +33,139 @@ import (
 
 func TestSourceCymbalBank(t *testing.T) {
 
-	// TODO: switch to backend_bucket
+	// TODO: switch to an array based on ENVs
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
 	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
-	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps/cymbal-bank/frontend"))
-	projectID := appfactory.GetStringOutput("app_admin_project_id")
 
-	vars := map[string]interface{}{
-		"project_id":                     projectID,
-		"region":                         multitenant.GetStringOutputList("cluster_regions")[0],
-		"cluster_membership_id_dev":      multitenant.GetStringOutputList("cluster_membership_ids")[0],
-		"cluster_membership_ids_nonprod": multitenant_nonprod.GetStringOutputList("cluster_membership_ids"),
-		"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
-		"buckets_force_destroy":          "true",
-	}
+	for appName, serviceNames := range testutils.ServicesNames {
+		for _, serviceName := range serviceNames {
+			region := multitenant.GetStringOutputList("cluster_regions")[0]
+			appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s/%s", appName, serviceName)))
+			projectID := appfactory.GetStringOutput("app_admin_project_id")
 
-	for _, appName := range testutils.ServicesNames {
-		appName := appName
-		t.Run(appName, func(t *testing.T) {
-			t.Parallel()
-			appsource := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(fmt.Sprintf("../../../6-appsource/apps/cymbal-bank/%s", appName)),
-				tft.WithVars(vars),
-				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-			)
+			vars := map[string]interface{}{
+				"project_id":                     projectID,
+				"region":                         region,
+				"cluster_membership_id_dev":      multitenant.GetStringOutputList("cluster_membership_ids")[0],
+				"cluster_membership_ids_nonprod": multitenant_nonprod.GetStringOutputList("cluster_membership_ids"),
+				"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
+				"buckets_force_destroy":          "true",
+			}
+			t.Run(serviceName, func(t *testing.T) {
+				t.Parallel()
 
-			appsource.DefineVerify(func(assert *assert.Assertions) {
-				appsource.DefaultVerify(assert)
+				appsource := tft.NewTFBlueprintTest(t,
+					tft.WithTFDir(fmt.Sprintf("../../../6-appsource/%s/%s", appName, serviceName)),
+					tft.WithVars(vars),
+					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+				)
 
-				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-cymbal-bank-%s", projectID, appName)
-				region := "us-central1"
-				pipelineName := appName
-				prodTarget := "dev"
+				appsource.DefineVerify(func(assert *assert.Assertions) {
+					appsource.DefaultVerify(assert)
 
-				// Push cymbal bank app source code
-				tmpDirApp := t.TempDir()
-				gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
-				gitAppRun := func(args ...string) {
-					_, err := gitApp.RunCmdE(args...)
+					appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
+					pipelineName := serviceName
+					prodTarget := "dev"
+
+					// Push cymbal bank app source code
+					tmpDirApp := t.TempDir()
+					gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
+					gitAppRun := func(args ...string) {
+						_, err := gitApp.RunCmdE(args...)
+						if err != nil {
+							t.Fatal(err)
+						}
+					}
+
+					gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+					gitAppRun("config", "user.email", "eab-robot@example.com")
+					gitAppRun("config", "user.name", "EAB Robot")
+					gitAppRun("config", "--global", "credential.https://source.developers.google.com.helper", "gcloud.sh")
+					gitAppRun("config", "--global", "init.defaultBranch", "main")
+					gitAppRun("config", "--global", "http.postBuffer", "157286400")
+					gitAppRun("checkout", "-b", "main")
+					gitAppRun("remote", "add", "google", appRepo)
+					datefile, err := os.OpenFile(tmpDirApp+"/src/frontend/date.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
 						t.Fatal(err)
 					}
-				}
+					defer datefile.Close()
 
-				gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
-				gitAppRun("config", "user.email", "eab-robot@example.com")
-				gitAppRun("config", "user.name", "EAB Robot")
-				gitAppRun("config", "--global", "credential.https://source.developers.google.com.helper", "gcloud.sh")
-				gitAppRun("config", "--global", "init.defaultBranch", "main")
-				gitAppRun("config", "--global", "http.postBuffer", "157286400")
-				gitAppRun("checkout", "-b", "main")
-				gitAppRun("remote", "add", "google", appRepo)
-				datefile, err := os.OpenFile(tmpDirApp+"/src/frontend/date.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-				if err != nil {
-					t.Fatal(err)
-				}
-				defer datefile.Close()
-
-				_, err = datefile.WriteString(time.Now().String() + "\n")
-				if err != nil {
-					t.Fatal(err)
-				}
-				gitAppRun("rm", "-r", "src/components")
-				gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", appName))
-				err = cp.Copy("../../../6-appsource/cymbal-bank/components", fmt.Sprintf("%s/src/components", tmpDirApp))
-				if err != nil {
-					t.Fatal(err)
-				}
-				err = cp.Copy(fmt.Sprintf("../../../6-appsource/cymbal-bank/%s/skaffold.yaml", appName), fmt.Sprintf("%s/src/%s/skaffold.yaml", tmpDirApp, appName))
-				if err != nil {
-					t.Fatal(err)
-				}
-				err = cp.Copy(fmt.Sprintf("../../../6-appsource/cymbal-bank/%s/k8s", appName), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, appName))
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				if strings.HasPrefix(appName, "ledger") {
-					err = cp.Copy("../../../6-appsource/cymbal-bank/ledger-db/k8s/overlays/development/ledger-db.yaml", fmt.Sprintf("%s/src/ledger/ledger-db/k8s/overlays/development/ledger-db.yaml", tmpDirApp))
+					_, err = datefile.WriteString(time.Now().String() + "\n")
 					if err != nil {
 						t.Fatal(err)
 					}
-				}
+					gitAppRun("rm", "-r", "src/components")
+					gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", serviceName))
+					err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/components", appName), fmt.Sprintf("%s/src/components", tmpDirApp))
+					if err != nil {
+						t.Fatal(err)
+					}
+					err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/%s/skaffold.yaml", appName, serviceName), fmt.Sprintf("%s/src/%s/skaffold.yaml", tmpDirApp, serviceName))
+					if err != nil {
+						t.Fatal(err)
+					}
+					err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/%s/k8s", appName, serviceName), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, serviceName))
+					if err != nil {
+						t.Fatal(err)
+					}
 
-				gitAppRun("add", ".")
-				gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
-				gitAppRun("push", "--all", "google", "-f")
+					if strings.HasPrefix(serviceName, "ledger") {
+						err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/ledger-db/k8s/overlays/development/ledger-db.yaml", appName), fmt.Sprintf("%s/src/ledger/ledger-db/k8s/overlays/development/ledger-db.yaml", tmpDirApp))
+						if err != nil {
+							t.Fatal(err)
+						}
+					}
 
-				lastCommit := gitApp.GetLatestCommit()
-				// filter builds triggered based on pushed commit sha
-				buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, projectID)
-				// poll build until complete
-				pollCloudBuild := func(cmd string) func() (bool, error) {
-					return func() (bool, error) {
-						build := gcloud.Runf(t, cmd).Array()
-						if len(build) < 1 {
+					gitAppRun("add", ".")
+					gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
+					gitAppRun("push", "--all", "google", "-f")
+
+					lastCommit := gitApp.GetLatestCommit()
+					// filter builds triggered based on pushed commit sha
+					buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, projectID)
+					// poll build until complete
+					pollCloudBuild := func(cmd string) func() (bool, error) {
+						return func() (bool, error) {
+							build := gcloud.Runf(t, cmd).Array()
+							if len(build) < 1 {
+								return true, nil
+							}
+							latestWorkflowRunStatus := build[0].Get("status").String()
+							if latestWorkflowRunStatus == "SUCCESS" {
+								return false, nil
+							}
 							return true, nil
 						}
-						latestWorkflowRunStatus := build[0].Get("status").String()
-						if latestWorkflowRunStatus == "SUCCESS" {
-							return false, nil
-						}
-						return true, nil
 					}
-				}
-				utils.Poll(t, pollCloudBuild(buildListCmd), 40, 30*time.Second)
-				releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, pipelineName, region, lastCommit[0:7])
-				releases := gcloud.Runf(t, releaseListCmd).Array()
-				if len(releases) == 0 {
-					t.Fatal("Failed to find the release")
-				}
-				releaseName := releases[0].Get("name")
-				fmt.Println(releaseName)
-				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, pipelineName, region, releaseName, pipelineName, prodTarget)
-				// Poll CD rollouts until rollout is successful
-				pollCloudDeploy := func(cmd string) func() (bool, error) {
-					return func() (bool, error) {
-						rollouts := gcloud.Runf(t, cmd).Array()
-						if len(rollouts) < 1 {
+					utils.Poll(t, pollCloudBuild(buildListCmd), 40, 30*time.Second)
+					releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, pipelineName, region, lastCommit[0:7])
+					releases := gcloud.Runf(t, releaseListCmd).Array()
+					if len(releases) == 0 {
+						t.Fatal("Failed to find the release")
+					}
+					releaseName := releases[0].Get("name")
+					fmt.Println(releaseName)
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, pipelineName, region, releaseName, pipelineName, prodTarget)
+					// Poll CD rollouts until rollout is successful
+					pollCloudDeploy := func(cmd string) func() (bool, error) {
+						return func() (bool, error) {
+							rollouts := gcloud.Runf(t, cmd).Array()
+							if len(rollouts) < 1 {
+								return true, nil
+							}
+							latestRolloutState := rollouts[0].Get("state").String()
+							if latestRolloutState == "SUCCEEDED" {
+								return false, nil
+							}
 							return true, nil
 						}
-						latestRolloutState := rollouts[0].Get("state").String()
-						if latestRolloutState == "SUCCEEDED" {
-							return false, nil
-						}
-						return true, nil
 					}
-				}
-				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
+					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
+				})
+				appsource.Test()
 			})
-			appsource.Test()
-		})
+		}
 	}
 }

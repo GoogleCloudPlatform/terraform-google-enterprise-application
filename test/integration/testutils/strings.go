@@ -25,13 +25,15 @@ var (
 		"production",
 	}
 
-	ServicesNames = []string{
-		"accounts-contacts",
-		"accounts-userservice",
-		"frontend",
-		"ledger-balancereader",
-		"ledger-ledgerwriter",
-		"ledger-transactionhistory",
+	ServicesNames = map[string][]string{
+		"cymbal-bank": []string{
+			"accounts-contacts",
+			"accounts-userservice",
+			"frontend",
+			"ledger-balancereader",
+			"ledger-ledgerwriter",
+			"ledger-transactionhistory",
+		},
 	}
 )
 
