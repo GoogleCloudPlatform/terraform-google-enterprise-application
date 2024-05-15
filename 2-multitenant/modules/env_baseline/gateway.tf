@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  cluster_project_id = module.eab_cluster_project.project_id
+  cluster_project_id = data.google_project.eab_cluster_project.project_id
   service_name       = "frontend.endpoints.${local.cluster_project_id}.cloud.goog"
 }
 

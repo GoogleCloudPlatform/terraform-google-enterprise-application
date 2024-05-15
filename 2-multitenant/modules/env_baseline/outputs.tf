@@ -37,7 +37,7 @@ output "cluster_membership_ids" {
 
 output "cluster_project_id" {
   description = "Cluster Project ID"
-  value       = module.eab_cluster_project.project_id
+  value       = data.google_project.eab_cluster_project.project_id
 }
 
 output "network_project_id" {
@@ -48,7 +48,7 @@ output "network_project_id" {
 # Provide for future seperate Fleet Project
 output "fleet_project_id" {
   description = "Fleet Project ID"
-  value       = module.eab_cluster_project.project_id
+  value       = data.google_project.eab_cluster_project.project_id
 }
 
 output "ip_address_self_links" {
