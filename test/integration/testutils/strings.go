@@ -24,6 +24,15 @@ var (
 		"non-production",
 		"production",
 	}
+
+	ServicesNames = []string{
+		"accounts-contacts",
+		"accounts-userservice",
+		"frontend",
+		"ledger-balancereader",
+		"ledger-ledgerwriter",
+		"ledger-transactionhistory",
+	}
 )
 
 func GetLastSplitElement(value string, sep string) string {
