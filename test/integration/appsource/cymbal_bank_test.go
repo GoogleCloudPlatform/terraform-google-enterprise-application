@@ -38,13 +38,19 @@ func TestSourceCymbalBank(t *testing.T) {
 	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
 
+	region := multitenant.GetStringOutputList("cluster_regions")[0]
 	for appName, serviceNames := range testutils.ServicesNames {
+
+		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
+
 		for _, serviceName := range serviceNames {
-			region := multitenant.GetStringOutputList("cluster_regions")[0]
+
 			cleanServiceNameArray := strings.Split(serviceName, "-")
 			cleanServiceName := cleanServiceNameArray[len(cleanServiceNameArray)-1]
 			appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s/%s", appName, cleanServiceName)))
 			projectID := appfactory.GetStringOutput("app_admin_project_id")
+
+			servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 
 			vars := map[string]interface{}{
 				"project_id":                     projectID,
@@ -54,11 +60,12 @@ func TestSourceCymbalBank(t *testing.T) {
 				"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
 				"buckets_force_destroy":          "true",
 			}
+
 			t.Run(serviceName, func(t *testing.T) {
 				t.Parallel()
 
 				appsource := tft.NewTFBlueprintTest(t,
-					tft.WithTFDir(fmt.Sprintf("../../../6-appsource/%s/%s", appName, serviceName)),
+					tft.WithTFDir(servicePath),
 					tft.WithVars(vars),
 					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				)
@@ -100,21 +107,28 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 					gitAppRun("rm", "-r", "src/components")
 					gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", serviceName))
-					err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/components", appName), fmt.Sprintf("%s/src/components", tmpDirApp))
+					err = cp.Copy(fmt.Sprintf("%s/components", appSourcePath), fmt.Sprintf("%s/src/components", tmpDirApp))
 					if err != nil {
 						t.Fatal(err)
 					}
-					err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/%s/skaffold.yaml", appName, serviceName), fmt.Sprintf("%s/src/%s/skaffold.yaml", tmpDirApp, serviceName))
+					err = cp.Copy(fmt.Sprintf("%s/skaffold.yaml", servicePath), fmt.Sprintf("%s/src/%s/skaffold.yaml", tmpDirApp, serviceName))
 					if err != nil {
 						t.Fatal(err)
 					}
-					err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/%s/k8s", appName, serviceName), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, serviceName))
+					err = cp.Copy(fmt.Sprintf("%s/k8s", servicePath), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, serviceName))
 					if err != nil {
 						t.Fatal(err)
 					}
 
 					if strings.HasPrefix(serviceName, "ledger") {
-						err = cp.Copy(fmt.Sprintf("../../../6-appsource/%s/ledger-db/k8s/overlays/development/ledger-db.yaml", appName), fmt.Sprintf("%s/src/ledger/ledger-db/k8s/overlays/development/ledger-db.yaml", tmpDirApp))
+						err = cp.Copy(fmt.Sprintf("%s/ledger-db/k8s/overlays/development/ledger-db.yaml", appSourcePath), fmt.Sprintf("%s/src/ledger/ledger-db/k8s/overlays/development/ledger-db.yaml", tmpDirApp))
+						if err != nil {
+							t.Fatal(err)
+						}
+					}
+
+					if strings.HasPrefix(serviceName, "accounts") {
+						err = cp.Copy(fmt.Sprintf("%s/accounts-db/k8s/overlays/development/accounts-db.yaml", appSourcePath), fmt.Sprintf("%s/src/accounts/accounts-db/k8s/overlays/development/accounts-db.yaml", tmpDirApp))
 						if err != nil {
 							t.Fatal(err)
 						}
