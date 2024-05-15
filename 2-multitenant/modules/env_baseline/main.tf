@@ -25,6 +25,8 @@ module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 15.0"
 
+  count = var.create_cluster_project ? 1 : 0
+
   name                     = "eab-gke-${var.env}"
   random_project_id        = "true"
   random_project_id_length = 4
@@ -57,12 +59,16 @@ module "eab_cluster_project" {
   ]
 }
 
+data "google_project" "eab_cluster_project" {
+  project_id = var.create_cluster_project ? module.eab_cluster_project[0].project_id : var.network_project_id
+}
+
 // Create Cloud Armor policy
 module "cloud_armor" {
   source  = "GoogleCloudPlatform/cloud-armor/google"
   version = "~> 2.0"
 
-  project_id                           = module.eab_cluster_project.project_id
+  project_id                           = data.google_project.eab_cluster_project.project_id
   name                                 = "eab-cloud-armor"
   description                          = "EAB Cloud Armor policy"
   default_rule_action                  = "allow"
@@ -99,7 +105,7 @@ module "ip_address_frontend_ip" {
   source  = "terraform-google-modules/address/google"
   version = "~> 3.2"
 
-  project_id   = module.eab_cluster_project.project_id
+  project_id   = data.google_project.eab_cluster_project.project_id
   address_type = "EXTERNAL"
   region       = "global"
   global       = true
@@ -114,7 +120,7 @@ module "gke" {
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
 
-  project_id          = module.eab_cluster_project.project_id
+  project_id          = data.google_project.eab_cluster_project.project_id
   regional            = true
   region              = each.value.region
   network_project_id  = regex(local.projects_re, each.value.id)[0]
@@ -129,9 +135,9 @@ module "gke" {
   datapath_provider                   = "ADVANCED_DATAPATH"
   enable_cost_allocation              = true
 
-  fleet_project = module.eab_cluster_project.project_id
+  fleet_project = data.google_project.eab_cluster_project.project_id
 
-  identity_namespace = "${module.eab_cluster_project.project_id}.svc.id.goog"
+  identity_namespace = "${data.google_project.eab_cluster_project.project_id}.svc.id.goog"
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
@@ -141,7 +147,7 @@ module "gke" {
   enable_binary_authorization = true
 
   cluster_resource_labels = {
-    "mesh_id" : "proj-${module.eab_cluster_project.project_number}"
+    "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
   }
 
   node_pools = [

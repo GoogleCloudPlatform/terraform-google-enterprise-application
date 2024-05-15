@@ -29,6 +29,12 @@ variable "folder_id" {
   type        = string
 }
 
+variable "create_cluster_project" {
+  description = "Create Cluster Project ID, otherwise the Network Project ID is used"
+  type        = bool
+  default     = true
+}
+
 variable "network_project_id" {
   description = "Network Project ID"
   type        = string
