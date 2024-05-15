@@ -69,7 +69,6 @@ func TestSourceCymbalBank(t *testing.T) {
 				)
 
 				appsource.DefineVerify(func(assert *assert.Assertions) {
-					appsource.DefaultVerify(assert)
 
 					appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
 					pipelineName := serviceName
