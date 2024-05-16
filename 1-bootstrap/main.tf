@@ -45,7 +45,7 @@ resource "google_sourcerepo_repository" "gcp_repo" {
 
 module "tfstate_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 5.0"
+  version = "~> 6.0"
 
   name          = "${var.bucket_prefix}-${var.project_id}-tf-state"
   project_id    = var.project_id
