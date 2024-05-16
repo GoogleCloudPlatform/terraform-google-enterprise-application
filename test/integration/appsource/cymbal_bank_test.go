@@ -71,7 +71,6 @@ func TestSourceCymbalBank(t *testing.T) {
 				appsource.DefineVerify(func(assert *assert.Assertions) {
 
 					appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
-					pipelineName := serviceName
 					prodTarget := "dev"
 
 					// Push cymbal bank app source code
@@ -153,14 +152,14 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 					utils.Poll(t, pollCloudBuild(buildListCmd), 40, 30*time.Second)
-					releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, pipelineName, region, lastCommit[0:7])
+					releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
 					releases := gcloud.Runf(t, releaseListCmd).Array()
 					if len(releases) == 0 {
 						t.Fatal("Failed to find the release")
 					}
 					releaseName := releases[0].Get("name")
 					fmt.Println(releaseName)
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, pipelineName, region, releaseName, pipelineName, prodTarget)
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, serviceName, region, releaseName, serviceName, prodTarget)
 					// Poll CD rollouts until rollout is successful
 					pollCloudDeploy := func(cmd string) func() (bool, error) {
 						return func() (bool, error) {
