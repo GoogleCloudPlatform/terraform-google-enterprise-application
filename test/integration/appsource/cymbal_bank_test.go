@@ -45,22 +45,20 @@ func TestSourceCymbalBank(t *testing.T) {
 
 		appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s/frontend/", appName)))
 		projectID := appfactory.GetStringOutput("app_admin_project_id")
+		t.Run(appName, func(t *testing.T) {
+			t.Parallel()
+			for _, serviceName := range serviceNames {
 
-		for _, serviceName := range serviceNames {
+				servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 
-			servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
-
-			vars := map[string]interface{}{
-				"project_id":                     projectID,
-				"region":                         region,
-				"cluster_membership_id_dev":      multitenant.GetStringOutputList("cluster_membership_ids")[0],
-				"cluster_membership_ids_nonprod": multitenant_nonprod.GetStringOutputList("cluster_membership_ids"),
-				"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
-				"buckets_force_destroy":          "true",
-			}
-
-			t.Run(serviceName, func(t *testing.T) {
-				t.Parallel()
+				vars := map[string]interface{}{
+					"project_id":                     projectID,
+					"region":                         region,
+					"cluster_membership_id_dev":      multitenant.GetStringOutputList("cluster_membership_ids")[0],
+					"cluster_membership_ids_nonprod": multitenant_nonprod.GetStringOutputList("cluster_membership_ids"),
+					"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
+					"buckets_force_destroy":          "true",
+				}
 
 				appsource := tft.NewTFBlueprintTest(t,
 					tft.WithTFDir(servicePath),
@@ -177,7 +175,8 @@ func TestSourceCymbalBank(t *testing.T) {
 					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
 				})
 				appsource.Test()
-			})
-		}
+
+			}
+		})
 	}
 }
