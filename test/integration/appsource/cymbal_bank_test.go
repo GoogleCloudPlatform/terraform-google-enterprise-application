@@ -92,7 +92,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					gitAppRun("config", "--global", "http.postBuffer", "157286400")
 					gitAppRun("checkout", "-b", "main")
 					gitAppRun("remote", "add", "google", appRepo)
-					datefile, err := os.OpenFile(tmpDirApp+"/src/frontend/date.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+					datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, serviceName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
 						t.Fatal(err)
 					}
