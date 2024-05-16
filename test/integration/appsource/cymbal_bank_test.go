@@ -49,6 +49,17 @@ func TestSourceCymbalBank(t *testing.T) {
 			t.Parallel()
 			for _, serviceName := range serviceNames {
 
+				splitServiceName := strings.Split(serviceName, "-")
+				prefixServiceName := splitServiceName[0]
+				suffixServiceName := splitServiceName[len(splitServiceName)-1]
+
+				mapPath := ""
+				if prefixServiceName == suffixServiceName {
+					mapPath = prefixServiceName
+				} else {
+					mapPath = fmt.Sprintf("%s/%s", prefixServiceName, suffixServiceName)
+				}
+
 				servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 
 				vars := map[string]interface{}{
@@ -89,7 +100,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					gitAppRun("config", "--global", "http.postBuffer", "157286400")
 					gitAppRun("checkout", "-b", "main")
 					gitAppRun("remote", "add", "google", appRepo)
-					datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, serviceName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+					datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -100,16 +111,16 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal(err)
 					}
 					gitAppRun("rm", "-r", "src/components")
-					gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", serviceName))
+					gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", mapPath))
 					err = cp.Copy(fmt.Sprintf("%s/components", appSourcePath), fmt.Sprintf("%s/src/components", tmpDirApp))
 					if err != nil {
 						t.Fatal(err)
 					}
-					err = cp.Copy(fmt.Sprintf("%s/skaffold.yaml", servicePath), fmt.Sprintf("%s/src/%s/skaffold.yaml", tmpDirApp, serviceName))
+					err = cp.Copy(fmt.Sprintf("%s/skaffold.yaml", servicePath), fmt.Sprintf("%s/src/%s/skaffold.yaml", tmpDirApp, mapPath))
 					if err != nil {
 						t.Fatal(err)
 					}
-					err = cp.Copy(fmt.Sprintf("%s/k8s", servicePath), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, serviceName))
+					err = cp.Copy(fmt.Sprintf("%s/k8s", servicePath), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, mapPath))
 					if err != nil {
 						t.Fatal(err)
 					}
