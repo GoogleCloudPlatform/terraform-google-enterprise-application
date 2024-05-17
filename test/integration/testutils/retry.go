@@ -21,5 +21,8 @@ var (
 
 		// Error code 409 for concurrent policy changes.
 		".*Error 409.*There were concurrent policy changes.*": "Concurrent policy changes.",
+
+		// Error 403: Compute Engine API has not been used in project {} before or it is disabled.
+		".*Error 403.*Compute Engine API has not been used in project.*": "Compute Engine API not enabled",
 	}
 )
