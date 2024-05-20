@@ -20,13 +20,13 @@ import (
 
 var (
 	EnvNames = []string{
-		"development",
-		"non-production",
+		// "development",
+		// "non-production",
 		"production",
 	}
 
 	ServicesNames = map[string][]string{
-		"cymbal-bank": []string{
+		"cymbal-bank": {
 			"accounts-contacts",
 			"accounts-userservice",
 			"frontend",

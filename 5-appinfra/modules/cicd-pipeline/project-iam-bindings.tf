@@ -57,5 +57,8 @@ module "project-iam-bindings" {
     "roles/container.developer" = [
       "serviceAccount:${google_service_account.cloud_deploy.email}"
     ],
+    "roles/container.admin" =  [
+      "serviceAccount:${google_service_account.cloud_deploy.email}"
+    ],
   }
 }
