@@ -19,10 +19,8 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
-	"github.com/tidwall/gjson"
 )
 
 func TestAppInfraContacts(t *testing.T) {
@@ -30,15 +28,15 @@ func TestAppInfraContacts(t *testing.T) {
 	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps/cymbal-bank"))
-	// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
-	projectID := gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Get("contacts").Get("app_admin_project_id").String()
+	projectID := appFactory.GetJsonOutput("app-group").Get("contacts.app_admin_project_id").String()
 
 	vars := map[string]interface{}{
 		"project_id":                     projectID,
-		"region":                         multitenant.GetStringOutputList("cluster_regions")[0],
-		"cluster_membership_id_dev":      multitenant.GetStringOutputList("cluster_membership_ids")[0],
-		"cluster_membership_ids_nonprod": multitenant_nonprod.GetStringOutputList("cluster_membership_ids"),
-		"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
+		"region":                         testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0],
+		// TODO: Convert to a dynamic array
+		"cluster_membership_id_dev":      testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")[0],
+		"cluster_membership_ids_nonprod": testutils.GetBptOutputStrSlice(multitenant_nonprod, "cluster_membership_ids"),
+		"cluster_membership_ids_prod":    testutils.GetBptOutputStrSlice(multitenant_prod, "cluster_membership_ids"),
 		"buckets_force_destroy":          "true",
 	}
 	frontend := tft.NewTFBlueprintTest(t,
