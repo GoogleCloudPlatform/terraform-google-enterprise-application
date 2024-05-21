@@ -20,8 +20,8 @@ import (
 
 var (
 	EnvNames = []string{
-		// "development",
-		// "non-production",
+		"development",
+		"non-production",
 		"production",
 	}
 
