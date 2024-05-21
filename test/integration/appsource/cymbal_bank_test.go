@@ -15,6 +15,7 @@
 package appsource
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -153,6 +154,8 @@ func TestSourceCymbalBank(t *testing.T) {
 							latestWorkflowRunStatus := build[0].Get("status").String()
 							if latestWorkflowRunStatus == "SUCCESS" {
 								return false, nil
+							} else if latestWorkflowRunStatus == "FAILURE" {
+								return false, errors.New("Build failed.")
 							}
 							return true, nil
 						}
@@ -175,6 +178,8 @@ func TestSourceCymbalBank(t *testing.T) {
 							latestRolloutState := rollouts[0].Get("state").String()
 							if latestRolloutState == "SUCCEEDED" {
 								return false, nil
+							} else if latestRolloutState == "FAILURE" {
+								return false, errors.New("Rollout failed.")
 							}
 							return true, nil
 						}
