@@ -48,10 +48,13 @@ func TestSourceCymbalBank(t *testing.T) {
 		for _, serviceName := range serviceNames {
 			t.Run(fmt.Sprintf("%s/%s", appName, serviceName), func(t *testing.T) {
 				t.Parallel()
+				prefixServiceName := ""
+				suffixServiceName := serviceName
+				splitServiceName := []string{}
 
-				splitServiceName := strings.Split(serviceName, "-")
-				prefixServiceName := splitServiceName[0]
-				suffixServiceName := splitServiceName[len(splitServiceName)-1]
+				splitServiceName = strings.Split(serviceName, "-")
+				prefixServiceName = splitServiceName[0]
+				suffixServiceName = splitServiceName[len(splitServiceName)-1]
 
 				mapPath := ""
 				if prefixServiceName == suffixServiceName {
@@ -125,15 +128,8 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal(err)
 					}
 
-					if strings.HasPrefix(serviceName, "ledger") {
-						err = cp.Copy(fmt.Sprintf("%s/ledger-db/k8s/overlays/development/ledger-db.yaml", appSourcePath), fmt.Sprintf("%s/src/ledger/ledger-db/k8s/overlays/development/ledger-db.yaml", tmpDirApp))
-						if err != nil {
-							t.Fatal(err)
-						}
-					}
-
-					if strings.HasPrefix(serviceName, "accounts") {
-						err = cp.Copy(fmt.Sprintf("%s/accounts-db/k8s/overlays/development/accounts-db.yaml", appSourcePath), fmt.Sprintf("%s/src/accounts/accounts-db/k8s/overlays/development/accounts-db.yaml", tmpDirApp))
+					if len(splitServiceName) > 1 {
+						err = cp.Copy(fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, prefixServiceName, prefixServiceName), fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, prefixServiceName, prefixServiceName, prefixServiceName))
 						if err != nil {
 							t.Fatal(err)
 						}
