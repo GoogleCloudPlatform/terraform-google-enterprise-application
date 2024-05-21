@@ -10,7 +10,7 @@
 | cloudbuild\_sa\_roles | Optional to assign to custom CloudBuild SA. Map of project name or any static key to object with list of roles. Keys much match keys from var.envs | <pre>map(object({<br>    roles = list(string)<br>  }))</pre> | `{}` | no |
 | create\_env\_projects | n/a | `bool` | `true` | no |
 | env\_project\_apis | List of APIs to enable for environment-specific application infra projects | `list(string)` | <pre>[<br>  "iam.googleapis.com",<br>  "cloudresourcemanager.googleapis.com",<br>  "serviceusage.googleapis.com",<br>  "cloudbilling.googleapis.com"<br>]</pre> | no |
-| envs | n/a | `map(any)` | n/a | yes |
+| envs | Environments | <pre>map(object({<br>    billing_account    = string<br>    folder_id          = string<br>    network_project_id = string<br>    network_self_link  = string<br>    org_id             = string<br>    subnets_self_links = list(string)<br>  }))</pre> | n/a | yes |
 | folder\_id | Folder ID of parent folder for application admin resources. If deploying on the enterprise foundation blueprint, this is usually the 'common' folder. | `string` | n/a | yes |
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Google Cloud Organization ID. | `string` | n/a | yes |

@@ -14,110 +14,19 @@
  * limitations under the License.
  */
 
-output "app_admin_project_id" {
-  description = "Project ID of the application admin project."
+output "app-group" {
+  description = "Description on the app-group components"
   value = {
-    "balancereader" : module.balancereader.app_admin_project_id,
-    "contacts" : module.contacts.app_admin_project_id,
-    "frontend" : module.frontend.app_admin_project_id,
-    "ledgerwriter" : module.ledgerwriter.app_admin_project_id,
-    "transactionhistory" : module.transactionhistory.app_admin_project_id,
-    "userservice" : module.userservice.app_admin_project_id,
-  }
-}
-
-output "app_infra_repository_name" {
-  description = "Name of the application infrastructure repository."
-  value = {
-    "balancereader" : module.balancereader.app_infra_repository_name,
-    "contacts" : module.contacts.app_infra_repository_name,
-    "frontend" : module.frontend.app_infra_repository_name,
-    "ledgerwriter" : module.ledgerwriter.app_infra_repository_name,
-    "transactionhistory" : module.transactionhistory.app_infra_repository_name,
-    "userservice" : module.userservice.app_infra_repository_name,
-  }
-}
-
-output "app_infra_repository_url" {
-  description = "URL of the application infrastructure repository."
-  value = {
-    "balancereader" : module.balancereader.app_infra_repository_url,
-    "contacts" : module.contacts.app_infra_repository_url,
-    "frontend" : module.frontend.app_infra_repository_url,
-    "ledgerwriter" : module.ledgerwriter.app_infra_repository_url,
-    "transactionhistory" : module.transactionhistory.app_infra_repository_url,
-    "userservice" : module.userservice.app_infra_repository_url,
-  }
-}
-
-output "app_cloudbuild_workspace_apply_trigger_id" {
-  description = "ID of the apply cloud build trigger."
-  value = {
-    "balancereader" : module.balancereader.app_cloudbuild_workspace_apply_trigger_id,
-    "contacts" : module.contacts.app_cloudbuild_workspace_apply_trigger_id,
-    "frontend" : module.frontend.app_cloudbuild_workspace_apply_trigger_id,
-    "ledgerwriter" : module.ledgerwriter.app_cloudbuild_workspace_apply_trigger_id,
-    "transactionhistory" : module.transactionhistory.app_cloudbuild_workspace_apply_trigger_id,
-    "userservice" : module.userservice.app_cloudbuild_workspace_apply_trigger_id,
-  }
-}
-
-output "app_cloudbuild_workspace_plan_trigger_id" {
-  description = "ID of the plan cloud build trigger."
-  value = {
-    "balancereader" : module.balancereader.app_cloudbuild_workspace_plan_trigger_id,
-    "contacts" : module.contacts.app_cloudbuild_workspace_plan_trigger_id,
-    "frontend" : module.frontend.app_cloudbuild_workspace_plan_trigger_id,
-    "ledgerwriter" : module.ledgerwriter.app_cloudbuild_workspace_plan_trigger_id,
-    "transactionhistory" : module.transactionhistory.app_cloudbuild_workspace_plan_trigger_id,
-    "userservice" : module.userservice.app_cloudbuild_workspace_plan_trigger_id,
-  }
-}
-
-output "app_cloudbuild_workspace_artifacts_bucket_name" {
-  description = "Artifacts bucket name for the application workspace."
-  value = {
-    "balancereader" : module.balancereader.app_cloudbuild_workspace_artifacts_bucket_name,
-    "contacts" : module.contacts.app_cloudbuild_workspace_artifacts_bucket_name,
-    "frontend" : module.frontend.app_cloudbuild_workspace_artifacts_bucket_name,
-    "ledgerwriter" : module.ledgerwriter.app_cloudbuild_workspace_artifacts_bucket_name,
-    "transactionhistory" : module.transactionhistory.app_cloudbuild_workspace_artifacts_bucket_name,
-    "userservice" : module.userservice.app_cloudbuild_workspace_artifacts_bucket_name,
-  }
-}
-
-output "app_cloudbuild_workspace_logs_bucket_name" {
-  description = "Logs bucket name for the application workspace."
-  value = {
-    "balancereader" : module.balancereader.app_cloudbuild_workspace_logs_bucket_name,
-    "contacts" : module.contacts.app_cloudbuild_workspace_logs_bucket_name,
-    "frontend" : module.frontend.app_cloudbuild_workspace_logs_bucket_name,
-    "ledgerwriter" : module.ledgerwriter.app_cloudbuild_workspace_logs_bucket_name,
-    "transactionhistory" : module.transactionhistory.app_cloudbuild_workspace_logs_bucket_name,
-    "userservice" : module.userservice.app_cloudbuild_workspace_logs_bucket_name,
-  }
-}
-
-output "app_cloudbuild_workspace_state_bucket_name" {
-  description = "Terraform state bucket name for the application workspace."
-  value = {
-    "balancereader" : module.balancereader.app_cloudbuild_workspace_state_bucket_name,
-    "contacts" : module.contacts.app_cloudbuild_workspace_state_bucket_name,
-    "frontend" : module.frontend.app_cloudbuild_workspace_state_bucket_name,
-    "ledgerwriter" : module.ledgerwriter.app_cloudbuild_workspace_state_bucket_name,
-    "transactionhistory" : module.transactionhistory.app_cloudbuild_workspace_state_bucket_name,
-    "userservice" : module.userservice.app_cloudbuild_workspace_state_bucket_name,
-  }
-}
-
-output "app_env_project_ids" {
-  description = "Application environment projects IDs."
-  value = {
-    "balancereader" : module.balancereader.app_env_project_ids,
-    "contacts" : module.contacts.app_env_project_ids,
-    "frontend" : module.frontend.app_env_project_ids,
-    "ledgerwriter" : module.ledgerwriter.app_env_project_ids,
-    "transactionhistory" : module.transactionhistory.app_env_project_ids,
-    "userservice" : module.userservice.app_env_project_ids,
+    for k, value in module.components : k => {
+      app_env_project_ids : value.app_env_project_ids,
+      app_admin_project_id : value.app_admin_project_id,
+      app_infra_repository_name : value.app_infra_repository_name,
+      app_infra_repository_url : value.app_infra_repository_url,
+      app_cloudbuild_workspace_apply_trigger_id : value.app_cloudbuild_workspace_apply_trigger_id,
+      app_cloudbuild_workspace_plan_trigger_id : value.app_cloudbuild_workspace_plan_trigger_id,
+      app_cloudbuild_workspace_artifacts_bucket_name : value.app_cloudbuild_workspace_artifacts_bucket_name,
+      app_cloudbuild_workspace_logs_bucket_name : value.app_cloudbuild_workspace_logs_bucket_name,
+      app_cloudbuild_workspace_state_bucket_name : value.app_cloudbuild_workspace_state_bucket_name,
+    }
   }
 }

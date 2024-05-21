@@ -26,10 +26,12 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 
 	cp "github.com/otiai10/copy"
+	"github.com/tidwall/gjson"
 )
 
 func TestSourceCymbalBank(t *testing.T) {
@@ -48,8 +50,8 @@ func TestSourceCymbalBank(t *testing.T) {
 	region := multitenant.GetStringOutputList("cluster_regions")[0]
 	for appName, serviceNames := range testutils.ServicesNames {
 		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
-		appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s/frontend/", appName)))
-		projectID := appfactory.GetStringOutput("app_admin_project_id")
+		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s/frontend/", appName)))
+
 		for _, serviceName := range serviceNames {
 			t.Run(fmt.Sprintf("%s/%s", appName, serviceName), func(t *testing.T) {
 				t.Parallel()
@@ -57,6 +59,9 @@ func TestSourceCymbalBank(t *testing.T) {
 				splitServiceName = strings.Split(serviceName, "-")
 				prefixServiceName = splitServiceName[0]
 				suffixServiceName = splitServiceName[len(splitServiceName)-1]
+
+				// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
+				projectID := gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Get(suffixServiceName).Get("app_admin_project_id").String()
 
 				mapPath := ""
 				if prefixServiceName == suffixServiceName {
