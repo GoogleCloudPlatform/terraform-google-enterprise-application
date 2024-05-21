@@ -21,8 +21,9 @@ locals {
 
 # cloud deploy service account
 resource "google_service_account" "cloud_deploy" {
-  project    = var.project_id
-  account_id = "deploy-${local.service_name}"
+  project                      = var.project_id
+  account_id                   = "deploy-${local.service_name}"
+  create_ignore_already_exists = true
 }
 
 resource "google_clouddeploy_target" "development" {

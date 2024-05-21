@@ -19,16 +19,19 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/tidwall/gjson"
 )
 
 func TestAppInfraContacts(t *testing.T) {
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
 	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
-	appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps/cymbal-bank/frontend"))
-	projectID := appfactory.GetStringOutput("app_admin_project_id")
+	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps/cymbal-bank"))
+	// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
+	projectID := gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Get("contacts").Get("app_admin_project_id").String()
 
 	vars := map[string]interface{}{
 		"project_id":                     projectID,
