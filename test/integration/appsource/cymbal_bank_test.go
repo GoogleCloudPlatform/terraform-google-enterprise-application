@@ -38,19 +38,20 @@ func TestSourceCymbalBank(t *testing.T) {
 	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
 
+	var (
+		prefixServiceName string
+		suffixServiceName string
+		splitServiceName  []string
+	)
+
 	region := multitenant.GetStringOutputList("cluster_regions")[0]
 	for appName, serviceNames := range testutils.ServicesNames {
-
 		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
-
 		appfactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s/frontend/", appName)))
 		projectID := appfactory.GetStringOutput("app_admin_project_id")
 		for _, serviceName := range serviceNames {
 			t.Run(fmt.Sprintf("%s/%s", appName, serviceName), func(t *testing.T) {
 				t.Parallel()
-				prefixServiceName := ""
-				suffixServiceName := serviceName
-				splitServiceName := []string{}
 
 				splitServiceName = strings.Split(serviceName, "-")
 				prefixServiceName = splitServiceName[0]
@@ -163,7 +164,6 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal("Failed to find the release")
 					}
 					releaseName := releases[0].Get("name")
-					fmt.Println(releaseName)
 					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, suffixServiceName, region, releaseName, serviceName, prodTarget)
 					// Poll CD rollouts until rollout is successful
 					pollCloudDeploy := func(cmd string) func() (bool, error) {
