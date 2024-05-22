@@ -31,7 +31,7 @@ func TestAppInfraLedgerwriter(t *testing.T) {
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../3-appfactory/apps/cymbal-bank"))
 	// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
-	projectID := gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Get("ledgerwrite").Get("app_admin_project_id").String()
+	projectID := gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Get("ledgerwriter").Get("app_admin_project_id").String()
 
 	vars := map[string]interface{}{
 		"project_id":                     projectID,
