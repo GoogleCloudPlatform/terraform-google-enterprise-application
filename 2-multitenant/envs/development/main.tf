@@ -21,6 +21,7 @@ locals {
 module "env" {
   source = "../../modules/env_baseline"
 
+  apps                = var.apps
   env                 = local.env
   org_id              = var.envs[local.env].org_id
   folder_id           = var.envs[local.env].folder_id

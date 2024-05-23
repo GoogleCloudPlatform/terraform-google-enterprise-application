@@ -15,9 +15,10 @@
  */
 
 locals {
-  networks_re    = "/networks/([^/]*)$"
-  subnetworks_re = "/subnetworks/([^/]*)$"
-  projects_re    = "projects/([^/]*)/"
+  networks_re        = "/networks/([^/]*)$"
+  subnetworks_re     = "/subnetworks/([^/]*)$"
+  projects_re        = "projects/([^/]*)/"
+  cluster_project_id = data.google_project.eab_cluster_project.project_id
 }
 
 // Create cluster project
@@ -68,7 +69,7 @@ module "cloud_armor" {
   source  = "GoogleCloudPlatform/cloud-armor/google"
   version = "~> 2.0"
 
-  project_id                           = data.google_project.eab_cluster_project.project_id
+  project_id                           = local.cluster_project_id
   name                                 = "eab-cloud-armor"
   description                          = "EAB Cloud Armor policy"
   default_rule_action                  = "allow"
@@ -100,18 +101,6 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
-// Create
-module "ip_address_frontend_ip" {
-  source  = "terraform-google-modules/address/google"
-  version = "~> 3.2"
-
-  project_id   = data.google_project.eab_cluster_project.project_id
-  address_type = "EXTERNAL"
-  region       = "global"
-  global       = true
-  names        = ["frontend-ip"]
-}
-
 // Create a GKE cluster in each subnetwork
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
@@ -120,7 +109,7 @@ module "gke" {
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
 
-  project_id          = data.google_project.eab_cluster_project.project_id
+  project_id          = local.cluster_project_id
   regional            = true
   region              = each.value.region
   network_project_id  = regex(local.projects_re, each.value.id)[0]
@@ -135,9 +124,9 @@ module "gke" {
   datapath_provider                   = "ADVANCED_DATAPATH"
   enable_cost_allocation              = true
 
-  fleet_project = data.google_project.eab_cluster_project.project_id
+  fleet_project = local.cluster_project_id
 
-  identity_namespace = "${data.google_project.eab_cluster_project.project_id}.svc.id.goog"
+  identity_namespace = "${local.cluster_project_id}.svc.id.goog"
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]

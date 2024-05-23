@@ -25,3 +25,11 @@ variable "envs" {
     subnets_self_links = list(string)
   }))
 }
+
+# Define Applications
+variable "apps" {
+  description = "Applications"
+  type = map(object({
+    ip_address_names = list(string)
+  }))
+}
