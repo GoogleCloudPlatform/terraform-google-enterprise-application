@@ -121,7 +121,11 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal(err)
 					}
 					gitAppRun("rm", "-r", "src/components")
-					gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", mapPath))
+
+					// base folder only exists in frontend app
+					if mapPath == "frontend" {
+						gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", mapPath))
+					}
 					err = cp.Copy(fmt.Sprintf("%s/components", appSourcePath), fmt.Sprintf("%s/src/components", tmpDirApp))
 					if err != nil {
 						t.Fatal(err)
@@ -172,7 +176,7 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal("Failed to find the release")
 					}
 					releaseName := releases[0].Get("name")
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, suffixServiceName, region, releaseName, serviceName, prodTarget)
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, suffixServiceName, region, releaseName, suffixServiceName, prodTarget)
 					// Poll CD rollouts until rollout is successful
 					pollCloudDeploy := func(cmd string) func() (bool, error) {
 						return func() (bool, error) {
@@ -183,7 +187,7 @@ func TestSourceCymbalBank(t *testing.T) {
 							latestRolloutState := rollouts[0].Get("state").String()
 							if latestRolloutState == "SUCCEEDED" {
 								return false, nil
-							} else if latestRolloutState == "FAILURE" {
+							} else if latestRolloutState == "FAILED" {
 								return false, errors.New("Rollout failed.")
 							}
 							return true, nil
