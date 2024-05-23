@@ -48,14 +48,13 @@ func TestSourceCymbalBank(t *testing.T) {
 	)
 
 	region := multitenant.GetStringOutputList("cluster_regions")[0]
-	for appName, serviceNames := range testutils.ServicesNames {
-		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
-		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
 
-		for _, serviceName := range serviceNames {
-			t.Run(fmt.Sprintf("%s/%s", appName, serviceName), func(t *testing.T) {
-				t.Parallel()
-
+	t.Run("AppSource", func(t *testing.T) {
+		t.Parallel()
+		for appName, serviceNames := range testutils.ServicesNames {
+			appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
+			appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
+			for _, serviceName := range serviceNames {
 				splitServiceName = strings.Split(serviceName, "-")
 				prefixServiceName = splitServiceName[0]
 				suffixServiceName = splitServiceName[len(splitServiceName)-1]
@@ -197,7 +196,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				})
 				appsource.Test()
 
-			})
+			}
 		}
-	}
+	})
 }
