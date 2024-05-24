@@ -10,10 +10,8 @@ An overview of the multitenant infrastructure pipeline is shown below.
 The following resources are created:
 - GCP Project (cluster project)
 - GKE cluster(s)
-- Cloud SQL PostgreSQL (accounts-db, ledger-db)
-- Cloud Endpoint
 - Cloud Armor
-- IP addresses (frontend-ip)
+- App IP addresses (see below for details)
 
 ## Prerequisites
 
@@ -36,7 +34,21 @@ The following resources are created:
    mv terraform.example.tfvars terraform.tfvars
    ```
 
-1. Update the file with values for your environment. See any of the envs folder [README.md](./envs/production/README.md#inputs) files for additional information on the values in the `terraform.tfvars` file.
+1. Update the file with values for your environment. See any of the envs folder
+[README.md](./envs/production/README.md#inputs) files for additional information
+on the values in the `terraform.tfvars` file. In addition to `envs` from
+prerequisites, each App must have it's own entry under `apps` with a list of any
+dedicated IP address to be provisioned.
+
+  ```
+  apps = {
+    "my-app" : {
+      "ip_address_names" : [
+        "my-app-ip",
+      ]
+    }
+  }
+  ```
 
 You can now deploy each of your environments (e.g. production).
 

@@ -51,17 +51,18 @@ output "fleet_project_id" {
   value       = data.google_project.eab_cluster_project.project_id
 }
 
-output "ip_address_self_links" {
-  description = "IP Address Self Links"
+output "app_ip_addresses" {
+  description = "App IP Addresses"
   value = {
-    "frontend-ip" = module.ip_address_frontend_ip.self_links[0]
+    for k, v in var.apps : k => {
+      for i in range(length(module.apps_ip_address[k].names)) : module.apps_ip_address[k].names[i] => module.apps_ip_address[k].addresses[i]
+    }
   }
 }
 
-output "ip_addresses" {
-  description = "IP Addresses"
+output "app_service_accounts" {
+  description = "App Service Accounts"
   value = {
-    "frontend-ip" = module.ip_address_frontend_ip.addresses[0]
+    for value in google_service_account.app_service_accounts : value.display_name => value.email
   }
 }
-

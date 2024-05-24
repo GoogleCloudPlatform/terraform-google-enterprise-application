@@ -49,13 +49,12 @@ output "cluster_membership_ids" {
   value       = module.env.cluster_membership_ids
 }
 
-output "ip_address_self_links" {
-  description = "IP Address Self Links"
-  value       = module.env.ip_address_self_links
-}
-
-output "ip_addresses" {
+output "app_ip_addresses" {
   description = "IP Addresses"
-  value       = module.env.ip_addresses
+  value       = module.env.app_ip_addresses
 }
 
+output "app_service_accounts" {
+  description = "IP Addresses"
+  value       = module.env.app_service_accounts
+}
