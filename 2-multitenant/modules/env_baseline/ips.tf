@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-# Define Multi-Tenant Environments
-variable "envs" {
-  description = "Environments"
-  type = map(object({
-    billing_account    = string
-    folder_id          = string
-    network_project_id = string
-    network_self_link  = string
-    org_id             = string
-    subnets_self_links = list(string)
-  }))
-}
+// Create App/Ip Addresses
+module "apps_ip_address" {
+  source  = "terraform-google-modules/address/google"
+  version = "~> 3.2"
 
-# Define Applications
-variable "apps" {
-  description = "Applications"
-  type = map(object({
-    ip_address_names = list(string)
-  }))
+  for_each = {
+    for k, v in var.apps : k => v.ip_address_names
+  }
+
+  project_id   = data.google_project.eab_cluster_project.project_id
+  address_type = "EXTERNAL"
+  region       = "global"
+  global       = true
+  names        = each.value
 }

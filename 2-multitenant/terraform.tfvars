@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-# Define Multi-Tenant Environments
-variable "envs" {
-  description = "Environments"
-  type = map(object({
-    billing_account    = string
-    folder_id          = string
-    network_project_id = string
-    network_self_link  = string
-    org_id             = string
-    subnets_self_links = list(string)
-  }))
-}
-
-# Define Applications
-variable "apps" {
-  description = "Applications"
-  type = map(object({
-    ip_address_names = list(string)
-  }))
+apps = {
+  "cymbal-bank" : {
+    "ip_address_names" : [
+      "frontend-ip",
+    ]
+  }
 }
