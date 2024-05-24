@@ -68,8 +68,11 @@ The purpose of this stage is to create application-speciifc infrastructure, incl
 ### [6. appsource](/6-appsource/)
 The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up the Cymbal Bank sample application, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
 
-## Cymbal Bank example
-This repo demonstrates setting up the developer platform for the [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) sample application. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
+## Applications (Apps)
+This repo demostrates setting up the developer platform for one or more *Apps* which is a high level of grouping of releated service or workloads. Apps are created infrquently and may include multiuple namespaces, team scopes, and dedicated IP address. A multi-teannt cluster can contain multiple Apps.
+
+### Cymbal Bank example
+The [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) (`cymbal-bank`) sample App is included in the repository. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
 
 ## Contributing
 
