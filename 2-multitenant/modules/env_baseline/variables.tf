@@ -55,3 +55,10 @@ variable "release_channel" {
   type        = string
   default     = "REGULAR"
 }
+
+variable "apps" {
+  description = "Applications"
+  type = map(object({
+    ip_address_names = list(string)
+  }))
+}

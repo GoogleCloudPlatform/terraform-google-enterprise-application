@@ -48,3 +48,11 @@ envs = {
     ]
   }
 }
+
+apps = {
+  "my-app" : {
+    "ip_address_names" : [
+      "my-app-ip",
+    ]
+  }
+}
