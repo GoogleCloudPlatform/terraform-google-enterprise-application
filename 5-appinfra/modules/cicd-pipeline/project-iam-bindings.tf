@@ -23,7 +23,7 @@ module "project-iam-bindings" {
   source   = "terraform-google-modules/iam/google//modules/projects_iam"
   version  = "~> 7.7"
   projects = [var.project_id]
-  # mode     = "authoritative"
+  mode     = "authoritative"
 
   bindings = {
     "roles/cloudtrace.agent" = [
