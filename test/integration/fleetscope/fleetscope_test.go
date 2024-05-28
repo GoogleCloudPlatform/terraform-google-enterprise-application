@@ -50,7 +50,7 @@ func TestFleetscope(t *testing.T) {
 				"cluster_project_id":     multitenant.GetStringOutput("cluster_project_id"),
 				"network_project_id":     multitenant.GetStringOutput("network_project_id"),
 				"fleet_project_id":       multitenant.GetStringOutput("fleet_project_id"),
-				"cluster_membership_ids": multitenant.GetStringOutputList("cluster_membership_ids"),
+				"cluster_membership_ids": testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids"),
 			}
 
 			fleetscope := tft.NewTFBlueprintTest(t,
@@ -64,8 +64,8 @@ func TestFleetscope(t *testing.T) {
 				fleetscope.DefaultVerify(assert)
 
 				// Multitenant Outputs
-				clusterRegions := multitenant.GetStringOutputList("cluster_regions")
-				clusterIds := multitenant.GetStringOutputList("clusters_ids")
+				clusterRegions := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")
+				clusterIds := testutils.GetBptOutputStrSlice(multitenant, "clusters_ids")
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 
 				// Service Account

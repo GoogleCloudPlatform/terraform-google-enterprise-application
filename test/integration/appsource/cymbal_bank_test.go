@@ -26,12 +26,10 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
-	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 
 	cp "github.com/otiai10/copy"
-	"github.com/tidwall/gjson"
 )
 
 func TestSourceCymbalBank(t *testing.T) {
@@ -47,20 +45,18 @@ func TestSourceCymbalBank(t *testing.T) {
 		splitServiceName  []string
 	)
 
-	region := multitenant.GetStringOutputList("cluster_regions")[0]
+	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
 
 	t.Run("AppSource", func(t *testing.T) {
 		t.Parallel()
 		for appName, serviceNames := range testutils.ServicesNames {
 			appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
-			appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
+			appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", 	)))
 			for _, serviceName := range serviceNames {
 				splitServiceName = strings.Split(serviceName, "-")
 				prefixServiceName = splitServiceName[0]
 				suffixServiceName = splitServiceName[len(splitServiceName)-1]
-
-				// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
-				projectID := gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Get(suffixServiceName).Get("app_admin_project_id").String()
+				projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
 
 				mapPath := ""
 				if prefixServiceName == suffixServiceName {
@@ -74,9 +70,9 @@ func TestSourceCymbalBank(t *testing.T) {
 				vars := map[string]interface{}{
 					"project_id":                     projectID,
 					"region":                         region,
-					"cluster_membership_id_dev":      multitenant.GetStringOutputList("cluster_membership_ids")[0],
-					"cluster_membership_ids_nonprod": multitenant_nonprod.GetStringOutputList("cluster_membership_ids"),
-					"cluster_membership_ids_prod":    multitenant_prod.GetStringOutputList("cluster_membership_ids"),
+					"cluster_membership_id_dev":      testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")[0],
+					"cluster_membership_ids_nonprod": testutils.GetBptOutputStrSlice(multitenant_nonprod, "cluster_membership_ids"),
+					"cluster_membership_ids_prod":    testutils.GetBptOutputStrSlice(multitenant_prod, "cluster_membership_ids"),
 					"buckets_force_destroy":          "true",
 				}
 
