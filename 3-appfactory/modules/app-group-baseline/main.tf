@@ -47,12 +47,12 @@ module "app_admin_project" {
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
   project = module.app_admin_project.project_id
-  name    = "${var.application_name}-infra-repo"
+  name    = "${var.application_name}-i-r"
 }
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 7.0"
+  version = "~> 8.0"
 
   project_id               = module.app_admin_project.project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
@@ -78,7 +78,7 @@ module "app_env_project" {
 
   random_project_id = true
   billing_account   = each.value.billing_account
-  name              = "${var.application_name}-${each.key}"
+  name              = substr("eab-${var.application_name}-${each.key}", 0, 25) # max length 30 chars
   org_id            = each.value.org_id
   folder_id         = each.value.folder_id
   activate_apis     = var.env_project_apis

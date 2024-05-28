@@ -14,86 +14,43 @@
  * limitations under the License.
  */
 
-module "balancereader" {
-  source = "./balancereader"
-
-  org_id               = var.org_id
-  billing_account      = var.billing_account
-  common_folder_id     = var.common_folder_id
-  envs                 = var.envs
-  bucket_prefix        = var.bucket_prefix
-  location             = var.location
-  trigger_location     = var.trigger_location
-  bucket_force_destroy = var.bucket_force_destroy
-  tf_apply_branches    = var.tf_apply_branches
+locals {
+  components = [
+    "balancereader",
+    "contacts",
+    "frontend",
+    "ledgerwriter",
+    "transactionhistory",
+    "userservice",
+  ]
 }
 
-module "contacts" {
-  source = "./contacts"
+module "components" {
+  for_each = toset(local.components)
+  source   = "../../modules/app-group-baseline"
+
+  application_name    = each.value
+  create_env_projects = true
 
   org_id               = var.org_id
   billing_account      = var.billing_account
-  common_folder_id     = var.common_folder_id
+  folder_id            = var.common_folder_id
   envs                 = var.envs
   bucket_prefix        = var.bucket_prefix
   location             = var.location
   trigger_location     = var.trigger_location
   bucket_force_destroy = var.bucket_force_destroy
   tf_apply_branches    = var.tf_apply_branches
-}
 
-module "frontend" {
-  source = "./frontend"
-
-  org_id               = var.org_id
-  billing_account      = var.billing_account
-  common_folder_id     = var.common_folder_id
-  envs                 = var.envs
-  bucket_prefix        = var.bucket_prefix
-  location             = var.location
-  trigger_location     = var.trigger_location
-  bucket_force_destroy = var.bucket_force_destroy
-  tf_apply_branches    = var.tf_apply_branches
-}
-
-module "ledgerwriter" {
-  source = "./ledgerwriter"
-
-  org_id               = var.org_id
-  billing_account      = var.billing_account
-  common_folder_id     = var.common_folder_id
-  envs                 = var.envs
-  bucket_prefix        = var.bucket_prefix
-  location             = var.location
-  trigger_location     = var.trigger_location
-  bucket_force_destroy = var.bucket_force_destroy
-  tf_apply_branches    = var.tf_apply_branches
-}
-
-module "transactionhistory" {
-  source = "./transactionhistory"
-
-  org_id               = var.org_id
-  billing_account      = var.billing_account
-  common_folder_id     = var.common_folder_id
-  envs                 = var.envs
-  bucket_prefix        = var.bucket_prefix
-  location             = var.location
-  trigger_location     = var.trigger_location
-  bucket_force_destroy = var.bucket_force_destroy
-  tf_apply_branches    = var.tf_apply_branches
-}
-
-module "userservice" {
-  source = "./userservice"
-
-  org_id               = var.org_id
-  billing_account      = var.billing_account
-  common_folder_id     = var.common_folder_id
-  envs                 = var.envs
-  bucket_prefix        = var.bucket_prefix
-  location             = var.location
-  trigger_location     = var.trigger_location
-  bucket_force_destroy = var.bucket_force_destroy
-  tf_apply_branches    = var.tf_apply_branches
+  cloudbuild_sa_roles = {
+    development = {
+      roles = ["roles/owner"]
+    }
+    non-production = {
+      roles = ["roles/owner"]
+    }
+    production = {
+      roles = ["roles/owner"]
+    }
+  }
 }

@@ -14,3 +14,19 @@
  * limitations under the License.
  */
 
+terraform {
+  required_version = ">= 0.13"
+
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+    google-beta = {
+      source = "hashicorp/google-beta"
+    }
+  }
+
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:environments/v0.0.1"
+  }
+}

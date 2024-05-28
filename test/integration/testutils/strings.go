@@ -26,6 +26,12 @@ var (
 	}
 )
 
+var (
+	AppNames = []string{
+		"cymbal-bank",
+	}
+)
+
 func GetLastSplitElement(value string, sep string) string {
 	splitted := strings.Split(value, sep)
 	return splitted[len(splitted)-1]

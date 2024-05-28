@@ -27,6 +27,8 @@ resource "google_gke_hub_feature" "mci" {
       config_membership = regex(local.fleet_membership_re, var.cluster_membership_ids[0])[0]
     }
   }
+
+  depends_on = [google_gke_hub_feature.mcs]
 }
 
 resource "google_gke_hub_feature" "mcs" {

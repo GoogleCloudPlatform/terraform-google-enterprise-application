@@ -15,8 +15,10 @@ The following resources are created:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| apps | Applications | <pre>map(object({<br>    ip_address_names = list(string)<br>  }))</pre> | n/a | yes |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cluster\_subnetworks | The subnetwork self\_links for clusters | `list(string)` | n/a | yes |
+| create\_cluster\_project | Create Cluster Project ID, otherwise the Network Project ID is used | `bool` | `true` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
@@ -27,13 +29,13 @@ The following resources are created:
 
 | Name | Description |
 |------|-------------|
+| app\_ip\_addresses | App IP Addresses |
+| app\_service\_accounts | App Service Accounts |
 | cluster\_ids | GKE cluster IDs |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
 | fleet\_project\_id | Fleet Project ID |
-| ip\_address\_self\_links | IP Address Self Links |
-| ip\_addresses | IP Addresses |
 | network\_project\_id | Network Project ID |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

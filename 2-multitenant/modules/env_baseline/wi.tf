@@ -12,19 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_service_account" "bank_of_anthos" {
-  project      = local.cluster_project_id
-  account_id   = "bank-of-anthos"
-  display_name = "bank-of-anthos"
+#TODO: Remove or move to AppInfra after validating with @yliaog
+resource "google_service_account" "app_service_accounts" {
+  for_each = var.apps
+
+  project                      = local.cluster_project_id
+  account_id                   = each.key
+  display_name                 = each.key
+  create_ignore_already_exists = true
 }
 
+#TODO: Remove or move to AppInfra after validating with @yliaog
 resource "google_service_account_iam_binding" "workload_identity" {
-  service_account_id = google_service_account.bank_of_anthos.name
+  for_each = google_service_account.app_service_accounts
+
+  service_account_id = each.value.id
   role               = "roles/iam.workloadIdentityUser"
 
   members = [
-    "serviceAccount:${local.cluster_project_id}.svc.id.goog[accounts-${var.env}/bank-of-anthos]",
-    "serviceAccount:${local.cluster_project_id}.svc.id.goog[ledger-${var.env}/bank-of-anthos]",
+    "serviceAccount:${local.cluster_project_id}.svc.id.goog[accounts-${var.env}/${each.value.display_name}]",
+    "serviceAccount:${local.cluster_project_id}.svc.id.goog[ledger-${var.env}/${each.value.display_name}]",
   ]
 
   depends_on = [

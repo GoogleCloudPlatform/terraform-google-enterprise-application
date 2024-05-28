@@ -20,9 +20,10 @@ resource "google_sourcerepo_repository" "acm_repo" {
 }
 
 resource "google_service_account" "root_reconciler" {
-  project      = var.cluster_project_id
-  account_id   = "root-reconciler"
-  display_name = "root-reconciler"
+  project                      = var.cluster_project_id
+  account_id                   = "root-reconciler"
+  display_name                 = "root-reconciler"
+  create_ignore_already_exists = true
 }
 
 resource "google_project_iam_member" "root_reconciler" {
