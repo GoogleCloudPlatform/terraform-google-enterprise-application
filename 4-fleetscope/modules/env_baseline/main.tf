@@ -16,7 +16,7 @@
 
 locals {
   membership_re = "//gkehub.googleapis.com/projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
-  scope_membership = { for val in setproduct(var.namespace_ids, var.cluster_membership_ids) :
+  scope_membership = { for val in setproduct(keys(var.namespace_ids), var.cluster_membership_ids) :
   "${val[0]}-${val[1]}" => val }
 }
 
@@ -27,14 +27,14 @@ resource "random_string" "suffix" {
 }
 
 resource "google_gke_hub_scope" "fleet-scope" {
-  for_each = toset(var.namespace_ids)
+  for_each = toset(keys(var.namespace_ids))
 
   scope_id = "${each.key}-${var.env}"
   project  = var.cluster_project_id
 }
 
 resource "google_gke_hub_namespace" "fleet-ns" {
-  for_each = toset(var.namespace_ids)
+  for_each = toset(keys(var.namespace_ids))
 
   scope_namespace_id = google_gke_hub_scope.fleet-scope[each.key].scope_id
   scope_id           = google_gke_hub_scope.fleet-scope[each.key].scope_id

@@ -36,7 +36,7 @@ variable "network_project_id" {
 
 variable "namespace_ids" {
   description = "The fleet namespace IDs"
-  type        = list(string)
+  type        = map(string)
 }
 
 variable "cluster_membership_ids" {

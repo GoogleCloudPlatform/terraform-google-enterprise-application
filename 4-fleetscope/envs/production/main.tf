@@ -17,7 +17,11 @@
 locals {
   env = "production"
 
-  namespace_ids = ["frontend", "accounts", "transactions"]
+  namespace_ids = {
+    "frontend"     = "frontend-team@googlegroups.com",
+    "accounts"     = "accounts-team@googlegroups.com",
+    "transactions" = "transactions-team@googlegroups.com"
+  }
 }
 
 import {
