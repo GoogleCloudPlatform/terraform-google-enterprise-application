@@ -24,19 +24,11 @@ variable "region" {
   type        = string
 }
 
-variable "cluster_membership_id_dev" {
-  description = "Cluster fleet membership ID in development environment"
-  type        = string
-}
-
-variable "cluster_membership_ids_nonprod" {
-  description = "Cluster fleet membership IDs in nonprod environment"
-  type        = list(string)
-}
-
-variable "cluster_membership_ids_prod" {
-  description = "Cluster fleet membership IDs in prod environment"
-  type        = list(string)
+variable "env_cluster_membership_ids" {
+  description = "Cluster Membership IDs"
+  type = map(object({
+    cluster_membership_ids = list(string)
+  }))
 }
 
 variable "buckets_force_destroy" {

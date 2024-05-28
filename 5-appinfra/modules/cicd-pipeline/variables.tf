@@ -22,19 +22,11 @@ variable "region" {
   description = "CI/CD Region (e.g. us-central1)"
 }
 
-variable "cluster_membership_id_dev" {
-  type        = string
-  description = "Fleet membership ID for the cluster in development environment"
-}
-
-variable "cluster_membership_ids_nonprod" {
-  type        = list(string)
-  description = "Fleet membership IDs for the cluster in non-production environment"
-}
-
-variable "cluster_membership_ids_prod" {
-  type        = list(string)
-  description = "Fleet membership IDs for the cluster in production environment"
+variable "env_cluster_membership_ids" {
+  description = "Env Cluster Membership IDs"
+  type = map(object({
+    cluster_membership_ids = list(string)
+  }))
 }
 
 variable "service" {
