@@ -15,6 +15,7 @@
 package testutils
 
 import (
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/tidwall/gjson"
 )
 
@@ -23,6 +24,15 @@ func GetResultFieldStrSlice(rs []gjson.Result, field string) []string {
 	s := make([]string, 0)
 	for _, r := range rs {
 		s = append(s, r.Get(field).String())
+	}
+	return s
+}
+
+// GetBptOutputStrSlice parses a TFBlueprintTest result field into a string slice
+func GetBptOutputStrSlice(bpt *tft.TFBlueprintTest, field string) []string {
+	s := make([]string, 0)
+	for _, r := range bpt.GetJsonOutput(field).Array() {
+		s = append(s, r.String())
 	}
 	return s
 }
