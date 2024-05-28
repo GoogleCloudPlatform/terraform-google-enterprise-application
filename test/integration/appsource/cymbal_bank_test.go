@@ -35,10 +35,12 @@ import (
 
 func TestSourceCymbalBank(t *testing.T) {
 
-	// TODO: switch to an array based on ENVs
-	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
-	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
-	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
+	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
+	for _, envName := range testutils.EnvNames {
+		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
+		multitenant :=  tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
+		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
+	}
 
 	type ServiceInfos struct {
 		ProjectID   string
@@ -50,7 +52,7 @@ func TestSourceCymbalBank(t *testing.T) {
 		suffixServiceName string
 		splitServiceName  []string
 	)
-	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
+	region := "us-central1" // TODO: Plumb output from appInfra
 	servicesInfoMap := make(map[string]ServiceInfos)
 
 	for appName, serviceNames := range testutils.ServicesNames {
@@ -81,14 +83,11 @@ func TestSourceCymbalBank(t *testing.T) {
 				tmpDirApp := t.TempDir()
 				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
-				prodTarget := "dev"
 
 				vars := map[string]interface{}{
 					"project_id":                     servicesInfoMap[serviceName].ProjectID,
 					"region":                         region,
-					"cluster_membership_id_dev":      testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")[0],
-					"cluster_membership_ids_nonprod": testutils.GetBptOutputStrSlice(multitenant_nonprod, "cluster_membership_ids"),
-					"cluster_membership_ids_prod":    testutils.GetBptOutputStrSlice(multitenant_prod, "cluster_membership_ids"),
+					"env_cluster_membership_ids":     env_cluster_membership_ids,
 					"buckets_force_destroy":          "true",
 				}
 
@@ -189,7 +188,8 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal("Failed to find the release.")
 					}
 					releaseName := releases[0].Get("name")
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, servicesInfoMap[serviceName].ServiceName, prodTarget)
+					targetId := fmt.Sprintf("%s-development", region) //TODO: convert to loop using env_cluster_membership_ids
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
 					// Poll CD rollouts until rollout is successful
 					pollCloudDeploy := func(cmd string) func() (bool, error) {
 						return func() (bool, error) {

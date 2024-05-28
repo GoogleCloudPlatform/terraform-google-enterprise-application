@@ -30,9 +30,12 @@ import (
 // TOOD: Update to a single parallel TestAppInfra test
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/pull/107
 func TestAppInfra(t *testing.T) {
-	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
-	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
-	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
+	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
+	for _, envName := range testutils.EnvNames {
+		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
+		multitenant :=  tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
+		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
+	}
 
 	type ServiceInfos struct {
 		ApplicationName string
@@ -46,7 +49,7 @@ func TestAppInfra(t *testing.T) {
 		splitServiceName  []string
 	)
 	servicesInfoMap := make(map[string]ServiceInfos)
-	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
+	region := "us-central1" // TODO: Move to terraform.tfvars?
 
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
@@ -72,9 +75,7 @@ func TestAppInfra(t *testing.T) {
 				vars := map[string]interface{}{
 					"project_id":                     servicesInfoMap[fullServiceName].ProjectID,
 					"region":                         region,
-					"cluster_membership_id_dev":      testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")[0],
-					"cluster_membership_ids_nonprod": testutils.GetBptOutputStrSlice(multitenant_nonprod, "cluster_membership_ids"),
-					"cluster_membership_ids_prod":    testutils.GetBptOutputStrSlice(multitenant_prod, "cluster_membership_ids"),
+					"env_cluster_membership_ids":     env_cluster_membership_ids,
 					"buckets_force_destroy":          "true",
 				}
 
@@ -138,12 +139,6 @@ func TestAppInfra(t *testing.T) {
 						fmt.Sprintf("release-source-development-%s-%s", servicesInfoMap[fullServiceName].ServiceName, projectNumber),
 					}
 
-					pipelinebucketNames := []string{
-						fmt.Sprintf("delivery-artifacts-development-%s-%s", projectNumber, servicesInfoMap[fullServiceName].ServiceName),
-						fmt.Sprintf("delivery-artifacts-non-prod-%s-%s", projectNumber, servicesInfoMap[fullServiceName].ServiceName),
-						fmt.Sprintf("delivery-artifacts-prod-%s-%s", projectNumber, servicesInfoMap[fullServiceName].ServiceName),
-					}
-
 					for _, bucketName := range cloudBuildBucketNames {
 						bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, servicesInfoMap[fullServiceName].ProjectID)
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
@@ -157,7 +152,9 @@ func TestAppInfra(t *testing.T) {
 						assert.Subset(bucketSaListMembers, []string{fmt.Sprintf("serviceAccount:%s", ciServiceAccountEmail)}, fmt.Sprintf("Bucket %s should have storage.admin role for SA %s.", bucketName, ciServiceAccountEmail))
 					}
 
-					for _, bucketName := range pipelinebucketNames {
+					for env := range env_cluster_membership_ids {
+						bucketName :=fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
+
 						bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, servicesInfoMap[fullServiceName].ProjectID)
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
 						assert.Equal(strings.ToUpper(region), bucketOp.Get("location").String(), fmt.Sprintf("Bucket should be at location %s", region))
@@ -225,19 +222,16 @@ func TestAppInfra(t *testing.T) {
 					projectRoles = testutils.GetResultFieldStrSlice(filtered, "bindings.role")
 					assert.Subset(projectRoles, cbSARoles, fmt.Sprintf("Service Account %s should have %v roles at project %s.", ciServiceAccountEmail, cbSARoles, servicesInfoMap[fullServiceName].ProjectID))
 
-					cloudDeployTargets := []string{
-						fmt.Sprintf("%s-dev", servicesInfoMap[fullServiceName].ServiceName),
-					}
-					for i := range testutils.GetBptOutputStrSlice(multitenant_nonprod, "cluster_membership_ids") {
-						cloudDeployTargets = append(cloudDeployTargets, fmt.Sprintf("%s-nonprod-%d", servicesInfoMap[fullServiceName].ServiceName, i))
-					}
-
-					for i := range testutils.GetBptOutputStrSlice(multitenant_prod, "cluster_membership_ids") {
-						cloudDeployTargets = append(cloudDeployTargets, fmt.Sprintf("%s-prod-%d", servicesInfoMap[fullServiceName].ServiceName, i))
+					cloudDeployTargets := make([]string, 0)
+					for _, v := range env_cluster_membership_ids {
+						for _, cluster_membership_id := range v["cluster_membership_ids"] {
+							cluster_membership_id := strings.Split(cluster_membership_id, "/")
+							cloudDeployTargets = append(cloudDeployTargets, cluster_membership_id[len(cluster_membership_id)-1])
+						}
 					}
 
 					for _, targetName := range cloudDeployTargets {
-						deployTargetOp := gcloud.Runf(t, "deploy targets describe %s --project %s --region %s --flatten Target", targetName, servicesInfoMap[fullServiceName].ProjectID, region).Array()[0]
+						deployTargetOp := gcloud.Runf(t, "deploy targets describe %s --project %s --region %s --flatten Target", strings.TrimPrefix(targetName, "cluster-"), servicesInfoMap[fullServiceName].ProjectID, region).Array()[0]
 						assert.Equal(cloudDeployServiceAccountEmail, deployTargetOp.Get("executionConfigs").Array()[0].Get("serviceAccount").String(), fmt.Sprintf("cloud deploy target %s should have service account %s", targetName, cloudDeployServiceAccountEmail))
 					}
 

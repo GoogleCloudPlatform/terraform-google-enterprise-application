@@ -26,50 +26,16 @@ resource "google_service_account" "cloud_deploy" {
   create_ignore_already_exists = true
 }
 
-resource "google_clouddeploy_target" "development" {
-  # one CloudDeploy target per target defined in vars
+resource "google_clouddeploy_target" "clouddeploy_targets" {
+  # one CloudDeploy target per cluster_membership_id defined in vars
+  for_each = merge([
+    for key, value in var.env_cluster_membership_ids : {
+      for item in value.cluster_membership_ids : "${key}/${item}" => item
+    }
+  ]...)
 
   project  = var.project_id
-  name     = "${local.service_name}-dev"
-  location = var.region
-
-  anthos_cluster {
-    membership = regex(local.fleet_membership_re, var.cluster_membership_id_dev)[0]
-  }
-
-  execution_configs {
-    artifact_storage = "gs://${google_storage_bucket.delivery_artifacts_development.name}"
-    service_account  = google_service_account.cloud_deploy.email
-    usages = [
-      "RENDER",
-      "DEPLOY"
-    ]
-  }
-}
-
-# GCS bucket used by Cloud Deploy for delivery artifact storage
-resource "google_storage_bucket" "delivery_artifacts_development" {
-  project                     = var.project_id
-  name                        = "delivery-artifacts-development-${data.google_project.project.number}-${local.service_name}"
-  uniform_bucket_level_access = true
-  location                    = var.region
-  force_destroy               = var.buckets_force_destroy
-}
-
-# give CloudDeploy SA access to administrate to delivery artifact bucket
-resource "google_storage_bucket_iam_member" "delivery_artifacts_development" {
-  bucket = google_storage_bucket.delivery_artifacts_development.name
-
-  member = "serviceAccount:${google_service_account.cloud_deploy.email}"
-  role   = "roles/storage.admin"
-}
-
-resource "google_clouddeploy_target" "non_prod" {
-  # one CloudDeploy target per target defined in vars
-  for_each = { for i, v in var.cluster_membership_ids_nonprod : i => v }
-
-  project  = var.project_id
-  name     = "${local.service_name}-nonprod-${each.key}"
+  name     = trimprefix(regex(local.membership_re, each.value)[2], "cluster-")
   location = var.region
 
   anthos_cluster {
@@ -77,66 +43,33 @@ resource "google_clouddeploy_target" "non_prod" {
   }
 
   execution_configs {
-    artifact_storage = "gs://${google_storage_bucket.delivery_artifacts_non_prod.name}"
+    artifact_storage = "gs://${google_storage_bucket.delivery_artifacts[split("/", each.key)[0]].name}"
     service_account  = google_service_account.cloud_deploy.email
     usages = [
       "RENDER",
       "DEPLOY"
     ]
   }
+
+  depends_on = [google_storage_bucket.delivery_artifacts]
 }
 
 # GCS bucket used by Cloud Deploy for delivery artifact storage
-resource "google_storage_bucket" "delivery_artifacts_non_prod" {
+resource "google_storage_bucket" "delivery_artifacts" {
+  for_each = var.env_cluster_membership_ids
+
   project                     = var.project_id
-  name                        = "delivery-artifacts-non-prod-${data.google_project.project.number}-${local.service_name}"
+  name                        = "artifacts-${each.key}-${data.google_project.project.number}-${local.service_name}"
   uniform_bucket_level_access = true
-  location                    = var.region
+  location                    = regex(local.membership_re, each.value.cluster_membership_ids[0])[1]
   force_destroy               = var.buckets_force_destroy
 }
 
 # give CloudDeploy SA access to administrate to delivery artifact bucket
-resource "google_storage_bucket_iam_member" "delivery_artifacts_non_prod" {
-  bucket = google_storage_bucket.delivery_artifacts_non_prod.name
+resource "google_storage_bucket_iam_member" "delivery_artifacts" {
+  for_each = var.env_cluster_membership_ids
 
-  member = "serviceAccount:${google_service_account.cloud_deploy.email}"
-  role   = "roles/storage.admin"
-}
-
-resource "google_clouddeploy_target" "prod" {
-  # one CloudDeploy target per target defined in vars
-  for_each = { for i, v in var.cluster_membership_ids_prod : i => v }
-
-  project  = var.project_id
-  name     = "${local.service_name}-prod-${each.key}"
-  location = var.region
-
-  anthos_cluster {
-    membership = regex(local.fleet_membership_re, each.value)[0]
-  }
-
-  execution_configs {
-    artifact_storage = "gs://${google_storage_bucket.delivery_artifacts_prod.name}"
-    service_account  = google_service_account.cloud_deploy.email
-    usages = [
-      "RENDER",
-      "DEPLOY"
-    ]
-  }
-}
-
-# GCS bucket used by Cloud Deploy for delivery artifact storage
-resource "google_storage_bucket" "delivery_artifacts_prod" {
-  project                     = var.project_id
-  name                        = "delivery-artifacts-prod-${data.google_project.project.number}-${local.service_name}"
-  uniform_bucket_level_access = true
-  location                    = var.region
-  force_destroy               = var.buckets_force_destroy
-}
-
-# give CloudDeploy SA access to administrate to delivery artifact bucket
-resource "google_storage_bucket_iam_member" "delivery_artifacts_prod" {
-  bucket = google_storage_bucket.delivery_artifacts_prod.name
+  bucket = google_storage_bucket.delivery_artifacts[each.key].name
 
   member = "serviceAccount:${google_service_account.cloud_deploy.email}"
   role   = "roles/storage.admin"
