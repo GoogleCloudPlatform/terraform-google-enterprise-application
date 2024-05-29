@@ -30,7 +30,7 @@ resource "google_gke_hub_scope" "fleet-scope" {
   for_each = toset(keys(var.namespace_ids))
 
   scope_id = "${each.key}-${var.env}"
-  project  = var.cluster_project_id
+  project  = var.fleet_project_id
 }
 
 resource "google_gke_hub_namespace" "fleet-ns" {
@@ -39,7 +39,7 @@ resource "google_gke_hub_namespace" "fleet-ns" {
   scope_namespace_id = google_gke_hub_scope.fleet-scope[each.key].scope_id
   scope_id           = google_gke_hub_scope.fleet-scope[each.key].scope_id
   scope              = google_gke_hub_scope.fleet-scope[each.key].name
-  project            = var.cluster_project_id
+  project            = google_gke_hub_scope.fleet-scope[each.key].project
 }
 
 resource "google_gke_hub_membership_binding" "membership-binding" {
@@ -49,5 +49,26 @@ resource "google_gke_hub_membership_binding" "membership-binding" {
   scope                 = google_gke_hub_scope.fleet-scope[each.value[0]].name
   membership_id         = regex(local.membership_re, each.value[1])[2]
   location              = regex(local.membership_re, each.value[1])[1]
-  project               = var.cluster_project_id
+  project               = google_gke_hub_scope.fleet-scope[each.value[0]].project
+}
+
+resource "google_gke_hub_scope_iam_member" "member" {
+  for_each = var.namespace_ids
+
+  scope_id = google_gke_hub_scope.fleet-scope[each.key].scope_id
+  role     = "roles/admin"
+  member   = "group:${each.value}"
+  project  = google_gke_hub_scope.fleet-scope[each.key].project
+}
+
+resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_role_binding" {
+  for_each = var.namespace_ids
+
+  scope_rbac_role_binding_id = "${each.key}-${each.value}"
+  scope_id                   = google_gke_hub_scope.fleet-scope[each.key].scope_id
+  user                       = each.value
+  project                    = google_gke_hub_scope.fleet-scope[each.key].project
+  role {
+    predefined_role = "ADMIN"
+  }
 }
