@@ -121,7 +121,7 @@ module "gke" {
   gateway_api_channel = "CHANNEL_STANDARD"
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
-  datapath_provider                   = "ADVANCED_DATAPATH"
+  network_policy                      = true
   enable_cost_allocation              = true
 
   fleet_project = local.cluster_project_id
