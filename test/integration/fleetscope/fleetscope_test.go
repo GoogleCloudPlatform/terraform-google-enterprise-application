@@ -104,6 +104,12 @@ func TestFleetscope(t *testing.T) {
 						// Service Mesh Management
 						{
 							assert.Equal("MANAGEMENT_AUTOMATIC", gkeFeatureOp.Get("fleetDefaultMemberConfig.mesh.management").String(), fmt.Sprintf("Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
+
+							// for _, id := range clusterIds {
+								// TODO: validate cluster service mesh state
+								//assert.Equal("MANAGEMENT_AUTOMATIC", gkeFeatureOp.Get(fmt.Sprintf("membershipSpecs.projects/*/locations/*/memberships/%s.mesh.management", id)).String(), fmt.Sprintf("Cluster %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", id))
+								//assert.Equal("OK", gkeFeatureOp.Get(fmt.Sprintf("membershipStates.projects/*/locations/*/memberships/%s.state.code", id)).String(), fmt.Sprintf("Cluster %s should have servicemesh state code equal to OK", id))
+							// }
 						}
 					case "multiclusteringress":
 						// Multicluster Ingress Membership

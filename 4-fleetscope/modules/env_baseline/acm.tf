@@ -78,3 +78,17 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
     google_gke_hub_feature.acm_feature
   ]
 }
+
+data "google_project" "cluster_project" {
+  project_id = var.cluster_project_id
+}
+
+# Allow Config Sync to send metrics
+resource "google_project_iam_binding" "acm_wi_metricWriter" {
+  project = var.cluster_project_id
+
+  role = "roles/monitoring.metricWriter"
+  members = [
+    "serviceAccount:${data.google_project.cluster_project.number}.svc.id.goog[config-management-monitoring/default]",
+  ]
+}
