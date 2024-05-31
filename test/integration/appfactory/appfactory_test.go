@@ -44,10 +44,7 @@ func TestAppfactory(t *testing.T) {
 		"bucket_force_destroy": "true",
 	}
 
-	// TODO: Use service names from https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/pull/137
-	for _, appGroupName := range []string{
-		"cymbal-bank",
-	} {
+	for _, appGroupName := range testutils.AppNames {
 		appGroupName := appGroupName
 		t.Run(appGroupName, func(t *testing.T) {
 			t.Parallel()
@@ -63,9 +60,9 @@ func TestAppfactory(t *testing.T) {
 				appFactory.DefaultVerify(assert)
 
 				// check admin projects
-  			// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
+				// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
 				// terraform.OutputJson OK to use as long as there is only one appGroupName
-				for appName, appData := range gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Map(){
+				for appName, appData := range gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Map() {
 					appName := appName
 					appData := appData
 					t.Run(appName, func(t *testing.T) {
