@@ -35,7 +35,7 @@ variable "network_project_id" {
 }
 
 variable "namespace_ids" {
-  description = "The fleet namespace IDs"
+  description = "The fleet namespace IDs with team"
   type        = map(string)
 }
 

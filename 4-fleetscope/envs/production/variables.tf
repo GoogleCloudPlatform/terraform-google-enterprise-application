@@ -33,3 +33,8 @@ variable "cluster_membership_ids" {
   description = "The membership IDs in the scope"
   type        = list(string)
 }
+
+variable "namespace_ids" {
+  description = "The fleet namespace IDs with team"
+  type        = map(string)
+}

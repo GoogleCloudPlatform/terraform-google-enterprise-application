@@ -27,7 +27,7 @@ import (
 )
 
 func TestFleetscope(t *testing.T) {
-
+	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
@@ -51,6 +51,7 @@ func TestFleetscope(t *testing.T) {
 				"network_project_id":     multitenant.GetStringOutput("network_project_id"),
 				"fleet_project_id":       multitenant.GetStringOutput("fleet_project_id"),
 				"cluster_membership_ids": testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids"),
+				"namespace_ids":          setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 			}
 
 			fleetscope := tft.NewTFBlueprintTest(t,

@@ -64,7 +64,7 @@ resource "google_gke_hub_scope_iam_member" "member" {
 resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_role_binding" {
   for_each = var.namespace_ids
 
-  scope_rbac_role_binding_id = "${each.key}-${each.value}"
+  scope_rbac_role_binding_id = "${google_gke_hub_scope.fleet-scope[each.key].scope_id}-${random_string.suffix.result}"
   scope_id                   = google_gke_hub_scope.fleet-scope[each.key].scope_id
   user                       = each.value
   project                    = google_gke_hub_scope.fleet-scope[each.key].project

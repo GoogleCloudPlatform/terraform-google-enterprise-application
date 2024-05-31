@@ -21,6 +21,12 @@ locals {
     "production",
   ]
 
+  teams = [
+    "frontend",
+    "accounts",
+    "transactions",
+  ]
+
   folder_admin_roles = [
     "roles/owner",
     "roles/resourcemanager.folderAdmin",
@@ -174,4 +180,20 @@ module "vpc" {
       },
     ]
   }
+}
+
+data "google_organization" "org" {
+  organization = var.org_id
+}
+
+# Create google groups
+module "group" {
+  for_each = toset(local.teams)
+  source   = "terraform-google-modules/group/google"
+  version  = "~> 0.6"
+
+  id           = "${each.key}-${random_string.prefix.result}@${data.google_organization.org.domain}"
+  display_name = "${each.key}-${random_string.prefix.result}"
+  description  = "Group module test group for ${each.key}"
+  domain       = data.google_organization.org.domain
 }
