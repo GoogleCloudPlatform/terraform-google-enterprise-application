@@ -57,7 +57,7 @@ data "google_project" "project" {
 
 // Grant service mesh service identity permission to access the cluster and network project
 resource "google_project_iam_member" "cluster_service_agent_mesh" {
-  for_each = toset([var.cluster_project_id, var.network_project_id])
+  for_each = toset(distinct([var.cluster_project_id, var.network_project_id]))
 
   project = each.key
   role    = "roles/anthosservicemesh.serviceAgent"
