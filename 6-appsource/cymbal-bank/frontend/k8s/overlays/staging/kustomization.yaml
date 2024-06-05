@@ -18,7 +18,7 @@ namespace: frontend-non-production
 resources:
   - ../../base
   - namespace.yaml
-  - destinationrule.yaml
+  #TODO CSM - destinationrule.yaml
 components:
   - ../../../../components/staging
 
