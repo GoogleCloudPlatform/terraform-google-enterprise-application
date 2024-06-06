@@ -29,3 +29,7 @@ variable "app_project_id" {
   type        = string
 }
 
+variable "network_project_id" {
+  description = "Network Project ID"
+  type        = string
+}
