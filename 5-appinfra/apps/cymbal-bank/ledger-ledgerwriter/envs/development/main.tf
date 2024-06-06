@@ -15,16 +15,17 @@
  */
 
 locals {
-  env     = "development"
-  db_name = "ledger-db"
+  env = "development"
 }
 
 module "env" {
   source = "../../../../../modules/env_baseline"
 
-  env                = local.env
-  cluster_project_id = var.cluster_project_id
-  cluster_regions    = var.cluster_regions
-  app_project_id     = var.app_project_id
-  db_name            = local.db_name
+  env                      = local.env
+  cluster_project_id       = var.cluster_project_id
+  network_project_id       = var.network_project_id
+  cluster_regions          = var.cluster_regions
+  app_project_id           = var.app_project_id
+  network_name             = var.network_name
+  psc_consumer_fwd_rule_ip = var.psc_consumer_fwd_rule_ip
 }
