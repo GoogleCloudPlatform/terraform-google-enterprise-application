@@ -52,13 +52,12 @@ func TestSourceCymbalBank(t *testing.T) {
 		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
 		for _, serviceName := range serviceNames {
 			serviceName := serviceName // capture range variable
+			splitServiceName = strings.Split(serviceName, "-")
+			prefixServiceName = splitServiceName[0]
+			suffixServiceName = splitServiceName[len(splitServiceName)-1]
+			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
 			t.Run(fmt.Sprintf("%s/%s", appName, serviceName), func(t *testing.T) {
 				t.Parallel()
-				splitServiceName = strings.Split(serviceName, "-")
-				prefixServiceName = splitServiceName[0]
-				suffixServiceName = splitServiceName[len(splitServiceName)-1]
-				projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
-
 				mapPath := ""
 				if prefixServiceName == suffixServiceName {
 					mapPath = prefixServiceName
