@@ -30,6 +30,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: postgres
+        # TODO: pull out the version as a variable
           image: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/ledger-db:v0.6.4
           ports:
             - containerPort: 5432
