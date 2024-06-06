@@ -55,9 +55,11 @@ data "google_project" "fleet_project" {
   project_id = var.fleet_project_id
 }
 
-// Grant service mesh service identity permission to access the cluster project
+// Grant service mesh service identity permission to access the cluster and network project
 resource "google_project_iam_member" "cluster_service_agent_mesh" {
-  project = var.cluster_project_id
+  for_each = toset(distinct([var.cluster_project_id, var.network_project_id]))
+
+  project = each.key
   role    = "roles/anthosservicemesh.serviceAgent"
   member  = "serviceAccount:service-${data.google_project.fleet_project.number}@gcp-sa-servicemesh.iam.gserviceaccount.com"
   depends_on = [
