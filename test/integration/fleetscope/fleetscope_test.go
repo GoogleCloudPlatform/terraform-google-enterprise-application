@@ -37,11 +37,7 @@ func TestFleetscope(t *testing.T) {
 		"bucket": backend_bucket,
 	}
 
-	for _, envName := range []string{
-		"development",
-		"non-production",
-		"production",
-	} {
+	for _, envName := range testutils.EnvNames {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
 			t.Parallel()

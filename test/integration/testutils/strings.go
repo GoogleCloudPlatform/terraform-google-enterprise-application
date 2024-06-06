@@ -24,6 +24,17 @@ var (
 		"non-production",
 		"production",
 	}
+
+	ServicesNames = map[string][]string{
+		"cymbal-bank": {
+			"accounts-contacts",
+			"accounts-userservice",
+			"frontend",
+			"ledger-balancereader",
+			"ledger-ledgerwriter",
+			"ledger-transactionhistory",
+		},
+	}
 )
 
 var (

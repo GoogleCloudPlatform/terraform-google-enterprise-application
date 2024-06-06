@@ -30,6 +30,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: accounts-db
+      # TODO: pull out the version as a variable
         image: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/accounts-db:v0.6.4
         envFrom:
           - configMapRef:
