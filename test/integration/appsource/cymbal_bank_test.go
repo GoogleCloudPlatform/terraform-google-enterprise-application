@@ -47,12 +47,12 @@ func TestSourceCymbalBank(t *testing.T) {
 
 	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
 
-	t.Run("AppSource", func(t *testing.T) {
-		t.Parallel()
-		for appName, serviceNames := range testutils.ServicesNames {
-			appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
-			appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
-			for _, serviceName := range serviceNames {
+	for appName, serviceNames := range testutils.ServicesNames {
+		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
+		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
+		for _, serviceName := range serviceNames {
+			t.Run(fmt.Sprintf("%s/%s", appName, serviceName), func(t *testing.T) {
+				t.Parallel()
 				splitServiceName = strings.Split(serviceName, "-")
 				prefixServiceName = splitServiceName[0]
 				suffixServiceName = splitServiceName[len(splitServiceName)-1]
@@ -191,8 +191,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
 				})
 				appsource.Test()
-
-			}
+			})
 		}
-	})
+	}
 }
