@@ -26,10 +26,9 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
-
-	cp "github.com/otiai10/copy"
 )
 
 func TestSourceCymbalBank(t *testing.T) {
@@ -48,6 +47,7 @@ func TestSourceCymbalBank(t *testing.T) {
 	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
 
 	for appName, serviceNames := range testutils.ServicesNames {
+		appName := appName
 		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
 		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
 		for _, serviceName := range serviceNames {
@@ -56,16 +56,18 @@ func TestSourceCymbalBank(t *testing.T) {
 			prefixServiceName = splitServiceName[0]
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
 			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
-			t.Run(fmt.Sprintf("%s/%s", appName, serviceName), func(t *testing.T) {
+			mapPath := ""
+			dbPath := ""
+			if prefixServiceName == suffixServiceName {
+				mapPath = prefixServiceName
+			} else {
+				mapPath = fmt.Sprintf("%s/%s", prefixServiceName, suffixServiceName)
+				dbPath = fmt.Sprintf("%s-db", prefixServiceName)
+			}
+			servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
+			appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
+			t.Run(servicePath, func(t *testing.T) {
 				t.Parallel()
-				mapPath := ""
-				if prefixServiceName == suffixServiceName {
-					mapPath = prefixServiceName
-				} else {
-					mapPath = fmt.Sprintf("%s/%s", prefixServiceName, suffixServiceName)
-				}
-
-				servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 
 				vars := map[string]interface{}{
 					"project_id":                     projectID,
@@ -84,7 +86,6 @@ func TestSourceCymbalBank(t *testing.T) {
 
 				appsource.DefineVerify(func(assert *assert.Assertions) {
 
-					appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
 					prodTarget := "dev"
 
 					// Push cymbal bank app source code
@@ -120,6 +121,12 @@ func TestSourceCymbalBank(t *testing.T) {
 					// base folder only exists in frontend app
 					if mapPath == "frontend" {
 						gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", mapPath))
+					} else {
+						err = cp.Copy(fmt.Sprintf("%s/%s/k8s/overlays/development/%s.yaml", appSourcePath, dbPath, dbPath),
+							fmt.Sprintf("%s/src/%s/%s/k8s/overlays/development/%s.yaml", tmpDirApp, prefixServiceName, dbPath, dbPath))
+						if err != nil {
+							t.Fatal(err)
+						}
 					}
 					err = cp.Copy(fmt.Sprintf("%s/components", appSourcePath), fmt.Sprintf("%s/src/components", tmpDirApp))
 					if err != nil {
@@ -132,13 +139,6 @@ func TestSourceCymbalBank(t *testing.T) {
 					err = cp.Copy(fmt.Sprintf("%s/k8s", servicePath), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, mapPath))
 					if err != nil {
 						t.Fatal(err)
-					}
-
-					if len(splitServiceName) > 1 {
-						err = cp.Copy(fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, prefixServiceName, prefixServiceName), fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, prefixServiceName, prefixServiceName, prefixServiceName))
-						if err != nil {
-							t.Fatal(err)
-						}
 					}
 
 					gitAppRun("add", ".")
