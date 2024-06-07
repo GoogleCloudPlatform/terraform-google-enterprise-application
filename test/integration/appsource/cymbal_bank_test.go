@@ -26,9 +26,10 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
-	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+
+	cp "github.com/otiai10/copy"
 )
 
 func TestSourceCymbalBank(t *testing.T) {
@@ -57,15 +58,17 @@ func TestSourceCymbalBank(t *testing.T) {
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
 			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
 			mapPath := ""
-			dbPath := ""
 			if prefixServiceName == suffixServiceName {
 				mapPath = prefixServiceName
 			} else {
 				mapPath = fmt.Sprintf("%s/%s", prefixServiceName, suffixServiceName)
-				dbPath = fmt.Sprintf("%s-db", prefixServiceName)
 			}
 			servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 			appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
+			tmpDirApp := t.TempDir()
+			dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, prefixServiceName, prefixServiceName)
+			dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, prefixServiceName, prefixServiceName, prefixServiceName)
+			prodTarget := "dev"
 			t.Run(servicePath, func(t *testing.T) {
 				t.Parallel()
 
@@ -86,10 +89,7 @@ func TestSourceCymbalBank(t *testing.T) {
 
 				appsource.DefineVerify(func(assert *assert.Assertions) {
 
-					prodTarget := "dev"
-
 					// Push cymbal bank app source code
-					tmpDirApp := t.TempDir()
 					gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
 					gitAppRun := func(args ...string) {
 						_, err := gitApp.RunCmdE(args...)
@@ -121,9 +121,9 @@ func TestSourceCymbalBank(t *testing.T) {
 					// base folder only exists in frontend app
 					if mapPath == "frontend" {
 						gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", mapPath))
-					} else {
-						err = cp.Copy(fmt.Sprintf("%s/%s/k8s/overlays/development/%s.yaml", appSourcePath, dbPath, dbPath),
-							fmt.Sprintf("%s/src/%s/%s/k8s/overlays/development/%s.yaml", tmpDirApp, prefixServiceName, dbPath, dbPath))
+					} else { // there isn't db for frontend.
+						fmt.Printf("%s - Copying from %s to %s", servicePath, dbFrom, dbTo)
+						err = cp.Copy(dbFrom, dbTo)
 						if err != nil {
 							t.Fatal(err)
 						}
