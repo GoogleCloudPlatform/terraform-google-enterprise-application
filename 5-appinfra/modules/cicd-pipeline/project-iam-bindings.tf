@@ -15,13 +15,14 @@
 locals {
   cloud_build_sas = ["serviceAccount:${google_service_account.cloud_build.email}"] # cloud build service accounts used for CI
   membership_re   = "projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
+  gke_projects    = [regex(local.membership_re, var.cluster_membership_id_dev)[0], regex(local.membership_re, var.cluster_membership_ids_nonprod[0])[0], regex(local.membership_re, var.cluster_membership_ids_prod[0])[0]]
 }
 
 # authoritative project-iam-bindings to increase reproducibility
 module "project-iam-bindings" {
   source   = "terraform-google-modules/iam/google//modules/projects_iam"
   version  = "~> 7.7"
-  projects = [var.project_id, regex(local.membership_re, var.cluster_membership_id_dev)[0], regex(local.membership_re, var.cluster_membership_ids_nonprod[0])[0], regex(local.membership_re, var.cluster_membership_ids_prod[0])[0]]
+  projects = [var.project_id]
   mode     = "authoritative"
 
   bindings = {
@@ -57,5 +58,32 @@ module "project-iam-bindings" {
     "roles/container.developer" = [
       "serviceAccount:${google_service_account.cloud_deploy.email}"
     ],
+    "roles/container.admin" = [
+      "serviceAccount:${google_service_account.cloud_deploy.email}"
+    ],
   }
+}
+
+
+// added to avoid overwriten of roles for each app service deploy service account, since GKE projects are shared between services
+module "cb-gke-project-iam-bindings" {
+  source     = "terraform-google-modules/iam/google//modules/member_iam"
+  version    = "~> 7.7"
+  for_each   = toset(local.gke_projects)
+  project_id = each.value
+
+  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor"]
+  prefix                  = "serviceAccount"
+  service_account_address = google_service_account.cloud_build.email
+}
+
+module "deploy-gke-project-iam-bindings" {
+  source     = "terraform-google-modules/iam/google//modules/member_iam"
+  version    = "~> 7.7"
+  for_each   = toset(local.gke_projects)
+  project_id = each.value
+
+  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor"]
+  prefix                  = "serviceAccount"
+  service_account_address = google_service_account.cloud_deploy.email
 }
