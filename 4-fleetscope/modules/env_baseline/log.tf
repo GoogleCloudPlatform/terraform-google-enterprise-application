@@ -16,7 +16,7 @@
 
 resource "google_gke_hub_feature" "fleet-o11y" {
   name     = "fleetobservability"
-  project  = var.cluster_project_id
+  project  = var.fleet_project_id
   location = "global"
   spec {
     fleetobservability {
@@ -29,5 +29,19 @@ resource "google_gke_hub_feature" "fleet-o11y" {
         }
       }
     }
+  }
+}
+
+resource "google_project_iam_member" "project" {
+  for_each = var.namespace_ids
+
+  project = var.fleet_project_id
+  role    = "roles/logging.viewAccessor"
+  member  = "group:${each.value}"
+
+  condition {
+    title       = "Log bucket reader condition"
+    description = "Grants logging.viewAccessor role"
+    expression  = "resource.name == \"projects/${var.fleet_project_id}/locations/global/buckets/fleet-o11y-scope-${each.key}/views/fleet-o11y-scope-${each.key}-k8s_container\" || resource.name == \"projects/${var.fleet_project_id}/locations/global/buckets/fleet-o11y-scope-${each.key}/views/fleet-o11y-scope-${each.key}-k8s_pod\""
   }
 }
