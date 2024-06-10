@@ -17,7 +17,7 @@
 // Create App/Ip Addresses
 module "apps_ip_address" {
   source  = "terraform-google-modules/address/google"
-  version = "~> 3.2"
+  version = "~> 4.0"
 
   for_each = {
     for k, v in var.apps : k => v.ip_address_names
