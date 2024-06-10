@@ -92,6 +92,7 @@ func TestFleetscope(t *testing.T) {
 					"servicemesh",
 					"multiclusteringress",
 					"multiclusterservicediscovery",
+					"policycontroller",
 				} {
 					gkeFeatureOp := gcloud.Runf(t, "container hub features describe %s --project %s", feature, clusterProjectID)
 					assert.Equal("ACTIVE", gkeFeatureOp.Get("resourceState.state").String(), fmt.Sprintf("Hub Feature %s should have resource state equal to ACTIVE", feature))
@@ -124,9 +125,18 @@ func TestFleetscope(t *testing.T) {
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 								assert.Equal("1.18.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 								assert.Equal(rootReconcilerSa, gkeFeatureOp.Get(configmanagementPath+".configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
-								assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.enabled").Bool(), fmt.Sprintf("Hub Feature %s  policy controler should be enabled", membershipName))
-								assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.referentialRulesEnabled").Bool(), fmt.Sprintf("Hub Feature %s  referencial rule should be enabled", membershipName))
-								assert.True(gkeFeatureOp.Get(configmanagementPath+".policyController.templateLibraryInstalled").Bool(), fmt.Sprintf("Hub Feature %s  template library should be installed", membershipName))
+							}
+						}
+					case "policycontroller":
+						// GKE Policy Controller Membership
+						{
+							for _, region := range clusterRegions {
+								fleetProjectNumber := gcloud.Runf(t, "projects describe %s", clusterProjectID).Get("projectNumber").String()
+								membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectNumber, region, envName)
+								policycontrollerPath := fmt.Sprintf("membershipSpecs.%s.policycontroller", membershipName)
+
+								assert.Equal("INSTALL_SPEC_ENABLED", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.installSpec").String(), fmt.Sprintf("Hub Feature %s policy controller should be INSTALL_SPEC_ENABLED", membershipName))
+								assert.Equal("ALL", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.policyContent.templateLibrary.installation").String(), fmt.Sprintf("Hub Feature %s policy controller templateLibrary should be ALL", membershipName))
 							}
 						}
 					}
