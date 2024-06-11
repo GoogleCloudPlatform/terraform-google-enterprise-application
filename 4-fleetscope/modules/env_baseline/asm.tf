@@ -17,7 +17,7 @@
 resource "google_gke_hub_feature" "mesh_feature" {
   name     = "servicemesh"
   location = "global"
-  project  = var.cluster_project_id
+  project  = var.fleet_project_id
   fleet_default_member_config {
     mesh {
       management = "MANAGEMENT_AUTOMATIC"
@@ -26,7 +26,7 @@ resource "google_gke_hub_feature" "mesh_feature" {
 }
 
 resource "google_gke_hub_feature_membership" "mesh_feature_member" {
-  project  = var.cluster_project_id
+  project  = var.fleet_project_id
   location = "global"
 
   for_each = toset(var.cluster_membership_ids)
@@ -35,23 +35,23 @@ resource "google_gke_hub_feature_membership" "mesh_feature_member" {
   membership          = regex(local.membership_re, each.key)[2]
   membership_location = regex(local.membership_re, each.key)[1]
 
-
   mesh {
     management = "MANAGEMENT_AUTOMATIC"
   }
 
   depends_on = [
-    google_gke_hub_feature.mesh_feature
+    google_gke_hub_feature.mesh_feature,
+    google_project_iam_member.cluster_service_agent_mesh
   ]
 }
 
 resource "google_project_service_identity" "fleet_meshconfig_sa" {
   provider = google-beta
-  project  = var.cluster_project_id
+  project  = var.fleet_project_id
   service  = "meshconfig.googleapis.com"
 }
 
-data "google_project" "project" {
+data "google_project" "fleet_project" {
   project_id = var.fleet_project_id
 }
 
@@ -61,18 +61,7 @@ resource "google_project_iam_member" "cluster_service_agent_mesh" {
 
   project = each.key
   role    = "roles/anthosservicemesh.serviceAgent"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-servicemesh.iam.gserviceaccount.com"
-  depends_on = [
-    google_project_service_identity.fleet_meshconfig_sa
-  ]
-}
-
-
-// Grant service mesh service identity permission to access the network project
-resource "google_project_iam_member" "network_service_agent_mesh" {
-  project = var.network_project_id
-  role    = "roles/anthosservicemesh.serviceAgent"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-servicemesh.iam.gserviceaccount.com"
+  member  = "serviceAccount:service-${data.google_project.fleet_project.number}@gcp-sa-servicemesh.iam.gserviceaccount.com"
   depends_on = [
     google_project_service_identity.fleet_meshconfig_sa
   ]

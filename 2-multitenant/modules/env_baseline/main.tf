@@ -142,6 +142,7 @@ module "gke" {
   node_pools = [
     {
       name            = "node-pool-1"
+      machine_type    = "e2-standard-4"
       strategy        = "SURGE"
       max_surge       = 1
       max_unavailable = 0
