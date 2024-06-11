@@ -1,0 +1,53 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'lint-tf-min'
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+env:
+  TFENV_VERSION: v3.0.0
+  TF_DEFAULT_MIN: "0.13.7"
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.head_ref || github.ref }}'
+  cancel-in-progress: true
+jobs:
+  lint-tf-min-required:
+    name: 'lint-terraform-min'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b' # v4.1.4
+      - name: Cache tfenv
+        id: cache-tfenv
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.tfenv
+          key: tfenv_${{ env.TFENV_VERSION }}
+      - name: Download tfenv
+        id: download-tfenv
+        if: steps.cache-tfenv.outputs.cache-hit != 'true'
+        run: git clone --depth=1 --branch ${{ env.TFENV_VERSION }} https://github.com/tfutils/tfenv.git /tmp/.tfenv
+      - name: Run lint-terraform-min-required
+        run: |
+          set -eou pipefail
+          mkdir -p /tmp/.terraform-cache
+          find . -regextype posix-egrep -regex ".*/\.terraform" -prune -o -type f -name "*.tf" -print \
+          | grep -v 'testdata' \
+          | xargs -n1 dirname | sort -u \
+          | xargs -t -I {} bash -c 'cd {}; /tmp/.tfenv/bin/tfenv use ${{ env.TF_DEFAULT_MIN }} >/dev/null; /tmp/.tfenv/bin/tfenv use min-required; /tmp/.tfenv/bin/terraform --version; TF_PLUGIN_CACHE_DIR=/tmp/.terraform-cache /tmp/.tfenv/bin/terraform init -backend=false >/dev/null; TF_PLUGIN_CACHE_DIR=/tmp/.terraform-cache /tmp/.tfenv/bin/terraform validate'
