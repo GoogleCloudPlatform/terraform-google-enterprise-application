@@ -14,3 +14,27 @@
  * limitations under the License.
  */
 
+output "primary_instance" {
+  description = "primary instance created"
+  value       = module.alloydb.primary_instance
+}
+
+output "primary_instance_id" {
+  description = "ID of the primary instance created"
+  value       = module.alloydb.primary_instance_id
+}
+
+output "primary_psc_attachment_link" {
+  description = "The private service connect (psc) attachment created for primary instance"
+  value       = module.alloydb.primary_psc_attachment_link
+}
+
+output "psc_dns_name" {
+  description = "he DNS name of the instance for PSC connectivity. Name convention: ...alloydb-psc.goog"
+  value       = module.alloydb.primary_instance.psc_instance_config[0].psc_dns_name
+}
+
+output "psc_consumer_fwd_rule_ip" {
+  description = "Consumer psc endpoint created"
+  value       = google_compute_address.psc_consumer_address.address
+}

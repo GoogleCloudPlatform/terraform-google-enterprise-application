@@ -12,44 +12,88 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# CloudSQL Postgres instance
-module "cloudsql" {
-  source  = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
-  version = "~> 20.0"
+locals {
+  region = var.cluster_regions[0]
+}
 
-  for_each = toset(var.cluster_regions)
+# Create alloydb cluster and instance.
 
-  project_id = var.app_project_id
-  region     = each.value
+data "google_project" "project" {
+  project_id = var.network_project_id
+}
 
-  name                = "${var.db_name}-${each.value}-${var.env}"
-  database_version    = "POSTGRES_14"
-  enable_default_db   = false
-  tier                = "db-custom-1-3840"
-  deletion_protection = false
-  availability_type   = "REGIONAL"
+module "alloydb" {
+  source  = "GoogleCloudPlatform/alloy-db/google"
+  version = "~> 3.0"
 
-  ip_configuration = {
-    ipv4_enabled                  = false
-    psc_enabled                   = true
-    psc_allowed_consumer_projects = [var.cluster_project_id]
+  cluster_id       = "cluster-${local.region}-psc-${var.env}"
+  cluster_location = local.region
+  project_id       = var.app_project_id
+  cluster_initial_user = {
+    user     = "admin",
+    password = "admin"
   }
 
-  additional_databases = [
+  psc_enabled                   = true
+  psc_allowed_consumer_projects = [data.google_project.project.number]
+
+  primary_instance = {
+    instance_id        = "cluster-${local.region}-instance1-psc-${var.env}",
+    require_connectors = false
+    ssl_mode           = "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
+  }
+
+  read_pool_instance = [
     {
-      name      = var.db_name
-      charset   = ""
-      collation = ""
-    },
+      instance_id        = "cluster-${local.region}-r1-psc-${var.env}"
+      display_name       = "cluster-${local.region}-r1-psc-${var.env}"
+      require_connectors = false
+      ssl_mode           = "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
+    }
   ]
-  user_name     = "admin"
-  user_password = "admin" # this is a security risk - do not do this for real world use-cases!
 }
+
+resource "google_compute_network" "psc_vpc" {
+  name    = "psc-endpoint-vpc-${var.env}"
+  project = var.network_project_id
+}
+
+resource "google_compute_subnetwork" "psc_subnet" {
+  project       = var.network_project_id
+  name          = "psc-endpoint-subnet-${var.env}"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = local.region
+  network       = google_compute_network.psc_vpc.id
+}
+
+# Create psc endpoing using alloydb psc attachment.
+
+resource "google_compute_address" "psc_consumer_address" {
+  name    = "psc-consumer-address-${var.env}"
+  project = var.network_project_id
+  region  = local.region
+
+  subnetwork   = google_compute_subnetwork.psc_subnet.name
+  address_type = "INTERNAL"
+  address      = "10.2.0.10"
+}
+
+resource "google_compute_forwarding_rule" "psc_fwd_rule_consumer" {
+  name    = "psc-fwd-rule-consumer-endpoint-${var.env}"
+  region  = local.region
+  project = var.network_project_id
+
+  target                  = module.alloydb.primary_instance.psc_instance_config[0].service_attachment_link
+  load_balancing_scheme   = "" # need to override EXTERNAL default when target is a service attachment
+  network                 = google_compute_network.psc_vpc.name
+  ip_address              = google_compute_address.psc_consumer_address.id
+  allow_psc_global_access = true
+}
+
+# Grant workload identity service account access to alloydb.
 
 resource "google_project_iam_member" "bank_of_anthos" {
-  for_each = toset(["roles/cloudsql.client", "roles/cloudsql.instanceUser"])
-  project  = var.app_project_id
-  role     = each.value
-  member   = "serviceAccount:bank-of-anthos@${var.cluster_project_id}.iam.gserviceaccount.com"
+  project = var.app_project_id
+  role    = "alloydb.admin"
+  member  = "serviceAccount:bank-of-anthos@${var.cluster_project_id}.iam.gserviceaccount.com"
 }
-
