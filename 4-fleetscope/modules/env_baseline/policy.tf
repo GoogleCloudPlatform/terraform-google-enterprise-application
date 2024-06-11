@@ -43,7 +43,7 @@ resource "google_gke_hub_feature" "poco_feature" {
 resource "google_gke_hub_feature_membership" "poco_feature_member" {
   for_each = toset(var.cluster_membership_ids)
   location = "global"
-  project  = var.cluster_project_id
+  project  = var.fleet_project_id
 
   feature             = google_gke_hub_feature.poco_feature.name
   membership          = regex(local.membership_re, each.key)[2]
