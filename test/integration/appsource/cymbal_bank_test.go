@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -39,36 +40,51 @@ func TestSourceCymbalBank(t *testing.T) {
 	multitenant_nonprod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/non-production"))
 	multitenant_prod := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/production"))
 
+	type ServiceInfos struct {
+		ProjectID   string
+		ServiceName string
+		TeamName    string
+	}
 	var (
 		prefixServiceName string
 		suffixServiceName string
 		splitServiceName  []string
 	)
-
 	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
+	servicesInfoMap := make(map[string]ServiceInfos)
 
-	t.Run("AppSource", func(t *testing.T) {
-		t.Parallel()
-		for appName, serviceNames := range testutils.ServicesNames {
-			appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
-			appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
-			for _, serviceName := range serviceNames {
-				splitServiceName = strings.Split(serviceName, "-")
-				prefixServiceName = splitServiceName[0]
-				suffixServiceName = splitServiceName[len(splitServiceName)-1]
-				projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
-
+	for appName, serviceNames := range testutils.ServicesNames {
+		appName := appName
+		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
+		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
+		for _, serviceName := range serviceNames {
+			serviceName := serviceName // capture range variable
+			splitServiceName = strings.Split(serviceName, "-")
+			prefixServiceName = splitServiceName[0]
+			suffixServiceName = splitServiceName[len(splitServiceName)-1]
+			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
+			servicesInfoMap[serviceName] = ServiceInfos{
+				ProjectID:   projectID,
+				ServiceName: suffixServiceName,
+				TeamName:    prefixServiceName,
+			}
+			servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
+			t.Run(servicePath, func(t *testing.T) {
+				t.Parallel()
 				mapPath := ""
-				if prefixServiceName == suffixServiceName {
-					mapPath = prefixServiceName
+				if servicesInfoMap[serviceName].TeamName == servicesInfoMap[serviceName].ServiceName {
+					mapPath = servicesInfoMap[serviceName].TeamName
 				} else {
-					mapPath = fmt.Sprintf("%s/%s", prefixServiceName, suffixServiceName)
+					mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
 				}
-
-				servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
+				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
+				tmpDirApp := t.TempDir()
+				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
+				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
+				prodTarget := "dev"
 
 				vars := map[string]interface{}{
-					"project_id":                     projectID,
+					"project_id":                     servicesInfoMap[serviceName].ProjectID,
 					"region":                         region,
 					"cluster_membership_id_dev":      testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")[0],
 					"cluster_membership_ids_nonprod": testutils.GetBptOutputStrSlice(multitenant_nonprod, "cluster_membership_ids"),
@@ -84,11 +100,7 @@ func TestSourceCymbalBank(t *testing.T) {
 
 				appsource.DefineVerify(func(assert *assert.Assertions) {
 
-					appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
-					prodTarget := "dev"
-
 					// Push cymbal bank app source code
-					tmpDirApp := t.TempDir()
 					gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
 					gitAppRun := func(args ...string) {
 						_, err := gitApp.RunCmdE(args...)
@@ -120,6 +132,12 @@ func TestSourceCymbalBank(t *testing.T) {
 					// base folder only exists in frontend app
 					if mapPath == "frontend" {
 						gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", mapPath))
+					} else { // there isn't db for frontend.
+						fmt.Printf("%s - Copying from %s to %s", servicePath, dbFrom, dbTo)
+						err = cp.Copy(dbFrom, dbTo)
+						if err != nil {
+							t.Fatal(err)
+						}
 					}
 					err = cp.Copy(fmt.Sprintf("%s/components", appSourcePath), fmt.Sprintf("%s/src/components", tmpDirApp))
 					if err != nil {
@@ -134,20 +152,13 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal(err)
 					}
 
-					if len(splitServiceName) > 1 {
-						err = cp.Copy(fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, prefixServiceName, prefixServiceName), fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, prefixServiceName, prefixServiceName, prefixServiceName))
-						if err != nil {
-							t.Fatal(err)
-						}
-					}
-
 					gitAppRun("add", ".")
 					gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 					gitAppRun("push", "--all", "google", "-f")
 
 					lastCommit := gitApp.GetLatestCommit()
 					// filter builds triggered based on pushed commit sha
-					buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, projectID)
+					buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
 					// poll build until complete
 					pollCloudBuild := func(cmd string) func() (bool, error) {
 						return func() (bool, error) {
@@ -165,13 +176,13 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 					utils.Poll(t, pollCloudBuild(buildListCmd), 40, 30*time.Second)
-					releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, suffixServiceName, region, lastCommit[0:7])
+					releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
 					releases := gcloud.Runf(t, releaseListCmd).Array()
 					if len(releases) == 0 {
-						t.Fatal("Failed to find the release")
+						t.Fatal("Failed to find the release.")
 					}
 					releaseName := releases[0].Get("name")
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", projectID, suffixServiceName, region, releaseName, suffixServiceName, prodTarget)
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s-%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, servicesInfoMap[serviceName].ServiceName, prodTarget)
 					// Poll CD rollouts until rollout is successful
 					pollCloudDeploy := func(cmd string) func() (bool, error) {
 						return func() (bool, error) {
@@ -182,17 +193,17 @@ func TestSourceCymbalBank(t *testing.T) {
 							latestRolloutState := rollouts[0].Get("state").String()
 							if latestRolloutState == "SUCCEEDED" {
 								return false, nil
-							} else if latestRolloutState == "FAILED" {
-								return false, errors.New("Rollout failed.")
+							} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
+								return true, nil
+							} else {
+								return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 							}
-							return true, nil
 						}
 					}
-					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
+					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
 				})
 				appsource.Test()
-
-			}
+			})
 		}
-	})
+	}
 }
