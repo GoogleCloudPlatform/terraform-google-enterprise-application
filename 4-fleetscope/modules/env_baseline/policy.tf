@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-resource "google_gke_hub_feature" "feature" {
+resource "google_gke_hub_feature" "poco_feature" {
   name     = "policycontroller"
   location = "global"
   project  = var.fleet_project_id
@@ -27,11 +27,45 @@ resource "google_gke_hub_feature" "feature" {
           bundles {
             bundle = "pss-baseline-v2022"
           }
+          bundles {
+            bundle = "policy-essentials-v2022"
+          }
           template_library {
             installation = "ALL"
           }
         }
+        referential_rules_enabled = true
       }
     }
   }
+}
+
+resource "google_gke_hub_feature_membership" "poco_feature_member" {
+  for_each = toset(var.cluster_membership_ids)
+  location = "global"
+  project  = var.fleet_project_id
+
+  feature             = google_gke_hub_feature.poco_feature.name
+  membership          = regex(local.membership_re, each.key)[2]
+  membership_location = regex(local.membership_re, each.key)[1]
+
+  policycontroller {
+    policy_controller_hub_config {
+      install_spec = "INSTALL_SPEC_ENABLED"
+      policy_content {
+        bundles {
+          bundle_name = "pss-baseline-v2022"
+        }
+        bundles {
+          bundle_name = "policy-essentials-v2022"
+        }
+        template_library {
+          installation = "ALL"
+        }
+      }
+      referential_rules_enabled = true
+    }
+  }
+
+  depends_on = [google_gke_hub_feature_membership.acm_feature_member]
 }

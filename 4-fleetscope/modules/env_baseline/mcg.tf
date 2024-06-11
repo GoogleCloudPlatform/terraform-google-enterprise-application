@@ -73,4 +73,6 @@ resource "google_project_iam_member" "cluster_network_viewer_mcs" {
   project  = var.cluster_project_id
   role     = each.key
   member   = "serviceAccount:${var.cluster_project_id}.svc.id.goog[gke-mcs/gke-mcs-importer]"
+
+  depends_on = [google_gke_hub_feature.mcs]
 }
