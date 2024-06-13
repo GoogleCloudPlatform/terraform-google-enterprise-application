@@ -15,18 +15,9 @@
  */
 
 terraform {
-  required_version = ">= 1.3"
-
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-    google-beta = {
-      source = "hashicorp/google-beta"
-    }
-  }
+  required_version = ">= 1.6"
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:environments/v0.0.1"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:bootstrap/v0.1.0"
   }
 }
