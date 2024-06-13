@@ -16,6 +16,12 @@
 
 terraform {
   required_version = ">= 0.13"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "= 5.32.0"
+    }
+  }
 
   provider_meta "google" {
     module_name = "blueprints/terraform/terraform-google-enterprise-application:environments/v0.1.0"
