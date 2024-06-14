@@ -74,7 +74,7 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
   ]
 }
 
-# Allow Config Sync to create trace
+# Allow Services Accounts to create trace
 resource "google_project_iam_binding" "acm_wi_trace_agent" {
   project = var.cluster_project_id
 
@@ -86,7 +86,7 @@ resource "google_project_iam_binding" "acm_wi_trace_agent" {
   ]
 }
 
-# Allow Config Sync to send metrics
+# Allow Services Accounts to send metrics
 resource "google_project_iam_binding" "acm_wi_metricWriter" {
   project = var.cluster_project_id
 
