@@ -54,11 +54,16 @@ func TestFleetscope(t *testing.T) {
 				"namespace_ids":          setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 			}
 
+			envs := map[string]string{
+				"TF_CLI_ARGS_apply": "-parallelism=1",
+			}
+
 			fleetscope := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../4-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
+				tft.tfEnvVars(envs),
 			)
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
