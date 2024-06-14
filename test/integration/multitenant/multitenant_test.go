@@ -80,6 +80,7 @@ func TestMultitenant(t *testing.T) {
 							"trafficdirector.googleapis.com",
 							"anthosconfigmanagement.googleapis.com",
 							"sourcerepo.googleapis.com",
+							"cloudtrace.googleapis.com",
 						},
 					},
 				} {
@@ -136,7 +137,7 @@ func TestMultitenant(t *testing.T) {
 					workloadIdentitiesSaListMembers := utils.GetResultStrSlice(workloadIdentitiesSAPolicyOp.Get("bindings.members").Array())
 					assert.Subset(workloadIdentitiesSaListMembers, workloadIdentitiesUsers, fmt.Sprintf("service account %s should have workload identity users", workloadIdentitiesSAEmail))
 					assert.Equal(len(workloadIdentitiesUsers), len(workloadIdentitiesSaListMembers), fmt.Sprintf("service account % should have %d workload identity users", workloadIdentitiesSAEmail, len(workloadIdentitiesUsers)))
-			}
+				}
 
 				// Service Identity
 				fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
