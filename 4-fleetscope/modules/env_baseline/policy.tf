@@ -38,6 +38,11 @@ resource "google_gke_hub_feature" "poco_feature" {
       }
     }
   }
+
+  depends_on = [
+    google_gke_hub_feature.mcs,
+    google_gke_hub_feature.mci
+  ]
 }
 
 resource "google_gke_hub_feature_membership" "poco_feature_member" {
@@ -67,5 +72,8 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
     }
   }
 
-  depends_on = [google_gke_hub_feature_membership.acm_feature_member]
+  depends_on = [
+    google_gke_hub_feature_membership.acm_feature_member,
+    google_gke_hub_feature.poco_feature
+  ]
 }

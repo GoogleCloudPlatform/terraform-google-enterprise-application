@@ -23,6 +23,10 @@ resource "google_gke_hub_feature" "mesh_feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
+
+  depends_on = [
+    google_gke_hub_feature.acm_feature
+  ]
 }
 
 resource "google_gke_hub_feature_membership" "mesh_feature_member" {
