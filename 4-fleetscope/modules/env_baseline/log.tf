@@ -30,9 +30,14 @@ resource "google_gke_hub_feature" "fleet-o11y" {
       }
     }
   }
+
+  depends_on = [
+    google_gke_hub_feature.mesh_feature,
+    google_project_iam_member.fleet_logging_viewaccessor
+  ]
 }
 
-resource "google_project_iam_member" "project" {
+resource "google_project_iam_member" "fleet_logging_viewaccessor" {
   for_each = var.namespace_ids
 
   project = var.fleet_project_id
