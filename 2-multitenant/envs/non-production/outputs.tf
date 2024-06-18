@@ -50,8 +50,13 @@ output "cluster_membership_ids" {
 }
 
 output "app_ip_addresses" {
-  description = "IP Addresses"
+  description = "App IP Addresses"
   value       = module.env.app_ip_addresses
+}
+
+output "app_certificates" {
+  description = "App Certificates"
+  value       = module.env.app_certificates
 }
 
 output "app_service_accounts" {

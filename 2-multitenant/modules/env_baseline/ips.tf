@@ -27,5 +27,5 @@ module "apps_ip_address" {
   address_type = "EXTERNAL"
   region       = "global"
   global       = true
-  names        = each.value
+  names        = each.value // TODO: switch to "${key}/${value}"
 }
