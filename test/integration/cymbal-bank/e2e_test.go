@@ -40,9 +40,8 @@ func TestAppE2E(t *testing.T) {
 		}
 		ctx := context.Background()
 		ipAddress := multitenant.GetJsonOutput("app_ip_addresses").Get("cymbal-bank.frontend-ip").String()
-		fmt.Println("APP Login.")
 		resp, err := login(ctx, client, ipAddress)
-		fmt.Println(resp)
+		fmt.Printf("Login resp: %v \n", resp)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -51,9 +50,8 @@ func TestAppE2E(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		fmt.Println("APP Home.")
 		resp, err = home(ctx, client, ipAddress)
-		fmt.Println(resp)
+		fmt.Printf("Home resp: %v \n", resp)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -61,11 +59,9 @@ func TestAppE2E(t *testing.T) {
 			fmt.Println(resp)
 			t.Fatal(err)
 		}
-		fmt.Println(resp)
 
-		fmt.Println("APP Deposit.")
 		resp, err = deposit(ctx, client, ipAddress)
-		fmt.Println(resp)
+		fmt.Printf("Deposit resp: %v \n", resp)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -74,9 +70,8 @@ func TestAppE2E(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		fmt.Println("APP Transfer.")
 		resp, err = transfer(ctx, client, ipAddress)
-		fmt.Println(resp)
+		fmt.Printf("Transfer resp: %v \n", resp)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -89,6 +84,7 @@ func TestAppE2E(t *testing.T) {
 }
 
 func login(ctx context.Context, c *http.Client, ipAddress string) (*http.Response, error) {
+	fmt.Println("APP Login.")
 	loginUrl := fmt.Sprintf("http://%s/login", ipAddress)
 	form := make(url.Values)
 	form.Add("username", "testuser")
@@ -103,6 +99,7 @@ func login(ctx context.Context, c *http.Client, ipAddress string) (*http.Respons
 }
 
 func home(ctx context.Context, c *http.Client, ipAddress string) (*http.Response, error) {
+
 	homeUrl := fmt.Sprintf("http://%s/home", ipAddress)
 	req, err := http.NewRequestWithContext(ctx, "GET", homeUrl, nil)
 	if err != nil {
@@ -113,34 +110,38 @@ func home(ctx context.Context, c *http.Client, ipAddress string) (*http.Response
 }
 
 func deposit(ctx context.Context, c *http.Client, ipAddress string) (*http.Response, error) {
+	fmt.Println("APP Deposit.")
 	depositUrl := fmt.Sprintf("http://%s/deposit", ipAddress)
 	form := make(url.Values)
 	form.Add("account", "{\"account_num\": \"9099791699\", \"routing_num\": \"808889588\"}")
 	form.Add("external_account_num", "")
 	form.Add("external_routing_num", "")
 	form.Add("external_label", "")
-	form.Add("amount", "100.00")
+	form.Add("amount", "5230.00")
 	form.Add("uuid", uuid.NewString())
 	req, err := http.NewRequestWithContext(ctx, "POST", depositUrl, strings.NewReader(form.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	fmt.Printf("Deposit value: %s \n", form.Get("amount"))
 	return c.Do(req)
 }
 
 func transfer(ctx context.Context, c *http.Client, ipAddress string) (*http.Response, error) {
+	fmt.Println("APP Transfer.")
 	transferUrl := fmt.Sprintf("http://%s/payment", ipAddress)
 	form := make(url.Values)
-	form.Add("account_num", "1033623433")
+	form.Add("account_num", "1077441377")
 	form.Add("contact_account_num", "")
 	form.Add("contact_label", "")
-	form.Add("amount", "113.00")
+	form.Add("amount", "320.98")
 	form.Add("uuid", uuid.NewString())
 	req, err := http.NewRequestWithContext(ctx, "POST", transferUrl, strings.NewReader(form.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	fmt.Printf("Transfer value: %s \n", form.Get("amount"))
 	return c.Do(req)
 }
