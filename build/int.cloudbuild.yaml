@@ -109,11 +109,16 @@ steps:
   args: ['/bin/bash', '-c', 'cft test run TestSourceCymbalBank --stage verify --verbose']
   waitFor:
     - appinfra-apply
+- id: wait-warmup
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'sleep 1m']
+  waitFor:
+    - appsource-verify
 - id: app-e2e
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestAppE2E --stage verify --verbose']
   waitFor:
-    - appsource-verify
+    - wait-warmup
 - id: appinfra-teardown
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestAppInfra --stage teardown --verbose']
