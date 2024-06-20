@@ -14,13 +14,9 @@
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-commonLabels:
-  tier: web
-  team: frontend
 resources:
-  - frontend.yaml
-  - virtualservice.yaml
+  - ../../base
+  - destinationrule.yaml
+  - ingress.yaml
 components:
-  - ../../../components/add-tmp-dir
-  - ../../../components/add-public-key-volume
-  - ../../../components/bank-of-anthos
+  - ../../../../components/development
