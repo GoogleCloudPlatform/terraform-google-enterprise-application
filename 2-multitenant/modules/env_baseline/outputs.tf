@@ -60,6 +60,13 @@ output "app_ip_addresses" {
   }
 }
 
+output "app_certificates" {
+  description = "App Certificates"
+  value = [
+    for value in google_compute_managed_ssl_certificate.app_ssl_certificates : value.name
+  ]
+}
+
 output "app_service_accounts" {
   description = "App Service Accounts"
   value = {

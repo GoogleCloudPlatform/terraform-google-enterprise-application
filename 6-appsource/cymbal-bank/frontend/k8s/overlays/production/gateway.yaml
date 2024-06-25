@@ -17,8 +17,6 @@ apiVersion: gateway.networking.k8s.io/v1beta1
 metadata:
   name: external-http
   namespace: asm-ingress
-  annotations:
-    networking.gke.io/certmap: mcg-cert-map
 spec:
   gatewayClassName: gke-l7-global-external-managed-mc
   listeners:
@@ -31,6 +29,10 @@ spec:
     allowedRoutes:
       kinds:
       - kind: HTTPRoute
+    tls:
+      mode: Terminate
+      options:
+        networking.gke.io/pre-shared-certs: frontend-example-com # TODO: Dynamically inject this value?
   addresses:
   - type: NamedAddress
     value: frontend-ip
