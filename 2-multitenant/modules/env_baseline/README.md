@@ -15,7 +15,7 @@ The following resources are created:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| apps | Applications | <pre>map(object({<br>    ip_address_names = list(string)<br>  }))</pre> | n/a | yes |
+| apps | Applications | <pre>map(object({<br>    ip_address_names = optional(list(string))<br>    certificates     = optional(map(list(string)))<br>  }))</pre> | n/a | yes |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cluster\_subnetworks | The subnetwork self\_links for clusters | `list(string)` | n/a | yes |
 | create\_cluster\_project | Create Cluster Project ID, otherwise the Network Project ID is used | `bool` | `true` | no |
@@ -29,6 +29,7 @@ The following resources are created:
 
 | Name | Description |
 |------|-------------|
+| app\_certificates | App Certificates |
 | app\_ip\_addresses | App IP Addresses |
 | app\_service\_accounts | App Service Accounts |
 | cluster\_ids | GKE cluster IDs |

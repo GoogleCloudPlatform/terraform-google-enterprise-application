@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-apps = {
-  "cymbal-bank" : {
-    "ip_address_names" : [
-      "frontend-ip",
-    ]
-    "certificates" : {
-      "frontend-example-com" : ["frontend.example.com"]
+// Create App/Certificates
+resource "google_compute_managed_ssl_certificate" "app_ssl_certificates" {
+  for_each = merge([
+    for key, value in var.apps : {
+      for k, v in value.certificates : "${key}-${k}" => v
     }
+  ]...)
+
+  name    = each.key
+  project = data.google_project.eab_cluster_project.project_id
+
+  managed {
+    domains = each.value
   }
 }
