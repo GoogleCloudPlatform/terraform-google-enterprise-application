@@ -17,6 +17,7 @@ package cymbalbank_e2e
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -70,6 +71,10 @@ func TestAppE2E(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		_, err = checkTransaction(ctx, client, ipAddress, "5,230.00", "DEPOSIT")
+		if err != nil {
+			t.Fatal(err)
+		}
 		resp, err = transfer(ctx, client, ipAddress)
 		fmt.Printf("Transfer resp: %v \n", resp)
 		if err != nil {
@@ -79,7 +84,10 @@ func TestAppE2E(t *testing.T) {
 			fmt.Println(resp)
 			t.Fatal(err)
 		}
-
+		_, err = checkTransaction(ctx, client, ipAddress, "320.98", "PAYMENT")
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 }
 
@@ -126,6 +134,33 @@ func deposit(ctx context.Context, c *http.Client, ipAddress string) (*http.Respo
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	fmt.Printf("Deposit value: %s \n", form.Get("amount"))
 	return c.Do(req)
+}
+
+func checkTransaction(ctx context.Context, c *http.Client, ipAddress string, amount string, typeTransaction string) (*http.Response, error) {
+	resp, err := home(ctx, c, ipAddress)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		fmt.Println(resp)
+		return nil, err
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	bodyString := string(bodyBytes)
+	if typeTransaction == "DEPOSIT" {
+		amount = fmt.Sprintf("+$%s", amount)
+	} else if typeTransaction == "PAYMENT" {
+		amount = fmt.Sprintf("-$%s", amount)
+	}
+	if !strings.Contains(bodyString, amount) {
+		fmt.Printf("Error on %s!\n", typeTransaction)
+		return nil, fmt.Errorf("Error on %s!\n", typeTransaction)
+	}
+	return resp, nil
 }
 
 func transfer(ctx context.Context, c *http.Client, ipAddress string) (*http.Response, error) {
