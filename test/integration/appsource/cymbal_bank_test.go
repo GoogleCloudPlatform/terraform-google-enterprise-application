@@ -78,7 +78,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
 				}
 				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
-				tmpDirApp := fmt.Sprintf("%s/%s", t.TempDir(), serviceName)
+				tmpDirApp := t.TempDir()
 				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 				prodTarget := "dev"
@@ -150,12 +150,6 @@ func TestSourceCymbalBank(t *testing.T) {
 					err = cp.Copy(fmt.Sprintf("%s/k8s", servicePath), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, mapPath))
 					if err != nil {
 						t.Fatal(err)
-					}
-					if mapPath == "frontend" {
-						err = cp.Copy("assets/", fmt.Sprintf("%s/src/%s/k8s/overlays/development/", tmpDirApp, mapPath))
-						if err != nil {
-							t.Fatal(err)
-						}
 					}
 
 					gitAppRun("add", ".")
