@@ -53,6 +53,12 @@ func TestSourceCymbalBank(t *testing.T) {
 	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
 	servicesInfoMap := make(map[string]ServiceInfos)
 
+	gitAppRun("config", "user.email", "eab-robot@example.com")
+	gitAppRun("config", "user.name", "EAB Robot")
+	gitAppRun("config", "--global", "credential.https://source.developers.google.com.helper", "gcloud.sh")
+	gitAppRun("config", "--global", "init.defaultBranch", "main")
+	gitAppRun("config", "--global", "http.postBuffer", "157286400")
+
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
 		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
@@ -110,11 +116,6 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 
 					gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
-					gitAppRun("config", "user.email", "eab-robot@example.com")
-					gitAppRun("config", "user.name", "EAB Robot")
-					gitAppRun("config", "--global", "credential.https://source.developers.google.com.helper", "gcloud.sh")
-					gitAppRun("config", "--global", "init.defaultBranch", "main")
-					gitAppRun("config", "--global", "http.postBuffer", "157286400")
 					gitAppRun("checkout", "-b", "main")
 					gitAppRun("remote", "add", "google", appRepo)
 					datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
