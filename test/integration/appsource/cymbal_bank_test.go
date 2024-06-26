@@ -53,12 +53,6 @@ func TestSourceCymbalBank(t *testing.T) {
 	region := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")[0]
 	servicesInfoMap := make(map[string]ServiceInfos)
 
-	gitAppRun("config", "user.email", "eab-robot@example.com")
-	gitAppRun("config", "user.name", "EAB Robot")
-	gitAppRun("config", "--global", "credential.https://source.developers.google.com.helper", "gcloud.sh")
-	gitAppRun("config", "--global", "init.defaultBranch", "main")
-	gitAppRun("config", "--global", "http.postBuffer", "157286400")
-
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
 		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
@@ -84,7 +78,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
 				}
 				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
-				tmpDirApp := t.TempDir()
+				tmpDirApp := fmt.Sprintf("%s/%s", t.TempDir(), serviceName)
 				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 				prodTarget := "dev"
@@ -116,6 +110,11 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 
 					gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+					gitAppRun("config", "user.email", "eab-robot@example.com")
+					gitAppRun("config", "user.name", "EAB Robot")
+					gitAppRun("config", "--global", "credential.https://source.developers.google.com.helper", "gcloud.sh")
+					gitAppRun("config", "--global", "init.defaultBranch", "main")
+					gitAppRun("config", "--global", "http.postBuffer", "157286400")
 					gitAppRun("checkout", "-b", "main")
 					gitAppRun("remote", "add", "google", appRepo)
 					datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
