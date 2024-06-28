@@ -8,6 +8,33 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.2.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.1.0...v0.2.0) (2024-06-28)
+
+
+### Features
+
+* adds frontend app infra test ([#108](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/108)) ([d0110ec](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/d0110ec99a842e3d3e443be9e3c8449b9de831f5))
+* **appfactory:** refactor appfactory to support multiple apps and nested parallel tests ([#112](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/112)) ([d87c954](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/d87c954b355a17f16bf1e310421031d0ea9d31f9))
+* granted cloud service mesh agent the necessary permission on ne… ([#162](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/162)) ([73028ab](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/73028ab77f935992788771b26ae5200e8e26a893))
+* Input group name to fleet-scope for log viewing ([#155](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/155)) ([8064ecf](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/8064ecf52bfbd0ac3312cc27dec3e9faa5e9ccf1))
+* **multitenant:** add certificate ([#179](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/179)) ([f5a31e3](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/f5a31e3a48303c031b93a7ee074e6a5b370774b3))
+* **multitenant:** enable security_posture, dpv2, cost_allocation ([#135](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/135)) ([ae06552](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/ae06552b76679c16d7950cf47a33035342364d5f))
+* **multitenant:** make cluster project creation optional ([#117](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/117)) ([878a63e](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/878a63e097c59159c85b554af552fb7c368f7af5))
+* **multitenant:** refactor multitenant to be multi-app configurable ([#148](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/148)) ([64e8b40](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/64e8b40abe7b21e82993e0bd769f9a9cb4556a2c))
+* Refactor integration tests 5-appinfra ([#169](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/169)) ([77263bf](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/77263bf23ad73da2d4f1a361a435066124a16b67))
+* refactor step 6 integration tests ([#137](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/137)) ([5aa2981](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/5aa29819ed4d58cc5bf098eadf7c2d9486d6c8eb))
+
+
+### Bug Fixes
+
+* add minimum TF version requirements ([#168](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/168)) ([cf8a456](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/cf8a4566ca56adf4a9f3d5599ae51fe6009edd50))
+* add permission, clarifications, dedup ([#160](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/160)) ([818f119](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/818f119653abd5302910e267ef8bf9024fe9f4be))
+* **deps:** update terraform terraform-google-modules/cloud-storage/google to v6 ([#138](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/138)) ([3335013](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/33350133fa385916ecc5b89adbc2ff087d48b985))
+* **deps:** update terraform terraform-google-modules/kubernetes-engine/google to v31 ([#157](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/157)) ([0e7ed98](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/0e7ed980692c633b04cc813f4e041c7ef909e136))
+* **fleetscope:** depends on and separate poco membership ([#124](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/124)) ([1f7df6e](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/1f7df6e307b38dec0f34c658fda97704a215a6e4))
+* **fleetscope:** serialize fleet feature enables ([#177](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/177)) ([a510901](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/a510901123b904a0a5ebfaa14015b1df3d9aa078))
+* Grants metric and trace roles to k8s agent, enables metric api ([#174](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/174)) ([7cb1d5f](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/7cb1d5f58a12e6e476c03e1ace2b1b47658b434a))
+
 ## 0.1.0 (2024-05-10)
 
 
