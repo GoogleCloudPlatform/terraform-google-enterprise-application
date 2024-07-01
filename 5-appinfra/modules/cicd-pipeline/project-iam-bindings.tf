@@ -15,7 +15,11 @@
 locals {
   cloud_build_sas = ["serviceAccount:${google_service_account.cloud_build.email}"] # cloud build service accounts used for CI
   membership_re   = "projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
-  gke_projects    = [regex(local.membership_re, var.cluster_membership_id_dev)[0], regex(local.membership_re, var.cluster_membership_ids_nonprod[0])[0], regex(local.membership_re, var.cluster_membership_ids_prod[0])[0]]
+  gke_projects = distinct(flatten([
+    for _, value in var.env_cluster_membership_ids : [
+      for item in value.cluster_membership_ids : regex(local.membership_re, item)[0]
+    ]
+  ]))
 }
 
 # authoritative project-iam-bindings to increase reproducibility
