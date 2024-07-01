@@ -119,11 +119,12 @@ module "vpc_project" {
   source   = "terraform-google-modules/project-factory/google"
   version  = "~> 15.0"
 
-  name              = "eab-vpc-${each.key}"
-  random_project_id = "true"
-  org_id            = var.org_id
-  folder_id         = each.value
-  billing_account   = var.billing_account
+  name                     = "eab-vpc-${each.key}"
+  random_project_id        = "true"
+  random_project_id_length = 4
+  org_id                   = var.org_id
+  folder_id                = each.value
+  billing_account          = var.billing_account
 
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
