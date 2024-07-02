@@ -102,6 +102,13 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
+// Allow additional time for NetworkEndpointGroups cleanup
+resource "time_sleep" "wait_1200_seconds" {
+  destroy_duration = "1200s"
+
+  depends_on = [module.gke]
+}
+
 // Create a GKE cluster in each subnetwork
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
