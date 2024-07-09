@@ -26,11 +26,12 @@ module "app_admin_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 15.0"
 
-  random_project_id = true
-  billing_account   = var.billing_account
-  name              = "${var.application_name}-admin"
-  org_id            = var.org_id
-  folder_id         = var.folder_id
+  random_project_id        = true
+  random_project_id_length = 4
+  billing_account          = var.billing_account
+  name                     = "${var.application_name}-admin"
+  org_id                   = var.org_id
+  folder_id                = var.folder_id
   activate_apis = [
     "iam.googleapis.com",
     "cloudresourcemanager.googleapis.com",
@@ -76,10 +77,11 @@ module "app_env_project" {
   version  = "~> 15.0"
   for_each = var.create_env_projects ? var.envs : {}
 
-  random_project_id = true
-  billing_account   = each.value.billing_account
-  name              = substr("eab-${var.application_name}-${each.key}", 0, 25) # max length 30 chars
-  org_id            = each.value.org_id
-  folder_id         = each.value.folder_id
-  activate_apis     = var.env_project_apis
+  random_project_id        = true
+  random_project_id_length = 4
+  billing_account          = each.value.billing_account
+  name                     = substr("eab-${var.application_name}-${each.key}", 0, 25) # max length 30 chars
+  org_id                   = each.value.org_id
+  folder_id                = each.value.folder_id
+  activate_apis            = var.env_project_apis
 }
