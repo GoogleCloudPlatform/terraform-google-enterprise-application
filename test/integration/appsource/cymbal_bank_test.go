@@ -152,6 +152,13 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal(err)
 					}
 
+					if mapPath == "frontend" {
+						err = cp.Copy("assets/", fmt.Sprintf("%s/src/%s/k8s/overlays/development/", tmpDirApp, mapPath))
+						if err != nil {
+							t.Fatal(err)
+						}
+					}
+
 					gitAppRun("add", ".")
 					gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 					gitAppRun("push", "--all", "google", "-f")
