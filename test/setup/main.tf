@@ -17,7 +17,7 @@
 locals {
   envs = [
     "development",
-    "non-production",
+    "nonproduction",
     "production",
   ]
 

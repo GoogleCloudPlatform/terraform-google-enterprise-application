@@ -17,7 +17,7 @@ kind: DestinationRule
 metadata:
   name: frontend
 spec:
-  host: frontend.frontend-non-production.svc.cluster.local
+  host: frontend.frontend-nonproduction.svc.cluster.local
   trafficPolicy:
     connectionPool:
       http:
