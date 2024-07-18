@@ -24,11 +24,9 @@ locals {
 module "app" {
   source = "../../../../../modules/cicd-pipeline"
 
-  project_id                     = var.project_id
-  region                         = var.region
-  cluster_membership_id_dev      = var.cluster_membership_id_dev
-  cluster_membership_ids_nonprod = var.cluster_membership_ids_nonprod
-  cluster_membership_ids_prod    = var.cluster_membership_ids_prod
+  project_id                 = var.project_id
+  region                     = var.region
+  env_cluster_membership_ids = var.env_cluster_membership_ids
 
   service     = local.service_name
   repo_name   = local.repo_name
