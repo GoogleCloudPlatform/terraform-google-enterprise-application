@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-    bucket = "UPDATE_ME"
-    prefix = "terraform/fleet_scope/non-production"
-  }
+locals {
+  env     = "nonproduction"
+  db_name = "ledger-db"
+}
+
+module "env" {
+  source = "../../../../../modules/env_baseline"
+
+  env                = local.env
+  cluster_project_id = var.cluster_project_id
+  cluster_regions    = var.cluster_regions
+  app_project_id     = var.app_project_id
+  db_name            = local.db_name
 }

@@ -46,7 +46,7 @@ module "components" {
     development = {
       roles = ["roles/owner"]
     }
-    non-production = {
+    nonproduction = {
       roles = ["roles/owner"]
     }
     production = {

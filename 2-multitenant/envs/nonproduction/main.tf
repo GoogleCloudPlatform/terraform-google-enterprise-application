@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-    bucket = "UPDATE_ME"
-    prefix = "terraform/multi_tenant/non-production"
-  }
+locals {
+  env = "nonproduction"
+}
+
+module "env" {
+  source = "../../modules/env_baseline"
+
+  apps                = var.apps
+  env                 = local.env
+  org_id              = var.envs[local.env].org_id
+  folder_id           = var.envs[local.env].folder_id
+  network_project_id  = var.envs[local.env].network_project_id
+  billing_account     = var.envs[local.env].billing_account
+  cluster_subnetworks = var.envs[local.env].subnets_self_links
 }

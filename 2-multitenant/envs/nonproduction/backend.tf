@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-locals {
-  env     = "non-production"
-  db_name = "accounts-db"
-}
-
-module "env" {
-  source = "../../../../../modules/env_baseline"
-
-  env                = local.env
-  cluster_project_id = var.cluster_project_id
-  cluster_regions    = var.cluster_regions
-  app_project_id     = var.app_project_id
-  db_name            = local.db_name
+terraform {
+  backend "gcs" {
+    bucket = "UPDATE_ME"
+    prefix = "terraform/multi_tenant/nonproduction"
+  }
 }

@@ -15,8 +15,8 @@
  */
 
 locals {
-  env     = "non-production"
-  db_name = "ledger-db"
+  env     = "nonproduction"
+  db_name = "accounts-db"
 }
 
 module "env" {

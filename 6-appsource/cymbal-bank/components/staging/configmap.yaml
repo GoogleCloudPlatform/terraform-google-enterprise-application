@@ -17,16 +17,16 @@ kind: ConfigMap
 metadata:
   name: cloud-sql-admin
 data:
-  connectionName: eab-gke-non-production-2cdd:us-central1:db-us-central1-non-production
+  connectionName: eab-gke-nonproduction-2cdd:us-central1:db-us-central1-nonproduction
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: service-api-config
 data:
-  TRANSACTIONS_API_ADDR: "ledgerwriter.ledger-non-production:8080"
-  BALANCES_API_ADDR: "balancereader.ledger-non-production:8080"
-  HISTORY_API_ADDR: "transactionhistory.ledger-non-production:8080"
-  CONTACTS_API_ADDR: "contacts.accounts-non-production:8080"
-  USERSERVICE_API_ADDR: "userservice.accounts-non-production:8080"
+  TRANSACTIONS_API_ADDR: "ledgerwriter.ledger-nonproduction:8080"
+  BALANCES_API_ADDR: "balancereader.ledger-nonproduction:8080"
+  HISTORY_API_ADDR: "transactionhistory.ledger-nonproduction:8080"
+  CONTACTS_API_ADDR: "contacts.accounts-nonproduction:8080"
+  USERSERVICE_API_ADDR: "userservice.accounts-nonproduction:8080"
 
