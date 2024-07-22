@@ -23,10 +23,17 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/gruntwork-io/terratest/modules/retry"
+)
+
+const (
+	sleepBetweenRetries time.Duration = time.Duration(60) * time.Second
+	maxRetries int = 30
 )
 
 func TestAppE2E(t *testing.T) {
@@ -41,6 +48,38 @@ func TestAppE2E(t *testing.T) {
 		}
 		ctx := context.Background()
 		ipAddress := multitenant.GetJsonOutput("app_ip_addresses").Get("cymbal-bank.frontend-ip").String()
+
+		// Test webserver is avaliable
+		heartbeat := func() (string, error) {
+			req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("http://%s", ipAddress), nil)
+			if err != nil {
+				return "", err
+			}
+			resp, err := client.Do(req)
+			if err != nil {
+				return "", err
+			}
+			if resp.StatusCode != 200 {
+				fmt.Println(resp)
+				return "", err
+			}
+			return fmt.Sprint(resp.StatusCode), err
+		}
+		statusCode, _ := retry.DoWithRetryE(
+			t,
+			fmt.Sprintf("Checking: %s", ipAddress),
+			maxRetries,
+			sleepBetweenRetries,
+			heartbeat,
+		)
+		if err != nil {
+			t.Fatalf("Error: webserver (%s) not ready after %d attemps, status code: %q",
+			  ipAddress,
+				maxRetries,
+				statusCode,
+			)
+		}
+
 		resp, err := login(ctx, client, ipAddress)
 		fmt.Printf("Login resp: %v \n", resp)
 		if err != nil {
