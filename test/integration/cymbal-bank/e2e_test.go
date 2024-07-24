@@ -74,7 +74,7 @@ func TestAppE2E(t *testing.T) {
 		)
 		if err != nil {
 			t.Fatalf("Error: webserver (%s) not ready after %d attemps, status code: %q",
-			  ipAddress,
+				ipAddress,
 				maxRetries,
 				statusCode,
 			)
