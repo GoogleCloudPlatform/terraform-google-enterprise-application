@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+data "google_project" "cluster_project" {
+  project_id = var.cluster_project_id
+}
+
 resource "google_sourcerepo_repository" "acm_repo" {
   project = var.cluster_project_id
   name    = "eab-acm"
@@ -76,24 +80,24 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
 
 # Allow Services Accounts to create trace
 resource "google_project_iam_binding" "acm_wi_trace_agent" {
-  project = var.cluster_project_id
+  project = var.fleet_project_id
 
   role = "roles/cloudtrace.agent"
   members = [
-    "serviceAccount:${var.fleet_project_id}.svc.id.goog[config-management-monitoring/default]",
-    "serviceAccount:${var.fleet_project_id}.svc.id.goog[default/bank-of-anthos]",
-    "serviceAccount:${var.fleet_project_id}.svc.id.goog[gatekeeper-system/gatekeeper-admin]",
+    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
+    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/default/sa/bank-of-anthos", #TODO rename/move
+    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
   ]
 }
 
 # Allow Services Accounts to send metrics
 resource "google_project_iam_binding" "acm_wi_metricWriter" {
-  project = var.cluster_project_id
+  project = var.fleet_project_id
 
   role = "roles/monitoring.metricWriter"
   members = [
-    "serviceAccount:${var.fleet_project_id}.svc.id.goog[config-management-monitoring/default]",
-    "serviceAccount:${var.fleet_project_id}.svc.id.goog[default/bank-of-anthos]",
-    "serviceAccount:${var.fleet_project_id}.svc.id.goog[gatekeeper-system/gatekeeper-admin]",
+    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
+    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/default/sa/bank-of-anthos", #TODO rename/move
+    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
   ]
 }
