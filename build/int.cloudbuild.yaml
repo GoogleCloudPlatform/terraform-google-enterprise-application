@@ -111,7 +111,7 @@ steps:
     - appinfra-apply
 - id: wait-warmup
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'echo "waiting warmup." && sleep 2m']
+  args: ['/bin/bash', '-c', 'echo "waiting warmup." && sleep 5m']
   waitFor:
     - appsource-verify
 - id: app-e2e
