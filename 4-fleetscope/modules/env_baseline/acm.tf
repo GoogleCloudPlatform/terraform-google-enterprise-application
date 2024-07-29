@@ -30,18 +30,12 @@ resource "google_service_account" "root_reconciler" {
   create_ignore_already_exists = true
 }
 
-resource "google_project_iam_member" "root_reconciler" {
-  project = var.cluster_project_id
-  role    = "roles/source.reader"
-  member  = "serviceAccount:${google_service_account.root_reconciler.email}"
-}
+resource "google_project_iam_binding" "acm_wi_sourcereader" {
+  project = var.fleet_project_id
 
-resource "google_service_account_iam_binding" "workload_identity" {
-  service_account_id = google_service_account.root_reconciler.name
-  role               = "roles/iam.workloadIdentityUser"
-
+  role = "roles/source.reader"
   members = [
-    "serviceAccount:${var.cluster_project_id}.svc.id.goog[config-management-system/root-reconciler]",
+    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-system/sa/root-reconciler",
   ]
 }
 
