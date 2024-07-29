@@ -39,11 +39,6 @@ output "cluster_regions" {
   value       = module.env.cluster_regions
 }
 
-output "clusters_ids" {
-  description = "GKE cluster IDs"
-  value       = module.env.cluster_ids
-}
-
 output "cluster_membership_ids" {
   description = "GKE cluster membership IDs"
   value       = module.env.cluster_membership_ids

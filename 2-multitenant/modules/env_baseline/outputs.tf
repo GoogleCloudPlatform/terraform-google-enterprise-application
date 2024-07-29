@@ -21,13 +21,6 @@ output "cluster_regions" {
   ]
 }
 
-output "cluster_ids" {
-  description = "GKE cluster IDs"
-  value = [
-    for value in module.gke : value.cluster_id
-  ]
-}
-
 output "cluster_membership_ids" {
   description = "GKE cluster membership IDs"
   value = [

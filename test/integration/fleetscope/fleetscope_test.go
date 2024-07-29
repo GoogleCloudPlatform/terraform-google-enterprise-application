@@ -16,7 +16,7 @@ package fleetscope
 
 import (
 	"fmt"
-	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -67,7 +67,7 @@ func TestFleetscope(t *testing.T) {
 
 				// Multitenant Outputs
 				clusterRegions := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")
-				clusterIds := testutils.GetBptOutputStrSlice(multitenant, "clusters_ids")
+				clusterMembershipIds := testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 
 				// Service Account
@@ -145,12 +145,8 @@ func TestFleetscope(t *testing.T) {
 				}
 
 				// GKE Membership binding
-				for _, id := range clusterIds {
-					// Cluster location
-					location := regexp.MustCompile(`\/locations\/([^\/]*)\/`).FindStringSubmatch(id)[1]
-					// Cluster and Membership details
-					clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", id, location, clusterProjectID)
-					membershipOp := gcloud.Runf(t, "container fleet memberships describe %s --location %s --project %s", clusterOp.Get("name").String(), location, clusterProjectID)
+				for _, id := range clusterMembershipIds {
+					membershipOp := gcloud.Runf(t, "container fleet memberships describe %s", strings.TrimPrefix(id, "//gkehub.googleapis.com/"))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
 				}
 
