@@ -66,10 +66,3 @@ output "app_certificates" {
     for value in google_compute_managed_ssl_certificate.app_ssl_certificates : value.name
   ]
 }
-
-output "app_service_accounts" {
-  description = "App Service Accounts"
-  value = {
-    for value in google_service_account.app_service_accounts : value.display_name => value.email
-  }
-}

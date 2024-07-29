@@ -58,8 +58,3 @@ output "app_certificates" {
   description = "App Certificates"
   value       = module.env.app_certificates
 }
-
-output "app_service_accounts" {
-  description = "IP Addresses"
-  value       = module.env.app_service_accounts
-}
