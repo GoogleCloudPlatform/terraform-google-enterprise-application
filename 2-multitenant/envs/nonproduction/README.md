@@ -15,6 +15,7 @@
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
+| cluster\_type | Cluster type |
 | env | Environment |
 | fleet\_project\_id | Fleet Project ID |
 | network\_project\_id | Network Project ID |
