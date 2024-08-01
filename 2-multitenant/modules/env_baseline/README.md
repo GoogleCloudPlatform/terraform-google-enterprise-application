@@ -31,7 +31,6 @@ The following resources are created:
 |------|-------------|
 | app\_certificates | App Certificates |
 | app\_ip\_addresses | App IP Addresses |
-| cluster\_ids | GKE cluster IDs |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
