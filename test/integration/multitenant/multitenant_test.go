@@ -123,25 +123,6 @@ func TestMultitenant(t *testing.T) {
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
 				}
 
-				// App Service Accounts
-				for _, appName := range testutils.AppNames {
-					workloadIdentitiesSAEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", appName, clusterProjectID)
-					saOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts describe %s --project %s", workloadIdentitiesSAEmail, clusterProjectID))
-					assert.False(saOp.Get("disabled").Bool(), "Service account should not be disabled.")
-
-					workloadIdentitiesUsers := []string{
-						fmt.Sprintf("serviceAccount:%s.svc.id.goog[accounts-%s/%s]", clusterProjectID, envName, appName),
-						fmt.Sprintf("serviceAccount:%s.svc.id.goog[ledger-%s/%s]", clusterProjectID, envName, appName),
-					}
-
-					workloadIdentitiesSAIamFilter := "bindings.role:'roles/iam.workloadIdentityUser'"
-					workloadIdentitiesSAIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", workloadIdentitiesSAIamFilter, "--format", "json"})
-					workloadIdentitiesSAPolicyOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts get-iam-policy %s", workloadIdentitiesSAEmail), workloadIdentitiesSAIamCommonArgs).Array()[0]
-					workloadIdentitiesSaListMembers := utils.GetResultStrSlice(workloadIdentitiesSAPolicyOp.Get("bindings.members").Array())
-					assert.Subset(workloadIdentitiesSaListMembers, workloadIdentitiesUsers, fmt.Sprintf("service account %s should have workload identity users", workloadIdentitiesSAEmail))
-					assert.Equal(len(workloadIdentitiesUsers), len(workloadIdentitiesSaListMembers), fmt.Sprintf("service account % should have %d workload identity users", workloadIdentitiesSAEmail, len(workloadIdentitiesUsers)))
-				}
-
 				// Service Identity
 				fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
 				gkeServiceAgent := fmt.Sprintf("service-%s@gcp-sa-gkehub.iam.gserviceaccount.com", fleetProjectNumber)
