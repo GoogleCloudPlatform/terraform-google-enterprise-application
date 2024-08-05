@@ -15,7 +15,7 @@
 # CloudSQL Postgres instance
 module "cloudsql" {
   source  = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
-  version = "~> 20.0"
+  version = "~> 21.0"
 
   for_each = toset(var.cluster_regions)
 
