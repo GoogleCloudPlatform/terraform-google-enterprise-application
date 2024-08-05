@@ -34,7 +34,17 @@ variable "app_project_id" {
   type        = string
 }
 
-variable "db_name" {
-  description = "Database name"
+variable "network_project_id" {
+  description = "The ID of the project in which PSC attachment will be provisioned"
+  type        = string
+}
+
+variable "network_name" {
+  description = "The name of the network in which PSC attachment will be provisioned"
+  type        = string
+}
+
+variable "psc_consumer_fwd_rule_ip" {
+  description = "Consumer psc endpoint IP address"
   type        = string
 }
