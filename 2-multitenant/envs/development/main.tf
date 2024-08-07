@@ -28,4 +28,5 @@ module "env" {
   network_project_id  = var.envs[local.env].network_project_id
   billing_account     = var.envs[local.env].billing_account
   cluster_subnetworks = [var.envs[local.env].subnets_self_links[0]]
+  cluster_type        = "AUTOPILOT"
 }

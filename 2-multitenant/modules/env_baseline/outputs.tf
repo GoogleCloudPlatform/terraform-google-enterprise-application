@@ -24,7 +24,7 @@ output "cluster_regions" {
 output "cluster_membership_ids" {
   description = "GKE cluster membership IDs"
   value = [
-    for value in module.gke : value.fleet_membership
+    for value in merge(module.gke-standard, module.gke-autopilot) : value.fleet_membership
   ]
 }
 
@@ -58,4 +58,9 @@ output "app_certificates" {
   value = [
     for value in google_compute_managed_ssl_certificate.app_ssl_certificates : value.name
   ]
+}
+
+output "cluster_type" {
+  description = "Cluster type"
+  value       = var.cluster_type
 }
