@@ -35,5 +35,6 @@ output "logs_bucket" {
 }
 
 output "source_repo_urls" {
-  value = { for repo_id, repo in google_sourcerepo_repository.gcp_repo : repo_id => "https://source.developers.google.com/p/${var.project_id}/r/${repo.name}" }
+  description = "Source repository URLs"
+  value       = { for repo_id, repo in google_sourcerepo_repository.gcp_repo : repo_id => "https://source.developers.google.com/p/${var.project_id}/r/${repo.name}" }
 }

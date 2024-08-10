@@ -81,7 +81,7 @@ If you receive any errors or made any changes to the Terraform config or `terraf
 | artifacts\_bucket | Bucket for storing TF plans |
 | logs\_bucket | Bucket for storing TF logs |
 | project\_id | Project ID |
-| source\_repo\_urls | n/a |
+| source\_repo\_urls | Source repository URLs |
 | state\_bucket | Bucket for storing TF state |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
