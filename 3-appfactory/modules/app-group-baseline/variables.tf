@@ -48,8 +48,9 @@ variable "envs" {
 }
 
 variable "create_env_projects" {
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
+  description = "Create environment-specific application infra projects"
 }
 
 variable "env_project_apis" {
