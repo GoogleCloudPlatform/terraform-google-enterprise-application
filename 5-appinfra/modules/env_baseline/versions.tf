@@ -17,6 +17,17 @@
 terraform {
   required_version = ">= 1.3"
 
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5, < 6"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3"
+    }
+  }
+
   provider_meta "google" {
     module_name = "blueprints/terraform/terraform-google-enterprise-application:bootstrap/v0.1.0"
   }
