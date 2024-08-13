@@ -73,3 +73,7 @@ rule "terraform_required_version" {
 rule "terraform_typed_variables" {
   enabled = true
 }
+
+rule "terraform_required_version" {
+  enabled = true
+}
