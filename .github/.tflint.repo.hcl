@@ -76,4 +76,5 @@ rule "terraform_typed_variables" {
 
 rule "terraform_required_version" {
   enabled = true
+  max_version = 1.3
 }
