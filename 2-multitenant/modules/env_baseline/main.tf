@@ -105,7 +105,7 @@ data "google_compute_subnetwork" "default" {
 // Create a GKE cluster in each subnetwork
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 31.0"
+  version = "~> 32.0"
 
   for_each = data.google_compute_subnetwork.default
   name     = "cluster-${each.value.region}-${var.env}"
