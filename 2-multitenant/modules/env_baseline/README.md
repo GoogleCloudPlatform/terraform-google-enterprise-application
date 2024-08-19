@@ -19,7 +19,7 @@ The following resources are created:
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cluster\_release\_channel | The release channel for the clusters | `string` | `"REGULAR"` | no |
 | cluster\_subnetworks | The subnetwork self\_links for clusters | `list(string)` | n/a | yes |
-| cluster\_type | Cluster types: STANDARD, STANDARD-NAP, AUTOPILOT | `string` | `"STANDARD-NAP"` | no |
+| cluster\_type | GKE multi-tenant cluster types: STANDARD, STANDARD-NAP (Standard with node auto-provisioning), AUTOPILOT | `string` | `"STANDARD-NAP"` | no |
 | create\_cluster\_project | Create Cluster Project ID, otherwise the Network Project ID is used | `bool` | `true` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |

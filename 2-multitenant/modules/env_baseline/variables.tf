@@ -65,7 +65,7 @@ variable "apps" {
 }
 
 variable "cluster_type" {
-  description = "Cluster types: STANDARD, STANDARD-NAP, AUTOPILOT"
+  description = "GKE multi-tenant cluster types: STANDARD, STANDARD-NAP (Standard with node auto-provisioning), AUTOPILOT"
   type        = string
   default     = "STANDARD-NAP"
 
