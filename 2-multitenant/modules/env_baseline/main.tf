@@ -200,7 +200,7 @@ module "gke-autopilot" {
 
   identity_namespace = "${local.cluster_project_id}.svc.id.goog"
 
-  #TODO: Enable with v32.0.1 
+  #TODO: Enable with v32.0.1
   #enable_binary_authorization = true
 
   cluster_resource_labels = {
