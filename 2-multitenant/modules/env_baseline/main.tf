@@ -177,7 +177,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 32.0"
+  version = "~> 31.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
@@ -200,7 +200,8 @@ module "gke-autopilot" {
 
   identity_namespace = "${local.cluster_project_id}.svc.id.goog"
 
-  enable_binary_authorization = true
+  #TODO: Enable with v32.0.1 
+  #enable_binary_authorization = true
 
   cluster_resource_labels = {
     "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
