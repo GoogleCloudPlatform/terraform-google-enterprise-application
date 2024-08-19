@@ -102,12 +102,11 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
-// Create a GKE cluster in each subnetwork
-module "gke" {
+module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
   version = "~> 32.0"
 
-  for_each = data.google_compute_subnetwork.default
+  for_each = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
 
   project_id          = local.cluster_project_id
@@ -118,7 +117,7 @@ module "gke" {
   subnetwork          = each.value.name
   ip_range_pods       = each.value.secondary_ip_range[0].range_name
   ip_range_services   = each.value.secondary_ip_range[1].range_name
-  release_channel     = var.release_channel
+  release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
@@ -133,6 +132,23 @@ module "gke" {
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
 
   remove_default_node_pool = true
+  cluster_autoscaling = {
+    enabled             = var.cluster_type == "STANDARD-NAP" ? true : false
+    autoscaling_profile = "BALANCED"
+    max_cpu_cores       = 100
+    min_cpu_cores       = 0
+    max_memory_gb       = 1024
+    min_memory_gb       = 0
+    gpu_resources = [
+      {
+        resource_type = "nvidia-tesla-t4"
+        minimum       = 0
+        maximum       = 4
+      }
+    ]
+    auto_repair  = true
+    auto_upgrade = true
+  }
 
   enable_binary_authorization = true
 
@@ -151,6 +167,45 @@ module "gke" {
       location_policy = "BALANCED"
     }
   ]
+
+  depends_on = [
+    module.eab_cluster_project
+  ]
+
+  deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
+}
+
+module "gke-autopilot" {
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
+  version = "~> 31.0"
+
+  for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
+  name     = "cluster-${each.value.region}-${var.env}"
+
+  project_id          = local.cluster_project_id
+  regional            = true
+  region              = each.value.region
+  network_project_id  = regex(local.projects_re, each.value.id)[0]
+  network             = regex(local.networks_re, each.value.network)[0]
+  subnetwork          = each.value.name
+  ip_range_pods       = each.value.secondary_ip_range[0].range_name
+  ip_range_services   = each.value.secondary_ip_range[1].range_name
+  release_channel     = var.cluster_release_channel
+  gateway_api_channel = "CHANNEL_STANDARD"
+
+  security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
+  enable_cost_allocation              = true
+
+  fleet_project = local.cluster_project_id
+
+  identity_namespace = "${local.cluster_project_id}.svc.id.goog"
+
+  #TODO: Enable with v32.0.1
+  #enable_binary_authorization = true
+
+  cluster_resource_labels = {
+    "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
+  }
 
   depends_on = [
     module.eab_cluster_project

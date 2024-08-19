@@ -79,6 +79,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				} else {
 					mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
 				}
+				t.Logf("ServicePath: %s, MapPath: %s",servicePath, mapPath)
 				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
 				tmpDirApp := t.TempDir()
 				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
@@ -128,15 +129,21 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 					gitAppRun("rm", "-r", "src/components")
 
+					// MapPaths which will get the database overlay
+					dbPaths := []string{"accounts/contacts", "ledger/balancereader"}
+
 					// base folder only exists in frontend app
 					if mapPath == "frontend" {
 						gitAppRun("rm", "-r", fmt.Sprintf("src/%s/k8s", mapPath))
-					} else { // there isn't db for frontend.
-						fmt.Printf("%s - Copying from %s to %s", servicePath, dbFrom, dbTo)
+					} else if slices.Contains(dbPaths, mapPath) {
+						t.Logf("%s - Copying from %s to %s", servicePath, dbFrom, dbTo)
 						err = cp.Copy(dbFrom, dbTo)
 						if err != nil {
 							t.Fatal(err)
 						}
+					} else {
+						t.Logf("%s - Removing database %s", servicePath, dbTo)
+						gitAppRun("rm", "-r", dbTo)
 					}
 					err = cp.Copy(fmt.Sprintf("%s/components", appSourcePath), fmt.Sprintf("%s/src/components", tmpDirApp))
 					if err != nil {

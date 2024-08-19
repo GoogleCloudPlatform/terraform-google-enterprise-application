@@ -20,9 +20,6 @@ requires:
 - configs:
   - e2e-tests
   path: ../../../skaffold-e2e.yaml
-- configs:
-  - accounts-db
-  path: ../accounts-db/skaffold.yaml
 build:
   artifacts:
   - image: userservice

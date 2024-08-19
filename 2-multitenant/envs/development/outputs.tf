@@ -53,3 +53,8 @@ output "app_certificates" {
   description = "App Certificates"
   value       = module.env.app_certificates
 }
+
+output "cluster_type" {
+  description = "Cluster type"
+  value       = module.env.cluster_type
+}

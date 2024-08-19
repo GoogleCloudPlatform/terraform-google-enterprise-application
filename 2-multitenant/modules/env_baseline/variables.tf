@@ -50,7 +50,7 @@ variable "cluster_subnetworks" {
   type        = list(string)
 }
 
-variable "release_channel" {
+variable "cluster_release_channel" {
   description = "The release channel for the clusters"
   type        = string
   default     = "REGULAR"
@@ -62,4 +62,15 @@ variable "apps" {
     ip_address_names = optional(list(string))
     certificates     = optional(map(list(string)))
   }))
+}
+
+variable "cluster_type" {
+  description = "GKE multi-tenant cluster types: STANDARD, STANDARD-NAP (Standard with node auto-provisioning), AUTOPILOT"
+  type        = string
+  default     = "STANDARD-NAP"
+
+  validation {
+    condition     = contains(["STANDARD", "STANDARD-NAP", "AUTOPILOT"], var.cluster_type)
+    error_message = "The cluster_type value must be one of: STANDARD, STANDARD-NAP, AUTOPILOT."
+  }
 }
