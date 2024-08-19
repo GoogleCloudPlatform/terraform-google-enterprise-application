@@ -52,23 +52,15 @@ resource "google_gke_hub_membership_binding" "membership-binding" {
   project               = google_gke_hub_scope.fleet-scope[each.value[0]].project
 }
 
-resource "google_gke_hub_scope_iam_member" "member" {
+module "fleet_app_operator_permissions" {
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-app-operator-permissions"
+  version = "~> 32.0"
+
   for_each = var.namespace_ids
 
-  scope_id = google_gke_hub_scope.fleet-scope[each.key].scope_id
-  role     = "roles/admin"
-  member   = "group:${each.value}"
-  project  = google_gke_hub_scope.fleet-scope[each.key].project
-}
-
-resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_role_binding" {
-  for_each = var.namespace_ids
-
-  scope_rbac_role_binding_id = "${google_gke_hub_scope.fleet-scope[each.key].scope_id}-${random_string.suffix.result}"
-  scope_id                   = google_gke_hub_scope.fleet-scope[each.key].scope_id
-  user                       = each.value
-  project                    = google_gke_hub_scope.fleet-scope[each.key].project
-  role {
-    predefined_role = "ADMIN"
-  }
+  fleet_project_id = var.fleet_project_id
+  scope_id         = google_gke_hub_scope.fleet-scope[each.key].scope_id
+  users            = []
+  groups           = [each.value]
+  role             = "ADMIN"
 }
