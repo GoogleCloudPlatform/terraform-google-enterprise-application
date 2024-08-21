@@ -60,7 +60,6 @@ module "fleet_app_operator_permissions" {
 
   fleet_project_id = var.fleet_project_id
   scope_id         = google_gke_hub_scope.fleet-scope[each.key].scope_id
-  users            = []
   groups           = [each.value]
   role             = "ADMIN"
 }
