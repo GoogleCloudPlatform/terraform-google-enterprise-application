@@ -151,9 +151,11 @@ func TestMultitenant(t *testing.T) {
 				// Service Identity
 				fleetProjectNumber := gcloud.Runf(t, "projects describe %s", fleetProjectID).Get("projectNumber").String()
 				gkeServiceAgent := fmt.Sprintf("service-%s@gcp-sa-gkehub.iam.gserviceaccount.com", fleetProjectNumber)
-				gkeSaRoles := []string{
-					"roles/gkehub.serviceAgent",
-					// TODO: Include if seperate fleet project "roles/gkehub.crossProjectServiceAgent",
+				gkeSaRoles := []string{"roles/gkehub.serviceAgent"}
+
+				// If using a seperate fleet project check the cross project SA role
+				if fleetProjectID != clusterProjectID {
+					gkeSaRoles = append(gkeSaRoles, "roles/gkehub.crossProjectServiceAgent")
 				}
 
 				gkeIamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", gkeServiceAgent)
