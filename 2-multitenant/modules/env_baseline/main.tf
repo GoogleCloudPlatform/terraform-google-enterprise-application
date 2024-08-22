@@ -172,6 +172,10 @@ module "gke-standard" {
     module.eab_cluster_project
   ]
 
+  // Private Cluster Configuration
+  enable_private_endpoint = true
+  enable_private_nodes    = true
+
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
 
@@ -210,6 +214,10 @@ module "gke-autopilot" {
   depends_on = [
     module.eab_cluster_project
   ]
+
+  // Private Cluster Configuration
+  enable_private_endpoint = true
+  enable_private_nodes    = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
