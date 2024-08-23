@@ -214,7 +214,7 @@ module "gke-autopilot" {
     module.eab_cluster_project
   ]
 
-  // Private Cluster Configuration  
+  // Private Cluster Configuration
   enable_private_nodes = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
