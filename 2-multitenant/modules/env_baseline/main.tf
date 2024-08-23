@@ -32,7 +32,7 @@ locals {
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 15.0"
+  version = "~> 16.0"
 
   count = var.create_cluster_project ? 1 : 0
 
@@ -222,7 +222,7 @@ module "gke-autopilot" {
     module.eab_cluster_project
   ]
 
-  // Private Cluster Configuration  
+  // Private Cluster Configuration
   enable_private_nodes = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
