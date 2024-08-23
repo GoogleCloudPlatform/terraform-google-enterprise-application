@@ -177,7 +177,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 31.0"
+  version = "~> 32.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
@@ -192,6 +192,7 @@ module "gke-autopilot" {
   ip_range_services   = each.value.secondary_ip_range[1].range_name
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
+  enable_gcfs         = true
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   enable_cost_allocation              = true
@@ -200,8 +201,7 @@ module "gke-autopilot" {
 
   identity_namespace = "${local.cluster_project_id}.svc.id.goog"
 
-  #TODO: Enable with v32.0.1
-  #enable_binary_authorization = true
+  enable_binary_authorization = true
 
   cluster_resource_labels = {
     "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
