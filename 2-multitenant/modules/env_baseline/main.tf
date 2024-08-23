@@ -173,7 +173,7 @@ module "gke-standard" {
   ]
 
   // Private Cluster Configuration
-  enable_private_nodes    = true
+  enable_private_nodes = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
@@ -215,7 +215,7 @@ module "gke-autopilot" {
   ]
 
   // Private Cluster Configuration  
-  enable_private_nodes    = true
+  enable_private_nodes = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
