@@ -19,6 +19,14 @@ locals {
   subnetworks_re     = "/subnetworks/([^/]*)$"
   projects_re        = "projects/([^/]*)/"
   cluster_project_id = data.google_project.eab_cluster_project.project_id
+  available_cidr_ranges = [
+    "10.11.10.0/28",
+    "10.11.20.0/28",
+  ]
+
+  subnets_to_cidr = {
+    for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
+  }
 }
 
 // Create cluster project
@@ -106,19 +114,19 @@ module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
   version = "~> 32.0"
 
-  for_each = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
-  name     = "cluster-${each.value.region}-${var.env}"
-
-  project_id          = local.cluster_project_id
-  regional            = true
-  region              = each.value.region
-  network_project_id  = regex(local.projects_re, each.value.id)[0]
-  network             = regex(local.networks_re, each.value.network)[0]
-  subnetwork          = each.value.name
-  ip_range_pods       = each.value.secondary_ip_range[0].range_name
-  ip_range_services   = each.value.secondary_ip_range[1].range_name
-  release_channel     = var.cluster_release_channel
-  gateway_api_channel = "CHANNEL_STANDARD"
+  for_each               = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
+  name                   = "cluster-${each.value.region}-${var.env}"
+  master_ipv4_cidr_block = local.subnets_to_cidr[each.value.id]
+  project_id             = local.cluster_project_id
+  regional               = true
+  region                 = each.value.region
+  network_project_id     = regex(local.projects_re, each.value.id)[0]
+  network                = regex(local.networks_re, each.value.network)[0]
+  subnetwork             = each.value.name
+  ip_range_pods          = each.value.secondary_ip_range[0].range_name
+  ip_range_services      = each.value.secondary_ip_range[1].range_name
+  release_channel        = var.cluster_release_channel
+  gateway_api_channel    = "CHANNEL_STANDARD"
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   datapath_provider                   = "ADVANCED_DATAPATH"
