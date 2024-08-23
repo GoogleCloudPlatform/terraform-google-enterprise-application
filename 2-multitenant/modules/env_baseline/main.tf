@@ -192,6 +192,7 @@ module "gke-autopilot" {
   ip_range_services   = each.value.secondary_ip_range[1].range_name
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
+  enable_gcfs         = true
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   enable_cost_allocation              = true
