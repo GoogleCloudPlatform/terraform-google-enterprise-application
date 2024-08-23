@@ -116,7 +116,7 @@ module "gke-standard" {
 
   for_each               = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name                   = "cluster-${each.value.region}-${var.env}"
-  master_ipv4_cidr_block = local.subnets_to_cidr[each.value.id]
+  master_ipv4_cidr_block = local.subnets_to_cidr[each.key]
   project_id             = local.cluster_project_id
   regional               = true
   region                 = each.value.region
