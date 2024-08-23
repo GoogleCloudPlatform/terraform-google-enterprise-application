@@ -24,7 +24,7 @@ locals {
 // Create admin project
 module "app_admin_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 15.0"
+  version = "~> 16.0"
 
   random_project_id        = true
   random_project_id_length = 4
@@ -74,7 +74,7 @@ module "tf_cloudbuild_workspace" {
 // Create env project
 module "app_env_project" {
   source   = "terraform-google-modules/project-factory/google"
-  version  = "~> 15.0"
+  version  = "~> 16.0"
   for_each = var.create_env_projects ? var.envs : {}
 
   random_project_id        = true

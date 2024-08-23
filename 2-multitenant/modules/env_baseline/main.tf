@@ -24,7 +24,7 @@ locals {
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 15.0"
+  version = "~> 16.0"
 
   count = var.create_cluster_project ? 1 : 0
 
