@@ -40,6 +40,11 @@ variable "network_project_id" {
   type        = string
 }
 
+variable "network_self_link" {
+  description = "Network Self Link"
+  type        = string
+}
+
 variable "billing_account" {
   description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
   type        = string

@@ -177,7 +177,9 @@ module "gke-standard" {
   ]
 
   depends_on = [
-    module.eab_cluster_project
+    module.eab_cluster_project,
+    google_compute_firewall.allow_internal_egress,
+    google_compute_firewall.allow_internal_ingress
   ]
 
   // Private Cluster Configuration
@@ -219,7 +221,9 @@ module "gke-autopilot" {
   }
 
   depends_on = [
-    module.eab_cluster_project
+    module.eab_cluster_project,
+    google_compute_firewall.allow_internal_egress,
+    google_compute_firewall.allow_internal_ingress
   ]
 
   // Private Cluster Configuration
