@@ -160,6 +160,7 @@ func TestMultitenant(t *testing.T) {
 					assert.True(clusterOp.Get("monitoringConfig.managedPrometheusConfig.enabled").Bool(), fmt.Sprintf("Cluster %s should have Managed Prometheus Config equals True", id))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), clusterOp.Get("workloadIdentityConfig.workloadPool").String(), fmt.Sprintf("Cluster %s workloadPool should be %s.svc.id.goog", id, clusterProjectID))
 					assert.Equal(fmt.Sprintf("%s.svc.id.goog", clusterProjectID), membershipOp.Get("authority.workloadIdentityPool").String(), fmt.Sprintf("Membership %s workloadIdentityPool should be %s.svc.id.goog", id, clusterProjectID))
+					assert.Equal("PROJECT_SINGLETON_POLICY_ENFORCE", clusterOp.Get("binaryAuthorization.evaluationMode").String(), fmt.Sprintf("Cluster %s Binary Authorization Evaluation Mode should be PROJECT_SINGLETON_POLICY_ENFORCE", id))
 				}
 
 				// Service Identity
