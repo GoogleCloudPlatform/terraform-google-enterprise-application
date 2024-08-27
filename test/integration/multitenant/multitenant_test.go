@@ -112,7 +112,7 @@ func TestMultitenant(t *testing.T) {
 
 					// Validate if all nodes inside node pool does not contain an external NAT IP address
 					nodePoolName := clusterOp.Get("nodePools.0.name").String()
-					nodeInstances := gcloud.Runf(t, "container compute instances list --filter=\"labels.goog-k8s-node-pool-name=%s\" --project=%s", nodePoolName, clusterProjectID).Array()
+					nodeInstances := gcloud.Runf(t, "compute instances list --filter=\"labels.goog-k8s-node-pool-name=%s\" --project=%s", nodePoolName, clusterProjectID).Array()
 					for _, node := range nodeInstances {
 						// retrieve all node network interfaces
 						nics := node.Get("networkInterfaces")
