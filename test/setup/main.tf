@@ -145,6 +145,38 @@ module "vpc" {
   network_name    = "eab-vpc-${each.key}"
   shared_vpc_host = true
 
+  egress_rules = [
+    {
+      name     = "allow-private-google-access"
+      priority = 200
+      destination_ranges = [
+        "34.126.0.0/18",
+        "199.36.153.8/30",
+      ]
+      allow = [
+        {
+          protocol = "tcp"
+          ports    = ["443"]
+        }
+      ]
+    },
+    {
+      name     = "allow-private-google-access-ipv6"
+      priority = 200
+      destination_ranges = [
+        "2600:2d00:0002:2000::/64",
+        "2001:4860:8040::/42"
+      ]
+      allow = [
+        {
+          protocol = "tcp"
+          ports    = ["443"]
+        }
+      ]
+    }
+  ]
+
+
   subnets = [
     {
       subnet_name           = "eab-${each.key}-region01"
@@ -183,48 +215,6 @@ module "vpc" {
       },
     ]
   }
-}
-
-resource "google_compute_firewall" "allow_private_google_access" {
-  for_each = module.vpc
-
-  name    = "allow-private-google-access"
-  network = each.value.network_self_link
-  project = each.value.project_id
-
-  allow {
-    protocol = "tcp"
-    ports    = ["443"]
-  }
-
-  destination_ranges = [
-    "34.126.0.0/18",
-    "199.36.153.8/30",
-  ]
-
-  priority  = 200
-  direction = "EGRESS"
-}
-
-resource "google_compute_firewall" "allow_private_google_access_ipv6" {
-  for_each = module.vpc
-
-  name    = "allow-private-google-access-ipv6"
-  network = each.value.network_self_link
-  project = each.value.project_id
-
-  allow {
-    protocol = "tcp"
-    ports    = ["443"]
-  }
-
-  destination_ranges = [
-    "2600:2d00:0002:2000::/64",
-    "2001:4860:8040::/42"
-  ]
-
-  priority  = 200
-  direction = "EGRESS"
 }
 
 data "google_organization" "org" {
