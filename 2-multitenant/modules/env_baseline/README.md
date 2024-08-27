@@ -24,6 +24,7 @@ The following resources are created:
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
+| network\_self\_link | Network Self Link | `string` | n/a | yes |
 | org\_id | Organization ID | `string` | n/a | yes |
 
 ## Outputs

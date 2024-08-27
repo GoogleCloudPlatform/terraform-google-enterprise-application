@@ -122,15 +122,11 @@ module "gke-standard" {
   region                 = each.value.region
   network_project_id     = regex(local.projects_re, each.value.id)[0]
   network                = regex(local.networks_re, each.value.network)[0]
-  network_tags           = ["allow-gke-internal-ingress", "allow-gke-internal-egress"]
-  node_pools_tags = {
-    "all" : ["allow-gke-internal-ingress", "allow-gke-internal-egress"]
-  }
-  subnetwork          = each.value.name
-  ip_range_pods       = each.value.secondary_ip_range[0].range_name
-  ip_range_services   = each.value.secondary_ip_range[1].range_name
-  release_channel     = var.cluster_release_channel
-  gateway_api_channel = "CHANNEL_STANDARD"
+  subnetwork             = each.value.name
+  ip_range_pods          = each.value.secondary_ip_range[0].range_name
+  ip_range_services      = each.value.secondary_ip_range[1].range_name
+  release_channel        = var.cluster_release_channel
+  gateway_api_channel    = "CHANNEL_STANDARD"
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   datapath_provider                   = "ADVANCED_DATAPATH"
@@ -181,9 +177,7 @@ module "gke-standard" {
   ]
 
   depends_on = [
-    module.eab_cluster_project,
-    google_compute_firewall.allow_internal_egress,
-    google_compute_firewall.allow_internal_ingress
+    module.eab_cluster_project
   ]
 
   // Private Cluster Configuration
@@ -204,7 +198,6 @@ module "gke-autopilot" {
   region              = each.value.region
   network_project_id  = regex(local.projects_re, each.value.id)[0]
   network             = regex(local.networks_re, each.value.network)[0]
-  network_tags        = ["allow-gke-internal-ingress", "allow-gke-internal-egress"]
   subnetwork          = each.value.name
   ip_range_pods       = each.value.secondary_ip_range[0].range_name
   ip_range_services   = each.value.secondary_ip_range[1].range_name
@@ -226,9 +219,7 @@ module "gke-autopilot" {
   }
 
   depends_on = [
-    module.eab_cluster_project,
-    google_compute_firewall.allow_internal_egress,
-    google_compute_firewall.allow_internal_ingress
+    module.eab_cluster_project
   ]
 
   // Private Cluster Configuration
