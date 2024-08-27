@@ -79,3 +79,9 @@ variable "cluster_type" {
     error_message = "The cluster_type value must be one of: STANDARD, STANDARD-NAP, AUTOPILOT."
   }
 }
+
+variable "add_cluster_firewall_rules" {
+  description = "When set to true, this flag will create additional firewall rules on the subnet, allowing all traffic on 10.0.0.0/8 range."
+  type        = bool
+  default     = false
+}

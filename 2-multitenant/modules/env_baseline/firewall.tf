@@ -1,4 +1,6 @@
 resource "google_compute_firewall" "allow_internal_ingress" {
+  count = var.add_cluster_firewall_rules ? 1 : 0
+
   name    = "allow-gke-ingress-ranges"
   project = var.network_project_id
   network = var.network_self_link
@@ -22,10 +24,16 @@ resource "google_compute_firewall" "allow_internal_ingress" {
   }
 
   direction = "INGRESS"
-  priority  = 1000
+  priority  = 200
+  # log_config {
+  #   metadata = "INCLUDE_ALL_METADATA"
+  # }
+  target_tags = ["allow-gke-internal-ingress"]
 }
 
 resource "google_compute_firewall" "allow_internal_egress" {
+  count = var.add_cluster_firewall_rules ? 1 : 0
+
   name    = "allow-gke-egress-ranges"
   project = var.network_project_id
   network = var.network_self_link
@@ -47,7 +55,10 @@ resource "google_compute_firewall" "allow_internal_egress" {
   allow {
     protocol = "icmp"
   }
-
-  direction = "EGRESS"
-  priority  = 1000
+  # log_config {
+  #   metadata = "INCLUDE_ALL_METADATA"
+  # }
+  direction   = "EGRESS"
+  priority    = 200
+  target_tags = ["allow-gke-internal-egress"]
 }
