@@ -15,14 +15,11 @@
  */
 
 locals {
-  networks_re        = "/networks/([^/]*)$"
-  subnetworks_re     = "/subnetworks/([^/]*)$"
-  projects_re        = "projects/([^/]*)/"
-  cluster_project_id = data.google_project.eab_cluster_project.project_id
-  available_cidr_ranges = [
-    "10.11.10.0/28",
-    "10.11.20.0/28",
-  ]
+  networks_re           = "/networks/([^/]*)$"
+  subnetworks_re        = "/subnetworks/([^/]*)$"
+  projects_re           = "projects/([^/]*)/"
+  cluster_project_id    = data.google_project.eab_cluster_project.project_id
+  available_cidr_ranges = var.master_ipv4_cidr_blocks
 
   subnets_to_cidr = {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
