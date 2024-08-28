@@ -110,9 +110,9 @@ func TestMultitenant(t *testing.T) {
 					clusterName := regexp.MustCompile(`\/clusters\/([^\/]*)$`).FindStringSubmatch(membershipOp.Get("endpoint.gkeCluster.resourceLink").String())[1]
 					clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", clusterName, clusterLocation, clusterProjectID)
 
-					// Extract the external endpoint of the cluster
-					publicEndpoint := clusterOp.Get("privateClusterConfig.publicEndpoint").String()
-					assert.Equal(nil, net.ParseIP(publicEndpoint), "The cluster can't have an external IP address")
+					// Extract enablePrivateEndpoint flag value
+					enablePrivateEndpoint := clusterOp.Get("privateClusterConfig.enablePrivateEndpoint").Bool()
+					assert.True(enablePrivateEndpoint, "The cluster external endpoint must be disabled.")
 
 					// Validate if all nodes inside node pool does not contain an external NAT IP address
 					nodePoolName := clusterOp.Get("nodePools.0.name").String()
