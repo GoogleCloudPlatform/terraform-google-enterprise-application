@@ -16,6 +16,7 @@ package multitenant
 
 import (
 	"fmt"
+	"net"
 	"regexp"
 	"strings"
 	"testing"
@@ -108,33 +109,47 @@ func TestMultitenant(t *testing.T) {
 					clusterLocation := regexp.MustCompile(`\/locations\/([^\/]*)\/`).FindStringSubmatch(membershipOp.Get("endpoint.gkeCluster.resourceLink").String())[1]
 					clusterName := regexp.MustCompile(`\/clusters\/([^\/]*)$`).FindStringSubmatch(membershipOp.Get("endpoint.gkeCluster.resourceLink").String())[1]
 					clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", clusterName, clusterLocation, clusterProjectID)
+
+					// Validate if all nodes inside node pool does not contain an external NAT IP address
+					nodePoolName := clusterOp.Get("nodePools.0.name").String()
+					nodeInstances := gcloud.Runf(t, "compute instances list --filter=\"labels.goog-k8s-node-pool-name=%s\" --project=%s", nodePoolName, clusterProjectID).Array()
+					for _, node := range nodeInstances {
+						// retrieve all node network interfaces
+						nics := node.Get("networkInterfaces")
+						// for each network interface, verify if it using an external natIP
+						nics.ForEach((func(key, value gjson.Result) bool {
+							assert.Equal(nil, net.ParseIP(value.Get("accessConfigs.0.natIP").String()), "The nodes inside the nodepool should not have external ip addresses.")
+							return true // keep iterating
+						}))
+					}
+
 					// NodePools
 					switch clusterType {
-						case "STANDARD":
-							assert.Equal("node-pool-1", clusterOp.Get("nodePools.0.name").String(), "NodePool name should be node-pool-1")
-							assert.Equal("SURGE", clusterOp.Get("nodePools.0.upgradeSettings.strategy").String(), "NodePool strategy should SURGE")
-							assert.Equal("1", clusterOp.Get("nodePools.0.upgradeSettings.maxSurge").String(), "NodePool max surge should be 1")
-							assert.Equal("BALANCED", clusterOp.Get("nodePools.0.autoscaling.locationPolicy").String(), "NodePool auto scaling location prolicy should be BALANCED")
-							assert.True(clusterOp.Get("nodePools.0.autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
-						case "STANDARD-NAP":
-							for _, pool := range clusterOp.Get("nodePools").Array() {
-								if pool.Get("name").String() == "node-pool-1" {
-									assert.False(pool.Get("autoscaling.autoprovisioned").Bool(), "NodePool autoscaling autoprovisioned should disabled(false)")
-								} else if regexp.MustCompile(`^nap-.*`).FindString(pool.Get("name").String()) != "" {
-									assert.True(pool.Get("autoscaling.autoprovisioned").Bool(), "NodePool autoscaling autoprovisioned should enabled(true)")
-								} else {
-									t.Fatalf("Error: unknown node pool: %s", pool.Get("name").String())
-								}
-								// common to all valid node pools
-								assert.True(pool.Get("autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
-								assert.Equal("SURGE", pool.Get("upgradeSettings.strategy").String(), "NodePool strategy should SURGE")
-								assert.Equal("1", pool.Get("upgradeSettings.maxSurge").String(), "NodePool max surge should be 1")
-								assert.Equal("BALANCED", pool.Get("autoscaling.locationPolicy").String(), "NodePool auto scaling location prolicy should be BALANCED")
+					case "STANDARD":
+						assert.Equal("node-pool-1", clusterOp.Get("nodePools.0.name").String(), "NodePool name should be node-pool-1")
+						assert.Equal("SURGE", clusterOp.Get("nodePools.0.upgradeSettings.strategy").String(), "NodePool strategy should SURGE")
+						assert.Equal("1", clusterOp.Get("nodePools.0.upgradeSettings.maxSurge").String(), "NodePool max surge should be 1")
+						assert.Equal("BALANCED", clusterOp.Get("nodePools.0.autoscaling.locationPolicy").String(), "NodePool auto scaling location prolicy should be BALANCED")
+						assert.True(clusterOp.Get("nodePools.0.autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
+					case "STANDARD-NAP":
+						for _, pool := range clusterOp.Get("nodePools").Array() {
+							if pool.Get("name").String() == "node-pool-1" {
+								assert.False(pool.Get("autoscaling.autoprovisioned").Bool(), "NodePool autoscaling autoprovisioned should disabled(false)")
+							} else if regexp.MustCompile(`^nap-.*`).FindString(pool.Get("name").String()) != "" {
+								assert.True(pool.Get("autoscaling.autoprovisioned").Bool(), "NodePool autoscaling autoprovisioned should enabled(true)")
+							} else {
+								t.Fatalf("Error: unknown node pool: %s", pool.Get("name").String())
 							}
-						case "AUTOPILOT":
-							// Autopilot manages all nodepools
-						default:
-							t.Fatalf("Error: unknown cluster type: %s", clusterType)
+							// common to all valid node pools
+							assert.True(pool.Get("autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
+							assert.Equal("SURGE", pool.Get("upgradeSettings.strategy").String(), "NodePool strategy should SURGE")
+							assert.Equal("1", pool.Get("upgradeSettings.maxSurge").String(), "NodePool max surge should be 1")
+							assert.Equal("BALANCED", pool.Get("autoscaling.locationPolicy").String(), "NodePool auto scaling location prolicy should be BALANCED")
+						}
+					case "AUTOPILOT":
+						// Autopilot manages all nodepools
+					default:
+						t.Fatalf("Error: unknown cluster type: %s", clusterType)
 					}
 					// Cluster
 					assert.Equal(fleetProjectID, clusterOp.Get("fleet.project").String(), fmt.Sprintf("Cluster %s Fleet Project should be %s", id, fleetProjectID))
