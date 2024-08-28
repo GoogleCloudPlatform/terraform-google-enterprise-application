@@ -56,6 +56,22 @@ steps:
   waitFor:
     - multitenant-apply
 
+- id: appfactory-init
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage init --verbose']
+  waitFor:
+    - multitenant-apply
+- id: appfactory-apply
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage apply --verbose']
+  waitFor:
+    - appfactory-init
+- id: appfactory-verify
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage verify --verbose']
+  waitFor:
+    - appfactory-apply
+
 - id: fleetscope-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestFleetscope --stage init --verbose']
@@ -71,22 +87,6 @@ steps:
   args: ['/bin/bash', '-c', 'cft test run TestFleetscope --stage verify --verbose']
   waitFor:
     - fleetscope-apply
-
-- id: appfactory-init
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage init --verbose']
-  waitFor:
-    - fleetscope-apply
-- id: appfactory-apply
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage apply --verbose']
-  waitFor:
-    - appfactory-init
-- id: appfactory-verify
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppfactory --stage verify --verbose']
-  waitFor:
-    - appfactory-apply
 
 - id: appinfra-init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
