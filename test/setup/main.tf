@@ -145,16 +145,50 @@ module "vpc" {
   network_name    = "eab-vpc-${each.key}"
   shared_vpc_host = true
 
-  subnets = [
+  egress_rules = [
     {
-      subnet_name   = "eab-${each.key}-region01"
-      subnet_ip     = "10.10.10.0/24"
-      subnet_region = "us-central1"
+      name     = "allow-private-google-access"
+      priority = 200
+      destination_ranges = [
+        "34.126.0.0/18",
+        "199.36.153.8/30",
+      ]
+      allow = [
+        {
+          protocol = "tcp"
+          ports    = ["443"]
+        }
+      ]
     },
     {
-      subnet_name   = "eab-${each.key}-region02"
-      subnet_ip     = "10.10.20.0/24"
-      subnet_region = "us-east4"
+      name     = "allow-private-google-access-ipv6"
+      priority = 200
+      destination_ranges = [
+        "2600:2d00:0002:2000::/64",
+        "2001:4860:8040::/42"
+      ]
+      allow = [
+        {
+          protocol = "tcp"
+          ports    = ["443"]
+        }
+      ]
+    }
+  ]
+
+
+  subnets = [
+    {
+      subnet_name           = "eab-${each.key}-region01"
+      subnet_ip             = "10.10.10.0/24"
+      subnet_region         = "us-central1"
+      subnet_private_access = true
+    },
+    {
+      subnet_name           = "eab-${each.key}-region02"
+      subnet_ip             = "10.10.20.0/24"
+      subnet_region         = "us-east4"
+      subnet_private_access = true
     },
   ]
 

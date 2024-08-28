@@ -15,10 +15,15 @@
  */
 
 locals {
-  networks_re        = "/networks/([^/]*)$"
-  subnetworks_re     = "/subnetworks/([^/]*)$"
-  projects_re        = "projects/([^/]*)/"
-  cluster_project_id = data.google_project.eab_cluster_project.project_id
+  networks_re           = "/networks/([^/]*)$"
+  subnetworks_re        = "/subnetworks/([^/]*)$"
+  projects_re           = "projects/([^/]*)/"
+  cluster_project_id    = data.google_project.eab_cluster_project.project_id
+  available_cidr_ranges = var.master_ipv4_cidr_blocks
+
+  subnets_to_cidr = {
+    for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
+  }
 }
 
 // Create cluster project
@@ -106,19 +111,19 @@ module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
   version = "~> 32.0"
 
-  for_each = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
-  name     = "cluster-${each.value.region}-${var.env}"
-
-  project_id          = local.cluster_project_id
-  regional            = true
-  region              = each.value.region
-  network_project_id  = regex(local.projects_re, each.value.id)[0]
-  network             = regex(local.networks_re, each.value.network)[0]
-  subnetwork          = each.value.name
-  ip_range_pods       = each.value.secondary_ip_range[0].range_name
-  ip_range_services   = each.value.secondary_ip_range[1].range_name
-  release_channel     = var.cluster_release_channel
-  gateway_api_channel = "CHANNEL_STANDARD"
+  for_each               = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
+  name                   = "cluster-${each.value.region}-${var.env}"
+  master_ipv4_cidr_block = local.subnets_to_cidr[each.key]
+  project_id             = local.cluster_project_id
+  regional               = true
+  region                 = each.value.region
+  network_project_id     = regex(local.projects_re, each.value.id)[0]
+  network                = regex(local.networks_re, each.value.network)[0]
+  subnetwork             = each.value.name
+  ip_range_pods          = each.value.secondary_ip_range[0].range_name
+  ip_range_services      = each.value.secondary_ip_range[1].range_name
+  release_channel        = var.cluster_release_channel
+  gateway_api_channel    = "CHANNEL_STANDARD"
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   datapath_provider                   = "ADVANCED_DATAPATH"
@@ -172,12 +177,15 @@ module "gke-standard" {
     module.eab_cluster_project
   ]
 
+  // Private Cluster Configuration
+  enable_private_nodes = true
+
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 31.0"
+  version = "~> 32.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
@@ -192,6 +200,7 @@ module "gke-autopilot" {
   ip_range_services   = each.value.secondary_ip_range[1].range_name
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
+  enable_gcfs         = true
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   enable_cost_allocation              = true
@@ -200,8 +209,7 @@ module "gke-autopilot" {
 
   identity_namespace = "${local.cluster_project_id}.svc.id.goog"
 
-  #TODO: Enable with v32.0.1
-  #enable_binary_authorization = true
+  enable_binary_authorization = true
 
   cluster_resource_labels = {
     "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
@@ -210,6 +218,9 @@ module "gke-autopilot" {
   depends_on = [
     module.eab_cluster_project
   ]
+
+  // Private Cluster Configuration
+  enable_private_nodes = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
