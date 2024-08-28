@@ -109,7 +109,7 @@ data "google_compute_subnetwork" "default" {
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 32.0"
+  version = "~> 32.0.4"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name                   = "cluster-${each.value.region}-${var.env}"
@@ -178,14 +178,15 @@ module "gke-standard" {
   ]
 
   // Private Cluster Configuration
-  enable_private_nodes = true
-
-  deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
+  enable_private_nodes    = true
+  enable_private_endpoint = true
+  
+  deletion_protection     = false # set to true to prevent the module from deleting the cluster on destroy
 }
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 32.0"
+  version = "~> 32.0.4"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
@@ -221,6 +222,7 @@ module "gke-autopilot" {
 
   // Private Cluster Configuration
   enable_private_nodes = true
+  enable_private_endpoint = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
