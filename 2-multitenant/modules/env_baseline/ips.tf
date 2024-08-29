@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+
+# locals {
+#   ip_addresses_names = for {
+#     for k, v in var.apps : k => [for a,b in v.ip_address_names: "${v.acronyms}-${b}"]
+#   }
+# }
+
 // Create App/Ip Addresses
 module "apps_ip_address" {
   source  = "terraform-google-modules/address/google"
   version = "~> 4.0"
 
   for_each = {
-    for k, v in var.apps : k => v.ip_address_names
+    for k, v in var.apps : k => [for a,b in v.ip_address_names: "${v.acronyms}-${b}"]
   }
 
   project_id   = data.google_project.eab_cluster_project.project_id
