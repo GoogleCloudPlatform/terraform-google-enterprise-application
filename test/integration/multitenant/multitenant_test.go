@@ -112,7 +112,7 @@ func TestMultitenant(t *testing.T) {
 
 					// Extract enablePrivateEndpoint flag value
 					enablePrivateEndpoint := clusterOp.Get("privateClusterConfig.enablePrivateEndpoint").Bool()
-					assert.True(enablePrivateEndpoint, "The cluster external endpoint must be disabled.")
+					assert.True(enablePrivateEndpoint, "The cluster external endpoint must be private.")
 
 					// Validate if all nodes inside node pool does not contain an external NAT IP address
 					nodePoolName := clusterOp.Get("nodePools.0.name").String()
