@@ -19,7 +19,7 @@ locals {
 }
 
 module "env" {
-  source = "../../../../../modules/env_baseline"
+  source = "../../../../../modules/alloydb-psc-setup"
 
   env                      = local.env
   cluster_project_id       = var.cluster_project_id
