@@ -76,6 +76,6 @@ resource "google_compute_forwarding_rule" "psc_fwd_rule_consumer" {
 
 resource "google_project_iam_member" "cymbal_bank" {
   project = var.app_project_id
-  role    = "alloydb.admin"
+  role    = "roles/alloydb.admin"
   member  = "serviceAccount:bank-of-anthos@${var.cluster_project_id}.iam.gserviceaccount.com"
 }
