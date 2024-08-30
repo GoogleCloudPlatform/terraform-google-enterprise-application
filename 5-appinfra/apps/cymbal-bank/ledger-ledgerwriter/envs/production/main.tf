@@ -15,7 +15,9 @@
  */
 
 locals {
-  env = "production"
+  env                = "production"
+  app_short_name     = "cym-bank"
+  service_short_name = "ldgr-writer"
 }
 
 module "env" {
@@ -28,4 +30,6 @@ module "env" {
   app_project_id           = var.app_project_id
   network_name             = var.network_name
   psc_consumer_fwd_rule_ip = var.psc_consumer_fwd_rule_ip
+  app_short_name           = local.app_short_name
+  service_short_name       = local.service_short_name
 }

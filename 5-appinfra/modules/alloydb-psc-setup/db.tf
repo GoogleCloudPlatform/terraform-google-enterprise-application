@@ -72,10 +72,8 @@ resource "google_compute_forwarding_rule" "psc_fwd_rule_consumer" {
 }
 
 # Grant workload identity service account access to alloydb.
-# TODO: Rename bank-of-anthos to cymbal-bank
-
 resource "google_project_iam_member" "alloydb_admin" {
   project = var.app_project_id
   role    = "roles/alloydb.admin"
-  member  = "serviceAccount:bank-of-anthos@${var.cluster_project_id}.iam.gserviceaccount.com"
+  member  = "serviceAccount:${var.app_short_name}-${var.service_short_name}@${var.cluster_project_id}.iam.gserviceaccount.com"
 }

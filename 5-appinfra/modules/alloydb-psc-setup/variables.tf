@@ -48,3 +48,13 @@ variable "psc_consumer_fwd_rule_ip" {
   description = "Consumer psc endpoint IP address"
   type        = string
 }
+
+variable "app_short_name" {
+  description = "Short name for the application name."
+  type        = string
+}
+
+variable "service_short_name" {
+  description = "Short name for the service name."
+  type        = string
+}
