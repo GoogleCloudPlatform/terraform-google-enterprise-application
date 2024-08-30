@@ -50,7 +50,7 @@ func TestAppfactory(t *testing.T) {
 			t.Parallel()
 
 			appFactory := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appGroupName)),
+				tft.WithTFDir(fmt.Sprintf("../../../4-appfactory/apps/%s", appGroupName)),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
