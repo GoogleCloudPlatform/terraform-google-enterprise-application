@@ -38,7 +38,7 @@ func TestSourceCymbalBank(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	for _, envName := range testutils.EnvNames {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
-		multitenant :=  tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
+		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 	}
 
@@ -58,7 +58,7 @@ func TestSourceCymbalBank(t *testing.T) {
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
 		appSourcePath := fmt.Sprintf("../../../6-appsource/%s", appName)
-		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../3-appfactory/apps/%s", appName)))
+		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../4-appfactory/apps/%s", appName)))
 		for _, serviceName := range serviceNames {
 			serviceName := serviceName // capture range variable
 			splitServiceName = strings.Split(serviceName, "-")
@@ -79,17 +79,17 @@ func TestSourceCymbalBank(t *testing.T) {
 				} else {
 					mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
 				}
-				t.Logf("ServicePath: %s, MapPath: %s",servicePath, mapPath)
+				t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
 				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
 				tmpDirApp := t.TempDir()
 				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 
 				vars := map[string]interface{}{
-					"project_id":                     servicesInfoMap[serviceName].ProjectID,
-					"region":                         region,
-					"env_cluster_membership_ids":     env_cluster_membership_ids,
-					"buckets_force_destroy":          "true",
+					"project_id":                 servicesInfoMap[serviceName].ProjectID,
+					"region":                     region,
+					"env_cluster_membership_ids": env_cluster_membership_ids,
+					"buckets_force_destroy":      "true",
 				}
 
 				appsource := tft.NewTFBlueprintTest(t,
