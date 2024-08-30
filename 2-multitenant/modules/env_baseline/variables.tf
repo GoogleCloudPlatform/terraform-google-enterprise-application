@@ -46,7 +46,7 @@ variable "billing_account" {
 }
 
 variable "cluster_subnetworks" {
-  description = "The subnetwork self_links for clusters"
+  description = "The subnetwork self_links for clusters. Adding more subnetworks will increase the number of clusters. You will need a IP block defined on `master_ipv4_cidr_blocks` variable for each cluster subnetwork."
   type        = list(string)
 }
 
@@ -74,4 +74,10 @@ variable "cluster_type" {
     condition     = contains(["STANDARD", "STANDARD-NAP", "AUTOPILOT"], var.cluster_type)
     error_message = "The cluster_type value must be one of: STANDARD, STANDARD-NAP, AUTOPILOT."
   }
+}
+
+variable "master_ipv4_cidr_blocks" {
+  description = "List of IP ranges (One range per cluster) in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet."
+  type        = list(string)
+  default     = ["10.11.10.0/28", "10.11.20.0/28"]
 }

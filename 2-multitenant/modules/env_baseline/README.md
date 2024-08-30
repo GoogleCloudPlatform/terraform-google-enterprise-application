@@ -18,11 +18,12 @@ The following resources are created:
 | apps | Applications | <pre>map(object({<br>    ip_address_names = optional(list(string))<br>    certificates     = optional(map(list(string)))<br>  }))</pre> | n/a | yes |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cluster\_release\_channel | The release channel for the clusters | `string` | `"REGULAR"` | no |
-| cluster\_subnetworks | The subnetwork self\_links for clusters | `list(string)` | n/a | yes |
+| cluster\_subnetworks | The subnetwork self\_links for clusters. Adding more subnetworks will increase the number of clusters. You will need a IP block defined on `master_ipv4_cidr_blocks` variable for each cluster subnetwork. | `list(string)` | n/a | yes |
 | cluster\_type | GKE multi-tenant cluster types: STANDARD, STANDARD-NAP (Standard with node auto-provisioning), AUTOPILOT | `string` | `"STANDARD-NAP"` | no |
 | create\_cluster\_project | Create Cluster Project ID, otherwise the Network Project ID is used | `bool` | `true` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |
+| master\_ipv4\_cidr\_blocks | List of IP ranges (One range per cluster) in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. | `list(string)` | <pre>[<br>  "10.11.10.0/28",<br>  "10.11.20.0/28"<br>]</pre> | no |
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
 | org\_id | Organization ID | `string` | n/a | yes |
 
