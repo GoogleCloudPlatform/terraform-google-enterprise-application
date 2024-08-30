@@ -24,7 +24,7 @@ locals {
   teams = [
     "frontend",
     "accounts",
-    "transactions",
+    "ledger",
   ]
 
   folder_admin_roles = [
