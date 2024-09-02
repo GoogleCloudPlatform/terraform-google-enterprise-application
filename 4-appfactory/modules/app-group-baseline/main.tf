@@ -29,7 +29,7 @@ module "app_admin_project" {
   random_project_id        = true
   random_project_id_length = 4
   billing_account          = var.billing_account
-  name                     = "${var.application_acronym}-${var.service_name}-adm"
+  name                     = "${var.application_acronym}-${var.service_name}-a"
   org_id                   = var.org_id
   folder_id                = var.folder_id
   activate_apis = [

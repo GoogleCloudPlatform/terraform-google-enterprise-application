@@ -95,7 +95,7 @@ func TestAppfactory(t *testing.T) {
 						assert.Equal(repoURL, repoOP.Get("url").String(), "source repo %s should have url %s", repositoryName, repoURL)
 
 						// check workspace SA access to repo
-						repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repositoryName, adminProjectID)
+						repoSa := fmt.Sprintf("serviceAccount:sa-cb-%s@%s.iam.gserviceaccount.com", repositoryName, adminProjectID)
 						repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
 						repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s --project %s", repositoryName, adminProjectID), repoIamOpts).Array()[0]
 						listMembers := utils.GetResultStrSlice(repoIamPolicyOp.Get("bindings.members").Array())
