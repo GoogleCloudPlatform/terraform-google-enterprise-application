@@ -53,3 +53,8 @@ variable "workload_identity_principal" {
   description = "Workload Identity Principal to assign Cloud AlloyDB Admin (roles/alloydb.admin) role. Format: https://cloud.google.com/billing/docs/reference/rest/v1/Policy#Binding"
   type        = string
 }
+
+variable "remote_state_bucket" {
+  description = "Backend bucket to load Terraform Remote State Data from previous steps."
+  type        = string
+}
