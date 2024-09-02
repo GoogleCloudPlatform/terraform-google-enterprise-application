@@ -29,6 +29,11 @@ variable "env_cluster_membership_ids" {
   }))
 }
 
+variable "application_acronym" {
+  type        = string
+  description = "The acronym of the application."
+}
+
 variable "service" {
   type        = string
   description = "service name (e.g. 'frontend')"

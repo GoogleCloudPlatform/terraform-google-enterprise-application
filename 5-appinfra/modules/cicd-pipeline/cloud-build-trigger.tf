@@ -14,7 +14,7 @@
 
 # CI trigger configuration
 resource "google_cloudbuild_trigger" "ci" {
-  name     = "${local.service_clean}-ci"
+  name     = "${local.final_service_name}-ci"
   project  = var.project_id
   location = var.region
 

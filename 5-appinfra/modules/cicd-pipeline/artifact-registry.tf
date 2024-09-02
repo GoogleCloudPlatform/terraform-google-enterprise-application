@@ -14,7 +14,7 @@
 
 # create artifact registry for container images
 resource "google_artifact_registry_repository" "container_registry" {
-  repository_id = local.service_name
+  repository_id = local.final_service_name
   location      = var.region
   format        = "docker"
   description   = "${local.service_name} docker repository"
@@ -29,7 +29,7 @@ module "artifact-registry-repository-iam-bindings" {
   source       = "terraform-google-modules/iam/google//modules/artifact_registry_iam"
   version      = "~> 7.7"
   project      = var.project_id
-  repositories = [local.service_name]
+  repositories = [local.final_service_name]
   location     = var.region
   mode         = "authoritative"
 

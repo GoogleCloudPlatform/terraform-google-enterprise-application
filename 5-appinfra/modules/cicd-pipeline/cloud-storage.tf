@@ -15,7 +15,7 @@
 # GCS bucket used as skaffold build cache
 resource "google_storage_bucket" "build_cache" {
   project                     = var.project_id
-  name                        = "build-cache-${local.service_name}-${data.google_project.project.number}"
+  name                        = "build-cache-${local.final_service_name}-${data.google_project.project.number}"
   uniform_bucket_level_access = true
   location                    = var.region
   force_destroy               = var.buckets_force_destroy
@@ -23,7 +23,7 @@ resource "google_storage_bucket" "build_cache" {
 
 resource "google_storage_bucket" "release_source_development" {
   project                     = var.project_id
-  name                        = "release-source-development-${local.service_name}-${data.google_project.project.number}"
+  name                        = "release-source-development-${local.final_service_name}-${data.google_project.project.number}"
   uniform_bucket_level_access = true
   location                    = var.region
   force_destroy               = var.buckets_force_destroy

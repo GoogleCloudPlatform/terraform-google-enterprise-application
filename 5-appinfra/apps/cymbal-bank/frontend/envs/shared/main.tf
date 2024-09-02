@@ -16,6 +16,7 @@
 
 locals {
   application_name = "cymbal-bank"
+  acronym          = "cb"
   service_name     = "frontend"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
@@ -28,9 +29,11 @@ module "app" {
   region                     = var.region
   env_cluster_membership_ids = var.env_cluster_membership_ids
 
-  service     = local.service_name
-  repo_name   = local.repo_name
-  repo_branch = local.repo_branch
+  service = local.service_name
+
+  application_acronym = local.acronym
+  repo_name           = local.repo_name
+  repo_branch         = local.repo_branch
 
   buckets_force_destroy = var.buckets_force_destroy
 }
