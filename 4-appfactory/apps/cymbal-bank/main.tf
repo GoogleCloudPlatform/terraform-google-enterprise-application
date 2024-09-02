@@ -15,26 +15,44 @@
  */
 
 locals {
-  components = [
-    "balancereader",
-    "contacts",
-    "frontend",
-    "ledgerwriter",
-    "transactionhistory",
-    "userservice",
-  ]
+  app_services = {
+    "cymbal-bank" = [
+      "balancereader",
+      "contacts",
+      "frontend",
+      "ledgerwriter",
+      "transactionhistory",
+      "userservice",
+    ]
+  }
+
+  expanded_app_services = flatten([
+    for key, services in local.app_services : [
+      for service in services : {
+        app_name     = key
+        service_name = service
+      }
+    ]
+  ])
+}
+
+resource "google_folder" "app_folder" {
+  for_each = local.app_services
+
+  display_name = each.key
+  parent       = var.common_folder_id
 }
 
 module "components" {
-  for_each = toset(local.components)
+  for_each = toset(local.expanded_app_services)
   source   = "../../modules/app-group-baseline"
 
-  application_name    = each.value
+  application_name    = each.value.service_name
   create_env_projects = true
 
   org_id               = var.org_id
   billing_account      = var.billing_account
-  folder_id            = var.common_folder_id
+  folder_id            = google_folder.app_folder[each.value.app_name].folder_id
   envs                 = var.envs
   bucket_prefix        = var.bucket_prefix
   location             = var.location
