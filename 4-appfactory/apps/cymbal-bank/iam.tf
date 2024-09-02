@@ -15,7 +15,9 @@ locals {
 // Assign artifactregistry reader to cluster service accounts
 // This allows docker images on application projects to be downloaded on the cluster
 resource "google_folder_iam_member" "admin" {
-  for_each = toset(local.expanded_cluster_service_accounts)
+  for_each = tomap({
+    for app_name_sa in local.expanded_cluster_service_accounts : "${app_name_sa.app_name}.${app_name_sa.cluster_sa_member}" => app_name_sa
+  })
 
   folder = google_folder.app_folder[each.value.app_name].name
   role   = "roles/artifactregistry.reader"

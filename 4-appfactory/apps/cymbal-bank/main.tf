@@ -36,6 +36,7 @@ locals {
   ])
 }
 
+// One folder per application, will group admin/service projects under it
 resource "google_folder" "app_folder" {
   for_each = local.app_services
 
@@ -44,8 +45,10 @@ resource "google_folder" "app_folder" {
 }
 
 module "components" {
-  for_each = toset(local.expanded_app_services)
-  source   = "../../modules/app-group-baseline"
+  for_each = tomap({
+    for app_service in local.expanded_app_services : "${app_service.app_name}.${app_service.service_name}" => app_service
+  })
+  source = "../../modules/app-group-baseline"
 
   application_name    = each.value.service_name
   create_env_projects = true
