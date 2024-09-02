@@ -15,21 +15,21 @@
  */
 
 locals {
-  env                = "development"
-  app_short_name     = "cym-bank"
-  service_short_name = "ldgr-writer"
+  env                           = "development"
+  app_namespace                 = "transactions-development"
+  app_service_account_name      = "bank-of-anthos"
+  pod_service_account_principal = "principal://iam.googleapis.com/projects/${local.cluster_project_id}/locations/global/workloadIdentityPools/${local.cluster_project_number}.svc.id.goog/subject/ns/${local.app_namespace}/sa/${local.app_service_account_name}"
 }
 
 module "env" {
   source = "../../../../../modules/alloydb-psc-setup"
 
-  env                      = local.env
-  cluster_project_id       = var.cluster_project_id
-  network_project_id       = var.network_project_id
-  cluster_regions          = var.cluster_regions
-  app_project_id           = var.app_project_id
-  network_name             = var.network_name
-  psc_consumer_fwd_rule_ip = var.psc_consumer_fwd_rule_ip
-  app_short_name           = local.app_short_name
-  service_short_name       = local.service_short_name
+  env                         = local.env
+  cluster_project_id          = var.cluster_project_id
+  network_project_id          = var.network_project_id
+  cluster_regions             = var.cluster_regions
+  app_project_id              = var.app_project_id
+  network_name                = var.network_name
+  psc_consumer_fwd_rule_ip    = var.psc_consumer_fwd_rule_ip
+  workload_identity_principal = local.pod_service_account_principal
 }

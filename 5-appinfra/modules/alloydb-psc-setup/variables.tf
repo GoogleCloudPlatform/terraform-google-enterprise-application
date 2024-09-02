@@ -49,12 +49,7 @@ variable "psc_consumer_fwd_rule_ip" {
   type        = string
 }
 
-variable "app_short_name" {
-  description = "Short name for the application name."
-  type        = string
-}
-
-variable "service_short_name" {
-  description = "Short name for the service name."
+variable "workload_identity_principal" {
+  description = "Workload Identity Principal to assign Cloud AlloyDB Admin (roles/alloydb.admin) role. Format: https://cloud.google.com/billing/docs/reference/rest/v1/Policy#Binding"
   type        = string
 }

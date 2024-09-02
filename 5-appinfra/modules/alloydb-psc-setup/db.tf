@@ -75,5 +75,5 @@ resource "google_compute_forwarding_rule" "psc_fwd_rule_consumer" {
 resource "google_project_iam_member" "alloydb_admin" {
   project = var.app_project_id
   role    = "roles/alloydb.admin"
-  member  = "serviceAccount:${var.app_short_name}-${var.service_short_name}@${var.cluster_project_id}.iam.gserviceaccount.com"
+  member  = var.workload_identity_principal
 }
