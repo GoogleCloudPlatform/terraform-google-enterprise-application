@@ -55,16 +55,17 @@ module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
   version = "~> 8.0"
 
-  project_id               = module.app_admin_project.project_id
-  tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
-  tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
-  location                 = var.location
-  trigger_location         = var.trigger_location
-  artifacts_bucket_name    = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-build"
-  create_state_bucket_name = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-state"
-  log_bucket_name          = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-logs"
-  buckets_force_destroy    = var.bucket_force_destroy
-  cloudbuild_sa_roles      = local.cloudbuild_sa_roles
+  project_id                = module.app_admin_project.project_id
+  tf_repo_uri               = google_sourcerepo_repository.app_infra_repo.url
+  tf_repo_type              = "CLOUD_SOURCE_REPOSITORIES"
+  location                  = var.location
+  trigger_location          = var.trigger_location
+  artifacts_bucket_name     = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-build"
+  create_state_bucket_name  = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-state"
+  log_bucket_name           = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-logs"
+  buckets_force_destroy     = var.bucket_force_destroy
+  cloudbuild_sa_roles       = local.cloudbuild_sa_roles
+  create_cloudbuild_sa_name = "sa-${var.application_acronym}-${var.service_name}"
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
