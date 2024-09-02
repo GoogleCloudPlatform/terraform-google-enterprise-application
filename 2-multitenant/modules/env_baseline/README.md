@@ -36,6 +36,7 @@ The following resources are created:
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
+| cluster\_service\_accounts | The service accounts to default running nodes as if not overridden in node\_pools. |
 | cluster\_type | Cluster type |
 | fleet\_project\_id | Fleet Project ID |
 | network\_project\_id | Network Project ID |
