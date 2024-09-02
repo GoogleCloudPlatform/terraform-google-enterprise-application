@@ -11,7 +11,6 @@ The following resources are created:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | app\_project\_id | App Project ID | `string` | n/a | yes |
-| cluster\_project\_id | Cluster Project ID | `string` | n/a | yes |
 | cluster\_regions | Cluster regions | `list(string)` | n/a | yes |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | network\_name | The name of the network in which PSC attachment will be provisioned | `string` | n/a | yes |

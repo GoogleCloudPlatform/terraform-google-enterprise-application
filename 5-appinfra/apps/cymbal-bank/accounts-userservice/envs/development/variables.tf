@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-variable "cluster_project_id" {
-  description = "Cluster Project ID"
-  type        = string
-}
-
 variable "cluster_regions" {
   description = "Cluster regions"
   type        = list(string)
