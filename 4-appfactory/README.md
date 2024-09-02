@@ -1,4 +1,4 @@
-# 3. Application Factory phase
+# 4. Application Factory phase
 
 ## Purpose
 The application factory creates application project groups, which contain resources responsible for deployment of a single application within the developer platform.
@@ -18,10 +18,10 @@ The application factory creates the following resources as defined in the [`app-
 
 ### Running Terraform locally
 
-1. The next instructions assume that you are in the `terraform-google-enterprise-application/3-appfactory` folder.
+1. The next instructions assume that you are in the `terraform-google-enterprise-application/4-appfactory` folder.
 
    ```bash
-   cd terraform-google-enterprise-application/3-appfactory
+   cd terraform-google-enterprise-application/4-appfactory
    ```
 
 1. Rename `terraform.example.tfvars` to `terraform.tfvars`.

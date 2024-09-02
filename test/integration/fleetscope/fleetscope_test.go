@@ -55,7 +55,7 @@ func TestFleetscope(t *testing.T) {
 			}
 
 			fleetscope := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(fmt.Sprintf("../../../4-fleetscope/envs/%s", envName)),
+				tft.WithTFDir(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
@@ -153,7 +153,7 @@ func TestFleetscope(t *testing.T) {
 				// GKE Scopes and Namespaces
 				for _, namespaces := range func() []string {
 					if envName == "development" {
-						return []string{"frontend", "accounts", "transactions"}
+						return []string{"frontend", "accounts", "ledger"}
 					}
 					return []string{"frontend"}
 				}() {
