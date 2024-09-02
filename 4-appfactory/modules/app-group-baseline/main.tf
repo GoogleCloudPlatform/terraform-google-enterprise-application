@@ -29,7 +29,7 @@ module "app_admin_project" {
   random_project_id        = true
   random_project_id_length = 4
   billing_account          = var.billing_account
-  name                     = "${var.application_name}-admin"
+  name                     = "${var.application_acronym}-${var.service_name}-adm"
   org_id                   = var.org_id
   folder_id                = var.folder_id
   activate_apis = [
@@ -48,7 +48,7 @@ module "app_admin_project" {
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
   project = module.app_admin_project.project_id
-  name    = "${var.application_name}-i-r"
+  name    = "${var.application_acronym}-${var.service_name}-i-r"
 }
 
 module "tf_cloudbuild_workspace" {
@@ -60,9 +60,9 @@ module "tf_cloudbuild_workspace" {
   tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
   location                 = var.location
   trigger_location         = var.trigger_location
-  artifacts_bucket_name    = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.application_name}-build"
-  create_state_bucket_name = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.application_name}-state"
-  log_bucket_name          = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.application_name}-logs"
+  artifacts_bucket_name    = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-build"
+  create_state_bucket_name = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-state"
+  log_bucket_name          = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-logs"
   buckets_force_destroy    = var.bucket_force_destroy
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 
@@ -80,7 +80,7 @@ module "app_env_project" {
   random_project_id        = true
   random_project_id_length = 4
   billing_account          = each.value.billing_account
-  name                     = substr("eab-${var.application_name}-${each.key}", 0, 25) # max length 30 chars
+  name                     = substr("eab-${var.application_acronym}-${var.service_name}-${each.key}", 0, 25) # max length 30 chars
   org_id                   = each.value.org_id
   folder_id                = each.value.folder_id
   activate_apis            = var.env_project_apis

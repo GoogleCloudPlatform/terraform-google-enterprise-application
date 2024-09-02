@@ -29,7 +29,8 @@ module "components" {
   for_each = toset(local.components)
   source   = "../../modules/app-group-baseline"
 
-  application_name    = each.value
+  service_name        = each.value
+  application_acronym = "cb"
   create_env_projects = true
 
   org_id               = var.org_id
