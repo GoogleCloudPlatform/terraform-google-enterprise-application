@@ -41,6 +41,10 @@ var (
 	AppNames = []string{
 		"cymbal-bank",
 	}
+
+	AppsAcronyms = map[string]string{
+		"cymbal-bank": "cb",
+	}
 )
 
 func GetLastSplitElement(value string, sep string) string {
