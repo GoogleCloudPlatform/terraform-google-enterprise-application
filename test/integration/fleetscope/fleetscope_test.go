@@ -102,7 +102,7 @@ func TestFleetscope(t *testing.T) {
 					case "servicemesh":
 						// Service Mesh Management
 						{
-							assert.Equal("MANAGEMENT_AUTOMATIC", gkeFeatureOp.Get("fleetDefaultMemberConfig.mesh.management").String(), fmt.Sprintf("Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
+							assert.Equal("MANAGEMENT_AUTOMATIC", gkeFeatureOp.Get("fleetDefaultMemberConfig.mesh.management").String(), fmt.Sprintf("Hub Feature %s should have mesh management equal to MANAGEMENT_AUTOMATIC", feature))
 							// TODO: validate clusters service mesh state
 						}
 					case "multiclusteringress":
@@ -153,9 +153,9 @@ func TestFleetscope(t *testing.T) {
 				// GKE Scopes and Namespaces
 				for _, namespaces := range func() []string {
 					if envName == "development" {
-						return []string{"frontend", "accounts", "ledger"}
+						return []string{"cb-frontend", "cb-accounts", "cb-ledger"}
 					}
-					return []string{"frontend"}
+					return []string{"cb-frontend"}
 				}() {
 					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", clusterProjectID, namespaces, envName)
 					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)
