@@ -19,9 +19,9 @@ variable "env" {
   type        = string
 }
 
-variable "cluster_regions" {
-  description = "Cluster regions"
-  type        = list(string)
+variable "db_region" {
+  description = "Database Region"
+  type        = string
 }
 
 variable "app_project_id" {

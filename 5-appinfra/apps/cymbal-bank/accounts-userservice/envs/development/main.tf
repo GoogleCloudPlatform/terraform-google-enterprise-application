@@ -21,12 +21,12 @@ locals {
   pod_service_account_principal = "principal://iam.googleapis.com/projects/${local.cluster_project_number}/locations/global/workloadIdentityPools/${local.cluster_project_id}.svc.id.goog/subject/ns/${local.app_namespace}/sa/${local.app_service_account_name}"
 }
 
-module "env" {
+module "alloydb" {
   source = "../../../../../modules/alloydb-psc-setup"
 
   env                         = local.env
   network_project_id          = var.network_project_id
-  cluster_regions             = var.cluster_regions
+  db_region                   = var.cluster_regions[0]
   app_project_id              = var.app_project_id
   network_name                = var.network_name
   psc_consumer_fwd_rule_ip    = var.psc_consumer_fwd_rule_ip

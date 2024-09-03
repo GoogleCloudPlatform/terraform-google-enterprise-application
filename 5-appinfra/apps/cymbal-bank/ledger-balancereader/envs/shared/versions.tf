@@ -18,6 +18,6 @@ terraform {
   required_version = ">= 1.3"
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:bootstrap/v0.1.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:appinfra/cymbal-bank/shared/v0.1.0"
   }
 }
