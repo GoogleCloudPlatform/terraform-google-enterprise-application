@@ -22,7 +22,7 @@ apps = {
     "certificates" : {
       "frontend-cb1-com" : ["frontend.cb1.com"]
     },
-    "acronyms" = "cb1",
+    "acronym" = "cb1",
   },
   "cymbal-bank-2" : {
     "ip_address_names" : [
@@ -31,6 +31,6 @@ apps = {
     "certificates" : {
       "frontend-cb2-com" : ["frontend.cb2.com"]
     },
-    "acronyms" = "cb2",
+    "acronym" = "cb2",
   }
 }

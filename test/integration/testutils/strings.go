@@ -42,7 +42,7 @@ var (
 		"cymbal-bank",
 	}
 
-	AppsAcronyms = map[string]string{
+	AppsAcronym = map[string]string{
 		"cymbal-bank": "cb",
 	}
 )

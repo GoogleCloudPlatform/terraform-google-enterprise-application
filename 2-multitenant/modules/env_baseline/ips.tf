@@ -20,7 +20,7 @@ module "apps_ip_address" {
   version = "~> 4.0"
 
   for_each = {
-    for k, v in var.apps : k => [for a, b in v.ip_address_names : "${v.acronyms}-${b}"]
+    for k, v in var.apps : k => [for a, b in v.ip_address_names : "${v.acronym}-${b}"]
   }
 
   project_id   = data.google_project.eab_cluster_project.project_id
