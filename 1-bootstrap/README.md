@@ -63,6 +63,8 @@ If you receive any errors or made any changes to the Terraform config or `terraf
 
 ### Updating `backend.tf` files on the repository
 
+Within the repository, you'll find `backend.tf` files that define the GCS bucket for storing the Terraform state. By running the commands below, instances of `UPDATE_ME` placeholders in these files will be automatically replaced with the actual name of your GCS bucket.
+
 1. Running the series of commands below will update the remote state bucket for `backend.tf` files on the repository.
 
    ```bash

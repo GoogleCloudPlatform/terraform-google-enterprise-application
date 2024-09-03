@@ -60,6 +60,6 @@ output "cluster_type" {
 }
 
 output "cluster_service_accounts" {
-  description = "The service accounts to default running nodes as if not overridden in node_pools."
+  description = "The default service accounts used for nodes, if not overridden in node_pools."
   value       = module.env.cluster_service_accounts
 }
