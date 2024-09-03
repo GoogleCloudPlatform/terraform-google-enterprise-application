@@ -58,3 +58,8 @@ output "cluster_type" {
   description = "Cluster type"
   value       = module.env.cluster_type
 }
+
+output "cluster_service_accounts" {
+  description = "The default service accounts used for nodes, if not overridden in node_pools."
+  value       = module.env.cluster_service_accounts
+}
