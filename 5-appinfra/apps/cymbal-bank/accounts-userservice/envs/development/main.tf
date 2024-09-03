@@ -18,7 +18,7 @@ locals {
   env                           = "development"
   app_namespace                 = "transactions-development"
   app_service_account_name      = "bank-of-anthos"
-  pod_service_account_principal = "principal://iam.googleapis.com/projects/${local.cluster_project_id}/locations/global/workloadIdentityPools/${local.cluster_project_number}.svc.id.goog/subject/ns/${local.app_namespace}/sa/${local.app_service_account_name}"
+  pod_service_account_principal = "principal://iam.googleapis.com/projects/${local.cluster_project_number}/locations/global/workloadIdentityPools/${local.cluster_project_id}.svc.id.goog/subject/ns/${local.app_namespace}/sa/${local.app_service_account_name}"
 }
 
 module "env" {
