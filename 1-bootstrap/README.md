@@ -61,6 +61,29 @@ You can now deploy the common environment for these pipelines.
 
 If you receive any errors or made any changes to the Terraform config or `terraform.tfvars`, re-run `terraform plan` before you run `terraform apply`.
 
+### Updating `backend.tf` files on the repository
+
+Within the repository, you'll find `backend.tf` files that define the GCS bucket for storing the Terraform state. By running the commands below, instances of `UPDATE_ME` placeholders in these files will be automatically replaced with the actual name of your GCS bucket.
+
+1. Running the series of commands below will update the remote state bucket for `backend.tf` files on the repository.
+
+   ```bash
+   export backend_bucket=$(terraform output -raw state_bucket)
+   echo "backend_bucket = ${backend_bucket}"
+
+   cp backend.tf.example backend.tf
+   cd ..
+
+   for i in `find . -name 'backend.tf'`; do sed -i'' -e "s/UPDATE_ME/${backend_bucket}/" $i; done
+   ```
+
+1. Re-run `terraform init`. When you're prompted, agree to copy Terraform state to Cloud Storage.
+
+   ```bash
+   cd 1-bootstrap
+
+   terraform init
+   ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
