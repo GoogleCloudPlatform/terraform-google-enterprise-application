@@ -29,6 +29,16 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
+// verify if gjson array of string contains another string
+func contains(slice []gjson.Result, item string) bool {
+	for _, v := range slice {
+		if v.String() == item {
+			return true
+		}
+	}
+	return false
+}
+
 func TestAppfactory(t *testing.T) {
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -58,6 +68,37 @@ func TestAppfactory(t *testing.T) {
 
 			appFactory.DefineVerify(func(assert *assert.Assertions) {
 				appFactory.DefaultVerify(assert)
+
+				// retrieve all cluster service accounts from all multitenant environments
+				var allClusterServiceAccounts []string
+
+				for _, envName := range testutils.EnvNames {
+					multitenant := tft.NewTFBlueprintTest(t,
+						tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
+					)
+					// add to slice the environment service accounts
+					for _, sa := range multitenant.GetJsonOutput("cluster_service_accounts").Array() {
+						allClusterServiceAccounts = append(allClusterServiceAccounts, ("serviceAccount:" + sa.String()))
+					}
+				}
+
+				// check if created folders contain artifactregistry.reader for the cluster service accounts
+				// this is necessary to ensure the cluster can download docker images
+				for _, folderId := range appFactory.GetJsonOutput("app-folders-ids").Map() {
+					t.Run(folderId.String(), func(t *testing.T) {
+						t.Parallel()
+						folderIamPolicy := gcloud.Runf(t, "resource-mangaer folder get-iam-policy %s", folderId.String())
+						// ensure cluster sa is in folder iam policy for artifactregistry.reader role
+						for _, binding := range folderIamPolicy.Get("bindings").Array() {
+							if binding.Get("role").String() == "roles/artifactregistry.reader" {
+								folderIamPolicyMembers := binding.Get("members").Array()
+								for _, sa := range allClusterServiceAccounts {
+									assert.True(contains(folderIamPolicyMembers, sa), fmt.Sprintf("The cluster service account %s must exist in the folder %s artifactregistry.reader iam policy", sa, folderId))
+								}
+							}
+						}
+					})
+				}
 
 				// check admin projects
 				// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
