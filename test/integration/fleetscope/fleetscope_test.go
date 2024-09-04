@@ -83,7 +83,12 @@ func TestFleetscope(t *testing.T) {
 				"namespace_ids":          setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 			}
 
-			disableAutoTfVarsFile(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName))
+			err := disableAutoTfVarsFile(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName))
+			if err != nil {
+				fmt.Printf("Error: %v\n", err)
+				t.Fail()
+			}
+
 			fleetscope := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
