@@ -18,6 +18,7 @@
 
 | Name | Description |
 |------|-------------|
+| app-folders-ids | Pair of app-name and folder\_id |
 | app-group | Description on the app-group components |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

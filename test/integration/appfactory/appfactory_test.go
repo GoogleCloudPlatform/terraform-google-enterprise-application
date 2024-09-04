@@ -87,7 +87,7 @@ func TestAppfactory(t *testing.T) {
 				for _, folderId := range appFactory.GetJsonOutput("app-folders-ids").Map() {
 					t.Run(folderId.String(), func(t *testing.T) {
 						t.Parallel()
-						folderIamPolicy := gcloud.Runf(t, "resource-mangaer folder get-iam-policy %s", folderId.String())
+						folderIamPolicy := gcloud.Runf(t, "resource-manager folder get-iam-policy %s", folderId.String())
 						// ensure cluster sa is in folder iam policy for artifactregistry.reader role
 						for _, binding := range folderIamPolicy.Get("bindings").Array() {
 							if binding.Get("role").String() == "roles/artifactregistry.reader" {
