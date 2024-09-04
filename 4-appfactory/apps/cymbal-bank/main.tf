@@ -41,7 +41,7 @@ resource "google_folder" "app_folder" {
   for_each = local.app_services
 
   display_name = each.key
-  parent       = var.common_folder_id
+  parent       = "folders/${var.common_folder_id}"
 }
 
 module "components" {

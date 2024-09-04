@@ -44,6 +44,8 @@ It will also create an Application Folder to group your admin projects under it,
 
 1. Update the file with values for your environment.
 
+   > TIP: To retrieve the remote state bucket variable, you can run `terraform -chdir=../1-bootstrap/ output -raw state_bucket` command.
+
 You can now deploy the into your common folder.
 
 1. Run `init` and `plan` and review the output.
