@@ -1,10 +1,11 @@
 # 4. Application Factory phase
 
 ## Purpose
+
 The application factory creates application project groups, which contain resources responsible for deployment of a single application within the developer platform.
 
 An overview of the application factory pipeline is shown below.
-![Enterprise Application application factory diagram](assets/eab-app-factory.svg)
+![Enterprise Application application factory diagram](../assets/eab-app-factory.svg)
 
 The application factory creates the following resources as defined in the [`app-group-baseline`](./modules/app-group-baseline/) submodule:
 
@@ -12,7 +13,6 @@ The application factory creates the following resources as defined in the [`app-
 * **Application environment projects:** A project for the application for each environment (e.g., development, nonproduction, production).
 * **Infrastructure repository:** A Git repository containing the Terraform configuration for the application infrastructure.
 * **Application infrastucture pipeline:** A Cloud Build pipeline for deploying the application infrastructure specified as Terraform.
-
 
 ## Usage
 
