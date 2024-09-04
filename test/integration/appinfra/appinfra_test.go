@@ -33,15 +33,16 @@ func TestAppInfra(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	for _, envName := range testutils.EnvNames {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
-		multitenant :=  tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
+		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 	}
 
 	type ServiceInfos struct {
-		ApplicationName string
-		ProjectID       string
-		ServiceName     string
-		TeamName        string
+		ApplicationName  string
+		ProjectID        string
+		ServiceName      string
+		FinalServiceName string
+		TeamName         string
 	}
 	var (
 		prefixServiceName string
@@ -62,10 +63,11 @@ func TestAppInfra(t *testing.T) {
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
 			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
 			servicesInfoMap[fullServiceName] = ServiceInfos{
-				ApplicationName: appName,
-				ProjectID:       projectID,
-				ServiceName:     suffixServiceName,
-				TeamName:        prefixServiceName,
+				ApplicationName:  appName,
+				ProjectID:        projectID,
+				ServiceName:      suffixServiceName,
+				FinalServiceName: fmt.Sprintf("%s-%s", testutils.AppsAcronym[appName], suffixServiceName),
+				TeamName:         prefixServiceName,
 			}
 
 			servicePath := fmt.Sprintf("%s/%s/envs/shared", appSourcePath, fullServiceName)
@@ -73,10 +75,10 @@ func TestAppInfra(t *testing.T) {
 				t.Parallel()
 
 				vars := map[string]interface{}{
-					"project_id":                     servicesInfoMap[fullServiceName].ProjectID,
-					"region":                         region,
-					"env_cluster_membership_ids":     env_cluster_membership_ids,
-					"buckets_force_destroy":          "true",
+					"project_id":                 servicesInfoMap[fullServiceName].ProjectID,
+					"region":                     region,
+					"env_cluster_membership_ids": env_cluster_membership_ids,
+					"buckets_force_destroy":      "true",
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -114,12 +116,12 @@ func TestAppInfra(t *testing.T) {
 					listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
 					assert.Subset(listApis, apis, "APIs should have been enabled")
 
-					art := gcloud.Runf(t, "artifacts repositories describe %s --project %s --location %s", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID, region)
+					art := gcloud.Runf(t, "artifacts repositories describe %s --project %s --location %s", servicesInfoMap[fullServiceName].FinalServiceName, servicesInfoMap[fullServiceName].ProjectID, region)
 					assert.Equal("DOCKER", art.Get("format").String(), fmt.Sprintf("Repository %s should have type DOCKER", fullServiceName))
 
 					arRegistryIAMMembers := []string{
 						fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber),
-						fmt.Sprintf("serviceAccount:deploy-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID),
+						fmt.Sprintf("serviceAccount:deploy-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].FinalServiceName, servicesInfoMap[fullServiceName].ProjectID),
 						"allAuthenticatedUsers",
 					}
 					arRegistrySAIamFilter := "bindings.role:'roles/artifactregistry.reader'"
@@ -128,15 +130,15 @@ func TestAppInfra(t *testing.T) {
 					arRegistrySaListMembers := utils.GetResultStrSlice(arRegistrySAPolicyOp.Get("bindings.members").Array())
 					assert.Subset(arRegistrySaListMembers, arRegistryIAMMembers, fmt.Sprintf("artifact registry %s should have artifactregistry.reader.", arRegistryIAMMembers))
 
-					cloudDeployServiceAccountEmail := fmt.Sprintf("deploy-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID)
+					cloudDeployServiceAccountEmail := fmt.Sprintf("deploy-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].FinalServiceName, servicesInfoMap[fullServiceName].ProjectID)
 					gcloud.Runf(t, "iam service-accounts describe %s --project %s", cloudDeployServiceAccountEmail, servicesInfoMap[fullServiceName].ProjectID)
 
-					ciServiceAccountEmail := fmt.Sprintf("ci-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID)
+					ciServiceAccountEmail := fmt.Sprintf("ci-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].FinalServiceName, servicesInfoMap[fullServiceName].ProjectID)
 					gcloud.Runf(t, "iam service-accounts describe %s --project %s", ciServiceAccountEmail, servicesInfoMap[fullServiceName].ProjectID)
 
 					cloudBuildBucketNames := []string{
-						fmt.Sprintf("build-cache-%s-%s", servicesInfoMap[fullServiceName].ServiceName, projectNumber),
-						fmt.Sprintf("release-source-development-%s-%s", servicesInfoMap[fullServiceName].ServiceName, projectNumber),
+						fmt.Sprintf("build-cache-%s-%s", servicesInfoMap[fullServiceName].FinalServiceName, projectNumber),
+						fmt.Sprintf("release-source-development-%s-%s", servicesInfoMap[fullServiceName].FinalServiceName, projectNumber),
 					}
 
 					for _, bucketName := range cloudBuildBucketNames {
@@ -153,7 +155,7 @@ func TestAppInfra(t *testing.T) {
 					}
 
 					for env := range env_cluster_membership_ids {
-						bucketName :=fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
+						bucketName := fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].FinalServiceName)
 
 						bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, servicesInfoMap[fullServiceName].ProjectID)
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
