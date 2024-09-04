@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-fleet_project_id = "{FLEET_PROJECT}"
-cluster_project_id = "{CLUSTER_PROJECT}"
-network_project_id = "{NETWORK_PROJECT}"
-cluster_membership_ids = [
-  "//gkehub.googleapis.com/projects/{CLUSTER_PROJECT}/locations/{REGION}/memberships/{MEMBERSHIP_ID}",
-  "//gkehub.googleapis.com/projects/{CLUSTER_PROJECT}/locations/{REGION}/memberships/{MEMBERSHIP_ID}",
-]
+namespace_ids = {
+  "frontend" = "your-frontend-group@yourdomain.com",
+  "accounts" = "your-accounts-group@yourdomain.com",
+  "transactions" = "your-transactions-group@yourdomain.com"
+}

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+fleet_project_id = "{FLEET_PROJECT}"
 cluster_project_id = "{CLUSTER_PROJECT}"
 network_project_id = "{NETWORK_PROJECT}"
 cluster_membership_ids = [

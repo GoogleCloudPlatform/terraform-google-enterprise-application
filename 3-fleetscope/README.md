@@ -41,9 +41,15 @@ The following resources are created:
    mv development.auto.example.tfvars development.auto.tfvars
    mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
    mv production.auto.example.tfvars production.auto.tfvars
+   mv common.auto.example.tfvars production.auto.tfvars
    ```
 
-1. Update the file with values for each environment.
+1. Update the files with values for each environment.
+
+   - Under `common.auto.tfvars` update namespace_ids with your Google Groups.
+   - Under `development.auto.tfvars` update the variables with values from development multitenant environment.
+   - Under `nonproduction.auto.tfvars` update the variables with values from nonproduction multitenant environment.
+   - Under `production.auto.tfvars` update the variables with values from production multitenant environment.
 
 You can now deploy each of your environments (e.g. production).
 
