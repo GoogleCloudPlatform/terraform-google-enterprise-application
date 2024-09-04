@@ -15,22 +15,13 @@
  */
 
 apps = {
-  "cymbal-bank-1" : {
+  "cymbal-bank" : {
     "ip_address_names" : [
       "frontend-ip",
     ]
     "certificates" : {
-      "frontend-cb1-com" : ["frontend.cb1.com"]
+      "frontend-cb-com" : ["frontend.cb.com"]
     },
-    "acronym" = "cb1",
+    "acronym" = "cb",
   },
-  "cymbal-bank-2" : {
-    "ip_address_names" : [
-      "frontend-ip",
-    ]
-    "certificates" : {
-      "frontend-cb2-com" : ["frontend.cb2.com"]
-    },
-    "acronym" = "cb2",
-  }
 }
