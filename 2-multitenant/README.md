@@ -59,17 +59,17 @@ You can now deploy each of your environments (e.g. production).
 1. Run `init` and `plan` and review the output.
 
    ```bash
-   terraform init -chdir=./envs/production
-   terraform plan -chdir=./envs/production
+   terraform -chdir=./envs/production init
+   terraform -chdir=./envs/production plan
    ```
 
 1. Run `apply production`.
 
    ```bash
-   terraform apply -chdir=./envs/production
+   terraform -chdir=./envs/production apply
    ```
 
-If you receive any errors or made any changes to the Terraform config or `terraform.tfvars`, re-run `terraform plan -chdir=./envs/production` before you run `terraform apply -chdir=./envs/production`.
+If you receive any errors or made any changes to the Terraform config or `terraform.tfvars`, re-run `terraform -chdir=./envs/production plan` before you run `terraform -chdir=./envs/production apply`.
 
 1. Repeat the same series of terraform commands but replace `-chdir=./envs/production` with `-chdir=./envs/nonproduction` to deploy the nonproduction environment.
 
