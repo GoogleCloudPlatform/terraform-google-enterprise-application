@@ -199,6 +199,14 @@ func TestMultitenant(t *testing.T) {
 					})
 				}
 
+				cluster_service_accounts := multitenant.GetJsonOutput("cluster_service_accounts").Array()
+
+				assert.Greater(len(cluster_service_accounts), 0, "The terraform output must contain more than 0 service accounts.")
+				// create regex to validate service accounts emails
+				saRegex := `^[a-zA-Z0-9_+-]+@[a-zA-Z0-9-]+.iam.gserviceaccount.com$`
+				for _, sa := range cluster_service_accounts {
+					assert.Regexp(saRegex, sa.String(), "The cluster SA value must be a Google Service Account")
+				}
 			})
 
 			multitenant.Test()
