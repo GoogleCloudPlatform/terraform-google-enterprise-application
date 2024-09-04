@@ -69,6 +69,7 @@ docker_test_integration:
 docker_test_lint:
 	docker run --rm -it \
                 -e ENABLE_PARALLEL=1 \
+				-e DISABLE_TFLINT=1 \
 		-e EXCLUDE_LINT_DIRS \
 		-v "$(CURDIR)":/workspace \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
