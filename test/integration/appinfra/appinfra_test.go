@@ -126,7 +126,7 @@ func TestAppInfra(t *testing.T) {
 					}
 					arRegistrySAIamFilter := "bindings.role:'roles/artifactregistry.reader'"
 					arRegistrySAIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", arRegistrySAIamFilter, "--format", "json"})
-					arRegistrySAPolicyOp := gcloud.Run(t, fmt.Sprintf("artifacts repositories get-iam-policy %s --location %s --project %s", servicesInfoMap[fullServiceName].ServiceName, region, servicesInfoMap[fullServiceName].ProjectID), arRegistrySAIamCommonArgs).Array()[0]
+					arRegistrySAPolicyOp := gcloud.Run(t, fmt.Sprintf("artifacts repositories get-iam-policy %s --location %s --project %s", servicesInfoMap[fullServiceName].FinalServiceName, region, servicesInfoMap[fullServiceName].ProjectID), arRegistrySAIamCommonArgs).Array()[0]
 					arRegistrySaListMembers := utils.GetResultStrSlice(arRegistrySAPolicyOp.Get("bindings.members").Array())
 					assert.Subset(arRegistrySaListMembers, arRegistryIAMMembers, fmt.Sprintf("artifact registry %s should have artifactregistry.reader.", arRegistryIAMMembers))
 
@@ -237,7 +237,7 @@ func TestAppInfra(t *testing.T) {
 						assert.Equal(cloudDeployServiceAccountEmail, deployTargetOp.Get("executionConfigs").Array()[0].Get("serviceAccount").String(), fmt.Sprintf("cloud deploy target %s should have service account %s", targetName, cloudDeployServiceAccountEmail))
 					}
 
-					buildTriggerName := fmt.Sprintf("%s-ci", fullServiceName)
+					buildTriggerName := fmt.Sprintf("%s-ci", servicesInfoMap[fullServiceName].FinalServiceName)
 					ciServiceAccountPath := fmt.Sprintf("projects/%s/serviceAccounts/%s", servicesInfoMap[fullServiceName].ProjectID, ciServiceAccountEmail)
 					buildTriggerOp := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", buildTriggerName, servicesInfoMap[fullServiceName].ProjectID, region)
 					assert.Equal(ciServiceAccountPath, buildTriggerOp.Get("serviceAccount").String(), fmt.Sprintf("cloud build trigger %s should have service account %s", buildTriggerName, ciServiceAccountPath))

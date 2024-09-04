@@ -43,9 +43,10 @@ func TestSourceCymbalBank(t *testing.T) {
 	}
 
 	type ServiceInfos struct {
-		ProjectID   string
-		ServiceName string
-		TeamName    string
+		ProjectID        string
+		ServiceName      string
+		FinalServiceName string
+		TeamName         string
 	}
 	var (
 		prefixServiceName string
@@ -66,9 +67,10 @@ func TestSourceCymbalBank(t *testing.T) {
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
 			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
 			servicesInfoMap[serviceName] = ServiceInfos{
-				ProjectID:   projectID,
-				ServiceName: suffixServiceName,
-				TeamName:    prefixServiceName,
+				ProjectID:        projectID,
+				ServiceName:      suffixServiceName,
+				FinalServiceName: fmt.Sprintf("%s-%s", testutils.AppsAcronym[appName], suffixServiceName),
+				TeamName:         prefixServiceName,
 			}
 			servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 			t.Run(servicePath, func(t *testing.T) {
@@ -189,14 +191,14 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 					utils.Poll(t, pollCloudBuild(buildListCmd), 40, 30*time.Second)
-					releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
+					releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].FinalServiceName, region, lastCommit[0:7])
 					releases := gcloud.Runf(t, releaseListCmd).Array()
 					if len(releases) == 0 {
 						t.Fatal("Failed to find the release.")
 					}
 					releaseName := releases[0].Get("name")
 					targetId := fmt.Sprintf("%s-development", region) //TODO: convert to loop using env_cluster_membership_ids
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].FinalServiceName, region, releaseName, targetId)
 					// Poll CD rollouts until rollout is successful
 					pollCloudDeploy := func(cmd string) func() (bool, error) {
 						return func() (bool, error) {
