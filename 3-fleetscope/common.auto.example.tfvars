@@ -15,7 +15,7 @@
  */
 
 namespace_ids = {
-  "frontend" = "your-frontend-group@yourdomain.com",
-  "accounts" = "your-accounts-group@yourdomain.com",
+  "frontend"     = "your-frontend-group@yourdomain.com",
+  "accounts"     = "your-accounts-group@yourdomain.com",
   "transactions" = "your-transactions-group@yourdomain.com"
 }
