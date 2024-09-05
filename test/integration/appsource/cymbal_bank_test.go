@@ -185,7 +185,7 @@ func TestSourceCymbalBank(t *testing.T) {
 							if latestWorkflowRunStatus == "SUCCESS" {
 								return false, nil
 							} else if latestWorkflowRunStatus == "FAILURE" {
-								return false, errors.New("Build failed.")
+								return false, errors.New(build[0].Get("failureInfo").String())
 							}
 							return true, nil
 						}
