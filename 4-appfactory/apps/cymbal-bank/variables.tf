@@ -16,7 +16,12 @@
 
 variable "common_folder_id" {
   type        = string
-  description = "Folder ID in which to create all application admin projects"
+  description = "Folder ID in which to create all application admin projects, must be prefixed with 'folders/'"
+
+  validation {
+    condition     = can(regex("^folders/", var.common_folder_id))
+    error_message = "The folder ID must be prefixed with 'folders/'."
+  }
 }
 
 variable "org_id" {
