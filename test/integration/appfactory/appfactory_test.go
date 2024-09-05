@@ -83,7 +83,7 @@ func TestAppfactory(t *testing.T) {
 							if binding.Get("role").String() == "roles/artifactregistry.reader" {
 								folderIamPolicyMembers := binding.Get("members").Array()
 								for _, sa := range allClusterServiceAccounts {
-									assert.True(testutils.contains(folderIamPolicyMembers, sa), fmt.Sprintf("The cluster service account %s must exist in the folder %s artifactregistry.reader iam policy", sa, folderId))
+									assert.True(testutils.Contains(folderIamPolicyMembers, sa), fmt.Sprintf("The cluster service account %s must exist in the folder %s artifactregistry.reader iam policy", sa, folderId))
 								}
 							}
 						}

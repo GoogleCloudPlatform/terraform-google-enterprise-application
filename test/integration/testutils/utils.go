@@ -35,7 +35,7 @@ func FileExists(filePath string) (bool, error) {
 	return false, err
 }
 
-func disableAutoTfVarsFile(rootDir string) error {
+func DisableAutoTfVarsFile(rootDir string) error {
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
@@ -75,7 +75,7 @@ func Filter(field string, value string, iamList []gjson.Result) []gjson.Result {
 }
 
 // verify if gjson array of string contains another string
-func contains(slice []gjson.Result, item string) bool {
+func Contains(slice []gjson.Result, item string) bool {
 	for _, v := range slice {
 		if v.String() == item {
 			return true

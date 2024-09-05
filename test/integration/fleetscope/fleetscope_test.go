@@ -54,7 +54,7 @@ func TestFleetscope(t *testing.T) {
 				"namespace_ids":          setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 			}
 
-			err := testutils.disableAutoTfVarsFile(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName))
+			err := testutils.DisableAutoTfVarsFile(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName))
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				t.Fail()
