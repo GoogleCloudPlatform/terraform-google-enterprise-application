@@ -16,6 +16,7 @@ package appfactory
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -80,7 +81,7 @@ func TestAppfactory(t *testing.T) {
 				for _, folderId := range appFactory.GetJsonOutput("app-folders-ids").Map() {
 					t.Run(folderId.String(), func(t *testing.T) {
 						t.Parallel()
-						folderIamPolicy := gcloud.Runf(t, "resource-manager folder get-iam-policy %s", folderId.String())
+						folderIamPolicy := gcloud.Runf(t, "resource-managers folder get-iam-policy %s", folderId.String())
 						// ensure cluster sa is in folder iam policy for artifactregistry.reader role
 						for _, binding := range folderIamPolicy.Get("bindings").Array() {
 							if binding.Get("role").String() == "roles/artifactregistry.reader" {
@@ -96,10 +97,14 @@ func TestAppfactory(t *testing.T) {
 				// check admin projects
 				// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
 				// terraform.OutputJson OK to use as long as there is only one appGroupName
-				for appName, appData := range gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Map() {
-					appName := appName
+				for applicationService, appData := range gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Map() {
+					parts := strings.Split(applicationService, ".")
+					assert.Equal(len(parts), 2, "The keys of app-group output must be in the format 'app-name'.'service-name', for example: 'cymbal-bank.userservice'")
+					appName := parts[0]
+					serviceName := parts[1]
+
 					appData := appData
-					t.Run(appName, func(t *testing.T) {
+					t.Run(fmt.Sprintf("%s.%s", appName, serviceName), func(t *testing.T) {
 						t.Parallel()
 
 						adminProjectID := appData.Get("app_admin_project_id").String()
@@ -160,7 +165,7 @@ func TestAppfactory(t *testing.T) {
 							},
 						} {
 							bucketSelfLink := appData.Get(bucket.output).String()
-							opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://%s-%s-%s-%s", bucket.prefix, adminProjectID, appName, bucket.suffix), gcloudArgsBucket).Array()
+							opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://%s-%s-%s-%s", bucket.prefix, adminProjectID, serviceName, bucket.suffix), gcloudArgsBucket).Array()
 							assert.Equal(bucketSelfLink, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket SelfLink should be %s.", bucketSelfLink))
 						}
 						// triggers
