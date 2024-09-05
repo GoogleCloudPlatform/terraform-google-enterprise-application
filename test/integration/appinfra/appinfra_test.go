@@ -33,7 +33,7 @@ func TestAppInfra(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	for _, envName := range testutils.EnvNames {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
-		multitenant :=  tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
+		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 	}
 
@@ -73,10 +73,10 @@ func TestAppInfra(t *testing.T) {
 				t.Parallel()
 
 				vars := map[string]interface{}{
-					"project_id":                     servicesInfoMap[fullServiceName].ProjectID,
-					"region":                         region,
-					"env_cluster_membership_ids":     env_cluster_membership_ids,
-					"buckets_force_destroy":          "true",
+					"project_id":                 servicesInfoMap[fullServiceName].ProjectID,
+					"region":                     region,
+					"env_cluster_membership_ids": env_cluster_membership_ids,
+					"buckets_force_destroy":      "true",
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -120,7 +120,6 @@ func TestAppInfra(t *testing.T) {
 					arRegistryIAMMembers := []string{
 						fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber),
 						fmt.Sprintf("serviceAccount:deploy-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID),
-						"allAuthenticatedUsers",
 					}
 					arRegistrySAIamFilter := "bindings.role:'roles/artifactregistry.reader'"
 					arRegistrySAIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", arRegistrySAIamFilter, "--format", "json"})
@@ -153,7 +152,7 @@ func TestAppInfra(t *testing.T) {
 					}
 
 					for env := range env_cluster_membership_ids {
-						bucketName :=fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
+						bucketName := fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
 
 						bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, servicesInfoMap[fullServiceName].ProjectID)
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
