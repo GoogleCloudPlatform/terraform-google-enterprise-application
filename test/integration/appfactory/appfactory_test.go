@@ -41,6 +41,7 @@ func TestAppfactory(t *testing.T) {
 	}
 
 	vars := map[string]interface{}{
+		"remote_state_bucket":  backend_bucket,
 		"bucket_force_destroy": "true",
 	}
 
@@ -71,6 +72,8 @@ func TestAppfactory(t *testing.T) {
 						allClusterServiceAccounts = append(allClusterServiceAccounts, ("serviceAccount:" + sa.String()))
 					}
 				}
+
+				assert.Greater(len(allClusterServiceAccounts), 0, "The slice of cluster service accounts must contain more than 0 service accounts.")
 
 				// check if created folders contain artifactregistry.reader for the cluster service accounts
 				// this is necessary to ensure the cluster can download docker images
