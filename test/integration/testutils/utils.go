@@ -15,7 +15,9 @@
 package testutils
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -33,6 +35,33 @@ func FileExists(filePath string) (bool, error) {
 	return false, err
 }
 
+func disableAutoTfVarsFile(rootDir string) error {
+	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			return err
+		}
+
+		if strings.HasSuffix(info.Name(), ".auto.tfvars") {
+			newName := path + ".disabled"
+			err := os.Rename(path, newName)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Renamed: %s -> %s\n", path, newName)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
 // filter select only values who match the condition for the field
 func Filter(field string, value string, iamList []gjson.Result) []gjson.Result {
 	var filtered []gjson.Result
@@ -43,4 +72,14 @@ func Filter(field string, value string, iamList []gjson.Result) []gjson.Result {
 		}
 	}
 	return filtered
+}
+
+// verify if gjson array of string contains another string
+func contains(slice []gjson.Result, item string) bool {
+	for _, v := range slice {
+		if v.String() == item {
+			return true
+		}
+	}
+	return false
 }

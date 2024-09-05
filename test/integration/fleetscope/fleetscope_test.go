@@ -16,8 +16,6 @@ package fleetscope
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -27,33 +25,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
-
-func disableAutoTfVarsFile(rootDir string) error {
-	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
-		}
-
-		if strings.HasSuffix(info.Name(), ".auto.tfvars") {
-			newName := path + ".disabled"
-			err := os.Rename(path, newName)
-			if err != nil {
-				return err
-			}
-			fmt.Printf("Renamed: %s -> %s\n", path, newName)
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return err
-	}
-
-	return nil
-}
 
 func TestFleetscope(t *testing.T) {
 	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
@@ -83,7 +54,7 @@ func TestFleetscope(t *testing.T) {
 				"namespace_ids":          setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 			}
 
-			err := disableAutoTfVarsFile(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName))
+			err := testutils.disableAutoTfVarsFile(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName))
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				t.Fail()

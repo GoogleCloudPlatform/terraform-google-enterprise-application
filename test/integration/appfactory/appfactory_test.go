@@ -29,16 +29,6 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
-// verify if gjson array of string contains another string
-func contains(slice []gjson.Result, item string) bool {
-	for _, v := range slice {
-		if v.String() == item {
-			return true
-		}
-	}
-	return false
-}
-
 func TestAppfactory(t *testing.T) {
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -93,7 +83,7 @@ func TestAppfactory(t *testing.T) {
 							if binding.Get("role").String() == "roles/artifactregistry.reader" {
 								folderIamPolicyMembers := binding.Get("members").Array()
 								for _, sa := range allClusterServiceAccounts {
-									assert.True(contains(folderIamPolicyMembers, sa), fmt.Sprintf("The cluster service account %s must exist in the folder %s artifactregistry.reader iam policy", sa, folderId))
+									assert.True(testutils.contains(folderIamPolicyMembers, sa), fmt.Sprintf("The cluster service account %s must exist in the folder %s artifactregistry.reader iam policy", sa, folderId))
 								}
 							}
 						}
