@@ -21,8 +21,6 @@ import (
 var (
 	EnvNames = []string{
 		"development",
-		"nonproduction",
-		"production",
 	}
 
 	ServicesNames = map[string][]string{

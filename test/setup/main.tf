@@ -17,8 +17,8 @@
 locals {
   envs = [
     "development",
-    "nonproduction",
-    "production",
+    # "nonproduction",
+    # "production",
   ]
 
   teams = [
