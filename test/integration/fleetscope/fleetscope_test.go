@@ -22,6 +22,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
@@ -37,7 +38,8 @@ func TestFleetscope(t *testing.T) {
 		"bucket": backend_bucket,
 	}
 
-	for _, envName := range testutils.EnvNames {
+	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
+	for _, envName := range testutils.EnvNames(branchName) {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
 			t.Parallel()

@@ -160,8 +160,8 @@ func TestAppfactory(t *testing.T) {
 							"serviceusage.googleapis.com",
 							"cloudbilling.googleapis.com",
 						}
-
-						for _, envName := range testutils.EnvNames {
+						branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
+						for _, envName := range testutils.EnvNames(branchName) {
 							envProjectID := envProjectsIDs.Get(envName).String()
 
 							envPrj := gcloud.Runf(t, "projects describe %s", envProjectID)

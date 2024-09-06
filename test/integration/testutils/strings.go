@@ -19,10 +19,6 @@ import (
 )
 
 var (
-	EnvNames = []string{
-		"development",
-	}
-
 	ServicesNames = map[string][]string{
 		"cymbal-bank": {
 			"accounts-contacts",
@@ -44,4 +40,17 @@ var (
 func GetLastSplitElement(value string, sep string) string {
 	splitted := strings.Split(value, sep)
 	return splitted[len(splitted)-1]
+}
+
+func EnvNames(branchName string) []string {
+	if branchName == "release-please--branches--main" {
+		return []string{
+			"development",
+			"non-production",
+			"production",
+		}
+	}
+	return []string{
+		"development",
+	}
 }

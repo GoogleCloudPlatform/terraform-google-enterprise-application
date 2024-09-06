@@ -31,9 +31,10 @@ import (
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/pull/107
 func TestAppInfra(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
-	for _, envName := range testutils.EnvNames {
+	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
+	for _, envName := range testutils.EnvNames(branchName) {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
-		multitenant :=  tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
+		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 	}
 
@@ -73,10 +74,10 @@ func TestAppInfra(t *testing.T) {
 				t.Parallel()
 
 				vars := map[string]interface{}{
-					"project_id":                     servicesInfoMap[fullServiceName].ProjectID,
-					"region":                         region,
-					"env_cluster_membership_ids":     env_cluster_membership_ids,
-					"buckets_force_destroy":          "true",
+					"project_id":                 servicesInfoMap[fullServiceName].ProjectID,
+					"region":                     region,
+					"env_cluster_membership_ids": env_cluster_membership_ids,
+					"buckets_force_destroy":      "true",
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -153,7 +154,7 @@ func TestAppInfra(t *testing.T) {
 					}
 
 					for env := range env_cluster_membership_ids {
-						bucketName :=fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
+						bucketName := fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
 
 						bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, servicesInfoMap[fullServiceName].ProjectID)
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
