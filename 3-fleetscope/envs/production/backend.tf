@@ -17,6 +17,6 @@
 terraform {
   backend "gcs" {
     bucket = "UPDATE_ME"
-    prefix = "terraform/fleet_scope/production"
+    prefix = "terraform/fleet_scope/${local.env}"
   }
 }
