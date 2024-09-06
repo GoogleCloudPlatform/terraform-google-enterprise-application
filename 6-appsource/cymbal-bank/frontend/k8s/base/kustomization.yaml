@@ -23,4 +23,4 @@ resources:
 components:
   - ../../../components/add-tmp-dir
   - ../../../components/add-public-key-volume
-  - ../../../components/bank-of-anthos
+  - ../../../components/cymbal-bank
