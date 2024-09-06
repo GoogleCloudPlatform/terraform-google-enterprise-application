@@ -15,6 +15,11 @@
  */
 
 locals {
+  envs = var.branch_name == "release-please--branches--main" ? [
+    "development",
+    "nonproduction",
+    "production",
+  ] : ["development"]
 
   teams = [
     "frontend",
@@ -31,7 +36,7 @@ locals {
   ]
 
   folder_role_mapping = flatten([
-    for env in var.envs : [
+    for env in local.envs : [
       for role in local.folder_admin_roles : {
         folder_id = module.folders.ids[env]
         role      = role
@@ -88,7 +93,7 @@ module "folders" {
 
   prefix = random_string.prefix.result
   parent = "folders/${var.folder_id}"
-  names  = var.envs
+  names  = local.envs
 }
 
 # Admin roles to folders

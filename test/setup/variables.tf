@@ -18,12 +18,9 @@ variable "org_id" {
   description = "The numeric organization id"
 }
 
-variable "envs" {
-  type        = list(string)
-  description = "All the environments to be created."
-  default = [
-    "development"
-  ]
+variable "branch_name" {
+  type        = string
+  description = "The branch starting the build."
 }
 
 variable "folder_id" {
