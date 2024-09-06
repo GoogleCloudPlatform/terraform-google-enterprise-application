@@ -17,35 +17,16 @@
 // These values are retrieved from the saved terraform state of the execution
 // of previous step using the terraform_remote_state data source.
 locals {
-  dev_cluster_service_accounts     = try(data.terraform_remote_state.dev_multitenant.outputs.cluster_service_accounts, [])
-  nonprod_cluster_service_accounts = try(data.terraform_remote_state.nonprod_multitenant.outputs.cluster_service_accounts, [])
-  prod_cluster_service_accounts    = try(data.terraform_remote_state.prod_multitenant.outputs.cluster_service_accounts, [])
+  cluster_service_accounts = [for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts]
 }
 
-data "terraform_remote_state" "dev_multitenant" {
+data "terraform_remote_state" "multitenant" {
+  for_each = var.envs
+
   backend = "gcs"
 
   config = {
     bucket = var.remote_state_bucket
-    prefix = "terraform/multi_tenant/development"
-  }
-}
-
-data "terraform_remote_state" "nonprod_multitenant" {
-  backend = "gcs"
-
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/multi_tenant/nonproduction"
-  }
-}
-
-
-data "terraform_remote_state" "prod_multitenant" {
-  backend = "gcs"
-
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/multi_tenant/production"
+    prefix = "terraform/multi_tenant/${each.key}"
   }
 }
