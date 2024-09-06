@@ -34,6 +34,11 @@ output "envs" {
   } }
 }
 
+
+output "envs_names" {
+  value = var.envs
+}
+
 output "common_folder_id" {
   value = module.folder_common.ids["common"]
 }
