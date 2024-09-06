@@ -19,14 +19,9 @@ variable "env" {
   type        = string
 }
 
-variable "cluster_project_id" {
-  description = "Cluster Project ID"
+variable "db_region" {
+  description = "Database Region"
   type        = string
-}
-
-variable "cluster_regions" {
-  description = "Cluster regions"
-  type        = list(string)
 }
 
 variable "app_project_id" {
@@ -46,5 +41,10 @@ variable "network_name" {
 
 variable "psc_consumer_fwd_rule_ip" {
   description = "Consumer psc endpoint IP address"
+  type        = string
+}
+
+variable "workload_identity_principal" {
+  description = "Workload Identity Principal to assign Cloud AlloyDB Admin (roles/alloydb.admin) role. Format: https://cloud.google.com/billing/docs/reference/rest/v1/Policy#Binding"
   type        = string
 }

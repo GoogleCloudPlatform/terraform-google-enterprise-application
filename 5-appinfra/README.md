@@ -16,9 +16,15 @@ The application infrastructure pipeline creates the following resources to estab
 - Custom service accounts and IAM bindings
 
 ### Other applicaiton infrastructure
-The application infrastructure pipeline creates additional resources on a per-environment basis as defined in the [`env_baseline`](.modules/env_baseline) submodule. Here, you can define additional infrastructure like application-specifc databases or other managed services.
+
+The application infrastructure pipeline can create additional resources on a per-environment basis.
+
+In this example, some services are using the [`alloydb-psc-setup`](.modules/alloydb-psc-setup) submodule for creating an AlloyDB Cluster with Private Service Connect.
+
+You may add additional infrastructure like application-specifc databases or other managed services by creating and invoking new submodules.
 
 ## Usage
+
 ### Running Terraform locally
 
 1. The next instructions assume that you are in the `terraform-google-enterprise-application/5-appinfra` folder.
