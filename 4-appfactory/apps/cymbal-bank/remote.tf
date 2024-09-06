@@ -17,7 +17,7 @@
 // These values are retrieved from the saved terraform state of the execution
 // of previous step using the terraform_remote_state data source.
 locals {
-  cluster_service_accounts = [for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts]
+  cluster_service_accounts = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts])
 }
 
 data "terraform_remote_state" "multitenant" {
