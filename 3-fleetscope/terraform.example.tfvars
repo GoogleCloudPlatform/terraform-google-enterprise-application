@@ -19,3 +19,5 @@ namespace_ids = {
   "accounts"     = "your-accounts-group@yourdomain.com",
   "transactions" = "your-transactions-group@yourdomain.com"
 }
+
+remote_state_bucket = "REMOTE_STATE_BUCKET"
