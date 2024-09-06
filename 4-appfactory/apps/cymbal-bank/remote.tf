@@ -17,9 +17,9 @@
 // These values are retrieved from the saved terraform state of the execution
 // of previous step using the terraform_remote_state data source.
 locals {
-  dev_cluster_service_accounts     = data.terraform_remote_state.dev_multitenant.outputs.cluster_service_accounts
-  nonprod_cluster_service_accounts = data.terraform_remote_state.nonprod_multitenant.outputs.cluster_service_accounts
-  prod_cluster_service_accounts    = data.terraform_remote_state.prod_multitenant.outputs.cluster_service_accounts
+  dev_cluster_service_accounts     = try(data.terraform_remote_state.dev_multitenant.outputs.cluster_service_accounts, [])
+  nonprod_cluster_service_accounts = try(data.terraform_remote_state.nonprod_multitenant.outputs.cluster_service_accounts, [])
+  prod_cluster_service_accounts    = try(data.terraform_remote_state.prod_multitenant.outputs.cluster_service_accounts, [])
 }
 
 data "terraform_remote_state" "dev_multitenant" {
