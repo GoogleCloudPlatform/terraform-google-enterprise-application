@@ -44,3 +44,13 @@ func Filter(field string, value string, iamList []gjson.Result) []gjson.Result {
 	}
 	return filtered
 }
+
+// verify if gjson array of string contains another string
+func Contains(slice []gjson.Result, item string) bool {
+	for _, v := range slice {
+		if v.String() == item {
+			return true
+		}
+	}
+	return false
+}

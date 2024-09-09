@@ -30,3 +30,10 @@ output "app-group" {
     }
   }
 }
+
+output "app-folders-ids" {
+  description = "Pair of app-name and folder_id"
+  value = {
+    for k, v in google_folder.app_folder : k => v.folder_id
+  }
+}

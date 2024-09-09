@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
+locals {
+  cluster_project_number = data.google_project.cluster_project_id.number
+}
 
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5, < 7"
-    }
-  }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:appinfra/cymbal-bank/development/v0.1.0"
-  }
+data "google_project" "cluster_project_id" {
+  project_id = local.cluster_project_id
 }

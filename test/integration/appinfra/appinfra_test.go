@@ -61,7 +61,7 @@ func TestAppInfra(t *testing.T) {
 			splitServiceName = strings.Split(fullServiceName, "-")
 			prefixServiceName = splitServiceName[0]
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
-			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s.app_admin_project_id", suffixServiceName)).String()
+			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, suffixServiceName)).String()
 			servicesInfoMap[fullServiceName] = ServiceInfos{
 				ApplicationName:  appName,
 				ProjectID:        projectID,
@@ -122,7 +122,6 @@ func TestAppInfra(t *testing.T) {
 					arRegistryIAMMembers := []string{
 						fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber),
 						fmt.Sprintf("serviceAccount:deploy-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].FinalServiceName, servicesInfoMap[fullServiceName].ProjectID),
-						"allAuthenticatedUsers",
 					}
 					arRegistrySAIamFilter := "bindings.role:'roles/artifactregistry.reader'"
 					arRegistrySAIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", arRegistrySAIamFilter, "--format", "json"})
