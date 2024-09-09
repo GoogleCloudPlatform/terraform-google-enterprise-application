@@ -17,7 +17,6 @@ package appsource
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"slices"
 	"strings"
@@ -168,7 +167,7 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 
-					input, err := ioutil.ReadFile(fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
+					input, err := os.ReadFile(fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -183,7 +182,7 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 					output := strings.Join(lines, "\n")
-					err = ioutil.WriteFile(fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName), []byte(output), 0644)
+					err = os.WriteFile(fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName), []byte(output), 0644)
 					if err != nil {
 						t.Fatal(err)
 					}
