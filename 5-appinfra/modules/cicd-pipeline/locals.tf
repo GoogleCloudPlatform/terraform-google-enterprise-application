@@ -17,6 +17,5 @@ locals {
   service_name       = reverse(split("-", var.service))[0]
   final_service_name = "${var.application_acronym}-${local.service_name}"
   team_name          = split("-", var.service)[0]
-  service_clean      = replace(var.service, "/", "-")
   container_registry = google_artifact_registry_repository.container_registry
 }

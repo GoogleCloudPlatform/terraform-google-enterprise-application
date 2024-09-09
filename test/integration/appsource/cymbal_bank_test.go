@@ -17,6 +17,7 @@ package appsource
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"slices"
 	"strings"
@@ -165,6 +166,26 @@ func TestSourceCymbalBank(t *testing.T) {
 						if err != nil {
 							t.Fatal(err)
 						}
+					}
+
+					input, err := ioutil.ReadFile(fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					lines := strings.Split(string(input), "\n")
+
+					for i, line := range lines {
+
+						if strings.Contains(line, "--delivery-pipeline") {
+							lines[i] = strings.ReplaceAll(lines[i], "$_SERVICE", "$_DELIVERY_PIPELINE")
+							lines[i] = strings.ReplaceAll(lines[i], "$_TEAM", "$_DELIVERY_PIPELINE")
+						}
+					}
+					output := strings.Join(lines, "\n")
+					err = ioutil.WriteFile(fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName), []byte(output), 0644)
+					if err != nil {
+						t.Fatal(err)
 					}
 
 					gitAppRun("add", ".")

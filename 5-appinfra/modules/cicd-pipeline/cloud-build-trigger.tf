@@ -31,6 +31,7 @@ resource "google_cloudbuild_trigger" "ci" {
     _CONTAINER_REGISTRY    = "${local.container_registry.location}-docker.pkg.dev/${local.container_registry.project}/${local.container_registry.repository_id}"
     _SOURCE_STAGING_BUCKET = "gs://${google_storage_bucket.release_source_development.name}"
     _CACHE                 = local.cache_filename
+    _DELIVERY_PIPELINE     = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
   }
   service_account = google_service_account.cloud_build.id
 }
