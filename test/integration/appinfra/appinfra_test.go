@@ -31,8 +31,8 @@ import (
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/pull/107
 func TestAppInfra(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
-	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
-	for _, envName := range testutils.EnvNames(branchName) {
+
+	for _, envName := range testutils.EnvNames(t) {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")

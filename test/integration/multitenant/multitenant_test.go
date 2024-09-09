@@ -42,8 +42,8 @@ func TestMultitenant(t *testing.T) {
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
 	}
-	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
-	for _, envName := range testutils.EnvNames(branchName) {
+
+	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
 			t.Parallel()

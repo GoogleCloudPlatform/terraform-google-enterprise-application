@@ -64,7 +64,7 @@ func TestAppfactory(t *testing.T) {
 				// retrieve all cluster service accounts from all multitenant environments
 				var allClusterServiceAccounts []string
 
-				for _, envName := range testutils.EnvNames {
+				for _, envName := range testutils.EnvNames(t) {
 					multitenant := tft.NewTFBlueprintTest(t,
 						tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
 					)
@@ -199,8 +199,7 @@ func TestAppfactory(t *testing.T) {
 							"serviceusage.googleapis.com",
 							"cloudbilling.googleapis.com",
 						}
-						branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
-						for _, envName := range testutils.EnvNames(branchName) {
+						for _, envName := range testutils.EnvNames(t) {
 							envProjectID := envProjectsIDs.Get(envName).String()
 
 							envPrj := gcloud.Runf(t, "projects describe %s", envProjectID)

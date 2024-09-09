@@ -16,6 +16,9 @@ package testutils
 
 import (
 	"strings"
+	"testing"
+
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 )
 
 var (
@@ -42,7 +45,8 @@ func GetLastSplitElement(value string, sep string) string {
 	return splitted[len(splitted)-1]
 }
 
-func EnvNames(branchName string) []string {
+func EnvNames(t *testing.T) []string {
+	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
 	if branchName == "release-please--branches--main" {
 		return []string{
 			"development",
