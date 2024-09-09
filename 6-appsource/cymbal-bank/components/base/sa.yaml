@@ -14,4 +14,4 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: bank-of-anthos
+  name: cymbal-bank
