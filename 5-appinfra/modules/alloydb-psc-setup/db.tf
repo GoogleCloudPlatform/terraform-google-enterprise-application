@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-locals {
-  region = var.cluster_regions[0]
-}
-
 # Create alloydb cluster and instance.
 
 data "google_project" "network_project" {
@@ -32,8 +28,8 @@ module "alloydb" {
   source  = "GoogleCloudPlatform/alloy-db/google"
   version = "~> 3.0"
 
-  cluster_id       = "cluster-${local.region}-psc-${var.env}"
-  cluster_location = local.region
+  cluster_id       = "cluster-${var.db_region}-psc-${var.env}"
+  cluster_location = var.db_region
   project_id       = var.app_project_id
   cluster_initial_user = {
     user     = "admin"
@@ -44,15 +40,15 @@ module "alloydb" {
   psc_allowed_consumer_projects = [data.google_project.network_project.number]
 
   primary_instance = {
-    instance_id        = "cluster-${local.region}-instance1-psc-${var.env}",
+    instance_id        = "cluster-${var.db_region}-instance1-psc-${var.env}",
     require_connectors = false
     ssl_mode           = "ENCRYPTED_ONLY"
   }
 
   read_pool_instance = [
     {
-      instance_id        = "cluster-${local.region}-r1-psc-${var.env}"
-      display_name       = "cluster-${local.region}-r1-psc-${var.env}"
+      instance_id        = "cluster-${var.db_region}-r1-psc-${var.env}"
+      display_name       = "cluster-${var.db_region}-r1-psc-${var.env}"
       require_connectors = false
       ssl_mode           = "ENCRYPTED_ONLY"
     }
@@ -61,7 +57,7 @@ module "alloydb" {
 
 resource "google_compute_forwarding_rule" "psc_fwd_rule_consumer" {
   name    = "psc-fwd-rule-consumer-endpoint-${var.env}"
-  region  = local.region
+  region  = var.db_region
   project = var.network_project_id
 
   target                  = module.alloydb.primary_instance.psc_instance_config[0].service_attachment_link
@@ -72,10 +68,8 @@ resource "google_compute_forwarding_rule" "psc_fwd_rule_consumer" {
 }
 
 # Grant workload identity service account access to alloydb.
-# TODO: Rename bank-of-anthos to cymbal-bank
-
-resource "google_project_iam_member" "cymbal_bank" {
+resource "google_project_iam_member" "alloydb_admin" {
   project = var.app_project_id
-  role    = "alloydb.admin"
-  member  = "serviceAccount:bank-of-anthos@${var.cluster_project_id}.iam.gserviceaccount.com"
+  role    = "roles/alloydb.admin"
+  member  = var.workload_identity_principal
 }

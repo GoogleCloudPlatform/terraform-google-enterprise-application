@@ -17,7 +17,14 @@
 terraform {
   required_version = ">= 1.3"
 
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5, < 7"
+    }
+  }
+
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:bootstrap/v0.1.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:appfactory/cymbal-bank/v0.1.0"
   }
 }
