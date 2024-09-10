@@ -59,6 +59,7 @@ variable "cluster_release_channel" {
 variable "apps" {
   description = "Applications"
   type = map(object({
+    acronym          = string
     ip_address_names = optional(list(string))
     certificates     = optional(map(list(string)))
   }))

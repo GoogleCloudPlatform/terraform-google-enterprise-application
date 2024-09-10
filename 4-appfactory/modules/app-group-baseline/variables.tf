@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-variable "application_name" {
+variable "service_name" {
   type        = string
   default     = "demo-app"
-  description = "The name of a single application."
+  description = "The name of a single service application."
+}
+
+variable "application_acronym" {
+  type        = string
+  description = "The acronym of the application."
 }
 
 variable "org_id" {
