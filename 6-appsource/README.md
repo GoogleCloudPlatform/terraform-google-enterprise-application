@@ -54,7 +54,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/cymbal-bank/ledger-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/ledger/ledger-db/k8s/overlays
-        
+
         cp -r $APP_SOURCE_DIR_PATH/cymbal-bank/accounts-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/accounts/accounts-db/k8s/overlays
 
         cp -r $APP_SOURCE_DIR_PATH/cymbal-bank/components $BANK_OF_ANTHOS_PATH/src/
@@ -72,9 +72,9 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         cp -r $APP_SOURCE_DIR_PATH/cymbal-bank/accounts-userservice/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/userservice
         cp -r $APP_SOURCE_DIR_PATH/cymbal-bank/accounts-contacts/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/contacts
         ```
-    
 
-    
+
+
     - Update `k8s` overlays:
 
         ```bash
