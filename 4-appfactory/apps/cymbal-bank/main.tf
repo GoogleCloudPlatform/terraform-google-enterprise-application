@@ -30,6 +30,7 @@ locals {
     for key, services in local.app_services : [
       for service in services : {
         app_name     = key
+        app_acronym  = "cb"
         service_name = service
       }
     ]
@@ -51,7 +52,7 @@ module "components" {
   source = "../../modules/app-group-baseline"
 
   service_name        = each.value.service_name
-  application_acronym = "cb"
+  application_acronym = each.value.app_acronym
   create_env_projects = true
 
   org_id               = var.org_id

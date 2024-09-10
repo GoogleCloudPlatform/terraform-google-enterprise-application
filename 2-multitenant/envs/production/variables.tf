@@ -34,4 +34,8 @@ variable "apps" {
     ip_address_names = optional(list(string))
     certificates     = optional(map(list(string)))
   }))
+  validation {
+    condition     = alltrue([for o in var.apps : length(o.acronym) > 3])
+    error_message = "The max lenght for acronym is 3 characters."
+  }
 }
