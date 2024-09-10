@@ -34,6 +34,13 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
     export APP_SOURCE_DIR_PATH=$(readlink -f ../6-appsource)
     ```
 
+1. Validate `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` variables values.
+
+    ```bash
+    echo "Bank of Anthos Path: $BANK_OF_ANTHOS_PATH"
+    echo "App Source Path: $APP_SOURCE_DIR_PATH"
+    ```
+
 1. Run the commands below to update the `bank-of-anthos` codebase with the updated assets:
 
     - Remove components and frontend:
