@@ -31,7 +31,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 
     ```bash
     export BANK_OF_ANTHOS_PATH=$(pwd)
-    export APP_SOURCE_DIR_PATH=$(readlink -f ..)
+    export APP_SOURCE_DIR_PATH=$(readlink -f ../6-appsource)
     ```
 
 1. Run the commands below to update the `bank-of-anthos` codebase with the updated assets:
