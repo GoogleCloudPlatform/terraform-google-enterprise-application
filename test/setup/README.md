@@ -11,6 +11,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `any` | n/a | yes |
+| branch\_name | The branch starting the build. | `string` | n/a | yes |
 | folder\_id | The folder to deploy in | `any` | n/a | yes |
 | org\_id | The numeric organization id | `any` | n/a | yes |
 

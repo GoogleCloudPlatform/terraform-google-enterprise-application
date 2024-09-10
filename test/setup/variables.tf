@@ -18,6 +18,11 @@ variable "org_id" {
   description = "The numeric organization id"
 }
 
+variable "branch_name" {
+  type        = string
+  description = "The branch starting the build."
+}
+
 variable "folder_id" {
   description = "The folder to deploy in"
 }

@@ -36,7 +36,8 @@ import (
 func TestSourceCymbalBank(t *testing.T) {
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
-	for _, envName := range testutils.EnvNames {
+
+	for _, envName := range testutils.EnvNames(t) {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")

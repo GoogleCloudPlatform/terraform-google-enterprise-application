@@ -15,11 +15,11 @@
  */
 
 locals {
-  envs = [
+  envs = var.branch_name == "release-please--branches--main" ? [
     "development",
-    # "nonproduction",
-    # "production",
-  ]
+    "nonproduction",
+    "production",
+  ] : ["development"]
 
   teams = [
     "frontend",
