@@ -3,11 +3,8 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| cluster\_membership\_ids | The membership IDs in the scope | `list(string)` | n/a | yes |
-| cluster\_project\_id | The cluster project ID | `string` | n/a | yes |
-| fleet\_project\_id | The fleet project ID | `string` | n/a | yes |
 | namespace\_ids | The fleet namespace IDs with team | `map(string)` | n/a | yes |
-| network\_project\_id | The network project ID | `string` | n/a | yes |
+| remote\_state\_bucket | Backend bucket to load Terraform Remote State Data from previous steps. | `string` | n/a | yes |
 
 ## Outputs
 
