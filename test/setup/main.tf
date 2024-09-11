@@ -15,11 +15,11 @@
  */
 
 locals {
-  envs = [
+  envs = var.branch_name == "release-please--branches--main" ? [
     "development",
-    # "nonproduction",
-    # "production",
-  ]
+    "nonproduction",
+    "production",
+  ] : ["development"]
 
   teams = [
     "frontend",
@@ -225,7 +225,7 @@ data "google_organization" "org" {
 module "group" {
   for_each = toset(local.teams)
   source   = "terraform-google-modules/group/google"
-  version  = "~> 0.6"
+  version  = "~> 0.7"
 
   id           = "${each.key}-${random_string.prefix.result}@${data.google_organization.org.domain}"
   display_name = "${each.key}-${random_string.prefix.result}"

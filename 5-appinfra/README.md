@@ -1,12 +1,14 @@
 # 5. Application Infrastructure pipeline
 
 ## Purpose
+
 The application infrastructure pipeline deploys the application-specific CI/CD resources as well as any additional application-specific services, such as databases or other managed services.
 
 An overview of application inrastruction pipeline is shown below, in the context of deploying a new applicaiton across the Enterprise Application blueprint.
-![Enterprise Application application infrastructure diagram](assets/eab-app-deployment.svg)
+![Enterprise Application application infrastructure diagram](../assets/eab-app-deployment.svg)
 
 ### Application CI/CD pipeline
+
 The application infrastructure pipeline creates the following resources to establish the application CI/CD pipeline, as defined in the [`cicd-pipeline`](./modules/cicd-pipeline/) submodule:
 
 - Cloud Build trigger
@@ -32,6 +34,7 @@ You may add additional infrastructure like application-specifc databases or othe
    ```bash
    cd terraform-google-enterprise-application/5-appinfra
    ```
+
 Under the `apps` folder are examples for each of the cymbal bank applications.
 
 1. Change directory into any of these folders to deploy.
@@ -47,14 +50,14 @@ Deploy the `shared` environment first, which contains the application CI/CD pipe
 1. Run `init` and `plan` and review the output.
 
    ```bash
-   terraform init -chdir=./envs/shared
-   terraform plan -chdir=./envs/shared
+   terraform -chdir=./envs/shared init
+   terraform -chdir=./envs/shared plan
    ```
 
 1. Run `apply shared`.
 
    ```bash
-   terraform apply -chdir=./envs/shared
+   terraform -chdir=./envs/shared apply
    ```
 
 You can now deploy each of your environments (e.g. production).
@@ -62,14 +65,14 @@ You can now deploy each of your environments (e.g. production).
 1. Run `init` and `plan` and review the output.
 
    ```bash
-   terraform init -chdir=./envs/production
-   terraform plan -chdir=./envs/production
+   terraform -chdir=./envs/production init
+   terraform -chdir=./envs/production plan
    ```
 
 1. Run `apply production`.
 
    ```bash
-   terraform apply -chdir=./envs/production
+   terraform -chdir=./envs/production apply
    ```
 
-If you receive any errors or made any changes to the Terraform config or `terraform.tfvars`, re-run `terraform plan -chdir=./envs/production` before you run `terraform apply -chdir=./envs/production`.
+If you receive any errors or made any changes to the Terraform config or `terraform.tfvars`, re-run `terraform -chdir=./envs/production plan` before you run `terraform apply -chdir=./envs/production`.

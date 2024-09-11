@@ -25,21 +25,17 @@ resource "google_artifact_registry_repository" "container_registry" {
   ]
 }
 
-module "artifact-registry-repository-iam-bindings" {
-  source       = "terraform-google-modules/iam/google//modules/artifact_registry_iam"
-  version      = "~> 7.7"
-  project      = var.project_id
-  repositories = [local.service_name]
-  location     = var.region
-  mode         = "authoritative"
-
-  bindings = {
-    "roles/artifactregistry.reader" = [
-      "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
-      "serviceAccount:${google_service_account.cloud_deploy.email}",
-      "allAuthenticatedUsers"
-    ],
+resource "google_artifact_registry_repository_iam_member" "member" {
+  for_each = {
+    "compute"      = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
+    "cloud_deploy" = "serviceAccount:${google_service_account.cloud_deploy.email}",
   }
+
+  project    = var.project_id
+  location   = var.region
+  repository = local.service_name
+  role       = "roles/artifactregistry.reader"
+  member     = each.value
 
   depends_on = [
     module.enabled_google_apis,

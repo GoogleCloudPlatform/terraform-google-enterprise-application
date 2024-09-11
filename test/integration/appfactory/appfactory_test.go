@@ -16,6 +16,7 @@ package appfactory
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -41,6 +42,7 @@ func TestAppfactory(t *testing.T) {
 	}
 
 	vars := map[string]interface{}{
+		"remote_state_bucket":  backend_bucket,
 		"bucket_force_destroy": "true",
 	}
 
@@ -59,13 +61,50 @@ func TestAppfactory(t *testing.T) {
 			appFactory.DefineVerify(func(assert *assert.Assertions) {
 				appFactory.DefaultVerify(assert)
 
+				// retrieve all cluster service accounts from all multitenant environments
+				var allClusterServiceAccounts []string
+
+				for _, envName := range testutils.EnvNames(t) {
+					multitenant := tft.NewTFBlueprintTest(t,
+						tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
+					)
+					// add to slice the environment service accounts
+					for _, sa := range multitenant.GetJsonOutput("cluster_service_accounts").Array() {
+						allClusterServiceAccounts = append(allClusterServiceAccounts, ("serviceAccount:" + sa.String()))
+					}
+				}
+
+				assert.Greater(len(allClusterServiceAccounts), 0, "The slice of cluster service accounts must contain more than 0 service accounts.")
+
+				// check if created folders contain artifactregistry.reader for the cluster service accounts
+				// this is necessary to ensure the cluster can download docker images
+				for _, folderId := range appFactory.GetJsonOutput("app-folders-ids").Map() {
+					t.Run(folderId.String(), func(t *testing.T) {
+						t.Parallel()
+						folderIamPolicy := gcloud.Runf(t, "resource-manager folders get-iam-policy %s", folderId.String())
+						// ensure cluster sa is in folder iam policy for artifactregistry.reader role
+						for _, binding := range folderIamPolicy.Get("bindings").Array() {
+							if binding.Get("role").String() == "roles/artifactregistry.reader" {
+								folderIamPolicyMembers := binding.Get("members").Array()
+								for _, sa := range allClusterServiceAccounts {
+									assert.True(testutils.Contains(folderIamPolicyMembers, sa), fmt.Sprintf("The cluster service account %s must exist in the folder %s artifactregistry.reader iam policy", sa, folderId))
+								}
+							}
+						}
+					})
+				}
+
 				// check admin projects
 				// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
 				// terraform.OutputJson OK to use as long as there is only one appGroupName
-				for appName, appData := range gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Map() {
-					appName := appName
+				for applicationService, appData := range gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Map() {
+					parts := strings.Split(applicationService, ".")
+					assert.Equal(len(parts), 2, "The keys of app-group output must be in the format 'app-name'.'service-name', for example: 'cymbal-bank.userservice'")
+					appName := parts[0]
+					serviceName := parts[1]
+
 					appData := appData
-					t.Run(appName, func(t *testing.T) {
+					t.Run(fmt.Sprintf("%s.%s", appName, serviceName), func(t *testing.T) {
 						t.Parallel()
 
 						adminProjectID := appData.Get("app_admin_project_id").String()
@@ -126,7 +165,7 @@ func TestAppfactory(t *testing.T) {
 							},
 						} {
 							bucketSelfLink := appData.Get(bucket.output).String()
-							opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://%s-%s-%s-%s", bucket.prefix, adminProjectID, appName, bucket.suffix), gcloudArgsBucket).Array()
+							opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://%s-%s-%s-%s", bucket.prefix, adminProjectID, serviceName, bucket.suffix), gcloudArgsBucket).Array()
 							assert.Equal(bucketSelfLink, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket SelfLink should be %s.", bucketSelfLink))
 						}
 						// triggers
@@ -160,8 +199,7 @@ func TestAppfactory(t *testing.T) {
 							"serviceusage.googleapis.com",
 							"cloudbilling.googleapis.com",
 						}
-
-						for _, envName := range testutils.EnvNames {
+						for _, envName := range testutils.EnvNames(t) {
 							envProjectID := envProjectsIDs.Get(envName).String()
 
 							envPrj := gcloud.Runf(t, "projects describe %s", envProjectID)
