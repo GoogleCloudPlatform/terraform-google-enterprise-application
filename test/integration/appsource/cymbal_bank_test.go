@@ -214,7 +214,7 @@ func TestSourceCymbalBank(t *testing.T) {
 								logsCmd := fmt.Sprintf("logging read \"resource.type=build\" --project=%s", servicesInfoMap[serviceName].ProjectID)
 								logs := gcloud.Runf(t, logsCmd).Array()
 								for _, log := range logs {
-									t.Logf(log.Get("textPayload").String())
+									t.Logf("build-log: %s", log.Get("textPayload").String())
 								}
 								return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 							}
