@@ -27,6 +27,7 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 
@@ -41,6 +42,17 @@ func TestSourceCymbalBank(t *testing.T) {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
+		cluster_membership := env_cluster_membership_ids[envName]["cluster_membership_ids"]
+		gcloud.Runf(t, "container fleet memberships get-credentials %s", cluster_membership[0])
+		kubectl := shell.Command{
+			Command: "kubectl",
+			Args:    []string{"get", "namespaces"},
+		}
+		output, err := shell.RunCommandAndGetStdOutE(t, kubectl)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("kubectl-output: %s", output)
 		cluster_project := multitenant.GetStringOutput("cluster_project_id")
 		fleet_scopes := gcloud.Runf(t, "container fleet scopes list --project=%s", cluster_project).Array()
 		for _, scope := range fleet_scopes {
@@ -93,8 +105,8 @@ func TestSourceCymbalBank(t *testing.T) {
 				t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
 				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
 				tmpDirApp := t.TempDir()
-				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
-				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
+				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays", appSourcePath, servicesInfoMap[serviceName].TeamName)
+				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 
 				vars := map[string]interface{}{
 					"project_id":                 servicesInfoMap[serviceName].ProjectID,
