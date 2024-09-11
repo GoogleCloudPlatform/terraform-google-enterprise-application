@@ -28,5 +28,5 @@ transformers:
     kind: NamespaceTransformer
     metadata:
       name: notImportantHere
-      namespace: frontend-production
+      namespace: cb-frontend-production
     unsetOnly: true
