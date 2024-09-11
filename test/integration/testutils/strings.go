@@ -32,9 +32,14 @@ var (
 			"ledger-transactionhistory",
 		},
 	}
-)
 
-var (
+	ServicesWithEnvProject = map[string][]string{
+		"cymbal-bank": {
+			"userservice",
+			"ledgerwriter",
+		},
+	}
+
 	AppNames = []string{
 		"cymbal-bank",
 	}
