@@ -15,21 +15,17 @@
  */
 
 locals {
-  env = "development"
+  fleet_project_id       = data.terraform_remote_state.multitenant.outputs.fleet_project_id
+  cluster_project_id     = data.terraform_remote_state.multitenant.outputs.cluster_project_id
+  network_project_id     = data.terraform_remote_state.multitenant.outputs.network_project_id
+  cluster_membership_ids = data.terraform_remote_state.multitenant.outputs.cluster_membership_ids
 }
 
-import {
-  id = "projects/${local.cluster_project_id}/locations/global/features/fleetobservability"
-  to = module.env.google_gke_hub_feature.fleet-o11y
-}
+data "terraform_remote_state" "multitenant" {
+  backend = "gcs"
 
-module "env" {
-  source = "../../modules/env_baseline"
-
-  env                    = local.env
-  cluster_project_id     = local.cluster_project_id
-  network_project_id     = local.network_project_id
-  fleet_project_id       = local.fleet_project_id
-  namespace_ids          = var.namespace_ids
-  cluster_membership_ids = local.cluster_membership_ids
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/multi_tenant/${local.env}"
+  }
 }
