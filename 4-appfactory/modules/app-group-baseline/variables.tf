@@ -24,8 +24,8 @@ variable "application_acronym" {
   type        = string
   description = "The acronym of the application."
   validation {
-    condition     = var.application_acronym > 3
-    error_message = "The max lenght for application_acronym is 3 characters."
+    condition     = length(var.application_acronym) <= 3
+    error_message = "The max length for application_acronym is 3 characters."
   }
 }
 
