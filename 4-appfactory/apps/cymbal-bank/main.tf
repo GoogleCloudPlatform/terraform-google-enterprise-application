@@ -29,9 +29,10 @@ locals {
   expanded_app_services = flatten([
     for key, services in local.app_services : [
       for service in services : {
-        app_name     = key
-        app_acronym  = "cb"
-        service_name = service
+        app_name            = key
+        app_acronym         = "cb"
+        service_name        = service
+        create_env_projects = service == "userservice" || service == "ledgerwriter"
       }
     ]
   ])
@@ -53,7 +54,7 @@ module "components" {
 
   service_name        = each.value.service_name
   application_acronym = each.value.app_acronym
-  create_env_projects = true
+  create_env_projects = each.value.create_env_projects
 
   org_id               = var.org_id
   billing_account      = var.billing_account

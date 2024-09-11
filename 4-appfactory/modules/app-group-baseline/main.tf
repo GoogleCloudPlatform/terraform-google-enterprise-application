@@ -15,10 +15,10 @@
  */
 
 locals {
-  cloudbuild_sa_roles = { for env in keys(var.envs) : env => {
+  cloudbuild_sa_roles = var.create_env_projects ? { for env in keys(var.envs) : env => {
     project_id = module.app_env_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
-  } }
+  } } : {}
 }
 
 // Create admin project
