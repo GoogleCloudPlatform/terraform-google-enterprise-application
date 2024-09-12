@@ -41,6 +41,18 @@ The following resources are created:
    mv terraform.example.tfvars terraform.tfvars
    ```
 
+1. Update the `namespace_ids` variables with Google Groups respective to each namespace/team.
+
+1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+
+   ```bash
+   export remote_state_bucket=$(terraform -chdir="../1-bootstrap/" output -raw state_bucket)
+
+   echo "remote_state_bucket = ${remote_state_bucket}"
+
+   sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
+   ```
+
 1. Update the file with values for your environment. See any of the envs folder [README.md](./envs/production/README.md#inputs) files for additional information on the values in the `terraform.tfvars` file.
 
 You can now deploy each of your environments (e.g. production).
