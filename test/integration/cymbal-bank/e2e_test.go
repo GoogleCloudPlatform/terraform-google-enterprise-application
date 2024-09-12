@@ -33,7 +33,7 @@ import (
 
 const (
 	sleepBetweenRetries time.Duration = time.Duration(60) * time.Second
-	maxRetries int = 30
+	maxRetries          int           = 30
 )
 
 func TestAppE2E(t *testing.T) {
@@ -81,6 +81,17 @@ func TestAppE2E(t *testing.T) {
 		}
 
 		resp, err := login(ctx, client, ipAddress)
+		gotToken := false
+		for _, cookie := range resp.Cookies() {
+			if cookie.Name == "token" {
+				gotToken = true
+			}
+		}
+		if resp.StatusCode != 200 || !gotToken {
+			fmt.Println("Failed Authentication.")
+			fmt.Println(resp)
+			t.Fatal(err)
+		}
 		fmt.Printf("Login resp: %v \n", resp)
 		if err != nil {
 			t.Fatal(err)
