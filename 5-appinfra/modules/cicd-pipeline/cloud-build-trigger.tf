@@ -22,8 +22,8 @@ resource "google_cloudbuild_trigger" "ci" {
     branch_name = var.repo_branch
     repo_name   = var.repo_name
   }
-  included_files = ["src/${local.team_name}/**", "src/components/**"]
-  filename       = "src/${local.team_name}/cloudbuild.yaml"
+  included_files = ["src/${var.team_name}/**", "src/components/**"]
+  filename       = "src/${var.team_name}/cloudbuild.yaml"
 
   substitutions = merge(
     {

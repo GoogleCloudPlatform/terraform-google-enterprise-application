@@ -29,9 +29,14 @@ variable "env_cluster_membership_ids" {
   }))
 }
 
-variable "service" {
+variable "service_name" {
   type        = string
-  description = "service name (e.g. 'frontend')"
+  description = "service name (e.g. 'transactionhistory')"
+}
+
+variable "team_name" {
+  type        = string
+  description = "team name (e.g. 'ledger')"
 }
 
 variable "repo_name" {

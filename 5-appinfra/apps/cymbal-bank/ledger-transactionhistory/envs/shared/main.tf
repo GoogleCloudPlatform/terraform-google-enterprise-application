@@ -16,8 +16,9 @@
 
 locals {
   application_name = "cymbal-bank"
-  service_name     = "ledger-transactionhistory"
-  repo_name        = "eab-${local.application_name}-${local.service_name}"
+  service_name     = "transactionhistory"
+  team_name        = "ledger"
+  repo_name        = "eab-${local.application_name}-${local.team_name}-${local.service_name}"
   repo_branch      = "main"
 }
 
@@ -28,14 +29,14 @@ module "app" {
   region                     = var.region
   env_cluster_membership_ids = var.env_cluster_membership_ids
 
-  service     = local.service_name
-  repo_name   = local.repo_name
-  repo_branch = local.repo_branch
+  service_name = local.service_name
+  team_name    = local.team_name
+  repo_name    = local.repo_name
+  repo_branch  = local.repo_branch
 
   additional_substitutions = {
-    _SERVICE = "transactionhistory"
-    _TEAM    = "ledger"
+    _SERVICE = local.service_name
+    _TEAM    = local.team_name
   }
-
   buckets_force_destroy = var.buckets_force_destroy
 }

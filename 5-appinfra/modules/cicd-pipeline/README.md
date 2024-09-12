@@ -12,7 +12,8 @@
 | region | CI/CD Region (e.g. us-central1) | `string` | n/a | yes |
 | repo\_branch | Branch to sync ACM configs from & trigger CICD if pushed to. | `string` | n/a | yes |
 | repo\_name | Short version of repository to sync ACM configs from & use source for CI (e.g. 'bank-of-anthos' for https://www.github.com/GoogleCloudPlatform/bank-of-anthos) | `string` | n/a | yes |
-| service | service name (e.g. 'frontend') | `string` | n/a | yes |
+| service\_name | service name (e.g. 'transactionhistory') | `string` | n/a | yes |
+| team\_name | team name (e.g. 'ledger') | `string` | n/a | yes |
 
 ## Outputs
 

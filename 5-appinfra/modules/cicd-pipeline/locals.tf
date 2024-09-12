@@ -14,8 +14,7 @@
 
 locals {
   cache_filename     = "cache"
-  service_name       = reverse(split("-", var.service))[0]
-  team_name          = split("-", var.service)[0]
-  service_clean      = replace(var.service, "/", "-")
+  full_service       = "${var.team_name}-${var.service_name}"
+  service_clean      = replace(local.full_service, "/", "-")
   container_registry = google_artifact_registry_repository.container_registry
 }
