@@ -29,10 +29,11 @@ module "app" {
   region                     = var.region
   env_cluster_membership_ids = var.env_cluster_membership_ids
 
-  service_name = local.service_name
-  team_name    = local.team_name
-  repo_name    = local.repo_name
-  repo_branch  = local.repo_branch
+  service_name           = local.service_name
+  team_name              = local.team_name
+  repo_name              = local.repo_name
+  repo_branch            = local.repo_branch
+  app_build_trigger_yaml = "src/${local.team_name}/cloudbuild.yaml"
 
   additional_substitutions = {
     _SERVICE = local.service_name

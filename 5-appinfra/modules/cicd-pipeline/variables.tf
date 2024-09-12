@@ -60,3 +60,8 @@ variable "additional_substitutions" {
   type        = map(string)
   default     = {}
 }
+
+variable "app_build_trigger_yaml" {
+  type        = string
+  description = "Name of application cloudbuild yaml file"
+}
