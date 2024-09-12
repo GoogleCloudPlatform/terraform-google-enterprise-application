@@ -21,7 +21,7 @@ metadata:
     team: frontend
     tier: web
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: frontend-ip
+    kubernetes.io/ingress.global-static-ip-name: cb-frontend-ip
     kubernetes.io/ingress.class: gce
   name: frontend
 spec:
