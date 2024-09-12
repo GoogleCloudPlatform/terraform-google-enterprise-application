@@ -15,6 +15,7 @@
  */
 
 locals {
+  services_with_infra = ["userservice", "ledgerwriter"]
   app_services = {
     "cymbal-bank" = [
       "balancereader",
@@ -32,7 +33,7 @@ locals {
         app_name            = key
         app_acronym         = "cb"
         service_name        = service
-        create_env_projects = service == "userservice" || service == "ledgerwriter"
+        create_env_projects = contains(local.services_with_infra, service)
       }
     ]
   ])
