@@ -169,6 +169,7 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal(err)
 					}
 
+					// Copy test-specific k8s manifests to the frontend development overlay
 					if mapPath == "frontend" {
 						err = cp.Copy("assets/", fmt.Sprintf("%s/src/%s/k8s/overlays/development/", tmpDirApp, mapPath))
 						if err != nil {
