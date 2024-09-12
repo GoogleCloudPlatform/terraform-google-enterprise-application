@@ -32,5 +32,10 @@ module "app" {
   repo_name   = local.repo_name
   repo_branch = local.repo_branch
 
+  additional_substitutions = {
+    _SERVICE = "ledgerwriter"
+    _TEAM    = "ledger"
+  }
+
   buckets_force_destroy = var.buckets_force_destroy
 }

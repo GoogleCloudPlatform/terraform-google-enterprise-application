@@ -32,5 +32,10 @@ module "app" {
   repo_name   = local.repo_name
   repo_branch = local.repo_branch
 
+  additional_substitutions = {
+    _SERVICE = "contacts"
+    _TEAM    = "accounts"
+  }
+
   buckets_force_destroy = var.buckets_force_destroy
 }

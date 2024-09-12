@@ -24,13 +24,17 @@ resource "google_cloudbuild_trigger" "ci" {
   }
   included_files = ["src/${local.team_name}/**", "src/components/**"]
   filename       = "src/${local.team_name}/cloudbuild.yaml"
-  substitutions = {
-    _SERVICE               = local.service_name
-    _TEAM                  = local.team_name
-    _CACHE_URI             = "gs://${google_storage_bucket.build_cache.name}/${google_storage_bucket_object.cache.name}"
-    _CONTAINER_REGISTRY    = "${local.container_registry.location}-docker.pkg.dev/${local.container_registry.project}/${local.container_registry.repository_id}"
-    _SOURCE_STAGING_BUCKET = "gs://${google_storage_bucket.release_source_development.name}"
-    _CACHE                 = local.cache_filename
-  }
+
+  substitutions = merge(
+    {
+      _CACHE_URI                 = "gs://${google_storage_bucket.build_cache.name}/${google_storage_bucket_object.cache.name}"
+      _CONTAINER_REGISTRY        = "${local.container_registry.location}-docker.pkg.dev/${local.container_registry.project}/${local.container_registry.repository_id}"
+      _SOURCE_STAGING_BUCKET     = "gs://${google_storage_bucket.release_source_development.name}"
+      _CACHE                     = local.cache_filename
+      _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
+    },
+    var.additional_substitutions
+  )
+
   service_account = google_service_account.cloud_build.id
 }
