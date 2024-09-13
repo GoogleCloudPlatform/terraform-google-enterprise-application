@@ -56,7 +56,7 @@ output "app_certificates" {
 
 output "acronym" {
   description = "App Acronym"
-  value       = [for k, v in var.apps : { k : v.acronym }]
+  value       = [for k, v in var.apps : { (k) : v.acronym }]
 }
 
 output "cluster_type" {
