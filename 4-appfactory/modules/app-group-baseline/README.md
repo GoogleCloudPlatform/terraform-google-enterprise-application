@@ -3,7 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| application\_acronym | The acronym of the application. | `string` | n/a | yes |
+| acronym | The acronym of the application. | `string` | n/a | yes |
 | billing\_account | Billing Account ID for application admin project resources. | `string` | n/a | yes |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |

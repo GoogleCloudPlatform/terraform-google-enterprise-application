@@ -20,12 +20,12 @@ variable "service_name" {
   description = "The name of a single service application."
 }
 
-variable "application_acronym" {
+variable "acronym" {
   type        = string
   description = "The acronym of the application."
   validation {
-    condition     = length(var.application_acronym) <= 3
-    error_message = "The max length for application_acronym is 3 characters."
+    condition     = length(var.acronym) <= 3
+    error_message = "The max length for acronym is 3 characters."
   }
 }
 

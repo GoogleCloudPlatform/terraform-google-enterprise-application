@@ -29,7 +29,7 @@ module "app_admin_project" {
   random_project_id        = true
   random_project_id_length = 4
   billing_account          = var.billing_account
-  name                     = substr("${var.application_acronym}-${var.service_name}-admin", 0, 25) # max length 30 chars
+  name                     = substr("${var.acronym}-${var.service_name}-admin", 0, 25) # max length 30 chars
   org_id                   = var.org_id
   folder_id                = var.folder_id
   activate_apis = [
@@ -80,7 +80,7 @@ module "app_env_project" {
   random_project_id        = true
   random_project_id_length = 4
   billing_account          = each.value.billing_account
-  name                     = substr("eab-${var.application_acronym}-${var.service_name}-${each.key}", 0, 25) # max length 30 chars
+  name                     = substr("eab-${var.acronym}-${var.service_name}-${each.key}", 0, 25) # max length 30 chars
   org_id                   = each.value.org_id
   folder_id                = each.value.folder_id
   activate_apis            = var.env_project_apis
