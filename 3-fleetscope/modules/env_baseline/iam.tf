@@ -16,7 +16,7 @@
 
 locals {
   namespaces            = [for k, v in google_gke_hub_scope.fleet-scope : v.scope_id]
-  namespace_wide_access = [for namespace in namespaces : "principalSet://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/namespace/${namespace}"]
+  namespace_wide_access = [for namespace in local.namespaces : "principalSet://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/namespace/${namespace}"]
 }
 
 # Allow Services Accounts to create trace
