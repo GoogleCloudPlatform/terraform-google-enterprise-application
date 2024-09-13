@@ -36,7 +36,7 @@ variable "service_name" {
 
 variable "team_name" {
   type        = string
-  description = "team name (e.g. 'ledger')"
+  description = "Team name (e.g. 'ledger'). This will be the prefix to the service CI Build Trigger Name."
 }
 
 variable "repo_name" {
