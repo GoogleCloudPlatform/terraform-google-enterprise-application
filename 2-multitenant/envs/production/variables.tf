@@ -28,7 +28,12 @@ variable "envs" {
 
 # Define Applications
 variable "apps" {
-  description = "Applications"
+  description = <<-EOF
+  A map, where the key is the application name, defining the application configurations with the following properties:
+  - **acronym** (Required): A short identifier for the application with a maximum of 3 characters in length.
+  - **ip_address_names** (Optional): A list of IP address names associated with the application.
+  - **certificates** (Optional): A map of certificate names to a list of certificate values required by the application.
+  EOF
   type = map(object({
     acronym          = string
     ip_address_names = optional(list(string))

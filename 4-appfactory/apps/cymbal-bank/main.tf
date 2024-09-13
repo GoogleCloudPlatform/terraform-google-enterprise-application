@@ -15,6 +15,7 @@
  */
 
 locals {
+  # Services in this list will receive dedicated projects for application-specific infrastructure, such as an app-specific database.
   services_with_infra = ["userservice", "ledgerwriter"]
   app_services = {
     "cymbal-bank" = [
