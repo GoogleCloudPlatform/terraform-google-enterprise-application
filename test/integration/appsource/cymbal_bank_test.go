@@ -41,16 +41,6 @@ func TestSourceCymbalBank(t *testing.T) {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
-		// cluster_project := multitenant.GetStringOutput("cluster_project_id")
-		// fleet_scopes := gcloud.Runf(t, "container fleet scopes list --project=%s", cluster_project).Array()
-		// for _, scope := range fleet_scopes {
-		// 	fleet_scope_name := scope.Get("name")
-		// 	t.Logf("fleetscope-name: %s", fleet_scope_name.String())
-		// 	namespaces := gcloud.Runf(t, "container hub scopes namespaces list --project=%s --scope=%s", cluster_project, fleet_scope_name.String()).Array()
-		// 	for _, namespace := range namespaces {
-		// 		t.Logf("namespace: %s", namespace.Get("name").String())
-		// 	}
-		// }
 	}
 
 	type ServiceInfos struct {
