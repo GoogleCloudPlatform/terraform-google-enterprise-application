@@ -14,7 +14,7 @@
 
 locals {
   cache_filename     = "cache"
-  full_service       = "${var.team_name}-${var.service_name}"
+  full_service       = var.team_name == var.service_name ? var.service_name : "${var.team_name}-${var.service_name}"
   service_clean      = replace(local.full_service, "/", "-")
   container_registry = google_artifact_registry_repository.container_registry
 }
