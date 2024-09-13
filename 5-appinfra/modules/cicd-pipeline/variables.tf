@@ -56,12 +56,12 @@ variable "buckets_force_destroy" {
 }
 
 variable "additional_substitutions" {
-  description = "Parameters to be substituted in the build specification. All keys should begin with an underscore."
+  description = "A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (_)."
   type        = map(string)
   default     = {}
 }
 
 variable "app_build_trigger_yaml" {
   type        = string
-  description = "Name of application cloudbuild yaml file"
+  description = "Path to the Cloud Build YAML file for the application"
 }
