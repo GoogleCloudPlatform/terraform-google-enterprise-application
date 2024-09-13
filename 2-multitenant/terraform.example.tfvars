@@ -57,6 +57,6 @@ apps = {
     "certificates" : {
       "my-app-cert" : ["my-domain"]
     }
-    "acronym" = "mp",
+    "acronym" = "ma",
   }
 }
