@@ -83,8 +83,8 @@ func TestSourceCymbalBank(t *testing.T) {
 				t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
 				appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
 				tmpDirApp := t.TempDir()
-				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays/development/%s-db.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
-				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays/development/%s-db.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
+				dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays", appSourcePath, servicesInfoMap[serviceName].TeamName)
+				dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 
 				vars := map[string]interface{}{
 					"project_id":                 servicesInfoMap[serviceName].ProjectID,
@@ -159,6 +159,7 @@ func TestSourceCymbalBank(t *testing.T) {
 						t.Fatal(err)
 					}
 
+					// Copy test-specific k8s manifests to the frontend development overlay
 					if mapPath == "frontend" {
 						err = cp.Copy("assets/", fmt.Sprintf("%s/src/%s/k8s/overlays/development/", tmpDirApp, mapPath))
 						if err != nil {
@@ -211,6 +212,11 @@ func TestSourceCymbalBank(t *testing.T) {
 							} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
 								return true, nil
 							} else {
+								logsCmd := fmt.Sprintf("logging read --project=%s", servicesInfoMap[serviceName].ProjectID)
+								logs := gcloud.Runf(t, logsCmd).Array()
+								for _, log := range logs {
+									t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, log.Get("textPayload").String())
+								}
 								return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 							}
 						}

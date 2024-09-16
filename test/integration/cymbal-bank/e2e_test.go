@@ -81,6 +81,26 @@ func TestAppE2E(t *testing.T) {
 		}
 
 		resp, err := login(ctx, client, ipAddress)
+
+		// check if the server replied with authentication cookie
+		gotToken := false
+		for _, cookie := range resp.Request.Cookies() {
+			if cookie.Name == "token" {
+				gotToken = true
+			}
+		}
+
+		if resp.StatusCode != 200 {
+			fmt.Println(resp)
+			t.Fatal(err)
+		}
+
+		if !gotToken {
+			fmt.Println("Failed Authentication.")
+			fmt.Println(resp.Request)
+			t.Fatal(err)
+		}
+
 		fmt.Printf("Login resp: %v \n", resp)
 		if err != nil {
 			t.Fatal(err)
