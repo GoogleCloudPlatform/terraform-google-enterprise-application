@@ -16,7 +16,7 @@
 resource "google_clouddeploy_delivery_pipeline" "delivery-pipeline" {
   project  = var.project_id
   location = var.region
-  name     = local.service_name
+  name     = var.service_name
   serial_pipeline {
     dynamic "stages" {
       for_each = google_clouddeploy_target.clouddeploy_targets
