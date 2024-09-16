@@ -77,27 +77,3 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
     google_gke_hub_feature.acm_feature
   ]
 }
-
-# Allow Services Accounts to create trace
-resource "google_project_iam_binding" "acm_wi_trace_agent" {
-  project = var.fleet_project_id
-
-  role = "roles/cloudtrace.agent"
-  members = [
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/default/sa/cymbal-bank", #TODO rename/move
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
-  ]
-}
-
-# Allow Services Accounts to send metrics
-resource "google_project_iam_binding" "acm_wi_metricWriter" {
-  project = var.fleet_project_id
-
-  role = "roles/monitoring.metricWriter"
-  members = [
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/default/sa/cymbal-bank", #TODO rename/move
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
-  ]
-}

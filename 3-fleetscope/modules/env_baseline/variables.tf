@@ -43,3 +43,25 @@ variable "cluster_membership_ids" {
   description = "The membership IDs in the scope"
   type        = list(string)
 }
+
+
+variable "additional_project_role_identities" {
+  description = <<-EOF
+  (Optional) A list of additional identities to assign roles at the project level for the fleet project. Use the following formats for specific Kubernetes identities:
+
+  - **Specific Service Account:** For all Pods using a specific Kubernetes ServiceAccount:
+    `principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/subject/ns/NAMESPACE/sa/SERVICEACCOUNT`
+
+  - **Namespace-Wide Access:** For all Pods in a namespace, regardless of the service account or cluster:
+    `principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/namespace/NAMESPACE`
+
+  - **Cluster-Wide Access:** For all Pods in a specific cluster:
+    `principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/kubernetes.cluster/https://container.googleapis.com/v1/projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_NAME`
+
+  Note: Namespace-Wide Access is Granted for all namespace created with `namespace_ids`.
+  More details can be found here:
+  https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity#principal-id-examples
+  EOF
+  type        = list(string)
+  default     = []
+}
