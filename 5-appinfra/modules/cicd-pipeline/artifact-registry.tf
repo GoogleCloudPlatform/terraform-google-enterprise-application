@@ -14,10 +14,10 @@
 
 # create artifact registry for container images
 resource "google_artifact_registry_repository" "container_registry" {
-  repository_id = local.service_name
+  repository_id = var.service_name
   location      = var.region
   format        = "docker"
-  description   = "${local.service_name} docker repository"
+  description   = "${var.service_name} docker repository"
   project       = var.project_id
 
   depends_on = [
@@ -33,7 +33,7 @@ resource "google_artifact_registry_repository_iam_member" "member" {
 
   project    = var.project_id
   location   = var.region
-  repository = local.service_name
+  repository = var.service_name
   role       = "roles/artifactregistry.reader"
   member     = each.value
 

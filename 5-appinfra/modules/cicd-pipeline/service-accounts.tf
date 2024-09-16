@@ -15,7 +15,7 @@
 # cloud build service account
 resource "google_service_account" "cloud_build" {
   project                      = var.project_id
-  account_id                   = "ci-${local.service_name}"
+  account_id                   = "ci-${var.service_name}"
   create_ignore_already_exists = true
 }
 

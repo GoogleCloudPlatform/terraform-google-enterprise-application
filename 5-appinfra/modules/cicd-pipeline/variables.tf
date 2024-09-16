@@ -29,9 +29,14 @@ variable "env_cluster_membership_ids" {
   }))
 }
 
-variable "service" {
+variable "service_name" {
   type        = string
-  description = "service name (e.g. 'frontend')"
+  description = "service name (e.g. 'transactionhistory')"
+}
+
+variable "team_name" {
+  type        = string
+  description = "Team name (e.g. 'ledger'). This will be the prefix to the service CI Build Trigger Name."
 }
 
 variable "repo_name" {
@@ -48,4 +53,15 @@ variable "buckets_force_destroy" {
   description = "When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
   type        = bool
   default     = false
+}
+
+variable "additional_substitutions" {
+  description = "A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (_)."
+  type        = map(string)
+  default     = {}
+}
+
+variable "app_build_trigger_yaml" {
+  type        = string
+  description = "Path to the Cloud Build YAML file for the application"
 }
