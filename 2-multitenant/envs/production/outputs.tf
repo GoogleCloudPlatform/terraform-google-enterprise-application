@@ -54,8 +54,8 @@ output "app_certificates" {
   value       = module.env.app_certificates
 }
 
-output "acronym" {
-  description = "App Acronym"
+output "acronyms" {
+  description = "App Acronyms"
   value       = [for k, v in var.apps : { (k) : v.acronym }]
 }
 

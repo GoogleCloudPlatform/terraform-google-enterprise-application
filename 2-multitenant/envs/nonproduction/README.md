@@ -10,7 +10,7 @@
 
 | Name | Description |
 |------|-------------|
-| acronym | App Acronym |
+| acronyms | App Acronyms |
 | app\_certificates | App Certificates |
 | app\_ip\_addresses | App IP Addresses |
 | cluster\_membership\_ids | GKE cluster membership IDs |

@@ -18,7 +18,7 @@
 // of previous step using the terraform_remote_state data source.
 locals {
   cluster_service_accounts = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts])
-  acronym                  = distinct(flatten([for state in data.terraform_remote_state.multitenant : state.outputs.acronym]))[0]
+  acronym                  = distinct(flatten([for state in data.terraform_remote_state.multitenant : state.outputs.acronyms]))[0]
 }
 
 data "terraform_remote_state" "multitenant" {
