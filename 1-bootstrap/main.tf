@@ -34,6 +34,7 @@ locals {
       roles        = []
     }
   }
+  cb_service_accounts_emails = { for k, v in module.tf_cloudbuild_workspace : k => reverse(split("/", v.cloudbuild_sa))[0] }
 }
 
 resource "google_sourcerepo_repository" "gcp_repo" {
@@ -73,6 +74,13 @@ module "tf_cloudbuild_workspace" {
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
+
+  substitutions = {
+    "_GAR_REGION"                   = var.location
+    "_GAR_PROJECT_ID"               = google_sourcerepo_repository.tf_cloud_builder_image.project
+    "_GAR_REPOSITORY"               = local.gar_repository
+    "_DOCKER_TAG_VERSION_TERRAFORM" = local.docker_tag_version_terraform
+  }
 
   # Branches to run the build
   tf_apply_branches = var.tf_apply_branches
