@@ -64,7 +64,7 @@ data "google_client_openid_userinfo" "me" {
 
 resource "null_resource" "name" {
   provisioner "local-exec" {
-    command = "builds triggers list --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
+    command = "gcloud storage buckets list --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
   }
 }
 
