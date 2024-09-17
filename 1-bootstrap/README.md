@@ -106,9 +106,11 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 |------|-------------|------|---------|:--------:|
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |
+| common\_folder\_id | Folder ID in which to create all application admin projects, must be prefixed with 'folders/' | `string` | n/a | yes |
+| envs | Environments | <pre>map(object({<br>    billing_account    = string<br>    folder_id          = string<br>    network_project_id = string<br>    network_self_link  = string<br>    org_id             = string<br>    subnets_self_links = list(string)<br>  }))</pre> | n/a | yes |
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | project\_id | Project ID for initial resources | `string` | n/a | yes |
-| tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "non\\-production",<br>  "production"<br>]</pre> | no |
+| tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"global"` | no |
 
 ## Outputs
@@ -116,6 +118,7 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 | Name | Description |
 |------|-------------|
 | artifacts\_bucket | Bucket for storing TF plans |
+| cb\_service\_accounts\_emails | Service Accounts for the Multitenant Administration Cloud Build Triggers |
 | logs\_bucket | Bucket for storing TF logs |
 | project\_id | Project ID |
 | source\_repo\_urls | Source repository URLs |

@@ -47,5 +47,9 @@ output "billing_account" {
 }
 
 output "teams" {
-  value = { for team, group in module.group : team => module.group[team].id }
+  value = {
+    "frontend" = "frontend-eab@clsecteam.com",
+    "accounts" = "accounts-eab@clsecteam.com",
+    "ledger"   = "transactions-eab@clsecteam.com"
+  }
 }
