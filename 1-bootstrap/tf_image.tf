@@ -59,6 +59,15 @@ resource "time_sleep" "cloud_builder" {
   ]
 }
 
+data "google_client_openid_userinfo" "me" {
+}
+
+resource "null_resource" "name" {
+  provisioner "local-exec" {
+    command = "echo ${data.google_client_openid_userinfo.me.email}"
+  }
+}
+
 module "build_terraform_image" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 3.1"
@@ -73,6 +82,7 @@ module "build_terraform_image" {
   module_depends_on = [
     time_sleep.cloud_builder,
   ]
+  depends_on = [ data.google_client_openid_userinfo.me ]
 }
 
 

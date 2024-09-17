@@ -123,10 +123,10 @@ resource "google_folder_iam_member" "app_factory_project_creator" {
   folder = var.common_folder_id
 }
 
-resource "google_organization_iam_member" "app_factory_folder_viewer" {
+resource "google_folder_iam_member" "app_factory_folder_viewer" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
 
   role   = "roles/resourcemanager.folderViewer"
   member = "serviceAccount:${each.value.email}"
-  org_id = each.value.org_id
+  folder = var.common_folder_id
 }
