@@ -64,7 +64,7 @@ data "google_client_openid_userinfo" "me" {
 
 resource "null_resource" "name" {
   provisioner "local-exec" {
-    command = "echo ${data.google_client_openid_userinfo.me.email}"
+    command = "gcloud config get account && echo ${data.google_client_openid_userinfo.me.email}"
   }
 }
 
