@@ -37,7 +37,7 @@ module "tf_cloud_builder" {
   terraform_version            = local.terraform_version
   build_timeout                = "1200s"
   cb_logs_bucket_force_destroy = var.bucket_force_destroy
-  trigger_location             = var.location  
+  trigger_location             = var.location
   bucket_name                  = "${var.bucket_prefix}-${var.project_id}-tf-cloudbuilder-build-logs"
 }
 
@@ -73,7 +73,6 @@ module "build_terraform_image" {
   module_depends_on = [
     time_sleep.cloud_builder,
   ]
-  depends_on = [data.google_client_openid_userinfo.me]
 }
 
 
