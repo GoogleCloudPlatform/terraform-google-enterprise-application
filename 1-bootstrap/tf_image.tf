@@ -24,6 +24,7 @@ locals {
 resource "google_service_account" "tf_cloudbuilder" {
   account_id   = "tf-cloudbuilder"
   display_name = "TF Cloud Builder"
+  project      = var.project_id
 }
 
 resource "google_storage_bucket_iam_member" "storage_admin" {
