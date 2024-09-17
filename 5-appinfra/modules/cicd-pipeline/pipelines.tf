@@ -22,7 +22,7 @@ locals {
 # cloud deploy service account
 resource "google_service_account" "cloud_deploy" {
   project                      = var.project_id
-  account_id                   = "deploy-${local.service_name}"
+  account_id                   = "deploy-${var.service_name}"
   create_ignore_already_exists = true
 }
 
@@ -59,7 +59,7 @@ resource "google_storage_bucket" "delivery_artifacts" {
   for_each = var.env_cluster_membership_ids
 
   project                     = var.project_id
-  name                        = "artifacts-${each.key}-${data.google_project.project.number}-${local.service_name}"
+  name                        = "artifacts-${each.key}-${data.google_project.project.number}-${var.service_name}"
   uniform_bucket_level_access = true
   location                    = regex(local.membership_re, each.value.cluster_membership_ids[0])[1]
   force_destroy               = var.buckets_force_destroy
