@@ -64,7 +64,7 @@ data "google_client_openid_userinfo" "me" {
 
 resource "null_resource" "name" {
   provisioner "local-exec" {
-    command = "gcloud config get account && echo ${data.google_client_openid_userinfo.me.email}"
+    command = "builds triggers list --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
   }
 }
 
@@ -77,7 +77,7 @@ module "build_terraform_image" {
     "terraform_version" = local.terraform_version
   }
 
-  create_cmd_body = "beta builds triggers run  ${local.cloud_builder_trigger_id} --branch main --region ${var.location} --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
+  create_cmd_body = "builds triggers run  ${local.cloud_builder_trigger_id} --branch main --region ${var.location} --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
 
   module_depends_on = [
     time_sleep.cloud_builder,
