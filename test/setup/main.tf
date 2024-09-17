@@ -19,7 +19,7 @@ locals {
     "development",
     "nonproduction",
     "production",
-  ] : ["development", "nonproduction", "production"]
+  ] : ["development"]
 
   teams = [
     "frontend",
@@ -72,9 +72,7 @@ module "project" {
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "workflows.googleapis.com",
-    "cloudscheduler.googleapis.com"
+    "cloudbilling.googleapis.com"
   ]
 }
 
@@ -223,14 +221,14 @@ data "google_organization" "org" {
   organization = var.org_id
 }
 
-# # Create google groups
-# module "group" {
-#   for_each = toset(local.teams)
-#   source   = "terraform-google-modules/group/google"
-#   version  = "~> 0.7"
+# Create google groups
+module "group" {
+  for_each = toset(local.teams)
+  source   = "terraform-google-modules/group/google"
+  version  = "~> 0.7"
 
-#   id           = "${each.key}-${random_string.prefix.result}@${data.google_organization.org.domain}"
-#   display_name = "${each.key}-${random_string.prefix.result}"
-#   description  = "Group module test group for ${each.key}"
-#   domain       = data.google_organization.org.domain
-# }
+  id           = "${each.key}-${random_string.prefix.result}@${data.google_organization.org.domain}"
+  display_name = "${each.key}-${random_string.prefix.result}"
+  description  = "Group module test group for ${each.key}"
+  domain       = data.google_organization.org.domain
+}
