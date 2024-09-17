@@ -64,7 +64,7 @@ data "google_client_openid_userinfo" "me" {
 
 resource "null_resource" "name" {
   provisioner "local-exec" {
-    command = "gcloud storage buckets list --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
+    command = "builder_bucket=$(gcloud storage buckets list --project ${google_sourcerepo_repository.tf_cloud_builder_image.project} | grep cloudbuilder | grep storage_url | awk '{ print $2 }') && echo $builder_bucket && gcloud storage buckets get-iam-policy $builder_bucket"
   }
 }
 
@@ -77,7 +77,7 @@ module "build_terraform_image" {
     "terraform_version" = local.terraform_version
   }
 
-  create_cmd_body = "builds triggers run  ${local.cloud_builder_trigger_id} --branch main --region ${var.location} --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
+  create_cmd_body = "builds triggers run ${local.cloud_builder_trigger_id} --branch main --region ${var.location} --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
 
   module_depends_on = [
     time_sleep.cloud_builder,
