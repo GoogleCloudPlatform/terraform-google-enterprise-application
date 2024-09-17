@@ -50,7 +50,7 @@ func EnvNames(t *testing.T) []string {
 	if branchName == "release-please--branches--main" {
 		return []string{
 			"development",
-			"non-production",
+			"nonproduction",
 			"production",
 		}
 	}
