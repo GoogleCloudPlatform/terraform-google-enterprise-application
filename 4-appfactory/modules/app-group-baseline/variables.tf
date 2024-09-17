@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-variable "application_name" {
+variable "service_name" {
   type        = string
   default     = "demo-app"
-  description = "The name of a single application."
+  description = "The name of a single service application."
+}
+
+variable "acronym" {
+  type        = string
+  description = "The acronym of the application."
+  validation {
+    condition     = length(var.acronym) <= 3
+    error_message = "The max length for acronym is 3 characters."
+  }
 }
 
 variable "org_id" {

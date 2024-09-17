@@ -47,7 +47,7 @@ func TestAppE2E(t *testing.T) {
 			Jar: jar,
 		}
 		ctx := context.Background()
-		ipAddress := multitenant.GetJsonOutput("app_ip_addresses").Get("cymbal-bank.frontend-ip").String()
+		ipAddress := multitenant.GetJsonOutput("app_ip_addresses").Get("cymbal-bank.cb-frontend-ip").String()
 
 		// Test webserver is avaliable
 		heartbeat := func() (string, error) {
