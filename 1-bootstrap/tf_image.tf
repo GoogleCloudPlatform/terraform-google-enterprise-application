@@ -21,6 +21,19 @@ locals {
   cloud_builder_trigger_id     = element(split("/", module.tf_cloud_builder.cloudbuild_trigger_id), index(split("/", module.tf_cloud_builder.cloudbuild_trigger_id), "triggers") + 1, )
 }
 
+resource "google_service_account" "tf_cloudbuilder" {
+  account_id   = "tf-cloudbuilder"
+  display_name = "TF Cloud Builder"
+}
+
+resource "google_storage_bucket_iam_member" "storage_admin" {
+  bucket = "${var.bucket_prefix}-${google_sourcerepo_repository.tf_cloud_builder_image.project}-tf-cloudbuilder-build-logs"
+  role   = "roles/storage.admin"
+  member = google_service_account.tf_cloudbuilder.member
+
+  depends_on = [module.tf_cloud_builder]
+}
+
 resource "google_sourcerepo_repository" "tf_cloud_builder_image" {
   project = var.project_id
   name    = "tf-cloudbuilder-image"
@@ -39,6 +52,7 @@ module "tf_cloud_builder" {
   bucket_name                  = "${var.bucket_prefix}-${google_sourcerepo_repository.tf_cloud_builder_image.project}-tf-cloudbuilder-build-logs"
   gar_repo_location            = var.location
   trigger_location             = var.location
+  cloudbuild_sa                = google_service_account.tf_cloudbuilder.id
 }
 
 module "bootstrap_csr_repo" {
@@ -56,6 +70,7 @@ resource "time_sleep" "cloud_builder" {
   depends_on = [
     module.tf_cloud_builder,
     module.bootstrap_csr_repo,
+    google_storage_bucket_iam_member.storage_admin
   ]
 }
 
@@ -66,7 +81,7 @@ resource "null_resource" "name" {
   provisioner "local-exec" {
     command = "builder_bucket=$(gcloud storage buckets list --project ${google_sourcerepo_repository.tf_cloud_builder_image.project} | grep cloudbuilder | grep storage_url | awk '{ print $2 }') && echo $builder_bucket && gcloud storage buckets get-iam-policy $builder_bucket"
   }
-  depends_on = [ time_sleep.cloud_builder ]
+  depends_on = [time_sleep.cloud_builder]
 }
 
 module "build_terraform_image" {
@@ -83,7 +98,7 @@ module "build_terraform_image" {
   module_depends_on = [
     time_sleep.cloud_builder,
   ]
-  depends_on = [ data.google_client_openid_userinfo.me ]
+  depends_on = [data.google_client_openid_userinfo.me]
 }
 
 
