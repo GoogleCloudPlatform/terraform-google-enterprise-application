@@ -36,7 +36,7 @@ module "tf_cloud_builder" {
   build_timeout                = "1200s"
   cb_logs_bucket_force_destroy = var.bucket_force_destroy
   enable_worker_pool           = true
-  bucket_name                  = "${var.bucket_prefix}-${google_sourcerepo_repository.tf_cloud_builder_image.project}-tf-cloud-builder-build-logs"
+  bucket_name                  = "${var.bucket_prefix}-${google_sourcerepo_repository.tf_cloud_builder_image.project}-tf-cloudbuilder-build-logs"
   gar_repo_location            = var.location
   trigger_location             = var.location
 }
