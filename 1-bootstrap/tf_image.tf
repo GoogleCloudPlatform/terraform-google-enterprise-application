@@ -66,6 +66,7 @@ resource "null_resource" "name" {
   provisioner "local-exec" {
     command = "builder_bucket=$(gcloud storage buckets list --project ${google_sourcerepo_repository.tf_cloud_builder_image.project} | grep cloudbuilder | grep storage_url | awk '{ print $2 }') && echo $builder_bucket && gcloud storage buckets get-iam-policy $builder_bucket"
   }
+  depends_on = [ time_sleep.cloud_builder ]
 }
 
 module "build_terraform_image" {
