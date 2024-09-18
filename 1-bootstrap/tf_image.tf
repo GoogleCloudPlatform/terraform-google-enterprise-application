@@ -67,7 +67,7 @@ resource "google_service_account_iam_member" "self_impersonate" {
   ])
   service_account_id = google_service_account.builder.name
   role               = each.key
-  member             = "ci-account@${var.project_id}.iam.gserviceaccount.com"
+  member             = "serviceAccount:ci-account@${var.project_id}.iam.gserviceaccount.com"
 }
 
 resource "time_sleep" "wait_iam_propagation" {
