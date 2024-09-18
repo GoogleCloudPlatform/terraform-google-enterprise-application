@@ -28,8 +28,12 @@ resource "google_service_account" "int_test" {
 }
 
 resource "google_service_account_iam_member" "self_impersonate" {
+  for_each = toset([
+    "roles/iam.serviceAccountUser",
+    "roles/iam.serviceAccountTokenCreator"
+  ])
   service_account_id = google_service_account.int_test.id
-  role               = "roles/iam.serviceAccountUser"
+  role               = each.key
   member             = google_service_account.int_test.member
 }
 
