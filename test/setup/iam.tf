@@ -20,6 +20,12 @@ locals {
   ]
 }
 
+resource "google_service_account_iam_member" "self_impersonate" {
+  service_account_id = google_service_account.int_test.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = google_service_account.int_test.member
+}
+
 resource "google_service_account" "int_test" {
   project                      = module.project.project_id
   account_id                   = "ci-account"
