@@ -25,7 +25,7 @@ locals {
 # authoritative project-iam-bindings to increase reproducibility
 module "project-iam-bindings" {
   source   = "terraform-google-modules/iam/google//modules/projects_iam"
-  version  = "~> 7.7"
+  version  = "~> 8.0"
   projects = [var.project_id]
   mode     = "authoritative"
 
@@ -72,7 +72,7 @@ module "project-iam-bindings" {
 // added to avoid overwriten of roles for each app service deploy service account, since GKE projects are shared between services
 module "cb-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"
-  version    = "~> 7.7"
+  version    = "~> 8.0"
   for_each   = toset(local.gke_projects)
   project_id = each.value
 
@@ -83,7 +83,7 @@ module "cb-gke-project-iam-bindings" {
 
 module "deploy-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"
-  version    = "~> 7.7"
+  version    = "~> 8.0"
   for_each   = toset(local.gke_projects)
   project_id = each.value
 
