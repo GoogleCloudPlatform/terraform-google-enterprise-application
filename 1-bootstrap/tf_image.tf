@@ -60,6 +60,16 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
   member     = google_service_account.builder.member
 }
 
+resource "google_service_account_iam_member" "self_impersonate" {
+  for_each = toset([
+    "roles/iam.serviceAccountUser",
+    "roles/iam.serviceAccountTokenCreator"
+  ])
+  service_account_id = google_service_account.builder.name
+  role               = each.key
+  member             = "ci-account@${var.project_id}.iam.gserviceaccount.com"
+}
+
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "5s"
 
