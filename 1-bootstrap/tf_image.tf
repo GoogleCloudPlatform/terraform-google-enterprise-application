@@ -60,7 +60,7 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
   member     = google_service_account.builder.member
 }
 
-resource "google_service_account_iam_member" "self_impersonate" {
+resource "google_service_account_iam_member" "impersonate" {
   for_each = toset([
     "roles/iam.serviceAccountUser",
     "roles/iam.serviceAccountTokenCreator"
@@ -71,12 +71,13 @@ resource "google_service_account_iam_member" "self_impersonate" {
 }
 
 resource "time_sleep" "wait_iam_propagation" {
-  create_duration = "5s"
+  create_duration = "10s"
 
   depends_on = [
     google_artifact_registry_repository_iam_member.builder,
     google_storage_bucket_iam_member.builder_admin,
-    google_project_iam_member.builder_object_user
+    google_project_iam_member.builder_object_user,
+    google_service_account_iam_member.impersonate,
   ]
 }
 

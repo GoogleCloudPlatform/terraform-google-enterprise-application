@@ -18,6 +18,9 @@ locals {
   int_required_roles = [
     "roles/owner"
   ]
+  int_org_required_roles = [
+    "roles/iam.serviceAccountTokenCreator",    
+  ]
 }
 
 resource "google_service_account" "int_test" {
@@ -25,6 +28,13 @@ resource "google_service_account" "int_test" {
   account_id                   = "ci-account"
   display_name                 = "ci-account"
   create_ignore_already_exists = true
+}
+
+resource "google_organization_iam_member" "org_roles" {
+  for_each = toset(local.int_org_required_roles)
+  org_id   = var.org_id
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.int_test.email}"
 }
 
 resource "google_service_account_iam_member" "self_impersonate" {
