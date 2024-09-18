@@ -26,6 +26,15 @@ resource "google_sourcerepo_repository" "tf_cloud_builder_image" {
   name    = "tf-cloudbuilder-image"
 }
 
+resource "google_project_iam_member" "owner" {
+  project = var.project_id
+  member  = "serviceAccount:tf-cb-builder-sa@${var.project_id}.iam.gserviceaccount.com"
+  role    = "roles/owner"
+
+  depends_on = [module.tf_cloud_builder]
+}
+
+
 module "tf_cloud_builder" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_builder"
   version = "~> 8.0"
@@ -56,6 +65,7 @@ resource "time_sleep" "cloud_builder" {
   depends_on = [
     module.tf_cloud_builder,
     module.bootstrap_csr_repo,
+    google_project_iam_member.owner
   ]
 }
 
