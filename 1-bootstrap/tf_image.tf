@@ -34,7 +34,6 @@ resource "google_project_iam_member" "owner" {
   depends_on = [module.tf_cloud_builder]
 }
 
-
 module "tf_cloud_builder" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_builder"
   version = "~> 8.0"
@@ -46,8 +45,7 @@ module "tf_cloud_builder" {
   terraform_version            = local.terraform_version
   build_timeout                = "1200s"
   cb_logs_bucket_force_destroy = var.bucket_force_destroy
-  trigger_location             = var.location
-  bucket_name                  = "${var.bucket_prefix}-${var.project_id}-tf-cloudbuilder-build-logs"
+  trigger_location             = var.location  
 }
 
 module "bootstrap_csr_repo" {
