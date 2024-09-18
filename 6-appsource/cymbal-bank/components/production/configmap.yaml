@@ -23,9 +23,9 @@ kind: ConfigMap
 metadata:
   name: service-api-config
 data:
-  TRANSACTIONS_API_ADDR: "ledgerwriter.ledger-production:8080"
-  BALANCES_API_ADDR: "balancereader.ledger-production:8080"
-  HISTORY_API_ADDR: "transactionhistory.ledger-production:8080"
-  CONTACTS_API_ADDR: "contacts.accounts-production:8080"
-  USERSERVICE_API_ADDR: "userservice.accounts-production:8080"
+  TRANSACTIONS_API_ADDR: "ledgerwriter.cb-ledger-production:8080"
+  BALANCES_API_ADDR: "balancereader.cb-ledger-production:8080"
+  HISTORY_API_ADDR: "transactionhistory.cb-ledger-production:8080"
+  CONTACTS_API_ADDR: "contacts.cb-accounts-production:8080"
+  USERSERVICE_API_ADDR: "userservice.cb-accounts-production:8080"
 

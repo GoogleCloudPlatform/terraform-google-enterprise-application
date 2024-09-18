@@ -22,9 +22,9 @@ locals {
   ] : ["development"]
 
   teams = [
-    "frontend",
-    "accounts",
-    "ledger",
+    "cb-frontend",
+    "cb-accounts",
+    "cb-ledger",
   ]
 
   folder_admin_roles = [

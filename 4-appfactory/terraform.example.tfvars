@@ -29,7 +29,7 @@ envs = {
       "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
     ]
   }
-  "non-production" = {
+  "nonproduction" = {
     "billing_account"    = "{BILLING_ACCOUNT}"
     "folder_id"          = "folders/{FOLDER}"
     "network_project_id" = "{PROJECT}"

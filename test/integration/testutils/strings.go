@@ -32,9 +32,14 @@ var (
 			"ledger-transactionhistory",
 		},
 	}
-)
 
-var (
+	ServicesWithEnvProject = map[string][]string{
+		"cymbal-bank": {
+			"userservice",
+			"ledgerwriter",
+		},
+	}
+
 	AppNames = []string{
 		"cymbal-bank",
 	}
@@ -50,7 +55,7 @@ func EnvNames(t *testing.T) []string {
 	if branchName == "release-please--branches--main" {
 		return []string{
 			"development",
-			"non-production",
+			"nonproduction",
 			"production",
 		}
 	}

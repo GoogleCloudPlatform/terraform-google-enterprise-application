@@ -54,6 +54,11 @@ output "app_certificates" {
   value       = module.env.app_certificates
 }
 
+output "acronyms" {
+  description = "App Acronyms"
+  value       = { for k, v in var.apps : (k) => v.acronym }
+}
+
 output "cluster_type" {
   description = "Cluster type"
   value       = module.env.cluster_type

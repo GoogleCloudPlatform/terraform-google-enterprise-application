@@ -15,6 +15,8 @@
  */
 
 locals {
+  # Services in this list will receive dedicated projects for application-specific infrastructure, such as an app-specific database.
+  services_with_infra = ["userservice", "ledgerwriter"]
   app_services = {
     "cymbal-bank" = [
       "balancereader",
@@ -29,8 +31,10 @@ locals {
   expanded_app_services = flatten([
     for key, services in local.app_services : [
       for service in services : {
-        app_name     = key
-        service_name = service
+        app_name            = key
+        acronym             = local.acronym[key]
+        service_name        = service
+        create_env_projects = contains(local.services_with_infra, service)
       }
     ]
   ])
@@ -50,8 +54,9 @@ module "components" {
   })
   source = "../../modules/app-group-baseline"
 
-  application_name    = each.value.service_name
-  create_env_projects = true
+  service_name        = each.value.service_name
+  acronym             = each.value.acronym
+  create_env_projects = each.value.create_env_projects
 
   org_id               = var.org_id
   billing_account      = var.billing_account

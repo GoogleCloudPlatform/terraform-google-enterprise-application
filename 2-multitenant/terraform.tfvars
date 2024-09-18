@@ -22,5 +22,6 @@ apps = {
     "certificates" : {
       "frontend-example-com" : ["frontend.example.com"]
     }
+    "acronym" = "cb",
   }
 }

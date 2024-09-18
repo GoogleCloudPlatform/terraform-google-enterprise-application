@@ -16,6 +16,7 @@ package appfactory
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -190,30 +191,32 @@ func TestAppfactory(t *testing.T) {
 							assert.Equal(repoName, buildTrigger.Get("triggerTemplate.repoName").String(), "the trigger should use the repo %s", repoName)
 						}
 
-						// check env projects
-						cloudBuildSARoles := []string{"roles/owner"}
-						envProjectsIDs := appData.Get("app_env_project_ids")
-						envProjectApis := []string{
-							"iam.googleapis.com",
-							"cloudresourcemanager.googleapis.com",
-							"serviceusage.googleapis.com",
-							"cloudbilling.googleapis.com",
-						}
-						for _, envName := range testutils.EnvNames(t) {
-							envProjectID := envProjectsIDs.Get(envName).String()
+						if slices.Contains(testutils.ServicesWithEnvProject[appName], serviceName) {
+							// check env projects
+							cloudBuildSARoles := []string{"roles/owner"}
+							envProjectsIDs := appData.Get("app_env_project_ids")
+							envProjectApis := []string{
+								"iam.googleapis.com",
+								"cloudresourcemanager.googleapis.com",
+								"serviceusage.googleapis.com",
+								"cloudbilling.googleapis.com",
+							}
+							for _, envName := range testutils.EnvNames(t) {
+								envProjectID := envProjectsIDs.Get(envName).String()
 
-							envPrj := gcloud.Runf(t, "projects describe %s", envProjectID)
-							assert.Equal("ACTIVE", envPrj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", envProjectID))
+								envPrj := gcloud.Runf(t, "projects describe %s", envProjectID)
+								assert.Equal("ACTIVE", envPrj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", envProjectID))
 
-							enabledAPIS := gcloud.Runf(t, "services list --project %s", envProjectID).Array()
-							listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
-							assert.Subset(listApis, envProjectApis, "APIs should have been enabled")
+								enabledAPIS := gcloud.Runf(t, "services list --project %s", envProjectID).Array()
+								listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
+								assert.Subset(listApis, envProjectApis, "APIs should have been enabled")
 
-							for _, role := range cloudBuildSARoles {
-								iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", fmt.Sprintf("bindings.role:%s", role), "--format", "json"})
-								iamPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", envProjectID), iamOpts).Array()[0]
-								listMembers := utils.GetResultStrSlice(iamPolicy.Get("bindings.members").Array())
-								assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role %s on project %s", repoSa, role, envProjectID))
+								for _, role := range cloudBuildSARoles {
+									iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", fmt.Sprintf("bindings.role:%s", role), "--format", "json"})
+									iamPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", envProjectID), iamOpts).Array()[0]
+									listMembers := utils.GetResultStrSlice(iamPolicy.Get("bindings.members").Array())
+									assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role %s on project %s", repoSa, role, envProjectID))
+								}
 							}
 						}
 					})

@@ -150,7 +150,7 @@ func TestFleetscope(t *testing.T) {
 				// GKE Scopes and Namespaces
 				for _, namespaces := range func() []string {
 					if envName == "development" {
-						return []string{"frontend", "accounts", "ledger"}
+						return []string{"cb-frontend", "cb-accounts", "cb-ledger"}
 					}
 					return []string{"frontend"}
 				}() {
