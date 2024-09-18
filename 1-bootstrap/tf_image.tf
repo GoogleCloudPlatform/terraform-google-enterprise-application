@@ -79,7 +79,7 @@ module "build_terraform_image" {
     "terraform_version" = local.terraform_version
   }
 
-  create_cmd_body = "config list"
+  create_cmd_body = "projects get-iam-policy ${var.project_id}"
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }
