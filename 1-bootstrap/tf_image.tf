@@ -88,7 +88,7 @@ module "build_terraform_image" {
   }
 
   create_cmd_entrypoint = "bash"
-  create_cmd_body       = "echo test list perm ; gcloud storage buckets list --project=${var.project_id} && echo test copy perm ; gsutil cp ./Dockerfile ${google_storage_bucket.build_logs.url} && echo test read perm ; gsutil cat ${google_storage_bucket.build_logs.url}/Dockerfile && gsutil cp ./Dockerfile ${google_storage_bucket.simulate.url} && echo simulate builder reading file ; gcloud storage cat ${google_storage_bucket.simulate.url}/Dockerfile --impersonate_service_account=${google_service_account.builder.email}"
+  create_cmd_body       = "echo test list perm ; gcloud storage buckets list --project=${var.project_id} && echo test copy perm ; gsutil cp ./Dockerfile ${google_storage_bucket.build_logs.url} && echo test read perm ; gsutil cat ${google_storage_bucket.build_logs.url}/Dockerfile && gsutil cp ./Dockerfile ${google_storage_bucket.simulate.url} && echo simulate builder reading file ; gcloud storage cat ${google_storage_bucket.simulate.url}/Dockerfile --impersonate-service-account=${google_service_account.builder.email}"
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }
