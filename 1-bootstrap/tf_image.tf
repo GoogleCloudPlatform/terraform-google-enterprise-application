@@ -17,53 +17,56 @@
 locals {
   terraform_version            = "1.9.5"
   docker_tag_version_terraform = "v1"
-  gar_repository               = split("/", module.tf_cloud_builder.artifact_repo)[length(split("/", module.tf_cloud_builder.artifact_repo)) - 1]
-  cloud_builder_trigger_id     = element(split("/", module.tf_cloud_builder.cloudbuild_trigger_id), index(split("/", module.tf_cloud_builder.cloudbuild_trigger_id), "triggers") + 1, )
 }
 
-resource "google_sourcerepo_repository" "tf_cloud_builder_image" {
+resource "google_artifact_registry_repository" "tf_image" {
+  project       = var.project_id
+  location      = var.location
+  repository_id = "terraform-image"
+  description   = "TF Image Docker repository"
+  format        = "DOCKER"
+}
+
+resource "google_service_account" "builder" {
+  project    = var.project_id
+  account_id = "tf-builder"
+}
+
+resource "google_storage_bucket" "build_logs" {
+  name                        = "cb-tf-builder-logs-${var.project_id}"
+  project                     = var.project_id
+  uniform_bucket_level_access = true
+  force_destroy               = var.bucket_force_destroy
+  location                    = var.location
+}
+
+resource "google_storage_bucket_iam_member" "builder_admin" {
+  member = google_service_account.builder.member
+  bucket = google_storage_bucket.build_logs.name
+  role   = "roles/storage.admin"
+}
+
+resource "google_project_iam_member" "builder_object_user" {
+  member  = google_service_account.builder.member
   project = var.project_id
-  name    = "tf-cloudbuilder-image"
+  role    = "roles/storage.objectUser"
 }
 
-resource "google_project_iam_member" "owner" {
-  project = var.project_id
-  member  = "serviceAccount:tf-cb-builder-sa@${var.project_id}.iam.gserviceaccount.com"
-  role    = "roles/owner"
-
-  depends_on = [module.tf_cloud_builder]
+resource "google_artifact_registry_repository_iam_member" "builder" {
+  project    = google_artifact_registry_repository.tf_image.project
+  location   = google_artifact_registry_repository.tf_image.location
+  repository = google_artifact_registry_repository.tf_image.name
+  role       = "roles/artifactregistry.repoAdmin"
+  member     = google_service_account.builder.member
 }
 
-module "tf_cloud_builder" {
-  source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_builder"
-  version = "~> 8.0"
-
-  project_id                   = google_sourcerepo_repository.tf_cloud_builder_image.project
-  dockerfile_repo_uri          = google_sourcerepo_repository.tf_cloud_builder_image.url
-  gar_repo_location            = var.location
-  workflow_region              = var.location
-  terraform_version            = local.terraform_version
-  build_timeout                = "1200s"
-  cb_logs_bucket_force_destroy = var.bucket_force_destroy
-  trigger_location             = var.location  
-}
-
-module "bootstrap_csr_repo" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.1"
-  upgrade = false
-
-  create_cmd_entrypoint = "${path.module}/scripts/push-to-repo.sh"
-  create_cmd_body       = "${google_sourcerepo_repository.tf_cloud_builder_image.project} ${split("/", google_sourcerepo_repository.tf_cloud_builder_image.id)[3]} ${path.module}/Dockerfile"
-}
-
-resource "time_sleep" "cloud_builder" {
-  create_duration = "30s"
+resource "time_sleep" "wait_iam_propagation" {
+  create_duration = "5s"
 
   depends_on = [
-    module.tf_cloud_builder,
-    module.bootstrap_csr_repo,
-    google_project_iam_member.owner
+    google_artifact_registry_repository_iam_member.builder,
+    google_storage_bucket_iam_member.builder_admin,
+    google_project_iam_member.builder_object_user
   ]
 }
 
@@ -76,20 +79,17 @@ module "build_terraform_image" {
     "terraform_version" = local.terraform_version
   }
 
-  create_cmd_body = "builds triggers run ${local.cloud_builder_trigger_id} --branch main --region ${var.location} --project ${google_sourcerepo_repository.tf_cloud_builder_image.project}"
+  create_cmd_body = "builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url}"
 
-  module_depends_on = [
-    time_sleep.cloud_builder,
-  ]
+  module_depends_on = [time_sleep.wait_iam_propagation]
 }
-
 
 resource "google_artifact_registry_repository_iam_member" "terraform_sa_artifact_registry_reader" {
   for_each = module.tf_cloudbuild_workspace
 
   project    = var.project_id
   location   = var.location
-  repository = local.gar_repository
+  repository = google_artifact_registry_repository.tf_image.name
   role       = "roles/artifactregistry.reader"
   member     = "serviceAccount:${reverse(split("/", each.value.cloudbuild_sa))[0]}"
 }

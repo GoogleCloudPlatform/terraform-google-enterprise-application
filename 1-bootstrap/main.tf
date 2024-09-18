@@ -77,8 +77,8 @@ module "tf_cloudbuild_workspace" {
 
   substitutions = {
     "_GAR_REGION"                   = var.location
-    "_GAR_PROJECT_ID"               = google_sourcerepo_repository.tf_cloud_builder_image.project
-    "_GAR_REPOSITORY"               = local.gar_repository
+    "_GAR_PROJECT_ID"               = google_artifact_registry_repository.tf_image.project
+    "_GAR_REPOSITORY"               = google_artifact_registry_repository.tf_image.name
     "_DOCKER_TAG_VERSION_TERRAFORM" = local.docker_tag_version_terraform
   }
 
