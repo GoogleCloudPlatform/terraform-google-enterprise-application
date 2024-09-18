@@ -40,6 +40,14 @@ resource "google_storage_bucket" "build_logs" {
   location                    = var.location
 }
 
+resource "google_storage_bucket" "simulate" {
+  name                        = "simulate-cb-bucket-${var.project_id}"
+  project                     = var.project_id
+  uniform_bucket_level_access = true
+  force_destroy               = var.bucket_force_destroy
+  location                    = var.location
+}
+
 resource "google_storage_bucket_iam_member" "builder_admin" {
   member = google_service_account.builder.member
   bucket = google_storage_bucket.build_logs.name
@@ -79,7 +87,8 @@ module "build_terraform_image" {
     "terraform_version" = local.terraform_version
   }
 
-  create_cmd_body = "builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url}"
+  create_cmd_entrypoint = "bash"
+  create_cmd_body       = "echo test list perm ; gcloud storage buckets list --project=${var.project_id} && echo test copy perm ; gsutil cp ./Dockerfile ${google_storage_bucket.build_logs.url} && echo test read perm ; gsutil cat ${google_storage_bucket.build_logs.url}/Dockerfile && gsutil cp ./Dockerfile ${google_storage_bucket.simulate.url} && echo simulate builder reading file ; gcloud storage cat ${google_storage_bucket.simulate.url}/Dockerfile --impersonate_service_account=${google_service_account.builder.email}"
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }
