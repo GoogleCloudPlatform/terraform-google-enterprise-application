@@ -70,6 +70,16 @@ resource "google_service_account_iam_member" "impersonate" {
   member             = "serviceAccount:ci-account@${var.project_id}.iam.gserviceaccount.com"
 }
 
+resource "google_project_iam_member" "impersonate_project_level" {
+  for_each = toset([
+    "roles/iam.serviceAccountUser",
+    "roles/iam.serviceAccountTokenCreator"
+  ])
+  member             = "serviceAccount:ci-account@${var.project_id}.iam.gserviceaccount.com"
+  project = var.project_id
+  role    = each.value
+}
+
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "10s"
 
@@ -78,6 +88,7 @@ resource "time_sleep" "wait_iam_propagation" {
     google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,
     google_service_account_iam_member.impersonate,
+    google_project_iam_member.impersonate_project_level
   ]
 }
 
