@@ -19,7 +19,20 @@ locals {
     "roles/owner"
   ]
   int_org_required_roles = [
-    "roles/iam.serviceAccountTokenCreator",    
+    "roles/billing.user",
+    "roles/resourcemanager.organizationAdmin",
+    "roles/resourcemanager.projectCreator",
+    "roles/resourcemanager.folderAdmin",
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/orgpolicy.policyAdmin",
+    "roles/logging.admin",
+    "roles/accesscontextmanager.policyAdmin",
+    "roles/securitycenter.admin",
+    "roles/compute.xpnAdmin",
+    "roles/compute.orgSecurityPolicyAdmin",
+    "roles/compute.orgSecurityResourceAdmin",
+    "roles/resourcemanager.organizationViewer",
+    "roles/viewer",
   ]
 }
 
