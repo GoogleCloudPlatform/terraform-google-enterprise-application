@@ -23,7 +23,7 @@ resource "google_artifact_registry_repository" "tf_image" {
   project       = var.project_id
   location      = var.location
   repository_id = "terraform-image"
-  description   = "TF Image Docker repository"
+  description   = "Terraform Image Docker repository"
   format        = "DOCKER"
 }
 
@@ -40,14 +40,7 @@ resource "google_storage_bucket" "build_logs" {
   location                    = var.location
 }
 
-resource "google_storage_bucket" "simulate" {
-  name                        = "simulate-cb-bucket-${var.project_id}"
-  project                     = var.project_id
-  uniform_bucket_level_access = true
-  force_destroy               = var.bucket_force_destroy
-  location                    = var.location
-}
-
+# IAM Roles required to build the terraform image on Google Cloud Build
 resource "google_storage_bucket_iam_member" "builder_admin" {
   member = google_service_account.builder.member
   bucket = google_storage_bucket.build_logs.name
@@ -78,6 +71,7 @@ resource "time_sleep" "wait_iam_propagation" {
   ]
 }
 
+# Use Dockerfile to create the custom Terraform Image on Google Cloud Build
 module "build_terraform_image" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 3.1"
@@ -93,6 +87,8 @@ module "build_terraform_image" {
   module_depends_on = [time_sleep.wait_iam_propagation]
 }
 
+
+# Allow infrastructure pipeline service accounts to download the image
 resource "google_artifact_registry_repository_iam_member" "terraform_sa_artifact_registry_reader" {
   for_each = module.tf_cloudbuild_workspace
 
