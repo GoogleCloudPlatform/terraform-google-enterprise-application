@@ -119,7 +119,7 @@ func TestBootstrap(t *testing.T) {
 		}
 
 		// Builds
-		branchesRegex := `^(development|non\\-production|production)$`
+		branchesRegex := `^(development|nonproduction|production)$`
 		for _, repo := range repos {
 			for _, filter := range []string{
 				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-apply'", branchesRegex, repo, repo),
