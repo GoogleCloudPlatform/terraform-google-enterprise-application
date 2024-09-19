@@ -22,7 +22,8 @@ locals {
 }
 
 module "alloydb" {
-  source = "../../../../../../../5-appinfra/modules/alloydb-psc-setup"
+  source  = "GoogleCloudPlatform/enterprise-application/google//5-appinfra/modules/alloydb-psc-setup"
+  version = "0.1.0"
 
   env                         = local.env
   network_project_id          = var.network_project_id
