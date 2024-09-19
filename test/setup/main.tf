@@ -72,9 +72,7 @@ module "project" {
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "workflows.googleapis.com",
-    "cloudscheduler.googleapis.com"
+    "cloudbilling.googleapis.com"
   ]
 }
 

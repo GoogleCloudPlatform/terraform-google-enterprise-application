@@ -27,26 +27,6 @@ resource "google_service_account" "int_test" {
   create_ignore_already_exists = true
 }
 
-resource "google_service_account_iam_member" "self_impersonate" {
-  for_each = toset([
-    "roles/iam.serviceAccountUser",
-    "roles/iam.serviceAccountTokenCreator"
-  ])
-  service_account_id = google_service_account.int_test.id
-  role               = each.key
-  member             = google_service_account.int_test.member
-}
-
-resource "google_project_iam_member" "impersonate_projects_sa" {
-  for_each = toset([
-    "roles/iam.serviceAccountUser",
-    "roles/iam.serviceAccountTokenCreator"
-  ])
-  project = module.project.project_id
-  role    = each.key
-  member  = google_service_account.int_test.member
-}
-
 resource "google_project_iam_member" "int_test" {
   for_each = toset(local.int_required_roles)
 
