@@ -108,7 +108,7 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | project\_id | Project ID for initial resources | `string` | n/a | yes |
-| tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "non\\-production",<br>  "production"<br>]</pre> | no |
+| tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"global"` | no |
 
 ## Outputs
