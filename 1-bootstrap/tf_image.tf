@@ -15,7 +15,6 @@
  */
 
 locals {
-  terraform_version            = "1.9.5"
   docker_tag_version_terraform = "v1"
 }
 
@@ -78,7 +77,7 @@ module "build_terraform_image" {
   upgrade = false
 
   create_cmd_triggers = {
-    "terraform_version" = local.terraform_version
+    "tag_version" = local.docker_tag_version_terraform
   }
 
   create_cmd_entrypoint = "bash"

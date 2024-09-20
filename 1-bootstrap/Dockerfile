@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2022-2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 FROM gcr.io/cloud-builders/gcloud-slim
 
 # Use ARG so that values can be overriden by user/cloudbuild
-ARG TERRAFORM_VERSION=1.5.7
+ARG TERRAFORM_VERSION=1.9.6
 
 ENV ENV_TERRAFORM_VERSION=$TERRAFORM_VERSION
 
