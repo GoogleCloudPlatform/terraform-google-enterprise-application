@@ -15,7 +15,7 @@
 FROM gcr.io/cloud-builders/gcloud-slim
 
 # Use ARG so that values can be overriden by user/cloudbuild
-ARG TERRAFORM_VERSION=1.9.6
+ARG TERRAFORM_VERSION=1.6.6
 
 ENV ENV_TERRAFORM_VERSION=$TERRAFORM_VERSION
 
