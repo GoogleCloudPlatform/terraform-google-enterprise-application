@@ -73,7 +73,7 @@ variable "trigger_location" {
 variable "tf_apply_branches" {
   description = "List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default."
   type        = list(string)
-  default     = ["development", "non\\-production", "production"]
+  default     = ["development", "nonproduction", "production"]
 }
 
 variable "remote_state_bucket" {

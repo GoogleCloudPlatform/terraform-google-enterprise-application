@@ -62,8 +62,9 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
   membership_location = regex(local.membership_re, each.key)[1]
 
   configmanagement {
-    version = "1.18.0"
+    version = "1.19.0"
     config_sync {
+      enabled       = true
       source_format = "unstructured"
       git {
         sync_repo                 = google_sourcerepo_repository.acm_repo.url
