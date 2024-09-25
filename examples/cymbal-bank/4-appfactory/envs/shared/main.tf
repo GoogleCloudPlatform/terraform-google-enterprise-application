@@ -49,11 +49,11 @@ resource "google_folder" "app_folder" {
 }
 
 module "components" {
+  source = "../../modules/app-group-baseline"
+
   for_each = tomap({
     for app_service in local.expanded_app_services : "${app_service.app_name}.${app_service.service_name}" => app_service
   })
-  source  = "GoogleCloudPlatform/enterprise-application/google//4-appfactory/modules/app-group-baseline"
-  version = "0.1.0"
 
   service_name        = each.value.service_name
   acronym             = each.value.acronym

@@ -23,8 +23,7 @@ locals {
 }
 
 module "app" {
-  source  = "GoogleCloudPlatform/enterprise-application/google//5-appinfra/modules/cicd-pipeline"
-  version = "0.1.0"
+  source = "../../../../../modules/cicd-pipeline"
 
   project_id                 = var.project_id
   region                     = var.region
