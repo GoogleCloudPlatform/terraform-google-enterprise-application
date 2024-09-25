@@ -48,3 +48,25 @@ variable "tf_apply_branches" {
   type        = list(string)
   default     = ["development", "nonproduction", "production"]
 }
+
+variable "envs" {
+  description = "Environments"
+  type = map(object({
+    billing_account    = string
+    folder_id          = string
+    network_project_id = string
+    network_self_link  = string
+    org_id             = string
+    subnets_self_links = list(string)
+  }))
+}
+
+variable "common_folder_id" {
+  type        = string
+  description = "Folder ID in which to create all application admin projects, must be prefixed with 'folders/'"
+
+  validation {
+    condition     = can(regex("^folders/", var.common_folder_id))
+    error_message = "The folder ID must be prefixed with 'folders/'."
+  }
+}
