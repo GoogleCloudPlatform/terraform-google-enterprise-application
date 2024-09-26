@@ -69,7 +69,17 @@ The purpose of this stage is to create application-speciifc infrastructure, incl
 The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up the Cymbal Bank sample application, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
 
 ## Applications (Apps)
-This repo demostrates setting up the developer platform for one or more *Apps* which is a high level of grouping of releated service or workloads. Apps are created infrquently and may include multiuple namespaces, team scopes, and dedicated IP address. A multi-teannt cluster can contain multiple Apps.
+This repo demostrates setting up the developer platform for one or more *Apps* which is a high level of grouping of releated service or workloads. Apps are created infrequently and may include multiple namespaces, team scopes, and dedicated IP address. A multi-tenant cluster can contain multiple Apps.
+
+### hello-world-service example
+
+This [hello-world-service](https://github.com/GoogleContainerTools/skaffold/tree/v2.13.2/examples/getting-started) example is a very simple Go application that is deployed along with the codebase as a placeholder, it uses basic skaffold features:
+
+* **building** a single Go file app and with a multistage `Dockerfile` using local docker to build
+* **tagging** using the default tagPolicy (`gitCommit`)
+* **deploying** a single container pod using `kubectl`
+
+The example is extracted from the skaffold repository and the source code is stored in `6-appsource/hello-world-service`.
 
 ### Cymbal Bank example
 The [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) (`cymbal-bank`) sample App is included in the repository. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
