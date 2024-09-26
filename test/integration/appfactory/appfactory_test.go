@@ -47,13 +47,15 @@ func TestAppfactory(t *testing.T) {
 		"bucket_force_destroy": "true",
 	}
 
-	for _, appGroupName := range testutils.AppNames {
-		appGroupName := appGroupName
-		t.Run(appGroupName, func(t *testing.T) {
+	codeDirectory := "envs/shared"
+	for _, appName := range testutils.AppNames {
+		appName := appName
+		appFactoryPath := fmt.Sprintf("../../../examples/%s/4-appfactory/%s", appName, codeDirectory)
+		t.Run(appFactoryPath, func(t *testing.T) {
 			t.Parallel()
 
 			appFactory := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(fmt.Sprintf("../../../examples/%s/4-appfactory/envs/shared", appGroupName)),
+				tft.WithTFDir(appFactoryPath),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
