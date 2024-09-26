@@ -24,7 +24,7 @@ locals {
 // Create admin project
 module "app_admin_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 16.0"
+  version = "~> 17.0"
 
   random_project_id        = true
   random_project_id_length = 4
@@ -32,6 +32,7 @@ module "app_admin_project" {
   name                     = substr("${var.acronym}-${var.service_name}-admin", 0, 25) # max length 30 chars
   org_id                   = var.org_id
   folder_id                = var.folder_id
+  deletion_policy          = "DELETE"
   activate_apis = [
     "iam.googleapis.com",
     "cloudresourcemanager.googleapis.com",
@@ -74,7 +75,7 @@ module "tf_cloudbuild_workspace" {
 // Create env project
 module "app_env_project" {
   source   = "terraform-google-modules/project-factory/google"
-  version  = "~> 16.0"
+  version  = "~> 17.0"
   for_each = var.create_env_projects ? var.envs : {}
 
   random_project_id        = true
@@ -84,4 +85,5 @@ module "app_env_project" {
   org_id                   = each.value.org_id
   folder_id                = each.value.folder_id
   activate_apis            = var.env_project_apis
+  deletion_policy          = "DELETE"
 }
