@@ -1,8 +1,15 @@
-apiVersion: skaffold/v4beta11
+apiVersion: skaffold/v4beta10
 kind: Config
 build:
+  tagPolicy:
+    gitCommit:
+      variant: CommitSha
   artifacts:
   - image: skaffold-example
 manifests:
   rawYaml:
   - k8s-pod.yaml
+profiles:
+- name: development
+- name: staging
+- name: production
