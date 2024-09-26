@@ -29,7 +29,7 @@ locals {
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 16.0"
+  version = "~> 17.0"
 
   count = var.create_cluster_project ? 1 : 0
 
@@ -41,6 +41,7 @@ module "eab_cluster_project" {
   billing_account          = var.billing_account
   svpc_host_project_id     = var.network_project_id
   shared_vpc_subnets       = var.cluster_subnetworks
+  deletion_policy          = "DELETE"
 
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
