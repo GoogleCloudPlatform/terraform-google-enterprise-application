@@ -11,9 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: frontend-production
-  labels:
-    istio-injection: enabled # enable ASM sidecar injection on namespace
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gateway.yaml
+  - ingress.yaml
+  - destinationrule.yaml
