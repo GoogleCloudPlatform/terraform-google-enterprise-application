@@ -23,8 +23,4 @@ terraform {
       version = ">= 5, < 7"
     }
   }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:appinfra/cymbal-bank/production/v0.1.0"
-  }
 }

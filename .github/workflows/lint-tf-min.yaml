@@ -22,7 +22,7 @@ on:
 
 env:
   TFENV_VERSION: v3.0.0
-  TF_DEFAULT_MIN: "0.13.7"
+  TF_DEFAULT_MIN: "1.3.10"
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.head_ref || github.ref }}'
