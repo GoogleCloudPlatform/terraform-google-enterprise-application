@@ -29,6 +29,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:environments/v0.1.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:appinfra/cicd-pipeline/v0.2.0"
   }
 }

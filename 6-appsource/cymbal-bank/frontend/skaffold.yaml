@@ -61,3 +61,4 @@ profiles:
     kustomize:
       paths:
       - k8s/overlays/production
+      - k8s/overlays/production-asm-configurations
