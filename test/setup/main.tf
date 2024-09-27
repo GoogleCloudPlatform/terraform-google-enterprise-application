@@ -80,7 +80,7 @@ module "project" {
 # Create mock common folder
 module "folder_common" {
   source  = "terraform-google-modules/folders/google"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
   prefix = random_string.prefix.result
   parent = "folders/${var.folder_id}"
@@ -90,7 +90,7 @@ module "folder_common" {
 # Create mock environment folders
 module "folders" {
   source  = "terraform-google-modules/folders/google"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
   prefix = random_string.prefix.result
   parent = "folders/${var.folder_id}"
