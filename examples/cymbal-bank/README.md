@@ -1,8 +1,8 @@
 # Cymbal Bank Examples
 
-This example shows how to deploy Cymbal Bank using the infrastructure created at [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint).
+This example shows how to deploy Cymbal Bank using the infrastructure created using [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint).
 
-For more information about Cymbal Bank application, please visit [Bank of Anthos repository](https://github.com/GoogleCloudPlatform/bank-of-anthos/blob/v0.6.4).
+For more information about the Cymbal Bank application, please visit [Bank of Anthos repository](https://github.com/GoogleCloudPlatform/bank-of-anthos/blob/v0.6.4).
 
 ## Pre-Requisites
 

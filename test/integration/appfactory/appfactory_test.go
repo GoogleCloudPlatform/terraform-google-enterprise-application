@@ -24,9 +24,7 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
-	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
-	"github.com/tidwall/gjson"
 
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
@@ -98,9 +96,7 @@ func TestAppfactory(t *testing.T) {
 				}
 
 				// check admin projects
-				// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
-				// terraform.OutputJson OK to use as long as there is only one appGroupName
-				for applicationService, appData := range gjson.Parse(terraform.OutputJson(t, appFactory.GetTFOptions(), "app-group")).Map() {
+				for applicationService, appData := range appFactory.GetJsonOutput("app-group").Map() {
 					parts := strings.Split(applicationService, ".")
 					assert.Equal(len(parts), 2, "The keys of app-group output must be in the format 'app-name'.'service-name', for example: 'cymbal-bank.userservice'")
 					appName := parts[0]
