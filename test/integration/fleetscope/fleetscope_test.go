@@ -152,7 +152,7 @@ func TestFleetscope(t *testing.T) {
 					if envName == "development" {
 						return []string{"cb-frontend", "cb-accounts", "cb-ledger"}
 					}
-					return []string{"frontend"}
+					return []string{"cb-frontend"}
 				}() {
 					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", clusterProjectID, namespaces, envName)
 					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)

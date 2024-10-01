@@ -40,6 +40,10 @@ resource "google_gke_hub_namespace" "fleet-ns" {
   scope_id           = google_gke_hub_scope.fleet-scope[each.key].scope_id
   scope              = google_gke_hub_scope.fleet-scope[each.key].name
   project            = google_gke_hub_scope.fleet-scope[each.key].project
+
+  labels = {
+    "istio-injection" = "enabled"
+  }
 }
 
 resource "google_gke_hub_membership_binding" "membership-binding" {
