@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-    bucket = "UPDATE_ME"
-    prefix = "terraform/appfactory/shared"
+// These values are retrieved from the saved terraform state of the execution
+// of previous step using the terraform_remote_state data source.
+locals {
+  cluster_service_accounts = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts])
+  acronym                  = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.acronyms])[0]
+}
+
+data "terraform_remote_state" "multitenant" {
+  for_each = var.envs
+
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/multi_tenant/${each.key}"
   }
 }

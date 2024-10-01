@@ -19,6 +19,9 @@ It will also create an Application Folder to group your admin projects under it,
 ```txt
 .
 └── fldr-common/
+    ├── default-example/
+    │   ├── hello-world-service-admin
+    │   └── ...
     ├── cymbal-bank/
     │   ├── accounts-userservice-admin
     │   ├── accounts-contacts-admin
@@ -130,17 +133,17 @@ You can now deploy the into your common folder.
 1. Run `init` and `plan` and review the output.
 
    ```bash
-   terraform -chdir=./apps/cymbal-bank init
-   terraform -chdir=./apps/cymbal-bank plan
+   terraform -chdir=./envs/shared init
+   terraform -chdir=./envs/shared plan
    ```
 
 1. Run `apply`.
 
    ```bash
-   terraform -chdir=./apps/cymbal-bank apply
+   terraform -chdir=./envs/shared apply
    ```
 
-If you receive any errors or made any changes to the Terraform config or `terraform.tfvars`, re-run `terraform -chdir=./apps/cymbal-bank plan` before you run `terraform -chdir=./apps/cymbal-bank apply`.
+If you receive any errors or made any changes to the Terraform config or `terraform.tfvars`, re-run `terraform -chdir=./envs/shared plan` before you run `terraform -chdir=./envs/shared apply`.
 
 ## Troubleshooting
 
