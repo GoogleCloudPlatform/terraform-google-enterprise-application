@@ -1,13 +1,13 @@
 module github.com/terraform-google-modules/enterprise-application/test/integration
 
-go 1.22
+go 1.22.0
 
-toolchain go1.22.7
+toolchain go1.22.8
 
 require (
 	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.16.2
 	github.com/google/uuid v1.6.0
-	github.com/gruntwork-io/terratest v0.47.1
+	github.com/gruntwork-io/terratest v0.47.2
 	github.com/otiai10/copy v1.14.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tidwall/gjson v1.17.3
