@@ -20,7 +20,7 @@ steps:
       - "--file-output=/workspace/artifacts.json"
       - "--default-repo=$_CONTAINER_REGISTRY"
   - name: gcr.io/cloud-builders/gcloud
-    args: 
+    args:
       - "deploy"
       - "releases"
       - "create"
