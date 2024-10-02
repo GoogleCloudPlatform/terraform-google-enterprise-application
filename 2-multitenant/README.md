@@ -32,6 +32,8 @@ The steps below assume that you are checkout out on the same level as `terraform
 └── .
 ```
 
+> NOTE: If you don't have the foundation codebase, you can clone it by running the following command: `git clone --branch v4.1.0 https://github.com/terraform-google-modules/terraform-example-foundation.git`
+
 1. Retrieve Multi-tenant administration project variable value from 1-bootstrap:
 
     ```bash
