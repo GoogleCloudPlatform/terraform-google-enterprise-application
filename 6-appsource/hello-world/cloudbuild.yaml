@@ -24,9 +24,10 @@ steps:
       - "deploy"
       - "releases"
       - "create"
-      - "$_TEAM-$SHORT_SHA-$$DATE-$$TIME"
+      - "hello-world-$SHORT_SHA"
       - "--delivery-pipeline=$_CLOUDDEPLOY_PIPELINE_NAME"
       - "--build-artifacts=/workspace/artifacts.json"
+      - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET"
       - "--skaffold-file=skaffold.yaml"
       - "--region=$LOCATION"
 options:

@@ -18,7 +18,7 @@ locals {
   application_name = "default-example"
   service_name     = "hello-world"
   team_name        = "default"
-  repo_name        = "eab-${local.application_name}-${local.team_name}-${local.service_name}"
+  repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
 }
 
