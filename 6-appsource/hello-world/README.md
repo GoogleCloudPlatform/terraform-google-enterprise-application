@@ -33,3 +33,5 @@ git push origin main
 1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on the `hello-world-admin` project under the common folder. You can view the results on the Cloud Build Page.
 
 1. After the CI build succesfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
+
+1. Once the CD pipeline succesfully runs, you should be able to see a pod named `getting-started` on your cluster that prints the "Hello world!" message.
