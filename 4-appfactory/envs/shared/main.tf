@@ -18,8 +18,10 @@ locals {
   # Services in this list will receive dedicated projects for application-specific infrastructure, such as an app-specific database.
   services_with_infra = []
   app_services = {
+    // app name
     "default-example" = [
-      "hello-world-service",
+      // microservices names
+      "hello-world",
     ]
   }
 
@@ -27,6 +29,7 @@ locals {
     for key, services in local.app_services : [
       for service in services : {
         app_name            = key
+        # app acronym is defined in 2-multitenant variables
         acronym             = local.acronym[key]
         service_name        = service
         create_env_projects = contains(local.services_with_infra, service)

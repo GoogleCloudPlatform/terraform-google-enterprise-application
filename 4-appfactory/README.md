@@ -20,7 +20,7 @@ It will also create an Application Folder to group your admin projects under it,
 .
 └── fldr-common/
     ├── default-example/
-    │   ├── hello-world-service-admin
+    │   ├── hello-world-admin
     │   └── ...
     ├── cymbal-bank/
     │   ├── accounts-userservice-admin
