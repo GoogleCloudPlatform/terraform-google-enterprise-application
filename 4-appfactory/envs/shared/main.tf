@@ -28,7 +28,7 @@ locals {
   expanded_app_services = flatten([
     for key, services in local.app_services : [
       for service in services : {
-        app_name            = key
+        app_name = key
         # app acronym is defined in 2-multitenant variables
         acronym             = local.acronym[key]
         service_name        = service
