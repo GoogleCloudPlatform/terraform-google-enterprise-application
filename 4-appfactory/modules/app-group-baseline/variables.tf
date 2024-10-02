@@ -110,3 +110,19 @@ variable "tf_apply_branches" {
   type        = list(string)
   default     = ["development", "nonproduction", "production"]
 }
+
+variable "gar_project_id" {
+  description = "Project ID where Docker image is stored."
+  type        = string
+}
+
+variable "gar_repository_name" {
+  description = "Repository name where Docker image is stored."
+  type        = string
+}
+
+variable "docker_tag_version_terraform" {
+  description = "Docker tag version of image."
+  type        = string
+  default     = "latest"
+}
