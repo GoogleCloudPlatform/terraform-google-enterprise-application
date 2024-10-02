@@ -27,7 +27,7 @@ steps:
       - "hello-world-$SHORT_SHA"
       - "--delivery-pipeline=$_CLOUDDEPLOY_PIPELINE_NAME"
       - "--build-artifacts=/workspace/artifacts.json"
-      - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET"
+      - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET/$SHORT_SH"
       - "--skaffold-file=skaffold.yaml"
       - "--region=$LOCATION"
 options:
