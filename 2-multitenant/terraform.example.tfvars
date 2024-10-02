@@ -50,13 +50,7 @@ envs = {
 }
 
 apps = {
-  "my-app" : {
-    "ip_address_names" : [
-      "my-app-ip",
-    ]
-    "certificates" : {
-      "my-app-cert" : ["my-domain"]
-    }
-    "acronym" = "ma",
+  "default-example" : {
+    "acronym" = "de",
   }
 }

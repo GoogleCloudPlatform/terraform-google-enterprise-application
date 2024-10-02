@@ -37,8 +37,8 @@ variable "apps" {
   EOF
   type = map(object({
     acronym          = string
-    ip_address_names = optional(list(string))
-    certificates     = optional(map(list(string)))
+    ip_address_names = optional(list(string), [])
+    certificates     = optional(map(list(string)), {})
   }))
   validation {
     condition     = alltrue([for o in var.apps : length(o.acronym) <= 3])

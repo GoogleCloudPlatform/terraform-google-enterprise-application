@@ -79,17 +79,12 @@ The steps below assume that you are checkout out on the same level as `terraform
 [README.md](./envs/production/README.md#inputs) files for additional information
 on the values in the `terraform.tfvars` file. In addition to `envs` from
 prerequisites, each App must have it's own entry under `apps` with a list of any
-dedicated IP address to be provisioned.
+dedicated IP address to be provisioned. For the default hello world example, use the following values
 
     ```terraform
     apps = {
-      "my-app" : {
-        "ip_address_names" : [
-          "my-app-ip",
-        ]
-        "certificates" : {
-          "my-app-cert" : ["my-domain-name"]
-        }
+      "default-example" : {
+        "acronym" = "de",
       }
     }
     ```
