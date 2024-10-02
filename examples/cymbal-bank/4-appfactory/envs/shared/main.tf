@@ -59,15 +59,18 @@ module "components" {
   acronym             = each.value.acronym
   create_env_projects = each.value.create_env_projects
 
-  org_id               = var.org_id
-  billing_account      = var.billing_account
-  folder_id            = google_folder.app_folder[each.value.app_name].folder_id
-  envs                 = var.envs
-  bucket_prefix        = var.bucket_prefix
-  location             = var.location
-  trigger_location     = var.trigger_location
-  bucket_force_destroy = var.bucket_force_destroy
-  tf_apply_branches    = var.tf_apply_branches
+  org_id                       = var.org_id
+  billing_account              = var.billing_account
+  folder_id                    = google_folder.app_folder[each.value.app_name].folder_id
+  envs                         = var.envs
+  bucket_prefix                = var.bucket_prefix
+  location                     = var.location
+  trigger_location             = var.trigger_location
+  bucket_force_destroy         = var.bucket_force_destroy
+  tf_apply_branches            = var.tf_apply_branches
+  gar_project_id               = local.gar_project_id
+  gar_repository_name          = local.gar_image_name
+  docker_tag_version_terraform = local.gar_tag_version
 
   cloudbuild_sa_roles = {
     development = {
