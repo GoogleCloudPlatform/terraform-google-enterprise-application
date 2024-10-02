@@ -15,7 +15,13 @@
  */
 
 apps = {
-  "default-example" : {
-    "acronym" = "de",
+  "cymbal-bank" : {
+    "ip_address_names" : [
+      "frontend-ip",
+    ]
+    "certificates" : {
+      "frontend-example-com" : ["frontend.example.com"]
+    }
+    "acronym" = "cb",
   }
 }
