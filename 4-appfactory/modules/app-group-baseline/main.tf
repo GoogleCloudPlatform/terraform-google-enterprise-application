@@ -80,9 +80,15 @@ module "tf_cloudbuild_workspace" {
 }
 
 resource "google_project_iam_member" "builder_object_user" {
-  member  = "serviceAccount:${module.tf_cloudbuild_workspace.cloudbuild_sa}"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = var.gar_project_id
   role    = "roles/storage.objectUser"
+}
+
+resource "google_project_iam_member" "builder_artifactregistry_reader" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = var.gar_project_id
+  role    = "roles/artifactregistry.reader"
 }
 
 // Create env project
