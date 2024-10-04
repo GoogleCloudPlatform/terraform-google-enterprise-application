@@ -44,9 +44,8 @@ module "components" {
     for app_service in local.expanded_microservices : "${app_service.app_name}.${app_service.service_name}" => app_service
   })
 
-  service_name        = each.value.service_name
-  acronym             = each.value.acronym
-  create_env_projects = each.value.service.create_infra_project
+  service_name = each.value.service_name
+  acronym      = each.value.acronym
 
   org_id               = var.org_id
   billing_account      = var.billing_account
@@ -69,4 +68,10 @@ module "components" {
       roles = ["roles/owner"]
     }
   }
+
+  // microservices-specific configuration to baseline module
+  cicd_project         = each.value.service.cicd_project
+  create_cicd_project  = each.value.service.create_cicd_project
+  create_infra_project = each.value.service.create_infra_project
+  infra_project        = each.value.service.infra_project
 }
