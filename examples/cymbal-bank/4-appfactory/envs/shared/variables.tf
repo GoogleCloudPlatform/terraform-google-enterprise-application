@@ -82,14 +82,20 @@ variable "remote_state_bucket" {
 }
 
 
+# Define Application Services
 variable "applications" {
+  description = <<-EOF
+  A map where the key is the application name, containing the configuration for each microservice under the application. Each microservice has the following properties:
+  - **infra_project** (Optional): The infrastructure project associated with the microservice. If set, `create_infra_project` must be `false`.
+  - **cicd_project** (Optional): The CI/CD project associated with the microservice. If set, `create_cicd_project` must be `false`.
+  - **create_infra_project** (Required): Indicates whether an infrastructure project should be created for the microservice.
+  - **create_cicd_project** (Required):Indicates whether a CI/CD project should be created for the microservice.
+  EOF
   type = map(map(object({
     infra_project        = optional(string, null)
     cicd_project         = optional(string, null)
     create_infra_project = bool
-    create_cicd_project  = bool
-    infra_project_folder = optional(string, null)
-    cicd_project_folder  = optional(string, null)
+    create_cicd_project  = bool    
   })))
 
   validation {

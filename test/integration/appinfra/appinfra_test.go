@@ -61,7 +61,7 @@ func TestAppInfra(t *testing.T) {
 			splitServiceName = strings.Split(fullServiceName, "-")
 			prefixServiceName = splitServiceName[0]
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
-			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, suffixServiceName)).String()
+			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cicd_project", appName, suffixServiceName)).String()
 			servicesInfoMap[fullServiceName] = ServiceInfos{
 				ApplicationName: appName,
 				ProjectID:       projectID,

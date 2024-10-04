@@ -106,7 +106,7 @@ func TestAppfactory(t *testing.T) {
 					t.Run(fmt.Sprintf("%s.%s", appName, serviceName), func(t *testing.T) {
 						t.Parallel()
 
-						adminProjectID := appData.Get("app_admin_project_id").String()
+						cicdProjectID := appData.Get("app_cicd_project").String()
 						adminProjectApis := []string{
 							"iam.googleapis.com",
 							"cloudresourcemanager.googleapis.com",
@@ -119,29 +119,29 @@ func TestAppfactory(t *testing.T) {
 							"sourcerepo.googleapis.com",
 						}
 
-						prj := gcloud.Runf(t, "projects describe %s", adminProjectID)
-						assert.Equal("ACTIVE", prj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", adminProjectID))
+						prj := gcloud.Runf(t, "projects describe %s", cicdProjectID)
+						assert.Equal("ACTIVE", prj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", cicdProjectID))
 
-						enabledAPIS := gcloud.Runf(t, "services list --project %s", adminProjectID).Array()
+						enabledAPIS := gcloud.Runf(t, "services list --project %s", cicdProjectID).Array()
 						listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
 						assert.Subset(listApis, adminProjectApis, "APIs should have been enabled")
 
 						// check app infra repo
 						repositoryName := appData.Get("app_infra_repository_name").String()
-						repoURL := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", adminProjectID, repositoryName)
-						repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repositoryName, adminProjectID)
+						repoURL := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", cicdProjectID, repositoryName)
+						repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repositoryName, cicdProjectID)
 						assert.Equal(repoURL, repoOP.Get("url").String(), "source repo %s should have url %s", repositoryName, repoURL)
 
 						// check workspace SA access to repo
-						repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repositoryName, adminProjectID)
+						repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repositoryName, cicdProjectID)
 						repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
-						repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s --project %s", repositoryName, adminProjectID), repoIamOpts).Array()[0]
+						repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s --project %s", repositoryName, cicdProjectID), repoIamOpts).Array()[0]
 						listMembers := utils.GetResultStrSlice(repoIamPolicyOp.Get("bindings.members").Array())
 						assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role roles/viewer on repo %s", repoSa, repositoryName))
 
 						// check cloudbuild workspace
 						// buckets
-						gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", adminProjectID, "--json"})
+						gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", cicdProjectID, "--json"})
 						for _, bucket := range []struct {
 							output string
 							suffix string
@@ -164,7 +164,7 @@ func TestAppfactory(t *testing.T) {
 							},
 						} {
 							bucketSelfLink := appData.Get(bucket.output).String()
-							opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://%s-%s-%s-%s", bucket.prefix, adminProjectID, serviceName, bucket.suffix), gcloudArgsBucket).Array()
+							opBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://%s-%s-%s-%s", bucket.prefix, cicdProjectID, serviceName, bucket.suffix), gcloudArgsBucket).Array()
 							assert.Equal(bucketSelfLink, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket SelfLink should be %s.", bucketSelfLink))
 						}
 						// triggers
@@ -183,7 +183,7 @@ func TestAppfactory(t *testing.T) {
 							},
 						} {
 							triggerID := testutils.GetLastSplitElement(appData.Get(trigger.output).String(), "/")
-							buildTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", triggerID, adminProjectID, "global")
+							buildTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", triggerID, cicdProjectID, "global")
 							filename := buildTrigger.Get("filename").String()
 							assert.Equal(trigger.file, filename, fmt.Sprintf("The filename for the trigger should be %s but got %s.", trigger.file, filename))
 							assert.Equal(repoName, buildTrigger.Get("triggerTemplate.repoName").String(), "the trigger should use the repo %s", repoName)
@@ -192,7 +192,7 @@ func TestAppfactory(t *testing.T) {
 						if slices.Contains(testutils.ServicesWithEnvProject[appName], serviceName) {
 							// check env projects
 							cloudBuildSARoles := []string{"roles/owner"}
-							envProjectsIDs := appData.Get("app_env_project_ids")
+							envProjectsIDs := appData.Get("app_infra_project_ids")
 							envProjectApis := []string{
 								"iam.googleapis.com",
 								"cloudresourcemanager.googleapis.com",
@@ -200,20 +200,20 @@ func TestAppfactory(t *testing.T) {
 								"cloudbilling.googleapis.com",
 							}
 							for _, envName := range testutils.EnvNames(t) {
-								envProjectID := envProjectsIDs.Get(envName).String()
+								infraProjectID := envProjectsIDs.Get(envName).String()
 
-								envPrj := gcloud.Runf(t, "projects describe %s", envProjectID)
-								assert.Equal("ACTIVE", envPrj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", envProjectID))
+								envPrj := gcloud.Runf(t, "projects describe %s", infraProjectID)
+								assert.Equal("ACTIVE", envPrj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", infraProjectID))
 
-								enabledAPIS := gcloud.Runf(t, "services list --project %s", envProjectID).Array()
+								enabledAPIS := gcloud.Runf(t, "services list --project %s", infraProjectID).Array()
 								listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
 								assert.Subset(listApis, envProjectApis, "APIs should have been enabled")
 
 								for _, role := range cloudBuildSARoles {
 									iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", fmt.Sprintf("bindings.role:%s", role), "--format", "json"})
-									iamPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", envProjectID), iamOpts).Array()[0]
+									iamPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", infraProjectID), iamOpts).Array()[0]
 									listMembers := utils.GetResultStrSlice(iamPolicy.Get("bindings.members").Array())
-									assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role %s on project %s", repoSa, role, envProjectID))
+									assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role %s on project %s", repoSa, role, infraProjectID))
 								}
 							}
 						}
