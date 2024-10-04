@@ -3,6 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| applications | n/a | <pre>map(map(object({<br>    infra_project        = optional(string, null)<br>    cicd_project         = optional(string, null)<br>    create_infra_project = bool<br>    create_cicd_project  = bool<br>    infra_project_folder = optional(string, null)<br>    cicd_project_folder  = optional(string, null)<br>  })))</pre> | n/a | yes |
 | billing\_account | Billing Account ID for application admin project resources. | `string` | n/a | yes |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |

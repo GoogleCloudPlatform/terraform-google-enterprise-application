@@ -93,12 +93,17 @@ variable "applications" {
   })))
 
   validation {
-    condition = alltrue([
-      for app_name, microservice in var.applications : (
-        (microservice.infra_project == null || microservice.create_infra_project == false) &&
-        (microservice.cicd_project == null || microservice.create_cicd_project == false)
-      )
-    ])
+    condition = alltrue(
+      [
+        for app_name, microservices in var.applications : alltrue(
+          [
+            for microservice_name, microservice_obj in microservices :
+            (microservice_obj.infra_project == null || microservice_obj.create_infra_project == false) &&
+            (microservice_obj.cicd_project == null || microservice_obj.create_cicd_project == false)
+          ]
+        )
+      ]
+    )
     error_message = "If infra_project or cicd_project is specified, the corresponding create_infra_project or create_cicd_project must be set to false."
   }
 }
