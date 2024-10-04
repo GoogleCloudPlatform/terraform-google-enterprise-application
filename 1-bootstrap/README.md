@@ -22,11 +22,6 @@ Each pipeline has the following associated resources:
 
 ## Usage
 
-### Pre-requisites
-
-- Google Cloud SDK version greater than 487.0.0
-- Terraform version greater than 1.6
-
 ### Deploying with Cloud Build
 
 #### Deploying on Enterprise Foundation blueprint

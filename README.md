@@ -9,7 +9,13 @@ For a complete description of the architecture deployed by this repository, refe
 ![Enterprise Application blueprint architecture diagram](assets/eab-architecture.svg)
 
 ## Overview
+
 This repository contains several distinct deployment stages, each contained in a directory. Each stage subdirectory represents the contents of a customer-owned repo that will trigger a distinct Terraform deployment pipeline.
+
+### Pre-requisites
+
+- Google Cloud SDK version greater than 487.0.0
+- Terraform version greater than 1.6
 
 ### [1. bootstrap](/1-bootstrap/)
 The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
