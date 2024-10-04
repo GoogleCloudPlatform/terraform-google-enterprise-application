@@ -94,7 +94,7 @@ variable "applications" {
 
   validation {
     condition = alltrue([
-      for app_name, microservice_name in var.apps : (
+      for app_name, microservice_name in var.applications : (
         (microservice_name.infra_project == null || microservice_name.create_infra_project == false) &&
         (microservice_name.cicd_project == null || microservice_name.create_cicd_project == false)
       )
