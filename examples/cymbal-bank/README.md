@@ -33,7 +33,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     namespace_ids = {
         "cb-frontend"     = "your-frontend-group@yourdomain.com",
         "cb-accounts"     = "your-accounts-group@yourdomain.com",
-        "cb-ledger"       = "your-transactions-group@yourdomain.com"
+        "cb-ledger"       = "your-ledger-group@yourdomain.com"
         ...
     }
    ```
