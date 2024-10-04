@@ -80,3 +80,25 @@ variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string
 }
+
+
+variable "applications" {
+  type = map(map(object({
+    infra_project        = optional(string, null)
+    cicd_project         = optional(string, null)
+    create_infra_project = bool
+    create_cicd_project  = bool
+    infra_project_folder = optional(string, null)
+    cicd_project_folder  = optional(string, null)
+  })))
+
+  validation {
+    condition = alltrue([
+      for app_name, microservice_name in var.apps : (
+        (microservice_name.infra_project == null || microservice_name.create_infra_project == false) &&
+        (microservice_name.cicd_project == null || microservice_name.create_cicd_project == false)
+      )
+    ])
+    error_message = "If infra_project or cicd_project is specified, the corresponding create_infra_project or create_cicd_project must be set to false."
+  }
+}
