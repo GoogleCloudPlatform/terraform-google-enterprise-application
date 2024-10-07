@@ -10,7 +10,7 @@ require (
 	github.com/gruntwork-io/terratest v0.47.2
 	github.com/otiai10/copy v1.14.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tidwall/gjson v1.17.3
+	github.com/tidwall/gjson v1.18.0
 )
 
 require (
