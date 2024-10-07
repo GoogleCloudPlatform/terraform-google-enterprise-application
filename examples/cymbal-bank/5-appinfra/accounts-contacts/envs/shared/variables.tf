@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-variable "project_id" {
-  description = "CI/CD project ID"
-  type        = string
-}
-
 variable "region" {
   description = "CI/CD region"
   type        = string
-}
-
-variable "env_cluster_membership_ids" {
-  description = "Cluster Membership IDs"
-  type = map(object({
-    cluster_membership_ids = list(string)
-  }))
+  default     = "us-central1"
 }
 
 variable "buckets_force_destroy" {
   description = "When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
   type        = bool
   default     = false
+}
+
+variable "remote_state_bucket" {
+  description = "Backend bucket to load Terraform Remote State Data from previous steps."
+  type        = string
 }
