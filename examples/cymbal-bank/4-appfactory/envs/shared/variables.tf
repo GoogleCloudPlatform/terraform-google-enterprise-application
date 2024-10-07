@@ -95,7 +95,7 @@ variable "applications" {
     infra_project        = optional(string, null)
     cicd_project         = optional(string, null)
     create_infra_project = bool
-    create_cicd_project  = bool    
+    create_cicd_project  = bool
   })))
 
   validation {

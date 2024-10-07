@@ -16,7 +16,7 @@
 
 output "app_cicd_project" {
   description = "Project ID of the application admin project."
-  value       = module.app_cicd_project.project_id
+  value       = local.cicd_project
 }
 
 output "app_infra_repository_name" {

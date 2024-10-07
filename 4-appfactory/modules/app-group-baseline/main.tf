@@ -15,7 +15,7 @@
  */
 
 locals {
-  cicd_project = var.create_cicd_project ? module.app_cicd_project.project_id : var.cicd_project
+  cicd_project = var.create_cicd_project ? module.app_cicd_project[0].project_id : var.cicd_project
   cloudbuild_sa_roles = var.create_infra_project ? { for env in keys(var.envs) : env => {
     project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
