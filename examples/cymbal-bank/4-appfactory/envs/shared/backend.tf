@@ -16,7 +16,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "UPDATE_ME"
+    bucket = "bkt-ci-enterprise-application-vzu2-tf-state"
     prefix = "terraform/appfactory/cymbal-bank"
   }
 }

@@ -96,7 +96,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
     ```bash
     git add .
-    git commit -m 'Initialize multitenant repo'
+    git commit -m 'Initialize appfactory repo'
     git push --set-upstream origin plan
     ```
 
@@ -106,6 +106,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git checkout -b production
     git push origin production
     ```
+
 
 ### Running Terraform locally
 

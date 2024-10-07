@@ -60,6 +60,7 @@ variable "create_env_projects" {
   type        = bool
   default     = true
   description = "Create environment-specific application infra projects"
+
 }
 
 variable "env_project_apis" {
@@ -71,6 +72,11 @@ variable "env_project_apis" {
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com",
   ]
+}
+
+variable "cluster_projects_ids" {
+  type        = list(string)
+  description = "Cluster projects ids."
 }
 
 variable "cloudbuild_sa_roles" {

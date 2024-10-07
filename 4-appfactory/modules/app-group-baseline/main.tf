@@ -13,12 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 locals {
-  cloudbuild_sa_roles = var.create_env_projects ? { for env in keys(var.envs) : env => {
+
+  cloudbuild_sa_roles = merge(var.create_env_projects ? { for env in keys(var.envs) : env => {
     project_id = module.app_env_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
-  } } : {}
+    } } : {}, {
+    "admin" : {
+      project_id = module.app_admin_project.project_id
+      roles = [
+        "roles/browser", "roles/serviceusage.serviceUsageAdmin",
+        "roles/storage.admin", "roles/iam.serviceAccountAdmin",
+        "roles/artifactregistry.admin", "roles/clouddeploy.admin",
+        "roles/cloudbuild.builds.editor", "roles/privilegedaccessmanager.projectServiceAgent",
+        "roles/iam.serviceAccountUser", "roles/source.admin"
+      ]
+    } },
+    {
+      for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
+        project_id = cluster_project_id
+        roles =  ["roles/privilegedaccessmanager.projectServiceAgent"]
+      }
+    }
+  )
+
+  org_ids = distinct([for env in var.envs : env.org_id])
 }
 
 // Create admin project
@@ -89,6 +108,25 @@ resource "google_project_iam_member" "builder_artifactregistry_reader" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = var.gar_project_id
   role    = "roles/artifactregistry.reader"
+}
+
+resource "google_service_account_iam_member" "account_access" {
+  service_account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_service_account_iam_member" "token_creator" {
+  service_account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_organization_iam_member" "builder_organization_browser" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/browser"
 }
 
 // Create env project

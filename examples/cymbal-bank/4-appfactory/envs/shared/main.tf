@@ -71,6 +71,7 @@ module "components" {
   gar_project_id               = local.gar_project_id
   gar_repository_name          = local.gar_image_name
   docker_tag_version_terraform = local.gar_tag_version
+  cluster_projects_ids         = local.cluster_projects_ids
 
   cloudbuild_sa_roles = {
     development = {
