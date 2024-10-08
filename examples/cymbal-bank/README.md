@@ -83,7 +83,8 @@ The steps below assume that you are checkout out on the same level as `terraform
 
     ```bash
     mkdir ./eab-applicationfactory/envs/
-    cp -R ./terraform-google-enterprise-application/examples/cymbal-bank/4-appfactory/envs/* ./eab-applicationfactory/envs/shared/
+    cp -R ./terraform-google-enterprise-application/examples/cymbal-bank/4-appfactory/envs/* ./eab-applicationfactory/envs/
+    cp -R ./terraform-google-enterprise-application/4-appfactory/modules/* ./eab-applicationfactory/modules/
     ```
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
 
@@ -170,12 +171,22 @@ The steps below assume that you are checkout out on the same level as `terraform
     echo transactionhistory_repository=$transactionhistory_repository
     export transactionhistory_statebucket=$(terraform output -json app-group | jq -r '.["cymbal-bank.transactionhistory"]["app_cloudbuild_workspace_state_bucket_name"]' | sed 's/.*\///')
     echo transactionhistory_statebucket=$transactionhistory_statebucket
+    cd ../../../
     ```
+
+1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+
+   ```bash
+   cd eab-applicationfactory
+   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
+
+   echo "remote_state_bucket = ${remote_state_bucket}"
+   ```
 
 1. Move out of directory:
 
     ```bash
-    cd ../../../
+    cd ../
     ```
 
 1. Clone the repositories for each service and initialized:
@@ -195,59 +206,74 @@ The steps below assume that you are checkout out on the same level as `terraform
 
     ```bash
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/ledger-balancereader/* $balancereader_repository
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $balancereader_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $balancereader_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $balancereader_repository/
     chmod 755 $balancereader_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $balancereader_repository/policy-library
     rm -rf $balancereader_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $balancereader_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/${balancereader_statebucket}/" $balancereader_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_ME/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $balancereader_repository/*/*/terraform.tfvars
+
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/accounts-userservice/* $userservice_repository
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $userservice_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $userservice_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $userservice_repository/
     chmod 755 $userservice_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $userservice_repository/policy-library
     rm -rf $userservice_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $userservice_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/${userservice_statebucket}/" $userservice_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_ME/$userservice_statebucket/" $userservice_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $userservice_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/frontend/* $frontend_repository
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $frontend_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $frontend_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $frontend_repository/
     chmod 755 $frontend_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $frontend_repository/policy-library
     rm -rf $frontend_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $frontend_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$frontend_statebucket}/" $frontend_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_ME/$frontend_statebucket/" $frontend_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $frontend_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/accounts-contacts/* $contacts_repository
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $contacts_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
     chmod 755 $contacts_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $contacts_repository/policy-library
     rm -rf $contacts_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $contacts_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$contacts_statebucket}/" $contacts_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_ME/$contacts_statebucket/" $contacts_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $contacts_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/ledger-ledgerwriter/* $ledgerwriter_repository
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $ledgerwriter_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $ledgerwriter_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $ledgerwriter_repository/
     chmod 755 $ledgerwriter_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $ledgerwriter_repository/policy-library
     rm -rf $ledgerwriter_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $ledgerwriter_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket}/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $ledgerwriter_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/ledger-transactionhistory/* $transactionhistory_repository
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $transactionhistory_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $transactionhistory_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $transactionhistory_repository/
     chmod 755 $transactionhistory_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $transactionhistory_repository/policy-library
     rm -rf $transactionhistory_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $transactionhistory_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket}/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $transactionhistory_repository/*/*/terraform.tfvars
     ```
+
+##### Commit changes for Ledgerwriter service
 
 1. Commit files to ledgerwriter repository a plan branch:
 
@@ -263,11 +289,59 @@ The steps below assume that you are checkout out on the same level as `terraform
 1. Merge plan to production branch:
 
    ```bash
-    cd $ledgerwriter_repository
-
     git checkout -b production
+    git push --set-upstream origin production
+    ```
+
+1. Merge plan to nonproduction branch:
+
+   ```bash
+    git checkout -b nonproduction
+    git push --set-upstream origin nonproduction
+    ```
+
+1. Merge plan to development branch:
+
+   ```bash
+    git checkout -b development
+    git push --set-upstream origin development
+    ```
+
+##### Commit changes for Contacts service
+
+1. Commit files to contacts repository a plan branch:
+
+    ```bash
+    cd $contacts_repository
+
+    git checkout -b plan
+    git add .
+    git commit -m 'Initialize contacts repo'
     git push --set-upstream origin plan
     ```
+
+1. Merge plan to production branch:
+
+   ```bash
+    git checkout -b production
+    git push --set-upstream origin production
+    ```
+
+1. Merge plan to nonproduction branch:
+
+   ```bash
+    git checkout -b nonproduction
+    git push --set-upstream origin nonproduction
+    ```
+
+1. Merge plan to development branch:
+
+   ```bash
+    git checkout -b development
+    git push --set-upstream origin development
+    ```
+
+##### Commit changes for BalanceReader service
 
 1. Commit files to balancereader repository a plan branch:
 
@@ -283,8 +357,66 @@ The steps below assume that you are checkout out on the same level as `terraform
 1. Merge plan to production branch:
 
    ```bash
-    cd $balancereader_repository
+    git checkout -b production
+    git push --set-upstream origin plan
+    ```
 
+##### Commit changes for UserService service
+
+1. Commit files to userservice repository a plan branch:
+
+    ```bash
+    cd $userservice_repository
+
+    git checkout -b plan
+    git add .
+    git commit -m 'Initialize userservice repo'
+    git push --set-upstream origin plan
+    ```
+
+1. Merge plan to production branch:
+
+   ```bash
+    git checkout -b production
+    git push --set-upstream origin plan
+    ```
+
+##### Commit changes for Frontend service
+
+1. Commit files to frontend repository a plan branch:
+
+    ```bash
+    cd $frontend_repository
+
+    git checkout -b plan
+    git add .
+    git commit -m 'Initialize frontend repo'
+    git push --set-upstream origin plan
+    ```
+
+1. Merge plan to production branch:
+
+   ```bash
+    git checkout -b production
+    git push --set-upstream origin plan
+    ```
+
+##### Commit changes for TransactionHistory service
+
+1. Commit files to transactionhistory repository a plan branch:
+
+    ```bash
+    cd $transactionhistory_repository
+
+    git checkout -b plan
+    git add .
+    git commit -m 'Initialize transactionhistory repo'
+    git push --set-upstream origin plan
+    ```
+
+1. Merge plan to production branch:
+
+   ```bash
     git checkout -b production
     git push --set-upstream origin plan
     ```
