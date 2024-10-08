@@ -31,8 +31,6 @@ data "terraform_remote_state" "multitenant" {
   }
 }
 
-
-
 data "terraform_remote_state" "appfactory" {
   backend = "gcs"
 
