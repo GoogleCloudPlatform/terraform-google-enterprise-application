@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-// These values are retrieved from the saved terraform state of the execution
-// of previous step using the terraform_remote_state data source.
 locals {
-  cluster_project_id = data.terraform_remote_state.multitenant.outputs.cluster_project_id
-  cluster_regions    = data.terraform_remote_state.multitenant.outputs.cluster_regions
-  network_project_id = data.terraform_remote_state.multitenant.outputs.network_project_id
-  network_name       = data.terraform_remote_state.multitenant.outputs.network_name
-  app_project_id     = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.userservice"].app_env_project_ids[local.env]
+  cluster_membership_ids = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => { "cluster_membership_ids" = (state.outputs.cluster_membership_ids) } }
+  app_admin_project      = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.userservice"].app_admin_project_id
+  envs                   = toset(["development", "nonproduction", "production"])
 }
 
 data "terraform_remote_state" "multitenant" {
+  for_each = local.envs
+
   backend = "gcs"
 
   config = {
     bucket = var.remote_state_bucket
-    prefix = "terraform/multi_tenant/${local.env}"
+    prefix = "terraform/multi_tenant/${each.value}"
   }
 }
+
+
 
 data "terraform_remote_state" "appfactory" {
   backend = "gcs"

@@ -18,6 +18,10 @@
 // of previous step using the terraform_remote_state data source.
 locals {
   cluster_project_id = data.terraform_remote_state.multitenant.outputs.cluster_project_id
+  cluster_regions    = data.terraform_remote_state.multitenant.outputs.cluster_regions
+  network_project_id = data.terraform_remote_state.multitenant.outputs.network_project_id
+  network_name       = data.terraform_remote_state.multitenant.outputs.network_name
+  app_project_id     = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.userservice"].app_env_project_ids[local.env]
 }
 
 data "terraform_remote_state" "multitenant" {
@@ -25,6 +29,15 @@ data "terraform_remote_state" "multitenant" {
 
   config = {
     bucket = var.remote_state_bucket
-    prefix = "terraform/multi_tenant/nonproduction"
+    prefix = "terraform/multi_tenant/${local.env}"
+  }
+}
+
+data "terraform_remote_state" "appfactory" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/appfactory/cymbal-bank"
   }
 }
