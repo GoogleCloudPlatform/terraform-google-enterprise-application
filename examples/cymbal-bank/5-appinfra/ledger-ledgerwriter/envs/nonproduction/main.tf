@@ -22,13 +22,13 @@ locals {
 }
 
 module "alloydb" {
-  source = "../../../../../modules/alloydb-psc-setup"
+  source = "../../modules/alloydb-psc-setup"
 
   env                         = local.env
-  network_project_id          = var.network_project_id
-  db_region                   = var.cluster_regions[0]
-  app_project_id              = var.app_project_id
-  network_name                = var.network_name
+  network_project_id          = local.network_project_id
+  db_region                   = local.cluster_regions[0]
+  app_project_id              = local.app_project_id
+  network_name                = local.network_name
   psc_consumer_fwd_rule_ip    = var.psc_consumer_fwd_rule_ip
   workload_identity_principal = local.pod_service_account_principal
 }

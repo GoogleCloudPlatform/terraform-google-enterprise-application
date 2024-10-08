@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-variable "region" {
-  description = "CI/CD region"
-  type        = string
-  default     = "us-central1"
-}
-
-variable "buckets_force_destroy" {
-  description = "When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
-  type        = bool
-  default     = false
-}
-
-variable "remote_state_bucket" {
-  description = "Backend bucket to load Terraform Remote State Data from previous steps."
-  type        = string
+terraform {
+  backend "gcs" {
+    bucket = "bkt-ci-enterprise-application-vzu2-tf-state"
+    prefix = "terraform/bootstrap"
+  }
 }

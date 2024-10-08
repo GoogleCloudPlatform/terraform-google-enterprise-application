@@ -25,3 +25,39 @@ apps = {
     "acronym" = "cb",
   }
 }
+
+envs = {
+  "development" = {
+    "billing_account"    = "010ECE-40301B-50DDD5"
+    "folder_id"          = "folders/86141427775"
+    "network_project_id" = "eab-vpc-development-e9p0"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/eab-vpc-development-e9p0/global/networks/eab-vpc-development"
+    "org_id"             = "1055058813388"
+    "subnets_self_links" = [
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-development-e9p0/regions/us-central1/subnetworks/eab-development-region01",
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-development-e9p0/regions/us-east4/subnetworks/eab-development-region02",
+    ]
+  }
+  "nonproduction" = {
+    "billing_account"    = "010ECE-40301B-50DDD5"
+    "folder_id"          = "folders/619291735267"
+    "network_project_id" = "eab-vpc-nonproduction-9ixg"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/eab-vpc-nonproduction-9ixg/global/networks/eab-vpc-nonproduction"
+    "org_id"             = "1055058813388"
+    "subnets_self_links" = [
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-nonproduction-9ixg/regions/us-central1/subnetworks/eab-nonproduction-region01",
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-nonproduction-9ixg/regions/us-east4/subnetworks/eab-nonproduction-region02",
+    ]
+  }
+  "production" = {
+    "billing_account"    = "010ECE-40301B-50DDD5"
+    "folder_id"          = "folders/594110332329"
+    "network_project_id" = "eab-vpc-production-c1e4"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/eab-vpc-production-c1e4/global/networks/eab-vpc-production"
+    "org_id"             = "1055058813388"
+    "subnets_self_links" = [
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-production-c1e4/regions/us-central1/subnetworks/eab-production-region01",
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-production-c1e4/regions/us-east4/subnetworks/eab-production-region02",
+    ]
+  }
+}

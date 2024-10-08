@@ -20,6 +20,7 @@
 | cluster\_type | Cluster type |
 | env | Environment |
 | fleet\_project\_id | Fleet Project ID |
+| network\_name | Network Name. |
 | network\_project\_id | Network Project ID |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

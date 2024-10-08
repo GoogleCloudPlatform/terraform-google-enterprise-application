@@ -77,7 +77,7 @@ module "tf_cloudbuild_workspace" {
   cloudbuild_sa_roles = {
     "roles" = {
       project_id = var.project_id
-      roles = each.value.roles }
+    roles = each.value.roles }
   }
 
   substitutions = {

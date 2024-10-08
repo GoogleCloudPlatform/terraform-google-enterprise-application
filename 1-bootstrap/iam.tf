@@ -138,3 +138,11 @@ resource "google_organization_iam_member" "app_factory_org_browser" {
   member = "serviceAccount:${each.value.email}"
   org_id = each.value.org_id
 }
+
+resource "google_organization_iam_member" "app_factory_org_organization_service_agent" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+
+  role   = "roles/privilegedaccessmanager.organizationServiceAgent"
+  member = "serviceAccount:${each.value.email}"
+  org_id = each.value.org_id
+}
