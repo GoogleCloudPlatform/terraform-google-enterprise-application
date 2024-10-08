@@ -23,11 +23,11 @@ locals {
 }
 
 module "app" {
-  source = "../../../../../modules/cicd-pipeline"
+  source = "../../modules/cicd-pipeline"
 
-  project_id                 = var.project_id
+  project_id                 = local.app_admin_project
   region                     = var.region
-  env_cluster_membership_ids = var.env_cluster_membership_ids
+  env_cluster_membership_ids = local.cluster_membership_ids
 
   service_name           = local.service_name
   team_name              = local.team_name
@@ -39,5 +39,6 @@ module "app" {
     _SERVICE = local.service_name
     _TEAM    = local.team_name
   }
+
   buckets_force_destroy = var.buckets_force_destroy
 }
