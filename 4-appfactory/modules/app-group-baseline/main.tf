@@ -32,7 +32,7 @@ locals {
     {
       for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
         project_id = cluster_project_id
-        roles =  ["roles/privilegedaccessmanager.projectServiceAgent"]
+        roles      = ["roles/privilegedaccessmanager.projectServiceAgent"]
       }
     }
   )
