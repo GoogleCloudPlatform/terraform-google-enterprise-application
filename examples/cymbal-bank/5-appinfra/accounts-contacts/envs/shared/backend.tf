@@ -16,7 +16,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "bkt-cb-contacts-admin-gmqm-contacts-state"
+    bucket = "UPDATE_ME"
     prefix = "terraform/appinfra/cymbal-bank/contacts/shared"
   }
 }
