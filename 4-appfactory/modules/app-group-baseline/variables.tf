@@ -36,12 +36,12 @@ variable "org_id" {
 
 variable "folder_id" {
   type        = string
-  description = "Folder ID of parent folder for Microservice CI/CD resources. If deploying on the enterprise foundation blueprint, this is usually the 'common' folder."
+  description = "Folder ID of parent folder for application admin resources. If deploying on the enterprise foundation blueprint, this is usually the 'common' folder."
 }
 
 variable "billing_account" {
   type        = string
-  description = "Billing Account ID for Microservice CI/CD project resources."
+  description = "Billing Account ID for application admin project resources."
 }
 
 variable "envs" {
@@ -110,8 +110,8 @@ variable "infra_project" {
   type        = string
 }
 
-variable "cicd_project" {
-  description = "The CI/CD project associated with the microservice. If set, `create_cicd_project` must be set to `false`."
+variable "admin_project" {
+  description = "The CI/CD project associated with the microservice. If set, `create_admin_project` must be set to `false`."
   type        = string
 }
 
@@ -120,7 +120,7 @@ variable "create_infra_project" {
   type        = bool
 }
 
-variable "create_cicd_project" {
+variable "create_admin_project" {
   description = "Boolean value that indicates whether a CI/CD project should be created for the microservice."
   type        = bool
 }

@@ -70,8 +70,8 @@ module "components" {
   }
 
   // microservices-specific configuration to baseline module
-  cicd_project         = each.value.service.cicd_project
-  create_cicd_project  = each.value.service.create_cicd_project
+  admin_project         = each.value.service.admin_project
+  create_admin_project  = each.value.service.create_admin_project
   create_infra_project = each.value.service.create_infra_project
   infra_project        = each.value.service.infra_project
 }

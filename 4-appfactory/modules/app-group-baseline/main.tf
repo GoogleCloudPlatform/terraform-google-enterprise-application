@@ -15,7 +15,7 @@
  */
 
 locals {
-  cicd_project = var.create_cicd_project ? module.app_cicd_project[0].project_id : var.cicd_project
+  admin_project = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project
   cloudbuild_sa_roles = var.create_infra_project ? { for env in keys(var.envs) : env => {
     project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
@@ -23,8 +23,8 @@ locals {
 }
 
 
-module "app_cicd_project" {
-  count = var.create_cicd_project ? 1 : 0
+module "app_admin_project" {
+  count = var.create_admin_project ? 1 : 0
 
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 17.0"
@@ -32,7 +32,7 @@ module "app_cicd_project" {
   random_project_id        = true
   random_project_id_length = 4
   billing_account          = var.billing_account
-  name                     = substr("${var.acronym}-${var.service_name}-cicd", 0, 25) # max length 30 chars
+  name                     = substr("${var.acronym}-${var.service_name}-admin", 0, 25) # max length 30 chars
   org_id                   = var.org_id
   folder_id                = var.folder_id
   deletion_policy          = "DELETE"
@@ -51,7 +51,7 @@ module "app_cicd_project" {
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
-  project = local.cicd_project
+  project = local.admin_project
   name    = "${var.service_name}-i-r"
 }
 
@@ -59,14 +59,14 @@ module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
   version = "~> 8.0"
 
-  project_id               = local.cicd_project
+  project_id               = local.admin_project
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
   tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
   location                 = var.location
   trigger_location         = var.trigger_location
-  artifacts_bucket_name    = "${var.bucket_prefix}-${local.cicd_project}-${var.service_name}-build"
-  create_state_bucket_name = "${var.bucket_prefix}-${local.cicd_project}-${var.service_name}-state"
-  log_bucket_name          = "${var.bucket_prefix}-${local.cicd_project}-${var.service_name}-logs"
+  artifacts_bucket_name    = "${var.bucket_prefix}-${local.admin_project}-${var.service_name}-build"
+  create_state_bucket_name = "${var.bucket_prefix}-${local.admin_project}-${var.service_name}-state"
+  log_bucket_name          = "${var.bucket_prefix}-${local.admin_project}-${var.service_name}-logs"
   buckets_force_destroy    = var.bucket_force_destroy
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 

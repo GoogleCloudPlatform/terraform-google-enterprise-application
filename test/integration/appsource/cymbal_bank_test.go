@@ -65,7 +65,7 @@ func TestSourceCymbalBank(t *testing.T) {
 			splitServiceName = strings.Split(serviceName, "-")
 			prefixServiceName = splitServiceName[0]
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
-			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cicd_project", appName, suffixServiceName)).String()
+			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project", appName, suffixServiceName)).String()
 			servicesInfoMap[serviceName] = ServiceInfos{
 				ProjectID:   projectID,
 				ServiceName: suffixServiceName,

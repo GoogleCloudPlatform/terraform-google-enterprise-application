@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-output "app_cicd_project" {
+output "app_admin_project" {
   description = "Project ID of the application admin project."
-  value       = local.cicd_project
+  value       = local.admin_project
 }
 
 output "app_infra_repository_name" {
