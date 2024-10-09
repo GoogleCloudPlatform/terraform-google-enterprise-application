@@ -111,7 +111,7 @@ variable "infra_project" {
 }
 
 variable "admin_project" {
-  description = "The CI/CD project associated with the microservice. If set, `create_admin_project` must be set to `false`."
+  description = "The admin project associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`."
   type        = string
 }
 
@@ -121,7 +121,7 @@ variable "create_infra_project" {
 }
 
 variable "create_admin_project" {
-  description = "Boolean value that indicates whether a CI/CD project should be created for the microservice."
+  description = "Boolean value that indicates whether a admin project should be created for the microservice."
   type        = bool
 }
 
