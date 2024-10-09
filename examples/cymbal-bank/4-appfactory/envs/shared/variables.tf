@@ -86,13 +86,11 @@ variable "remote_state_bucket" {
 variable "applications" {
   description = <<-EOF
   A map where the key is the application name, containing the configuration for each microservice under the application. Each microservice has the following properties:
-  - **infra_project** (Optional): The infrastructure project associated with the microservice. If set, `create_infra_project` must be `false`.
-  - **admin_project** (Optional): The CI/CD project associated with the microservice. If set, `create_admin_project` must be `false`.
-  - **create_infra_project** (Required): Indicates whether an infrastructure project should be created for the microservice.
-  - **create_admin_project** (Required):Indicates whether a CI/CD project should be created for the microservice.
+  - **admin_project** (Optional): Admin project associated with the microservice. This hosts microservice specific CI/CD pipelines. If set, `create_admin_project` must be `false`.
+  - **create_infra_project** (Required): Indicates whether an infrastructure project should be created for the microservice (one infra project will be created per environment defines in var.envs).
+  - **create_admin_project** (Required): Indicates whether a Admin project should be created for the microservice.
   EOF
   type = map(map(object({
-    infra_project        = optional(string, null)
     admin_project        = optional(string, null)
     create_infra_project = bool
     create_admin_project = bool
@@ -104,7 +102,6 @@ variable "applications" {
         for app_name, microservices in var.applications : alltrue(
           [
             for microservice_name, microservice_obj in microservices :
-            (microservice_obj.infra_project == null || microservice_obj.create_infra_project == false) &&
             (microservice_obj.admin_project == null || microservice_obj.create_admin_project == false)
           ]
         )

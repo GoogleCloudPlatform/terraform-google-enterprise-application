@@ -105,11 +105,6 @@ variable "tf_apply_branches" {
   default     = ["development", "nonproduction", "production"]
 }
 
-variable "infra_project" {
-  description = "The infrastructure project associated with the microservice. If set, `create_infra_project` must be set to `false`."
-  type        = string
-}
-
 variable "admin_project" {
   description = "The admin project associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`."
   type        = string
