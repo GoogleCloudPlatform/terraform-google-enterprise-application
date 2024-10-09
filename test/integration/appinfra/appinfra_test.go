@@ -87,6 +87,7 @@ func TestAppInfra(t *testing.T) {
 				vars := map[string]interface{}{
 					"remote_state_bucket":   remoteState,
 					"buckets_force_destroy": "true",
+					"envs":                  testutils.EnvNames(t),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,

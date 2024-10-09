@@ -30,3 +30,8 @@ variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string
 }
+
+variable "envs" {
+  description = "A list of environment names."
+  type        = list(string)
+}

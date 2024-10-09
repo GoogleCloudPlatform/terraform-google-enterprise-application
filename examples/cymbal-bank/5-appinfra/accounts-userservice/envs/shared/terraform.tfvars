@@ -17,3 +17,4 @@
 remote_state_bucket   = "REMOTE_STATE_BUCKET"
 buckets_force_destroy = true
 region                = "us-central1"
+envs                  = ["development", "nonproduction", "production"]
