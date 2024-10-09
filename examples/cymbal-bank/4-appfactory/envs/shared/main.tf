@@ -73,5 +73,4 @@ module "components" {
   admin_project        = each.value.service.admin_project
   create_admin_project = each.value.service.create_admin_project
   create_infra_project = each.value.service.create_infra_project
-  infra_project        = each.value.service.infra_project
 }
