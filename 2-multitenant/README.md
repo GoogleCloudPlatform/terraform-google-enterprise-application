@@ -32,6 +32,8 @@ The steps below assume that you are checkout out on the same level as `terraform
 └── .
 ```
 
+> NOTE: If you don't have the foundation codebase, you can clone it by running the following command: `git clone --branch v4.1.0 https://github.com/terraform-google-modules/terraform-example-foundation.git`
+
 1. Retrieve Multi-tenant administration project variable value from 1-bootstrap:
 
     ```bash
@@ -77,17 +79,12 @@ The steps below assume that you are checkout out on the same level as `terraform
 [README.md](./envs/production/README.md#inputs) files for additional information
 on the values in the `terraform.tfvars` file. In addition to `envs` from
 prerequisites, each App must have it's own entry under `apps` with a list of any
-dedicated IP address to be provisioned.
+dedicated IP address to be provisioned. For the default hello world example, use the following values
 
     ```terraform
     apps = {
-      "my-app" : {
-        "ip_address_names" : [
-          "my-app-ip",
-        ]
-        "certificates" : {
-          "my-app-cert" : ["my-domain-name"]
-        }
+      "default-example" : {
+        "acronym" = "de",
       }
     }
     ```

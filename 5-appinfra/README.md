@@ -39,8 +39,8 @@ Under the `apps` folder are examples for each of the cymbal bank applications.
 
 1. Change directory into any of these folders to deploy.
 
-```
-cd apps/accounts-userservice
+```bash
+cd apps/default-example/hello-world
 ```
 
 1. Update the configuration with values for your environment.

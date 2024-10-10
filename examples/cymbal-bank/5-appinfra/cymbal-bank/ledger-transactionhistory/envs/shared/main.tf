@@ -39,5 +39,8 @@ module "app" {
     _SERVICE = local.service_name
     _TEAM    = local.team_name
   }
+
+  ci_build_included_files = ["src/${local.team_name}/**", "src/components/**"]
+
   buckets_force_destroy = var.buckets_force_destroy
 }
