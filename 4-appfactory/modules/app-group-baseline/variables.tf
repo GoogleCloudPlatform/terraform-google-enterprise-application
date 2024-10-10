@@ -60,6 +60,7 @@ variable "create_env_projects" {
   type        = bool
   default     = true
   description = "Create environment-specific application infra projects"
+
 }
 
 variable "env_project_apis" {
@@ -71,6 +72,11 @@ variable "env_project_apis" {
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com",
   ]
+}
+
+variable "cluster_projects_ids" {
+  type        = list(string)
+  description = "Cluster projects ids."
 }
 
 variable "cloudbuild_sa_roles" {
@@ -109,4 +115,20 @@ variable "tf_apply_branches" {
   description = "List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default."
   type        = list(string)
   default     = ["development", "nonproduction", "production"]
+}
+
+variable "gar_project_id" {
+  description = "Project ID where Docker image is stored."
+  type        = string
+}
+
+variable "gar_repository_name" {
+  description = "Repository name where Docker image is stored."
+  type        = string
+}
+
+variable "docker_tag_version_terraform" {
+  description = "Docker tag version of image."
+  type        = string
+  default     = "latest"
 }
