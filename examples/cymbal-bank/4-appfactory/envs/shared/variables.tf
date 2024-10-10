@@ -107,6 +107,6 @@ variable "applications" {
         )
       ]
     )
-    error_message = "If infra_project or admin_project is specified, the corresponding create_infra_project or create_admin_project must be set to false."
+    error_message = "If admin_project is specified, the corresponding create_admin_project must be set to false."
   }
 }
