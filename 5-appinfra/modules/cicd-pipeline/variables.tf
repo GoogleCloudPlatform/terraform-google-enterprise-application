@@ -65,3 +65,9 @@ variable "app_build_trigger_yaml" {
   type        = string
   description = "Path to the Cloud Build YAML file for the application"
 }
+
+variable "ci_build_included_files" {
+  type        = list(string)
+  description = "(Optional) includedFiles are file glob matches using https://golang.org/pkg/path/filepath/#Match extended with support for **. If any of the files altered in the commit pass the ignoredFiles filter and includedFiles is empty, then as far as this filter is concerned, we should trigger the build. If any of the files altered in the commit pass the ignoredFiles filter and includedFiles is not empty, then we make sure that at least one of those files matches a includedFiles glob. If not, then we do not trigger a build."
+  default     = []
+}

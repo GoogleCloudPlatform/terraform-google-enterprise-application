@@ -29,11 +29,11 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 1. Navigate to Fleetscope repository and add the Cymbal Bank namespaces at `terraform.tfvars` if they were not created:
 
-   ```hl
+   ```hcl
     namespace_ids = {
         "cb-frontend"     = "your-frontend-group@yourdomain.com",
         "cb-accounts"     = "your-accounts-group@yourdomain.com",
-        "cb-transactions" = "your-transactions-group@yourdomain.com"
+        "cb-ledger"       = "your-ledger-group@yourdomain.com"
         ...
     }
    ```

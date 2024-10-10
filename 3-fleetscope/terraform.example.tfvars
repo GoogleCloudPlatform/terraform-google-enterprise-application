@@ -15,9 +15,9 @@
  */
 
 namespace_ids = {
-  "cb-frontend"     = "your-frontend-group@yourdomain.com",
-  "cb-accounts"     = "your-accounts-group@yourdomain.com",
-  "cb-transactions" = "your-transactions-group@yourdomain.com"
+  "cb-frontend" = "your-frontend-group@yourdomain.com",
+  "cb-accounts" = "your-accounts-group@yourdomain.com",
+  "cb-ledger"   = "your-ledger-group@yourdomain.com"
 }
 
 remote_state_bucket = "REMOTE_STATE_BUCKET"
