@@ -8,6 +8,18 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.3.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.2.0...v0.3.0) (2024-10-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* moves code to examples folder ([#238](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/238))
+
+### Features
+
+* add hello-world as the default application ([#247](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/247)) ([da26d9b](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/da26d9b208cc8d064d03de993a6e599b1f676a4b))
+* moves code to examples folder ([#238](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/238)) ([211b381](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/211b3815fb95168eed9fc408d0cc599315d48b82))
+
 ## [0.2.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.1.0...v0.2.0) (2024-09-27)
 
 
