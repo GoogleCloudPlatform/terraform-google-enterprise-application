@@ -124,7 +124,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 #### Add Cymbal Bank envs at App Infra
 
-1. Retrieve Cymbal Bank repositories created on 4-appfactory
+1. Retrieve Cymbal Bank repositories created on 4-appfactory.
 
     ```bash
     cd eab-applicationfactory/envs/shared/
@@ -420,3 +420,65 @@ The steps below assume that you are checkout out on the same level as `terraform
     git checkout -b production
     git push --set-upstream origin plan
     ```
+
+#### Deploy Cymbal Bank app
+
+1. Clone Bank of Anthos repository:
+
+    ```bash
+    git clone --branch v0.6.4 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
+    ```
+
+1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.
+
+    ```bash
+    cd bank-of-anthos
+    export BANK_OF_ANTHOS_PATH=$(pwd)
+    export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource)
+    ```
+
+1. Remove components and frontend:
+
+    ```bash
+    rm -rf src/components
+    rm -rf src/frontend/k8s
+    ```
+
+1. Validate `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` variables values.
+
+    ```bash
+    echo "Bank of Anthos Path: $BANK_OF_ANTHOS_PATH"
+    echo "App Source Path: $APP_SOURCE_DIR_PATH"
+    cd ../
+    ```
+
+##### Deploying Balance Reader
+
+1. Retrieve Cymbal Bank repositories created on 5-appinfra.
+
+    ```bash
+    cd cymbal-bank/balancereader-i-r/envs/shared
+    terraform init
+
+    export balancereader_project=$(terraform output -raw service_repository_project_id)
+    echo balancereader_project=$balancereader_project
+    export balancereader_repository=$(terraform output -raw  service_repository_name)
+    echo balancereader_repository=$balancereader_repository
+    cd ../../../../
+    ```
+
+1. Clone Balance Reader Repository.
+
+    ```bash
+    gcloud source repos clone $balancereader_repository --project=$balancereader_project
+    cd eab-cymbal-bank-ledger-balancereader
+    ```
+
+1. Copy Balance Reader resources:
+
+    ```bash
+    cp -pr  $APP_SOURCE_DIR_PATH/ledger-db/* ./ledger-db
+    cp -pr  $APP_SOURCE_DIR_PATH/components/* ./components
+    cp -pr  $APP_SOURCE_DIR_PATH/ledger-balancereader/* ./ledger-balancereader
+    ```
+
