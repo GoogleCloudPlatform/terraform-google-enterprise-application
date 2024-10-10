@@ -421,7 +421,9 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push --set-upstream origin plan
     ```
 
-#### Deploy Cymbal Bank app
+#### Application Source Code pipeline
+
+The step below assumes your are on `terraform-google-enterprise-application` repository.
 
 1. Clone Bank of Anthos repository:
 
@@ -437,48 +439,134 @@ The steps below assume that you are checkout out on the same level as `terraform
     export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource)
     ```
 
-1. Remove components and frontend:
+1. Run the commands below to update the `bank-of-anthos` codebase with the updated assets:
 
-    ```bash
-    rm -rf src/components
-    rm -rf src/frontend/k8s
-    ```
+- Remove components and frontend:
 
-1. Validate `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` variables values.
+        ```bash
+        rm -rf src/components
+        rm -rf src/frontend/k8s
+        ```
 
-    ```bash
-    echo "Bank of Anthos Path: $BANK_OF_ANTHOS_PATH"
-    echo "App Source Path: $APP_SOURCE_DIR_PATH"
-    cd ../
-    ```
+    - Update database and components assets:
 
-##### Deploying Balance Reader
+        ```bash
+        cp -r $APP_SOURCE_DIR_PATH/ledger-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/ledger/ledger-db/k8s/overlays
+
+        cp -r $APP_SOURCE_DIR_PATH/accounts-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/accounts/accounts-db/k8s/overlays
+
+        cp -r $APP_SOURCE_DIR_PATH/components $BANK_OF_ANTHOS_PATH/src/
+        ```
+
+    - Override `skaffold.yaml` files:
+
+        ```bash
+        cp -r $APP_SOURCE_DIR_PATH/frontend/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/frontend
+
+        cp -r $APP_SOURCE_DIR_PATH/ledger-ledgerwriter/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/ledgerwriter
+        cp -r $APP_SOURCE_DIR_PATH/ledger-transactionhistory/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/transactionhistory
+        cp -r $APP_SOURCE_DIR_PATH/ledger-balancereader/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/balancereader
+
+        cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/userservice
+        cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/contacts
+        ```
+    - Update `k8s` overlays:
+
+        ```bash
+        cp -r $APP_SOURCE_DIR_PATH/frontend/k8s $BANK_OF_ANTHOS_PATH/src/frontend
+
+        cp -r $APP_SOURCE_DIR_PATH/ledger-ledgerwriter/k8s/* $BANK_OF_ANTHOS_PATH/src/ledger/ledgerwriter/k8s
+        cp -r $APP_SOURCE_DIR_PATH/ledger-transactionhistory/k8s/* $BANK_OF_ANTHOS_PATH/src/ledger/transactionhistory/k8s
+        cp -r $APP_SOURCE_DIR_PATH/ledger-balancereader/k8s/* $BANK_OF_ANTHOS_PATH/src/ledger/balancereader/k8s
+
+        cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/k8s/* $BANK_OF_ANTHOS_PATH/src/accounts/userservice/k8s
+        cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/k8s/* $BANK_OF_ANTHOS_PATH/src/accounts/contacts/k8s
+        ```
+
+    - Create specific assets for `frontend`:
+
+        ```bash
+        cp $APP_SOURCE_DIR_PATH/../../../test/integration/appsource/assets/* $BANK_OF_ANTHOS_PATH/src/frontend/k8s/overlays/development
+        ```
+
+    - Add files and commit:
+
+        ``` bash
+        git add .
+        git commit -m "Override codebase with updated assets"
+        ```
 
 1. Retrieve Cymbal Bank repositories created on 5-appinfra.
 
+    - Balance Reader:
     ```bash
-    cd cymbal-bank/balancereader-i-r/envs/shared
-    terraform init
+        terraform -chdir="cymbal-bank/balancereader-i-r/envs/shared" init
+        export balancereader_project=$(terraform -chdir="cymbal-bank/balancereader-i-r/envs/shared" output -raw service_repository_project_id )
+        echo balancereader_project=$balancereader_project
+        export balancereader_repository=$(terraform -chdir="cymbal-bank/balancereader-i-r/envs/shared" output -raw  service_repository_name)
+        echo balancereader_repository=$balancereader_repository
+        ```
 
-    export balancereader_project=$(terraform output -raw service_repository_project_id)
-    echo balancereader_project=$balancereader_project
-    export balancereader_repository=$(terraform output -raw  service_repository_name)
-    echo balancereader_repository=$balancereader_repository
-    cd ../../../../
+    - Transaction History:
+        ```bash
+        terraform -chdir="cymbal-bank/transactionhistory-i-r/envs/shared" init
+        export transactionhistory_project=$(terraform -chdir="cymbal-bank/transactionhistory-i-r/envs/shared" output -raw service_repository_project_id )
+        echo transactionhistory_project=$transactionhistory_project
+        export transactionhistory_repository=$(terraform -chdir="cymbal-bank/transactionhistory-i-r/envs/shared" output -raw  service_repository_name)
+        echo transactionhistory_repository=$transactionhistory_repository
+        ```
+
+    - Legderwriter:
+        ```bash
+        terraform -chdir="cymbal-bank/ledgerwriter-i-r/envs/shared" init
+        export ledgerwriter_project=$(terraform -chdir="cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw service_repository_project_id )
+        echo ledgerwriter_project=$ledgerwriter_project
+        export ledgerwriter_repository=$(terraform -chdir="cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw  service_repository_name)
+        echo ledgerwriter_repository=$ledgerwriter_repository
+        ```
+
+    - Frontend:
+        ```bash
+        terraform -chdir="cymbal-bank/frontend-i-r/envs/shared" init
+        export frontend_project=$(terraform -chdir="cymbal-bank/frontend-i-r/envs/shared" output -raw service_repository_project_id )
+        echo frontend_project=$frontend_project
+        export frontend_repository=$(terraform -chdir="cymbal-bank/frontend-i-r/envs/shared" output -raw  service_repository_name)
+        echo frontend_repository=$frontend_repository
+        ```
+
+    - Contacts:
+        ```bash
+        terraform -chdir="cymbal-bank/contacts-i-r/envs/shared" init
+        export contacts_project=$(terraform -chdir="cymbal-bank/contacts-i-r/envs/shared" output -raw service_repository_project_id )
+        echo contacts_project=$contacts_project
+        export contacts_repository=$(terraform -chdir="cymbal-bank/contacts-i-r/envs/shared" output -raw  service_repository_name)
+        echo contacts_repository=$contacts_repository
+        ```
+
+    - User Service:
+        ```bash
+        terraform -chdir="cymbal-bank/userservice-i-r/envs/shared" init
+        export userservice_project=$(terraform -chdir="cymbal-bank/userservice-i-r/envs/shared" output -raw service_repository_project_id )
+        echo userservice_project=$userservice_project
+        export userservice_repository=$(terraform -chdir="cymbal-bank/userservice-i-r/envs/shared" output -raw  service_repository_name)
+        echo userservice_repository=$userservice_repository
+        ```
+
+1. Add remote source repositories.
+
+    ```bash
+    git remote add frontend https://source.developers.google.com/p/$frontend_project/r/$frontend_repository
+    git remote add contacts https://source.developers.google.com/p/$contacts_project/r/$contacts_repository
+    git remote add userservice https://source.developers.google.com/p/$userservice_project/r/$userservice_repository
+    git remote add ledgerwriter https://source.developers.google.com/p/$ledgerwriter_project/r/$ledgerwriter_repository
+    git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/$transactionhistory_repository
+    git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/$balancereader_repository
     ```
 
-1. Clone Balance Reader Repository.
+1. Push `main` branch to each remote:
 
     ```bash
-    gcloud source repos clone $balancereader_repository --project=$balancereader_project
-    cd eab-cymbal-bank-ledger-balancereader
+    for remote in frontend contacts userservice ledgerwriter transactionhistory balancereader; do
+        git push $remote main
+    done
     ```
-
-1. Copy Balance Reader resources:
-
-    ```bash
-    cp -pr  $APP_SOURCE_DIR_PATH/ledger-db/* ./ledger-db
-    cp -pr  $APP_SOURCE_DIR_PATH/components/* ./components
-    cp -pr  $APP_SOURCE_DIR_PATH/ledger-balancereader/* ./ledger-balancereader
-    ```
-
