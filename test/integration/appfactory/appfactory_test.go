@@ -106,7 +106,7 @@ func TestAppfactory(t *testing.T) {
 					t.Run(fmt.Sprintf("%s.%s", appName, serviceName), func(t *testing.T) {
 						t.Parallel()
 
-						adminProjectID := appData.Get("app_admin_project").String()
+						adminProjectID := appData.Get("app_admin_project_id").String()
 						adminProjectApis := []string{
 							"iam.googleapis.com",
 							"cloudresourcemanager.googleapis.com",
