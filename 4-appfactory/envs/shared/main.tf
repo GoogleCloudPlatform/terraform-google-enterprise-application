@@ -15,24 +15,15 @@
  */
 
 locals {
-  # Services in this list will receive dedicated projects for application-specific infrastructure, such as an app-specific database.
-  services_with_infra = []
-  app_services = {
-    // app name
-    "default-example" = [
-      // microservices names
-      "hello-world",
-    ]
-  }
+  application_names = [for k, v in var.applications : k]
 
-  expanded_app_services = flatten([
-    for key, services in local.app_services : [
-      for service in services : {
-        app_name = key
-        # app acronym is defined in 2-multitenant variables
-        acronym             = local.acronym[key]
-        service_name        = service
-        create_env_projects = contains(local.services_with_infra, service)
+  expanded_microservices = flatten([
+    for key, services in var.applications : [
+      for service_name, service in services : {
+        app_name     = key
+        service_name = service_name
+        acronym      = local.acronym[key]
+        service      = service
       }
     ]
   ])
@@ -40,7 +31,7 @@ locals {
 
 // One folder per application, will group admin/service projects under it
 resource "google_folder" "app_folder" {
-  for_each = local.app_services
+  for_each = toset(local.application_names)
 
   display_name = each.key
   parent       = var.common_folder_id
@@ -50,12 +41,11 @@ module "components" {
   source = "../../modules/app-group-baseline"
 
   for_each = tomap({
-    for app_service in local.expanded_app_services : "${app_service.app_name}.${app_service.service_name}" => app_service
+    for app_service in local.expanded_microservices : "${app_service.app_name}.${app_service.service_name}" => app_service
   })
 
-  service_name        = each.value.service_name
-  acronym             = each.value.acronym
-  create_env_projects = each.value.create_env_projects
+  service_name = each.value.service_name
+  acronym      = each.value.acronym
 
   org_id               = var.org_id
   billing_account      = var.billing_account
@@ -78,4 +68,9 @@ module "components" {
       roles = ["roles/owner"]
     }
   }
+
+  // microservices-specific configuration to baseline module
+  admin_project_id     = each.value.service.admin_project_id
+  create_admin_project = each.value.service.create_admin_project
+  create_infra_project = each.value.service.create_infra_project
 }

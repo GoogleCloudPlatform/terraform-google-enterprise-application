@@ -18,7 +18,7 @@ output "app-group" {
   description = "Description on the app-group components"
   value = {
     for k, value in module.components : k => {
-      app_env_project_ids : value.app_env_project_ids,
+      app_infra_project_ids : value.app_infra_project_ids,
       app_admin_project_id : value.app_admin_project_id,
       app_infra_repository_name : value.app_infra_repository_name,
       app_infra_repository_url : value.app_infra_repository_url,

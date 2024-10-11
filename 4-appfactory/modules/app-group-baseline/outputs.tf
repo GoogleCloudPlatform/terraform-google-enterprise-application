@@ -16,7 +16,7 @@
 
 output "app_admin_project_id" {
   description = "Project ID of the application admin project."
-  value       = module.app_admin_project.project_id
+  value       = local.admin_project_id
 }
 
 output "app_infra_repository_name" {
@@ -54,7 +54,7 @@ output "app_cloudbuild_workspace_state_bucket_name" {
   value       = module.tf_cloudbuild_workspace.state_bucket
 }
 
-output "app_env_project_ids" {
+output "app_infra_project_ids" {
   description = "Application environment projects IDs."
-  value       = { for key, value in module.app_env_project : key => value.project_id }
+  value       = { for key, value in module.app_infra_project : key => value.project_id }
 }
