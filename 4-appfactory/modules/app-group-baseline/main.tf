@@ -15,7 +15,7 @@
  */
 
 locals {
-  admin_project = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project
+  admin_project_id = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project_id
   cloudbuild_sa_roles = var.create_infra_project ? { for env in keys(var.envs) : env => {
     project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
@@ -51,7 +51,7 @@ module "app_admin_project" {
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
-  project = local.admin_project
+  project = local.admin_project_id
   name    = "${var.service_name}-i-r"
 }
 
@@ -59,14 +59,14 @@ module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
   version = "~> 8.0"
 
-  project_id               = local.admin_project
+  project_id               = local.admin_project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
   tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
   location                 = var.location
   trigger_location         = var.trigger_location
-  artifacts_bucket_name    = "${var.bucket_prefix}-${local.admin_project}-${var.service_name}-build"
-  create_state_bucket_name = "${var.bucket_prefix}-${local.admin_project}-${var.service_name}-state"
-  log_bucket_name          = "${var.bucket_prefix}-${local.admin_project}-${var.service_name}-logs"
+  artifacts_bucket_name    = "${var.bucket_prefix}-${local.admin_project_id}-${var.service_name}-build"
+  create_state_bucket_name = "${var.bucket_prefix}-${local.admin_project_id}-${var.service_name}-state"
+  log_bucket_name          = "${var.bucket_prefix}-${local.admin_project_id}-${var.service_name}-logs"
   buckets_force_destroy    = var.bucket_force_destroy
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 

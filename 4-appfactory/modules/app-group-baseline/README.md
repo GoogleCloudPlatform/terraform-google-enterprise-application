@@ -4,7 +4,7 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | acronym | The acronym of the application. | `string` | n/a | yes |
-| admin\_project | The admin project associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`. | `string` | n/a | yes |
+| admin\_project\_id | The admin project id associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`. | `string` | n/a | yes |
 | billing\_account | Billing Account ID for application admin project resources. | `string` | n/a | yes |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |
@@ -24,7 +24,7 @@
 
 | Name | Description |
 |------|-------------|
-| app\_admin\_project | Project ID of the application admin project. |
+| app\_admin\_project\_id | Project ID of the application admin project. |
 | app\_cloudbuild\_workspace\_apply\_trigger\_id | ID of the apply cloud build trigger. |
 | app\_cloudbuild\_workspace\_artifacts\_bucket\_name | Artifacts bucket name for the application workspace. |
 | app\_cloudbuild\_workspace\_logs\_bucket\_name | Logs bucket name for the application workspace. |

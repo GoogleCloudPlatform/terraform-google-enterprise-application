@@ -70,7 +70,7 @@ module "components" {
   }
 
   // microservices-specific configuration to baseline module
-  admin_project        = each.value.service.admin_project
+  admin_project_id     = each.value.service.admin_project_id
   create_admin_project = each.value.service.create_admin_project
   create_infra_project = each.value.service.create_infra_project
 }

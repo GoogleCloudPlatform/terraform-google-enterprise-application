@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-output "app_admin_project" {
+output "app_admin_project_id" {
   description = "Project ID of the application admin project."
-  value       = local.admin_project
+  value       = local.admin_project_id
 }
 
 output "app_infra_repository_name" {
