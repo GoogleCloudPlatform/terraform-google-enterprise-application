@@ -18,6 +18,20 @@ locals {
   int_required_roles = [
     "roles/owner"
   ]
+  standalone_required_roles = [
+    "roles/artifactregistry.admin",
+    "roles/cloudbuild.builds.builder",
+    "roles/clouddeploy.admin",
+    "roles/compute.networkAdmin",
+    "roles/container.admin",
+    "roles/gkehub.editor",
+    "roles/iam.serviceAccountAdmin",
+    "roles/serviceusage.serviceUsageAdmin",
+    "roles/source.admin",
+    "roles/storage.admin",
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/viewer",
+  ]
 }
 
 resource "google_service_account" "int_test" {
@@ -31,6 +45,14 @@ resource "google_project_iam_member" "int_test" {
   for_each = toset(local.int_required_roles)
 
   project = module.project.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+resource "google_project_iam_member" "standalone_int_test" {
+  for_each = toset(local.standalone_required_roles)
+
+  project = module.project_standalone.project_id
   role    = each.value
   member  = "serviceAccount:${google_service_account.int_test.email}"
 }
