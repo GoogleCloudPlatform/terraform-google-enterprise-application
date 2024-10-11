@@ -38,6 +38,6 @@ data "terraform_remote_state" "appfactory" {
 
   config = {
     bucket = var.remote_state_bucket
-    prefix = "terraform/appfactory/cymbal-bank"
+    prefix = "terraform/appfactory/cymbal-bank/shared"
   }
 }

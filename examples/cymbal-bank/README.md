@@ -90,6 +90,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
    ```bash
    cd eab-applicationfactory
+   terraform -chdir="../terraform-google-enterprise-application/1-bootstrap/" init
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
 
    echo "remote_state_bucket = ${remote_state_bucket}"
@@ -177,17 +178,10 @@ The steps below assume that you are checkout out on the same level as `terraform
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
 
    ```bash
-   cd eab-applicationfactory
-   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
-
+   terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" init
+   export remote_state_bucket=$(terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
-
-1. Move out of directory:
-
-    ```bash
-    cd ../
-    ```
 
 1. Clone the repositories for each service and initialized:
 
@@ -322,24 +316,11 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 1. Merge plan to production branch:
 
-   ```bash
+    ```bash
     git checkout -b production
     git push --set-upstream origin production
     ```
 
-1. Merge plan to nonproduction branch:
-
-   ```bash
-    git checkout -b nonproduction
-    git push --set-upstream origin nonproduction
-    ```
-
-1. Merge plan to development branch:
-
-   ```bash
-    git checkout -b development
-    git push --set-upstream origin development
-    ```
 
 ##### Commit changes for BalanceReader service
 
@@ -499,56 +480,56 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 1. Retrieve Cymbal Bank repositories created on 5-appinfra.
 
     - Balance Reader:
-    ```bash
-        terraform -chdir="cymbal-bank/balancereader-i-r/envs/shared" init
-        export balancereader_project=$(terraform -chdir="cymbal-bank/balancereader-i-r/envs/shared" output -raw service_repository_project_id )
+        ```bash
+        terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" init
+        export balancereader_project=$(terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" output -raw service_repository_project_id )
         echo balancereader_project=$balancereader_project
-        export balancereader_repository=$(terraform -chdir="cymbal-bank/balancereader-i-r/envs/shared" output -raw  service_repository_name)
+        export balancereader_repository=$(terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" output -raw  service_repository_name)
         echo balancereader_repository=$balancereader_repository
         ```
 
     - Transaction History:
         ```bash
-        terraform -chdir="cymbal-bank/transactionhistory-i-r/envs/shared" init
-        export transactionhistory_project=$(terraform -chdir="cymbal-bank/transactionhistory-i-r/envs/shared" output -raw service_repository_project_id )
+        terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" init
+        export transactionhistory_project=$(terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" output -raw service_repository_project_id )
         echo transactionhistory_project=$transactionhistory_project
-        export transactionhistory_repository=$(terraform -chdir="cymbal-bank/transactionhistory-i-r/envs/shared" output -raw  service_repository_name)
+        export transactionhistory_repository=$(terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" output -raw  service_repository_name)
         echo transactionhistory_repository=$transactionhistory_repository
         ```
 
     - Legderwriter:
         ```bash
-        terraform -chdir="cymbal-bank/ledgerwriter-i-r/envs/shared" init
-        export ledgerwriter_project=$(terraform -chdir="cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw service_repository_project_id )
+        terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" init
+        export ledgerwriter_project=$(terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw service_repository_project_id )
         echo ledgerwriter_project=$ledgerwriter_project
-        export ledgerwriter_repository=$(terraform -chdir="cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw  service_repository_name)
+        export ledgerwriter_repository=$(terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw  service_repository_name)
         echo ledgerwriter_repository=$ledgerwriter_repository
         ```
 
     - Frontend:
         ```bash
-        terraform -chdir="cymbal-bank/frontend-i-r/envs/shared" init
-        export frontend_project=$(terraform -chdir="cymbal-bank/frontend-i-r/envs/shared" output -raw service_repository_project_id )
+        terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" init
+        export frontend_project=$(terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" output -raw service_repository_project_id )
         echo frontend_project=$frontend_project
-        export frontend_repository=$(terraform -chdir="cymbal-bank/frontend-i-r/envs/shared" output -raw  service_repository_name)
+        export frontend_repository=$(terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" output -raw  service_repository_name)
         echo frontend_repository=$frontend_repository
         ```
 
     - Contacts:
         ```bash
-        terraform -chdir="cymbal-bank/contacts-i-r/envs/shared" init
-        export contacts_project=$(terraform -chdir="cymbal-bank/contacts-i-r/envs/shared" output -raw service_repository_project_id )
+        terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" init
+        export contacts_project=$(terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" output -raw service_repository_project_id )
         echo contacts_project=$contacts_project
-        export contacts_repository=$(terraform -chdir="cymbal-bank/contacts-i-r/envs/shared" output -raw  service_repository_name)
+        export contacts_repository=$(terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" output -raw  service_repository_name)
         echo contacts_repository=$contacts_repository
         ```
 
     - User Service:
         ```bash
-        terraform -chdir="cymbal-bank/userservice-i-r/envs/shared" init
-        export userservice_project=$(terraform -chdir="cymbal-bank/userservice-i-r/envs/shared" output -raw service_repository_project_id )
+        terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" init
+        export userservice_project=$(terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" output -raw service_repository_project_id )
         echo userservice_project=$userservice_project
-        export userservice_repository=$(terraform -chdir="cymbal-bank/userservice-i-r/envs/shared" output -raw  service_repository_name)
+        export userservice_repository=$(terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" output -raw  service_repository_name)
         echo userservice_repository=$userservice_repository
         ```
 
