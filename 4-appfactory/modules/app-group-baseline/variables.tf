@@ -56,14 +56,7 @@ variable "envs" {
   description = "Environments"
 }
 
-variable "create_env_projects" {
-  type        = bool
-  default     = true
-  description = "Create environment-specific application infra projects"
-
-}
-
-variable "env_project_apis" {
+variable "infra_project_apis" {
   type        = list(string)
   description = "List of APIs to enable for environment-specific application infra projects"
   default = [
@@ -132,3 +125,19 @@ variable "docker_tag_version_terraform" {
   type        = string
   default     = "latest"
 }
+
+variable "admin_project_id" {
+  description = "The admin project id associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`."
+  type        = string
+}
+
+variable "create_infra_project" {
+  description = "Boolean value that indicates whether an infrastructure project should be created for the microservice."
+  type        = bool
+}
+
+variable "create_admin_project" {
+  description = "Boolean value that indicates whether a admin project should be created for the microservice."
+  type        = bool
+}
+

@@ -43,6 +43,12 @@ Under the `apps` folder are examples for each of the cymbal bank applications.
 cd apps/default-example/hello-world
 ```
 
+1. Use example terraform.tfvars and update values from your environment:
+
+```bash
+cp envs/shared/terraform.example.tfvars envs/shared/terraform.tfvars
+```
+
 1. Update the configuration with values for your environment.
 
 Deploy the `shared` environment first, which contains the application CI/CD pipeline.

@@ -18,7 +18,7 @@ locals {
   all_environments_cluster_service_accounts_iam_members = [for sa in local.cluster_service_accounts : "serviceAccount:${sa}"]
 
   expanded_cluster_service_accounts = flatten([
-    for key in keys(local.app_services) : [
+    for key in local.application_names : [
       for sa in local.all_environments_cluster_service_accounts_iam_members : {
         app_name          = key
         cluster_sa_member = sa

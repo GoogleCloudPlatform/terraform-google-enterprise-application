@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 locals {
-
-  cloudbuild_sa_roles = merge(var.create_env_projects ? { for env in keys(var.envs) : env => {
-    project_id = module.app_env_project[env].project_id
+  admin_project_id = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project_id
+  cloudbuild_sa_roles = merge(var.create_infra_project ? { for env in keys(var.envs) : env => {
+    project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
     } } : {}, {
     "admin" : {
-      project_id = module.app_admin_project.project_id
+      project_id = local.admin_project_id
       roles = [
         "roles/browser", "roles/serviceusage.serviceUsageAdmin",
         "roles/storage.admin", "roles/iam.serviceAccountAdmin",
@@ -40,8 +40,10 @@ locals {
   org_ids = distinct([for env in var.envs : env.org_id])
 }
 
-// Create admin project
+
 module "app_admin_project" {
+  count = var.create_admin_project ? 1 : 0
+
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 17.0"
 
@@ -67,7 +69,7 @@ module "app_admin_project" {
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
-  project = module.app_admin_project.project_id
+  project = local.admin_project_id
   name    = "${var.service_name}-i-r"
 }
 
@@ -75,14 +77,14 @@ module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
   version = "~> 8.0"
 
-  project_id               = module.app_admin_project.project_id
+  project_id               = local.admin_project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
   tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
   location                 = var.location
   trigger_location         = var.trigger_location
-  artifacts_bucket_name    = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-build"
-  create_state_bucket_name = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-state"
-  log_bucket_name          = "${var.bucket_prefix}-${module.app_admin_project.project_id}-${var.service_name}-logs"
+  artifacts_bucket_name    = "${var.bucket_prefix}-${local.admin_project_id}-${var.service_name}-build"
+  create_state_bucket_name = "${var.bucket_prefix}-${local.admin_project_id}-${var.service_name}-state"
+  log_bucket_name          = "${var.bucket_prefix}-${local.admin_project_id}-${var.service_name}-logs"
   buckets_force_destroy    = var.bucket_force_destroy
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 
@@ -129,11 +131,11 @@ resource "google_organization_iam_member" "builder_organization_browser" {
   role     = "roles/browser"
 }
 
-// Create env project
-module "app_env_project" {
+// Create infra project
+module "app_infra_project" {
   source   = "terraform-google-modules/project-factory/google"
   version  = "~> 17.0"
-  for_each = var.create_env_projects ? var.envs : {}
+  for_each = var.create_infra_project ? var.envs : {}
 
   random_project_id        = true
   random_project_id_length = 4
@@ -141,6 +143,6 @@ module "app_env_project" {
   name                     = substr("eab-${var.acronym}-${var.service_name}-${each.key}", 0, 25) # max length 30 chars
   org_id                   = each.value.org_id
   folder_id                = each.value.folder_id
-  activate_apis            = var.env_project_apis
+  activate_apis            = var.infra_project_apis
   deletion_policy          = "DELETE"
 }
