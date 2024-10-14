@@ -15,8 +15,8 @@
 | docker\_tag\_version\_terraform | Docker tag version of image. | `string` | `"latest"` | no |
 | envs | Environments | <pre>map(object({<br>    billing_account    = string<br>    folder_id          = string<br>    network_project_id = string<br>    network_self_link  = string<br>    org_id             = string<br>    subnets_self_links = list(string)<br>  }))</pre> | n/a | yes |
 | folder\_id | Folder ID of parent folder for application admin resources. If deploying on the enterprise foundation blueprint, this is usually the 'common' folder. | `string` | n/a | yes |
-| gar\_project\_id | Project ID where Docker image is stored. | `string` | n/a | yes |
-| gar\_repository\_name | Repository name where Docker image is stored. | `string` | n/a | yes |
+| gar\_project\_id | Project ID where the Artifact Registry Repository that Hosts the infrastructure pipeline docker image is located. | `string` | n/a | yes |
+| gar\_repository\_name | Artifact Registry repository name where the Docker image for the infrastructure pipeline is stored. | `string` | n/a | yes |
 | infra\_project\_apis | List of APIs to enable for environment-specific application infra projects | `list(string)` | <pre>[<br>  "iam.googleapis.com",<br>  "cloudresourcemanager.googleapis.com",<br>  "serviceusage.googleapis.com",<br>  "cloudbilling.googleapis.com"<br>]</pre> | no |
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Google Cloud Organization ID. | `string` | n/a | yes |

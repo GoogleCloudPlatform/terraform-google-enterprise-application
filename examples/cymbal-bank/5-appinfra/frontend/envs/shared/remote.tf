@@ -20,7 +20,7 @@ locals {
 }
 
 data "terraform_remote_state" "multitenant" {
-  for_each = toset(var.envs)
+  for_each = toset(var.environment_names)
 
   backend = "gcs"
 

@@ -111,12 +111,12 @@ variable "tf_apply_branches" {
 }
 
 variable "gar_project_id" {
-  description = "Project ID where Docker image is stored."
+  description = "Project ID where the Artifact Registry Repository that Hosts the infrastructure pipeline docker image is located."
   type        = string
 }
 
 variable "gar_repository_name" {
-  description = "Repository name where Docker image is stored."
+  description = "Artifact Registry repository name where the Docker image for the infrastructure pipeline is stored."
   type        = string
 }
 

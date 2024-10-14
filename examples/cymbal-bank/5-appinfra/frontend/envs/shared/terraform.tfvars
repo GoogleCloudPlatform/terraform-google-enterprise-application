@@ -20,4 +20,4 @@ region = "us-central1"
 
 buckets_force_destroy = "true"
 
-envs = ["development", "nonproduction", "production"]
+environment_names = ["development", "nonproduction", "production"]

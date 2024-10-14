@@ -31,7 +31,7 @@ variable "remote_state_bucket" {
   type        = string
 }
 
-variable "envs" {
+variable "environment_names" {
   description = "A list of environment names."
   type        = list(string)
 }
