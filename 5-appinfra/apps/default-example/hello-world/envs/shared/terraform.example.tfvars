@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-project_id = "admin-project-id"
-region     = "value"
-env_cluster_membership_ids = {
-  "development" = {
-    cluster_membership_ids = [
-      "//gkehub.googleapis.com/projects/PROJECT/locations/LOCATION/memberships/cluster-us-central1-development",
-    ]
-  }
-}
+remote_state_bucket = "REMOTE_STATE_BUCKET"
 
+region = "us-central1"
+
+buckets_force_destroy = "true"
+
+environment_names = ["development", "nonproduction", "production"]
