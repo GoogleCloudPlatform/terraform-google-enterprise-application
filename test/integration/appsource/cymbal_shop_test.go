@@ -48,7 +48,7 @@ func TestSourceCymbalShop(t *testing.T) {
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/multitenant-applications/4-appfactory/envs/shared"))
 
-	projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("cymbal-shop.cymbalshop.app_admin_project_id")).String()
+	projectID := appFactory.GetJsonOutput("app-group").Get("cymbal-shop.cymbalshop.app_admin_project_id").String()
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
