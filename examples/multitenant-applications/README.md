@@ -1,3 +1,7 @@
+# Multitenant Applications
+
+This example demonstrates modifications necessary to deploy two separate application in the cluster, the applications are named `cymbal-bank` and `cymbal-shop`. `cymbal-bank` microservices will be deployed across differente namespaces, to represent different teams, and each microservice will have its own `admin` project, which hosts the CI/CD pipeline for the microservice. `cymbal-shop` microservices will be deployed into a single namespace and all pipelines into a single `admin` project. See the 4-appfactory [terraform.tfvars](./4-appfactory/envs/shared/terraform.tfvars) for more information on how these projects are specified.
+
 # Cymbal Bank Examples
 
 This example shows how to deploy Cymbal Bank using the infrastructure created using [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint).
@@ -38,7 +42,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     }
    ```
 
-1. Commit and push changes. Because the plan branch is not a named environment branch, pushing your plan branch triggers terraform plan but not terraform apply. Review the plan output in your Cloud Build project. https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Commit and push changes. Because the plan branch is not a named environment branch, pushing your plan branch triggers terraform plan but not terraform apply. Review the plan output in your Cloud Build project. <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout plan
@@ -47,7 +51,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push --set-upstream origin plan
     ```
 
-1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout development
@@ -55,7 +59,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push origin development
     ```
 
-1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout nonproduction
@@ -63,7 +67,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push origin nonproduction
     ```
 
-1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout production
@@ -95,7 +99,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push --set-upstream origin plan
     ```
 
-1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout development
@@ -103,7 +107,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push origin development
     ```
 
-1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout nonproduction
@@ -111,7 +115,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push origin nonproduction
     ```
 
-1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout production
@@ -126,4 +130,5 @@ The steps below assume that you are checkout out on the same level as `terraform
     ```
 
 #### Add Cymbal Bank envs at App Infra
+
 // TODO: add steps to copy each service code to each repo created at step 4-appfactory
