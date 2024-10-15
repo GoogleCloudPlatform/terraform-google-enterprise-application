@@ -32,7 +32,7 @@ var (
 			"ledger-transactionhistory",
 		},
 		"cymbal-shop": {
-			"cymbal-shop",
+			"cymbalshop",
 		},
 	}
 
