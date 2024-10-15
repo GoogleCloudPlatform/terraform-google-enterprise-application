@@ -58,8 +58,8 @@ func TestSourceCymbalBank(t *testing.T) {
 
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
-		appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
-		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/4-appfactory/envs/shared", appName)))
+		appSourcePath := fmt.Sprintf("../../../examples/multitenant-applications/6-appsource/%s", appName)
+		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/multitenant-applications/4-appfactory/envs/shared"))
 		for _, serviceName := range serviceNames {
 			serviceName := serviceName // capture range variable
 			splitServiceName = strings.Split(serviceName, "-")
