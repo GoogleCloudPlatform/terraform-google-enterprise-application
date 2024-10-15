@@ -17,7 +17,7 @@
 locals {
   application_name = "cymbal-shop"
   service_name     = "cymbalshop"
-  team_name        = "cymbal-shop"
+  team_name        = "cymbalshop"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
 }
