@@ -176,7 +176,7 @@ steps:
       ]
     waitFor:
       - app-e2e
-      - appsource-verify
+      - appsource-verify-cymbal-bank
       - appinfra-verify
       - appfactory-verify
       - fleetscope-verify
