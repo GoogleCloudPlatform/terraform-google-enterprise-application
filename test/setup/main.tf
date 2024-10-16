@@ -25,7 +25,7 @@ locals {
     "cb-frontend",
     "cb-accounts",
     "cb-ledger",
-    "cymbal-shop"
+    "cymbalshops"
   ]
 
   folder_admin_roles = [
