@@ -119,7 +119,7 @@ func TestSourceCymbalShop(t *testing.T) {
 					return true, nil
 				}
 			}
-			utils.Poll(t, pollCloudBuild(buildListCmd), 40, 30*time.Second)
+			utils.Poll(t, pollCloudBuild(buildListCmd), 60, 30*time.Second)
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
 			releases := gcloud.Runf(t, releaseListCmd).Array()
 			if len(releases) == 0 {
