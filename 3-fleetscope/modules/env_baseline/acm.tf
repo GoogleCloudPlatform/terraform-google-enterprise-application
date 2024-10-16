@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+locals {
+  cluster_membership_ids = { for k, v in var.cluster_membership_ids: k => v}
+}
+
 data "google_project" "cluster_project" {
   project_id = var.cluster_project_id
 }
@@ -52,14 +56,14 @@ resource "google_gke_hub_feature" "acm_feature" {
 }
 
 resource "google_gke_hub_feature_membership" "acm_feature_member" {
-  for_each = toset(var.cluster_membership_ids)
+  for_each = local.cluster_membership_ids
 
   project  = var.cluster_project_id
   location = "global"
 
   feature             = google_gke_hub_feature.acm_feature.name
-  membership          = regex(local.membership_re, each.key)[2]
-  membership_location = regex(local.membership_re, each.key)[1]
+  membership          = regex(local.membership_re, each.value)[2]
+  membership_location = regex(local.membership_re, each.value)[1]
 
   configmanagement {
     version = "1.19.0"

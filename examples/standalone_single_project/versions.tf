@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-variable "project_id" {
-  type        = string
-  description = "Google Cloud project ID in which to deploy all example resources"
-}
+terraform {
+  required_version = ">= 1.3"
 
-variable "region" {
-  type        = string
-  description = "Google Cloud region for deployments"
-  default     = "us-central1"
-}
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5, < 7"
+    }
+  }
 
-variable "teams" {
-  type        = map(string)
-  description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-example/v0.2.0"
+  }
 }

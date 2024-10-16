@@ -15,13 +15,12 @@
 locals {
   cloud_build_sas = ["serviceAccount:${google_service_account.cloud_build.email}"] # cloud build service accounts used for CI
   membership_re   = "projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
-  gke_projects = distinct(flatten([
-    for _, value in var.env_cluster_membership_ids : [
-      for item in value.cluster_membership_ids : regex(local.membership_re, item)[0]
-    ]
-  ]))
-}
+  envs = keys(var.env_cluster_membership_ids)
 
+  memberships = flatten([for i in local.envs: var.env_cluster_membership_ids[i].cluster_membership_ids])
+  memberships_map = {for i , item in local.memberships : (i) =>  item}
+  gke_projects= { for i , item in local.memberships : (i) =>  regex(local.membership_re, item)[0]}
+}
 # authoritative project-iam-bindings to increase reproducibility
 module "project-iam-bindings" {
   source   = "terraform-google-modules/iam/google//modules/projects_iam"
@@ -73,7 +72,7 @@ module "project-iam-bindings" {
 module "cb-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"
   version    = "~> 8.0"
-  for_each   = toset(local.gke_projects)
+  for_each   = local.gke_projects
   project_id = each.value
 
   project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor"]
@@ -84,7 +83,7 @@ module "cb-gke-project-iam-bindings" {
 module "deploy-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"
   version    = "~> 8.0"
-  for_each   = toset(local.gke_projects)
+  for_each   = local.gke_projects
   project_id = each.value
 
   project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor"]

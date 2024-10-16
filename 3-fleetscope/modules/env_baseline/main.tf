@@ -16,8 +16,9 @@
 
 locals {
   membership_re = "//gkehub.googleapis.com/projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
-  scope_membership = { for val in setproduct(keys(var.namespace_ids), var.cluster_membership_ids) :
-  "${val[0]}-${val[1]}" => val }
+
+  scope_membership = { for idx, val in setproduct(keys(var.namespace_ids), var.cluster_membership_ids) :
+  "${val[0]}-${idx}" => val }
 }
 
 resource "random_string" "suffix" {

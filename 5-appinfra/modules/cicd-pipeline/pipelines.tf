@@ -28,11 +28,7 @@ resource "google_service_account" "cloud_deploy" {
 
 resource "google_clouddeploy_target" "clouddeploy_targets" {
   # one CloudDeploy target per cluster_membership_id defined in vars
-  for_each = merge([
-    for key, value in var.env_cluster_membership_ids : {
-      for item in value.cluster_membership_ids : "${key}/${item}" => item
-    }
-  ]...)
+  for_each = local.memberships_map
 
   project  = var.project_id
   name     = trimprefix(regex(local.membership_re, each.value)[2], "cluster-")
@@ -43,7 +39,7 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
   }
 
   execution_configs {
-    artifact_storage = "gs://${google_storage_bucket.delivery_artifacts[split("/", each.key)[0]].name}"
+    artifact_storage = "gs://${google_storage_bucket.delivery_artifacts[split("-", each.value)[length(split("-", each.value))-1]].name}"
     service_account  = google_service_account.cloud_deploy.email
     usages = [
       "RENDER",
