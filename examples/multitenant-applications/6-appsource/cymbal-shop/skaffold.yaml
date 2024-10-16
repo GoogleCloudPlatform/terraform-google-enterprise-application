@@ -120,13 +120,13 @@ profiles:
       timeout: 4000s
 - name: development
   manifests:
-  rawYaml:
-    - ./kubernetes-manifests/loadgenerator-development.yaml
+    rawYaml:
+      - ./kubernetes-manifests/loadgenerator-development.yaml
 - name: staging
   manifests:
-  rawYaml:
-    - ./kubernetes-manifests/loadgenerator-staging.yaml
+    rawYaml:
+      - ./kubernetes-manifests/loadgenerator-staging.yaml
 - name: production
   manifests:
-  rawYaml:
-    - ./kubernetes-manifests/loadgenerator-production.yaml
+    rawYaml:
+      - ./kubernetes-manifests/loadgenerator-production.yaml
