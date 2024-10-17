@@ -1,18 +1,6 @@
-# Multitenant Applications
+# Cymbal Bank Examples
 
-This example demonstrates modifications necessary to deploy two separate application in the cluster, the applications are named `cymbal-bank` and `cymbal-shop`. `cymbal-bank` microservices will be deployed across differente namespaces, to represent different teams, and each microservice will have its own `admin` project, which hosts the CI/CD pipeline for the microservice. `cymbal-shop` microservices will be deployed into a single namespace and all pipelines into a single `admin` project. See the 4-appfactory [terraform.tfvars](./4-appfactory/envs/shared/terraform.tfvars) for more information on how these projects are specified.
-
-# Cymbal Shop Example
-
-The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
-
-In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
-
-For more information about the Cymbal Bank application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
-
-# Cymbal Bank Example
-
-Cymbal Bank is a web app that simulates a bank's payment processing network. The microservices are divided in three fleet scopes and namespaced and they are deployed through individual `admin` project using Cloud Deploy (1 per microservice) - this means that each microservice will have its own `skaffold.yaml` file.
+This example shows how to deploy Cymbal Bank using the infrastructure created using [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint).
 
 For more information about the Cymbal Bank application, please visit [Bank of Anthos repository](https://github.com/GoogleCloudPlatform/bank-of-anthos/blob/v0.6.4).
 
@@ -37,7 +25,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 └── .
 ```
 
-#### Add Cymbal Bank and Cymbal Shop namespaces at Fleetscope repository
+#### Add Cymbal Bank namespaces at Fleetscope repository
 
 1. Navigate to Fleetscope repository and add the Cymbal Bank namespaces at `terraform.tfvars` if they were not created:
 
@@ -45,8 +33,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     namespace_ids = {
         "cb-frontend"     = "your-frontend-group@yourdomain.com",
         "cb-accounts"     = "your-accounts-group@yourdomain.com",
-        "cb-ledger"       = "your-ledger-group@yourdomain.com",
-        "cymbalshops"     = "your-cymbal-shop-group@yourdomain.com"
+        "cb-ledger"       = "your-ledger-group@yourdomain.com"
         ...
     }
    ```
@@ -56,7 +43,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     ```bash
     git checkout plan
     git add .
-    git commit -m 'Adds Cymbal Bank and Cymbal Shop namespaces.'
+    git commit -m 'Adds Cymbal Bank namespaces.'
     git push --set-upstream origin plan
     ```
 
@@ -137,40 +124,6 @@ The steps below assume that you are checkout out on the same level as `terraform
     ```bash
     cd ../
     ```
-
-#### Add Cymbal shop envs at App Factory
-
-1. Copy the `examples/cymbal-shop/4-appfactory` folder content to the repo:
-
-    ```bash
-    cp -R terraform-google-enterprise-application/examples/cymbal-shop/4-appfactory/* eab-applicationfactory/4-appfactory/
-    ```
-
-1. Navigate to Application Factory repository and checkout plan branch:
-
-    ```bash
-    cd eab-applicationfactory
-    git checkout plan
-    git add .
-    git commit -m 'Adds Cymbal shop code'
-    git push --set-upstream origin plan
-    ```
-
-1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
-
-    ```bash
-    git checkout production
-    git merge plan
-    git push origin production
-    ```
-
-#### Use the `terraform.tfvars` inside this example on the 4-appfactory repository
-
-The [terraform.tfvars](./4-appfactory/terraform.tfvars) contains an example object structure that specifies both the cymbal bank and cymbal shop application creation.
-
-```bash
-cp -R terraform-google-enterprise-application/examples/multitenant-applications/4-appfactory/terraform.tfvars eab-applicationfactory/4-appfactory/
-```
 
 #### Add Cymbal Bank envs at App Infra
 

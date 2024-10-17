@@ -46,7 +46,7 @@ func TestSourceCymbalShop(t *testing.T) {
 	serviceName := "cymbalshop"
 	appSourcePath := fmt.Sprintf("../../../examples/multitenant-applications/6-appsource/%s", appName)
 
-	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/multitenant-applications/4-appfactory/envs/shared"))
+	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
 	projectID := appFactory.GetJsonOutput("app-group").Get("cymbal-shop\\.cymbalshop.app_admin_project_id").String()
 

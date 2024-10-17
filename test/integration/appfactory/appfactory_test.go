@@ -26,6 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
 
+	cp "github.com/otiai10/copy"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
@@ -45,8 +46,15 @@ func TestAppfactory(t *testing.T) {
 		"bucket_force_destroy": "true",
 	}
 
-	codeDirectory := "envs/shared"
-	appFactoryPath := fmt.Sprintf("../../../examples/multitenant-applications/4-appfactory/%s", codeDirectory)
+	// use combined multitenat tfvars - will test cymbal-bank and cymbal-shop
+	from := "../../../examples/multitenant-applications/4-appfactory/terraform.tfvars"
+	to := "../../../4-appfactory"
+	err := cp.Copy(from, to)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	appFactoryPath := "../../../4-appfactory"
 	t.Run(appFactoryPath, func(t *testing.T) {
 		t.Parallel()
 
