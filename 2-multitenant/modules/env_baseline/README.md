@@ -39,7 +39,7 @@ The following resources are created:
 | cluster\_service\_accounts | The default service accounts used for nodes, if not overridden in node\_pools. |
 | cluster\_type | Cluster type |
 | fleet\_project\_id | Fleet Project ID |
-| network\_name | Network name |
+| network\_names | Network name |
 | network\_project\_id | Network Project ID |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

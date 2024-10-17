@@ -38,7 +38,7 @@ output "network_project_id" {
   value       = var.network_project_id
 }
 
-output "network_name" {
+output "network_names" {
   description = "Network name"
   value       = [for subnet in data.google_compute_subnetwork.default : regex(local.networks_re, subnet.network)[0]][0]
 }

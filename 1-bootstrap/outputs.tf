@@ -50,7 +50,7 @@ output "tf_project_id" {
 }
 
 output "tf_repository_name" {
-  description = "Google Artifact registry terraform image name."
+  description = "Name of Artifact Registry repository for Terraform image."
   value       = google_artifact_registry_repository.tf_image.name
 }
 

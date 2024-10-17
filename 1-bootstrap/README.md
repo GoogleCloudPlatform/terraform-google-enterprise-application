@@ -124,7 +124,7 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 | source\_repo\_urls | Source repository URLs |
 | state\_bucket | Bucket for storing TF state |
 | tf\_project\_id | Google Artifact registry terraform project id. |
-| tf\_repository\_name | Google Artifact registry terraform image name. |
+| tf\_repository\_name | Name of Artifact Registry repository for Terraform image. |
 | tf\_tag\_version\_terraform | Docker tag version terraform. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

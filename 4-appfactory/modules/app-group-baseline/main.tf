@@ -100,27 +100,19 @@ module "tf_cloudbuild_workspace" {
   tf_apply_branches         = var.tf_apply_branches
 }
 
-resource "google_project_iam_member" "builder_object_user" {
-  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
-  project = var.gar_project_id
-  role    = "roles/storage.objectUser"
-}
+resource "google_project_iam_member" "cloud_build_sa_roles" {
+  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader"])
 
-resource "google_project_iam_member" "builder_artifactregistry_reader" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = var.gar_project_id
-  role    = "roles/artifactregistry.reader"
+  role    = each.value
 }
 
 resource "google_service_account_iam_member" "account_access" {
-  service_account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
-}
+  for_each = toset(["roles/iam.serviceAccountUser", "roles/iam.serviceAccountTokenCreator"])
 
-resource "google_service_account_iam_member" "token_creator" {
   service_account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
-  role               = "roles/iam.serviceAccountTokenCreator"
+  role               = each.value
   member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 
