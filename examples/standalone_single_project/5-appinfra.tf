@@ -18,6 +18,8 @@
 
 # app_01
 locals {
+
+  cluster_membership_ids = { (local.env) : {"cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids }}
   cicd_apps = {
     "app-01" = {
       application_name = "default-example"
@@ -34,7 +36,7 @@ module "cicd" {
 
   project_id                 = var.project_id
   region                     = var.region
-  env_cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
+  env_cluster_membership_ids = local.cluster_membership_ids
 
   service_name           = each.value.service_name
   team_name              = each.value.team_name
@@ -43,4 +45,5 @@ module "cicd" {
   app_build_trigger_yaml = "cloudbuild.yaml"
 
   buckets_force_destroy = true
+  depends_on = [ module.fleetscope_infra ]
 }

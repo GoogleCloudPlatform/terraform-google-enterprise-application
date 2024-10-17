@@ -17,6 +17,20 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+resource "google_project_service_identity" "cloudbuild_service_identity" {
+  provider = google-beta
+
+  project = var.project_id
+  service = "cloudbuild.googleapis.com"
+}
+
+resource "google_project_service_identity" "compute_service_identity" {
+  provider = google-beta
+
+  project = var.project_id
+  service = "compute.googleapis.com"
+}
+
 resource "google_sourcerepo_repository" "app_repo" {
   project = var.project_id
   name    = var.repo_name

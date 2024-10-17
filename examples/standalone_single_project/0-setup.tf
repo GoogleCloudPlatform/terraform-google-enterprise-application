@@ -22,7 +22,7 @@ module "vpc" {
 
   project_id      = var.project_id
   network_name    = "eab-vpc-nonprod"
-  shared_vpc_host = true
+  shared_vpc_host = false
 
   egress_rules = [
     {

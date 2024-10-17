@@ -46,13 +46,13 @@ resource "google_gke_hub_feature" "poco_feature" {
 }
 
 resource "google_gke_hub_feature_membership" "poco_feature_member" {
-  for_each = toset(var.cluster_membership_ids)
+  for_each = local.cluster_membership_ids
   location = "global"
   project  = var.fleet_project_id
 
   feature             = google_gke_hub_feature.poco_feature.name
-  membership          = regex(local.membership_re, each.key)[2]
-  membership_location = regex(local.membership_re, each.key)[1]
+  membership          = regex(local.membership_re, each.value)[2]
+  membership_location = regex(local.membership_re, each.value)[1]
 
   policycontroller {
     policy_controller_hub_config {
