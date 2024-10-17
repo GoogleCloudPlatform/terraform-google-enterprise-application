@@ -215,6 +215,48 @@ steps:
     waitFor:
       - multitenant-teardown
 
+# standalone single project example
+  - id: standalone-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestStandaloneSingleProjectExample --stage init --verbose",
+      ]
+    waitFor:
+      - prepare
+  - id: standalone-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestStandaloneSingleProjectExample --stage apply --verbose",
+      ]
+    waitFor:
+      - standalone-init
+  - id: standalone-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
+      ]
+    waitFor:
+      - standalone-apply
+  - id: standalone-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestStandaloneSingleProjectExample --stage teardown --verbose",
+      ]
+    waitFor:
+      - standalone-verify
+
 tags:
   - "ci"
   - "integration"
