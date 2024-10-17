@@ -1,8 +1,10 @@
-# Cymbal Bank Examples
+# Cymbal Shop Example
 
-This example shows how to deploy Cymbal Bank using the infrastructure created using [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint).
+The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
 
-For more information about the Cymbal Bank application, please visit [Bank of Anthos repository](https://github.com/GoogleCloudPlatform/bank-of-anthos/blob/v0.6.4).
+In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
+
+For more information about the Cymbal Bank application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
 
 ## Pre-Requisites
 
@@ -25,9 +27,9 @@ The steps below assume that you are checkout out on the same level as `terraform
 └── .
 ```
 
-#### Add Cymbal Bank namespaces at Fleetscope repository
+#### Add Cymbal shop namespaces at Fleetscope repository
 
-1. Navigate to Fleetscope repository and add the Cymbal Bank namespaces at `terraform.tfvars` if they were not created:
+1. Navigate to Fleetscope repository and add the Cymbal shop namespaces at `terraform.tfvars` if they were not created:
 
    ```hcl
     namespace_ids = {
@@ -43,7 +45,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     ```bash
     git checkout plan
     git add .
-    git commit -m 'Adds Cymbal Bank namespaces.'
+    git commit -m 'Adds Cymbal shop namespaces.'
     git push --set-upstream origin plan
     ```
 
@@ -77,12 +79,12 @@ The steps below assume that you are checkout out on the same level as `terraform
     cd ../
     ```
 
-#### Add Cymbal Bank envs at App Factory
+#### Add Cymbal shop envs at App Factory
 
-1. Copy the `examples/cymbal-bank/4-appfactory` folder content to the repo:
+1. Copy the `examples/cymbal-shop/4-appfactory` folder content to the repo:
 
     ```bash
-    cp -R terraform-google-enterprise-application/examples/cymbal-bank/4-appfactory/* eab-applicationfactory/4-appfactory/
+    cp -R terraform-google-enterprise-application/examples/cymbal-shop/4-appfactory/* eab-applicationfactory/4-appfactory/
     ```
 
 1. Navigate to Application Factory repository and checkout plan branch:
@@ -91,7 +93,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     cd eab-applicationfactory
     git checkout plan
     git add .
-    git commit -m 'Adds Cymbal bank code'
+    git commit -m 'Adds Cymbal shop code'
     git push --set-upstream origin plan
     ```
 
@@ -125,6 +127,6 @@ The steps below assume that you are checkout out on the same level as `terraform
     cd ../
     ```
 
-#### Add Cymbal Bank envs at App Infra
+#### Add Cymbal shop envs at App Infra
 
 // TODO: add steps to copy each service code to each repo created at step 4-appfactory

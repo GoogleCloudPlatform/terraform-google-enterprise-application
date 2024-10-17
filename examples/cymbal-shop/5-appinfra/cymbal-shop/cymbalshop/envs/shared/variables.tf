@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-// These values are retrieved from the saved terraform state of the execution
-// of previous step using the terraform_remote_state data source.
-locals {
-  cluster_service_accounts = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts])
-  acronym                  = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.acronyms])[0]
+variable "project_id" {
+  description = "CI/CD project ID"
+  type        = string
 }
 
-data "terraform_remote_state" "multitenant" {
-  for_each = var.envs
+variable "region" {
+  description = "CI/CD region"
+  type        = string
+}
 
-  backend = "gcs"
+variable "env_cluster_membership_ids" {
+  description = "Cluster Membership IDs"
+  type = map(object({
+    cluster_membership_ids = list(string)
+  }))
+}
 
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/multi_tenant/${each.key}"
-  }
+variable "buckets_force_destroy" {
+  description = "When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
+  type        = bool
+  default     = false
 }

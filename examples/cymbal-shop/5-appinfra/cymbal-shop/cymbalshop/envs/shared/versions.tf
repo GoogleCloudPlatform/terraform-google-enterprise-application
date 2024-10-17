@@ -15,8 +15,5 @@
  */
 
 terraform {
-  backend "gcs" {
-    bucket = "UPDATE_ME"
-    prefix = "terraform/appfactory/shared"
-  }
+  required_version = ">= 1.3"
 }
