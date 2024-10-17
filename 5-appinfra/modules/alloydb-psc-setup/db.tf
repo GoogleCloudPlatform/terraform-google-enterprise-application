@@ -24,6 +24,12 @@ resource "random_password" "password" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
+resource "google_project_service" "alloydb_api" {
+  project            = var.app_project_id
+  service            = "alloydb.googleapis.com"
+  disable_on_destroy = false
+}
+
 module "alloydb" {
   source  = "GoogleCloudPlatform/alloy-db/google"
   version = "~> 3.0"
@@ -53,6 +59,8 @@ module "alloydb" {
       ssl_mode           = "ENCRYPTED_ONLY"
     }
   ]
+
+  depends_on = [google_project_service.alloydb_api]
 }
 
 resource "google_compute_forwarding_rule" "psc_fwd_rule_consumer" {

@@ -17,6 +17,6 @@
 terraform {
   backend "gcs" {
     bucket = "UPDATE_ME"
-    prefix = "terraform/appfactory/shared"
+    prefix = "terraform/appfactory/cymbal-bank/shared"
   }
 }

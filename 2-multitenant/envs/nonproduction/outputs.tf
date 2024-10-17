@@ -24,6 +24,11 @@ output "network_project_id" {
   value       = module.env.network_project_id
 }
 
+output "network_names" {
+  description = "Network Names."
+  value       = module.env.network_names
+}
+
 output "fleet_project_id" {
   description = "Fleet Project ID"
   value       = module.env.fleet_project_id

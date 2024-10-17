@@ -67,6 +67,11 @@ variable "infra_project_apis" {
   ]
 }
 
+variable "cluster_projects_ids" {
+  type        = list(string)
+  description = "Cluster projects ids."
+}
+
 variable "cloudbuild_sa_roles" {
   description = "Optional to assign to custom CloudBuild SA. Map of project name or any static key to object with list of roles. Keys much match keys from var.envs"
   type = map(object({
@@ -103,6 +108,22 @@ variable "tf_apply_branches" {
   description = "List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default."
   type        = list(string)
   default     = ["development", "nonproduction", "production"]
+}
+
+variable "gar_project_id" {
+  description = "Project ID where the Artifact Registry Repository that Hosts the infrastructure pipeline docker image is located."
+  type        = string
+}
+
+variable "gar_repository_name" {
+  description = "Artifact Registry repository name where the Docker image for the infrastructure pipeline is stored."
+  type        = string
+}
+
+variable "docker_tag_version_terraform" {
+  description = "Docker tag version of image."
+  type        = string
+  default     = "latest"
 }
 
 variable "admin_project_id" {
