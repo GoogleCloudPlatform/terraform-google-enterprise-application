@@ -30,21 +30,21 @@ module "project-iam-bindings" {
 
   bindings = {
     "roles/cloudtrace.agent" = [
-      "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+      google_project_service_identity.compute_service_identity.member
     ],
     "roles/monitoring.metricWriter" = [
-      "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+      google_project_service_identity.compute_service_identity.member
     ],
     "roles/logging.logWriter" = setunion(
       [
-        "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
+        google_project_service_identity.compute_service_identity.member,
         "serviceAccount:${google_service_account.cloud_deploy.email}"
       ],
       local.cloud_build_sas
     ),
     "roles/cloudbuild.builds.builder" = setunion(
       [
-        "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
+        google_project_service_identity.cloudbuild_service_identity.member,
       ],
       local.cloud_build_sas
     ),

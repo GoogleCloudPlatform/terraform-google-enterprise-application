@@ -35,4 +35,5 @@ module "fleetscope_infra" {
   fleet_project_id       = local.fleet_project_id
   namespace_ids          = var.teams
   cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
+  depends_on = [ module.multitenant_infra ]
 }
