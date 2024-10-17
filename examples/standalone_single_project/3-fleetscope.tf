@@ -16,9 +16,9 @@
 
 # 3-fleetscope
 locals {
-  fleet_project_id       = module.multitenant_infra.fleet_project_id
-  cluster_project_id     = module.multitenant_infra.cluster_project_id
-  network_project_id     = module.multitenant_infra.network_project_id
+  fleet_project_id   = module.multitenant_infra.fleet_project_id
+  cluster_project_id = module.multitenant_infra.cluster_project_id
+  network_project_id = module.multitenant_infra.network_project_id
 }
 
 # import {
@@ -35,4 +35,5 @@ module "fleetscope_infra" {
   fleet_project_id       = local.fleet_project_id
   namespace_ids          = var.teams
   cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
+  depends_on             = [module.multitenant_infra]
 }

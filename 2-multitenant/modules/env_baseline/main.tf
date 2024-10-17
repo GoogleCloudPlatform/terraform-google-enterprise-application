@@ -21,7 +21,7 @@ locals {
   cluster_project_id    = data.google_project.eab_cluster_project.project_id
   available_cidr_ranges = var.master_ipv4_cidr_blocks
 
-  subnets = {for idx, v in var.cluster_subnetworks: idx => v}
+  subnets = { for idx, v in var.cluster_subnetworks : idx => v }
 
   subnets_to_cidr = {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
@@ -122,7 +122,7 @@ module "gke-standard" {
   region                 = each.value.region
   network_project_id     = regex(local.projects_re, each.value.id)[0]
   network                = regex(local.networks_re, each.value.network)[0]
-  subnetwork             = regex(local.subnetworks_re,local.subnets[each.key])[0]
+  subnetwork             = regex(local.subnetworks_re, local.subnets[each.key])[0]
   ip_range_pods          = each.value.secondary_ip_range[0].range_name
   ip_range_services      = each.value.secondary_ip_range[1].range_name
   release_channel        = var.cluster_release_channel

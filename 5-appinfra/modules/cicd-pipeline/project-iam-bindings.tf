@@ -15,11 +15,11 @@
 locals {
   cloud_build_sas = ["serviceAccount:${google_service_account.cloud_build.email}"] # cloud build service accounts used for CI
   membership_re   = "projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
-  envs = keys(var.env_cluster_membership_ids)
+  envs            = keys(var.env_cluster_membership_ids)
 
-  memberships = flatten([for i in local.envs: var.env_cluster_membership_ids[i].cluster_membership_ids])
-  memberships_map = {for i , item in local.memberships : (i) =>  item}
-  gke_projects= { for i , item in local.memberships : (i) =>  regex(local.membership_re, item)[0]}
+  memberships     = flatten([for i in local.envs : var.env_cluster_membership_ids[i].cluster_membership_ids])
+  memberships_map = { for i, item in local.memberships : (i) => item }
+  gke_projects    = { for i, item in local.memberships : (i) => regex(local.membership_re, item)[0] }
 }
 # authoritative project-iam-bindings to increase reproducibility
 module "project-iam-bindings" {
@@ -30,21 +30,21 @@ module "project-iam-bindings" {
 
   bindings = {
     "roles/cloudtrace.agent" = [
-      "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+      data.google_compute_default_service_account.compute_service_identity.member
     ],
     "roles/monitoring.metricWriter" = [
-      "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+      data.google_compute_default_service_account.compute_service_identity.member
     ],
     "roles/logging.logWriter" = setunion(
       [
-        "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
+        data.google_compute_default_service_account.compute_service_identity.member,
         "serviceAccount:${google_service_account.cloud_deploy.email}"
       ],
       local.cloud_build_sas
     ),
     "roles/cloudbuild.builds.builder" = setunion(
       [
-        "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
+        google_project_service_identity.cloudbuild_service_identity.member,
       ],
       local.cloud_build_sas
     ),

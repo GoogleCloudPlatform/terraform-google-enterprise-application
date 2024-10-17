@@ -31,6 +31,8 @@ output "cluster_membership_ids" {
 output "cluster_project_id" {
   description = "Cluster Project ID"
   value       = data.google_project.eab_cluster_project.project_id
+
+  depends_on = [module.gke-standard, module.gke-autopilot]
 }
 
 output "network_project_id" {

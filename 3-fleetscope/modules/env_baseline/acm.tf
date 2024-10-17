@@ -15,7 +15,7 @@
  */
 
 locals {
-  cluster_membership_ids = { for k, v in var.cluster_membership_ids: k => v}
+  cluster_membership_ids = { for k, v in var.cluster_membership_ids : k => v }
 }
 
 data "google_project" "cluster_project" {
