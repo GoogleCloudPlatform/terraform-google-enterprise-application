@@ -54,7 +54,7 @@ func TestAppfactory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	appFactoryPath := "../../../4-appfactory"
+	appFactoryPath := "../../../4-appfactory/envs/shared"
 	t.Run(appFactoryPath, func(t *testing.T) {
 		t.Parallel()
 
