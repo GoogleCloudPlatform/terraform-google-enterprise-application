@@ -13,13 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 locals {
   admin_project_id = var.create_admin_project_id ? module.app_admin_project[0].project_id : var.admin_project_id
-  cloudbuild_sa_roles = var.create_infra_project_id ? { for env in keys(var.envs) : env => {
+  cloudbuild_sa_roles = merge(var.create_infra_project_id ? { for env in keys(var.envs) : env => {
     project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
-  } } : {}
+    } } : {}, {
+    "admin" : {
+      project_id = local.admin_project_id
+      roles = [
+        "roles/browser", "roles/serviceusage.serviceUsageAdmin",
+        "roles/storage.admin", "roles/iam.serviceAccountAdmin",
+        "roles/artifactregistry.admin", "roles/clouddeploy.admin",
+        "roles/cloudbuild.builds.editor", "roles/privilegedaccessmanager.projectServiceAgent",
+        "roles/iam.serviceAccountUser", "roles/source.admin"
+      ]
+    } },
+    {
+      for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
+        project_id = cluster_project_id
+        roles      = ["roles/privilegedaccessmanager.projectServiceAgent"]
+      }
+    }
+  )
+
+  org_ids = distinct([for env in var.envs : env.org_id])
 }
 
 
@@ -70,9 +88,39 @@ module "tf_cloudbuild_workspace" {
   buckets_force_destroy    = var.bucket_force_destroy
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 
+  substitutions = {
+    "_GAR_REGION"                   = var.location
+    "_GAR_PROJECT_ID"               = var.gar_project_id
+    "_GAR_REPOSITORY"               = var.gar_repository_name
+    "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
+  }
+
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
+}
+
+resource "google_project_iam_member" "cloud_build_sa_roles" {
+  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader"])
+
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = var.gar_project_id
+  role    = each.value
+}
+
+resource "google_service_account_iam_member" "account_access" {
+  for_each = toset(["roles/iam.serviceAccountUser", "roles/iam.serviceAccountTokenCreator"])
+
+  service_account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
+  role               = each.value
+  member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_organization_iam_member" "builder_organization_browser" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/browser"
 }
 
 // Create infra project
