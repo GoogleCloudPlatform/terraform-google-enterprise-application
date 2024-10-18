@@ -15,8 +15,8 @@
  */
 
 locals {
-  admin_project_id = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project_id
-  cloudbuild_sa_roles = var.create_infra_project ? { for env in keys(var.envs) : env => {
+  admin_project_id = var.create_admin_project_id ? module.app_admin_project[0].project_id : var.admin_project_id
+  cloudbuild_sa_roles = var.create_infra_project_id ? { for env in keys(var.envs) : env => {
     project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
   } } : {}
@@ -24,7 +24,7 @@ locals {
 
 
 module "app_admin_project" {
-  count = var.create_admin_project ? 1 : 0
+  count = var.create_admin_project_id ? 1 : 0
 
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 17.0"
@@ -79,7 +79,7 @@ module "tf_cloudbuild_workspace" {
 module "app_infra_project" {
   source   = "terraform-google-modules/project-factory/google"
   version  = "~> 17.0"
-  for_each = var.create_infra_project ? var.envs : {}
+  for_each = var.create_infra_project_id ? var.envs : {}
 
   random_project_id        = true
   random_project_id_length = 4
