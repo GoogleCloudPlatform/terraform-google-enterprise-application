@@ -127,16 +127,16 @@ variable "docker_tag_version_terraform" {
 }
 
 variable "admin_project_id" {
-  description = "The admin project id associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project_id` must be set to `false`."
+  description = "The admin project id associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`."
   type        = string
 }
 
-variable "create_infra_project_id" {
+variable "create_infra_project" {
   description = "Boolean value that indicates whether an infrastructure project should be created for the microservice."
   type        = bool
 }
 
-variable "create_admin_project_id" {
+variable "create_admin_project" {
   description = "Boolean value that indicates whether a admin project should be created for the microservice."
   type        = bool
 }
