@@ -38,6 +38,10 @@ func TestAppInfra(t *testing.T) {
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 	}
 
+	bootstrap := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../1-bootstrap"),
+	)
+
 	type ServiceInfos struct {
 		ApplicationName string
 		ProjectID       string
@@ -54,7 +58,7 @@ func TestAppInfra(t *testing.T) {
 
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
-		appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
+		appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/", appName)
 		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/4-appfactory/envs/shared", appName)))
 		for _, fullServiceName := range serviceNames {
 			fullServiceName := fullServiceName // capture range variable
@@ -69,21 +73,28 @@ func TestAppInfra(t *testing.T) {
 				TeamName:        prefixServiceName,
 			}
 
+			remoteState := bootstrap.GetStringOutput("state_bucket")
+
+			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, suffixServiceName)).String(), "/")
+			backendConfig := map[string]interface{}{
+				"bucket": backend_bucket[len(backend_bucket)-1],
+			}
+
 			servicePath := fmt.Sprintf("%s/%s/envs/shared", appSourcePath, fullServiceName)
 			t.Run(servicePath, func(t *testing.T) {
 				t.Parallel()
 
 				vars := map[string]interface{}{
-					"project_id":                 servicesInfoMap[fullServiceName].ProjectID,
-					"region":                     region,
-					"env_cluster_membership_ids": env_cluster_membership_ids,
-					"buckets_force_destroy":      "true",
+					"remote_state_bucket":   remoteState,
+					"buckets_force_destroy": "true",
+					"environment_names":     testutils.EnvNames(t),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
 					tft.WithTFDir(servicePath),
 					tft.WithVars(vars),
 					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+					tft.WithBackendConfig(backendConfig),
 				)
 				appService.DefineVerify(func(assert *assert.Assertions) {
 					appService.DefaultVerify(assert)
