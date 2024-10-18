@@ -21,11 +21,6 @@ locals {
   network_project_id = module.multitenant_infra.network_project_id
 }
 
-# import {
-#   id = "projects/${local.cluster_project_id}/locations/global/features/fleetobservability"
-#   to = module.fleetscope_infra.google_gke_hub_feature.fleet-o11y
-# }
-
 module "fleetscope_infra" {
   source = "../../3-fleetscope/modules/env_baseline"
 
@@ -35,5 +30,4 @@ module "fleetscope_infra" {
   fleet_project_id       = local.fleet_project_id
   namespace_ids          = var.teams
   cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
-  depends_on             = [module.multitenant_infra]
 }

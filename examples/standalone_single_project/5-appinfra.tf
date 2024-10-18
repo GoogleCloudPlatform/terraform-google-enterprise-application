@@ -45,5 +45,4 @@ module "cicd" {
   app_build_trigger_yaml = "cloudbuild.yaml"
 
   buckets_force_destroy = true
-  depends_on            = [module.fleetscope_infra]
 }
