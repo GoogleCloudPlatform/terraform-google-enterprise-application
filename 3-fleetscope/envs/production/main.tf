@@ -18,10 +18,10 @@ locals {
   env = "production"
 }
 
-import {
-  id = "projects/${local.cluster_project_id}/locations/global/features/fleetobservability"
-  to = module.env.google_gke_hub_feature.fleet-o11y
-}
+# import {
+#   id = "projects/${local.cluster_project_id}/locations/global/features/fleetobservability"
+#   to = module.env.google_gke_hub_feature.fleet-o11y
+# }
 
 module "env" {
   source = "../../modules/env_baseline"

@@ -21,16 +21,22 @@ locals {
   standalone_required_roles = [
     "roles/artifactregistry.admin",
     "roles/cloudbuild.builds.builder",
+    "roles/clouddeploy.serviceAgent",
     "roles/clouddeploy.admin",
     "roles/compute.networkAdmin",
+    "roles/compute.securityAdmin",
     "roles/container.admin",
     "roles/gkehub.editor",
+    "roles/gkehub.scopeAdmin",
+    "roles/container.clusterAdmin",
     "roles/iam.serviceAccountAdmin",
     "roles/serviceusage.serviceUsageAdmin",
     "roles/source.admin",
     "roles/storage.admin",
     "roles/resourcemanager.projectIamAdmin",
     "roles/viewer",
+    "roles/iam.serviceAccountUser",
+    "roles/privilegedaccessmanager.projectServiceAgent",
   ]
 }
 
