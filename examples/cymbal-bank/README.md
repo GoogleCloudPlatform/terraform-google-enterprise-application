@@ -431,7 +431,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
     ```bash
     cd bank-of-anthos
     export BANK_OF_ANTHOS_PATH=$(pwd)
-    export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource)
+    export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource/cymbal-bank)
     ```
 
 1. Run the commands below to update the `bank-of-anthos` codebase with the updated assets:
