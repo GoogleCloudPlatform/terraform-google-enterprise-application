@@ -138,7 +138,7 @@ steps:
     waitFor:
       - appinfra-apply
 
-  - id: appsource-verify
+  - id: appsource-verify-cymbal-bank
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -148,12 +148,24 @@ steps:
       ]
     waitFor:
       - appinfra-apply
+
+  - id: appsource-verify-cymbal-shop
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestSourceCymbalShop --stage verify --verbose",
+      ]
+    waitFor:
+      - appinfra-apply
+
   - id: app-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestAppE2E --stage verify --verbose"]
     waitFor:
-      - appsource-verify
+      - appsource-verify-cymbal-bank
   - id: appinfra-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -164,7 +176,8 @@ steps:
       ]
     waitFor:
       - app-e2e
-      - appsource-verify
+      - appsource-verify-cymbal-bank
+      - appsource-verify-cymbal-shop
       - appinfra-verify
       - appfactory-verify
       - fleetscope-verify
