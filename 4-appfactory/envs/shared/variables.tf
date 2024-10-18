@@ -91,8 +91,8 @@ variable "applications" {
   EOF
   type = map(map(object({
     admin_project_id        = optional(string, null)
-    create_infra_project_id    = bool
-    create_admin_project_id_id = bool
+    create_infra_project_id = bool
+    create_admin_project_id = bool
   })))
 
   validation {
