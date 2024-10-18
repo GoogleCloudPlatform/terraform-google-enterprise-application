@@ -44,7 +44,7 @@ func TestSourceCymbalShop(t *testing.T) {
 	region := "us-central1" // TODO: Plumb output from appInfra
 	appName := "cymbal-shop"
 	serviceName := "cymbalshop"
-	appSourcePath := fmt.Sprintf("../../../examples/multitenant-applications/6-appsource/%s", appName)
+	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
