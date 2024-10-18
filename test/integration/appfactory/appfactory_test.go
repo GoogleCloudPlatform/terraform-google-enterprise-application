@@ -46,15 +46,14 @@ func TestAppfactory(t *testing.T) {
 		"bucket_force_destroy": "true",
 	}
 
+	appFactoryPath := "../../../4-appfactory/envs/shared"
 	// use combined multitenat tfvars - will test cymbal-bank and cymbal-shop
 	from := "../../../examples/multitenant-applications/4-appfactory"
-	to := "../../../4-appfactory"
-	err := cp.Copy(from, to)
+	err := cp.Copy(from, appFactoryPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	appFactoryPath := "../../../4-appfactory/envs/shared"
 	t.Run(appFactoryPath, func(t *testing.T) {
 		t.Parallel()
 
