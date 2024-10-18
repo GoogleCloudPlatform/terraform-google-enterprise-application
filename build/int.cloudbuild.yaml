@@ -226,7 +226,7 @@ steps:
       ]
     waitFor:
       - prepare
-  - id: standalone-apply-fase1
+  - id: standalone-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -234,29 +234,8 @@ steps:
         "-c",
         "cft test run TestStandaloneSingleProjectExample --stage apply --verbose",
       ]
-    allowFailure: true
     waitFor:
       - standalone-init
-  - id: standalone-add-import
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "mv /workspace/examples/standalone_single_project/fleet-olly-import.tf.example /workspace/examples/standalone_single_project/fleet-olly-import.tf",
-      ]
-    waitFor:
-      - standalone-apply-fase1
-  - id: standalone-apply-fase2
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage apply --verbose",
-      ]
-    waitFor:
-      - standalone-add-import
   - id: standalone-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -266,7 +245,7 @@ steps:
         "cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
       ]
     waitFor:
-      - standalone-apply-fase2
+      - standalone-apply
   - id: standalone-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -277,6 +256,7 @@ steps:
       ]
     waitFor:
       - standalone-verify
+      - bootstrap-teardown
 
 tags:
   - "ci"
