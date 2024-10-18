@@ -37,11 +37,7 @@ variable "buckets_force_destroy" {
   default     = false
 }
 
-data "terraform_remote_state" "bootstrap" {
-  backend = "gcs"
-
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/bootstrap"
-  }
+variable "environment_names" {
+  description = "A list of environment names."
+  type        = list(string)
 }
