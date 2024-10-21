@@ -229,3 +229,9 @@ module "gke-autopilot" {
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
+
+resource "time_sleep" "wait_service_cleanup" {
+  depends_on = [module.gke-autopilot.name, module.gke-standard.name]
+
+  destroy_duration = "600s"
+}
