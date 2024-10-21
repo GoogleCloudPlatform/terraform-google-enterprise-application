@@ -110,6 +110,46 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
+resource "google_project_service_identity" "gke_identity_cluster_project" {
+  provider   = google-beta
+  project    = local.cluster_project_id
+  service    = "gkehub.googleapis.com"
+  depends_on = [module.eab_cluster_project]
+}
+
+resource "google_project_service_identity" "mcsd_cluster_project" {
+  provider   = google-beta
+  project    = local.cluster_project_id
+  service    = "multiclusterservicediscovery.googleapis.com"
+  depends_on = [module.eab_cluster_project]
+}
+
+resource "google_project_iam_member" "gke_service_agent" {
+  project    = local.cluster_project_id
+  role       = "roles/gkehub.serviceAgent"
+  member     = google_project_service_identity.gke_identity_cluster_project.member
+  depends_on = [module.eab_cluster_project]
+}
+
+resource "google_project_service_identity" "fleet_meshconfig_sa" {
+  provider = google-beta
+  project  = local.cluster_project_id
+  service  = "meshconfig.googleapis.com"
+}
+
+resource "google_project_iam_member" "servicemesh_service_agent" {
+  project    = local.cluster_project_id
+  role       = "roles/meshconfig.serviceAgent"
+  member     = google_project_service_identity.fleet_meshconfig_sa.member
+  depends_on = [module.eab_cluster_project, google_project_service_identity.fleet_meshconfig_sa]
+}
+
+resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
+  project = local.cluster_project_id
+  role    = "roles/multiclusterservicediscovery.serviceAgent"
+  member  = google_project_service_identity.mcsd_cluster_project.member
+}
+
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
   version = "~> 33.0"
@@ -177,12 +217,14 @@ module "gke-standard" {
   ]
 
   depends_on = [
-    module.eab_cluster_project
+    module.eab_cluster_project, google_project_iam_member.gke_service_agent, google_project_iam_member.servicemesh_service_agent, google_project_iam_member.multiclusterdiscovery_service_agent
   ]
 
   // Private Cluster Configuration
   enable_private_nodes    = true
   enable_private_endpoint = true
+
+  fleet_project_grant_service_agent = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
@@ -220,12 +262,14 @@ module "gke-autopilot" {
   }
 
   depends_on = [
-    module.eab_cluster_project
+    module.eab_cluster_project, google_project_iam_member.gke_service_agent, google_project_iam_member.servicemesh_service_agent, google_project_iam_member.multiclusterdiscovery_service_agent
   ]
 
   // Private Cluster Configuration
   enable_private_nodes    = true
   enable_private_endpoint = true
+
+  fleet_project_grant_service_agent = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
@@ -233,5 +277,5 @@ module "gke-autopilot" {
 resource "time_sleep" "wait_service_cleanup" {
   depends_on = [module.gke-autopilot.name, module.gke-standard.name]
 
-  destroy_duration = "600s"
+  destroy_duration = "300s"
 }
