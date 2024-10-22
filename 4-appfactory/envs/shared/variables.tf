@@ -90,9 +90,9 @@ variable "applications" {
   - **create_admin_project** (Required): Indicates whether a Admin project should be created for the microservice.
   EOF
   type = map(map(object({
-    admin_project_id        = optional(string, null)
-    create_infra_project    = bool
-    create_admin_project_id = bool
+    admin_project_id     = optional(string, null)
+    create_infra_project = bool
+    create_admin_project = bool
   })))
 
   validation {
