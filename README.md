@@ -1,9 +1,11 @@
 # Enterprise Application blueprint
+
 This example repository shows how to build an enterprise developer platform on Google Cloud, following the [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint). This repository deploys an internal developer platform that enables cloud platform teams to provide a managed software development and delivery platform for their organization's application development groups.
 
 The Enterprise Application blueprint adopts practices defined in the [Enterprise Foundation blueprint](https://cloud.google.com/architecture/security-foundations), and is meant to be deployed after deploying the foundation. Refer to the [Enterprise Foundation blueprint repository](https://github.com/terraform-google-modules/terraform-example-foundation) for complete deployment instructions.
 
 ## Architecture
+
 For a complete description of the architecture deployed by this repository, refer to the [published guide](https://cloud.google.com/architecture/enterprise-application-blueprint/architecture). See below for a high-level diagram of the architecture:
 
 ![Enterprise Application blueprint architecture diagram](assets/eab-architecture.svg)
@@ -18,7 +20,9 @@ This repository contains several distinct deployment stages, each contained in a
 - Terraform version greater than 1.6
 
 ### [1. bootstrap](/1-bootstrap/)
+
 The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
+
 - the Multitenant Infrastructure pipeline
 - the Application Factory
 - the Fleet-Scope pipeline
@@ -32,7 +36,9 @@ example-organization
 ```
 
 ### [2. multitenant](/2-multitenant/)
+
 The purpose of this stage is to deploy the per-environment multitenant resources via the multitenant infrastructure pipeline. The resulting project hierarchy is as follows:
+
 ```
 example-organization
 └── fldr-development
@@ -44,6 +50,7 @@ example-organization
 ```
 
 ### [3. fleet-scope](/3-fleet-scope/)
+
 The purpose of this stage is to deploy the per-environment fleet resources via the fleetscope infrastructure pipeline. This stage does not create any new projects, but creates resources within the existing multitenant infrastructure projects.
 
 The fleet-scope pipeline manages configuration and resources related to [GKE Fleets](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). This stage manages the creation of namespaces in the GKE clusters via [team scopes and fleet namespaces](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management#fleet_team_management_overview). This pipeline also enables the [Config Sync](https://cloud.google.com/anthos-config-management/docs/config-sync-overview) and [Service Mesh](https://cloud.google.com/service-mesh/docs) features for the fleet and thus the member clusters.
@@ -69,34 +76,47 @@ example-organization
 ```
 
 ### [5. appinfra](/5-appinfra/)
+
 The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. This stage deploys the application-specific resources for the Cymbal Bank sample application, including service-specific databases. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
 
 ### [6. appsource](/6-appsource/)
+
 The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up the Cymbal Bank sample application, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
 
 ## Applications (Apps)
+
 This repo demostrates setting up the developer platform for one or more *Apps* which is a high level of grouping of releated service or workloads. Apps are created infrequently and may include multiple namespaces, team scopes, and dedicated IP address. A multi-tenant cluster can contain multiple Apps.
 
-### hello-world example
+### Hello World Example
 
 This [hello-world](https://github.com/GoogleContainerTools/skaffold/tree/v2.13.2/examples/getting-started) example is a very simple Go application that is deployed along with the codebase as a placeholder, it uses basic skaffold features:
 
-* **building** a single Go file app and with a multistage `Dockerfile` using local docker to build
-* **tagging** using the default tagPolicy (`gitCommit`)
-* **deploying** a single container pod using `kubectl`
+- **building** a single Go file app and with a multistage `Dockerfile` using local docker to build
+- **tagging** using the default tagPolicy (`gitCommit`)
+- **deploying** a single container pod using `kubectl`
 
 The example is extracted from the skaffold repository and the source code is stored in `6-appsource/hello-world`.
 
-### Cymbal Bank example
+### [Cymbal Bank example](./examples/cymbal-bank/)
+
 The [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) (`cymbal-bank`) sample App is included in the repository. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
+
+### [Cymbal Shop Example](./examples/cymbal-shop/)
+
+The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
+
+In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
+
+For more information about the Cymbal Bank application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
+
+### [Multitenant Applications Example](./examples/multitenant-applications)
+
+This example demonstrates modifications necessary to deploy two separate application in the cluster, the applications are named `cymbal-bank` and `cymbal-shop`. `cymbal-bank` microservices will be deployed across differente namespaces, to represent different teams, and each microservice will have its own `admin` project, which hosts the CI/CD pipeline for the microservice. `cymbal-shop` microservices will be deployed into a single namespace and all pipelines into a single `admin` project. See the 4-appfactory [terraform.tfvars](./examples/multitenant-applications/4-appfactory/envs/shared/terraform.tfvars) for more information on how these projects are specified.
 
 ## Contributing
 
 Refer to the [contribution guidelines](./CONTRIBUTING.md) for
 information on contributing to this module.
-
-[terraform-provider-gcp]: https://www.terraform.io/docs/providers/google/index.html
-[terraform]: https://www.terraform.io/downloads.html
 
 ## Security Disclosures
 

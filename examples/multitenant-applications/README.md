@@ -2,7 +2,13 @@
 
 This example demonstrates modifications necessary to deploy two separate application in the cluster, the applications are named `cymbal-bank` and `cymbal-shop`. `cymbal-bank` microservices will be deployed across differente namespaces, to represent different teams, and each microservice will have its own `admin` project, which hosts the CI/CD pipeline for the microservice. `cymbal-shop` microservices will be deployed into a single namespace and all pipelines into a single `admin` project. See the 4-appfactory [terraform.tfvars](./4-appfactory/envs/shared/terraform.tfvars) for more information on how these projects are specified.
 
-# Cymbal Shop Example
+The `4-appfactory` directory under this example, contains only a terraform.tfvars file, it represents the variable modifications that are necessary to support both applications on the cluster.
+
+The `5-appinfra` directory contains symbolic links to the `5-appinfra` directories on `examples/cymbal-bank` and `examples/cymbal-shop`. It contains infrastructure specific to the application. On the `envs/shared` a CI/CD pipeline is created using Cloud Build and Cloud Deploy.
+
+The `6-appsource` directory contains symbolic links to the `6-appsource` directories on `examples/cymbal-bank` and `examples/cymbal-shop`. It contains application specific code, this includes custom `cloudbuild.yaml`, `skaffold.yaml` files. The code in this repository will be integrated into `bank-of-anthos` and `microservices-demo` repositories.
+
+## Cymbal Shop Example
 
 The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
 
@@ -10,7 +16,7 @@ In the developer platform, it is deployed into a single namespace/fleet scope (`
 
 For more information about the Cymbal Bank application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
 
-# Cymbal Bank Example
+## Cymbal Bank Example
 
 Cymbal Bank is a web app that simulates a bank's payment processing network. The microservices are divided in three fleet scopes and namespaced and they are deployed through individual `admin` project using Cloud Deploy (1 per microservice) - this means that each microservice will have its own `skaffold.yaml` file.
 
