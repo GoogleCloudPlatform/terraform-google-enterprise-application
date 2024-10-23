@@ -16,7 +16,7 @@
 
 locals {
   cluster_membership_ids = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => { "cluster_membership_ids" = (state.outputs.cluster_membership_ids) } }
-  app_admin_project      = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.transactionhistory"].app_admin_project_id
+  app_admin_project      = data.terraform_remote_state.appfactory.outputs.app-group["default-example.hello-world"].app_admin_project_id
 }
 
 data "terraform_remote_state" "multitenant" {
