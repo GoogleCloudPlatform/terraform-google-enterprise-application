@@ -38,9 +38,9 @@ The steps below assume that you are checkout out on the same level as `terraform
 └── .
 ```
 
-#### Add Hello World Bank envs at App Infra
+#### Add Hello World envs at App Infra
 
-1. Retrieve Cymbal Bank repositories created on 4-appfactory.
+1. Retrieve repositories created on 4-appfactory.
 
     ```bash
     cd eab-applicationfactory/envs/shared/
@@ -114,7 +114,7 @@ The steps below assume that you are checkout out on the same level as `terraform
    cd terraform-google-enterprise-application/5-appinfra
    ```
 
-Under the `apps` folder are examples for each of the cymbal bank applications.
+Under the `apps` folder are examples for each of the applications.
 
 1. Change directory into any of these folders to deploy.
 
