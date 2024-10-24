@@ -16,21 +16,10 @@
 
 # 3-fleetscope
 locals {
-  fleet_project_id       = module.multitenant_infra.fleet_project_id
-  cluster_project_id     = module.multitenant_infra.cluster_project_id
-  network_project_id     = module.multitenant_infra.network_project_id
-  cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
-  namespace_ids = {
-    "cb-frontend" = "your-frontend-group@yourdomain.com",
-    "cb-accounts" = "your-accounts-group@yourdomain.com",
-    "cb-ledger"   = "your-ledger-group@yourdomain.com"
-  }
+  fleet_project_id   = module.multitenant_infra.fleet_project_id
+  cluster_project_id = module.multitenant_infra.cluster_project_id
+  network_project_id = module.multitenant_infra.network_project_id
 }
-
-# import {
-#   id = "projects/${local.cluster_project_id}/locations/global/features/fleetobservability"
-#   to = module.fleetscope_infra.google_gke_hub_feature.fleet-o11y
-# }
 
 module "fleetscope_infra" {
   source = "../../3-fleetscope/modules/env_baseline"
@@ -39,6 +28,6 @@ module "fleetscope_infra" {
   cluster_project_id     = local.cluster_project_id
   network_project_id     = local.network_project_id
   fleet_project_id       = local.fleet_project_id
-  namespace_ids          = local.namespace_ids
-  cluster_membership_ids = local.cluster_membership_ids
+  namespace_ids          = var.teams
+  cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
 }

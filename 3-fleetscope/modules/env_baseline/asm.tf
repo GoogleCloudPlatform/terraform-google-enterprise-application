@@ -33,11 +33,11 @@ resource "google_gke_hub_feature_membership" "mesh_feature_member" {
   project  = var.fleet_project_id
   location = "global"
 
-  for_each = toset(var.cluster_membership_ids)
+  for_each = local.cluster_membership_ids
 
   feature             = google_gke_hub_feature.mesh_feature.name
-  membership          = regex(local.membership_re, each.key)[2]
-  membership_location = regex(local.membership_re, each.key)[1]
+  membership          = regex(local.membership_re, each.value)[2]
+  membership_location = regex(local.membership_re, each.value)[1]
 
   mesh {
     management = "MANAGEMENT_AUTOMATIC"

@@ -50,6 +50,6 @@ output "billing_account" {
   value = var.billing_account
 }
 
-# output "teams" {
-#   value = { for team, group in module.group : team => module.group[team].id }
-# }
+output "teams" {
+  value = { for team, group in module.group : team => module.group[team].id }
+}

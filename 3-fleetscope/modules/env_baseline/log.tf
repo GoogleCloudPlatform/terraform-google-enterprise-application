@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-resource "google_gke_hub_feature" "fleet-o11y" {
-  name     = "fleetobservability"
-  project  = var.fleet_project_id
-  location = "global"
-  spec {
-    fleetobservability {
-      logging_config {
-        default_config {
-          mode = "COPY"
-        }
-        fleet_scope_logs_config {
-          mode = "MOVE"
-        }
-      }
-    }
-  }
+# resource "google_gke_hub_feature" "fleet-o11y" {
+#   name     = "fleetobservability"
+#   project  = var.fleet_project_id
+#   location = "global"
+#   spec {
+#     fleetobservability {
+#       logging_config {
+#         default_config {
+#           mode = "COPY"
+#         }
+#         fleet_scope_logs_config {
+#           mode = "MOVE"
+#         }
+#       }
+#     }
+#   }
 
-  depends_on = [
-    google_gke_hub_feature.mesh_feature,
-    google_project_iam_member.fleet_logging_viewaccessor
-  ]
-}
+#   depends_on = [
+#     google_gke_hub_feature.mesh_feature,
+#     google_project_iam_member.fleet_logging_viewaccessor
+#   ]
+# }
 
 resource "google_project_iam_member" "fleet_logging_viewaccessor" {
   for_each = var.namespace_ids
