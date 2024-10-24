@@ -18,6 +18,6 @@ terraform {
   required_version = ">= 1.3"
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:appinfra/hello-world/shared/v0.2.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:appinfra/hello-world/shared/v0.3.0"
   }
 }
