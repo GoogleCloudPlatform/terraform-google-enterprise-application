@@ -29,7 +29,7 @@ resource "google_gke_hub_feature" "mci" {
   }
 
   depends_on = [
-    google_gke_hub_feature.mcs,
+    google_gke_hub_feature.mcs
     # google_gke_hub_feature.fleet-o11y
   ]
 }
@@ -46,7 +46,7 @@ resource "google_project_service_identity" "fleet_mci_sa" {
   service  = "multiclusteringress.googleapis.com"
 
   depends_on = [
-    google_gke_hub_feature.mci,
+    google_gke_hub_feature.mci
     # google_gke_hub_feature.fleet-o11y
   ]
 }

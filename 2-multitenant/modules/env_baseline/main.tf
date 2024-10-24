@@ -217,7 +217,10 @@ module "gke-standard" {
   ]
 
   depends_on = [
-    module.eab_cluster_project, google_project_iam_member.gke_service_agent, google_project_iam_member.servicemesh_service_agent, google_project_iam_member.multiclusterdiscovery_service_agent
+    module.eab_cluster_project, 
+    google_project_iam_member.gke_service_agent, 
+    google_project_iam_member.servicemesh_service_agent, 
+    google_project_iam_member.multiclusterdiscovery_service_agent
   ]
 
   // Private Cluster Configuration
@@ -262,7 +265,10 @@ module "gke-autopilot" {
   }
 
   depends_on = [
-    module.eab_cluster_project, google_project_iam_member.gke_service_agent, google_project_iam_member.servicemesh_service_agent, google_project_iam_member.multiclusterdiscovery_service_agent
+    module.eab_cluster_project, 
+    google_project_iam_member.gke_service_agent, 
+    google_project_iam_member.servicemesh_service_agent, 
+    google_project_iam_member.multiclusterdiscovery_service_agent
   ]
 
   // Private Cluster Configuration
