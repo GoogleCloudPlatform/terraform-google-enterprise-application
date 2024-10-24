@@ -43,7 +43,7 @@ module "vpc" {
       name     = "allow-private-google-access-ipv6"
       priority = 200
       destination_ranges = [
-        "2600:2d00:0002:2000::/64",
+        "2600:2d00:2:2000::/64",
         "2001:4860:8040::/42"
       ]
       allow = [

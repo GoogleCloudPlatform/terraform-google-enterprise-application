@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	// import the blueprints test framework modules for testing and assertions
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,7 +39,17 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes
 	standaloneSingleProjT.DefineVerify(func(assert *assert.Assertions) {
 		// perform default verification ensuring Terraform reports no additional changes on an applied blueprint
-		// standaloneSingleProjT.DefaultVerify(assert)
+		standaloneSingleProjT.DefaultVerify(assert)
+
+	})
+
+	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {
+		// removes firewall rules created by the service but not being deleted.
+		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", projectID).Array()
+		for i := range firewallRules {
+			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
+		}
+		standaloneSingleProjT.DefaultTeardown(assert)
 
 	})
 	// call the test function to execute the integration test

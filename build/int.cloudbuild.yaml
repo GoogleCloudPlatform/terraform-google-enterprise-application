@@ -256,7 +256,6 @@ steps:
       ]
     waitFor:
       - standalone-verify
-      - bootstrap-teardown
 
 tags:
   - "ci"
