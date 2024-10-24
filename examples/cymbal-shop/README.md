@@ -18,7 +18,7 @@ This example requires:
 
 ### Deploying with Google Cloud Build
 
-The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+**IMPORTANT**: The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -41,6 +41,8 @@ The steps below assume that you are checkout out on the same level as `terraform
     ```
 
 #### Add Cymbal Shop Namespaces at the Fleetscope repository
+
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run.
 
 1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
 
@@ -84,13 +86,15 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push origin production
     ```
 
-1. Move out of Fleetscope folder:
+1. Navigate out of the Fleetscope repository:
 
     ```bash
     cd ../
     ```
 
 #### Deploy Cymbal shop App Factory
+
+This stage will setup the application admin project, and infrastructure specific projects if created.
 
 1. Navigate to Application Factory repository and checkout plan branch:
 
@@ -99,7 +103,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git checkout plan
     ```
 
-1. Navigate to the Application Factory repository and add the value below to the applications variable:
+1. Navigate to the Application Factory repository and add the value below to the applications variable on `terraform.tfvars`:
 
     ```diff
     applications = {
@@ -136,7 +140,9 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 #### Deploy Cymbal Shop App Infra
 
-The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+This stage will create the CI/CD pipeline for the service, and application specific infrastructure if specified.
+
+**IMPORTANT**: The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -145,7 +151,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 └── .
 ```
 
-1. Retrieve Cymbal Shop repository created on 4-appfactory.
+1. Retrieve Cymbal Shop repository, Admin Project and Appplication specific State Bucket that were created on 4-appfactory stage.
 
     ```bash
     cd eab-applicationfactory/envs/shared/
@@ -153,8 +159,8 @@ The steps below assume that you are checkout out on the same level as `terraform
 
     export cymbalshop_project=$(terraform output -json app-group | jq -r '.["cymbal-shop.cymbalshop"]["app_admin_project_id"]')
     echo cymbalshop_project=$cymbalshop_project
-    export cymbalshop_repository=$(terraform output -json app-group | jq -r '.["cymbal-shop.cymbalshop"]["app_infra_repository_name"]')
-    echo cymbalshop_repository=$cymbalshop_repository
+    export cymbalshop_infra_repo=$(terraform output -json app-group | jq -r '.["cymbal-shop.cymbalshop"]["app_infra_repository_name"]')
+    echo cymbalshop_infra_repo=$cymbalshop_infra_repo
     export cymbalshop_statebucket=$(terraform output -json app-group | jq -r '.["cymbal-shop.cymbalshop"]["app_cloudbuild_workspace_state_bucket_name"]' | sed 's/.*\///')
     echo cymbalshop_statebucket=$cymbalshop_statebucket
 
@@ -172,30 +178,32 @@ The steps below assume that you are checkout out on the same level as `terraform
 1. Clone the repositories for each service and initialized:
 
     ```bash
-    gcloud source repos clone $cymbalshop_repository --project=$cymbalshop_project
+    gcloud source repos clone $cymbalshop_infra_repo --project=$cymbalshop_project
     ```
 
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    cp -R ./terraform-google-enterprise-application/examples/cymbal-shop/5-appinfra/* $cymbalshop_repository
-    cp ./terraform-example-foundation/build/cloudbuild-tf-* $cymbalshop_repository/
-    cp ./terraform-example-foundation/build/tf-wrapper.sh $cymbalshop_repository/
-    chmod 755 $cymbalshop_repository/tf-wrapper.sh
-    sed -i'' -e 's/max_depth=1/max_depth=5/' $cymbalshop_repository/tf-wrapper.sh
-    cp -RT ./terraform-example-foundation/policy-library/ $cymbalshop_repository/policy-library
-    rm -rf $cymbalshop_repository/policy-library/policies/constraints/*
-    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $cymbalshop_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$cymbalshop_statebucket/" $cymbalshop_repository/apps/cymbal-shop/cymbalshop/envs/shared/backend.tf
-    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $cymbalshop_repository/apps/cymbal-shop/cymbalshop/envs/shared/terraform.tvars
+    rm -rf $cymbalshop_infra_repo/modules
+    cp -R ./terraform-google-enterprise-application/examples/cymbal-shop/5-appinfra/cymbal-shop/cymbalshop/envs $cymbalshop_infra_repo
+    rm -rf $cymbalshop_infra_repo/modules
+    cp -R ./terraform-google-enterprise-application//5-appinfra/modules $cymbalshop_infra_repo
+    cp ./terraform-example-foundation/build/cloudbuild-tf-* $cymbalshop_infra_repo/
+    cp ./terraform-example-foundation/build/tf-wrapper.sh $cymbalshop_infra_repo/
+    chmod 755 $cymbalshop_infra_repo/tf-wrapper.sh
+    cp -RT ./terraform-example-foundation/policy-library/ $cymbalshop_infra_repo/policy-library
+    rm -rf $cymbalshop_infra_repo/policy-library/policies/constraints/*
+    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $cymbalshop_infra_repo/cloudbuild-tf-*
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$cymbalshop_statebucket/" $cymbalshop_infra_repo/envs/shared/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $cymbalshop_infra_repo/envs/shared/terraform.tfvars
     ```
 
 ##### Commit changes to repository
 
-1. Commit files to transactionhistory repository a plan branch:
+1. Commit files to cymbalshop repository in the plan branch:
 
     ```bash
-    cd $cymbalshop_repository
+    cd $cymbalshop_infra_repo
 
     git checkout -b plan
     git add .
@@ -203,13 +211,57 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push --set-upstream origin plan
     ```
 
-1. Merge plan to production branch:
+1. Merge plan branch to production branch and push to remote:
 
    ```bash
     git checkout -b production
     git push --set-upstream origin production
     ```
 
+1. You can view the build results on Google Cloud Build at the admin project.
+
 #### Deploy Cymbal Shop App Source
 
-v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git
+**IMPORTANT**: The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+
+```txt
+.
+├── terraform-example-foundation
+├── terraform-google-enterprise-application
+└── .
+```
+
+1. Clone the `microservices-demo` repository, it contains the cymbal-shop source code:
+
+    ```bash
+    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git cymbal-shop
+    ```
+
+1. Navigate to the repository and create main branch on top of the current version:
+
+    ```bash
+    cd cymbal-shop
+    git checkout -b main
+    ```
+
+1. Add the remote source repository, this repository will host your application source code:
+
+    ```bash
+    git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
+    ```
+
+1. Overwrite repository with overlays defined in `examples/cymbal-shop`:
+
+    ```bash
+    cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .
+    ```
+
+1. Add changes and commit to the specified remote, this will trigger the associated Cloud Build CI/CD pipeline:
+
+    ```bash
+    git add .
+    git commit -m "Add Cymbal Shop Code"
+    git push google main
+    ```
+
+1. You can view the build results on the Cymbal Shop Admin Project.
