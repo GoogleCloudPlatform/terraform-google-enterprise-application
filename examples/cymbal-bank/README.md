@@ -216,7 +216,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $balancereader_repository/policy-library
     rm -rf $balancereader_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $balancereader_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $balancereader_repository/*/*/terraform.tfvars
 
 
