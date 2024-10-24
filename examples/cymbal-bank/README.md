@@ -86,6 +86,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -R ./terraform-google-enterprise-application/examples/cymbal-bank/4-appfactory/envs/* ./eab-applicationfactory/envs/
     cp -R ./terraform-google-enterprise-application/4-appfactory/modules/* ./eab-applicationfactory/modules/
     ```
+
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
 
    ```bash
@@ -109,7 +110,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git push --set-upstream origin plan
     ```
 
-1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout production
@@ -199,7 +200,15 @@ The steps below assume that you are checkout out on the same level as `terraform
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
+    rm -rf $frontend_repository/modules
+    rm -rf $balancereader_repository/modules
+    rm -rf $userservice_repository/modules
+    rm -rf $contacts_repository/modules
+    rm -rf $ledgerwriter_repository/modules
+    rm -rf $transactionhistory_repository/modules
+
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-balancereader/* $balancereader_repository
+    rm -rf $balancereader_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $balancereader_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $balancereader_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $balancereader_repository/
@@ -212,6 +221,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-userservice/* $userservice_repository
+    rm -rf $userservice_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $userservice_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $userservice_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $userservice_repository/
@@ -219,10 +229,11 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $userservice_repository/policy-library
     rm -rf $userservice_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $userservice_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$userservice_statebucket/" $userservice_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$userservice_statebucket/" $userservice_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $userservice_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/frontend/* $frontend_repository
+    rm -rf $frontend_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $frontend_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $frontend_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $frontend_repository/
@@ -230,21 +241,23 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $frontend_repository/policy-library
     rm -rf $frontend_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $frontend_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$frontend_statebucket/" $frontend_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$frontend_statebucket/" $frontend_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $frontend_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-contacts/* $contacts_repository
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $contacts_repository
+    rm -rf $contacts_repository/modules
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
     chmod 755 $contacts_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $contacts_repository/policy-library
     rm -rf $contacts_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $contacts_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$contacts_statebucket/" $contacts_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$contacts_statebucket/" $contacts_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $contacts_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-ledgerwriter/* $ledgerwriter_repository
+    rm -rf $ledgerwriter_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $ledgerwriter_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $ledgerwriter_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $ledgerwriter_repository/
@@ -252,10 +265,11 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $ledgerwriter_repository/policy-library
     rm -rf $ledgerwriter_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $ledgerwriter_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $ledgerwriter_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-transactionhistory/* $transactionhistory_repository
+    rm -rf $transactionhistory_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $transactionhistory_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $transactionhistory_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $transactionhistory_repository/
@@ -263,7 +277,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $transactionhistory_repository/policy-library
     rm -rf $transactionhistory_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $transactionhistory_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $transactionhistory_repository/*/*/terraform.tfvars
     ```
 
@@ -320,7 +334,6 @@ The steps below assume that you are checkout out on the same level as `terraform
     git checkout -b production
     git push --set-upstream origin production
     ```
-
 
 ##### Commit changes for BalanceReader service
 
@@ -418,7 +431,14 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 #### Application Source Code pipeline
 
-The step below assumes your are on `terraform-google-enterprise-application` repository.
+The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+
+```txt
+.
+├── terraform-example-foundation
+├── terraform-google-enterprise-application
+└── .
+```
 
 1. Clone Bank of Anthos repository:
 
@@ -426,10 +446,11 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
     git clone --branch v0.6.4 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
     ```
 
-1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.
+1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables .
 
     ```bash
     cd bank-of-anthos
+    git checkout -b main
     export BANK_OF_ANTHOS_PATH=$(pwd)
     export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource/cymbal-bank)
     ```
@@ -443,7 +464,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         rm -rf src/frontend/k8s
         ```
 
-    - Update database and components assets:
+  - Update database and components assets:
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/ledger-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/ledger/ledger-db/k8s/overlays
@@ -453,7 +474,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         cp -r $APP_SOURCE_DIR_PATH/components $BANK_OF_ANTHOS_PATH/src/
         ```
 
-    - Override `skaffold.yaml` files:
+  - Override `skaffold.yaml` files:
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/frontend/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/frontend
@@ -465,7 +486,8 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/userservice
         cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/contacts
         ```
-    - Update `k8s` overlays:
+
+  - Update `k8s` overlays:
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/frontend/k8s $BANK_OF_ANTHOS_PATH/src/frontend
@@ -478,13 +500,13 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/k8s/* $BANK_OF_ANTHOS_PATH/src/accounts/contacts/k8s
         ```
 
-    - Create specific assets for `frontend`:
+  - Create specific assets for `frontend`:
 
         ```bash
         cp $APP_SOURCE_DIR_PATH/../../../test/integration/appsource/assets/* $BANK_OF_ANTHOS_PATH/src/frontend/k8s/overlays/development
         ```
 
-    - Add files and commit:
+  - Add files and commit:
 
         ``` bash
         git add .
@@ -494,6 +516,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 1. Retrieve Cymbal Bank repositories created on 5-appinfra.
 
     - Balance Reader:
+
         ```bash
         terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" init
         export balancereader_project=$(terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" output -raw service_repository_project_id )
@@ -503,6 +526,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Transaction History:
+
         ```bash
         terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" init
         export transactionhistory_project=$(terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" output -raw service_repository_project_id )
@@ -512,6 +536,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Legderwriter:
+
         ```bash
         terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" init
         export ledgerwriter_project=$(terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw service_repository_project_id )
@@ -521,6 +546,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Frontend:
+
         ```bash
         terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" init
         export frontend_project=$(terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" output -raw service_repository_project_id )
@@ -530,6 +556,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Contacts:
+
         ```bash
         terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" init
         export contacts_project=$(terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" output -raw service_repository_project_id )
@@ -539,6 +566,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - User Service:
+
         ```bash
         terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" init
         export userservice_project=$(terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" output -raw service_repository_project_id )
@@ -550,12 +578,12 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 1. Add remote source repositories.
 
     ```bash
-    git remote add frontend https://source.developers.google.com/p/$frontend_project/r/$frontend_repository
-    git remote add contacts https://source.developers.google.com/p/$contacts_project/r/$contacts_repository
-    git remote add userservice https://source.developers.google.com/p/$userservice_project/r/$userservice_repository
-    git remote add ledgerwriter https://source.developers.google.com/p/$ledgerwriter_project/r/$ledgerwriter_repository
-    git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/$transactionhistory_repository
-    git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/$balancereader_repository
+    git remote add frontend https://source.developers.google.com/p/$frontend_project/r/eab-cymbal-bank-frontend
+    git remote add contacts https://source.developers.google.com/p/$contacts_project/r/eab-cymbal-bank-accounts-contacts
+    git remote add userservice https://source.developers.google.com/p/$userservice_project/r/eab-cymbal-bank-accounts-userservice
+    git remote add ledgerwriter https://source.developers.google.com/p/$ledgerwriter_project/r/eab-cymbal-bank-ledger-ledgerwriter
+    git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/eab-cymbal-bank-ledger-transactionhistory
+    git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/eab-cymbal-bank-ledger-balancereader
     ```
 
 1. Push `main` branch to each remote:
@@ -641,6 +669,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -R ./terraform-google-enterprise-application/examples/cymbal-bank/4-appfactory/envs/* ./eab-applicationfactory/envs/
     cp -R ./terraform-google-enterprise-application/4-appfactory/modules/* ./eab-applicationfactory/modules/
     ```
+
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
 
    ```bash
@@ -754,7 +783,15 @@ The steps below assume that you are checkout out on the same level as `terraform
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
+    rm -rf $frontend_repository/modules
+    rm -rf $balancereader_repository/modules
+    rm -rf $userservice_repository/modules
+    rm -rf $contacts_repository/modules
+    rm -rf $ledgerwriter_repository/modules
+    rm -rf $transactionhistory_repository/modules
+
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-balancereader/* $balancereader_repository
+    rm -rf $balancereader_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $balancereader_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $balancereader_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $balancereader_repository/
@@ -762,11 +799,12 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $balancereader_repository/policy-library
     rm -rf $balancereader_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $balancereader_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $balancereader_repository/*/*/terraform.tfvars
 
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-userservice/* $userservice_repository
+    rm -rf $userservice_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $userservice_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $userservice_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $userservice_repository/
@@ -774,10 +812,11 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $userservice_repository/policy-library
     rm -rf $userservice_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $userservice_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$userservice_statebucket/" $userservice_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$userservice_statebucket/" $userservice_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $userservice_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/frontend/* $frontend_repository
+    rm -rf $frontend_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $frontend_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $frontend_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $frontend_repository/
@@ -785,10 +824,11 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $frontend_repository/policy-library
     rm -rf $frontend_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $frontend_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$frontend_statebucket/" $frontend_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$frontend_statebucket/" $frontend_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $frontend_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-contacts/* $contacts_repository
+    rm -rf $contacts_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $contacts_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
@@ -796,10 +836,11 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $contacts_repository/policy-library
     rm -rf $contacts_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $contacts_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$contacts_statebucket/" $contacts_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$contacts_statebucket/" $contacts_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $contacts_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-ledgerwriter/* $ledgerwriter_repository
+    rm -rf $ledgerwriter_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $ledgerwriter_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $ledgerwriter_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $ledgerwriter_repository/
@@ -807,10 +848,11 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $ledgerwriter_repository/policy-library
     rm -rf $ledgerwriter_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $ledgerwriter_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $ledgerwriter_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-transactionhistory/* $transactionhistory_repository
+    rm -rf $transactionhistory_repository/modules
     cp -R ../terraform-google-enterprise-application/5-appinfra/modules $transactionhistory_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $transactionhistory_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $transactionhistory_repository/
@@ -818,7 +860,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     cp -RT ../terraform-example-foundation/policy-library/ $transactionhistory_repository/policy-library
     rm -rf $transactionhistory_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $transactionhistory_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_ME/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $transactionhistory_repository/*/*/terraform.tfvars
     ```
 
@@ -884,7 +926,6 @@ The steps below assume that you are checkout out on the same level as `terraform
     git checkout -b production
     terraform apply -chdir="envs/shared"
     ```
-
 
 ##### Commit changes for BalanceReader service
 
@@ -993,7 +1034,14 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 #### Application Source Code pipeline
 
-The step below assumes your are on `terraform-google-enterprise-application` repository.
+The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+
+```txt
+.
+├── terraform-example-foundation
+├── terraform-google-enterprise-application
+└── .
+```
 
 1. Clone Bank of Anthos repository:
 
@@ -1005,8 +1053,9 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 
     ```bash
     cd bank-of-anthos
+    git checkout -b main
     export BANK_OF_ANTHOS_PATH=$(pwd)
-    export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource)
+    export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource/cymbal-bank)
     ```
 
 1. Run the commands below to update the `bank-of-anthos` codebase with the updated assets:
@@ -1018,7 +1067,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         rm -rf src/frontend/k8s
         ```
 
-    - Update database and components assets:
+  - Update database and components assets:
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/ledger-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/ledger/ledger-db/k8s/overlays
@@ -1028,7 +1077,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         cp -r $APP_SOURCE_DIR_PATH/components $BANK_OF_ANTHOS_PATH/src/
         ```
 
-    - Override `skaffold.yaml` files:
+  - Override `skaffold.yaml` files:
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/frontend/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/frontend
@@ -1040,7 +1089,8 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/userservice
         cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/contacts
         ```
-    - Update `k8s` overlays:
+
+  - Update `k8s` overlays:
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/frontend/k8s $BANK_OF_ANTHOS_PATH/src/frontend
@@ -1053,13 +1103,13 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/k8s/* $BANK_OF_ANTHOS_PATH/src/accounts/contacts/k8s
         ```
 
-    - Create specific assets for `frontend`:
+  - Create specific assets for `frontend`:
 
         ```bash
         cp $APP_SOURCE_DIR_PATH/../../../test/integration/appsource/assets/* $BANK_OF_ANTHOS_PATH/src/frontend/k8s/overlays/development
         ```
 
-    - Add files and commit:
+  - Add files and commit:
 
         ``` bash
         git add .
@@ -1069,6 +1119,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 1. Retrieve Cymbal Bank repositories created on 5-appinfra.
 
     - Balance Reader:
+
         ```bash
         terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" init
         export balancereader_project=$(terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" output -raw service_repository_project_id )
@@ -1078,6 +1129,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Transaction History:
+
         ```bash
         terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" init
         export transactionhistory_project=$(terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" output -raw service_repository_project_id )
@@ -1087,6 +1139,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Legderwriter:
+
         ```bash
         terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" init
         export ledgerwriter_project=$(terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw service_repository_project_id )
@@ -1096,6 +1149,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Frontend:
+
         ```bash
         terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" init
         export frontend_project=$(terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" output -raw service_repository_project_id )
@@ -1105,6 +1159,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - Contacts:
+
         ```bash
         terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" init
         export contacts_project=$(terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" output -raw service_repository_project_id )
@@ -1114,6 +1169,7 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
         ```
 
     - User Service:
+
         ```bash
         terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" init
         export userservice_project=$(terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" output -raw service_repository_project_id )
@@ -1125,12 +1181,12 @@ The step below assumes your are on `terraform-google-enterprise-application` rep
 1. Add remote source repositories.
 
     ```bash
-    git remote add frontend https://source.developers.google.com/p/$frontend_project/r/$frontend_repository
-    git remote add contacts https://source.developers.google.com/p/$contacts_project/r/$contacts_repository
-    git remote add userservice https://source.developers.google.com/p/$userservice_project/r/$userservice_repository
-    git remote add ledgerwriter https://source.developers.google.com/p/$ledgerwriter_project/r/$ledgerwriter_repository
-    git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/$transactionhistory_repository
-    git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/$balancereader_repository
+    git remote add frontend https://source.developers.google.com/p/$frontend_project/r/eab-cymbal-bank-frontend
+    git remote add contacts https://source.developers.google.com/p/$contacts_project/r/eab-cymbal-bank-accounts-contacts
+    git remote add userservice https://source.developers.google.com/p/$userservice_project/r/eab-cymbal-bank-accounts-userservice
+    git remote add ledgerwriter https://source.developers.google.com/p/$ledgerwriter_project/r/eab-cymbal-bank-ledger-ledgerwriter
+    git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/eab-cymbal-bank-ledger-transactionhistory
+    git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/eab-cymbal-bank-ledger-balancereader
     ```
 
 1. Push `main` branch to each remote:
