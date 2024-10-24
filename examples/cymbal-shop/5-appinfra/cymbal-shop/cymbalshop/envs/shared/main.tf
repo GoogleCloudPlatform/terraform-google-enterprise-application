@@ -23,7 +23,7 @@ locals {
 }
 
 module "app" {
-  source = "../../../../../modules/cicd-pipeline"
+  source = "../../modules/cicd-pipeline"
 
   project_id                 = local.app_admin_project
   region                     = var.region

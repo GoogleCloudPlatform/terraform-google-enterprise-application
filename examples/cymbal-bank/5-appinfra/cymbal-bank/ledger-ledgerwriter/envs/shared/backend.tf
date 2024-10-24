@@ -16,7 +16,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "UPDATE_ME"
+    bucket = "UPDATE_INFRA_REPO_STATE"
     prefix = "terraform/appinfra/cymbal-bank/ledgerwriter/shared"
   }
 }
