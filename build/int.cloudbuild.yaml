@@ -242,7 +242,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
+        "cft test run TestSingleProjectHelloWorld --stage verify --verbose",
       ]
     waitFor:
       - standalone-apply
