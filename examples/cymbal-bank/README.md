@@ -16,7 +16,7 @@ This example requires:
 
 ### Deploying with Google Cloud Build
 
-The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -184,7 +184,7 @@ The steps below assume that you are checkout out on the same level as `terraform
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
-1. Clone the repositories for each service and initialized:
+1. Clone the repositories for each service and initialize:
 
     ```bash
     mkdir cymbal-bank
@@ -431,7 +431,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 #### Application Source Code pipeline
 
-The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -596,7 +596,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 ### Deploying locally
 
-The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -767,7 +767,7 @@ The steps below assume that you are checkout out on the same level as `terraform
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
-1. Clone the repositories for each service and initialized:
+1. Clone the repositories for each service and initialize:
 
     ```bash
     mkdir cymbal-bank
@@ -1034,7 +1034,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
 #### Application Source Code pipeline
 
-The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .

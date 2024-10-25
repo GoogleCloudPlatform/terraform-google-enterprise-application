@@ -18,7 +18,7 @@ This example requires:
 
 ### Deploying with Google Cloud Build
 
-**IMPORTANT**: The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+**IMPORTANT**: The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -142,7 +142,7 @@ This stage will setup the application admin project, and infrastructure specific
 
 This stage will create the CI/CD pipeline for the service, and application specific infrastructure if specified.
 
-**IMPORTANT**: The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+**IMPORTANT**: The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -151,7 +151,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
 └── .
 ```
 
-1. Retrieve Cymbal Shop repository, Admin Project and Appplication specific State Bucket that were created on 4-appfactory stage.
+1. Retrieve Cymbal Shop repository, Admin Project, and Application specific State Bucket that were created on 4-appfactory stage.
 
     ```bash
     cd eab-applicationfactory/envs/shared/
@@ -175,7 +175,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
-1. Clone the repositories for each service and initialized:
+1. Clone the repositories for each service and initialize:
 
     ```bash
     gcloud source repos clone $cymbalshop_infra_repo --project=$cymbalshop_project
@@ -222,7 +222,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
 
 #### Deploy Cymbal Shop App Source
 
-**IMPORTANT**: The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+**IMPORTANT**: The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
