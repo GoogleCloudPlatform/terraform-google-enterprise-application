@@ -20,13 +20,42 @@
 locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
-  cicd_apps = {
-    "app-01" = {
-      application_name = "default-example"
-      service_name     = "hello-world"
-      team_name        = "default"
+  cicd_apps = { "app-01" = {
+      application_name = "cymbal-bank"
+      service_name     = "contacts"
+      team_name        = "account"
       repo_branch      = "main"
-    }
+    },
+    "app-02" = {
+      application_name = "cymbal-bank"
+      service_name     = "userservice"
+      team_name        = "account"
+      repo_branch      = "main"
+    },
+    "app-03" = {
+      application_name = "cymbal-bank"
+      service_name     = "frontend"
+      team_name        = "frontend"
+      repo_branch      = "main"
+    },
+    "app-04" = {
+      application_name = "cymbal-bank"
+      service_name     = "balancereader"
+      team_name        = "ledger"
+      repo_branch      = "main"
+    },
+    "app-05" = {
+      application_name = "cymbal-bank"
+      service_name     = "ledgerwriter"
+      team_name        = "ledger"
+      repo_branch      = "main"
+    },
+    "app-06" = {
+      application_name = "cymbal-bank"
+      service_name     = "transactionhistory"
+      team_name        = "ledger"
+      repo_branch      = "main"
+    },
   }
 }
 
@@ -40,9 +69,16 @@ module "cicd" {
 
   service_name           = each.value.service_name
   team_name              = each.value.team_name
-  repo_name              = "eab-${each.value.application_name}-${each.value.service_name}"
+  repo_name              = each.value.team_name != each.value.service_name ? "eab-${each.value.application_name}-${each.value.team_name}-${each.value.service_name}" : "eab-${each.value.application_name}-${each.value.service_name}"
   repo_branch            = each.value.repo_branch
-  app_build_trigger_yaml = "cloudbuild.yaml"
+  app_build_trigger_yaml = "src/${each.value.team_name}/cloudbuild.yaml"
+
+  additional_substitutions = {
+    _SERVICE = each.value.service_name
+    _TEAM    = each.value.team_name
+  }
+
+  ci_build_included_files = ["src/${each.value.team_name}/**", "src/components/**"]
 
   buckets_force_destroy = true
 }

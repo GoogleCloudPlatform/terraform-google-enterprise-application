@@ -245,6 +245,16 @@ steps:
         "cft test run TestSingleProjectHelloWorld --stage verify --verbose",
       ]
     waitFor:
+      - standalone-apply  
+  - id: standalone-source-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestSourceCymbalBankSingleProject --stage verify --verbose",
+      ]
+    waitFor:
       - standalone-apply
   - id: standalone-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -256,6 +266,7 @@ steps:
       ]
     waitFor:
       - standalone-verify
+      - standalone-source-verify
 
 tags:
   - "ci"

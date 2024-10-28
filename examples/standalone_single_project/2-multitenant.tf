@@ -17,7 +17,7 @@
 # 2-multitenant
 
 locals {
-  env = "nonproduction"
+  env = "development"
 
   apps = {
     "cymbal-bank" : {
