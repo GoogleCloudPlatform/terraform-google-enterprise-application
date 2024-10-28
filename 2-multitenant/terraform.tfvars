@@ -18,3 +18,4 @@ apps = {
   "default-example" : {
     "acronym" = "de",
   }
+}
