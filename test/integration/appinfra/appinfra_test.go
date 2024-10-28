@@ -75,7 +75,7 @@ func TestAppInfra(t *testing.T) {
 
 			remoteState := bootstrap.GetStringOutput("state_bucket")
 
-			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, suffixServiceName)).String(), "/")
+			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get("default-example\\.hello-world.app_cloudbuild_workspace_state_bucket_name").String(), "/")
 			backendConfig := map[string]interface{}{
 				"bucket": backend_bucket[len(backend_bucket)-1],
 			}
