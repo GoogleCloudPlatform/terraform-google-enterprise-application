@@ -160,7 +160,6 @@ steps:
         "cft test run TestAppInfra --stage teardown --verbose",
       ]
     waitFor:
-      - app-e2e
       - appsource-verify-hello-world
       - appinfra-verify
       - appfactory-verify
