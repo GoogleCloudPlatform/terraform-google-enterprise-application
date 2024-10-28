@@ -23,16 +23,8 @@ import (
 
 var (
 	ServicesNames = map[string][]string{
-		"cymbal-bank": {
-			"accounts-contacts",
-			"accounts-userservice",
-			"frontend",
-			"ledger-balancereader",
-			"ledger-ledgerwriter",
-			"ledger-transactionhistory",
-		},
-		"cymbal-shop": {
-			"cymbalshop",
+		"default-example": {
+			"hello-world",
 		},
 	}
 
@@ -44,7 +36,7 @@ var (
 	}
 
 	AppNames = []string{
-		"cymbal-bank",
+		"default-example",
 	}
 )
 

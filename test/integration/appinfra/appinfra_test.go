@@ -58,7 +58,7 @@ func TestAppInfra(t *testing.T) {
 
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
-		appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
+		appSourcePath := "../../../5-appinfra/apps/default-example"
 		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 		for _, fullServiceName := range serviceNames {
 			fullServiceName := fullServiceName // capture range variable
