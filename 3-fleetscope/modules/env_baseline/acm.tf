@@ -40,13 +40,11 @@ resource "google_project_iam_member" "root_reconciler" {
   member  = "serviceAccount:${google_service_account.root_reconciler.email}"
 }
 
-resource "google_service_account_iam_binding" "workload_identity" {
+resource "google_service_account_iam_member" "workload_identity" {
   service_account_id = google_service_account.root_reconciler.name
-  role               = "roles/iam.workloadIdentityUser"
 
-  members = [
-    "serviceAccount:${var.cluster_project_id}.svc.id.goog[config-management-system/root-reconciler]",
-  ]
+  role   = "roles/iam.workloadIdentityUser"
+  member = "serviceAccount:${var.cluster_project_id}.svc.id.goog[config-management-system/root-reconciler]"
 }
 
 resource "google_gke_hub_feature" "acm_feature" {
