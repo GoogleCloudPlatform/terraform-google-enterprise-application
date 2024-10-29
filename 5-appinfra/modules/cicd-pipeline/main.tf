@@ -32,3 +32,10 @@ resource "google_sourcerepo_repository" "app_repo" {
   project = var.project_id
   name    = var.repo_name
 }
+
+resource "google_sourcerepo_repository_iam_member" "member" {
+  project    = var.project_id
+  repository = google_sourcerepo_repository.app_repo.name
+  role       = "roles/source.admin"
+  member     = google_project_service_identity.cloudbuild_service_identity.member
+}

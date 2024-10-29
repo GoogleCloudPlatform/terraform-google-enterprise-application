@@ -19,7 +19,9 @@
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| clouddeploy\_targets\_names | Cloud deploy targets names. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 

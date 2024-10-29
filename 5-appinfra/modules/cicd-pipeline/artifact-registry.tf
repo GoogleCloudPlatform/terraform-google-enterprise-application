@@ -28,7 +28,7 @@ resource "google_artifact_registry_repository" "container_registry" {
 resource "google_artifact_registry_repository_iam_member" "member" {
   for_each = {
     "cloud_deploy" = "serviceAccount:${google_service_account.cloud_deploy.email}",
-    "compute"  = data.google_compute_default_service_account.compute_service_identity.member
+    "compute"      = data.google_compute_default_service_account.compute_service_identity.member
   }
 
   project    = var.project_id

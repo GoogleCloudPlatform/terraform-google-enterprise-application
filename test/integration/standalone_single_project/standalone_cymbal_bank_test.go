@@ -71,6 +71,7 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 				TeamName:    prefixServiceName,
 			}
 			servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
+			deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 			t.Run(servicePath, func(t *testing.T) {
 				t.Parallel()
 				mapPath := ""
@@ -196,7 +197,7 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 						t.Fatal("Failed to find the release.")
 					}
 					releaseName := releases[0].Get("name")
-					targetId := fmt.Sprintf("%s-%s", region, envName) //TODO: convert to loop using env_cluster_membership_ids
+					targetId := deployTargets.Get(servicesInfoMap[serviceName].ServiceName).Array()[0]
 					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
 					// Poll CD rollouts until rollout is successful
 					pollCloudDeploy := func(cmd string) func() (bool, error) {

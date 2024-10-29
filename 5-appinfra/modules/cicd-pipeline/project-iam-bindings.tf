@@ -13,60 +13,101 @@
 # limitations under the License.
 
 locals {
-  cloud_build_sas = ["serviceAccount:${google_service_account.cloud_build.email}"] # cloud build service accounts used for CI
-  membership_re   = "projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
-  envs            = keys(var.env_cluster_membership_ids)
+  membership_re = "projects/([^/]*)/locations/([^/]*)/memberships/([^/]*)$"
+  envs          = keys(var.env_cluster_membership_ids)
 
   memberships     = flatten([for i in local.envs : var.env_cluster_membership_ids[i].cluster_membership_ids])
   memberships_map = { for i, item in local.memberships : (i) => item }
   gke_projects    = { for i, item in local.memberships : (i) => regex(local.membership_re, item)[0] }
 }
-# authoritative project-iam-bindings to increase reproducibility
-module "project-iam-bindings" {
-  source   = "terraform-google-modules/iam/google//modules/projects_iam"
-  version  = "~> 8.0"
-  projects = [var.project_id]
-  mode     = "additive"
 
-  bindings = {
-    "roles/cloudtrace.agent" = [
-      data.google_compute_default_service_account.compute_service_identity.member
-    ],
-    "roles/monitoring.metricWriter" = [
-      data.google_compute_default_service_account.compute_service_identity.member
-    ],
-    "roles/logging.logWriter" = setunion(
-      [
-        data.google_compute_default_service_account.compute_service_identity.member,
-        "serviceAccount:${google_service_account.cloud_deploy.email}"
-      ],
-      local.cloud_build_sas
-    ),
-    "roles/cloudbuild.builds.builder" = setunion(
-      [
-        google_project_service_identity.cloudbuild_service_identity.member,
-      ],
-      local.cloud_build_sas
-    ),
-    "roles/gkehub.gatewayEditor" = [
-      "serviceAccount:${google_service_account.cloud_deploy.email}"
-    ],
-    "roles/gkehub.viewer" = setunion(
-      local.cloud_build_sas,
-      [
-        "serviceAccount:${google_service_account.cloud_deploy.email}"
-      ],
-    ),
-    "roles/clouddeploy.releaser" = local.cloud_build_sas,
-    "roles/container.developer" = [
-      "serviceAccount:${google_service_account.cloud_deploy.email}"
-    ],
-    "roles/container.admin" = [
-      "serviceAccount:${google_service_account.cloud_deploy.email}"
-    ],
-  }
+resource "google_project_iam_member" "cloud_trace_agent" {
+  project = var.project_id
+  role    = "roles/cloudtrace.agent"
+
+  member = data.google_compute_default_service_account.compute_service_identity.member
 }
 
+resource "google_project_iam_member" "metric_writer" {
+  project = var.project_id
+  role    = "roles/monitoring.metricWriter"
+
+  member = data.google_compute_default_service_account.compute_service_identity.member
+}
+
+resource "google_project_iam_member" "log_writer" {
+  for_each = {
+    "compute"      = data.google_compute_default_service_account.compute_service_identity.member,
+    "cloud_deploy" = google_service_account.cloud_deploy.member,
+    "cloud_build"  = google_service_account.cloud_build.member,
+  }
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+
+  member = each.value
+}
+
+resource "google_project_iam_member" "builder" {
+  for_each = {
+    "cloud_build_service" = google_service_account.cloud_deploy.member,
+    "cloud_build"         = google_service_account.cloud_build.member,
+  }
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.builder"
+
+  member = each.value
+}
+
+resource "google_project_iam_member" "gateway_editor" {
+  for_each = {
+    "cloud_deploy" = google_service_account.cloud_deploy.member,
+    "cloud_build"  = google_service_account.cloud_build.member,
+  }
+  project = var.project_id
+  role    = "roles/gkehub.gatewayEditor"
+
+  member = each.value
+}
+
+resource "google_project_iam_member" "gke_viewer" {
+  for_each = {
+    "cloud_deploy" = google_service_account.cloud_deploy.member,
+    "cloud_build"  = google_service_account.cloud_build.member,
+  }
+  project = var.project_id
+  role    = "roles/gkehub.viewer"
+
+  member = each.value
+}
+
+resource "google_project_iam_member" "cloud_deploy_releaser" {
+  project = var.project_id
+  role    = "roles/clouddeploy.releaser"
+
+  member = google_service_account.cloud_build.member
+}
+
+resource "google_project_iam_member" "container_developer" {
+  for_each = {
+    "cloud_deploy" = google_service_account.cloud_deploy.member,
+    "cloud_build"  = google_service_account.cloud_build.member,
+  }
+  project = var.project_id
+  role    = "roles/container.developer"
+
+  member = each.value
+}
+
+resource "google_project_iam_member" "container_admin" {
+  for_each = {
+    "cloud_deploy" = google_service_account.cloud_deploy.member,
+    "cloud_build"  = google_service_account.cloud_build.member,
+  }
+  project = var.project_id
+  role    = "roles/container.admin"
+
+  member = each.value
+}
 
 // added to avoid overwriten of roles for each app service deploy service account, since GKE projects are shared between services
 module "cb-gke-project-iam-bindings" {

@@ -20,37 +20,37 @@
 locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
-  cicd_apps = { "app-01" = {
-      application_name = "cymbal-bank"
-      service_name     = "contacts"
-      team_name        = "account"
-      repo_branch      = "main"
+  cicd_apps = { "contacts" = {
+    application_name = "cymbal-bank"
+    service_name     = "contacts"
+    team_name        = "accounts"
+    repo_branch      = "main"
     },
-    "app-02" = {
+    "userservice" = {
       application_name = "cymbal-bank"
       service_name     = "userservice"
-      team_name        = "account"
+      team_name        = "accounts"
       repo_branch      = "main"
     },
-    "app-03" = {
+    "frontend" = {
       application_name = "cymbal-bank"
       service_name     = "frontend"
       team_name        = "frontend"
       repo_branch      = "main"
     },
-    "app-04" = {
+    "balancereader" = {
       application_name = "cymbal-bank"
       service_name     = "balancereader"
       team_name        = "ledger"
       repo_branch      = "main"
     },
-    "app-05" = {
+    "ledgerwriter" = {
       application_name = "cymbal-bank"
       service_name     = "ledgerwriter"
       team_name        = "ledger"
       repo_branch      = "main"
     },
-    "app-06" = {
+    "transactionhistory" = {
       application_name = "cymbal-bank"
       service_name     = "transactionhistory"
       team_name        = "ledger"

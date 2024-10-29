@@ -37,6 +37,8 @@ locals {
     "roles/viewer",
     "roles/iam.serviceAccountUser",
     "roles/privilegedaccessmanager.projectServiceAgent",
+    "roles/logging.logWriter",
+    "roles/source.admin"
   ]
 }
 

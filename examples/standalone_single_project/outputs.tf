@@ -89,3 +89,8 @@ output "app_infos" {
   description = "App infos (name, services, team)."
   value       = local.cicd_apps
 }
+
+output "clouddeploy_targets_names" {
+  description = "Cloud deploy targets names."
+  value       = { for k, cicd in module.cicd : k => cicd.clouddeploy_targets_names }
+}
