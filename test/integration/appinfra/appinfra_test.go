@@ -250,7 +250,7 @@ func TestAppInfra(t *testing.T) {
 
 					buildTriggerName := fmt.Sprintf("%s-ci", fullServiceName)
 					ciServiceAccountPath := fmt.Sprintf("projects/%s/serviceAccounts/%s", servicesInfoMap[fullServiceName].ProjectID, ciServiceAccountEmail)
-					buildTriggerOp := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", buildTriggerName, servicesInfoMap[fullServiceName].ProjectID, region)
+					buildTriggerOp := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", "default-hello-world-ci", servicesInfoMap[fullServiceName].ProjectID, region)
 					assert.Equal(ciServiceAccountPath, buildTriggerOp.Get("serviceAccount").String(), fmt.Sprintf("cloud build trigger %s should have service account %s", buildTriggerName, ciServiceAccountPath))
 				})
 				appService.Test()
