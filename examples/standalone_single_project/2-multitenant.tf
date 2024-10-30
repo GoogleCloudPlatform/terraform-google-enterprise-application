@@ -17,7 +17,8 @@
 # 2-multitenantl
 
 locals {
-  env = "development"
+  env       = "development"
+  short_env = "develop"
 
   apps = {
     "cymbal-bank" : {

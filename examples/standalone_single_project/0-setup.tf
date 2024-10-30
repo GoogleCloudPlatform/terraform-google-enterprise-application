@@ -21,7 +21,7 @@ module "vpc" {
   version = "~> 9.0"
 
   project_id      = var.project_id
-  network_name    = "eab-vpc-develop"
+  network_name    = "eab-vpc-${local.env}"
   shared_vpc_host = false
 
   egress_rules = [
@@ -58,13 +58,13 @@ module "vpc" {
 
   subnets = [
     {
-      subnet_name           = "eab-develop-region01"
+      subnet_name           = "eab-${local.short_env}-region01"
       subnet_ip             = "10.10.10.0/24"
       subnet_region         = "us-central1"
       subnet_private_access = true
     },
     {
-      subnet_name           = "eab-develop-region02"
+      subnet_name           = "eab-${local.short_env}-region02"
       subnet_ip             = "10.10.20.0/24"
       subnet_region         = "us-east4"
       subnet_private_access = true
@@ -72,24 +72,24 @@ module "vpc" {
   ]
 
   secondary_ranges = {
-    "eab-develop-region01" = [
+    "eab-${local.short_env}-region01" = [
       {
-        range_name    = "eab-develop-region01-secondary-01"
+        range_name    = "eab-${local.short_env}-region01-secondary-01"
         ip_cidr_range = "192.168.0.0/18"
       },
       {
-        range_name    = "eab-develop-region01-secondary-02"
+        range_name    = "eab-${local.short_env}-region01-secondary-02"
         ip_cidr_range = "192.168.64.0/18"
       },
     ]
 
-    "eab-develop-region02" = [
+    "eab-${local.short_env}-region02" = [
       {
-        range_name    = "eab-develop-region02-secondary-01"
+        range_name    = "eab-${local.short_env}-region02-secondary-01"
         ip_cidr_range = "192.168.128.0/18"
       },
       {
-        range_name    = "eab-develop-region02-secondary-02"
+        range_name    = "eab-${local.short_env}-region02-secondary-02"
         ip_cidr_range = "192.168.192.0/18"
       },
     ]

@@ -222,14 +222,7 @@ func TestAppInfra(t *testing.T) {
 					projectRoles = testutils.GetResultFieldStrSlice(filtered, "bindings.role")
 					assert.Subset(projectRoles, cbSARoles, fmt.Sprintf("Service Account %s should have %v roles at project %s.", ciServiceAccountEmail, cbSARoles, servicesInfoMap[fullServiceName].ProjectID))
 
-					cloudDeployTargets := make([]string, 0)
-					for _, v := range env_cluster_membership_ids {
-						for _, cluster_membership_id := range v["cluster_membership_ids"] {
-							cluster_membership_id := strings.Split(cluster_membership_id, "/")
-							cloudDeployTargets = append(cloudDeployTargets, cluster_membership_id[len(cluster_membership_id)-1])
-						}
-					}
-
+					cloudDeployTargets := appService.GetStringOutputList("clouddeploy_targets_names")
 					for _, targetName := range cloudDeployTargets {
 						deployTargetOp := gcloud.Runf(t, "deploy targets describe %s --project %s --region %s --flatten Target", strings.TrimPrefix(targetName, "cluster-"), servicesInfoMap[fullServiceName].ProjectID, region).Array()[0]
 						assert.Equal(cloudDeployServiceAccountEmail, deployTargetOp.Get("executionConfigs").Array()[0].Get("serviceAccount").String(), fmt.Sprintf("cloud deploy target %s should have service account %s", targetName, cloudDeployServiceAccountEmail))
