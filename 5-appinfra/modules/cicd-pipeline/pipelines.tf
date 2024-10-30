@@ -17,6 +17,7 @@
 
 locals {
   fleet_membership_re = "//gkehub.googleapis.com/(.*)$"
+  service_name_short  = substr(var.service_name, 0, 4)
 }
 
 # cloud deploy service account
@@ -31,7 +32,7 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
   for_each = local.memberships_map
 
   project  = var.project_id
-  name     = trimsuffix(substr("${var.service_name}-${trimprefix(regex(local.membership_re, each.value)[2], "cluster-")}", 0, 25), "-")
+  name     = trimsuffix(substr("${local.service_name_short}-${trimprefix(regex(local.membership_re, each.value)[2], "cluster-")}", 0, 25), "-")
   location = var.region
 
   anthos_cluster {

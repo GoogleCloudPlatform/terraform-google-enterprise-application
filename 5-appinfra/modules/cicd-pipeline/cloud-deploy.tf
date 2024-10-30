@@ -22,7 +22,7 @@ resource "google_clouddeploy_delivery_pipeline" "delivery-pipeline" {
       for_each = google_clouddeploy_target.clouddeploy_targets
       content {
         # TODO: use "production" profile once validated.
-        profiles  = [endswith(stages.value.name, "-development") ? "development" : (endswith(stages.value.name, "-nonproduction") ? "staging" : "production")]
+        profiles  = [endswith(stages.value.anthos_cluster[0].membership, "-development") ? "development" : (endswith(stages.value.name, "-nonproduction") ? "staging" : "production")]
         target_id = stages.value.name
       }
     }
