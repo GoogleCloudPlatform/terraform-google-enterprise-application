@@ -109,13 +109,6 @@ resource "google_project_iam_member" "container_admin" {
   member = each.value
 }
 
-resource "google_project_iam_member" "token_creator" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-
-  member = google_service_account.cloud_deploy.member
-}
-
 // added to avoid overwriten of roles for each app service deploy service account, since GKE projects are shared between services
 module "cb-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"

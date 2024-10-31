@@ -22,6 +22,12 @@ variable "region" {
   description = "CI/CD Region (e.g. us-central1)"
 }
 
+variable "cluster_services_accounts" {
+  description = "Cluster services accounts to be grantes Artifact Register reader role."
+  type        = map(string)
+  default     = {}
+}
+
 variable "env_cluster_membership_ids" {
   description = "Env Cluster Membership IDs"
   type = map(object({
