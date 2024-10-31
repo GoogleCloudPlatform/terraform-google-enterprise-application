@@ -258,7 +258,7 @@ steps:
         "cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
       ]
     waitFor:
-      - standalone-apply  
+      - standalone-apply
   - id: standalone-source-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
