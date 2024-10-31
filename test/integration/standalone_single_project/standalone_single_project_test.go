@@ -124,11 +124,6 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 		gkeServiceAgent := fmt.Sprintf("service-%s@gcp-sa-gkehub.iam.gserviceaccount.com", fleetProjectNumber)
 		gkeSaRoles := []string{"roles/gkehub.serviceAgent"}
 
-		// If using a seperate fleet project check the cross project SA role
-		if projectID != projectID {
-			gkeSaRoles = append(gkeSaRoles, "roles/gkehub.crossProjectServiceAgent")
-		}
-
 		gkeIamFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", gkeServiceAgent)
 		gkeIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", gkeIamFilter, "--format", "json"})
 		gkeProjectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", projectID), gkeIamCommonArgs).Array()
