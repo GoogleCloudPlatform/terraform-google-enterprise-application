@@ -28,6 +28,7 @@ module "app" {
   project_id                 = local.app_admin_project
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
+  cluster_services_accounts  = local.cluster_services_accounts
 
   service_name           = local.service_name
   team_name              = local.team_name
