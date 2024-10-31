@@ -23,7 +23,7 @@ variable "region" {
 }
 
 variable "cluster_services_accounts" {
-  description = "Cluster services accounts to be grantes Artifact Register reader role."
+  description = "Cluster services accounts to be granted the Artifact Registry reader role."
   type        = map(string)
   default     = {}
 }
