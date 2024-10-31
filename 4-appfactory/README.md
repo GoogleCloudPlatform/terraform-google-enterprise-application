@@ -33,7 +33,7 @@ It will also create an Application Folder to group your admin projects under it,
 
 ### Deploying with Google Cloud Build
 
-The steps below assume that you are checkout out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
 
 ```txt
 .
@@ -99,7 +99,7 @@ The steps below assume that you are checkout out on the same level as `terraform
 
     ```bash
     git add .
-    git commit -m 'Initialize multitenant repo'
+    git commit -m 'Initialize appfactory repo'
     git push --set-upstream origin plan
     ```
 
@@ -109,6 +109,7 @@ The steps below assume that you are checkout out on the same level as `terraform
     git checkout -b production
     git push origin production
     ```
+
 
 ### Running Terraform locally
 

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-    bucket = "UPDATE_ME"
-    prefix = "terraform/appfactory/shared"
-  }
-}
+remote_state_bucket = "REMOTE_STATE_BUCKET"
+
+region = "us-central1"
+
+buckets_force_destroy = "true"
+
+environment_names = ["development", "nonproduction", "production"]

@@ -14,26 +14,6 @@
  * limitations under the License.
  */
 
-variable "cluster_regions" {
-  description = "Cluster regions"
-  type        = list(string)
-}
-
-variable "app_project_id" {
-  description = "App Project ID"
-  type        = string
-}
-
-variable "network_project_id" {
-  description = "Network Project ID"
-  type        = string
-}
-
-variable "network_name" {
-  description = "Network name"
-  type        = string
-}
-
 variable "psc_consumer_fwd_rule_ip" {
   description = "Consumer psc endpoint IP address"
   type        = string

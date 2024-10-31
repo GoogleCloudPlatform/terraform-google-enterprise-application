@@ -23,6 +23,8 @@
 | Name | Description |
 |------|-------------|
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
+| service\_repository\_name | The Source Repository name. |
+| service\_repository\_project\_id | The Source Repository project id. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 

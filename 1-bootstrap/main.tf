@@ -26,7 +26,7 @@ locals {
     "applicationfactory" = {
       repo_name    = "eab-applicationfactory",
       bucket_infix = "af"
-      roles        = []
+      roles        = ["roles/resourcemanager.projectIamAdmin"]
     }
     "fleetscope" = {
       repo_name    = "eab-fleetscope",
@@ -46,7 +46,7 @@ resource "google_sourcerepo_repository" "gcp_repo" {
 
 module "tfstate_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 6.0"
+  version = "~> 8.0"
 
   name          = "${var.bucket_prefix}-${var.project_id}-tf-state"
   project_id    = var.project_id
@@ -74,6 +74,11 @@ module "tf_cloudbuild_workspace" {
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
+  cloudbuild_sa_roles = {
+    "roles" = {
+      project_id = var.project_id
+    roles = each.value.roles }
+  }
 
   substitutions = {
     "_GAR_REGION"                   = var.location

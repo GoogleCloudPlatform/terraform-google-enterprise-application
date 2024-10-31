@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-// These values are retrieved from the saved terraform state of the execution
-// of previous step using the terraform_remote_state data source.
 locals {
-  cluster_service_accounts = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts])
-  acronym                  = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.acronyms])[0]
+  cluster_membership_ids = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => { "cluster_membership_ids" = (state.outputs.cluster_membership_ids) } }
+  app_admin_project      = data.terraform_remote_state.appfactory.outputs.app-group["default-example.hello-world"].app_admin_project_id
 }
 
 data "terraform_remote_state" "multitenant" {
-  for_each = var.envs
+  for_each = toset(var.environment_names)
 
   backend = "gcs"
 
   config = {
     bucket = var.remote_state_bucket
-    prefix = "terraform/multi_tenant/${each.key}"
+    prefix = "terraform/multi_tenant/${each.value}"
+  }
+}
+
+data "terraform_remote_state" "appfactory" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/appfactory/shared"
   }
 }

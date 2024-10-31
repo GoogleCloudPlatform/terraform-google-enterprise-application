@@ -18,3 +18,13 @@ output "clouddeploy_targets_names" {
   description = "Cloud deploy targets names."
   value       = module.app.clouddeploy_targets_names
 }
+
+output "service_repository_name" {
+  description = "The Source Repository name."
+  value       = module.app.service_repository_name
+}
+
+output "service_repository_project_id" {
+  description = "The Source Repository project id."
+  value       = module.app.service_repository_project_id
+}

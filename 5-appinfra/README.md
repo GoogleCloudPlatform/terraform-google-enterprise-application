@@ -27,6 +27,85 @@ You may add additional infrastructure like application-specifc databases or othe
 
 ## Usage
 
+### Deploying with Google Cloud Build
+
+The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+
+```txt
+.
+├── terraform-example-foundation
+├── terraform-google-enterprise-application
+└── .
+```
+
+#### Add Hello World envs at App Infra
+
+1. Retrieve repositories created on 4-appfactory.
+
+    ```bash
+    cd eab-applicationfactory/envs/shared/
+    terraform init
+
+    export helloworld_project=$(terraform output -json app-group | jq -r '.["default-example.hello-world"]["app_admin_project_id"]')
+    echo helloworld_project=$helloworld_project
+    export helloworld_repository=$(terraform output -json app-group | jq -r '.["default-example.hello-world"]["app_infra_repository_name"]')
+    echo helloworld_repository=$helloworld_repository
+    export helloworld_statebucket=$(terraform output -json app-group | jq -r '.["default-example.hello-world"]["app_cloudbuild_workspace_state_bucket_name"]' | sed 's/.*\///')
+    echo helloworld_statebucket=$helloworld_statebucket
+
+    cd ../../../
+    ```
+
+1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+
+   ```bash
+   terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" init
+   export remote_state_bucket=$(terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
+   echo "remote_state_bucket = ${remote_state_bucket}"
+   ```
+
+1. Clone the repositories for each service and initialize:
+
+    ```bash
+    gcloud source repos clone $helloworld_repository --project=$helloworld_project
+    ```
+
+1. Copy terraform code for each service repository and replace backend bucket:
+
+    ```bash
+    cp -R ./terraform-google-enterprise-application/5-appinfra/* $helloworld_repository
+    mv $helloworld_repository/apps/default-example/hello-world/envs/shared/terraform.example.tfvars $helloworld_repository/apps/default-example/hello-world/envs/shared/terraform.tfvars
+    cp ./terraform-example-foundation/build/cloudbuild-tf-* $helloworld_repository/
+    cp ./terraform-example-foundation/build/tf-wrapper.sh $helloworld_repository/
+    chmod 755 $helloworld_repository/tf-wrapper.sh
+    sed -i'' -e 's/max_depth=1/max_depth=5/' $helloworld_repository/tf-wrapper.sh
+    cp -RT ./terraform-example-foundation/policy-library/ $helloworld_repository/policy-library
+    rm -rf $helloworld_repository/policy-library/policies/constraints/*
+    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $helloworld_repository/cloudbuild-tf-*
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$helloworld_statebucket/" $helloworld_repository/apps/default-example/hello-world/envs/shared/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $helloworld_repository/apps/default-example/hello-world/envs/shared/terraform.tfvars
+    ```
+
+##### Commit changes to repository
+
+1. Commit files to transactionhistory repository a plan branch:
+
+    ```bash
+    cd $helloworld_repository
+
+    git checkout -b plan
+    git add .
+    git commit -m 'Initialize helloworld repo'
+    git push --set-upstream origin plan
+    ```
+
+1. Merge plan to production branch:
+
+   ```bash
+    git checkout -b production
+    git push --set-upstream origin production
+    ```
+
 ### Running Terraform locally
 
 1. The next instructions assume that you are in the `terraform-google-enterprise-application/5-appinfra` folder.
@@ -35,7 +114,7 @@ You may add additional infrastructure like application-specifc databases or othe
    cd terraform-google-enterprise-application/5-appinfra
    ```
 
-Under the `apps` folder are examples for each of the cymbal bank applications.
+Under the `apps` folder are examples for each of the applications.
 
 1. Change directory into any of these folders to deploy.
 

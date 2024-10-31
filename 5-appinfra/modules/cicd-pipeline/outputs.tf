@@ -16,3 +16,13 @@ output "clouddeploy_targets_names" {
   description = "Cloud deploy targets names."
   value       = [for target in google_clouddeploy_target.clouddeploy_targets : target.name]
 }
+
+output "service_repository_name" {
+  description = "The Source Repository name."
+  value       = google_sourcerepo_repository.app_repo.name
+}
+
+output "service_repository_project_id" {
+  description = "The Source Repository project id."
+  value       = google_sourcerepo_repository.app_repo.project
+}

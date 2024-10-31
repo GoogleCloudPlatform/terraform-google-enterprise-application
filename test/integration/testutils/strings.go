@@ -31,6 +31,9 @@ var (
 			"ledger-ledgerwriter",
 			"ledger-transactionhistory",
 		},
+		"cymbal-shop": {
+			"cymbalshop",
+		},
 	}
 
 	ServicesWithEnvProject = map[string][]string{

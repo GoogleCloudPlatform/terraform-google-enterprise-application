@@ -24,4 +24,13 @@ apps = {
     }
     "acronym" = "cb",
   }
+  "cymbal-shop" : {
+    "ip_address_names" : [
+      "cymbal-shop-frontend-ip",
+    ]
+    "certificates" : {
+      "cymbal-shop-frontend-example-com" : ["cymbal-shop.frontend.example.com"]
+    }
+    "acronym" = "cs",
+  }
 }
