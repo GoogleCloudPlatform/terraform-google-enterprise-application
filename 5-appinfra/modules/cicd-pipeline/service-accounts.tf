@@ -34,3 +34,9 @@ resource "google_service_account_iam_member" "cloud_build_impersonate_cloud_depl
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.cloud_build.email}"
 }
+
+resource "google_service_account_iam_member" "cloud_build_token_creator_cloud_deploy" {
+  service_account_id = google_service_account.cloud_deploy.id
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${google_service_account.cloud_build.email}"
+}
