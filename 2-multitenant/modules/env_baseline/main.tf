@@ -28,6 +28,12 @@ locals {
   }
 }
 
+resource "google_project_service_identity" "compute_sa" {
+  provider = google-beta
+  project  = local.cluster_project_id
+  service  = "compute.googleapis.com"
+}
+
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
@@ -44,6 +50,16 @@ module "eab_cluster_project" {
   svpc_host_project_id     = var.network_project_id
   shared_vpc_subnets       = var.cluster_subnetworks
   deletion_policy          = "DELETE"
+
+
+  default_service_account = "KEEP"
+
+  activate_api_identities = [
+    {
+      api   = "compute.googleapis.com",
+      roles = []
+    }
+  ]
 
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
@@ -221,7 +237,8 @@ module "gke-standard" {
     module.eab_cluster_project,
     google_project_iam_member.gke_service_agent,
     google_project_iam_member.servicemesh_service_agent,
-    google_project_iam_member.multiclusterdiscovery_service_agent
+    google_project_iam_member.multiclusterdiscovery_service_agent,
+    google_project_service_identity.compute_sa
   ]
 
   // Private Cluster Configuration
@@ -231,6 +248,7 @@ module "gke-standard" {
   fleet_project_grant_service_agent = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
+
 }
 
 module "gke-autopilot" {
@@ -269,7 +287,8 @@ module "gke-autopilot" {
     module.eab_cluster_project,
     google_project_iam_member.gke_service_agent,
     google_project_iam_member.servicemesh_service_agent,
-    google_project_iam_member.multiclusterdiscovery_service_agent
+    google_project_iam_member.multiclusterdiscovery_service_agent,
+    google_project_service_identity.compute_sa
   ]
 
   // Private Cluster Configuration

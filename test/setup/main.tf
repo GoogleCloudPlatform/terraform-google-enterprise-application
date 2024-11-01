@@ -77,6 +77,14 @@ module "project" {
     "sqladmin.googleapis.com",
     "cloudbilling.googleapis.com"
   ]
+  default_service_account = "KEEP"
+
+  activate_api_identities = [
+    {
+      api   = "compute.googleapis.com",
+      roles = []
+    }
+  ]
 }
 
 module "project_standalone" {
@@ -90,6 +98,15 @@ module "project_standalone" {
   folder_id                = var.folder_id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
+
+  default_service_account = "KEEP"
+
+  activate_api_identities = [
+    {
+      api   = "compute.googleapis.com",
+      roles = []
+    }
+  ]
 
   activate_apis = [
     "anthos.googleapis.com",
