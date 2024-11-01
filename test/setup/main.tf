@@ -67,6 +67,7 @@ module "project" {
 
   activate_apis = [
     "cloudbuild.googleapis.com",
+    "compute.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com",
     "storage-api.googleapis.com",
