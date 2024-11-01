@@ -573,10 +573,10 @@ The steps below assume that you are checked out on the same level as `terraform-
 
 - Remove components and frontend:
 
-      ```bash
-      rm -rf src/components
-      rm -rf src/frontend/k8s
-      ```
+    ```bash
+    rm -rf src/components
+    rm -rf src/frontend/k8s
+    ```
 
 - Update database and components assets:
 
