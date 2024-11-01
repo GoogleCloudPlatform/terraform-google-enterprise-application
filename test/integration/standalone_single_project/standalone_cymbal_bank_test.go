@@ -29,6 +29,7 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/tidwall/gjson"
 
 	cp "github.com/otiai10/copy"
 )
@@ -172,11 +173,18 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
-				buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
+				buildListCmd := fmt.Sprintf("builds list --region=%s --project %s", region, servicesInfoMap[serviceName].ProjectID)
 				// poll build until complete
 				pollCloudBuild := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
-						build := gcloud.Runf(t, cmd).Array()
+						allBuilds := gcloud.Runf(t, cmd).Array()
+						var build []gjson.Result
+						for _, b := range allBuilds {
+							if b.Get("substitutions.COMMIT_SHA").String() == lastCommit {
+								fmt.Printf("Build found form commit %s: %s \n", lastCommit, b.Get("buildTriggerId"))
+								build = append(build, b)
+							}
+						}
 						if len(build) < 1 {
 							return true, nil
 						}
