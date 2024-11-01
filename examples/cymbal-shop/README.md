@@ -265,3 +265,152 @@ This stage will create the CI/CD pipeline for the service, and application speci
     ```
 
 1. You can view the build results on the Cymbal Shop Admin Project.
+
+### Deploying with Terraform Locally
+
+**IMPORTANT**: The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+
+```txt
+.
+├── terraform-google-enterprise-application
+└── .
+```
+
+#### Ensure the app acronym is present in 2-multitenant `terraform.tfvars` file
+
+1. Navigate to the Multitenant repository and add the value below if it is not present:
+
+    ```diff
+    apps = {
+    +    "cymbal-shop": {
+    +        "acronym" = "cs",
+    +    },
+        ...
+    }
+    ```
+
+#### Add Cymbal Shop Namespaces at the Fleetscope repository
+
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run.
+
+1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
+
+    ```diff
+    namespace_ids = {
+    +    "cymbalshops"     = "your-cymbalshop-group@yourdomain.com",
+         ...
+    }
+   ```
+
+#### Deploy Cymbal Shop App Factory
+
+1. Add the cymbal shop application to the `terraform.tfvars` file on 4-appfactory:
+
+    ```diff
+    applications = {
+    +    "cymbal-shop" = {
+    +        "cymbalshop" = {
+    +        create_infra_project = false
+    +        create_admin_project = true
+    +        },
+    +    }
+    ...
+    }
+   ```
+
+1. Run `terraform apply` command on `4-appfactory/envs/shared`.
+
+#### Deploy Cymbal Shop App Infra
+
+1. Copy the directories under `examples/cymbal-shop/5-appinfra` to `5-appinfra`.
+
+    ```bash
+    APP_INFRA_REPO=$(readlink -f ./terraform-google-enterprise-application/5-appinfra)
+    cp -r $APP_INFRA_REPO/../examples/cymbal-shop/5-appinfra/* $APP_INFRA_REPO/apps/
+    (cd $APP_INFRA_REPO/apps/cymbal-shop/cymbalshop && rm -rf modules && ln -s ../../../modules modules)
+    ```
+
+    > NOTE: This command must be run on the same level as `terraform-google-enterprise-application` directory.
+
+1. Navigate to `terraform-google-enterprise-application/5-appinfra` directory
+
+    ```bash
+    cd terraform-google-enterprise-application/5-appinfra
+    ```
+
+1. Adjust the `backend.tf` file with values from your environment. Follow the steps below to retrieve the backend and replace the placeholder:
+
+    - Retrieve state bucket from 4-appfactory and update the example with it:
+
+        ```bash
+        export cymbalshop_statebucket=$(terraform -chdir=../4-appfactory/envs/shared output -json app-group | jq -r '.["cymbal-shop.cymbalshop"].app_cloudbuild_workspace_state_bucket_name' | sed 's/.*\///')
+        echo cymbalshop_statebucket=$cymbalshop_statebucket
+
+        sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$cymbalshop_statebucket/" $APP_INFRA_REPO/apps/cymbal-shop/cymbalshop/envs/shared/backend.tf
+        ```
+
+1. Adjust the `terraform.tfvars` file with values from your environment. Follow the steps below to retrieve the state bucket and replace the placeholder:
+
+    - Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+
+        ```bash
+        terraform -chdir="../1-bootstrap/" init
+        export remote_state_bucket=$(terraform -chdir="../1-bootstrap/" output -raw state_bucket)
+        echo "remote_state_bucket = ${remote_state_bucket}"
+
+        sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $APP_INFRA_REPO/apps/cymbal-shop/cymbalshop/envs/shared//terraform.tfvars
+        ```
+
+1. Navigate to the service path (`5-appinfra/apps/cymbal-shop/cymbalshop/envs/shared`) and run `terraform apply` command.
+
+#### Deploy Cymbal Shop App Source
+
+**IMPORTANT**: The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
+
+```txt
+.
+├── terraform-google-enterprise-application
+└── .
+```
+
+1. Clone the `microservices-demo` repository, it contains the cymbal-shop source code:
+
+    ```bash
+    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git cymbal-shop
+    ```
+
+1. Navigate to the repository and create main branch on top of the current version:
+
+    ```bash
+    cd cymbal-shop
+    git checkout -b main
+    ```
+
+1. Retrieve project value:
+
+    ```bash
+    export cymbalshop_project=$(terraform -chdir=../terraform-google-enterprise-application/4-appfactory/envs/shared output -json app-group | jq -r '.["cymbal-shop.cymbalshop"]["app_admin_project_id"]')
+    echo cymbalshop_project=$cymbalshop_project
+    ```
+
+1. Add the remote source repository, this repository will host your application source code:
+
+    ```bash
+    git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
+    ```
+
+1. Overwrite repository with overlays defined in `examples/cymbal-shop`:
+
+    ```bash
+    cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .
+    ```
+
+1. Add changes and commit to the specified remote, this will trigger the associated Cloud Build CI/CD pipeline:
+
+    ```bash
+    git add .
+    git commit -m "Add Cymbal Shop Code"
+    git push google main
+    ```
+
+1. You can view the build results on the Cymbal Shop Admin Project.
