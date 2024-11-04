@@ -67,6 +67,20 @@ module "eab_cluster_project" {
   ]
 }
 
+data "google_compute_default_service_account" "default" {
+  project = local.cluster_project_id
+}
+
+module "gcloud-enable-compute-sa" {
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 3.5"
+
+  create_cmd_entrypoint  = "gcloud"
+  create_cmd_body        = "iam service-accounts enable ${data.google_compute_default_service_account.default.email} --project=${local.cluster_project_id}"
+  destroy_cmd_entrypoint = "gcloud"
+  destroy_cmd_body       = "iam service-accounts disable ${data.google_compute_default_service_account.default.email} --project=${local.cluster_project_id}"
+}
+
 data "google_project" "eab_cluster_project" {
   project_id = var.create_cluster_project ? module.eab_cluster_project[0].project_id : var.network_project_id
 }
@@ -175,7 +189,8 @@ module "gke-standard" {
   ]
 
   depends_on = [
-    module.eab_cluster_project
+    module.eab_cluster_project,
+    module.gcloud-enable-compute-sa
   ]
 
   // Private Cluster Configuration
@@ -218,7 +233,8 @@ module "gke-autopilot" {
   }
 
   depends_on = [
-    module.eab_cluster_project
+    module.eab_cluster_project,
+    module.gcloud-enable-compute-sa
   ]
 
   // Private Cluster Configuration
