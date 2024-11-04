@@ -61,7 +61,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 
 #### Add Cymbal Shop and Cymbal Bank Namespaces at the Fleetscope repository
 
-The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run.
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Tipically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
 1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
 
@@ -738,7 +738,7 @@ The steps below assume that you are checked out on the same level as `terraform-
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
 
-1. Overwrite repository with overlays defined in `examples/cymbal-shop`:
+1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 
     ```bash
     cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .
@@ -782,7 +782,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 
 #### Add Cymbal Shop and Cymbal Bank Namespaces at the Fleetscope repository
 
-The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run.
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Tipically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
 1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
 
@@ -1022,7 +1022,7 @@ All services have common infrastructure under `envs/shared`.
     git checkout -b main
     ```
 
-1. Retrieve project value:
+1. Retrieve the `admin` project value:
 
     ```bash
     export cymbalshop_project=$(terraform -chdir=../terraform-google-enterprise-application/4-appfactory/envs/shared output -json app-group | jq -r '.["cymbal-shop.cymbalshop"]["app_admin_project_id"]')
@@ -1035,7 +1035,7 @@ All services have common infrastructure under `envs/shared`.
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
 
-1. Overwrite repository with overlays defined in `examples/cymbal-shop`:
+1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 
     ```bash
     cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .

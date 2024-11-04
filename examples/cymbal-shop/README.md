@@ -42,7 +42,7 @@ This example requires:
 
 #### Add Cymbal Shop Namespaces at the Fleetscope repository
 
-The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run.
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Tipically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
 1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
 
@@ -250,7 +250,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
 
-1. Overwrite repository with overlays defined in `examples/cymbal-shop`:
+1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 
     ```bash
     cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .
@@ -291,7 +291,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
 
 #### Add Cymbal Shop Namespaces at the Fleetscope repository
 
-The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run.
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Tipically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
 1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
 
@@ -310,13 +310,15 @@ The namespaces created at 3-fleetscope will be used in the application kubernete
     applications = {
     +    "cymbal-shop" = {
     +        "cymbalshop" = {
-    +        create_infra_project = false
-    +        create_admin_project = true
+    +           create_infra_project = false
+    +           create_admin_project = true
     +        },
     +    }
     ...
     }
    ```
+
+The specified values above will create a sigle `admin` project for cymbal-shop application. In this case, all cymbal-shop microservices CI/CD pipelines will be on the same project.
 
 1. Run `terraform apply` command on `4-appfactory/envs/shared`.
 
@@ -386,7 +388,7 @@ The namespaces created at 3-fleetscope will be used in the application kubernete
     git checkout -b main
     ```
 
-1. Retrieve project value:
+1. Retrieve the `admin` project value:
 
     ```bash
     export cymbalshop_project=$(terraform -chdir=../terraform-google-enterprise-application/4-appfactory/envs/shared output -json app-group | jq -r '.["cymbal-shop.cymbalshop"]["app_admin_project_id"]')
@@ -399,7 +401,7 @@ The namespaces created at 3-fleetscope will be used in the application kubernete
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
 
-1. Overwrite repository with overlays defined in `examples/cymbal-shop`:
+1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 
     ```bash
     cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .
