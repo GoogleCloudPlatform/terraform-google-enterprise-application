@@ -173,7 +173,7 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
-				buildListCmd := fmt.Sprintf("builds list --project %s", servicesInfoMap[serviceName].ProjectID)
+				buildListCmd := fmt.Sprintf("builds list --region=%s --project %s", region, servicesInfoMap[serviceName].ProjectID)
 				// poll build until complete
 				pollCloudBuild := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
