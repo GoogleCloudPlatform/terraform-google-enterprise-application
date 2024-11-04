@@ -989,7 +989,7 @@ All services have common infrastructure under `envs/shared`.
 
     ```bash
     for service in accounts-contacts accounts-userservice frontend ledger-balancereader ledger-ledgerwriter ledger-transactionhistory;
-    do 
+    do
         cd $APP_INFRA_REPO/apps/cymbal-bank/$service
         terraform -chdir="envs/shared" init
         terraform -chdir="envs/shared" plan
