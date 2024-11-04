@@ -15,7 +15,6 @@
 package standalone_single_project
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"slices"
@@ -181,7 +180,7 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 						var build []gjson.Result
 						for _, b := range allBuilds {
 							if b.Get("substitutions.COMMIT_SHA").String() == lastCommit {
-								fmt.Printf("Build found for commit %s: %s \n", lastCommit, b.Get("buildTriggerId"))
+								t.Logf("Build found for commit %s: %s \n", lastCommit, b.Get("buildTriggerId"))
 								build = append(build, b)
 							}
 						}
@@ -190,9 +189,10 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 						}
 						latestWorkflowRunStatus := build[0].Get("status").String()
 						if latestWorkflowRunStatus == "SUCCESS" {
+							t.Logf("Build finished successfully %s. \n", build[0].Get("buildTriggerId"))
 							return false, nil
 						} else if latestWorkflowRunStatus == "FAILURE" {
-							return false, errors.New("Build failed.")
+							return false, fmt.Errorf("Build failed %s.", build[0].Get("buildTriggerId"))
 						}
 						return true, nil
 					}
@@ -215,8 +215,10 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 						}
 						latestRolloutState := rollouts[0].Get("state").String()
 						if latestRolloutState == "SUCCEEDED" {
+							t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
 							return false, nil
 						} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
+							t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 							return true, nil
 						} else {
 							logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
