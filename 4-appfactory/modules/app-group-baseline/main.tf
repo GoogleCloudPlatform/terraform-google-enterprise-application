@@ -69,13 +69,14 @@ module "app_admin_project" {
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
-  project = local.admin_project_id
-  name    = "${var.service_name}-i-r"
+  project                      = local.admin_project_id
+  name                         = "${var.service_name}-i-r"
+  create_ignore_already_exists = true
 }
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 8.0"
+  version = "~> 9.0"
 
   project_id               = local.admin_project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url

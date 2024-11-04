@@ -40,8 +40,9 @@ locals {
 resource "google_sourcerepo_repository" "gcp_repo" {
   for_each = local.cb_config
 
-  project = var.project_id
-  name    = each.value.repo_name
+  project                      = var.project_id
+  name                         = each.value.repo_name
+  create_ignore_already_exists = true
 }
 
 module "tfstate_bucket" {
@@ -56,7 +57,7 @@ module "tfstate_bucket" {
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 8.0"
+  version = "~> 9.0"
 
   for_each = local.cb_config
 

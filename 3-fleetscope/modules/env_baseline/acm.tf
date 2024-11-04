@@ -23,8 +23,9 @@ data "google_project" "cluster_project" {
 }
 
 resource "google_sourcerepo_repository" "acm_repo" {
-  project = var.cluster_project_id
-  name    = "eab-acm"
+  project                      = var.cluster_project_id
+  name                         = "eab-acm"
+  create_ignore_already_exists = true
 }
 
 resource "google_service_account" "root_reconciler" {

@@ -31,6 +31,8 @@ data "google_compute_default_service_account" "compute_service_identity" {
 resource "google_sourcerepo_repository" "app_repo" {
   project = var.project_id
   name    = var.repo_name
+
+  create_ignore_already_exists = true
 }
 
 resource "google_sourcerepo_repository_iam_member" "member" {

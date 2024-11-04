@@ -181,7 +181,7 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 						var build []gjson.Result
 						for _, b := range allBuilds {
 							if b.Get("substitutions.COMMIT_SHA").String() == lastCommit {
-								fmt.Printf("Build found form commit %s: %s \n", lastCommit, b.Get("buildTriggerId"))
+								fmt.Printf("Build found for commit %s: %s \n", lastCommit, b.Get("buildTriggerId"))
 								build = append(build, b)
 							}
 						}
