@@ -32,7 +32,7 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-func TestSourceCymbalBankSingleProject(t *testing.T) {
+func TestSingleProjectSourceCymbalBank(t *testing.T) {
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	// initialize Terraform test from the Blueprints test framework
@@ -42,6 +42,7 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 	envName := standaloneSingleProj.GetStringOutput("env")
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
+	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
 	type ServiceInfos struct {
 		ProjectID   string
@@ -53,12 +54,11 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 		suffixServiceName string
 		splitServiceName  []string
 	)
-	region := "us-central1" // TODO: Plumb output from appInfra
+	region := "us-central1"
 	servicesInfoMap := make(map[string]ServiceInfos)
 	appName := "cymbal-bank"
+	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
 	for _, serviceName := range testutils.ServicesNames[appName] {
-		appName := appName
-		appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
 		serviceName := serviceName // capture range variable
 		splitServiceName = strings.Split(serviceName, "-")
 		prefixServiceName = splitServiceName[0]
@@ -69,21 +69,9 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 			TeamName:    prefixServiceName,
 		}
 		servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
-		deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
+		t.Log(servicePath)
 		t.Run(servicePath, func(t *testing.T) {
 			t.Parallel()
-			mapPath := ""
-			if servicesInfoMap[serviceName].TeamName == servicesInfoMap[serviceName].ServiceName {
-				mapPath = servicesInfoMap[serviceName].TeamName
-			} else {
-				mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
-			}
-			t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
-			appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
-			tmpDirApp := t.TempDir()
-			dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays", appSourcePath, servicesInfoMap[serviceName].TeamName)
-			dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
-
 			vars := map[string]interface{}{
 				"project_id":                 servicesInfoMap[serviceName].ProjectID,
 				"region":                     region,
@@ -96,6 +84,17 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
+			mapPath := ""
+			if servicesInfoMap[serviceName].TeamName == servicesInfoMap[serviceName].ServiceName {
+				mapPath = servicesInfoMap[serviceName].TeamName
+			} else {
+				mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
+			}
+			t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
+			appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
+			tmpDirApp := t.TempDir()
+			dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays", appSourcePath, servicesInfoMap[serviceName].TeamName)
+			dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 
 			appsource.DefineVerify(func(assert *assert.Assertions) {
 
@@ -171,7 +170,7 @@ func TestSourceCymbalBankSingleProject(t *testing.T) {
 
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
-				buildListCmd := fmt.Sprintf("builds list --filter substitutions.COMMIT_SHA='%s' --region=%s --project %s", lastCommit, region, servicesInfoMap[serviceName].ProjectID)
+				buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
 				// poll build until complete
 				pollCloudBuild := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {

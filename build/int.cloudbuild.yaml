@@ -229,7 +229,7 @@ steps:
       - multitenant-teardown
 
 # standalone single project example
-  - id: standalone-init
+  - id: single-project-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -239,7 +239,7 @@ steps:
       ]
     waitFor:
       - prepare
-  - id: standalone-apply
+  - id: single-project-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -248,8 +248,8 @@ steps:
         "cft test run TestStandaloneSingleProjectExample --stage apply --verbose",
       ]
     waitFor:
-      - standalone-init
-  - id: standalone-verify
+      - single-project-init
+  - id: single-project-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -258,18 +258,24 @@ steps:
         "cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
       ]
     waitFor:
-      - standalone-apply
-  - id: standalone-source-verify
+      - single-project-apply
+  - id: single-project-source-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestSourceCymbalBankSingleProject --stage verify --verbose",
+        "cft test run TestSingleProjectSourceCymbalBank --stage verify --verbose",
       ]
     waitFor:
-      - standalone-apply
-  - id: standalone-teardown
+      - single-project-apply
+  - id: app-single-project-e2e
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestAppE2ECymbalBankSingleProject --stage verify --verbose"]
+    waitFor:
+      - single-project-source-verify
+  - id: single-project-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -278,8 +284,8 @@ steps:
         "cft test run TestStandaloneSingleProjectExample --stage teardown --verbose",
       ]
     waitFor:
-      - standalone-verify
-      - standalone-source-verify
+      - single-project-verify
+      - app-single-project-e2e
 
 tags:
   - "ci"
