@@ -83,6 +83,21 @@ module "project" {
     {
       api   = "compute.googleapis.com",
       roles = []
+    },
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/cloudbuild.builds.builder",
+        "roles/cloudbuild.connectionAdmin",
+      ]
+    },
+    {
+      api   = "workflows.googleapis.com",
+      roles = ["roles/workflows.serviceAgent"]
+    },
+    {
+      api   = "config.googleapis.com",
+      roles = ["roles/cloudconfig.serviceAgent"]
     }
   ]
 }
@@ -105,6 +120,21 @@ module "project_standalone" {
     {
       api   = "compute.googleapis.com",
       roles = []
+    },
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/cloudbuild.builds.builder",
+        "roles/cloudbuild.connectionAdmin",
+      ]
+    },
+    {
+      api   = "workflows.googleapis.com",
+      roles = ["roles/workflows.serviceAgent"]
+    },
+    {
+      api   = "config.googleapis.com",
+      roles = ["roles/cloudconfig.serviceAgent"]
     }
   ]
 

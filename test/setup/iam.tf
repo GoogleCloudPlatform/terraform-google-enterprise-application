@@ -80,3 +80,19 @@ resource "google_billing_account_iam_member" "tf_billing_user" {
   role               = "roles/billing.admin"
   member             = "serviceAccount:${google_service_account.int_test.email}"
 }
+
+resource "google_project_iam_member" "cb_standalone_service_agent_role" {
+  project = module.project_standalone.project_id
+  role    = "roles/cloudbuild.serviceAgent"
+  member  = "serviceAccount:service-${module.project_standalone.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+
+  depends_on = [module.project_standalone]
+}
+
+resource "google_project_iam_member" "cb_service_agent_role" {
+  project = module.project.project_id
+  role    = "roles/cloudbuild.serviceAgent"
+  member  = "serviceAccount:service-${module.project.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+
+  depends_on = [module.project]
+}
