@@ -54,6 +54,7 @@ module "app_admin_project" {
   org_id                   = var.org_id
   folder_id                = var.folder_id
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
   activate_apis = [
     "iam.googleapis.com",
     "cloudresourcemanager.googleapis.com",
