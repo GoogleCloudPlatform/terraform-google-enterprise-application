@@ -138,4 +138,5 @@ module "app_infra_project" {
   folder_id                = each.value.folder_id
   activate_apis            = var.infra_project_apis
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 }
