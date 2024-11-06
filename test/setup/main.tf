@@ -64,6 +64,7 @@ module "project" {
   folder_id                = var.folder_id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   activate_apis = [
     "cloudbuild.googleapis.com",
@@ -128,6 +129,7 @@ module "vpc_project" {
   folder_id                = each.value
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
