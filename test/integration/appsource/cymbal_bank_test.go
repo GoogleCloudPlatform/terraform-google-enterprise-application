@@ -36,6 +36,7 @@ import (
 func TestSourceCymbalBank(t *testing.T) {
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
+	appName := "cymbal-bank"
 
 	for _, envName := range testutils.EnvNames(t) {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
@@ -56,7 +57,6 @@ func TestSourceCymbalBank(t *testing.T) {
 	region := "us-central1" // TODO: Plumb output from appInfra
 	servicesInfoMap := make(map[string]ServiceInfos)
 
-	appName := "cymbal-bank"
 	for _, serviceName := range testutils.ServicesNames[appName] {
 		appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
 		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
@@ -65,6 +65,8 @@ func TestSourceCymbalBank(t *testing.T) {
 		prefixServiceName = splitServiceName[0]
 		suffixServiceName = splitServiceName[len(splitServiceName)-1]
 		projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, suffixServiceName)).String()
+		appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/5-appinfra/%s/%s/envs/shared", appName, appName, serviceName)))
+		deployTargets := appInfra.GetJsonOutput("clouddeploy_targets_names")
 		servicesInfoMap[serviceName] = ServiceInfos{
 			ProjectID:   projectID,
 			ServiceName: suffixServiceName,
@@ -196,7 +198,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					t.Fatal("Failed to find the release.")
 				}
 				releaseName := releases[0].Get("name")
-				targetId := fmt.Sprintf("%s-development", region) //TODO: convert to loop using env_cluster_membership_ids
+				targetId := deployTargets.Get(servicesInfoMap[serviceName].ServiceName).Array()[0]
 				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
 				// Poll CD rollouts until rollout is successful
 				pollCloudDeploy := func(cmd string) func() (bool, error) {
