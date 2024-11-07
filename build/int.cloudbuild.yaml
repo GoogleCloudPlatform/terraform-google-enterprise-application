@@ -265,7 +265,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestSingleProjectSourceCymbalBank --stage verify --verbose",
+        "sleep 60s && cft test run TestSingleProjectSourceCymbalBank --stage verify --verbose",
       ]
     waitFor:
       - single-project-apply
