@@ -198,7 +198,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					t.Fatal("Failed to find the release.")
 				}
 				releaseName := releases[0].Get("name")
-				targetId := deployTargets.Get(servicesInfoMap[serviceName].ServiceName).Array()[0]
+				targetId := deployTargets.Array()[0]
 				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
 				// Poll CD rollouts until rollout is successful
 				pollCloudDeploy := func(cmd string) func() (bool, error) {
