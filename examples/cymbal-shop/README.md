@@ -42,7 +42,7 @@ This example requires:
 
 #### Add Cymbal Shop Namespaces at the Fleetscope repository
 
-The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Tipically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Typically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
 1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
 
@@ -291,7 +291,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
 
 #### Add Cymbal Shop Namespaces at the Fleetscope repository
 
-The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Tipically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
+The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Typically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
 1. Navigate to Fleetscope repository and add the Cymbal Shop namespaces at `terraform.tfvars`, if the namespace was not created already:
 
