@@ -139,15 +139,15 @@ func TestSourceCymbalShop(t *testing.T) {
 					}
 					latestRolloutState := rollouts[0].Get("state").String()
 					if latestRolloutState == "SUCCEEDED" {
+						t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
 						return false, nil
 					} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
+						t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 						return true, nil
 					} else {
-						logsCmd := fmt.Sprintf("logging read --project=%s", projectID)
-						logs := gcloud.Runf(t, logsCmd).Array()
-						for _, log := range logs {
-							t.Logf("%s build-log: %s", serviceName, log.Get("textPayload").String())
-						}
+						logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
+						logs := gcloud.Runf(t, logsCmd).String()
+						t.Logf("%s build-log: %s", serviceName, logs)
 						return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 					}
 				}
