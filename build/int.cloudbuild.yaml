@@ -144,7 +144,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestSourceCymbalBank --stage verify --verbose",
+        "sleep 60s && cft test run TestSourceCymbalBank --stage verify --verbose",
       ]
     waitFor:
       - appinfra-apply
@@ -155,7 +155,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestSourceCymbalShop --stage verify --verbose",
+        "sleep 60s && cft test run TestSourceCymbalShop --stage verify --verbose",
       ]
     waitFor:
       - appinfra-apply
@@ -163,7 +163,7 @@ steps:
   - id: app-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestAppE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 60s &&  cft test run TestAppE2E --stage verify --verbose"]
     waitFor:
       - appsource-verify-cymbal-bank
   - id: appinfra-teardown
@@ -255,7 +255,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
+        "sleep 60s && cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
       ]
     waitFor:
       - single-project-apply
