@@ -22,6 +22,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
@@ -66,6 +67,7 @@ func TestFleetscope(t *testing.T) {
 				clusterRegions := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")
 				clusterMembershipIds := testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
+				clusterProjectNumber := multitenant.GetStringOutput("cluster_project_number")
 
 				// Service Account
 				rootReconcilerRoles := []string{"roles/source.reader"}
@@ -84,6 +86,16 @@ func TestFleetscope(t *testing.T) {
 				saSvcListRoles := testutils.GetResultFieldStrSlice(svcPolicyOp, "bindings.role")
 				assert.Subset(saSvcListRoles, svcRoles, fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" project level role", svcSa))
 
+				membershipNames := []string{}
+				for _, region := range clusterRegions {
+					membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectID, region, envName)
+					membershipNames = append(membershipNames, membershipName)
+				}
+				membershipNamesProjectNumber := []string{}
+				for _, region := range clusterRegions {
+					membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
+					membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
+				}
 				// GKE Feature
 				for _, feature := range []string{
 					"configmanagement",
@@ -100,17 +112,10 @@ func TestFleetscope(t *testing.T) {
 						// Service Mesh Management
 						{
 							assert.Equal("MANAGEMENT_AUTOMATIC", gkeFeatureOp.Get("fleetDefaultMemberConfig.mesh.management").String(), fmt.Sprintf("Hub Feature %s should have mesh menagement equal to MANAGEMENT_AUTOMATIC", feature))
-							gkeMesh := gcloud.Runf(t, "beta container fleet mesh describe --project %s", clusterProjectID)
-							assert.Equal("ACTIVE", gkeMesh.Get("resourceState.state").String(), fmt.Sprintf("Hub Feature %s should have resource state equal to ACTIVE", feature))
 						}
 					case "multiclusteringress":
 						// Multicluster Ingress Membership
 						{
-							membershipNames := []string{}
-							for _, region := range clusterRegions {
-								membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectID, region, envName)
-								membershipNames = append(membershipNames, membershipName)
-							}
 							assert.Contains(membershipNames, gkeFeatureOp.Get("spec.multiclusteringress.configMembership").String(), fmt.Sprintf("Hub Feature %s should have Config Membership in one region", feature))
 						}
 					case "configmanagement":
@@ -164,6 +169,27 @@ func TestFleetscope(t *testing.T) {
 					assert.Equal(gkeScopes, opGKEScopes.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeScopes))
 					assert.True(opGKEScopes.Exists(), "Namespace %s should exist", gkeScopes)
 				}
+				gkeMeshCommand := fmt.Sprintf("beta container fleet mesh describe --project %s --format='json(membershipStates)'", clusterProjectID)
+				pollMeshProvisioning := func(cmd string) func() (bool, error) {
+					return func() (bool, error) {
+						retry := false
+						result := gcloud.Runf(t, cmd)
+						if len(result.Array()) < 1 {
+							return true, nil
+						}
+						for _, memberShipName := range membershipNamesProjectNumber {
+							dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
+							controlPLaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
+							if dataPlaneManagement == "FAILED_PRECONDITION" || controlPLaneManagement == "FAILED_PRECONDITION" {
+								return false, fmt.Errorf("Service Mesh provisioning failed.")
+							} else if dataPlaneManagement == "PROVISIONING" || controlPLaneManagement == "PROVISIONING" {
+								retry = true
+							}
+						}
+						return retry, nil
+					}
+				}
+				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
 
 			})
 
