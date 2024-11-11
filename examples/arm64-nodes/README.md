@@ -70,7 +70,3 @@ spec:
   - name: getting-started
     image: skaffold-example
 ```
-
-## Modified Version of Code
-
-You can find a version of the code with the modifications above on `examples/arm64-nodes/6-appsource/hello-world`.

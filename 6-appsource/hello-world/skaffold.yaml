@@ -20,10 +20,20 @@ build:
       variant: CommitSha
   artifacts:
   - image: skaffold-example
+    platforms: ["linux/amd64"]
 manifests:
   rawYaml:
   - k8s-pod.yaml
 profiles:
 - name: development
+  build:
+    artifacts:
+    - image: skaffold-example
+      platforms: ["linux/amd64"]
+      docker:
+        dockerfile: Dockerfile.arm64
+  manifests:
+    rawYaml:
+    - k8s-pod-arm64.yaml
 - name: staging
 - name: production
