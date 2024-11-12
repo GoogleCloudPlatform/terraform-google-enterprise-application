@@ -216,6 +216,7 @@ func TestSourceCymbalBank(t *testing.T) {
 									logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
 									logs := gcloud.Runf(t, logsCmd).String()
 									t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
+									return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 								}
 							}
 						}

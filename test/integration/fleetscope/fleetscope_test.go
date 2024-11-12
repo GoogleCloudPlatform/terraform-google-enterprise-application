@@ -179,11 +179,14 @@ func TestFleetscope(t *testing.T) {
 						}
 						for _, memberShipName := range membershipNamesProjectNumber {
 							dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
-							controlPLaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-							if dataPlaneManagement == "FAILED_PRECONDITION" || controlPLaneManagement == "FAILED_PRECONDITION" {
-								return false, fmt.Errorf("Service Mesh provisioning failed.")
-							} else if dataPlaneManagement == "PROVISIONING" || controlPLaneManagement == "PROVISIONING" {
+							controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
+							if dataPlaneManagement == "PROVISIONING" || controlPlaneManagement == "PROVISIONING" {
 								retry = true
+							} else if (dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") && !retry {
+								// if there is no other membership still in PROVISIONING
+								retry = false
+							} else {
+								return false, fmt.Errorf("Service mesh provisioning failed: dataPlaneManagement = %s and controlPlaneManagement = %s", dataPlaneManagement, controlPlaneManagement)
 							}
 						}
 						return retry, nil
