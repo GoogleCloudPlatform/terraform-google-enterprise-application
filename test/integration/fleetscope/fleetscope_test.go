@@ -186,7 +186,7 @@ func TestFleetscope(t *testing.T) {
 								// if there is no other membership still in PROVISIONING
 								retry = false
 							} else {
-								return false, fmt.Errorf("Service mesh provisioning failed: dataPlaneManagement = %s and controlPlaneManagement = %s", dataPlaneManagement, controlPlaneManagement)
+								return false, fmt.Errorf("Service mesh provisioning failed for %s: dataPlaneManagement = %s and controlPlaneManagement = %s", memberShipName, dataPlaneManagement, controlPlaneManagement)
 							}
 						}
 						return retry, nil

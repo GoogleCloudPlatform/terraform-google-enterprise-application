@@ -220,7 +220,7 @@ func TestSourceCymbalBank(t *testing.T) {
 								}
 							}
 						}
-						utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
+						utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
 					})
 					appsource.Test()
 				})
