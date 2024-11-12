@@ -42,6 +42,7 @@ module "eab_cluster_project" {
   svpc_host_project_id     = var.network_project_id
   shared_vpc_subnets       = var.cluster_subnetworks
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
