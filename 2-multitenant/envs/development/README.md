@@ -15,6 +15,7 @@
 | app\_ip\_addresses | App IP Addresses |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
+| cluster\_project\_number | Cluster Project number |
 | cluster\_regions | Regions with clusters |
 | cluster\_service\_accounts | The default service accounts used for nodes, if not overridden in node\_pools. |
 | cluster\_type | Cluster type |

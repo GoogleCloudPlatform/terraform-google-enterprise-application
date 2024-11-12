@@ -213,16 +213,14 @@ func TestSourceCymbalBank(t *testing.T) {
 								} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
 									return true, nil
 								} else {
-									logsCmd := fmt.Sprintf("logging read --project=%s", servicesInfoMap[serviceName].ProjectID)
-									logs := gcloud.Runf(t, logsCmd).Array()
-									for _, log := range logs {
-										t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, log.Get("textPayload").String())
-									}
+									logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
+									logs := gcloud.Runf(t, logsCmd).String()
+									t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
 									return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 								}
 							}
 						}
-						utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
+						utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
 					})
 					appsource.Test()
 				})
