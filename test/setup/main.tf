@@ -84,9 +84,10 @@ module "folder_common" {
   source  = "terraform-google-modules/folders/google"
   version = "~> 5.0"
 
-  prefix = random_string.prefix.result
-  parent = "folders/${var.folder_id}"
-  names  = ["common"]
+  prefix              = random_string.prefix.result
+  parent              = "folders/${var.folder_id}"
+  names               = ["common"]
+  deletion_protection = false
 }
 
 # Create mock environment folders
@@ -94,9 +95,10 @@ module "folders" {
   source  = "terraform-google-modules/folders/google"
   version = "~> 5.0"
 
-  prefix = random_string.prefix.result
-  parent = "folders/${var.folder_id}"
-  names  = local.envs
+  prefix              = random_string.prefix.result
+  parent              = "folders/${var.folder_id}"
+  names               = local.envs
+  deletion_protection = false
 }
 
 # Admin roles to folders
