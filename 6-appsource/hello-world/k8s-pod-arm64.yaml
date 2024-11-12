@@ -18,7 +18,7 @@ metadata:
   name: getting-started
 spec:
   nodeSelector:
-    cloud.google.com/machine-family: c4a
+    cloud.google.com/machine-family: t2a
   containers:
   - name: getting-started
     image: skaffold-example
