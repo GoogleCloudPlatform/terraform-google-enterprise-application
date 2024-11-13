@@ -1,4 +1,4 @@
-### Example: Getting started with a simple go app
+# Example: Getting started with a simple go app
 
 This is a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold, and contains the following features:
 
@@ -14,7 +14,9 @@ This example contains multi-architecture images. On the development environment,
 
 To achieve multi-architecture builds and images, the examples needs to use the extended features of [`buildx`](https://github.com/docker/buildx).
 
-### Using the CI/CD Pipeline
+## Using the CI/CD Pipeline
+
+A CI/CD pipeline was created for this application on 5-appinfra, it uses Cloud Build to build the docker image and Cloud Deploy to deploy the image to the cluster using skaffold.
 
 1. Clone the CI/CD repository
 
