@@ -64,6 +64,7 @@ module "project" {
   folder_id                = var.folder_id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   activate_apis = [
     "cloudbuild.googleapis.com",
@@ -83,9 +84,10 @@ module "folder_common" {
   source  = "terraform-google-modules/folders/google"
   version = "~> 5.0"
 
-  prefix = random_string.prefix.result
-  parent = "folders/${var.folder_id}"
-  names  = ["common"]
+  prefix              = random_string.prefix.result
+  parent              = "folders/${var.folder_id}"
+  names               = ["common"]
+  deletion_protection = false
 }
 
 # Create mock environment folders
@@ -93,9 +95,10 @@ module "folders" {
   source  = "terraform-google-modules/folders/google"
   version = "~> 5.0"
 
-  prefix = random_string.prefix.result
-  parent = "folders/${var.folder_id}"
-  names  = local.envs
+  prefix              = random_string.prefix.result
+  parent              = "folders/${var.folder_id}"
+  names               = local.envs
+  deletion_protection = false
 }
 
 # Admin roles to folders
@@ -128,6 +131,7 @@ module "vpc_project" {
   folder_id                = each.value
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   activate_apis = [
     "cloudresourcemanager.googleapis.com",

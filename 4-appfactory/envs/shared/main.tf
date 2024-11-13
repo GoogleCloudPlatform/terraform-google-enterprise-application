@@ -33,8 +33,9 @@ locals {
 resource "google_folder" "app_folder" {
   for_each = toset(local.application_names)
 
-  display_name = each.key
-  parent       = var.common_folder_id
+  display_name        = each.key
+  parent              = var.common_folder_id
+  deletion_protection = false
 }
 
 module "components" {

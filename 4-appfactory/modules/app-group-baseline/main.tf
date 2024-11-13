@@ -54,6 +54,7 @@ module "app_admin_project" {
   org_id                   = var.org_id
   folder_id                = var.folder_id
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
   activate_apis = [
     "iam.googleapis.com",
     "cloudresourcemanager.googleapis.com",
@@ -75,7 +76,7 @@ resource "google_sourcerepo_repository" "app_infra_repo" {
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 8.0"
+  version = "~> 9.0"
 
   project_id               = local.admin_project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
@@ -137,4 +138,5 @@ module "app_infra_project" {
   folder_id                = each.value.folder_id
   activate_apis            = var.infra_project_apis
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 }
