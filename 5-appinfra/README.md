@@ -108,10 +108,29 @@ The steps below assume that you are checked out on the same level as `terraform-
 
 ### Running Terraform locally
 
-1. The next instructions assume that you are in the `terraform-google-enterprise-application/5-appinfra` folder.
+1. **IMPORTANT** The next instructions assume that you are in the `terraform-google-enterprise-application/5-appinfra` folder.
 
    ```bash
    cd terraform-google-enterprise-application/5-appinfra
+   ```
+
+1. Retrieve state bucket from 4-appfactory and update the example with it:
+
+   ```bash
+   export hello_world_statebucket=$(terraform -chdir=../4-appfactory/envs/shared output -json app-group | jq -r '.["default-example.hello-world"].app_cloudbuild_workspace_state_bucket_name' | sed 's/.*\///')
+   echo hello_world_statebucket=$hello_world_statebucket
+
+   sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$hello_world_statebucket/" apps/default-example/hello-world/envs/shared/backend.tf
+   ```
+
+1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+
+   ```bash
+   terraform -chdir="../1-bootstrap/" init
+   export remote_state_bucket=$(terraform -chdir="../1-bootstrap/" output -raw state_bucket)
+   echo "remote_state_bucket = ${remote_state_bucket}"
+
+   sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" apps/default-example/hello-world/envs/shared/terraform.tfvars
    ```
 
 Under the `apps` folder are examples for each of the applications.
