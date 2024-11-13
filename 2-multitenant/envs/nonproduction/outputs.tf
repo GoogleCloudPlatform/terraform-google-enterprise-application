@@ -19,6 +19,11 @@ output "cluster_project_id" {
   value       = module.env.cluster_project_id
 }
 
+output "cluster_project_number" {
+  description = "Cluster Project number"
+  value       = module.env.cluster_project_number
+}
+
 output "network_project_id" {
   description = "Network Project ID"
   value       = module.env.network_project_id
