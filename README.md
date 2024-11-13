@@ -77,11 +77,11 @@ example-organization
 
 ### [5. appinfra](/5-appinfra/)
 
-The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. This stage deploys the application-specific resources for the Cymbal Bank sample application, including service-specific databases. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
+The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. This stage deploys the application-specific resources, including service-specific databases. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
 
 ### [6. appsource](/6-appsource/)
 
-The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up the Cymbal Bank sample application, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
+The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up and deploying the sample applications, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
 
 ## Applications (Apps)
 
