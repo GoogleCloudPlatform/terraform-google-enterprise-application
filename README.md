@@ -87,6 +87,15 @@ The purpose of this stage is to set up application source code repositories, whi
 
 This repo demostrates setting up the developer platform for one or more *Apps* which is a high level of grouping of releated service or workloads. Apps are created infrequently and may include multiple namespaces, team scopes, and dedicated IP address. A multi-tenant cluster can contain multiple Apps.
 
+App-specific resources such as application CI/CD pipelines specification and kubernetes manifests are configured on 5-appinfra and 6-appsource. The table below indicates where you can find the app-specific directories for the examples contained in this repository:
+
+| Application               | 5-appinfra directory                | 6-appsource directory                |
+|---------------------------|-------------------------------------|-------------------------------------|
+| Hello World               | [./5-appinfra](./5-appinfra)                        | [./6-appsource](./6-appsource)                        |
+| Cymbal Bank               | [./examples/cymbal-bank/5-appinfra](./examples/cymbal-bank/5-appinfra)   | [./examples/cymbal-bank/6-appsource](./examples/cymbal-bank/6-appsource)   |
+| Cymbal Shop               | [./examples/cymbal-shop/5-appinfra](./examples/cymbal-shop/5-appinfra)   | [./examples/cymbal-shop/6-appsource](./examples/cymbal-shop/6-appsource)   |
+| Cymbal Bank + Cymbal Shop | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) |
+
 ### Hello World Example
 
 This [hello-world](https://github.com/GoogleContainerTools/skaffold/tree/v2.13.2/examples/getting-started) example is a very simple Go application that is deployed along with the codebase as a placeholder, it uses basic skaffold features:
