@@ -22,7 +22,7 @@ variable "region" {
   description = "CI/CD Region (e.g. us-central1)"
 }
 
-variable "cluster_services_accounts" {
+variable "cluster_service_accounts" {
   description = "Cluster services accounts to be granted the Artifact Registry reader role."
   type        = map(string)
 }

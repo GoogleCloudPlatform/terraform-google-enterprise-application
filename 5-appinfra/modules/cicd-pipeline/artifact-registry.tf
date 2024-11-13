@@ -30,7 +30,7 @@ resource "google_artifact_registry_repository_iam_member" "member" {
     cloud_deploy   = google_service_account.cloud_deploy.member,
     cloud_build_si = google_project_service_identity.cloudbuild_service_identity.member,
     compute        = data.google_compute_default_service_account.compute_service_identity.member,
-  }, var.cluster_services_accounts)
+  }, var.cluster_service_accounts)
 
   project    = var.project_id
   location   = var.region

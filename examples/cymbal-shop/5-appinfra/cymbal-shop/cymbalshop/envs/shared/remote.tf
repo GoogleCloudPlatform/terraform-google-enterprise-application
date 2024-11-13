@@ -15,9 +15,16 @@
  */
 
 locals {
-  cluster_membership_ids    = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => { "cluster_membership_ids" = (state.outputs.cluster_membership_ids) } }
-  cluster_services_accounts = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.cluster_service_accounts])
-  app_admin_project         = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-shop.cymbalshop"].app_admin_project_id
+  cluster_membership_ids = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => { "cluster_membership_ids" = (state.outputs.cluster_membership_ids) } }
+  cluster_service_accounts = zipmap(
+    flatten(
+      [for item in data.terraform_remote_state.multitenant : keys(item.outputs.cluster_service_accounts)]
+    ),
+    flatten(
+      [for item in data.terraform_remote_state.multitenant : values(item.outputs.cluster_service_accounts)]
+    )
+  )
+  app_admin_project = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-shop.cymbalshop"].app_admin_project_id
 }
 
 data "terraform_remote_state" "multitenant" {

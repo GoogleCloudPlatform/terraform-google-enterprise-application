@@ -80,7 +80,7 @@ output "cluster_type" {
 output "cluster_service_accounts" {
   description = "The default service accounts used for nodes, if not overridden in node_pools."
   value = merge(
-    { for i, value in merge(module.gke-standard, module.gke-autopilot) : "cluster_${i}" => value.service_account },
-    { for i, value in module.eab_cluster_project : "project_${i}" => "${value.project_number}-compute@developer.gserviceaccount.com" }
+    { for i, value in merge(module.gke-standard, module.gke-autopilot) : "cluster_${var.env}_${i}" => value.service_account },
+    { for i, value in module.eab_cluster_project : "project_${var.env}_${i}" => "${value.project_number}-compute@developer.gserviceaccount.com" }
   )
 }

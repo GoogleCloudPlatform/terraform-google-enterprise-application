@@ -182,10 +182,7 @@ func TestFleetscope(t *testing.T) {
 							controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
 							if dataPlaneManagement == "PROVISIONING" || controlPlaneManagement == "PROVISIONING" {
 								retry = true
-							} else if (dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") && !retry {
-								// if there is no other membership still in PROVISIONING
-								retry = false
-							} else {
+							} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
 								return false, fmt.Errorf("Service mesh provisioning failed for %s: dataPlaneManagement = %s and controlPlaneManagement = %s", memberShipName, dataPlaneManagement, controlPlaneManagement)
 							}
 						}

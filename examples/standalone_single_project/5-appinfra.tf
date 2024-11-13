@@ -66,7 +66,7 @@ module "cicd" {
   project_id                 = var.project_id
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
-  cluster_services_accounts  = tomap(module.multitenant_infra.cluster_service_accounts)
+  cluster_service_accounts   = { for i, sa in module.multitenant_infra.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
 
   service_name           = each.value.service_name
   team_name              = each.value.team_name
