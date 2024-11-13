@@ -97,7 +97,7 @@ This [hello-world](https://github.com/GoogleContainerTools/skaffold/tree/v2.13.2
 
 The example is extracted from the skaffold repository and the source code is stored in `6-appsource/hello-world`.
 
-### [Cymbal Bank example](./examples/cymbal-bank/)
+### [Cymbal Bank Example](./examples/cymbal-bank/)
 
 The [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) (`cymbal-bank`) sample App is included in the repository. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
 
@@ -107,7 +107,7 @@ The application is a web-based e-commerce app where users can browse items, add 
 
 In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
 
-For more information about the Cymbal Bank application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
+For more information about the Cymbal Shop application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
 
 ### [Multitenant Applications Example](./examples/multitenant-applications)
 
