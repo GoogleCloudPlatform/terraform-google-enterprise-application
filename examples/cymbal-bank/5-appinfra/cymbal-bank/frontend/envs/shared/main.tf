@@ -29,7 +29,7 @@ module "app" {
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
 
-  cluster_services_accounts = { for i, sa in local.cluster_services_accounts : (i) => "serviceAccount:${sa}" }
+  cluster_services_accounts = tomap(local.cluster_services_accounts)
 
   service_name           = local.service_name
   team_name              = local.team_name
