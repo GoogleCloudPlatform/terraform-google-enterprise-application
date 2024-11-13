@@ -20,18 +20,15 @@ build:
       variant: CommitSha
   artifacts:
   - image: skaffold-example
-    platforms: ["linux/amd64"]
+    platforms: ["linux/arm64", "linux/amd64"]
+    custom:
+      buildCommand: |
+        docker buildx build --platform=$PLATFORMS --tag=$IMAGE --push .
 manifests:
   rawYaml:
   - k8s-pod.yaml
 profiles:
 - name: development
-  build:
-    artifacts:
-    - image: skaffold-example
-      platforms: ["linux/amd64"]
-      docker:
-        dockerfile: Dockerfile.arm64
   manifests:
     rawYaml:
     - k8s-pod-arm64.yaml
