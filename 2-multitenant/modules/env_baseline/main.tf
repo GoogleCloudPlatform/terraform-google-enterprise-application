@@ -160,7 +160,7 @@ resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 33.0"
+  version = "~> 34.0"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name                   = "cluster-${each.value.region}-${var.env}"
@@ -244,7 +244,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 33.0"
+  version = "~> 34.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
