@@ -46,13 +46,14 @@ func getServiceIpAddress(t *testing.T, serviceName string, namespace string) (st
 	}
 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
 }
-func connectToFleet(t *testing.T, clusterName string, location string) {
-	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s", clusterName, location)
+func connectToFleet(t *testing.T, clusterName string, location string, project string) {
+	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s --project=%s", clusterName, location, project)
 }
 
 func TestCymbalShopE2E(t *testing.T) {
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
 	// retrieve cluster location and fleet membership from 2-multitenant
+	clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
 	clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
 	clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
 
@@ -60,7 +61,7 @@ func TestCymbalShopE2E(t *testing.T) {
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-	connectToFleet(t, clusterName, clusterLocation)
+	connectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 	t.Run("Cymbal-Shop End-to-End Test", func(t *testing.T) {
 		jar, err := cookiejar.New(nil)
 		if err != nil {

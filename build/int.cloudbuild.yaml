@@ -186,6 +186,7 @@ steps:
       ]
     waitFor:
       - cymbal-bank-e2e
+      - cymbal-shop-e2e
       - appsource-verify-cymbal-bank
       - appsource-verify-cymbal-shop
       - appinfra-verify
