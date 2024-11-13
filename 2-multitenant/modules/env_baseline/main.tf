@@ -52,29 +52,6 @@ module "eab_cluster_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  activate_api_identities = [
-    {
-      api   = "compute.googleapis.com",
-      roles = []
-    },
-    {
-      api = "cloudbuild.googleapis.com",
-      roles = [
-        "roles/cloudbuild.builds.builder",
-        "roles/cloudbuild.connectionAdmin",
-      ]
-    },
-    {
-      api   = "workflows.googleapis.com",
-      roles = ["roles/workflows.serviceAgent"]
-    },
-    {
-      api   = "config.googleapis.com",
-      roles = ["roles/cloudconfig.serviceAgent"]
-    }
-  ]
-
-
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
   disable_services_on_destroy = false

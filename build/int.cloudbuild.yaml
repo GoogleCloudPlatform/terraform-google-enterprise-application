@@ -148,6 +148,7 @@ steps:
       ]
     waitFor:
       - appinfra-apply
+      - fleetscope-verify
 
   - id: appsource-verify-cymbal-shop
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -159,6 +160,7 @@ steps:
       ]
     waitFor:
       - appinfra-apply
+      - fleetscope-verify
 
   - id: app-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"

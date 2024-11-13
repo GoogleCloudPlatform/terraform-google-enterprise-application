@@ -209,10 +209,8 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 						latestRolloutState := rollouts[0].Get("state").String()
 						if latestRolloutState == "SUCCEEDED" {
-							t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
 							return false, nil
 						} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
-							t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 							return true, nil
 						} else {
 							logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
@@ -222,7 +220,7 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 				}
-				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
+				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
 			})
 			appsource.Test()
 		})

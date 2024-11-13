@@ -64,6 +64,7 @@ module "project" {
   folder_id                = var.folder_id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   activate_apis = [
     "cloudbuild.googleapis.com",
@@ -77,7 +78,6 @@ module "project" {
     "sqladmin.googleapis.com",
     "cloudbilling.googleapis.com"
   ]
-  default_service_account = "KEEP"
 
   activate_api_identities = [
     {
@@ -168,13 +168,11 @@ module "project_standalone" {
 
 # Create mock common folder
 module "folder_common" {
-  source  = "terraform-google-modules/folders/google"
-  version = "~> 5.0"
-
-  prefix = random_string.prefix.result
-  parent = "folders/${var.folder_id}"
-  names  = ["common"]
-
+  source              = "terraform-google-modules/folders/google"
+  version             = "~> 5.0"
+  prefix              = random_string.prefix.result
+  parent              = "folders/${var.folder_id}"
+  names               = ["common"]
   deletion_protection = false
 }
 
@@ -219,6 +217,7 @@ module "vpc_project" {
   folder_id                = each.value
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
