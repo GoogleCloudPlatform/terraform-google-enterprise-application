@@ -26,7 +26,10 @@ import (
 )
 
 func TestAppE2ECymbalBankSingleProject(t *testing.T) {
-	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/standalone_single_project"))
+	// initialize Terraform test from the Blueprints test framework
+	setupOutput := tft.NewTFBlueprintTest(t)
+	projectID := setupOutput.GetTFSetupStringOutput("project_id_standalone")
+	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
 	t.Run("End to end tests Single project", func(t *testing.T) {
 		jar, err := cookiejar.New(nil)
 		if err != nil {

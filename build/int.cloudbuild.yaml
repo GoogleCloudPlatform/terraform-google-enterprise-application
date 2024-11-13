@@ -165,7 +165,7 @@ steps:
   - id: app-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "sleep 60s &&  cft test run TestAppE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 60s &&  cft test run TestAppE2EMultitenent --stage verify --verbose"]
     waitFor:
       - appsource-verify-cymbal-bank
   - id: appinfra-teardown
