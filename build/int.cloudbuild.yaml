@@ -271,6 +271,7 @@ steps:
       ]
     waitFor:
       - single-project-apply
+      - single-project-verify
   - id: app-single-project-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -286,7 +287,6 @@ steps:
         "cft test run TestStandaloneSingleProjectExample --stage teardown --verbose",
       ]
     waitFor:
-      - single-project-verify
       - app-single-project-e2e
 
 tags:

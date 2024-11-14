@@ -54,6 +54,9 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 		// standaloneSingleProjT.DefaultVerify(assert)
 		clusterMembershipIds := testutils.GetBptOutputStrSlice(standaloneSingleProjT, "cluster_membership_ids")
 		clusterType := standaloneSingleProjT.GetStringOutput("cluster_type")
+		clusterProjectNumber := standaloneSingleProjT.GetStringOutput("cluster_project_number")
+		clusterRegions := testutils.GetBptOutputStrSlice(standaloneSingleProjT, "cluster_regions")
+		envName := standaloneSingleProjT.GetStringOutput("env")
 		listMonitoringEnabledComponents := []string{
 			"SYSTEM_COMPONENTS",
 			"DEPLOYMENT",
@@ -146,6 +149,36 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 		for _, sa := range cluster_service_accounts {
 			assert.True(strings.Contains(sa.String(), ".gserviceaccount.com"), "The cluster SA value must be a Google Service Account")
 		}
+
+		gkeMeshCommand := fmt.Sprintf("beta container fleet mesh describe --project %s --format='json(membershipStates)'", projectID)
+
+		membershipNamesProjectNumber := []string{}
+		for _, region := range clusterRegions {
+			membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
+			membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
+		}
+		pollMeshProvisioning := func(cmd string) func() (bool, error) {
+			return func() (bool, error) {
+				retry := false
+				result := gcloud.Runf(t, cmd)
+				if len(result.Array()) < 1 {
+					return true, nil
+				}
+				for _, memberShipName := range membershipNamesProjectNumber {
+					dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
+					controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
+					if dataPlaneManagement == "PROVISIONING" || controlPlaneManagement == "PROVISIONING" {
+						retry = true
+					} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
+						generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
+						generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
+						return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
+					}
+				}
+				return retry, nil
+			}
+		}
+		utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
 	})
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {
