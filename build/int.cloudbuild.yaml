@@ -165,7 +165,7 @@ steps:
   - id: cymbal-bank-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestAppE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "cft test run TestCymbalBankE2E --stage verify --verbose"]
     waitFor:
       - appsource-verify-cymbal-bank
 
