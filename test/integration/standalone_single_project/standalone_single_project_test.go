@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
@@ -41,7 +42,11 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 	projectID := setupOutput.GetTFSetupStringOutput("project_id_standalone")
 
 	// wire setup output project_id_standalone to example var.project_id
-	standaloneSingleProjT := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
+	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
+		tft.WithVars(map[string]interface{}{"project_id": projectID}),
+		tft.WithTFDir("../../../examples/standalone_single_project"),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+	)
 
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes
 	standaloneSingleProjT.DefineVerify(func(assert *assert.Assertions) {
