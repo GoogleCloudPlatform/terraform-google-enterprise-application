@@ -183,7 +183,9 @@ func TestFleetscope(t *testing.T) {
 							if dataPlaneManagement == "PROVISIONING" || controlPlaneManagement == "PROVISIONING" {
 								retry = true
 							} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
-								return false, fmt.Errorf("Service mesh provisioning failed for %s: dataPlaneManagement = %s and controlPlaneManagement = %s", memberShipName, dataPlaneManagement, controlPlaneManagement)
+								generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
+								generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
+								return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
 							}
 						}
 						return retry, nil
