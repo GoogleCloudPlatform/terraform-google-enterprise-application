@@ -77,7 +77,7 @@ example-organization
 
 ### [5. appinfra](/5-appinfra/)
 
-The purpose of this stage is to create application-specific infrastructure, including the application CI/CD pipeline. This stage deploys the application-specific resources, including service-related infrastructure components such as databases, storage buckets, BigQuery datasets, and others. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
+The purpose of this stage is to create application-specific infrastructure. This stage deploys the application-specific resources, including service-related infrastructure components such as databases, storage buckets, BigQuery datasets, and others. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
 
 ### [6. appsource](/6-appsource/)
 
