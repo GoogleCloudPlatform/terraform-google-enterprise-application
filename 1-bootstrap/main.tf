@@ -40,8 +40,9 @@ locals {
 resource "google_sourcerepo_repository" "gcp_repo" {
   for_each = local.cb_config
 
-  project = var.project_id
-  name    = each.value.repo_name
+  project                      = var.project_id
+  name                         = each.value.repo_name
+  create_ignore_already_exists = true
 }
 
 module "tfstate_bucket" {

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-output "clouddeploy_targets_names" {
-  description = "Cloud deploy targets names."
-  value       = module.app.clouddeploy_targets_names
+variable "project_id" {
+  type        = string
+  description = "Google Cloud project ID in which to deploy all example resources"
 }
 
-output "service_repository_name" {
-  description = "The Source Repository name."
-  value       = module.app.service_repository_name
+variable "region" {
+  type        = string
+  description = "Google Cloud region for deployments"
+  default     = "us-central1"
 }
 
-output "service_repository_project_id" {
-  description = "The Source Repository project id."
-  value       = module.app.service_repository_project_id
+variable "teams" {
+  type        = map(string)
+  description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
 }

@@ -18,6 +18,28 @@ locals {
   int_required_roles = [
     "roles/owner"
   ]
+  standalone_required_roles = [
+    "roles/artifactregistry.admin",
+    "roles/cloudbuild.builds.builder",
+    "roles/clouddeploy.serviceAgent",
+    "roles/clouddeploy.admin",
+    "roles/compute.networkAdmin",
+    "roles/compute.securityAdmin",
+    "roles/container.admin",
+    "roles/gkehub.editor",
+    "roles/gkehub.scopeAdmin",
+    "roles/container.clusterAdmin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/serviceusage.serviceUsageAdmin",
+    "roles/source.admin",
+    "roles/storage.admin",
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/viewer",
+    "roles/iam.serviceAccountUser",
+    "roles/privilegedaccessmanager.projectServiceAgent",
+    "roles/logging.logWriter",
+    "roles/source.admin"
+  ]
 }
 
 resource "google_service_account" "int_test" {
@@ -31,6 +53,14 @@ resource "google_project_iam_member" "int_test" {
   for_each = toset(local.int_required_roles)
 
   project = module.project.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+resource "google_project_iam_member" "standalone_int_test" {
+  for_each = toset(local.standalone_required_roles)
+
+  project = module.project_standalone.project_id
   role    = each.value
   member  = "serviceAccount:${google_service_account.int_test.email}"
 }
@@ -49,4 +79,20 @@ resource "google_billing_account_iam_member" "tf_billing_user" {
   billing_account_id = var.billing_account
   role               = "roles/billing.admin"
   member             = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+resource "google_project_iam_member" "cb_standalone_service_agent_role" {
+  project = module.project_standalone.project_id
+  role    = "roles/cloudbuild.serviceAgent"
+  member  = "serviceAccount:service-${module.project_standalone.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+
+  depends_on = [module.project_standalone]
+}
+
+resource "google_project_iam_member" "cb_service_agent_role" {
+  project = module.project.project_id
+  role    = "roles/cloudbuild.serviceAgent"
+  member  = "serviceAccount:service-${module.project.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+
+  depends_on = [module.project]
 }
