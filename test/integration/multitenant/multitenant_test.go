@@ -207,6 +207,22 @@ func TestMultitenant(t *testing.T) {
 				}
 			})
 
+			multitenant.DefineTeardown(func(assert *assert.Assertions) {
+				multitenant := tft.NewTFBlueprintTest(t,
+					tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
+					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+					tft.WithBackendConfig(backendConfig),
+				)
+				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
+				// removes firewall rules created by the service but not being deleted.
+				firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
+				for i := range firewallRules {
+					gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
+				}
+				multitenant.DefaultTeardown(assert)
+
+			})
+
 			multitenant.Test()
 		})
 	}

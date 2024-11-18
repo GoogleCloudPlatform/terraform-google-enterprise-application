@@ -29,6 +29,9 @@ module "app" {
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
 
+  cluster_service_accounts = { for i, sa in local.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
+
+
   service_name           = local.service_name
   team_name              = local.team_name
   repo_name              = local.repo_name

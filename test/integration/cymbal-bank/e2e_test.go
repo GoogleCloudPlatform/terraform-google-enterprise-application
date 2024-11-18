@@ -36,9 +36,9 @@ const (
 	maxRetries          int           = 30
 )
 
-func TestAppE2E(t *testing.T) {
+func TestAppE2EMultitenent(t *testing.T) {
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
-	t.Run("End to end tests", func(t *testing.T) {
+	t.Run("End to end tests Cymbal Bank Multitenant", func(t *testing.T) {
 		jar, err := cookiejar.New(nil)
 		if err != nil {
 			t.Fatal(err)
