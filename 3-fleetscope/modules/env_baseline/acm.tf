@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
+locals {
+  cluster_membership_ids = { for k, v in var.cluster_membership_ids : k => v }
+}
+
 data "google_project" "cluster_project" {
   project_id = var.cluster_project_id
 }
 
 resource "google_sourcerepo_repository" "acm_repo" {
-  project = var.cluster_project_id
-  name    = "eab-acm"
+  project                      = var.cluster_project_id
+  name                         = "eab-acm"
+  create_ignore_already_exists = true
 }
 
 resource "google_service_account" "root_reconciler" {
@@ -36,13 +41,11 @@ resource "google_project_iam_member" "root_reconciler" {
   member  = "serviceAccount:${google_service_account.root_reconciler.email}"
 }
 
-resource "google_service_account_iam_binding" "workload_identity" {
+resource "google_service_account_iam_member" "workload_identity" {
   service_account_id = google_service_account.root_reconciler.name
-  role               = "roles/iam.workloadIdentityUser"
 
-  members = [
-    "serviceAccount:${var.cluster_project_id}.svc.id.goog[config-management-system/root-reconciler]",
-  ]
+  role   = "roles/iam.workloadIdentityUser"
+  member = "serviceAccount:${var.cluster_project_id}.svc.id.goog[config-management-system/root-reconciler]"
 }
 
 resource "google_gke_hub_feature" "acm_feature" {
@@ -52,14 +55,14 @@ resource "google_gke_hub_feature" "acm_feature" {
 }
 
 resource "google_gke_hub_feature_membership" "acm_feature_member" {
-  for_each = toset(var.cluster_membership_ids)
+  for_each = local.cluster_membership_ids
 
   project  = var.cluster_project_id
   location = "global"
 
   feature             = google_gke_hub_feature.acm_feature.name
-  membership          = regex(local.membership_re, each.key)[2]
-  membership_location = regex(local.membership_re, each.key)[1]
+  membership          = regex(local.membership_re, each.value)[2]
+  membership_location = regex(local.membership_re, each.value)[1]
 
   configmanagement {
     version = "1.19.0"

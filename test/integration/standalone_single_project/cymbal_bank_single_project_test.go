@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package appsource
+package standalone_single_project
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"slices"
@@ -33,16 +32,17 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-func TestSourceCymbalBank(t *testing.T) {
+func TestSingleProjectSourceCymbalBank(t *testing.T) {
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
-	appName := "cymbal-bank"
-
-	for _, envName := range testutils.EnvNames(t) {
-		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
-		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
-		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
-	}
+	// initialize Terraform test from the Blueprints test framework
+	setupOutput := tft.NewTFBlueprintTest(t)
+	projectID := setupOutput.GetTFSetupStringOutput("project_id_standalone")
+	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
+	envName := standaloneSingleProj.GetStringOutput("env")
+	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
+	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
+	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
 	type ServiceInfos struct {
 		ProjectID   string
@@ -54,39 +54,24 @@ func TestSourceCymbalBank(t *testing.T) {
 		suffixServiceName string
 		splitServiceName  []string
 	)
-	region := "us-central1" // TODO: Plumb output from appInfra
+	region := "us-central1"
 	servicesInfoMap := make(map[string]ServiceInfos)
-
+	appName := "cymbal-bank"
+	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
 	for _, serviceName := range testutils.ServicesNames[appName] {
-		appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
-		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 		serviceName := serviceName // capture range variable
 		splitServiceName = strings.Split(serviceName, "-")
 		prefixServiceName = splitServiceName[0]
 		suffixServiceName = splitServiceName[len(splitServiceName)-1]
-		projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, suffixServiceName)).String()
-		appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/5-appinfra/%s/%s/envs/shared", appName, appName, serviceName)))
-		deployTargets := appInfra.GetJsonOutput("clouddeploy_targets_names")
 		servicesInfoMap[serviceName] = ServiceInfos{
 			ProjectID:   projectID,
 			ServiceName: suffixServiceName,
 			TeamName:    prefixServiceName,
 		}
 		servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
+		t.Log(servicePath)
 		t.Run(servicePath, func(t *testing.T) {
 			t.Parallel()
-			mapPath := ""
-			if servicesInfoMap[serviceName].TeamName == servicesInfoMap[serviceName].ServiceName {
-				mapPath = servicesInfoMap[serviceName].TeamName
-			} else {
-				mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
-			}
-			t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
-			appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
-			tmpDirApp := t.TempDir()
-			dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays", appSourcePath, servicesInfoMap[serviceName].TeamName)
-			dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
-
 			vars := map[string]interface{}{
 				"project_id":                 servicesInfoMap[serviceName].ProjectID,
 				"region":                     region,
@@ -99,6 +84,17 @@ func TestSourceCymbalBank(t *testing.T) {
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			)
+			mapPath := ""
+			if servicesInfoMap[serviceName].TeamName == servicesInfoMap[serviceName].ServiceName {
+				mapPath = servicesInfoMap[serviceName].TeamName
+			} else {
+				mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
+			}
+			t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
+			appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
+			tmpDirApp := t.TempDir()
+			dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays", appSourcePath, servicesInfoMap[serviceName].TeamName)
+			dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
 
 			appsource.DefineVerify(func(assert *assert.Assertions) {
 
@@ -162,7 +158,7 @@ func TestSourceCymbalBank(t *testing.T) {
 
 				// Copy test-specific k8s manifests to the frontend development overlay
 				if mapPath == "frontend" {
-					err = cp.Copy("assets/", fmt.Sprintf("%s/src/%s/k8s/overlays/development/", tmpDirApp, mapPath))
+					err = cp.Copy("../appsource/assets/", fmt.Sprintf("%s/src/%s/k8s/overlays/development/", tmpDirApp, mapPath))
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -183,10 +179,12 @@ func TestSourceCymbalBank(t *testing.T) {
 							return true, nil
 						}
 						latestWorkflowRunStatus := build[0].Get("status").String()
+						t.Logf("Build found for commit %s: %s \n", lastCommit, build[0].Get("buildTriggerId"))
 						if latestWorkflowRunStatus == "SUCCESS" {
+							t.Logf("Build finished successfully %s. \n", build[0].Get("buildTriggerId"))
 							return false, nil
 						} else if latestWorkflowRunStatus == "FAILURE" {
-							return false, errors.New("Build failed.")
+							return false, fmt.Errorf("Build failed %s.", build[0].Get("buildTriggerId"))
 						}
 						return true, nil
 					}
@@ -198,7 +196,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					t.Fatal("Failed to find the release.")
 				}
 				releaseName := releases[0].Get("name")
-				targetId := deployTargets.Array()[0]
+				targetId := deployTargets.Get(servicesInfoMap[serviceName].ServiceName).Array()[0]
 				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
 				// Poll CD rollouts until rollout is successful
 				pollCloudDeploy := func(cmd string) func() (bool, error) {
@@ -209,8 +207,10 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 						latestRolloutState := rollouts[0].Get("state").String()
 						if latestRolloutState == "SUCCEEDED" {
+							t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
 							return false, nil
 						} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
+							t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 							return true, nil
 						} else {
 							logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
@@ -220,9 +220,10 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 				}
-				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
+				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
 			})
 			appsource.Test()
 		})
+
 	}
 }

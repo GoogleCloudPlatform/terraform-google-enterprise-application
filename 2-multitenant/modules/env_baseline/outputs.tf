@@ -31,6 +31,8 @@ output "cluster_membership_ids" {
 output "cluster_project_id" {
   description = "Cluster Project ID"
   value       = data.google_project.eab_cluster_project.project_id
+
+  depends_on = [module.gke-standard, module.gke-autopilot]
 }
 
 output "cluster_project_number" {
@@ -77,8 +79,8 @@ output "cluster_type" {
 
 output "cluster_service_accounts" {
   description = "The default service accounts used for nodes, if not overridden in node_pools."
-  value = setunion(
-    [for value in merge(module.gke-standard, module.gke-autopilot) : value.service_account],
-    [for value in module.eab_cluster_project : "${value.project_number}-compute@developer.gserviceaccount.com"]
+  value = merge(
+    { for i, value in merge(module.gke-standard, module.gke-autopilot) : "cluster_${var.env}_${i}" => value.service_account },
+    { for i, value in module.eab_cluster_project : "project_${var.env}_${i}" => "${value.project_number}-compute@developer.gserviceaccount.com" }
   )
 }

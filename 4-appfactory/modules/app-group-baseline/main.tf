@@ -67,11 +67,35 @@ module "app_admin_project" {
     "sourcerepo.googleapis.com",
     "clouddeploy.googleapis.com"
   ]
+
+  activate_api_identities = [
+    {
+      api   = "compute.googleapis.com",
+      roles = []
+    },
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/cloudbuild.builds.builder",
+        "roles/cloudbuild.connectionAdmin",
+      ]
+    },
+    {
+      api   = "workflows.googleapis.com",
+      roles = ["roles/workflows.serviceAgent"]
+    },
+    {
+      api   = "config.googleapis.com",
+      roles = ["roles/cloudconfig.serviceAgent"]
+    }
+  ]
+
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
-  project = local.admin_project_id
-  name    = "${var.service_name}-i-r"
+  project                      = local.admin_project_id
+  name                         = "${var.service_name}-i-r"
+  create_ignore_already_exists = true
 }
 
 module "tf_cloudbuild_workspace" {

@@ -68,6 +68,7 @@ module "project" {
 
   activate_apis = [
     "cloudbuild.googleapis.com",
+    "compute.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com",
     "storage-api.googleapis.com",
@@ -77,13 +78,98 @@ module "project" {
     "sqladmin.googleapis.com",
     "cloudbilling.googleapis.com"
   ]
+
+  activate_api_identities = [
+    {
+      api   = "compute.googleapis.com",
+      roles = []
+    },
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/cloudbuild.builds.builder",
+        "roles/cloudbuild.connectionAdmin",
+      ]
+    },
+    {
+      api   = "workflows.googleapis.com",
+      roles = ["roles/workflows.serviceAgent"]
+    },
+    {
+      api   = "config.googleapis.com",
+      roles = ["roles/cloudconfig.serviceAgent"]
+    }
+  ]
+}
+
+module "project_standalone" {
+  source  = "terraform-google-modules/project-factory/google"
+  version = "~> 17.0"
+
+  name                     = "ci-enterprise-app-std"
+  random_project_id        = "true"
+  random_project_id_length = 4
+  org_id                   = var.org_id
+  folder_id                = var.folder_id
+  billing_account          = var.billing_account
+  deletion_policy          = "DELETE"
+
+  default_service_account = "KEEP"
+
+  activate_api_identities = [
+    {
+      api   = "compute.googleapis.com",
+      roles = []
+    },
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/cloudbuild.builds.builder",
+        "roles/cloudbuild.connectionAdmin",
+      ]
+    },
+    {
+      api   = "workflows.googleapis.com",
+      roles = ["roles/workflows.serviceAgent"]
+    },
+    {
+      api   = "config.googleapis.com",
+      roles = ["roles/cloudconfig.serviceAgent"]
+    }
+  ]
+
+  activate_apis = [
+    "anthos.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
+    "apikeys.googleapis.com",
+    "certificatemanager.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "clouddeploy.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "gkehub.googleapis.com",
+    "iam.googleapis.com",
+    "mesh.googleapis.com",
+    "multiclusteringress.googleapis.com",
+    "multiclusterservicediscovery.googleapis.com",
+    "secretmanager.googleapis.com",
+    "servicemanagement.googleapis.com",
+    "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com",
+    "sqladmin.googleapis.com",
+    "storage-api.googleapis.com",
+    "trafficdirector.googleapis.com",
+  ]
 }
 
 # Create mock common folder
 module "folder_common" {
-  source  = "terraform-google-modules/folders/google"
-  version = "~> 5.0"
-
+  source              = "terraform-google-modules/folders/google"
+  version             = "~> 5.0"
   prefix              = random_string.prefix.result
   parent              = "folders/${var.folder_id}"
   names               = ["common"]
