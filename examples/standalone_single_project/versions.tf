@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-output "clouddeploy_targets_names" {
-  description = "Cloud deploy targets names."
-  value       = module.app.clouddeploy_targets_names
-}
+terraform {
+  required_version = ">= 1.3"
 
-output "service_repository_name" {
-  description = "The Source Repository name."
-  value       = module.app.service_repository_name
-}
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5, < 7"
+    }
+  }
 
-output "service_repository_project_id" {
-  description = "The Source Repository project id."
-  value       = module.app.service_repository_project_id
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-example/v0.2.0"
+  }
 }

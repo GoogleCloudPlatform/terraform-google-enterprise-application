@@ -49,6 +49,8 @@ func TestSourceCymbalShop(t *testing.T) {
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
 	projectID := appFactory.GetJsonOutput("app-group").Get("cymbal-shop\\.cymbalshop.app_admin_project_id").String()
+	appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/5-appinfra/%s/%s/envs/shared", appName, appName, serviceName)))
+	deployTargets := appInfra.GetJsonOutput("clouddeploy_targets_names")
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
@@ -126,7 +128,7 @@ func TestSourceCymbalShop(t *testing.T) {
 				t.Fatal("Failed to find the release.")
 			}
 			releaseName := releases[0].Get("name")
-			targetId := fmt.Sprintf("%s-development", region) //TODO: convert to loop using env_cluster_membership_ids
+			targetId := deployTargets.Array()[0]
 			rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
 			// Poll CD rollouts until rollout is successful
 			pollCloudDeploy := func(cmd string) func() (bool, error) {
@@ -137,8 +139,10 @@ func TestSourceCymbalShop(t *testing.T) {
 					}
 					latestRolloutState := rollouts[0].Get("state").String()
 					if latestRolloutState == "SUCCEEDED" {
+						t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
 						return false, nil
 					} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
+						t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 						return true, nil
 					} else {
 						logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
