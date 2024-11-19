@@ -171,11 +171,17 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
 				buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
+				retriesBuildTrigger := 0
 				// poll build until complete
 				pollCloudBuild := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
 						build := gcloud.Runf(t, cmd).Array()
 						if len(build) < 1 {
+							if retriesBuildTrigger == 5 {
+								// force push to trigger build 1 more time
+								gitAppRun("push", "--all", "google", "-f")
+							}
+							retriesBuildTrigger++
 							return true, nil
 						}
 						latestWorkflowRunStatus := build[0].Get("status").String()
