@@ -111,8 +111,9 @@ func TestSourceCymbalShop(t *testing.T) {
 				return func() (bool, error) {
 					build := gcloud.Runf(t, cmd).Array()
 					if len(build) < 1 {
-						if retriesBuildTrigger == 5 {
+						if retriesBuildTrigger == 3 {
 							// force push to trigger build 1 more time
+							t.Logf("Force push again to try trigger build for commit %s", lastCommit)
 							gitAppRun("push", "--all", "google", "-f")
 						}
 						retriesBuildTrigger++
