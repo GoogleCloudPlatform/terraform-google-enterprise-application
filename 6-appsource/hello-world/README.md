@@ -1,12 +1,22 @@
-### Example: Getting started with a simple go app
+# Example: Getting started with a simple go app
 
-This is a simple example based on:
+This is a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold, and contains the following features:
 
 * **building** a single Go file app and with a multistage `Dockerfile` using local docker to build
 * **tagging** using the default tagPolicy (`gitCommit`)
 * **deploying** a single container pod using `kubectl`
 
-### Using the CI/CD Pipeline
+This example contains multi-architecture images. On the development environment, the pod specification will request arm64 nodes for the autopilot cluster and run an arm64 version of the docker image. On nonproduction and production environments, the pod will run an amd64/x86 version of the image on standard clusters.
+
+|              | Development | Non Production/Staging | Production |   |
+|--------------|-------------|------------------------|------------|---|
+| Architecture | arm64       | amd64/x86              | amd64/x86  |   |
+
+To achieve multi-architecture builds and images, the examples needs to use the extended features of [`buildx`](https://github.com/docker/buildx).
+
+## Using the CI/CD Pipeline
+
+A CI/CD pipeline was created for this application on 5-appinfra, it uses Cloud Build to build the docker image and Cloud Deploy to deploy the image to the cluster using skaffold.
 
 1. Clone the CI/CD repository
 
