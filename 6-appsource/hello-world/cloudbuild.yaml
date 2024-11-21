@@ -13,12 +13,25 @@
 # limitations under the License.
 
 steps:
-  - name: gcr.io/k8s-skaffold/skaffold:v2.13.2
+  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+    args: ['run', '--privileged', 'linuxkit/binfmt:v0.7']
+    id: 'initialize-qemu'
+  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+    args: ['buildx', 'create', '--name', 'multiarch', "--use"]
+    id: 'create-builder-and-use'
+  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+    args: ['buildx', 'inspect', '--bootstrap']
+    id: 'show-target-build-platforms'
+  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+    entrypoint: sh
     args:
-      - "skaffold"
-      - "build"
-      - "--file-output=/workspace/artifacts.json"
-      - "--default-repo=$_CONTAINER_REGISTRY"
+      - "-c"
+      - |
+        apk add --no-cache curl
+        curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+        install skaffold /usr/local/bin/
+        skaffold build --file-output=/workspace/artifacts.json --default-repo=$_CONTAINER_REGISTRY --cache-artifacts=false
+    id: build-multi-arch-image
   - name: gcr.io/cloud-builders/gcloud
     args:
       - "deploy"
@@ -30,5 +43,8 @@ steps:
       - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET/$SHORT_SHA"
       - "--skaffold-file=skaffold.yaml"
       - "--region=$LOCATION"
+    id: start-release-pipeline
 options:
   logging: CLOUD_LOGGING_ONLY
+  env:
+    - 'DOCKER_CLI_EXPERIMENTAL=enabled'
