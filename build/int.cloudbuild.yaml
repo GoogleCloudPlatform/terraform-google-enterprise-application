@@ -162,12 +162,20 @@ steps:
       - appinfra-apply
       - fleetscope-verify
 
-  - id: app-e2e
+  - id: cymbal-bank-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "sleep 60s &&  cft test run TestAppE2EMultitenent --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 60 && cft test run TestCymbalBankE2E --stage verify --verbose"]
     waitFor:
       - appsource-verify-cymbal-bank
+
+  - id: cymbal-shop-e2e
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestCymbalShopE2E --stage verify --verbose"]
+    waitFor:
+      - appsource-verify-cymbal-shop
+
   - id: appinfra-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -177,7 +185,8 @@ steps:
         "cft test run TestAppInfra --stage teardown --verbose",
       ]
     waitFor:
-      - app-e2e
+      - cymbal-bank-e2e
+      - cymbal-shop-e2e
       - appsource-verify-cymbal-bank
       - appsource-verify-cymbal-shop
       - appinfra-verify
