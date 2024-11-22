@@ -15,10 +15,9 @@
  */
 
 locals {
-  int_required_roles = [
+  int_required_roles = !var.single_project ? [
     "roles/owner"
-  ]
-  standalone_required_roles = [
+    ] : [
     "roles/artifactregistry.admin",
     "roles/cloudbuild.builds.builder",
     "roles/clouddeploy.serviceAgent",
@@ -43,7 +42,8 @@ locals {
 }
 
 resource "google_service_account" "int_test" {
-  project                      = module.project.project_id
+  for_each                     = { for i, value in merge(module.project, module.project_standalone) : (i) => value.project_id }
+  project                      = each.value
   account_id                   = "ci-account"
   display_name                 = "ci-account"
   create_ignore_already_exists = true
@@ -52,47 +52,32 @@ resource "google_service_account" "int_test" {
 resource "google_project_iam_member" "int_test" {
   for_each = toset(local.int_required_roles)
 
-  project = module.project.project_id
+  project = local.project_id
   role    = each.value
-  member  = "serviceAccount:${google_service_account.int_test.email}"
-}
-
-resource "google_project_iam_member" "standalone_int_test" {
-  for_each = toset(local.standalone_required_roles)
-
-  project = module.project_standalone.project_id
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.int_test.email}"
+  member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
 resource "google_organization_iam_member" "organizationServiceAgent_role" {
   org_id = var.org_id
   role   = "roles/privilegedaccessmanager.organizationServiceAgent"
-  member = "serviceAccount:${google_service_account.int_test.email}"
+  member = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
 resource "google_service_account_key" "int_test" {
-  service_account_id = google_service_account.int_test.id
+  service_account_id = google_service_account.int_test[local.index].id
 }
 
 resource "google_billing_account_iam_member" "tf_billing_user" {
   billing_account_id = var.billing_account
   role               = "roles/billing.admin"
-  member             = "serviceAccount:${google_service_account.int_test.email}"
-}
-
-resource "google_project_iam_member" "cb_standalone_service_agent_role" {
-  project = module.project_standalone.project_id
-  role    = "roles/cloudbuild.serviceAgent"
-  member  = "serviceAccount:service-${module.project_standalone.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-
-  depends_on = [module.project_standalone]
+  member             = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
 resource "google_project_iam_member" "cb_service_agent_role" {
-  project = module.project.project_id
-  role    = "roles/cloudbuild.serviceAgent"
-  member  = "serviceAccount:service-${module.project.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  for_each = { for i, value in merge(module.project, module.project_standalone) : (i) => value }
+  project  = each.value.project_id
+  role     = "roles/cloudbuild.serviceAgent"
+  member   = "serviceAccount:service-${each.value.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 
-  depends_on = [module.project]
+  depends_on = [module.project, module.project_standalone]
 }

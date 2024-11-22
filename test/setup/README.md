@@ -10,10 +10,11 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `any` | n/a | yes |
+| billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | branch\_name | The branch starting the build. | `string` | n/a | yes |
-| folder\_id | The folder to deploy in | `any` | n/a | yes |
-| org\_id | The numeric organization id | `any` | n/a | yes |
+| folder\_id | The folder to deploy in | `string` | n/a | yes |
+| org\_id | The numeric organization id | `string` | n/a | yes |
+| single\_project | The example which will be tested, if is true, single project infra will be created; if is false multitentant infra will be created | `bool` | n/a | yes |
 
 ## Outputs
 
@@ -24,7 +25,6 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | envs | n/a |
 | org\_id | n/a |
 | project\_id | n/a |
-| project\_id\_standalone | n/a |
 | sa\_key | n/a |
 | teams | n/a |
 
