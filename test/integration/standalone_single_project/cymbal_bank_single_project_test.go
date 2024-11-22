@@ -37,7 +37,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t)
-	projectID := setupOutput.GetTFSetupStringOutput("project_id_standalone")
+	projectID := setupOutput.GetTFSetupStringOutput("project_id")
 	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
 	envName := standaloneSingleProj.GetStringOutput("env")
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)

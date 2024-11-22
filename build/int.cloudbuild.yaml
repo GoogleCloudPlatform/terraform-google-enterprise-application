@@ -26,6 +26,7 @@ steps:
       - "TF_VAR_org_id=$_ORG_ID"
       - "TF_VAR_folder_id=$_FOLDER_ID"
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+      - "TF_VAR_single_project=false"
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -238,65 +239,6 @@ steps:
       ]
     waitFor:
       - multitenant-teardown
-
-# standalone single project example
-  - id: single-project-init
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage init --verbose",
-      ]
-    waitFor:
-      - prepare
-  - id: single-project-apply
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage apply --verbose",
-      ]
-    waitFor:
-      - single-project-init
-  - id: single-project-verify
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "sleep 60s && cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
-      ]
-    waitFor:
-      - single-project-apply
-  - id: single-project-source-verify
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "sleep 60s && cft test run TestSingleProjectSourceCymbalBank --stage verify --verbose",
-      ]
-    waitFor:
-      - single-project-apply
-      - single-project-verify
-  - id: app-single-project-e2e
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestAppE2ECymbalBankSingleProject --stage verify --verbose"]
-    waitFor:
-      - single-project-source-verify
-  - id: single-project-teardown
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage teardown --verbose",
-      ]
-    waitFor:
-      - app-single-project-e2e
 
 tags:
   - "ci"
