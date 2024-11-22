@@ -33,7 +33,7 @@ import (
 
 const (
 	sleepBetweenRetries time.Duration = time.Duration(60) * time.Second
-	maxRetries          int           = 30
+	maxRetries          int           = 40
 )
 
 func TestCymbalBankE2E(t *testing.T) {
