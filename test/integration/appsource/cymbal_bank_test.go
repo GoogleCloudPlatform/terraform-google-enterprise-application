@@ -175,11 +175,33 @@ func TestSourceCymbalBank(t *testing.T) {
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
 				buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
+				retriesBuildTrigger := 1
 				// poll build until complete
 				pollCloudBuild := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
 						build := gcloud.Runf(t, cmd).Array()
 						if len(build) < 1 {
+							if retriesBuildTrigger%3 == 0 {
+								// force push to trigger build again
+								t.Logf("Try trigger build again for service %s", serviceName)
+								datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+								if err != nil {
+									t.Fatal(err)
+								}
+								defer datefile.Close()
+
+								_, err = datefile.WriteString(time.Now().String() + "\n")
+								if err != nil {
+									t.Fatal(err)
+								}
+								gitAppRun("add", ".")
+								gitApp.CommitWithMsg("retries build", []string{"--allow-empty"})
+								gitAppRun("push", "--all", "google", "-f")
+								lastCommit = gitApp.GetLatestCommit()
+								t.Logf("New commit for %s is: %s", serviceName, lastCommit)
+								buildListCmd = fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
+							}
+							retriesBuildTrigger++
 							return true, nil
 						}
 						latestWorkflowRunStatus := build[0].Get("status").String()

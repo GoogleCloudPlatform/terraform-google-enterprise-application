@@ -24,5 +24,8 @@ var (
 
 		// Error 403: Compute Engine API has not been used in project {} before or it is disabled.
 		".*Error 403.*Compute Engine API has not been used in project.*": "Compute Engine API not enabled",
+
+		// Error 403: Kubernetes Engine API has not been used in project {} before or it is disabled.
+		".*Error 403: Kubernetes Engine API is not enabled for this project*": "Kubernetes Engine API not enabled",
 	}
 )

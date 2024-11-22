@@ -16,6 +16,7 @@
 
 variable "org_id" {
   description = "The numeric organization id"
+  type        = string
 }
 
 variable "branch_name" {
@@ -25,8 +26,15 @@ variable "branch_name" {
 
 variable "folder_id" {
   description = "The folder to deploy in"
+  type        = string
 }
 
 variable "billing_account" {
   description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
+  type        = string
+}
+
+variable "single_project" {
+  description = "The example which will be tested, if is true, single project infra will be created; if is false multitentant infra will be created"
+  type        = bool
 }

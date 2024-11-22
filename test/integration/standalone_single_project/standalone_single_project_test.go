@@ -39,9 +39,9 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t)
-	projectID := setupOutput.GetTFSetupStringOutput("project_id_standalone")
+	projectID := setupOutput.GetTFSetupStringOutput("project_id")
 
-	// wire setup output project_id_standalone to example var.project_id
+	// wire setup output project_id to example var.project_id
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
 		tft.WithVars(map[string]interface{}{"project_id": projectID}),
 		tft.WithTFDir("../../../examples/standalone_single_project"),

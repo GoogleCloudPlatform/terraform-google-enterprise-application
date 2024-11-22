@@ -15,11 +15,7 @@
  */
 
 output "project_id" {
-  value = module.project.project_id
-}
-
-output "project_id_standalone" {
-  value = module.project_standalone.project_id
+  value = local.project_id
 }
 
 output "sa_key" {
@@ -30,7 +26,7 @@ output "sa_key" {
 output "envs" {
   value = { for env, vpc in module.vpc : env => {
     org_id             = var.org_id
-    folder_id          = module.folders.ids[env]
+    folder_id          = module.folders[local.index].ids[env]
     billing_account    = var.billing_account
     network_project_id = vpc.project_id
     network_self_link  = vpc.network_self_link,
@@ -39,7 +35,7 @@ output "envs" {
 }
 
 output "common_folder_id" {
-  value = module.folder_common.ids["common"]
+  value = try([for value in module.folder_common : value.ids["common"]][0], "")
 }
 
 output "org_id" {
