@@ -77,15 +77,24 @@ example-organization
 
 ### [5. appinfra](/5-appinfra/)
 
-The purpose of this stage is to create application-speciifc infrastructure, including the application CI/CD pipeline. This stage deploys the application-specific resources for the Cymbal Bank sample application, including service-specific databases. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
+The purpose of this stage is to create application-specific infrastructure. This stage deploys the application-specific resources, including service-related infrastructure components such as databases, cloud build triggers, storage buckets, BigQuery datasets, and others. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
 
 ### [6. appsource](/6-appsource/)
 
-The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up the Cymbal Bank sample application, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
+The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up and deploying the sample applications, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
 
 ## Applications (Apps)
 
 This repo demostrates setting up the developer platform for one or more *Apps* which is a high level of grouping of releated service or workloads. Apps are created infrequently and may include multiple namespaces, team scopes, and dedicated IP address. A multi-tenant cluster can contain multiple Apps.
+
+App-specific resources such as application CI/CD pipelines specification and kubernetes manifests are configured on 5-appinfra and 6-appsource. The table below indicates where you can find the app-specific directories for the examples contained in this repository:
+
+| Application               | 5-appinfra directory                | 6-appsource directory                |
+|---------------------------|-------------------------------------|-------------------------------------|
+| Hello World               | [./5-appinfra](./5-appinfra)                        | [./6-appsource](./6-appsource)                        |
+| Cymbal Bank               | [./examples/cymbal-bank/5-appinfra](./examples/cymbal-bank/5-appinfra)   | [./examples/cymbal-bank/6-appsource](./examples/cymbal-bank/6-appsource)   |
+| Cymbal Shop               | [./examples/cymbal-shop/5-appinfra](./examples/cymbal-shop/5-appinfra)   | [./examples/cymbal-shop/6-appsource](./examples/cymbal-shop/6-appsource)   |
+| Cymbal Bank + Cymbal Shop | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) |
 
 ### Hello World Example
 
@@ -97,7 +106,7 @@ This [hello-world](https://github.com/GoogleContainerTools/skaffold/tree/v2.13.2
 
 The example is extracted from the skaffold repository and the source code is stored in `6-appsource/hello-world`.
 
-### [Cymbal Bank example](./examples/cymbal-bank/)
+### [Cymbal Bank Example](./examples/cymbal-bank/)
 
 The [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) (`cymbal-bank`) sample App is included in the repository. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
 
@@ -107,7 +116,7 @@ The application is a web-based e-commerce app where users can browse items, add 
 
 In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
 
-For more information about the Cymbal Bank application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
+For more information about the Cymbal Shop application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
 
 ### [Multitenant Applications Example](./examples/multitenant-applications)
 
