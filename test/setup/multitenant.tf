@@ -128,7 +128,7 @@ resource "google_folder_iam_member" "common_folder_iam" {
 
 # Create SVPC host projects
 module "vpc_project" {
-  for_each = { for i, folder in module.folders[local.index].ids : (i) => folder }
+  for_each = !var.single_project ? { for i, folder in module.folders[local.index].ids : (i) => folder } : {}
   source   = "terraform-google-modules/project-factory/google"
   version  = "~> 17.0"
 
