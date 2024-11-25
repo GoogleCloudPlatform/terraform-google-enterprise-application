@@ -22,6 +22,39 @@ Each pipeline has the following associated resources:
 
 ## Usage
 
+### Pre-requisites
+
+### Cloudbuild with Github Pre-requisites
+
+To proceed with github as your git provider you will need:
+
+- A authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
+- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
+  - Multitenant (`eab-multitenant`)
+  - Fleetscope (`eab-fleetscope`)
+  - Application Factory (`eab-applicationfactory`)
+
+   > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used in `terraform.tfvars`.
+- [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in secret manager, you will use the secret id in the `terraform.tfvars` file.
+
+### Cloudbuild with Gitlab Pre-requisites
+
+To proceed with gitlab as your git provider you will need:
+
+- A authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
+- A **private** GitLab repository for each one of the repositories below:
+  - Multitenant (`eab-multitenant`)
+  - Fleetscope (`eab-fleetscope`)
+  - Application Factory (`eab-applicationfactory`)
+
+   > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+
+- An access token with the `api` scope to use for connecting and disconnecting repositories.
+
+- An access token with the `read_api` scope to ensure Cloud Build repositories can access source code in repositories.
+
 ### Deploying with Cloud Build
 
 #### Deploying on Enterprise Foundation blueprint
