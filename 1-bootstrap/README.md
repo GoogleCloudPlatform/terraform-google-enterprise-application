@@ -24,7 +24,11 @@ Each pipeline has the following associated resources:
 
 ### Pre-requisites
 
-### Cloudbuild with Github Pre-requisites
+#### Secrets Project
+
+You will need a project with secret manager to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
+
+#### Cloudbuild with Github Pre-requisites
 
 To proceed with github as your git provider you will need:
 
@@ -36,10 +40,63 @@ To proceed with github as your git provider you will need:
 
    > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
-- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used in `terraform.tfvars`.
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later.
 - [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in secret manager, you will use the secret id in the `terraform.tfvars` file.
+- Create a secret for the app id:
 
-### Cloudbuild with Gitlab Pre-requisites
+   ```bash
+   APP_ID_VALUE=<replace_with_app_id>
+   printf $APP_ID_VALUE | gcloud secrets create github-app-id --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id:
+
+   ```bash
+   gcloud secrets describe github-app-id --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Create a secret for the Personal Access Token:
+
+   ```bash
+   GITHUB_TOKEN=<replace_with_token>
+   printf $GITHUB_TOKEN | gcloud secrets create github-pat --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id:
+
+   ```bash
+   gcloud secrets describe github-pat --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Populate your `terraform.tfvars` file with the cloudbuild 2nd gen configuration variable, here is an example:
+
+   ```hcl
+   cloudbuildv2_repository_config = {
+   repo_type = "GITHUBv2"
+
+   repositories = {
+      multitenant = {
+         repository_name = "eab-multitenant"
+         repository_url  = "https://github.com/your-org/eab-multitenant.git"
+      }
+
+      applicationfactory = {
+         repository_name = "eab-applicationfactory"
+         repository_url  = "https://github.com/your-org/eab-applicationfactory.git"
+      }
+
+      fleetscope = {
+         repository_name = "eab-fleetscope"
+         repository_url  = "https://github.com/your-org/eab-fleetscope.git"
+      }
+   }
+
+   github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat" # Personal Access Token Secret
+   github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id" # App ID value secret
+   }
+   ```
+
+#### Cloudbuild with Gitlab Pre-requisites
 
 To proceed with gitlab as your git provider you will need:
 
@@ -89,7 +146,9 @@ example-organization
    mv terraform.example.tfvars terraform.tfvars
    ```
 
-1. Update the `terraform.tfvars` file with your project id.
+1. Update the `terraform.tfvars` file with your project id. If you are using Github or Gitlab as your Git provider for Cloud Build, you will need to configure the `cloudbuildv2_repository_config` variable as described in the following sections:
+   - [Cloudbuild with Github Pre-requisites](#cloudbuild-with-github-pre-requisites)
+   - [Cloudbuild with Gitlab Pre-requisites](#cloudbuild-with-gitlab-pre-requisites)
 
 You can now deploy the common environment for these pipelines.
 
