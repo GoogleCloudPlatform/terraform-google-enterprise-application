@@ -129,12 +129,21 @@ func TestSourceCymbalShop(t *testing.T) {
 				}
 			}
 			utils.Poll(t, pollCloudBuild(buildListCmd), 60, 30*time.Second)
+
+			releaseName := ""
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
-			releases := gcloud.Runf(t, releaseListCmd).Array()
-			if len(releases) == 0 {
-				t.Fatal("Failed to find the release.")
+			pollRelease := func(cmd string) func() (bool, error) {
+				return func() (bool, error) {
+					releases := gcloud.Runf(t, releaseListCmd).Array()
+					if len(releases) == 0 {
+						return true, nil
+					}
+					releaseName = releases[0].Get("name").String()
+					return false, nil
+				}
 			}
-			releaseName := releases[0].Get("name")
+			utils.Poll(t, pollRelease(releaseListCmd), 10, 60*time.Second)
+
 			targetId := deployTargets.Array()[0]
 			rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
 			// Poll CD rollouts until rollout is successful
