@@ -32,7 +32,7 @@ locals {
     }
   }
   use_csr                    = var.cloudbuildv2_repository_config.repo_type == "CSR"
-  csr_repos                  = local.use_csr ? {for k, v in var.cloudbuildv2_repository_config.repositories : k => v.repository_name} : {}
+  csr_repos                  = local.use_csr ? { for k, v in var.cloudbuildv2_repository_config.repositories : k => v.repository_name } : {}
   cb_service_accounts_emails = { for k, v in module.tf_cloudbuild_workspace : k => reverse(split("/", v.cloudbuild_sa))[0] }
 }
 
