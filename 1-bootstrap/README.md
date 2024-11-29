@@ -26,13 +26,13 @@ Each pipeline has the following associated resources:
 
 #### Secrets Project
 
-You will need a project with secret manager to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
+You will need a project with Secret Manager to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
 
-#### Cloudbuild with Github Pre-requisites
+#### Cloud Build with Github Pre-requisites
 
 To proceed with github as your git provider you will need:
 
-- A authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
+- An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
   - Multitenant (`eab-multitenant`)
   - Fleetscope (`eab-fleetscope`)
@@ -41,66 +41,66 @@ To proceed with github as your git provider you will need:
    > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later.
-- [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in secret manager, you will use the secret id in the `terraform.tfvars` file.
-- Create a secret for the app id:
+- [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
+- Create a secret for the Github Cloud Build App ID:
 
    ```bash
    APP_ID_VALUE=<replace_with_app_id>
    printf $APP_ID_VALUE | gcloud secrets create github-app-id --project=$GIT_SECRET_PROJECT --data-file=-
    ```
 
-- Take note of the secret id:
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
 
    ```bash
    gcloud secrets describe github-app-id --project=$GIT_SECRET_PROJECT --format="value(name)"
    ```
 
-- Create a secret for the Personal Access Token:
+- Create a secret for the Github Personal Access Token:
 
    ```bash
    GITHUB_TOKEN=<replace_with_token>
    printf $GITHUB_TOKEN | gcloud secrets create github-pat --project=$GIT_SECRET_PROJECT --data-file=-
    ```
 
-- Take note of the secret id:
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
 
    ```bash
    gcloud secrets describe github-pat --project=$GIT_SECRET_PROJECT --format="value(name)"
    ```
 
-- Populate your `terraform.tfvars` file with the cloudbuild 2nd gen configuration variable, here is an example:
+- Populate your `terraform.tfvars` file in `1-bootstrap` with the Cloud Build 2nd Gen configuration variable, here is an example:
 
    ```hcl
    cloudbuildv2_repository_config = {
-   repo_type = "GITHUBv2"
+      repo_type = "GITHUBv2"
 
-   repositories = {
-      multitenant = {
-         repository_name = "eab-multitenant"
-         repository_url  = "https://github.com/your-org/eab-multitenant.git"
+      repositories = {
+         multitenant = {
+            repository_name = "eab-multitenant"
+            repository_url  = "https://github.com/your-org/eab-multitenant.git"
+         }
+
+         applicationfactory = {
+            repository_name = "eab-applicationfactory"
+            repository_url  = "https://github.com/your-org/eab-applicationfactory.git"
+         }
+
+         fleetscope = {
+            repository_name = "eab-fleetscope"
+            repository_url  = "https://github.com/your-org/eab-fleetscope.git"
+         }
       }
 
-      applicationfactory = {
-         repository_name = "eab-applicationfactory"
-         repository_url  = "https://github.com/your-org/eab-applicationfactory.git"
-      }
-
-      fleetscope = {
-         repository_name = "eab-fleetscope"
-         repository_url  = "https://github.com/your-org/eab-fleetscope.git"
-      }
-   }
-
-   github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat" # Personal Access Token Secret
-   github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id" # App ID value secret
+      github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat" # Personal Access Token Secret
+      github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id" # App ID value secret
    }
    ```
 
-#### Cloudbuild with Gitlab Pre-requisites
+#### Cloud Build with Gitlab Pre-requisites
 
 To proceed with gitlab as your git provider you will need:
 
-- A authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
+- An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** GitLab repository for each one of the repositories below:
   - Multitenant (`eab-multitenant`)
   - Fleetscope (`eab-fleetscope`)
@@ -111,6 +111,76 @@ To proceed with gitlab as your git provider you will need:
 - An access token with the `api` scope to use for connecting and disconnecting repositories.
 
 - An access token with the `read_api` scope to ensure Cloud Build repositories can access source code in repositories.
+
+- Create a secret for the Gitlab API Access Token:
+
+   ```bash
+   GITLAB_API_TOKEN=<replace_with_app_id>
+   printf $GITLAB_API_TOKEN | gcloud secrets create gitlab-api-token --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe gitlab-api-token --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Create a secret for the Gitlab Read API Access Token:
+
+   ```bash
+   GITLAB_READ_API_TOKEN=<replace_with_token>
+   printf $GITLAB_READ_API_TOKEN | gcloud secrets create gitlab-read-api-token --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe gitlab-read-api-token --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Generate a random 36 character string that will be used as the Webhook Secret:
+
+   ```bash
+   GITLAB_WEBHOOK=<replace_with_webhook>
+   printf $GITLAB_WEBHOOK | gcloud secrets create gitlab-webhook --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+   > NOTE: for testing purposes, you may use the following command to generate the webhook in bash: `GITLAB_WEBHOOK=$(cat /dev/urandom | tr -dc "[:alnum:]" | head -c 36)`
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe gitlab-webhook --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Populate your `terraform.tfvars` file in `1-bootstrap` with the Cloud Build 2nd Gen configuration variable, here is an example:
+
+   ```hcl
+   cloudbuildv2_repository_config = {
+      repo_type = "GITLABv2"
+
+      repositories = {
+         multitenant = {
+            repository_name = "eab-multitenant"
+            repository_url  = "https://gitlab.com/your-group/eab-multitenant.git"
+         }
+
+         applicationfactory = {
+            repository_name = "eab-applicationfactory"
+            repository_url  = "https://gitlab.com/your-group/eab-applicationfactory.git"
+         }
+
+         fleetscope = {
+            repository_name = "eab-fleetscope"
+            repository_url  = "https://gitlab.com/your-group/eab-fleetscope.git"
+         }
+      }
+
+      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-api-token"
+      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-read-api-token"
+      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-webhook"
+   }
+   ```
 
 ### Deploying with Cloud Build
 
@@ -147,8 +217,8 @@ example-organization
    ```
 
 1. Update the `terraform.tfvars` file with your project id. If you are using Github or Gitlab as your Git provider for Cloud Build, you will need to configure the `cloudbuildv2_repository_config` variable as described in the following sections:
-   - [Cloudbuild with Github Pre-requisites](#cloudbuild-with-github-pre-requisites)
-   - [Cloudbuild with Gitlab Pre-requisites](#cloudbuild-with-gitlab-pre-requisites)
+   - [Cloud Build with Github Pre-requisites](#cloud-build-with-github-pre-requisites)
+   - [Cloud Build with Gitlab Pre-requisites](#cloud-build-with-gitlab-pre-requisites)
 
 You can now deploy the common environment for these pipelines.
 

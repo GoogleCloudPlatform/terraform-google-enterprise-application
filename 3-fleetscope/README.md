@@ -54,13 +54,19 @@ Please note that some steps in this documentation are specific to the selected G
     gcloud source repos clone eab-fleetscope --project=$multitenant_admin_project
     ```
 
-1. (Github Only) When using Github with Cloudbuild, clone the repository with the following command.
+1. (Github Only) When using Github with Cloud Build, clone the repository with the following command.
 
     ```bash
     git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/eab-fleetscope.git
     ```
 
-1. Initialize the git repository, copy `3-fleetscope` code into the repository, cloudbuild yaml files and terraform wrapper script:
+1. (Gitlab Only) When using Gitlab with Cloud Build, clone the repository with the following command.
+
+    ```bash
+    git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/eab-fleetscope.git
+    ```
+
+1. Initialize the git repository, copy `3-fleetscope` code into the repository, Cloud Build yaml files and terraform wrapper script:
 
     ```bash
     cd eab-fleetscope
