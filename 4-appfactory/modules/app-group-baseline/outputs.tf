@@ -21,12 +21,12 @@ output "app_admin_project_id" {
 
 output "app_infra_repository_name" {
   description = "Name of the application infrastructure repository."
-  value       = google_sourcerepo_repository.app_infra_repo.name
+  value       = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].name : "CLOUDBUILD_V2_REPOSITORY"
 }
 
 output "app_infra_repository_url" {
   description = "URL of the application infrastructure repository."
-  value       = google_sourcerepo_repository.app_infra_repo.url
+  value       = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].url : "CLOUDBUILD_V2_REPOSITORY"
 }
 
 output "app_cloudbuild_workspace_apply_trigger_id" {

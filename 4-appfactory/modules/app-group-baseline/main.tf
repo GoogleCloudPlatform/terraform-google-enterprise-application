@@ -38,6 +38,7 @@ locals {
   )
 
   org_ids = distinct([for env in var.envs : env.org_id])
+  use_csr = var.cloudbuildv2_repository_id == ""
 }
 
 
@@ -93,6 +94,9 @@ module "app_admin_project" {
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
+  // conditionally create the cloud source repo if the user did not define a cloud build 2nd gen repository.
+  count = local.use_csr ? 1 : 0
+
   project                      = local.admin_project_id
   name                         = "${var.service_name}-i-r"
   create_ignore_already_exists = true
@@ -103,8 +107,8 @@ module "tf_cloudbuild_workspace" {
   version = "~> 9.0"
 
   project_id               = local.admin_project_id
-  tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
-  tf_repo_type             = "CLOUD_SOURCE_REPOSITORIES"
+  tf_repo_uri              = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].url : var.cloudbuildv2_repository_id
+  tf_repo_type             = local.use_csr ? "CLOUD_SOURCE_REPOSITORIES" : "CLOUDBUILD_V2_REPOSITORY"
   location                 = var.location
   trigger_location         = var.trigger_location
   artifacts_bucket_name    = "${var.bucket_prefix}-${local.admin_project_id}-${var.service_name}-build"

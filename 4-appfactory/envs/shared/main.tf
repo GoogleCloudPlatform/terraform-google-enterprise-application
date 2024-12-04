@@ -27,6 +27,8 @@ locals {
       }
     ]
   ])
+  use_csr   = var.cloudbuildv2_repository_config.repo_type == "CSR"
+  csr_repos = local.use_csr ? [for k, v in var.cloudbuildv2_repository_config.repositories : v.repository_name] : []
 }
 
 // One folder per application, will group admin/service projects under it
@@ -36,6 +38,24 @@ resource "google_folder" "app_folder" {
   display_name        = each.key
   parent              = var.common_folder_id
   deletion_protection = false
+}
+
+module "cloudbuild_repositories" {
+  count = local.use_csr ? 0 : 1
+  # TODO: update git URL to registry format after release is available 
+  source = "git::https://github.com/terraform-google-modules/terraform-google-bootstrap.git//modules/cloudbuild_repo_connection?ref=a6072e0db92d976f1535dab767ad6b4331bcb4ef"
+
+  project_id = var.project_id
+
+  credential_config = {
+    connection_type                             = var.cloudbuildv2_repository_config.repo_type
+    github_secret_id                            = var.cloudbuildv2_repository_config.github_secret_id
+    github_app_id_secret_id                     = var.cloudbuildv2_repository_config.github_app_id_secret_id
+    gitlab_read_authorizer_credential_secret_id = var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id
+    gitlab_authorizer_credential_secret_id      = var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
+    gitlab_webhook_secret_id                    = var.cloudbuildv2_repository_config.gitlab_webhook_secret_id
+  }
+  cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
 }
 
 module "components" {
@@ -78,4 +98,6 @@ module "components" {
   admin_project_id     = each.value.service.admin_project_id
   create_admin_project = each.value.service.create_admin_project
   create_infra_project = each.value.service.create_infra_project
+
+  cloudbuildv2_repository_id = local.use_csr ? "" : module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[each.value.service_name].id
 }

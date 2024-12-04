@@ -141,3 +141,20 @@ variable "create_admin_project" {
   type        = bool
 }
 
+variable "cloudbuildv2_repository_id" {
+  description = "Cloud Build 2nd Gen repository ID to be used for the infrastructure repository. If not defined, a Cloud Source Repository will be created."
+  type        = string
+  default     = ""
+}
+
+variable "cloudbuildv2_repository_name" {
+  description = "Cloud Build 2nd Gen repository Name."
+  type        = string
+  default     = ""
+}
+
+variable "cloudbuildv2_repository_url" {
+  description = "Cloud Build 2nd Gen repository URL."
+  type        = string
+  default     = ""
+}
