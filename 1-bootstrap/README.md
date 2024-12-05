@@ -26,11 +26,11 @@ Each pipeline has the following associated resources:
 
 #### Secrets Project
 
-You will need a project with Secret Manager to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
+You will need a Google Cloud project with [Secret Manager](https://cloud.google.com/security/products/secret-manager) to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
 
 #### Cloud Build with Github Pre-requisites
 
-To proceed with github as your git provider you will need:
+To proceed with GitHub as your git provider you will need:
 
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
@@ -98,7 +98,7 @@ To proceed with github as your git provider you will need:
 
 #### Cloud Build with Gitlab Pre-requisites
 
-To proceed with gitlab as your git provider you will need:
+To proceed with Gitlab as your git provider you will need:
 
 - An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** GitLab repository for each one of the repositories below:
