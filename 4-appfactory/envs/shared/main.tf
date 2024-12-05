@@ -28,7 +28,6 @@ locals {
     ]
   ])
   use_csr   = var.cloudbuildv2_repository_config.repo_type == "CSR"
-  csr_repos = local.use_csr ? [for k, v in var.cloudbuildv2_repository_config.repositories : v.repository_name] : []
 }
 
 // One folder per application, will group admin/service projects under it

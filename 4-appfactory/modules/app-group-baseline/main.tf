@@ -39,7 +39,7 @@ locals {
 
   org_ids           = distinct([for env in var.envs : env.org_id])
   use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
-  service_repo_name = var.cloudbuildv2_repository_config.repositories["${var.service_name}"].repository_name
+  service_repo_name = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
 }
 
 
@@ -126,7 +126,7 @@ module "tf_cloudbuild_workspace" {
   version = "~> 9.0"
 
   project_id               = local.admin_project_id
-  tf_repo_uri              = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].url : module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories["${var.service_name}"].id
+  tf_repo_uri              = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].url : module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[var.service_name].id
   tf_repo_type             = local.use_csr ? "CLOUD_SOURCE_REPOSITORIES" : "CLOUDBUILD_V2_REPOSITORY"
   location                 = var.location
   trigger_location         = var.trigger_location
