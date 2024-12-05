@@ -20,8 +20,8 @@ output "app-group" {
     for k, value in module.components : k => {
       app_infra_project_ids : value.app_infra_project_ids,
       app_admin_project_id : value.app_admin_project_id,
-      app_infra_repository_name : (value.app_infra_repository_name == "CLOUDBUILD_V2_REPOSITORY" ? module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[value.service_name].name : value.app_infra_repository_name),
-      app_infra_repository_url : (value.app_infra_repository_url == "CLOUDBUILD_V2_REPOSITORY" ? module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[value.service_name].remote_uri : value.app_infra_repository_url),
+      app_infra_repository_name : value.app_infra_repository_name,
+      app_infra_repository_url : value.app_infra_repository_url,
       app_cloudbuild_workspace_apply_trigger_id : value.app_cloudbuild_workspace_apply_trigger_id,
       app_cloudbuild_workspace_plan_trigger_id : value.app_cloudbuild_workspace_plan_trigger_id,
       app_cloudbuild_workspace_artifacts_bucket_name : value.app_cloudbuild_workspace_artifacts_bucket_name,
