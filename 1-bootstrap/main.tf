@@ -57,7 +57,7 @@ module "tfstate_bucket" {
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 9.0"
+  version = "~> 10.0"
 
   for_each = local.cb_config
 
