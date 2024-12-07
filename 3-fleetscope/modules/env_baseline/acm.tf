@@ -70,6 +70,7 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
       enabled       = true
       source_format = "unstructured"
       git {
+        // TODO: Update to use another credential type https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/reference/rootsync-reposync-fields
         sync_repo                 = google_sourcerepo_repository.acm_repo.url
         secret_type               = "gcpserviceaccount"
         gcp_service_account_email = google_service_account.root_reconciler.email

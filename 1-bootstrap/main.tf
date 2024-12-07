@@ -17,32 +17,50 @@
 locals {
   cb_config = {
     "multitenant" = {
-      repo_name    = "eab-multitenant",
       bucket_infix = "mt"
       roles = [
         "roles/container.admin"
       ]
     }
     "applicationfactory" = {
-      repo_name    = "eab-applicationfactory",
       bucket_infix = "af"
       roles        = ["roles/resourcemanager.projectIamAdmin"]
     }
     "fleetscope" = {
-      repo_name    = "eab-fleetscope",
       bucket_infix = "fs"
       roles        = []
     }
   }
+  use_csr                    = var.cloudbuildv2_repository_config.repo_type == "CSR"
+  csr_repos                  = local.use_csr ? { for k, v in var.cloudbuildv2_repository_config.repositories : k => v.repository_name } : {}
   cb_service_accounts_emails = { for k, v in module.tf_cloudbuild_workspace : k => reverse(split("/", v.cloudbuild_sa))[0] }
 }
 
 resource "google_sourcerepo_repository" "gcp_repo" {
-  for_each = local.cb_config
+  for_each = local.csr_repos
 
   project                      = var.project_id
-  name                         = each.value.repo_name
+  name                         = each.value
   create_ignore_already_exists = true
+}
+
+module "cloudbuild_repositories" {
+  count = local.use_csr ? 0 : 1
+
+  source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
+  version = "~> 10.0"
+
+  project_id = var.project_id
+
+  connection_config = {
+    connection_type                             = var.cloudbuildv2_repository_config.repo_type
+    github_secret_id                            = var.cloudbuildv2_repository_config.github_secret_id
+    github_app_id_secret_id                     = var.cloudbuildv2_repository_config.github_app_id_secret_id
+    gitlab_read_authorizer_credential_secret_id = var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id
+    gitlab_authorizer_credential_secret_id      = var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
+    gitlab_webhook_secret_id                    = var.cloudbuildv2_repository_config.gitlab_webhook_secret_id
+  }
+  cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
 }
 
 module "tfstate_bucket" {
@@ -56,19 +74,19 @@ module "tfstate_bucket" {
 }
 
 module "tf_cloudbuild_workspace" {
+  for_each = var.cloudbuildv2_repository_config.repositories
+
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
   version = "~> 10.0"
-
-  for_each = local.cb_config
 
   project_id = var.project_id
   location   = var.location
 
-  tf_repo_uri           = google_sourcerepo_repository.gcp_repo[each.key].url
-  tf_repo_type          = "CLOUD_SOURCE_REPOSITORIES"
+  tf_repo_uri           = local.use_csr ? google_sourcerepo_repository.gcp_repo[each.key].url : module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[each.key].id
+  tf_repo_type          = local.use_csr ? "CLOUD_SOURCE_REPOSITORIES" : "CLOUDBUILD_V2_REPOSITORY"
   trigger_location      = var.trigger_location
-  artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-build"
-  log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${each.value.bucket_infix}-logs"
+  artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${local.cb_config[each.key].bucket_infix}-build"
+  log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${local.cb_config[each.key].bucket_infix}-logs"
 
   create_state_bucket    = false
   state_bucket_self_link = module.tfstate_bucket.bucket.self_link
@@ -78,7 +96,7 @@ module "tf_cloudbuild_workspace" {
   cloudbuild_sa_roles = {
     "roles" = {
       project_id = var.project_id
-    roles = each.value.roles }
+    roles = local.cb_config[each.key].roles }
   }
 
   substitutions = {

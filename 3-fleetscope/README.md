@@ -38,6 +38,8 @@ The steps below assume that you are checked out on the same level as `terraform-
 └── .
 ```
 
+Please note that some steps in this documentation are specific to the selected Git provider. These steps are clearly marked at the beginning of each instruction. For example, if a step applies only to GitHub users, it will be labeled with "(GitHub only)."
+
 1. Retrieve Multi-tenant administration project variable value from 1-bootstrap:
 
     ```bash
@@ -46,13 +48,25 @@ The steps below assume that you are checked out on the same level as `terraform-
     echo multitenant_admin_project=$multitenant_admin_project
     ```
 
-1. (CSR) Clone the infrastructure pipeline repository:
+1. (CSR Only) Clone the infrastructure pipeline repository:
 
     ```bash
     gcloud source repos clone eab-fleetscope --project=$multitenant_admin_project
     ```
 
-1. Initialize the git repository, copy `3-fleetscope` code into the repository, cloudbuild yaml files and terraform wrapper script:
+1. (Github Only) When using Github with Cloud Build, clone the repository with the following command.
+
+    ```bash
+    git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/eab-fleetscope.git
+    ```
+
+1. (Gitlab Only) When using Gitlab with Cloud Build, clone the repository with the following command.
+
+    ```bash
+    git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/eab-fleetscope.git
+    ```
+
+1. Initialize the git repository, copy `3-fleetscope` code into the repository, Cloud Build yaml files and terraform wrapper script:
 
     ```bash
     cd eab-fleetscope
