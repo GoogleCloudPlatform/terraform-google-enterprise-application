@@ -174,6 +174,8 @@ func TestAppfactory(t *testing.T) {
 					}
 					// triggers
 					repoName := appData.Get("app_infra_repository_name").String()
+					triggerRegion := "us-central1"
+
 					for _, trigger := range []struct {
 						output string
 						file   string
@@ -188,7 +190,7 @@ func TestAppfactory(t *testing.T) {
 						},
 					} {
 						triggerID := testutils.GetLastSplitElement(appData.Get(trigger.output).String(), "/")
-						buildTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", triggerID, adminProjectID, "global")
+						buildTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", triggerID, adminProjectID, triggerRegion)
 						filename := buildTrigger.Get("filename").String()
 						assert.Equal(trigger.file, filename, fmt.Sprintf("The filename for the trigger should be %s but got %s.", trigger.file, filename))
 						assert.Equal(repoName, buildTrigger.Get("triggerTemplate.repoName").String(), "the trigger should use the repo %s", repoName)
