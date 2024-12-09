@@ -27,7 +27,6 @@ locals {
       }
     ]
   ])
-  use_csr   = var.cloudbuildv2_repository_config.repo_type == "CSR"
 }
 
 // One folder per application, will group admin/service projects under it
