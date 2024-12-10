@@ -45,8 +45,9 @@ locals {
 
 module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
-  # TODO: update git URL to registry format after release is available
-  source = "git::https://github.com/terraform-google-modules/terraform-google-bootstrap.git//modules/cloudbuild_repo_connection?ref=a6072e0db92d976f1535dab767ad6b4331bcb4ef"
+
+  source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
+  version = "~> 10.0"
 
   project_id = local.admin_project_id
 

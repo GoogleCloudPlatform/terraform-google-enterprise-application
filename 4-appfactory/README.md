@@ -36,63 +36,34 @@ It will also create an Application Folder to group your admin projects under it,
 To proceed with GitHub as your git provider you will need:
 
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
-- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
-  - Multitenant (`eab-multitenant`)
-  - Fleetscope (`eab-fleetscope`)
-  - Application Factory (`eab-applicationfactory`)
-
-   > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories infrastucture repositories that will be created, in this example only a `hello-world` infrastucture repo will be created:
+  - Hello World Infrastructure Repository (`hello-world-i-r`)
 - [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later.
 - [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
-- Create a secret for the Github Cloud Build App ID:
 
-   ```bash
-   APP_ID_VALUE=<replace_with_app_id>
-   printf $APP_ID_VALUE | gcloud secrets create github-app-id --project=$GIT_SECRET_PROJECT --data-file=-
-   ```
+- Populate your `terraform.tfvars` file in `4-appfactory` with the Cloud Build 2nd Gen configuration variable, here is an example:
 
-- Take note of the secret id, it will be used in `terraform.tfvars` later on:
-
-   ```bash
-   gcloud secrets describe github-app-id --project=$GIT_SECRET_PROJECT --format="value(name)"
-   ```
-
-- Create a secret for the Github Personal Access Token:
-
-   ```bash
-   GITHUB_TOKEN=<replace_with_token>
-   printf $GITHUB_TOKEN | gcloud secrets create github-pat --project=$GIT_SECRET_PROJECT --data-file=-
-   ```
-
-- Take note of the secret id, it will be used in `terraform.tfvars` later on:
-
-   ```bash
-   gcloud secrets describe github-pat --project=$GIT_SECRET_PROJECT --format="value(name)"
-   ```
-
-- Populate your `terraform.tfvars` file in `1-bootstrap` with the Cloud Build 2nd Gen configuration variable, here is an example:
-
-   ```hcl
+   ```diff
    cloudbuildv2_repository_config = {
       repo_type = "GITHUBv2"
       repositories = {
-         multitenant = {
-            repository_name = "eab-multitenant"
-            repository_url  = "https://github.com/your-org/eab-multitenant.git"
-         }
-         applicationfactory = {
-            repository_name = "eab-applicationfactory"
-            repository_url  = "https://github.com/your-org/eab-applicationfactory.git"
-         }
-         fleetscope = {
-            repository_name = "eab-fleetscope"
-            repository_url  = "https://github.com/your-org/eab-fleetscope.git"
-         }
+   +     "hello-world" = {
+   +         repository_name = "hello-world-i-r"
+   +         repository_url  = "https://github.com/<owner or organization>/hello-world-i-r.git"
+        }
       }
-      github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat" # Personal Access Token Secret
-      github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id" # App ID value secret
+   +  github_secret_id = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat"
+   +  github_app_id_secret_id = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id"
    }
    ```
+
+    > IMPORTANT: The map key must be `SERVICE_NAME`. Where `SERVICE_NAME` is the same name specified in the `applications` variable for the microservice.
+
+- Grant [Secret Manager Admin Role](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) to the Service Account that runs the Pipeline on your Git Credentials Project. You can use the gcloud command below by replacing `GIT_SECRET_PROJECT` with the project that stores your Git credentials and `YOUR-CLOUDBUILD-PROJECT` with the project id that hosts the Cloud Build builds for the `eab-applicationfactory` stage.
+
+    ```bash
+    gcloud projects add-iam-policy-binding $GIT_SECRET_PROJECT --role=roles/secretmanager.admin --member=serviceAccount:tf-cb-eab-applicationfactory@YOUR-CLOUDBUILD-PROJECT.iam.gserviceaccount.com
+    ```
 
 #### Cloud Build with Gitlab Pre-requisites
 
@@ -106,7 +77,7 @@ To proceed with Gitlab as your git provider you will need:
 
 - An access token with the `read_api` scope to ensure Cloud Build repositories can access source code in repositories.
 
-- Populate your `terraform.tfvars` file in `1-bootstrap` with the Cloud Build 2nd Gen configuration variable, here is an example:
+- Populate your `terraform.tfvars` file in `4-appfactory` with the Cloud Build 2nd Gen configuration variable, here is an example:
 
    ```diff
    cloudbuildv2_repository_config = {
