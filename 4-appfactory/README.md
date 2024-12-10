@@ -33,7 +33,7 @@ It will also create an Application Folder to group your admin projects under it,
 
 #### Cloud Build with Github Pre-requisites
 
-To proceed with github as your git provider you will need:
+To proceed with GitHub as your git provider you will need:
 
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
@@ -96,7 +96,7 @@ To proceed with github as your git provider you will need:
 
 #### Cloud Build with Gitlab Pre-requisites
 
-To proceed with gitlab as your git provider you will need:
+To proceed with Gitlab as your git provider you will need:
 
 - An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** GitLab repository for each one of the repositories infrastucture repositories that will be created, in this example only a `hello-world` infrastucture repo will be created:
