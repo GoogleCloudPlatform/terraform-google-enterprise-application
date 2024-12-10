@@ -48,7 +48,7 @@ module "cloudbuild_repositories" {
   source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
   version = "~> 10.0"
 
-  project_id = var.project_id
+  project_id = local.admin_project_id
 
   connection_config = {
     connection_type                             = var.cloudbuildv2_repository_config.repo_type
