@@ -42,14 +42,13 @@ locals {
   service_repo_name = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
 }
 
-
 module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
-  source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
+  source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
   version = "~> 10.0"
 
-  project_id = local.admin_project_id
+  project_id = var.project_id
 
   connection_config = {
     connection_type                             = var.cloudbuildv2_repository_config.repo_type
