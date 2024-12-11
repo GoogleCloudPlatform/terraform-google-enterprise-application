@@ -55,6 +55,8 @@ The purpose of this stage is to deploy the per-environment fleet resources via t
 
 The fleet-scope pipeline manages configuration and resources related to [GKE Fleets](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). This stage manages the creation of namespaces in the GKE clusters via [team scopes and fleet namespaces](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management#fleet_team_management_overview). This pipeline also enables the [Config Sync](https://cloud.google.com/anthos-config-management/docs/config-sync-overview) and [Service Mesh](https://cloud.google.com/service-mesh/docs) features for the fleet and thus the member clusters.
 
+[Fleet team management](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management-overview) makes it easier for platform admins to provision and manage the necessary infrastructure resources that application and service teams might need to run their workloads, with the appropriate access control. Each team acts as a separate "tenant" on your fleet. In this repository, for demonstration purposes, the `ADMIN` permission is assigned on the fleet scope for each Group/Namespace.
+
 ### [4. app-factory](/4-app-factory/)
 
 The purpose of this stage is to set up the application-specific projects. This includes a single project in the common folder, and a project in each of the environment folders. The app-infra pipeline creates the application CI/CD pipeline, responsible for deploying applications to the multitenant infrastructure. The app-infra pipeline also creates any application-specific infrastructure, such as databases or other managed services. The resulting project hierarchy is as follows:
