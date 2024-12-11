@@ -8,6 +8,39 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.3.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.2.0...v0.3.0) (2024-12-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Update Terraform terraform-google-modules/kubernetes-engine/google to v34 ([#271](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/271))
+* **deps:** Update Terraform terraform-google-modules/cloud-storage/google to v8 ([#263](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/263))
+* moves code to examples folder ([#238](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/238))
+
+### Features
+
+* add cymbal shop  + cymbal bank deployment ([#260](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/260)) ([be36dee](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/be36dee32ddb39cb02172b4de818e7b1b8b119fa))
+* add cymbalshop e2e test ([#275](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/275)) ([8296254](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/8296254c148f6da7ad1e02b88b5afc8e5caa1833))
+* add github and gitlab support on 1-bootstrap ([#288](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/288)) ([a581a1e](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/a581a1ed20b45e4a84943bacb39bdde37dad0959))
+* add hello-world as the default application ([#247](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/247)) ([da26d9b](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/da26d9b208cc8d064d03de993a6e599b1f676a4b))
+* add local deployment docs for cymbal-shop and multitenant applications ([#272](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/272)) ([1c412aa](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/1c412aa3ce3e27013db4cc86a7a3241678fc51f3))
+* add single project example ([#261](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/261)) ([5ec49b3](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/5ec49b3d1cbe91909d82fdf385e1e0d78ca8af00))
+* **hello-world-example:** use arm nodes on development environment and x86 on staging/prod ([#279](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/279)) ([03b2db6](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/03b2db6ad7d76b94212c08ac3ff449ef2a19dbbe))
+* moves code to examples folder ([#238](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/238)) ([211b381](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/211b3815fb95168eed9fc408d0cc599315d48b82))
+* new app factory interface ([#255](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/255)) ([f101f8d](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/f101f8db35b16d50d8283927505e8eeb834d68ac))
+
+
+### Bug Fixes
+
+* adjust tf image cmd ([#265](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/265)) ([1953438](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/1953438f2ee5f9f1df1f7430f88bdb1390d0fdbc))
+* adjusting deploy with cloudbuild docs for examples ([#264](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/264)) ([a24a39f](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/a24a39f13bf25bcbeb6f6081ba885e77e22b1006))
+* **deps:** Update gcr.io/cloud-builders/docker Docker tag to v20.10.24 ([#285](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/285)) ([2034ab0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/2034ab0ae7a108ca2eee6844b67cf2f1fd2cb30c))
+* **deps:** Update gcr.io/cloud-builders/docker Docker tag to v24 ([#286](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/286)) ([1aa7532](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/1aa75327fcf9be90edcb350016ff4591053ecdd4))
+* **deps:** Update Terraform terraform-google-modules/bootstrap/google to v10 ([#292](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/292)) ([3d3d0b7](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/3d3d0b76819cf8260b83d4fb2d01d62c08c9d57f))
+* **deps:** Update Terraform terraform-google-modules/cloud-storage/google to v8 ([#263](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/263)) ([bda9f7c](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/bda9f7c74c3e09fd7f8512fd44e4e618ecdb35f0))
+* **deps:** Update Terraform terraform-google-modules/kubernetes-engine/google to v34 ([#271](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/271)) ([2535f87](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/2535f875aca9fc55c74a69937a612e1f41f65fa7))
+* fix compute sa roles ([#278](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/278)) ([2db1efd](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/2db1efd6f96fd688f4409c6ee8451623e8bfcb1a))
+
 ## [0.2.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.1.0...v0.2.0) (2024-09-27)
 
 
