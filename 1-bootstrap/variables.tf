@@ -40,7 +40,7 @@ variable "location" {
 variable "trigger_location" {
   description = "Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool."
   type        = string
-  default     = "global"
+  default     = "us-central1"
 }
 
 variable "tf_apply_branches" {

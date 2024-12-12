@@ -34,6 +34,8 @@ import (
 
 func TestBootstrap(t *testing.T) {
 
+	triggerRegion := "us-central1"
+
 	vars := map[string]interface{}{
 		"bucket_force_destroy": true,
 	}
@@ -125,7 +127,7 @@ func TestBootstrap(t *testing.T) {
 				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-apply'", branchesRegex, repo, repo),
 				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-plan'", branchesRegex, repo, repo),
 			} {
-				cbOpts := gcloud.WithCommonArgs([]string{"--project", projectID, "--filter", filter, "--format", "json"})
+				cbOpts := gcloud.WithCommonArgs([]string{"--project", projectID, "--filter", filter, "--format", "json", "--region", triggerRegion})
 				cbTriggers := gcloud.Run(t, "beta builds triggers list", cbOpts).Array()
 				assert.Equal(1, len(cbTriggers), fmt.Sprintf("cloud builds trigger with filter %s should exist", filter))
 			}

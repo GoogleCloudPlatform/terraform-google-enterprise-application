@@ -100,7 +100,7 @@ resource "google_sourcerepo_repository" "app_infra_repo" {
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 9.0"
+  version = "~> 10.0"
 
   project_id               = local.admin_project_id
   tf_repo_uri              = google_sourcerepo_repository.app_infra_repo.url
