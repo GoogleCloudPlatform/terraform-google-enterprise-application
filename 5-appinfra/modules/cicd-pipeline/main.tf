@@ -27,17 +27,3 @@ resource "google_project_service_identity" "cloudbuild_service_identity" {
 data "google_compute_default_service_account" "compute_service_identity" {
   project = var.project_id
 }
-
-resource "google_sourcerepo_repository" "app_repo" {
-  project = var.project_id
-  name    = var.repo_name
-
-  create_ignore_already_exists = true
-}
-
-resource "google_sourcerepo_repository_iam_member" "member" {
-  project    = var.project_id
-  repository = google_sourcerepo_repository.app_repo.name
-  role       = "roles/source.admin"
-  member     = google_project_service_identity.cloudbuild_service_identity.member
-}

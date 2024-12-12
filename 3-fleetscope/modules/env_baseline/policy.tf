@@ -22,7 +22,8 @@ resource "google_gke_hub_feature" "poco_feature" {
   fleet_default_member_config {
     policycontroller {
       policy_controller_hub_config {
-        install_spec = "INSTALL_SPEC_ENABLED"
+        audit_interval_seconds = 60
+        install_spec           = "INSTALL_SPEC_ENABLED"
         policy_content {
           bundles {
             bundle = "pss-baseline-v2022"
@@ -56,7 +57,8 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
 
   policycontroller {
     policy_controller_hub_config {
-      install_spec = "INSTALL_SPEC_ENABLED"
+      audit_interval_seconds = 60
+      install_spec           = "INSTALL_SPEC_ENABLED"
       policy_content {
         bundles {
           bundle_name = "pss-baseline-v2022"
