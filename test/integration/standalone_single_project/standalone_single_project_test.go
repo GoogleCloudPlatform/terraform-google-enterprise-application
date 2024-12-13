@@ -82,7 +82,7 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 				nics := node.Get("networkInterfaces")
 				// for each network interface, verify if it using an external natIP
 				nics.ForEach((func(key, value gjson.Result) bool {
-					assert.Equal(nil, net.ParseIP(value.Get("accessConfigs.0.natIP").String()), "The nodes inside the nodepool should not have external ip addresses.")
+					assert.Equal(net.IP(nil), net.ParseIP(value.Get("accessConfigs.0.natIP").String()), "The nodes inside the nodepool should not have external ip addresses.")
 					return true // keep iterating
 				}))
 			}
