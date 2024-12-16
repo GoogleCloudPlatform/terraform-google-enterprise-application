@@ -36,7 +36,7 @@ steps:
         "-c",
         "sleep 20m && cft test run TestBootstrapGitlabVM --stage verify --verbose",
       ]
-     waitFor:
+    waitFor:
       - prepare
 
   # Distinct init stages for tf output state passing
