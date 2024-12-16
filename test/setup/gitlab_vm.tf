@@ -12,6 +12,8 @@ module "gitlab_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
+  auto_create_network = true
+
   activate_apis = [
     "compute.googleapis.com",
     "iam.googleapis.com",
