@@ -16,7 +16,7 @@ import (
 
 // Will walk directories searching for terraform.tfvars and replace the pattern with the replacement
 func replacePatternInTfVars(pattern string, replacement string) error {
-	root := "."
+	root := "../../.."
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, fnErr error) error {
 		if fnErr != nil {
 			return fnErr
@@ -59,7 +59,7 @@ func getTokenFromSecretManager(t *testing.T, secretName string, secretProject st
 
 func TestBootstrapGitlabVM(t *testing.T) {
 	setup := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("./test/setup"),
+		tft.WithTFDir("../../setup"),
 	)
 	url := setup.GetStringOutput("gitlab_url")
 	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
@@ -116,7 +116,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	}
 
 	// Print tfvars to output for debug
-	file, err := os.Open("1-bootstrap/terraform.tfvars")
+	file, err := os.Open("../../../1-bootstrap/terraform.tfvars")
 	if err != nil {
 		t.Fatal(err)
 	}
