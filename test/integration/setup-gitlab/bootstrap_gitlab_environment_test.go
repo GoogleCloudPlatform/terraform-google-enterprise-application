@@ -118,7 +118,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	// Print tfvars to output for debug
 	file, err := os.Open("1-bootstrap/terraform.tfvars")
 	if err != nil {
-		t.Fatal(e.Printrr)
+		t.Fatal(err)
 	}
 	defer func() {
 		if err = file.Close(); err != nil {
