@@ -45,4 +45,6 @@ module "app" {
   ci_build_included_files = ["src/${local.team_name}/**", "src/components/**"]
 
   buckets_force_destroy = var.buckets_force_destroy
+
+  cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 }
