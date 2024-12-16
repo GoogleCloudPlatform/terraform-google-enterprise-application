@@ -35,6 +35,7 @@ resource "google_gke_hub_feature" "poco_feature" {
             installation = "ALL"
           }
         }
+        audit_interval_seconds    = 60
         referential_rules_enabled = true
       }
     }
@@ -70,6 +71,7 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
           installation = "ALL"
         }
       }
+      audit_interval_seconds    = 60
       referential_rules_enabled = true
     }
   }
