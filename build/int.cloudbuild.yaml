@@ -34,8 +34,10 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestBootstrapGitlabVM --stage verify --verbose",
+        "sleep 20m && cft test run TestBootstrapGitlabVM --stage verify --verbose",
       ]
+     waitFor:
+      - prepare
 
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
@@ -44,6 +46,8 @@ steps:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage init --verbose"]
     waitFor:
       - prepare
+      - bootstrap-gitlab-vm
+
   - id: bootstrap-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
