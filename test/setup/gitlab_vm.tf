@@ -30,10 +30,16 @@ resource "google_service_account" "gitlab_vm" {
   display_name = "Custom SA for VM Instance"
 }
 
-resource "google_project_iam_member" "secret_manager_admin" {
+resource "google_project_iam_member" "secret_manager_admin_vm_instance" {
   project = module.gitlab_project.project_id
   role    = "roles/secretmanager.admin"
   member  = google_service_account.gitlab_vm.member
+}
+
+resource "google_project_iam_member" "secret_manager_admin_int_test" {
+  project = module.gitlab_project.project_id
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
 resource "google_compute_instance" "default" {
