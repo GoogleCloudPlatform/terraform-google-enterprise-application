@@ -216,7 +216,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
 				pollRelease := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
-						releases := gcloud.Runf(t, releaseListCmd).Array()
+						releases := gcloud.Runf(t, cmd).Array()
 						if len(releases) == 0 {
 							return true, nil
 						}
