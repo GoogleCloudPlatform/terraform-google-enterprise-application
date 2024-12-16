@@ -22,13 +22,6 @@ module "gitlab_project" {
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com"
   ]
-
-  activate_api_identities = [
-    {
-      api   = "compute.googleapis.com",
-      roles = []
-    },
-  ]
 }
 
 resource "google_service_account" "gitlab_vm" {
