@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # GitLab Installation
 apt-get update
 apt-get install -y curl openssh-server ca-certificates tzdata perl jq
@@ -22,11 +21,15 @@ while [[ true ]]; do
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
       echo "GitLab initialized and ready to sign-in"
+      # Sign-in to gitlab
       GITLAB_INITIAL_PASSWORD=$(cat /etc/gitlab/initial_root_password  | grep "Password:" | awk '{ print $2 }')
       echo "grant_type=password&username=root&password=$GITLAB_INITIAL_PASSWORD" > auth.txt
       access_token=$(curl -k --data "@auth.txt" --request POST "$URL/oauth/token" | jq -r '.access_token')
-      personal_token=$(curl -k --request POST --header "Authorization: Bearer $access_token" --data "name=mytoken" --data "scopes[]=api" "$URL/api/v4/users/1/personal_access_tokens" -k | jq -r '.token')
-      printf $personal_token | gcloud secrets create gitlab-pat-created-from-vm --project=$PROJECT_ID --data-file=-
+      echo access_token=$access_token
+      # Create a personal access token and store in secret manager
+      personal_token=$(curl -k --request POST --header "Authorization: Bearer $access_token" --data "name=mytoken" --data "scopes[]=api" --data "scopes[]=read_user" "$URL/api/v4/users/1/personal_access_tokens" -k | jq -r '.token')
+      [[ $personal_token != "null" ]] || (echo "failed: personal access token is null" && exit 1)
+      printf $personal_token | gcloud secrets create gitlab-pat-from-vm --project=$PROJECT_ID --data-file=-
       break
   else
       echo "GitLab is not ready for sign-in operations. Waiting 5 seconds and will try again."
@@ -36,4 +39,3 @@ while [[ true ]]; do
   fi
 
 done
-
