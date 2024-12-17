@@ -60,7 +60,7 @@ func getTokenFromSecretManager(t *testing.T, secretName string, secretProject st
 
 // connects to a Google Cloud VM instance using SSH and retrieves the logs from the VM's Startup Script service
 func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, instanceProject string) (string, error) {
-	args := []string{"compute", "ssh", instanceName, fmt.Sprintf("--zone=%s", instanceZone), fmt.Sprintf("--project=%s", instanceProject), "--command=journalctl -u google-startup-scripts.service -n 10"}
+	args := []string{"compute", "ssh", instanceName, fmt.Sprintf("--zone=%s", instanceZone), fmt.Sprintf("--project=%s", instanceProject), "--command=journalctl -u google-startup-scripts.service -n 20"}
 	gcloudCmd := shell.Command{
 		Command: "gcloud",
 		Args:    args,

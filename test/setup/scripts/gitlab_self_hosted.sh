@@ -25,6 +25,11 @@ while [[ true ]]; do
       GITLAB_INITIAL_PASSWORD=$(cat /etc/gitlab/initial_root_password  | grep "Password:" | awk '{ print $2 }')
       echo "grant_type=password&username=root&password=$GITLAB_INITIAL_PASSWORD" > auth.txt
       access_token=$(curl -k --data "@auth.txt" --request POST "$URL/oauth/token" | jq -r '.access_token')
+      if [[ $access_token == "null" ]]; then
+        echo "Authentication failed, will try again in 15 seconds."
+        sleep 15
+        access_token=$(curl -k --data "grant_type=password&username=root&password=$GITLAB_INITIAL_PASSWORD" --request POST "$URL/oauth/token" | jq -r '.access_token')
+      fi
       echo access_token=$(echo $access_token | head -c 6)*********
       # Create a personal access token and store in secret manager
       personal_token=$(curl -k --request POST --header "Authorization: Bearer $access_token" --data "name=mytoken" --data "scopes[]=api" --data "scopes[]=read_user" "$URL/api/v4/users/1/personal_access_tokens" -k | jq -r '.token')
