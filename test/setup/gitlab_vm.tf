@@ -36,9 +36,13 @@ resource "google_project_iam_member" "secret_manager_admin_vm_instance" {
   member  = google_service_account.gitlab_vm.member
 }
 
-resource "google_project_iam_member" "secret_manager_admin_int_test" {
+resource "google_project_iam_member" "int_test_gitlab_permissions" {
+  for_each = toset([
+    "roles/compute.instanceAdmin",
+    "roles/secretmanager.admin"
+  ])
   project = module.gitlab_project.project_id
-  role    = "roles/secretmanager.admin"
+  role    = each.value
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
