@@ -139,9 +139,9 @@ output "gitlab_secret_project" {
 }
 
 output "gitlab_instance_zone" {
-  value = google_compute_instance.default.name
+  value = google_compute_instance.default.zone
 }
 
 output "gitlab_instance_name" {
-  value = google_compute_instance.default.zone
+  value = google_compute_instance.default.name
 }
