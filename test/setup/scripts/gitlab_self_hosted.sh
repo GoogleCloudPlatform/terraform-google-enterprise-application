@@ -24,9 +24,10 @@ while [[ true ]]; do
       # Sign-in to gitlab
       GITLAB_INITIAL_PASSWORD=$(cat /etc/gitlab/initial_root_password  | grep "Password:" | awk '{ print $2 }')
       echo "grant_type=password&username=root&password=$GITLAB_INITIAL_PASSWORD" > auth.txt
-      access_token=$(curl -k --data "@auth.txt" --request POST "$URL/oauth/token" | jq -r '.access_token')
+      access_token=$(curl -k --data "@auth.txt" --request POST "$URL/oauth/token" | tee /tmp/token_curl_stdout.txt | jq -r '.access_token')
       if [[ $access_token == "null" ]]; then
-        echo "Authentication failed, will try again in 15 seconds."
+        echo "Authentication failed, will try again in 15 seconds. More information about the request:"
+        cat /tmp/token_curl_stdout.txt
         sleep 15
         access_token=$(curl -k --data "grant_type=password&username=root&password=$GITLAB_INITIAL_PASSWORD" --request POST "$URL/oauth/token" | jq -r '.access_token')
       fi
