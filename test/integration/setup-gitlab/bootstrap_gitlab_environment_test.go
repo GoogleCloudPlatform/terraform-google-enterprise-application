@@ -15,6 +15,16 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
+func deleteVM(t *testing.T, instanceName string, instanceZone string, instanceProject string) (string, error) {
+	cmd := fmt.Sprintf("compute instances delete %s --zone=%s --project=%s --delete-disks=all --quiet", instanceName, instanceZone, instanceProject)
+	args := strings.Fields(cmd)
+	gcloudCmd := shell.Command{
+		Command: "gcloud",
+		Args:    args,
+	}
+	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
+}
+
 // Will walk directories searching for terraform.tfvars and replace the pattern with the replacement
 func replacePatternInTfVars(pattern string, replacement string) error {
 	root := "../../.."
@@ -81,6 +91,9 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	instanceName := setup.GetStringOutput("gitlab_instance_name")
 	instanceZone := setup.GetStringOutput("gitlab_instance_zone")
 	gitlabTokenSecretId := fmt.Sprintf("projects/%s/secrets/%s", gitlabSecretProjectNumber, gitlabPersonalTokenSecretName)
+
+	// delete VM instance in case the test fails
+	defer deleteVM(t, instanceName, instanceZone, gitlabSecretProject)
 
 	// Periodically read logs from startup script running on the VM instance
 	for count := 0; count < 10; count++ {
