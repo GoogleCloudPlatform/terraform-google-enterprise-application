@@ -27,7 +27,7 @@ func deleteVM(t *testing.T, instanceName string, instanceZone string, instancePr
 
 // Will walk directories searching for terraform.tfvars and replace the pattern with the replacement
 func replacePatternInTfVars(pattern string, replacement string) error {
-	root := "../../.."
+	root := "../../../1-bootstrap"
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, fnErr error) error {
 		if fnErr != nil {
 			return fnErr
