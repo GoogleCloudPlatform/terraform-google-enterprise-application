@@ -36,6 +36,12 @@ resource "google_project_iam_member" "secret_manager_admin_vm_instance" {
   member  = google_service_account.gitlab_vm.member
 }
 
+resource "google_service_account_iam_member" "impersonate" {
+  service_account_id = google_service_account.gitlab_vm.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
 resource "google_project_iam_member" "int_test_gitlab_permissions" {
   for_each = toset([
     "roles/compute.instanceAdmin",
