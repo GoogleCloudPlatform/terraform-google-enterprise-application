@@ -129,7 +129,7 @@ resource "google_secret_manager_secret_version" "gitlab_webhook" {
 }
 
 output "gitlab_webhook_secret_id" {
-  value = google_secret_manager_secret.gitlab_webhook.secret_id
+  value = google_secret_manager_secret.gitlab_webhook.id
 }
 
 output "gitlab_pat_secret_name" {
