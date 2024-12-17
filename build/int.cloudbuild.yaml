@@ -34,7 +34,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "sleep 20m && cft test run TestBootstrapGitlabVM --stage verify --verbose",
+        "cft test run TestBootstrapGitlabVM --stage verify --verbose",
       ]
     waitFor:
       - prepare
