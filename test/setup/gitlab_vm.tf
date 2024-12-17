@@ -137,3 +137,11 @@ output "gitlab_url" {
 output "gitlab_secret_project" {
   value = module.gitlab_project.project_id
 }
+
+output "gitlab_instance_zone" {
+  value = google_compute_instance.default.name
+}
+
+output "gitlab_instance_name" {
+  value = google_compute_instance.default.zone
+}

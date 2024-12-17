@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/shell"
@@ -57,7 +58,18 @@ func getTokenFromSecretManager(t *testing.T, secretName string, secretProject st
 	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
 }
 
+// connects to a Google Cloud VM instance using SSH and retrieves the logs from the VM's Startup Script service
+func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, instanceProject string) (string, error) {
+	args := []string{"compute", "ssh", instanceName, fmt.Sprintf("--zone=%s", instanceZone), fmt.Sprintf("--project=%s", instanceProject), "--command=journalctl -u google-startup-scripts.service -n 10"}
+	gcloudCmd := shell.Command{
+		Command: "gcloud",
+		Args:    args,
+	}
+	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
+}
+
 func TestBootstrapGitlabVM(t *testing.T) {
+	// Retrieve output values from test setup
 	setup := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup"),
 	)
@@ -66,7 +78,22 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	gitlabSecretProjectNumber := setup.GetStringOutput("gitlab_project_number")
 	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
 	gitlabWebhookSecretId := setup.GetStringOutput("gitlab_webhook_secret_id")
+	instanceName := setup.GetStringOutput("gitlab_instance_name")
+	instanceZone := setup.GetStringOutput("gitlab_instance_zone")
 	gitlabTokenSecretId := fmt.Sprintf("projects/%s/secrets/%s", gitlabSecretProjectNumber, gitlabPersonalTokenSecretName)
+
+	// Periodically read logs from startup script running on the VM instance
+	for count := 0; count < 10; count++ {
+		logs, err := readLogsFromVm(t, instanceName, instanceZone, gitlabSecretProject)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(logs, "Finished Google Compute Engine Startup Scripts") {
+			break
+		}
+		time.Sleep(3 * time.Minute)
+	}
+
 	token, err := getTokenFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
