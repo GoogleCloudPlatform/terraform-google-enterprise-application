@@ -21,7 +21,7 @@ for i in {1..100}; do
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
       personal_token=$(cat /dev/random | tr -dc "[:alnum:]" | head -c 20)
-      gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$ruby_token'); token.save!"
+      gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$personal_token'); token.save!"
       echo "personal_token=$(echo $personal_token | head -c 6)*********"
       printf $personal_token | gcloud secrets create gitlab-pat-from-vm --project=$PROJECT_ID --data-file=-
       break
