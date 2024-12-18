@@ -37,7 +37,8 @@ for i in {1..100}; do
       fi
       echo "access_token=$(echo $access_token | head -c 6)*********"
       # Create a personal access token and store in secret manager
-      personal_token=$(curl -k --request POST --header "Authorization: Bearer $access_token" --data "name=mytoken" --data "scopes[]=api" --data "scopes[]=read_api" --data "scopes[]=read_user" "$URL/api/v4/users/1/personal_access_tokens" -k | jq -r '.token')
+      # personal_token=$(curl -k --request POST --header "Authorization: Bearer $access_token" --data "name=mytoken" --data "scopes[]=api" --data "scopes[]=read_api" --data "scopes[]=read_user" "$URL/api/v4/users/1/personal_access_tokens" -k | jq -r '.token')
+      personal_token=$(create_token_using_ruby)
       echo "personal_token=$(echo $personal_token | head -c 6)*********"
       printf $personal_token | gcloud secrets create gitlab-pat-from-vm --project=$PROJECT_ID --data-file=-
       break
