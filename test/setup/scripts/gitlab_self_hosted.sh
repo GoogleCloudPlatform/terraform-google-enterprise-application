@@ -15,29 +15,17 @@ PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/pro
 URL="https://$EXTERNAL_IP.nip.io"
 echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
+create_token_using_ruby() {
+  local ruby_token=$(cat /dev/random | tr -dc "[:alnum:]" | head -c 20)
+  gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$ruby_token'); token.save!"
+  echo "$ruby_token"
+}
 
 # Wait for the server to handle authentication requests
 for i in {1..100}; do
   RESPONSE_BODY=$(curl $URL)
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
-      echo "GitLab initialized and ready to handle sign-in interactions"
-      sleep 5
-      # Sign-in to gitlab
-      GITLAB_INITIAL_PASSWORD=$(cat /etc/gitlab/initial_root_password  | grep "Password:" | awk '{ print $2 }')
-      echo "grant_type=password&username=root&password=$GITLAB_INITIAL_PASSWORD" > auth.txt
-      access_token=$(curl -k --data "@auth.txt" --request POST "$URL/oauth/token" | tee /tmp/token_curl_stdout.txt | jq -r '.access_token')
-      if [[ $access_token == "null" ]]; then
-        echo "Authentication failed, will try creating the personal token using gitlab-rails. More details about failed request:"
-        cat /tmp/token_curl_stdout.txt
-        personal_token=$(create_token_using_ruby)
-        echo "personal_token=$(echo $personal_token | head -c 6)*********"
-        printf $personal_token | gcloud secrets create gitlab-pat-from-vm --project=$PROJECT_ID --data-file=-
-        break
-      fi
-      echo "access_token=$(echo $access_token | head -c 6)*********"
-      # Create a personal access token and store in secret manager
-      # personal_token=$(curl -k --request POST --header "Authorization: Bearer $access_token" --data "name=mytoken" --data "scopes[]=api" --data "scopes[]=read_api" --data "scopes[]=read_user" "$URL/api/v4/users/1/personal_access_tokens" -k | jq -r '.token')
       personal_token=$(create_token_using_ruby)
       echo "personal_token=$(echo $personal_token | head -c 6)*********"
       printf $personal_token | gcloud secrets create gitlab-pat-from-vm --project=$PROJECT_ID --data-file=-
@@ -50,9 +38,3 @@ for i in {1..100}; do
   fi
 
 done
-
-create_token_using_ruby() {
-  local ruby_token=$(cat /dev/random | tr -dc "[:alnum:]" | head -c 20)
-  gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$ruby_token'); token.save!"
-  echo "$ruby_token"
-}
