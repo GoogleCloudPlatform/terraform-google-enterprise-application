@@ -15,18 +15,13 @@ PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/pro
 URL="https://$EXTERNAL_IP.nip.io"
 echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
-create_token_using_ruby() {
-  local ruby_token=$(cat /dev/random | tr -dc "[:alnum:]" | head -c 20)
-  gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$ruby_token'); token.save!"
-  echo "$ruby_token"
-}
-
 # Wait for the server to handle authentication requests
 for i in {1..100}; do
   RESPONSE_BODY=$(curl $URL)
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
-      personal_token=$(create_token_using_ruby)
+      personal_token=$(cat /dev/random | tr -dc "[:alnum:]" | head -c 20)
+      gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$ruby_token'); token.save!"
       echo "personal_token=$(echo $personal_token | head -c 6)*********"
       printf $personal_token | gcloud secrets create gitlab-pat-from-vm --project=$PROJECT_ID --data-file=-
       break
