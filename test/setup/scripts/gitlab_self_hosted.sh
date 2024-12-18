@@ -31,6 +31,7 @@ for i in {1..100}; do
         echo "Authentication failed, will reconfigure the gitlab server and try again. More information about the request:"
         cat /tmp/token_curl_stdout.txt
         gitlab-ctl reconfigure
+        sleep 30
         continue
       fi
       echo "access_token=$(echo $access_token | head -c 6)*********"
