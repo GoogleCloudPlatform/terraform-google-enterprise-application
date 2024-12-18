@@ -24,6 +24,12 @@ module "gitlab_project" {
   ]
 }
 
+resource "time_sleep" "wait_gitlab_project_apis" {
+  depends_on = [module.gitlab_project]
+
+  create_duration = "30s"
+}
+
 resource "google_service_account" "gitlab_vm" {
   account_id   = "gitlab-vm-sa"
   project      = module.gitlab_project.project_id
@@ -81,6 +87,8 @@ resource "google_compute_instance" "default" {
     email  = google_service_account.gitlab_vm.email
     scopes = ["cloud-platform"]
   }
+
+  depends_on = [ time_sleep.wait_gitlab_project_apis ]
 }
 
 
@@ -96,6 +104,8 @@ resource "google_compute_firewall" "allow_http" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["git-vm"]
+
+  depends_on = [ time_sleep.wait_gitlab_project_apis ]
 }
 
 resource "google_compute_firewall" "allow_https" {
@@ -110,6 +120,8 @@ resource "google_compute_firewall" "allow_https" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["git-vm"]
+  
+  depends_on = [ time_sleep.wait_gitlab_project_apis ]
 }
 
 resource "google_secret_manager_secret" "gitlab_webhook" {
@@ -118,6 +130,8 @@ resource "google_secret_manager_secret" "gitlab_webhook" {
   replication {
     auto {}
   }
+
+  depends_on = [ time_sleep.wait_gitlab_project_apis ]
 }
 
 resource "random_uuid" "random_webhook_secret" {
