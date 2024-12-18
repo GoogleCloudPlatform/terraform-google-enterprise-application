@@ -112,8 +112,8 @@ func TestBootstrap(t *testing.T) {
 		branchesRegex := `^(development|nonproduction|production)$`
 		for _, repo := range repos {
 			for _, filter := range []string{
-				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-apply'", branchesRegex, repo, repo),
-				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-plan'", branchesRegex, repo, repo),
+				fmt.Sprintf("trigger_template.branch_name='%s' AND name='%s-apply'", branchesRegex, repo),
+				fmt.Sprintf("trigger_template.branch_name='%s' AND name='%s-plan'", branchesRegex, repo),
 			} {
 				cbOpts := gcloud.WithCommonArgs([]string{"--project", projectID, "--filter", filter, "--format", "json", "--region", triggerRegion})
 				cbTriggers := gcloud.Run(t, "beta builds triggers list", cbOpts).Array()
