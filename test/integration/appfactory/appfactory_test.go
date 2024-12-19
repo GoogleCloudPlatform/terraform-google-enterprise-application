@@ -174,7 +174,7 @@ func TestAppfactory(t *testing.T) {
 					}
 					// triggers
 					repoName := appData.Get("app_infra_repository_name").String()
-					triggerRegion := "us-central1"
+					triggerRegion := appFactory.GetStringOutput("trigger_location")
 
 					for _, trigger := range []struct {
 						output string
