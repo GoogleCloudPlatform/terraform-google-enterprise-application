@@ -47,7 +47,8 @@ resource "google_sourcerepo_repository" "gcp_repo" {
 module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
-  source  = "git::https://github.com/caetano-colin/terraform-google-bootstrap.git//modules/cloudbuild_repo_connection?ref=use-parent-resource"
+  // TODO: update to upstream module after PR https://github.com/terraform-google-modules/terraform-google-bootstrap/pull/335 is merger
+  source = "git::https://github.com/caetano-colin/terraform-google-bootstrap.git//modules/cloudbuild_repo_connection?ref=use-parent-resource"
 
   project_id = var.project_id
 
