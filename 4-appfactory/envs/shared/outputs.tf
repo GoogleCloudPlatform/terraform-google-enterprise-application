@@ -37,3 +37,8 @@ output "app-folders-ids" {
     for k, v in google_folder.app_folder : k => v.folder_id
   }
 }
+
+output "trigger_location" {
+  description = "Trigger location."
+  value       = var.trigger_location
+}

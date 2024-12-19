@@ -61,3 +61,13 @@ applications = {
     }
   }
 }
+
+cloudbuildv2_repository_config = {
+  repo_type = "CSR"
+  repositories = {
+    "hello-world" = {
+      repository_name = "hello-world"
+      repository_url  = ""
+    }
+  }
+}
