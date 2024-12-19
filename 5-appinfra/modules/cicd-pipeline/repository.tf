@@ -19,6 +19,7 @@ locals {
   use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
 }
 
+# DEPRECATED - TODO: Remove after CSR support is removed
 resource "google_sourcerepo_repository" "app_repo" {
   count = local.use_csr ? 1 : 0
 
@@ -29,6 +30,7 @@ resource "google_sourcerepo_repository" "app_repo" {
   create_ignore_already_exists = true
 }
 
+# DEPRECATED - TODO: Remove after CSR support is removed
 resource "google_sourcerepo_repository_iam_member" "member" {
   count = local.use_csr ? 1 : 0
 
