@@ -22,5 +22,6 @@
 |------|-------------|
 | app-folders-ids | Pair of app-name and folder\_id |
 | app-group | Description on the app-group components |
+| trigger\_location | Trigger location. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
