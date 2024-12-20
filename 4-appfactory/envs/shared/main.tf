@@ -81,4 +81,7 @@ module "components" {
   
   # DEPRECATED - TODO: Remove after CSR support is removed
   csr_project_id = var.csr_project_id
+
+
+  cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 }
