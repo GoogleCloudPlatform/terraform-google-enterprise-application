@@ -18,10 +18,25 @@ resource "google_cloudbuild_trigger" "ci" {
   project  = var.project_id
   location = var.region
 
-  trigger_template {
-    branch_name = var.repo_branch
-    repo_name   = var.repo_name
+  # TODO: remove after CSR support is removed
+  dynamic "trigger_template" {
+    for_each = local.use_csr ? [1] : []
+    content {
+      branch_name = var.repo_branch
+      repo_name   = var.repo_name
+    }
   }
+
+  dynamic "repository_event_config" {
+    for_each = local.use_csr ? [] : [1]
+    content {
+      repository = module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[var.repo_name].id
+      push {
+        branch = var.repo_branch
+      }
+    }
+  }
+
   included_files = var.ci_build_included_files
   filename       = var.app_build_trigger_yaml
 

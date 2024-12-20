@@ -18,3 +18,13 @@ remote_state_bucket   = "REMOTE_STATE_BUCKET"
 buckets_force_destroy = true
 region                = "us-central1"
 environment_names     = ["development", "nonproduction", "production"]
+
+cloudbuildv2_repository_config = {
+  repo_type = "CSR"
+  repositories = {
+    "eab-cymbal-bank-accounts-userservice" = {
+      repository_name = "eab-cymbal-bank-accounts-userservice"
+      repository_url  = ""
+    }
+  }
+}
