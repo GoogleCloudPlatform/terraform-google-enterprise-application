@@ -49,3 +49,7 @@ output "billing_account" {
 output "teams" {
   value = { for team, group in module.group : team => module.group[team].id }
 }
+
+output "csr_project_id" {
+  value = local.project_id
+}

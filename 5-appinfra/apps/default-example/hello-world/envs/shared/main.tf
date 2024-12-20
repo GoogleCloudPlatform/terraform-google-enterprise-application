@@ -39,4 +39,6 @@ module "app" {
   buckets_force_destroy = var.buckets_force_destroy
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
+
+  csr_project_id = var.csr_project_id
 }

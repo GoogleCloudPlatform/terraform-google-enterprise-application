@@ -20,23 +20,11 @@ locals {
 }
 
 # DEPRECATED - TODO: Remove after CSR support is removed
-resource "google_sourcerepo_repository" "app_repo" {
-  count = local.use_csr ? 1 : 0
-
-
-  project = var.project_id
-  name    = var.repo_name
-
-  create_ignore_already_exists = true
-}
-
-# DEPRECATED - TODO: Remove after CSR support is removed
 resource "google_sourcerepo_repository_iam_member" "member" {
   count = local.use_csr ? 1 : 0
 
-
-  project    = var.project_id
-  repository = google_sourcerepo_repository.app_repo[0].name
+  project    = var.csr_project_id
+  repository = var.repo_name
   role       = "roles/source.admin"
   member     = google_project_service_identity.cloudbuild_service_identity.member
 }

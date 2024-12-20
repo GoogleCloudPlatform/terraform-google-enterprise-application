@@ -109,3 +109,10 @@ variable "applications" {
     error_message = "If admin_project_id is specified, the corresponding create_admin_project must be set to false."
   }
 }
+
+# DEPRECATED - TODO: Remove after CSR support is removed
+variable "csr_project_id" {
+  type        = string
+  description = "(Optional) this variable must be defined when using cloudbuildv2_repository_config.repotype == CSR."
+  default     = ""
+}

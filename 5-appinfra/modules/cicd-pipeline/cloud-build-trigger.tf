@@ -24,6 +24,7 @@ resource "google_cloudbuild_trigger" "ci" {
     content {
       branch_name = var.repo_branch
       repo_name   = var.repo_name
+      project_id  = var.csr_project_id
     }
   }
 

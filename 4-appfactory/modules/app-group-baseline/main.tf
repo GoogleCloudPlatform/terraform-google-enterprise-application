@@ -164,3 +164,15 @@ module "app_infra_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 }
+
+# DEPRECATED - TODO: Remove after CSR support is removed
+data "google_service_account" "app_infra_sa" {
+  account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
+}
+
+// allow appinfra cloudbuild sa to set iam policy on CSR repository project
+resource "google_project_iam_member" "csr_project" {
+  project = var.csr_project_id
+  role    = "roles/resourcemanager.projectIamAdmin"
+  member  = data.google_service_account.app_infra_sa.member
+}
