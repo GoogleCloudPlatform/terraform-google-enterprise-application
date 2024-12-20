@@ -18,7 +18,7 @@ resource "google_cloudbuild_trigger" "ci" {
   project  = var.project_id
   location = var.region
 
-  # TODO: remove after CSR support is removed 
+  # TODO: remove after CSR support is removed
   dynamic "trigger_template" {
     for_each = local.use_csr ? [1] : []
     content {
