@@ -19,10 +19,10 @@ output "clouddeploy_targets_names" {
 
 output "service_repository_name" {
   description = "The Source Repository name."
-  value       = local.use_csr ? google_sourcerepo_repository.app_repo[0].name : local.service_repo_name
+  value       = local.use_csr ? var.repo_name : local.service_repo_name
 }
 
 output "service_repository_project_id" {
   description = "The Source Repository project id."
-  value       = local.use_csr ? google_sourcerepo_repository.app_repo[0].project : var.project_id
+  value       = local.use_csr ? var.csr_project_id : var.project_id
 }
