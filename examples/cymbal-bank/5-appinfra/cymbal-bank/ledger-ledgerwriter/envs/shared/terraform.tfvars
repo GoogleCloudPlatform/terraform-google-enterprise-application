@@ -21,3 +21,13 @@ region = "us-central1"
 buckets_force_destroy = "true"
 
 environment_names = ["development", "nonproduction", "production"]
+
+cloudbuildv2_repository_config = {
+  repo_type = "CSR"
+  repositories = {
+    "eab-cymbal-bank-ledger-ledgerwriter" = {
+      repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
+      repository_url  = ""
+    }
+  }
+}

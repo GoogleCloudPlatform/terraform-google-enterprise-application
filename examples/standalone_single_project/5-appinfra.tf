@@ -25,36 +25,90 @@ locals {
     service_name     = "contacts"
     team_name        = "accounts"
     repo_branch      = "main"
+    cloudbuildv2_repository_config = {
+      repo_type = "CSR"
+      repositories = {
+        "eab-cymbal-bank-accounts-contacts" = {
+          repository_name = "eab-cymbal-bank-accounts-contacts"
+          repository_url  = ""
+        }
+      }
+    }
     },
     "userservice" = {
       application_name = "cymbal-bank"
       service_name     = "userservice"
       team_name        = "accounts"
       repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "CSR"
+        repositories = {
+          "eab-cymbal-bank-accounts-userservice" = {
+            repository_name = "eab-cymbal-bank-accounts-userservice"
+            repository_url  = ""
+          }
+        }
+      }
     },
     "frontend" = {
       application_name = "cymbal-bank"
       service_name     = "frontend"
       team_name        = "frontend"
       repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "CSR"
+        repositories = {
+          "eab-cymbal-bank-frontend" = {
+            repository_name = "eab-cymbal-bank-frontend"
+            repository_url  = ""
+          }
+        }
+      }
     },
     "balancereader" = {
       application_name = "cymbal-bank"
       service_name     = "balancereader"
       team_name        = "ledger"
       repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "CSR"
+        repositories = {
+          "eab-cymbal-bank-ledger-balancereader" = {
+            repository_name = "eab-cymbal-bank-ledger-balancereader"
+            repository_url  = ""
+          }
+        }
+      }
     },
     "ledgerwriter" = {
       application_name = "cymbal-bank"
       service_name     = "ledgerwriter"
       team_name        = "ledger"
       repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "CSR"
+        repositories = {
+          "eab-cymbal-bank-ledger-ledgerwriter" = {
+            repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
+            repository_url  = ""
+          }
+        }
+      }
     },
     "transactionhistory" = {
       application_name = "cymbal-bank"
       service_name     = "transactionhistory"
       team_name        = "ledger"
       repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "CSR"
+        repositories = {
+          "eab-cymbal-bank-ledger-transactionhistory" = {
+            repository_name = "eab-cymbal-bank-ledger-transactionhistory"
+            repository_url  = ""
+          }
+        }
+      }
     },
   }
 }
@@ -82,4 +136,6 @@ module "cicd" {
   ci_build_included_files = ["src/${each.value.team_name}/**", "src/components/**"]
 
   buckets_force_destroy = true
+
+  cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
 }
