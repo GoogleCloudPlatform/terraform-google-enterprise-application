@@ -27,5 +27,8 @@ var (
 
 		// Error 403: Kubernetes Engine API has not been used in project {} before or it is disabled.
 		".*Error 403: Kubernetes Engine API is not enabled for this project*": "Kubernetes Engine API not enabled",
+
+		// Error 400: Service account service-{}@gcp-sa-mcsd.iam.gserviceaccount.com does not exist.*"
+		".*Error 400: Service account service-.*@gcp-sa-mcsd.iam.gserviceaccount.com does not exist.*": "Multi-cluster Service Discovery Service Account does not exist.",
 	}
 )
