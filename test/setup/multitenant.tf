@@ -154,7 +154,7 @@ module "vpc_project" {
 module "vpc" {
   for_each = module.vpc_project
   source   = "terraform-google-modules/network/google"
-  version  = "~> 9.0"
+  version  = "~> 10.0"
 
   project_id      = each.value.project_id
   network_name    = "eab-vpc-${each.key}"
