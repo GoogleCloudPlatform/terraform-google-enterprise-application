@@ -9,7 +9,7 @@ Review Release Notes: Familiarize yourself with the new features, improvements, 
 
 ## Sample Application Change
 
-In version v0.2.0, the default sample application used on the repository was `cymbal-bank`. It now has been relocated to the `examples/` directory under at the repository root. The new default example is a lightweight application named `hello-world`, the new example features cross-platform builds for ARM64 and x86 architectures and the use of ARM nodes in GKE.
+In version v0.2.0, the default sample application used on the repository was `cymbal-bank`. It now has been relocated to the `examples/` directory under the repository root. The new default example is a lightweight application named `hello-world`, the new example features cross-platform builds for ARM64 and x86 architectures and the use of ARM nodes in GKE.
 
 ## CSR Users
 
@@ -26,7 +26,3 @@ cloudbuildv2_repository_config = {
   }
 }
 ```
-
-
-
-
