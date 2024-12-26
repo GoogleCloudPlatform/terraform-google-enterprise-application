@@ -1,11 +1,11 @@
-# Upgrade Guide: Version 0.2.0 to 0.3.0
+# Upgrade Guide: Version v0.2.0 to v0.3.0
 
 This document is designed to help you navigate the changes and improvements included in the v0.3.0 release. Upgrading ensures that you benefit from enhanced features, security updates, and bug fixes.
 
 Key Steps for a Successful Upgrade
 - Configure the newly introduced `cloudbuildv2_repository_config` variable for existing cloud source repositories.
 
-Review Release Notes: Familiarize yourself with the new features, improvements, and any breaking changes introduced in version 0.3.0.
+Review Release Notes: Familiarize yourself with the new features, improvements, and any breaking changes introduced in version v0.3.0.
 
 ## Sample Application Change
 
