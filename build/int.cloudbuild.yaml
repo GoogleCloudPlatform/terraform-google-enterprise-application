@@ -248,4 +248,4 @@ options:
   machineType: E2_HIGHCPU_8
   env:
     - 'TF_PLUGIN_CACHE_DIR=""'
-    - 'TF_VAR_branch_name=release-please--branches--main'
+    - 'TF_VAR_branch_name=$BRANCH_NAME'
