@@ -5,7 +5,7 @@ go 1.23.4
 require (
 	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.17.3
 	github.com/google/uuid v1.6.0
-	github.com/gruntwork-io/terratest v0.48.0
+	github.com/gruntwork-io/terratest v0.48.1
 	github.com/otiai10/copy v1.14.0
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0

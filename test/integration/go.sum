@@ -41,8 +41,8 @@ github.com/google/gofuzz v1.2.0 h1:xRy4A+RhZaiKjJ1bPfwQ8sedCA+YS2YcCHW6ec7JMi0=
 github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/gruntwork-io/terratest v0.48.0 h1:OoqJYAnBxejInn7TPizFGJNMCFvPHbiWNS3hGFKdHhA=
-github.com/gruntwork-io/terratest v0.48.0/go.mod h1:U2EQW4Odlz75XJUH16Kqkr9c93p+ZZtkpVez7GkZFa4=
+github.com/gruntwork-io/terratest v0.48.1 h1:pnydDjkWbZCUYXvQkr24y21fBo8PfJC5hRGdwbl1eXM=
+github.com/gruntwork-io/terratest v0.48.1/go.mod h1:U2EQW4Odlz75XJUH16Kqkr9c93p+ZZtkpVez7GkZFa4=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
@@ -133,8 +133,11 @@ github.com/zclconf/go-cty v1.15.0 h1:tTCRWxsexYUmtt/wVxgDClUe+uQusuI443uL6e+5sXQ
 github.com/zclconf/go-cty v1.15.0/go.mod h1:VvMs5i0vgZdhYawQNq5kePSpLAoz8u1xvZgrPIxfnZE=
 github.com/zclconf/go-cty-debug v0.0.0-20240509010212-0d6042c53940 h1:4r45xpDWB6ZMSMNJFMOjqrGHynW3DIBuR2H9j0ug+Mo=
 github.com/zclconf/go-cty-debug v0.0.0-20240509010212-0d6042c53940/go.mod h1:CmBdvvj3nqzfzJ6nTCIwDTPZ56aVGvDrmztiO5g3qrM=
+<<<<<<< HEAD
 gitlab.com/gitlab-org/api/client-go v0.117.0 h1:HsbKxlTjVgfYmyCU+NRQk2G42RlMOKs6gF+/o0DL+TI=
 gitlab.com/gitlab-org/api/client-go v0.117.0/go.mod h1:E+X2dndIYDuUfKVP0C3jhkWvTSE00BkLbCsXTY3edDo=
+=======
+>>>>>>> 536cf506c7b8346412d1150d36ab4fd4e358e1ba
 golang.org/x/crypto v0.31.0 h1:ihbySMvVjLAeSH1IbfcRTkD/iNscyz8rGzjF/E5hV6U=
 golang.org/x/crypto v0.31.0/go.mod h1:kDsLvtWBEx7MV9tJOj9bnXsPbxwJQ6csT/x4KIN4Ssk=
 golang.org/x/mod v0.22.0 h1:D4nJWe9zXqHOmWqj4VMOJhvzj7bEZg4wEYa759z1pH4=
