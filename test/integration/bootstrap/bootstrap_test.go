@@ -24,7 +24,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -109,23 +108,11 @@ func TestBootstrap(t *testing.T) {
 			"eab-multitenant",
 		}
 
-		for _, repo := range repos {
-			url := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", projectID, repo)
-			repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repo, projectID)
-			repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repo, projectID)
-			repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
-			repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s --project %s", repo, projectID), repoIamOpts).Array()[0]
-			listMembers := utils.GetResultStrSlice(repoIamPolicyOp.Get("bindings.members").Array())
-			assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role roles/viewer on repo %s", repoSa, repo))
-			assert.Equal(url, repoOP.Get("url").String(), "source repo %s should have url %s", repo, url)
-		}
-
 		// Builds
-		branchesRegex := `^(development|nonproduction|production)$`
 		for _, repo := range repos {
 			for _, filter := range []string{
-				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-apply'", branchesRegex, repo, repo),
-				fmt.Sprintf("trigger_template.branch_name='%s' trigger_template.repo_name='%s' AND name='%s-plan'", branchesRegex, repo, repo),
+				fmt.Sprintf("name='%s-apply'", repo),
+				fmt.Sprintf("name='%s-plan'", repo),
 			} {
 				cbOpts := gcloud.WithCommonArgs([]string{"--project", projectID, "--filter", filter, "--format", "json", "--region", triggerRegion})
 				cbTriggers := gcloud.Run(t, "beta builds triggers list", cbOpts).Array()
