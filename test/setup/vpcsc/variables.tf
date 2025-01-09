@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
+variable "org_id" {
+  description = "The numeric organization id"
+  type        = string
+}
+
 variable "project_id" {
+  description = "The project_id"
   type        = string
-  description = "Google Cloud project ID in which to deploy all example resources"
 }
 
-variable "region" {
+variable "project_number" {
+  description = "The project_id"
   type        = string
-  description = "Google Cloud region for deployments"
-  default     = "us-central1"
-}
-
-variable "teams" {
-  type        = map(string)
-  description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
-}
-
-variable "service_perimeter_name" {
-  description = "Service perimeter full name."
-  type        = string
-  default     = null
 }
 
 variable "service_perimeter_mode" {
   description = "Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string
-  default     = "ENFORCE"
+  default     = "DRY_RUN"
 
   validation {
     condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
     error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
   }
+}
+
+variable "access_level_members" {
+  description = "Extra access level members. serviceAccount:EMAIL@DOMAIN or user:EMAIL@DOMAIN"
+  type        = list(string)
+  default     = []
 }

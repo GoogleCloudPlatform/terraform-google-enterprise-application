@@ -47,4 +47,6 @@ module "app" {
   buckets_force_destroy = var.buckets_force_destroy
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
+
+  network_id = local.network_id[0]
 }

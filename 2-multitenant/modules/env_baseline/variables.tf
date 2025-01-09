@@ -91,3 +91,15 @@ variable "master_ipv4_cidr_blocks" {
   type        = list(string)
   default     = ["10.11.10.0/28", "10.11.20.0/28"]
 }
+
+variable "service_perimeter_name" {
+  description = "Service perimeter full name."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = null
+}

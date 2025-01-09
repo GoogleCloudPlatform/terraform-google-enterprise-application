@@ -22,6 +22,8 @@
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Google Cloud Organization ID. | `string` | n/a | yes |
 | service\_name | The name of a single service application. | `string` | `"demo-app"` | no |
+| service\_perimeter\_mode | Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | n/a | yes |
+| service\_perimeter\_name | Service perimeter full name. | `string` | `null` | no |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"global"` | no |
 
@@ -38,5 +40,8 @@
 | app\_infra\_project\_ids | Application environment projects IDs. |
 | app\_infra\_repository\_name | Name of the application infrastructure repository. |
 | app\_infra\_repository\_url | URL of the application infrastructure repository. |
+| network\_id | Admin project network id. |
+| network\_name | Admin project network name |
+| network\_self\_link | Admin project network self-link. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

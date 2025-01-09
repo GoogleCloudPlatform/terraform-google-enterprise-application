@@ -17,6 +17,13 @@
 output "project_id" {
   value = local.project_id
 }
+output "project_number" {
+  value = local.project_number
+}
+
+output "sa_email" {
+  value = google_service_account.int_test[local.index].email
+}
 
 output "sa_key" {
   value     = google_service_account_key.int_test.private_key
@@ -48,4 +55,8 @@ output "billing_account" {
 
 output "teams" {
   value = { for team, group in module.group : team => module.group[team].id }
+}
+
+output "single_project" {
+  value = var.single_project
 }

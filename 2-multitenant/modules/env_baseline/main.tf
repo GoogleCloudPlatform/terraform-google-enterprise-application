@@ -52,6 +52,9 @@ module "eab_cluster_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN" ? true : false
+  vpc_service_control_perimeter_name = var.service_perimeter_name
+
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
   disable_services_on_destroy = false

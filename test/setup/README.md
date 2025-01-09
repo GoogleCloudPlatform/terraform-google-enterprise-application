@@ -25,7 +25,10 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | envs | n/a |
 | org\_id | n/a |
 | project\_id | n/a |
+| project\_number | n/a |
+| sa\_email | n/a |
 | sa\_key | n/a |
+| single\_project | n/a |
 | teams | n/a |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

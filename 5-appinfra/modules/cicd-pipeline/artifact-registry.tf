@@ -16,7 +16,7 @@
 resource "google_artifact_registry_repository" "container_registry" {
   repository_id = var.service_name
   location      = var.region
-  format        = "docker"
+  format        = "DOCKER"
   description   = "${var.service_name} docker repository"
   project       = var.project_id
 
@@ -25,7 +25,7 @@ resource "google_artifact_registry_repository" "container_registry" {
   ]
 }
 
-resource "google_artifact_registry_repository_iam_member" "member" {
+resource "google_artifact_registry_repository_iam_member" "container_member" {
   for_each = merge({
     cloud_deploy   = google_service_account.cloud_deploy.member,
     cloud_build_si = google_project_service_identity.cloudbuild_service_identity.member,

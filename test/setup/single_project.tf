@@ -53,6 +53,7 @@ module "project_standalone" {
   ]
 
   activate_apis = [
+    "accesscontextmanager.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",
@@ -77,5 +78,12 @@ module "project_standalone" {
     "sqladmin.googleapis.com",
     "storage-api.googleapis.com",
     "trafficdirector.googleapis.com",
+    "accesscontextmanager.googleapis.com"
   ]
+}
+
+resource "google_project_service_identity" "gke_identity_cluster_project" {
+  provider = google-beta
+  project  = local.project_id
+  service  = "container.googleapis.com"
 }

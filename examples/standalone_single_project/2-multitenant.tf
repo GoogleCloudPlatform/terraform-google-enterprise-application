@@ -42,7 +42,9 @@ module "multitenant_infra" {
   env                    = local.env
   create_cluster_project = false
   # ignore below vars because we are reusing an existing project
-  org_id          = null
-  folder_id       = null
-  billing_account = null
+  org_id                 = null
+  folder_id              = null
+  billing_account        = null
+  service_perimeter_name = var.service_perimeter_name
+  service_perimeter_mode = var.service_perimeter_mode
 }

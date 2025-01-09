@@ -16,7 +16,9 @@
 
 locals {
   int_required_roles = !var.single_project ? [
-    "roles/owner"
+    "roles/owner",
+    "roles/cloudbuild.workerPoolOwner",
+    "roles/dns.admin"
     ] : [
     "roles/artifactregistry.admin",
     "roles/cloudbuild.builds.builder",
@@ -24,6 +26,7 @@ locals {
     "roles/clouddeploy.admin",
     "roles/compute.networkAdmin",
     "roles/compute.securityAdmin",
+    "roles/compute.admin",
     "roles/container.admin",
     "roles/gkehub.editor",
     "roles/gkehub.scopeAdmin",
@@ -37,7 +40,9 @@ locals {
     "roles/iam.serviceAccountUser",
     "roles/privilegedaccessmanager.projectServiceAgent",
     "roles/logging.logWriter",
-    "roles/source.admin"
+    "roles/source.admin",
+    "roles/cloudbuild.workerPoolOwner",
+    "roles/dns.admin"
   ]
 }
 
@@ -60,6 +65,12 @@ resource "google_project_iam_member" "int_test" {
 resource "google_organization_iam_member" "organizationServiceAgent_role" {
   org_id = var.org_id
   role   = "roles/privilegedaccessmanager.organizationServiceAgent"
+  member = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  org_id = var.org_id
+  role   = "roles/accesscontextmanager.policyAdmin"
   member = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 

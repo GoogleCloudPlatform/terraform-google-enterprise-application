@@ -88,6 +88,9 @@ module "app_admin_project" {
     "clouddeploy.googleapis.com"
   ]
 
+  vpc_service_control_attach_dry_run = true
+  vpc_service_control_perimeter_name = var.service_perimeter_name
+
   activate_api_identities = [
     {
       api   = "compute.googleapis.com",
@@ -186,4 +189,7 @@ module "app_infra_project" {
   activate_apis            = var.infra_project_apis
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN" ? true : false
+  vpc_service_control_perimeter_name = var.service_perimeter_name
 }
