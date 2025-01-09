@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -69,7 +70,7 @@ func getTokenFromSecretManager(t *testing.T, secretName string, secretProject st
 	gcloudCmd := shell.Command{
 		Command: "gcloud",
 		Args:    args,
-		// Logger: logger.Discard
+		Logger:  logger.Discard,
 	}
 	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
 }
@@ -122,7 +123,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	for _, repo := range repos {
 		p := &gitlab.CreateProjectOptions{
 			Name:                 gitlab.Ptr(repo),
-			Description:          gitlab.Ptr("just testing"),
+			Description:          gitlab.Ptr("Test Repo"),
 			InitializeWithReadme: gitlab.Ptr(true),
 			Visibility:           gitlab.Ptr(gitlab.PrivateVisibility),
 		}
