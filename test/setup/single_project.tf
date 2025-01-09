@@ -53,6 +53,7 @@ module "project_standalone" {
   ]
 
   activate_apis = [
+    "accesscontextmanager.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",

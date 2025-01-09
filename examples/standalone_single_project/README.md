@@ -8,6 +8,8 @@ The standalone example deploys the entire enterprise application blueprint into 
 |------|-------------|------|---------|:--------:|
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
+| service\_perimeter\_mode | Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
+| service\_perimeter\_name | Service perimeter full name. | `string` | `null` | no |
 | teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | n/a | yes |
 
 ## Outputs

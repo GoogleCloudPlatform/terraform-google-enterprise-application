@@ -49,3 +49,23 @@ output "billing_account" {
 output "teams" {
   value = { for team, group in module.group : team => module.group[team].id }
 }
+
+output "service_perimeter_name" {
+  description = "Service Perimeter name."
+  value       = "accessPolicies/${trim(data.local_file.policy-org.content, "\n")}/servicePerimeters/${module.regular_service_perimeter.perimeter_name}"
+}
+
+output "access_level_name" {
+  description = "Access level name."
+  value       = module.access_level_members.name
+}
+
+output "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  value       = var.service_perimeter_mode
+}
+
+output "access_context_manager_name" {
+  description = "Access context manager name."
+  value       = trim(data.local_file.policy-org.content, "\n")
+}

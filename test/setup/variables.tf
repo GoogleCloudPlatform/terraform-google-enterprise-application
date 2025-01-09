@@ -38,3 +38,20 @@ variable "single_project" {
   description = "The example which will be tested, if is true, single project infra will be created; if is false multitentant infra will be created"
   type        = bool
 }
+
+variable "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = "DRY_RUN"
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
+}
+
+variable "access_level_members" {
+  description = "Extra access level members. serviceAccount:EMAIL@DOMAIN or user:EMAIL@DOMAIN"
+  type        = list(string)
+  default     = []
+}

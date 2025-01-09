@@ -16,7 +16,7 @@
 resource "google_artifact_registry_repository" "container_registry" {
   repository_id = var.service_name
   location      = var.region
-  format        = "docker"
+  format        = "DOCKER"
   description   = "${var.service_name} docker repository"
   project       = var.project_id
 
@@ -42,4 +42,113 @@ resource "google_artifact_registry_repository_iam_member" "member" {
     module.enabled_google_apis,
     google_artifact_registry_repository.container_registry
   ]
+}
+
+# create artifact registry for DOCKER HUB
+resource "google_artifact_registry_repository" "dockerhub_registry" {
+  count         = var.create_artifact_registry_remote_dockerhub ? 1 : 0
+  repository_id = "ar-dockerhub"
+  location      = var.region
+  format        = "DOCKER"
+  description   = "${var.service_name} docker repository"
+  project       = var.project_id
+  mode          = "REMOTE_REPOSITORY"
+
+  remote_repository_config {
+    description = "docker hub"
+    docker_repository {
+      public_repository = "DOCKER_HUB"
+    }
+  }
+
+  depends_on = [
+    module.enabled_google_apis
+  ]
+}
+
+# create artifact registry for PYpi
+resource "google_artifact_registry_repository" "python_registry" {
+  count         = var.create_artifact_registry_remote_python ? 1 : 0
+  repository_id = "ar-python"
+  location      = var.region
+  format        = "PYTHON"
+  description   = "${var.service_name} docker repository"
+  project       = var.project_id
+  mode          = "REMOTE_REPOSITORY"
+
+  remote_repository_config {
+    description = "PYPI"
+    python_repository {
+      public_repository = "PYPI"
+    }
+  }
+
+  depends_on = [
+    module.enabled_google_apis
+  ]
+}
+
+resource "google_artifact_registry_repository_iam_member" "container_member" {
+  for_each = merge({
+    cloud_deploy   = google_service_account.cloud_deploy.member,
+    cloud_build_si = google_project_service_identity.cloudbuild_service_identity.member,
+    compute        = data.google_compute_default_service_account.compute_service_identity.member,
+  }, var.cluster_service_accounts)
+
+  project    = var.project_id
+  location   = var.region
+  repository = google_artifact_registry_repository.container_registry.name
+  role       = "roles/artifactregistry.reader"
+  member     = each.value
+
+  depends_on = [
+    module.enabled_google_apis,
+    google_artifact_registry_repository.container_registry
+  ]
+}
+
+resource "google_artifact_registry_repository_iam_member" "dockerhub_member" {
+  for_each = var.create_artifact_registry_remote_dockerhub ? merge({
+    cloud_deploy   = google_service_account.cloud_deploy.member,
+    cloud_build_si = google_project_service_identity.cloudbuild_service_identity.member,
+    compute        = data.google_compute_default_service_account.compute_service_identity.member,
+  }, var.cluster_service_accounts) : {}
+
+  project    = var.project_id
+  location   = var.region
+  repository = google_artifact_registry_repository.dockerhub_registry[0].name
+  role       = "roles/artifactregistry.reader"
+  member     = each.value
+
+  depends_on = [
+    module.enabled_google_apis,
+    google_artifact_registry_repository.dockerhub_registry
+  ]
+}
+
+resource "google_artifact_registry_repository_iam_member" "python_member" {
+  for_each = var.create_artifact_registry_remote_python ? merge({
+    cloud_deploy   = google_service_account.cloud_deploy.member,
+    cloud_build_si = google_project_service_identity.cloudbuild_service_identity.member,
+    compute        = data.google_compute_default_service_account.compute_service_identity.member,
+  }, var.cluster_service_accounts) : {}
+
+  project    = var.project_id
+  location   = var.region
+  repository = google_artifact_registry_repository.python_registry[0].name
+  role       = "roles/artifactregistry.reader"
+  member     = each.value
+
+  depends_on = [
+    module.enabled_google_apis,
+    google_artifact_registry_repository.python_registry
+  ]
+}
+
+resource "google_artifact_registry_vpcsc_config" "my-config" {
+  count        = var.create_artifact_registry_remote_dockerhub || var.create_artifact_registry_remote_python ? 1 : 0
+  provider     = google-beta
+  project      = var.project_id
+  location     = var.region
+  vpcsc_policy = "ALLOW"
 }

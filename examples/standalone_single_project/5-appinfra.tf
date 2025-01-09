@@ -138,4 +138,132 @@ module "cicd" {
   buckets_force_destroy = true
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
+
+  network_id = module.multitenant_infra.network_id
+
+  create_artifact_registry_remote_dockerhub = each.value.service_name == "contacts"
+  create_artifact_registry_remote_python    = each.value.service_name == "contacts"
+
+  depends_on = [time_sleep.wait_propagation]
 }
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
+  perimeter = var.service_perimeter_name
+  egress_from {
+    sources {
+      access_level = "*"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/265687763945", "projects/220271587623", "projects/682719828243", "projects/848655640797"] //google project, bank of anthos
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "logging.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iamcredentials.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [module.cicd]
+}
+
+# resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
+#   perimeter = var.service_perimeter_name
+#   ingress_from {
+#     sources {
+#       access_level = "*"
+#     }
+#     identities = [
+#       "serviceAccount:ci-ledgerwriter@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:ci-transactionhistory@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:ci-frontend@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:ci-balancereader@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:ci-userservice@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:ci-contacts@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:deploy-ledgerwriter@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:deploy-transactionhistory@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:deploy-frontend@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:deploy-balancereader@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:deploy-userservice@${var.project_id}.iam.gserviceaccount.com",
+#       "serviceAccount:deploy-contacts@${var.project_id}.iam.gserviceaccount.com"
+#     ]
+#   }
+#   ingress_to {
+#     resources = ["*"]
+#     operations {
+#       service_name = "cloudbuild.googleapis.com"
+#       method_selectors {
+#         method = "*"
+#       }
+#     }
+#     operations {
+#       service_name = "storage.googleapis.com"
+#       method_selectors {
+#         method = "*"
+#       }
+#     }
+#     operations {
+#       service_name = "logging.googleapis.com"
+#       method_selectors {
+#         method = "*"
+#       }
+#     }
+#     operations {
+#       service_name = "iamcredentials.googleapis.com"
+#       method_selectors {
+#         method = "*"
+#       }
+#     }
+#     operations {
+#       service_name = "artifactregistry.googleapis.com"
+#       method_selectors {
+#         method = "*"
+#       }
+#     }
+#     operations {
+#       service_name = "clouddeploy.googleapis.com"
+#       method_selectors {
+#         method = "*"
+#       }
+#     }
+#   }
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+
+#   depends_on = [module.cicd]
+# }
