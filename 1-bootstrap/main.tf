@@ -47,8 +47,8 @@ resource "google_sourcerepo_repository" "gcp_repo" {
 module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
-  // TODO: update to registry format after a new release is in place
-  source = "git::https://github.com/terraform-google-modules/terraform-google-bootstrap.git//modules/cloudbuild_repo_connection?ref=c1799d3733b4d216e7e104afa8e3ba6790272db1"
+  source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
+  version = "~> 11.0"
 
   project_id = var.project_id
 
