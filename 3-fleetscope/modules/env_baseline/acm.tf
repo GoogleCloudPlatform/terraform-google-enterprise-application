@@ -16,6 +16,7 @@
 
 locals {
   cluster_membership_ids = { for k, v in var.cluster_membership_ids : k => v }
+  use_csr                = var.config_sync_secret_type == "gcpserviceaccount"
 }
 
 data "google_project" "cluster_project" {
@@ -23,12 +24,16 @@ data "google_project" "cluster_project" {
 }
 
 resource "google_sourcerepo_repository" "acm_repo" {
+  count = local.use_csr ? 1 : 0
+
   project                      = var.cluster_project_id
   name                         = "eab-acm"
   create_ignore_already_exists = true
 }
 
 resource "google_service_account" "root_reconciler" {
+  count = local.use_csr ? 1 : 0
+
   project                      = var.cluster_project_id
   account_id                   = "root-reconciler"
   display_name                 = "root-reconciler"
@@ -36,13 +41,17 @@ resource "google_service_account" "root_reconciler" {
 }
 
 resource "google_project_iam_member" "root_reconciler" {
+  count = local.use_csr ? 1 : 0
+
   project = var.cluster_project_id
   role    = "roles/source.reader"
-  member  = "serviceAccount:${google_service_account.root_reconciler.email}"
+  member  = "serviceAccount:${google_service_account.root_reconciler[0].email}"
 }
 
 resource "google_service_account_iam_member" "workload_identity" {
-  service_account_id = google_service_account.root_reconciler.name
+  count = local.use_csr ? 1 : 0
+
+  service_account_id = google_service_account.root_reconciler[0].name
 
   role   = "roles/iam.workloadIdentityUser"
   member = "serviceAccount:${var.cluster_project_id}.svc.id.goog[config-management-system/root-reconciler]"
@@ -70,10 +79,9 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
       enabled       = true
       source_format = "unstructured"
       git {
-        // TODO: Update to use another credential type https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/reference/rootsync-reposync-fields
-        sync_repo                 = google_sourcerepo_repository.acm_repo.url
-        secret_type               = "gcpserviceaccount"
-        gcp_service_account_email = google_service_account.root_reconciler.email
+        sync_repo                 = local.use_csr ? google_sourcerepo_repository.acm_repo[0].url : var.config_sync_repository_url
+        secret_type               = var.config_sync_secret_type
+        gcp_service_account_email = local.use_csr ? google_service_account.root_reconciler[0].email : null
       }
     }
   }
