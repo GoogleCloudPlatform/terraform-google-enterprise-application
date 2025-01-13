@@ -72,7 +72,7 @@ variable "config_sync_secret_type" {
 }
 
 variable "config_sync_repository_url" {
-  description = "The Git repository url for Config Sync. If `config_sync_secret_type` is value `gcpserviceaccount`, a Cloud Source Repository will automatically be created and this variable will be ignored."
+  description = "The Git repository url for Config Sync. If `config_sync_secret_type` value is `gcpserviceaccount`, a Cloud Source Repository will automatically be created and this variable will be ignored."
   type        = string
   default     = ""
 }
