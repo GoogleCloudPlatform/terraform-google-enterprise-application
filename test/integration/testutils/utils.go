@@ -15,7 +15,10 @@
 package testutils
 
 import (
+	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -53,4 +56,37 @@ func Contains(slice []gjson.Result, item string) bool {
 		}
 	}
 	return false
+}
+
+// Will walk directories searching for terraform.tfvars and replace the pattern with the replacement
+func ReplacePatternInTfVars(pattern string, replacement string, root string) error {
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, fnErr error) error {
+		if fnErr != nil {
+			return fnErr
+		}
+		if !d.IsDir() && d.Name() == "terraform.tfvars" {
+			return replaceInFile(path, pattern, replacement)
+		}
+		return nil
+	})
+
+	return err
+}
+
+// Will replace oldPattern in filePath with newPattern
+func replaceInFile(filePath, oldPattern, newPattern string) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	newContent := strings.ReplaceAll(string(content), oldPattern, newPattern)
+
+	err = os.WriteFile(filePath, []byte(newContent), 0644)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Updated file: %s\n", filePath)
+	return nil
 }

@@ -27,6 +27,18 @@ steps:
       - "TF_VAR_folder_id=$_FOLDER_ID"
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
       - "TF_VAR_single_project=false"
+
+  - id: bootstrap-gitlab-vm
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestBootstrapGitlabVM --stage verify --verbose",
+      ]
+    waitFor:
+      - prepare
+
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -34,6 +46,8 @@ steps:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage init --verbose"]
     waitFor:
       - prepare
+      - bootstrap-gitlab-vm
+
   - id: bootstrap-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:

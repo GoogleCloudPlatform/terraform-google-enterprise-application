@@ -48,7 +48,7 @@ module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
   source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   project_id = var.project_id
 
@@ -59,6 +59,9 @@ module "cloudbuild_repositories" {
     gitlab_read_authorizer_credential_secret_id = var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id
     gitlab_authorizer_credential_secret_id      = var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
     gitlab_webhook_secret_id                    = var.cloudbuildv2_repository_config.gitlab_webhook_secret_id
+    gitlab_enterprise_host_uri                  = var.cloudbuildv2_repository_config.gitlab_enterprise_host_uri
+    gitlab_enterprise_service_directory         = var.cloudbuildv2_repository_config.gitlab_enterprise_service_directory
+    gitlab_enterprise_ca_certificate            = var.cloudbuildv2_repository_config.gitlab_enterprise_ca_certificate
   }
   cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
 }
