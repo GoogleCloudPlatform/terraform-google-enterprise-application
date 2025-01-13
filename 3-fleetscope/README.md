@@ -25,6 +25,61 @@ The following resources are created:
 1. 1-bootstrap phase executed successfully.
 1. 2-multitenant phase executed successfully.
 
+### Configuring Git Access for Config Sync Repository
+
+With Config Sync, you can manage Kubernetes resources with configuration files stored in a source of truth. Config Sync supports Git repositories, that are used as the source of truth in this example.
+
+Config Sync is installed in this step when running the terraform code. Before installing, you must grant access to Git.
+
+Config Sync supports the following mechanisms for authentication:
+
+* SSH key pair (ssh)
+* Cookiefile (cookiefile)
+* Token (token)
+* Google service account (gcpserviceaccount)
+* Compute Engine default service account (gcenode)
+* GitHub App (githubapp)
+
+The example below shows an example configuration steps for using the `token` mechanism with Gitlab as the Git provider, for more information please check the [following documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync).
+
+#### Git access: Gitlab using Token
+
+After you create and obtain the personal access token in Gitlab, add it to a new Secret in the cluster.
+
+- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the Secret with the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace="config-management-system" \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN
+    ```
+
+    Replace the following:
+
+    - `USERNAME`: the username that you want to use.
+    - `TOKEN`: the token that you created in the previous step.
+
+- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the Secret together with username and token by running the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace=config-management-system \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN \
+    --from-literal=https_proxy=HTTPS_PROXY_URL
+    ```
+
+    Replace the following:
+
+    - `USERNAME`: the username that you want to use.
+    - `TOKEN`: the token that you created in the previous step.
+    - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+
+> NOTE: Config Sync must be able to fetch your Git server, this means you might need to adjust your firewall rules to allow GKE pods to reach that server or create a Cloud NAT Router to allow acessing the Github/Gitlab or Bitbucket SaaS servers.
+
 ## Usage
 
 ### Deploying with Google Cloud Build

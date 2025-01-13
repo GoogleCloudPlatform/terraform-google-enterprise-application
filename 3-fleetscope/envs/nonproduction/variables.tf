@@ -23,3 +23,15 @@ variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string
 }
+
+variable "config_sync_secret_type" {
+  description = "The type of Secret configured for access to the Config Sync Git repo. Must be `ssh`, `cookiefile`, `gcenode`, `gcpserviceaccount`, `githubapp`, `token`, or `none`. Depending on the credential type, additional steps must be executed prior to this step. Refer to the following documentation for guidance: https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync#git-creds-secret"
+  type        = string
+  default     = "gcpserviceaccount"
+}
+
+variable "config_sync_repository_url" {
+  description = "The Git repository url for Config Sync. If `config_sync_secret_type` is value `gcpserviceaccount`, a Cloud Source Repository will automatically be created and this variable will be ignored."
+  type        = string
+  default     = ""
+}
