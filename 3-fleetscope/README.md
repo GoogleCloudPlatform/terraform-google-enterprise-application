@@ -40,7 +40,7 @@ Config Sync supports the following mechanisms for authentication:
 * Compute Engine default service account (gcenode)
 * GitHub App (githubapp)
 
-The example below shows an example configuration steps for using the `token` mechanism with Gitlab as the Git provider, for more information please check the [following documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync).
+The example below shows configuration steps for the `token` mechanism, using Gitlab as the Git provider, for more information please check the [following documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync).
 
 #### Git access: Gitlab using Token
 
