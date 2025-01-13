@@ -17,9 +17,7 @@ package bootstrap_gitlab
 import (
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -27,41 +25,9 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
-
-// Will walk directories searching for terraform.tfvars and replace the pattern with the replacement
-func replacePatternInTfVars(pattern string, replacement string) error {
-	root := "../../../1-bootstrap"
-	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, fnErr error) error {
-		if fnErr != nil {
-			return fnErr
-		}
-		if !d.IsDir() && d.Name() == "terraform.tfvars" {
-			return replaceInFile(path, pattern, replacement)
-		}
-		return nil
-	})
-
-	return err
-}
-
-func replaceInFile(filePath, oldPattern, newPattern string) error {
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-
-	newContent := strings.ReplaceAll(string(content), oldPattern, newPattern)
-
-	err = os.WriteFile(filePath, []byte(newContent), 0644)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Updated file: %s\n", filePath)
-	return nil
-}
 
 func getTokenFromSecretManager(t *testing.T, secretName string, secretProject string) (string, error) {
 	t.Log("Retrieving secret from secret manager.")
@@ -135,32 +101,34 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Log(project.Name)
 	}
 
+	root := "../../../1-bootstrap"
+
 	// Replace gitlab.com/user with custom self hosted URL using the root namespace
 	replacement := fmt.Sprintf("%s/root", url)
-	err = replacePatternInTfVars("https://gitlab.com/user", replacement)
+	err = testutils.ReplacePatternInTfVars("https://gitlab.com/user", replacement, root)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Replace https://gitlab.com with custom self hosted URL
-	err = replacePatternInTfVars("https://gitlab.com", url)
+	err = testutils.ReplacePatternInTfVars("https://gitlab.com", url, root)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Replace webhook secret id
-	err = replacePatternInTfVars("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId)
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId, root)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Replace gitlab token secret ids
-	err = replacePatternInTfVars("REPLACE_WITH_READ_API_SECRET_ID", gitlabTokenSecretId)
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_READ_API_SECRET_ID", gitlabTokenSecretId, root)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = replacePatternInTfVars("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId)
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, root)
 	if err != nil {
 		t.Fatal(err)
 	}
