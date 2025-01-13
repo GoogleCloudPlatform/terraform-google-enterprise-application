@@ -115,7 +115,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Log(project.Name)
 	}
 
-	root := "../../../1-bootstrap"
+	root := "../../.."
 
 	// Replace gitlab.com/user with custom self hosted URL using the root namespace
 	replacement := fmt.Sprintf("%s/root", url)
