@@ -44,7 +44,7 @@ The example below shows configuration steps for the `token` mechanism, using Git
 
 #### Git access: Gitlab using Token
 
-After you create and obtain the personal access token in Gitlab, add it to a new Secret in the cluster.
+After you create and obtain the personal access token in Gitlab, add it to a new `Secret` in the cluster.
 
 - (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
 
