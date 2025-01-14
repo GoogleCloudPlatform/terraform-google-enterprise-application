@@ -29,7 +29,7 @@ The following resources are created:
 
 With Config Sync, you can manage Kubernetes resources with configuration files stored in a source of truth. Config Sync supports Git repositories, that are used as the source of truth in this example.
 
-Config Sync is installed in this step when running the terraform code. Before installing, you must grant access to Git.
+Config Sync is installed in this step when running the Terraform code. Before installing, you must grant access to Git.
 
 Config Sync supports the following mechanisms for authentication:
 
