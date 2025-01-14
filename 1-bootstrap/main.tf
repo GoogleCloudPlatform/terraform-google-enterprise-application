@@ -80,7 +80,7 @@ module "tf_cloudbuild_workspace" {
   for_each = var.cloudbuildv2_repository_config.repositories
 
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   project_id = var.project_id
   location   = var.location

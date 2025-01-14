@@ -46,7 +46,7 @@ module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
   source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   project_id = local.admin_project_id
 
@@ -123,7 +123,7 @@ resource "google_sourcerepo_repository" "app_infra_repo" {
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   project_id               = local.admin_project_id
   tf_repo_uri              = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].url : module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[var.service_name].id
