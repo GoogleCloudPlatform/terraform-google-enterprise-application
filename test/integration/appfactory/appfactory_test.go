@@ -131,6 +131,10 @@ func TestAppfactory(t *testing.T) {
 					listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
 					assert.Subset(listApis, adminProjectApis, "APIs should have been enabled")
 
+					// check app infra repo
+					repositoryName := appData.Get("app_infra_repository_name").String()
+					repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repositoryName, adminProjectID)
+
 					// check cloudbuild workspace
 					// buckets
 					gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", adminProjectID, "--json"})
