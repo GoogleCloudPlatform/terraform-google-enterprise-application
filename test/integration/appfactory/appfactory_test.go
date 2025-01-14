@@ -164,6 +164,7 @@ func TestAppfactory(t *testing.T) {
 						assert.Equal(bucketSelfLink, opBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket SelfLink should be %s.", bucketSelfLink))
 					}
 					// triggers
+					repoName := appData.Get("app_infra_repository_name").String()
 					triggerRegion := appFactory.GetStringOutput("trigger_location")
 
 					for _, trigger := range []struct {
@@ -183,6 +184,10 @@ func TestAppfactory(t *testing.T) {
 						buildTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", triggerID, adminProjectID, triggerRegion)
 						filename := buildTrigger.Get("filename").String()
 						assert.Equal(trigger.file, filename, fmt.Sprintf("The filename for the trigger should be %s but got %s.", trigger.file, filename))
+						cbConnectionRepo := buildTrigger.Get("repositoryEventConfig.repository").String()
+						parts := strings.Split(cbConnectionRepo, "/")
+						createdName := parts[len(parts)-1]
+						assert.Equal(repoName, createdName, "the trigger should use the repo %s", repoName)
 					}
 
 					if slices.Contains(testutils.ServicesWithEnvProject[appName], serviceName) {
