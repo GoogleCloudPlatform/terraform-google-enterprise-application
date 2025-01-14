@@ -75,7 +75,7 @@ func ReplacePatternInTfVars(pattern string, replacement string, root string) err
 
 // Will replace oldPattern in filePath with newPattern
 func replaceInFile(filePath, oldPattern, newPattern string) error {
-	fileInfo, err := os.Lstat(filepath)
+	fileInfo, err := os.Lstat(filePath)
 	if err != nil {
 		return err
 	}
