@@ -61,7 +61,7 @@ After you create and obtain the personal access token in Gitlab, add it to a new
     - `USERNAME`: the username that you want to use.
     - `TOKEN`: the token that you created in the previous step.
 
-- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the Secret together with username and token by running the following command:
+- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
 
     ```bash
     kubectl create ns config-management-system && \
