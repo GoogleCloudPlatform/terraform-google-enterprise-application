@@ -46,7 +46,7 @@ The example below shows configuration steps for the `token` mechanism, using Git
 
 After you create and obtain the personal access token in Gitlab, add it to a new Secret in the cluster.
 
-- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the Secret with the following command:
+- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
 
     ```bash
     kubectl create ns config-management-system && \
