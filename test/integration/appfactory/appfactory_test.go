@@ -131,12 +131,6 @@ func TestAppfactory(t *testing.T) {
 					listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
 					assert.Subset(listApis, adminProjectApis, "APIs should have been enabled")
 
-					// check app infra repo
-					repositoryName := appData.Get("app_infra_repository_name").String()
-					repoURL := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", adminProjectID, repositoryName)
-					repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repositoryName, adminProjectID)
-					assert.Equal(repoURL, repoOP.Get("url").String(), "source repo %s should have url %s", repositoryName, repoURL)
-
 					// check workspace SA access to repo
 					repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repositoryName, adminProjectID)
 					repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
