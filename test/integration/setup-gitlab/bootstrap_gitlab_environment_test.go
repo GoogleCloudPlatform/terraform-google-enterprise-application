@@ -148,16 +148,23 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	}
 
 	// Print tfvars to output for debug
-	file, err := os.Open("../../../1-bootstrap/terraform.tfvars")
-	if err != nil {
-		t.Fatal(err)
+	printFiles := []string{
+		"../../../1-bootstrap/terraform.tfvars",
+		"../../../examples/multitenant-applications/4-appfactory/terraform.tfvars",
 	}
-	defer func() {
-		if err = file.Close(); err != nil {
+
+	for _, filePath := range printFiles {
+
+		file, err := os.Open(filePath)
+		if err != nil {
 			t.Fatal(err)
 		}
-	}()
-
-	b, err := io.ReadAll(file)
-	t.Log(string(b))
+		defer func() {
+			if err = file.Close(); err != nil {
+				t.Fatal(err)
+			}
+		}()
+		b, err := io.ReadAll(file)
+		t.Log(string(b))
+	}
 }
