@@ -78,7 +78,7 @@ After you create and obtain the personal access token in Gitlab, add it to a new
     - `TOKEN`: the token that you created in the previous step.
     - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
 
-> NOTE: Config Sync must be able to fetch your Git server, this means you might need to adjust your firewall rules to allow GKE pods to reach that server or create a Cloud NAT Router to allow acessing the Github/Gitlab or Bitbucket SaaS servers.
+> NOTE: Config Sync must be able to fetch your Git server, this means you might need to adjust your firewall rules to allow GKE pods to reach that server or create a Cloud NAT Router to allow accessing the Github/Gitlab or Bitbucket SaaS servers.
 
 ## Usage
 
