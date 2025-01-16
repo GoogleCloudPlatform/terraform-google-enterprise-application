@@ -18,11 +18,27 @@ To achieve multi-architecture builds and images, the examples needs to use the e
 
 A CI/CD pipeline was created for this application on 5-appinfra, it uses Cloud Build to build the docker image and Cloud Deploy to deploy the image to the cluster using skaffold.
 
-1. Clone the CI/CD repository
+1. (CSR Only) Clone the CI/CD repository
 
-```bash
-gcloud source repos clone eab-default-example-hello-world --project=REPLACE_WITH_ADMIN_PROJECT
-```
+   ```bash
+   gcloud source repos clone eab-default-example-hello-world --project=REPLACE_WITH_ADMIN_PROJECT
+   ```
+
+1. (GitHub Only) When using GitHub, clone the CI/CD repository with the following command.
+
+   ```bash
+   git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/eab-default-example-hello-world.git
+   ```
+
+   > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, clone the CI/CD repository with the following command.
+
+   ```bash
+   git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/eab-default-example-hello-world.git
+   ```
+
+   > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Copy the contents of this directory to the repository:
 
