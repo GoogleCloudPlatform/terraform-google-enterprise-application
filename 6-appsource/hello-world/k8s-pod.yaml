@@ -17,6 +17,7 @@ kind: Pod
 metadata:
   name: getting-started
 spec:
+  runtimeClassName: gvisor
   containers:
   - name: getting-started
     image: skaffold-example
