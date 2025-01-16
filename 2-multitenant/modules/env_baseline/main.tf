@@ -223,6 +223,7 @@ module "gke-standard" {
   }
 
   enable_binary_authorization = true
+  sandbox_enabled             = true
 
   cluster_resource_labels = {
     "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
