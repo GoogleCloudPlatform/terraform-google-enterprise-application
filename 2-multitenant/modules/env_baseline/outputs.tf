@@ -50,6 +50,11 @@ output "network_names" {
   value       = [for subnet in data.google_compute_subnetwork.default : regex(local.networks_re, subnet.network)[0]][0]
 }
 
+output "network_id" {
+  description = "Network id"
+  value       = [for net in data.google_compute_network.default : net.id][0]
+}
+
 # Provide for future seperate Fleet Project
 output "fleet_project_id" {
   description = "Fleet Project ID"

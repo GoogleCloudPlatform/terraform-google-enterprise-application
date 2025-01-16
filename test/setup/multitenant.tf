@@ -231,3 +231,39 @@ module "vpc" {
     ]
   }
 }
+
+resource "google_project_service" "servicenetworking" {
+  for_each           = module.vpc
+  service            = "servicenetworking.googleapis.com"
+  project            = each.value.project_id
+  disable_on_destroy = false
+}
+
+resource "google_compute_global_address" "worker_range" {
+  for_each      = module.vpc
+  name          = "cga-worker"
+  project       = each.value.project_id
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = each.value.network_id
+}
+
+resource "google_service_networking_connection" "worker_pool_conn" {
+  for_each                = module.vpc
+  network                 = each.value.network_id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.worker_range[each.key].name]
+  depends_on              = [google_project_service.servicenetworking]
+}
+
+module "private_service_connect" {
+  for_each = module.vpc
+
+  source                     = "terraform-google-modules/network/google//modules/private-service-connect"
+  version                    = "~> 10.0"
+  project_id                 = each.value.project_id
+  network_self_link          = each.value.network_self_link
+  private_service_connect_ip = "10.3.0.5"
+  forwarding_rule_target     = "vpc-sc"
+}

@@ -130,3 +130,20 @@ variable "cloudbuildv2_repository_config" {
   }
 
 }
+
+variable "network_id" {
+  description = "The network self link to be used by private worker pool."
+  type        = string
+}
+
+variable "create_artifact_registry_remote_dockerhub" {
+  description = "Create a Artifact Registry repository remote to dockerhub."
+  type        = bool
+  default     = false
+}
+
+variable "create_artifact_registry_remote_python" {
+  description = "Create a Artifact Registry repository remote to PYPI."
+  type        = bool
+  default     = false
+}

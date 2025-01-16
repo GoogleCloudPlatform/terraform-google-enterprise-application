@@ -52,6 +52,22 @@ module "vpc" {
           ports    = ["443"]
         }
       ]
+    },
+    {
+      name     = "fw-e-shared-restricted-65534-e-a-allow-google-apis-all-tcp-443"
+      priority = 65534
+
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      deny = []
+      allow = [{
+        protocol = "tcp"
+        ports    = ["443"]
+      }]
+
+      ranges      = ["10.3.0.5"]
+      target_tags = ["allow-google-apis", "vpc-connector"]
     }
   ]
 
@@ -93,4 +109,40 @@ module "vpc" {
       },
     ]
   }
+}
+
+resource "google_project_service" "servicenetworking" {
+  service            = "servicenetworking.googleapis.com"
+  project            = module.vpc.project_id
+  disable_on_destroy = false
+}
+
+resource "google_compute_global_address" "worker_range" {
+  name          = "cga-worker"
+  project       = module.vpc.project_id
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = module.vpc.network_id
+}
+
+resource "google_service_networking_connection" "worker_pool_conn" {
+  network                 = module.vpc.network_id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.worker_range.name]
+  depends_on              = [google_project_service.servicenetworking]
+}
+
+module "private_service_connect" {
+  source                     = "terraform-google-modules/network/google//modules/private-service-connect"
+  version                    = "~> 10.0"
+  project_id                 = module.vpc.project_id
+  network_self_link          = module.vpc.network_self_link
+  private_service_connect_ip = "10.3.0.5"
+  forwarding_rule_target     = "vpc-sc"
+}
+resource "time_sleep" "wait_propagation" {
+  depends_on       = [module.private_service_connect, google_service_networking_connection.worker_pool_conn]
+  create_duration  = "1m"
+  destroy_duration = "1m"
 }

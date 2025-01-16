@@ -40,10 +40,11 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t)
 	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	service_perimeter_mode := setupOutput.GetTFSetupStringOutput("service_perimeter_mode")
 
 	// wire setup output project_id to example var.project_id
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
-		tft.WithVars(map[string]interface{}{"project_id": projectID}),
+		tft.WithVars(map[string]interface{}{"project_id": projectID, "service_perimeter_mode": service_perimeter_mode}),
 		tft.WithTFDir("../../../examples/standalone_single_project"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
