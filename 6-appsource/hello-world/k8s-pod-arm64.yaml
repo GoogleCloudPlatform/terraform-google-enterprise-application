@@ -19,6 +19,7 @@ metadata:
 spec:
   nodeSelector:
     cloud.google.com/machine-family: t2a
+  runtimeClassName: gvisor
   containers:
   - name: getting-started
     image: skaffold-example
