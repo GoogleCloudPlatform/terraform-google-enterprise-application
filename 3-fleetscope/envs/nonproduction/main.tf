@@ -32,4 +32,7 @@ module "env" {
   fleet_project_id       = local.fleet_project_id
   namespace_ids          = var.namespace_ids
   cluster_membership_ids = local.cluster_membership_ids
+
+  config_sync_secret_type    = var.config_sync_secret_type
+  config_sync_repository_url = var.config_sync_repository_url
 }
