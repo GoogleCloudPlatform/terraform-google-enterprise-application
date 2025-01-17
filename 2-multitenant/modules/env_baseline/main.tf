@@ -221,7 +221,17 @@ module "gke-standard" {
       max_unavailable = 0
       autoscaling     = true
       location_policy = "BALANCED"
-    }
+    },
+    each.value.region == "us-central1" ? {
+      name            = "arm-node-pool"
+      machine_type    = "t2a-standard-4"
+      node_locations  = "us-central1-a,us-central1-b,us-central1-f"
+      strategy        = "SURGE"
+      max_surge       = 1
+      max_unavailable = 0
+      autoscaling     = true
+      location_policy = "BALANCED"
+    } : {}
   ]
 
   depends_on = [
