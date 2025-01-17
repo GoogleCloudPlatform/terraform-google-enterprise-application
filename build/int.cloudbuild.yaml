@@ -177,6 +177,18 @@ steps:
       - appinfra-apply
       - fleetscope-verify
 
+  - id: hello-world-app-deployment
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestSourceHelloWorld --stage verify --verbose",
+      ]
+    waitFor:
+      - appinfra-apply
+      - fleetscope-verify
+
   - id: cymbal-bank-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
