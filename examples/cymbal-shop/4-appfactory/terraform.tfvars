@@ -8,11 +8,15 @@ applications = {
 }
 
 cloudbuildv2_repository_config = {
-  repo_type = "CSR"
+  repo_type = "GITLABv2"
   repositories = {
-    "cymbalshop" = {
-      repository_name = "cymbalshop"
-      repository_url  = ""
+    cymbalshop = {
+      repository_name = "cymbalshop-i-r"
+      repository_url  = "https://gitlab.com/user/cymbalshop-i-r.git"
     }
   }
+  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
+  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
 }

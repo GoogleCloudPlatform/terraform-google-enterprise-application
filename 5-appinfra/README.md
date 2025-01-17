@@ -27,6 +27,8 @@ You may add additional infrastructure like application-specifc databases or othe
 
 ## Usage
 
+Please note that some steps in this documentation are specific to the selected Git provider. These steps are clearly marked at the beginning of each instruction. For example, if a step applies only to GitHub users, it will be labeled with "(GitHub only)."
+
 ### Deploying with Google Cloud Build
 
 The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
@@ -64,11 +66,27 @@ The steps below assume that you are checked out on the same level as `terraform-
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
-1. Clone the repositories for each service and initialize:
+1. (CSR Only) Clone the repositories for each service and initialize:
 
     ```bash
     gcloud source repos clone $helloworld_repository --project=$helloworld_project
     ```
+
+1. (GitHub Only) When using GitHub, clone the repository with the following command.
+
+   ```bash
+   git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/$helloworld_repository.git
+   ```
+
+   > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, clone the repository with the following command.
+
+   ```bash
+   git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/$helloworld_repository.git
+   ```
+
+   > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Copy terraform code for each service repository and replace backend bucket:
 

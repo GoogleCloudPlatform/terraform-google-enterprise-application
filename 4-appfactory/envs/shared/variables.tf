@@ -121,7 +121,10 @@ variable "cloudbuildv2_repository_config" {
     - github_app_id_secret_id: (Optional) The application ID for a GitHub App used for authentication.
     - gitlab_read_authorizer_credential_secret_id: (Optional) The read authorizer credential for GitLab access.
     - gitlab_authorizer_credential_secret_id: (Optional) The authorizer credential for GitLab access.
-    - gitlab_webhook_secret_id: (Optional) The secret ID for the GitLab WebHook..
+    - gitlab_webhook_secret_id: (Optional) The secret ID for the GitLab WebHook.
+    - gitlab_enterprise_host_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.
+    - gitlab_enterprise_service_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+    - gitlab_enterprise_ca_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.
   Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.
   Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.
   Note: If 'cloudbuildv2_repository_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default.
@@ -141,13 +144,10 @@ variable "cloudbuildv2_repository_config" {
     gitlab_read_authorizer_credential_secret_id = optional(string)
     gitlab_authorizer_credential_secret_id      = optional(string)
     gitlab_webhook_secret_id                    = optional(string)
+    gitlab_enterprise_host_uri                  = optional(string)
+    gitlab_enterprise_service_directory         = optional(string)
+    gitlab_enterprise_ca_certificate            = optional(string)
   })
-
-  # If cloudbuildv2 is not configured, then auto-creation with CSR will be used
-  default = {
-    repo_type    = "CSR"
-    repositories = {}
-  }
 
   validation {
     condition = (
