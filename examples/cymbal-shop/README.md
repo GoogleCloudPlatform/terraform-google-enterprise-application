@@ -175,11 +175,27 @@ This stage will create the CI/CD pipeline for the service, and application speci
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
-1. Clone the repositories for each service and initialize:
+1. (CSR Only) Clone the repositories for each service and initialize:
 
     ```bash
     gcloud source repos clone $cymbalshop_infra_repo --project=$cymbalshop_project
     ```
+
+1. (GitHub Only) When using GitHub, clone the repository with the following command.
+
+   ```bash
+   git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/$cymbalshop_infra_repo.git
+   ```
+
+   > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, clone the repository with the following command.
+
+   ```bash
+   git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/$cymbalshop_infra_repo.git
+   ```
+
+   > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Copy terraform code for each service repository and replace backend bucket:
 
@@ -244,11 +260,27 @@ This stage will create the CI/CD pipeline for the service, and application speci
     git checkout -b main
     ```
 
-1. Add the remote source repository, this repository will host your application source code:
+1. (CSR Only) Add the remote source repository, this repository will host your application source code:
 
     ```bash
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
+
+1. (GitHub Only) When using GitHub, add the remote source repository with the following command.
+
+   ```bash
+   git remote add origin https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-shop-cymbalshop.git
+   ```
+
+   > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, add the remote source repository with the following command.
+
+   ```bash
+   git remote add origin https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-shop-cymbalshop.git
+   ```
+
+   > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 
@@ -395,11 +427,27 @@ The specified values above will create a sigle `admin` project for cymbal-shop a
     echo cymbalshop_project=$cymbalshop_project
     ```
 
-1. Add the remote source repository, this repository will host your application source code:
+1. (CSR Only) Add the remote source repository, this repository will host your application source code:
 
     ```bash
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
+
+1. (GitHub Only) When using GitHub, add the remote source repository with the following command.
+
+   ```bash
+   git remote add origin https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-shop-cymbalshop.git
+   ```
+
+   > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, add the remote source repository with the following command.
+
+   ```bash
+   git remote add origin https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-shop-cymbalshop.git
+   ```
+
+   > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 

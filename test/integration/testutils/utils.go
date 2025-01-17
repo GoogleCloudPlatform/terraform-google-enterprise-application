@@ -75,18 +75,29 @@ func ReplacePatternInTfVars(pattern string, replacement string, root string) err
 
 // Will replace oldPattern in filePath with newPattern
 func replaceInFile(filePath, oldPattern, newPattern string) error {
-	content, err := os.ReadFile(filePath)
+	fileInfo, err := os.Lstat(filePath)
 	if err != nil {
 		return err
 	}
 
-	newContent := strings.ReplaceAll(string(content), oldPattern, newPattern)
+	if fileInfo.Mode()&os.ModeSymlink != 0 {
+		fmt.Printf("%s is a symlink, will skip the pattern replacement.", filePath)
+		return nil
+	} else {
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			return err
+		}
 
-	err = os.WriteFile(filePath, []byte(newContent), 0644)
-	if err != nil {
-		return err
+		newContent := strings.ReplaceAll(string(content), oldPattern, newPattern)
+
+		err = os.WriteFile(filePath, []byte(newContent), 0644)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Updated file: %s\n", filePath)
+
+		return nil
 	}
-
-	fmt.Printf("Updated file: %s\n", filePath)
-	return nil
 }
