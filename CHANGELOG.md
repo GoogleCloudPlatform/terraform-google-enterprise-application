@@ -8,6 +8,26 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.4.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.3.0...v0.4.0) (2025-01-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Update Terraform GoogleCloudPlatform/cloud-armor/google to v4 ([#317](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/317))
+* use gitlab self-hosted VM on ci - bootstrap stage ([#300](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/300))
+
+### Features
+
+* add multiple credential type options for config sync git repo ([#314](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/314)) ([35ef757](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/35ef75785b80727735552f7a2ab8e8389bfac7b7))
+* use gitlab self-hosted VM on ci - bootstrap stage ([#300](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/300)) ([e8f9a1a](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/e8f9a1a0467eb649d4462325da0aa628e2c8a16c))
+
+
+### Bug Fixes
+
+* **deps:** Update Terraform GoogleCloudPlatform/cloud-armor/google to v4 ([#317](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/317)) ([11e0821](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/11e0821d6834a3b7c2a546d1a509e15ce5754884))
+* **deps:** Update Terraform terraform-google-modules/bootstrap/google to v11 ([#318](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/318)) ([e561f51](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/e561f51b3719db0744dbfba3f2d97889530c5e94))
+* **deps:** Update Terraform terraform-google-modules/project-factory/google to v18 ([#322](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/322)) ([ef22bac](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/ef22bacf81a11890ffce890e2d5cb6b370fbf1db))
+
 ## [0.3.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.2.0...v0.3.0) (2024-12-30)
 
 
