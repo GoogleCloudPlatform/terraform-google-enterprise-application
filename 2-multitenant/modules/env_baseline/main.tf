@@ -212,32 +212,17 @@ module "gke-standard" {
     "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
   }
 
-  node_pools = concat(
-    [
-      {
-        name            = "node-pool-1"
-        machine_type    = "e2-standard-4"
-        strategy        = "SURGE"
-        max_surge       = 1
-        max_unavailable = 0
-        autoscaling     = true
-        location_policy = "BALANCED"
-      }
-    ],
-    // T2A ARM Nodes are supported only on selected zones
-    each.value.region == "us-central1" ? [
-      {
-        name            = "arm-node-pool"
-        machine_type    = "t2a-standard-4"
-        node_locations  = "us-central1-a,us-central1-b,us-central1-f"
-        strategy        = "SURGE"
-        max_surge       = 1
-        max_unavailable = 0
-        autoscaling     = true
-        location_policy = "BALANCED"
-      }
-    ] : []
-  )
+  node_pools = [
+    {
+      name            = "node-pool-1"
+      machine_type    = "e2-standard-4"
+      strategy        = "SURGE"
+      max_surge       = 1
+      max_unavailable = 0
+      autoscaling     = true
+      location_policy = "BALANCED"
+    }
+  ]
 
   depends_on = [
     module.eab_cluster_project,
