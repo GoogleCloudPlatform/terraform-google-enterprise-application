@@ -68,7 +68,7 @@ module "app_admin_project" {
   count = var.create_admin_project ? 1 : 0
 
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 18.0"
 
   random_project_id        = true
   random_project_id_length = 4
@@ -177,7 +177,7 @@ resource "google_organization_iam_member" "builder_organization_browser" {
 // Create infra project
 module "app_infra_project" {
   source   = "terraform-google-modules/project-factory/google"
-  version  = "~> 17.0"
+  version  = "~> 18.0"
   for_each = var.create_infra_project ? var.envs : {}
 
   random_project_id        = true

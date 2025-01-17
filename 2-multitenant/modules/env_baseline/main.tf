@@ -37,7 +37,7 @@ resource "google_project_service_identity" "compute_sa" {
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 18.0"
 
   count = var.create_cluster_project ? 1 : 0
 
