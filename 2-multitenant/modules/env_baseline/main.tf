@@ -221,6 +221,15 @@ module "gke-standard" {
       max_unavailable = 0
       autoscaling     = true
       location_policy = "BALANCED"
+    },
+    {
+      name            = "arm-node-pool"
+      machine_type    = "t2a-standard-4"
+      strategy        = "SURGE"
+      max_surge       = 1
+      max_unavailable = 0
+      autoscaling     = true
+      location_policy = "BALANCED"
     }
   ]
 
