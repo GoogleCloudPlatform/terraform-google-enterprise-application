@@ -16,7 +16,7 @@
 
 module "project_standalone" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 18.0"
 
   for_each = var.single_project ? { (local.index) = true } : {}
 
