@@ -33,4 +33,7 @@ apps = {
     }
     "acronym" = "cs",
   }
+  "default-example" : {
+    "acronym" = "de",
+  }
 }
