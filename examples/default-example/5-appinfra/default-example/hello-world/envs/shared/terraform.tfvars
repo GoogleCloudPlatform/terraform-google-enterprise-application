@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-apps = {
-  "cymbal-bank" : {
-    "ip_address_names" : [
-      "frontend-ip",
-    ]
-    "certificates" : {
-      "frontend-example-com" : ["frontend.example.com"]
+remote_state_bucket = "REMOTE_STATE_BUCKET"
+
+region = "us-central1"
+
+buckets_force_destroy = "true"
+
+environment_names = ["development", "nonproduction", "production"]
+
+cloudbuildv2_repository_config = {
+  repo_type = "CSR"
+  repositories = {
+    "eab-default-example-hello-world" = {
+      repository_name = "eab-default-example-hello-world"
+      repository_url  = ""
     }
-    "acronym" = "cb",
-  }
-  "cymbal-shop" : {
-    "ip_address_names" : [
-      "cymbal-shop-frontend-ip",
-    ]
-    "certificates" : {
-      "cymbal-shop-frontend-example-com" : ["cymbal-shop.frontend.example.com"]
-    }
-    "acronym" = "cs",
-  }
-  "default-example" : {
-    "acronym" = "de",
   }
 }
