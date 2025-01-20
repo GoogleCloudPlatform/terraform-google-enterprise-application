@@ -242,6 +242,52 @@ module "gke-standard" {
 
 }
 
+resource "google_container_node_pool" "arm_node_pool" {
+  for_each = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
+
+  name       = "arm-node-pool"
+  cluster    = google_container_cluster.my_cluster.name
+  location   = each.value.region
+  node_count = 1
+
+  autoscaling {
+    min_node_count  = 1
+    max_node_count  = 100
+    location_policy = "BALANCED"
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
+  upgrade_settings {
+    strategy        = "SURGE"
+    max_surge       = 1
+    max_unavailable = 0
+  }
+
+  node_config {
+    machine_type    = "t2a-standard-4"
+    disk_size_gb    = 100
+    disk_type       = "pd-standard"
+    image_type      = "COS_CONTAINERD"
+    local_ssd_count = 0
+    oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"]
+    preemptible     = false
+
+    shielded_instance_config {
+      enable_integrity_monitoring = true
+      enable_secure_boot          = false
+    }
+
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
+  }
+}
+
+
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
   version = "~> 35.0"
