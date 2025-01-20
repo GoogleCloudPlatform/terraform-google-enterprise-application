@@ -20,7 +20,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"testing"
 
+	"github.com/gruntwork-io/terratest/modules/logger"
+	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/tidwall/gjson"
 )
 
@@ -100,4 +103,16 @@ func replaceInFile(filePath, oldPattern, newPattern string) error {
 
 		return nil
 	}
+}
+
+func GetSecretFromSecretManager(t *testing.T, secretName string, secretProject string) (string, error) {
+	t.Log("Retrieving secret from secret manager.")
+	cmd := fmt.Sprintf("secrets versions access latest --project=%s --secret=%s", secretProject, secretName)
+	args := strings.Fields(cmd)
+	gcloudCmd := shell.Command{
+		Command: "gcloud",
+		Args:    args,
+		Logger:  logger.Discard,
+	}
+	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
 }

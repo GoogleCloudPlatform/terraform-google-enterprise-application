@@ -23,23 +23,10 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
-
-func getTokenFromSecretManager(t *testing.T, secretName string, secretProject string) (string, error) {
-	t.Log("Retrieving secret from secret manager.")
-	cmd := fmt.Sprintf("secrets versions access latest --project=%s --secret=%s", secretProject, secretName)
-	args := strings.Fields(cmd)
-	gcloudCmd := shell.Command{
-		Command: "gcloud",
-		Args:    args,
-		Logger:  logger.Discard,
-	}
-	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
-}
 
 // connects to a Google Cloud VM instance using SSH and retrieves the logs from the VM's Startup Script service
 func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, instanceProject string) (string, error) {
@@ -77,7 +64,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		time.Sleep(3 * time.Minute)
 	}
 
-	token, err := getTokenFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
 	}
