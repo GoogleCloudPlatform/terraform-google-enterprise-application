@@ -44,7 +44,7 @@ func TestSourceCymbalShop(t *testing.T) {
 	}
 
 	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
-	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s", token, hostNameWithPath)
+	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 
