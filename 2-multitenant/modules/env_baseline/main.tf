@@ -27,7 +27,7 @@ locals {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
   }
 
-  arm_node_pool_iterator = { for k, v in module.gke-standard : k => v if v.location == "us-central1" }
+  arm_node_pool_iterator = { for idx, value in values(module.gke-standard) : idx => value if value.location == "us-central1" }
 }
 
 resource "google_project_service_identity" "compute_sa" {
@@ -245,7 +245,7 @@ module "gke-standard" {
 }
 
 resource "google_container_node_pool" "arm_node_pool" {
-  for_each = { for k, v in module.gke-standard : v.location == "us-central1" ? {} : k => v }
+  for_each = local.arm_node_pool_iterator
 
   name       = "arm-node-pool"
   cluster    = each.value.name
