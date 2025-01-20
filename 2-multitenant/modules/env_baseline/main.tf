@@ -246,7 +246,7 @@ resource "google_container_node_pool" "arm_node_pool" {
   for_each = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
 
   name       = "arm-node-pool"
-  cluster    = google_container_cluster.my_cluster.name
+  cluster    = module.gke-standard.name
   location   = each.value.region
   node_count = 1
 
