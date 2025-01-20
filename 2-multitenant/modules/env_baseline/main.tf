@@ -247,7 +247,10 @@ resource "google_container_node_pool" "arm_node_pool" {
   for_each = var.cluster_type != "AUTOPILOT" ? module.gke-standard : {}
 
   name       = "arm-node-pool"
+  project    = local.cluster_project_id
   cluster    = each.value.name
+  location   = each.value.location
+
   node_count = 1
 
   // locations with t2a nodes
