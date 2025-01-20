@@ -96,7 +96,7 @@ App-specific resources such as application CI/CD pipelines specification and kub
 | Hello World               | [./5-appinfra](./5-appinfra)                        | [./6-appsource](./6-appsource)                        |
 | Cymbal Bank               | [./examples/cymbal-bank/5-appinfra](./examples/cymbal-bank/5-appinfra)   | [./examples/cymbal-bank/6-appsource](./examples/cymbal-bank/6-appsource)   |
 | Cymbal Shop               | [./examples/cymbal-shop/5-appinfra](./examples/cymbal-shop/5-appinfra)   | [./examples/cymbal-shop/6-appsource](./examples/cymbal-shop/6-appsource)   |
-| Cymbal Bank + Cymbal Shop | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) |
+| Cymbal Bank + Cymbal Shop | [./examples/multitenant-applications/5-appinfra](./examples/multitenant-applications/5-appinfra) | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) |
 
 ### Hello World Example
 
