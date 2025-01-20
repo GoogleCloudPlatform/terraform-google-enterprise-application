@@ -164,4 +164,37 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		b, err := io.ReadAll(file)
 		t.Log(string(b))
 	}
+
+	// single project repository replacement
+
+	single_project_root := "../../../examples/standalone_single_project"
+
+	// Replace gitlab.com/user with custom self hosted URL using the root namespace
+	err = testutils.ReplacePatternInFile("https://gitlab.com/user", replacement, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace https://gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("https://gitlab.com", url, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace webhook secret id
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace gitlab token secret ids
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_API_SECRET_ID", gitlabTokenSecretId, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 }

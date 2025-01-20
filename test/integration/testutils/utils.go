@@ -76,6 +76,21 @@ func ReplacePatternInTfVars(pattern string, replacement string, root string) err
 	return err
 }
 
+// Will walk directories searching for fileName and replace the pattern with the replacement
+func ReplacePatternInFile(pattern string, replacement string, root string, fileName string) error {
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, fnErr error) error {
+		if fnErr != nil {
+			return fnErr
+		}
+		if !d.IsDir() && d.Name() == fileName {
+			return replaceInFile(path, pattern, replacement)
+		}
+		return nil
+	})
+
+	return err
+}
+
 // Will replace oldPattern in filePath with newPattern
 func replaceInFile(filePath, oldPattern, newPattern string) error {
 	fileInfo, err := os.Lstat(filePath)
