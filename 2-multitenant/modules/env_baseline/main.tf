@@ -245,7 +245,7 @@ module "gke-standard" {
 }
 
 resource "google_container_node_pool" "arm_node_pool" {
-  for_each = local.arm_node_pool_iterator
+  for_each = { for k, v in module.gke-standard : v.location == "us-central1" ? {} : k => v }
 
   name       = "arm-node-pool"
   cluster    = each.value.name
