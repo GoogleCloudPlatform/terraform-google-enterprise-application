@@ -34,10 +34,14 @@ import (
 
 func TestSingleProjectSourceCymbalBank(t *testing.T) {
 
-	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-	gitUrl := setup.GetStringOutput("gitlab_url")
-	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
-	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
+	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
+	// initialize Terraform test from the Blueprints test framework
+	setupOutput := tft.NewTFBlueprintTest(t)
+	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	gitUrl := setupOutput.GetTFSetupStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := setupOutput.GetTFSetupStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := setupOutput.GetTFSetupStringOutput("gitlab_secret_project")
+
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
@@ -46,10 +50,6 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
-	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
-	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t)
-	projectID := setupOutput.GetTFSetupStringOutput("project_id")
 	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
 	envName := standaloneSingleProj.GetStringOutput("env")
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
