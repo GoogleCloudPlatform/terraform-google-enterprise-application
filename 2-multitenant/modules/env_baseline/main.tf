@@ -27,7 +27,8 @@ locals {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
   }
 
-  arm_node_pool_iterator = var.cluster_type != "AUTOPILOT" ? { for k, v in data.google_compute_subnetwork.default : k => v if v.region == "us-central1" } : {}
+  arm_family_available_subnet = { for k, v in data.google_compute_subnetwork.default : k => v if v.region == "us-central1" }
+  arm_node_pool_iterator      = var.cluster_type != "AUTOPILOT" ? local.arm_family_available_subnet : {}
 }
 
 resource "google_project_service_identity" "compute_sa" {
