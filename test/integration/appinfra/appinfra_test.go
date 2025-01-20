@@ -65,6 +65,13 @@ func TestAppInfra(t *testing.T) {
 			splitServiceName = strings.Split(fullServiceName, "-")
 			prefixServiceName = splitServiceName[0]
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
+
+			// hello-world does not have a team implicit in name
+			if fullServiceName == "hello-world" {
+				suffixServiceName = fullServiceName
+				prefixServiceName = fullServiceName
+			}
+
 			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, suffixServiceName)).String()
 			servicesInfoMap[fullServiceName] = ServiceInfos{
 				ApplicationName: appName,
