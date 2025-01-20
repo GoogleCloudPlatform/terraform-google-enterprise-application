@@ -247,7 +247,7 @@ func TestAppInfra(t *testing.T) {
 					}
 					buildTriggerName := fmt.Sprintf("%s-ci", fullServiceName)
 					if fullServiceName == "hello-world" {
-						buildTriggerName = "default-example-hello-world-ci"
+						buildTriggerName = "default-hello-world-ci"
 					}
 
 					ciServiceAccountPath := fmt.Sprintf("projects/%s/serviceAccounts/%s", servicesInfoMap[fullServiceName].ProjectID, ciServiceAccountEmail)
