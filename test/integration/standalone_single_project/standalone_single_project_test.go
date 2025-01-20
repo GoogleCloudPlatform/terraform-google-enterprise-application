@@ -101,9 +101,7 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 					} else if regexp.MustCompile(`^nap-.*`).FindString(pool.Get("name").String()) != "" {
 						assert.True(pool.Get("autoscaling.autoprovisioned").Bool(), "NodePool autoscaling autoprovisioned should enabled(true)")
 					} else {
-						if pool.Get("name").String() != "arm-node-pool" {
-							t.Fatalf("Error: unknown node pool: %s", pool.Get("name").String())
-						}
+						t.Fatalf("Error: unknown node pool: %s", pool.Get("name").String())
 					}
 					// common to all valid node pools
 					assert.True(pool.Get("autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
