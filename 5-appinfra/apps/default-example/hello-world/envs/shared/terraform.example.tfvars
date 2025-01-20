@@ -27,7 +27,7 @@ cloudbuildv2_repository_config = {
   repositories = {
     "eab-default-example-hello-world" = {
       repository_name = "eab-default-example-hello-world"
-      repository_url  = "https://gitlab.com/user/eab-default-example-hello-world"
+      repository_url  = "https://gitlab.com/user/eab-default-example-hello-world.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME

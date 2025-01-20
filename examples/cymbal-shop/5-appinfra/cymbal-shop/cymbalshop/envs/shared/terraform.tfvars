@@ -27,7 +27,7 @@ cloudbuildv2_repository_config = {
   repositories = {
     "eab-cymbal-shop-cymbalshop" = {
       repository_name = "eab-cymbal-shop-cymbalshop"
-      repository_url  = "https://gitlab.com/user/eab-cymbal-shop-cymbalshop"
+      repository_url  = "https://gitlab.com/user/eab-cymbal-shop-cymbalshop.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME

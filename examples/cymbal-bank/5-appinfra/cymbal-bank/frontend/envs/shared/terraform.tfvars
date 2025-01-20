@@ -27,7 +27,7 @@ cloudbuildv2_repository_config = {
   repositories = {
     "eab-cymbal-bank-frontend" = {
       repository_name = "eab-cymbal-bank-frontend"
-      repository_url  = "https://gitlab.com/user/eab-cymbal-bank-frontend"
+      repository_url  = "https://gitlab.com/user/eab-cymbal-bank-frontend.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
