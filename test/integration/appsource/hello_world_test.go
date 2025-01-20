@@ -123,6 +123,9 @@ func TestSourceHelloWorld(t *testing.T) {
 					if latestWorkflowRunStatus == "SUCCESS" {
 						return false, nil
 					} else if latestWorkflowRunStatus == "FAILURE" {
+						logsCmd := fmt.Sprintf("builds log %s", build[0].Get("id").String())
+						logs := gcloud.Runf(t, logsCmd).String()
+						t.Logf("%s build-log: %s", serviceName, logs)
 						return false, errors.New("Build failed.")
 					}
 					return true, nil
