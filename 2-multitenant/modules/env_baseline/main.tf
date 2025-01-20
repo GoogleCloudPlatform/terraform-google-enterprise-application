@@ -27,7 +27,6 @@ locals {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
   }
 
-  arm_node_pool_iterator = { for idx, value in values(module.gke-standard) : idx => value if value.location == "us-central1" }
 }
 
 resource "google_project_service_identity" "compute_sa" {
@@ -245,12 +244,18 @@ module "gke-standard" {
 }
 
 resource "google_container_node_pool" "arm_node_pool" {
-  for_each = local.arm_node_pool_iterator
+  for_each = var.cluster_type != "AUTOPILOT" ? module.gke-standard : {}
 
   name       = "arm-node-pool"
   cluster    = each.value.name
-  location   = each.value.location
   node_count = 1
+
+  // locations with t2a nodes
+  node_locations = [
+    "us-central1-a",
+    "us-central1-b",
+    "us-central1-f"
+  ]
 
   autoscaling {
     min_node_count  = 1
