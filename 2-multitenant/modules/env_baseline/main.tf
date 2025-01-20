@@ -28,7 +28,7 @@ locals {
   }
 
   arm_family_available_subnet = { for k, v in data.google_compute_subnetwork.default : k => v if v.region == "us-central1" }
-  arm_node_pool_iterator      = var.cluster_type != "AUTOPILOT" ? local.arm_family_available_subnet : {}
+  arm_node_pool_iterator      = local.arm_family_available_subnet
 }
 
 resource "google_project_service_identity" "compute_sa" {
@@ -246,11 +246,11 @@ module "gke-standard" {
 }
 
 resource "google_container_node_pool" "arm_node_pool" {
-  for_each = local.arm_node_pool_iterator
+  for_each = { for k, v in module.gke-standard : k => v if v.location == "us-central1" }
 
   name       = "arm-node-pool"
-  cluster    = module.gke-standard[each.key].name
-  location   = each.value.region
+  cluster    = each.value.name
+  location   = each.value.location
   node_count = 1
 
   autoscaling {
