@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,6 +33,18 @@ import (
 )
 
 func TestSourceHelloWorld(t *testing.T) {
+
+	setupOutput := tft.NewTFBlueprintTest(t)
+	gitUrl := setupOutput.GetTFSetupStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := setupOutput.GetTFSetupStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := setupOutput.GetTFSetupStringOutput("gitlab_secret_project")
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s", token, hostNameWithPath)
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 
@@ -54,7 +67,7 @@ func TestSourceHelloWorld(t *testing.T) {
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
-		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
+		appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
 		t.Logf("source-repo: %s", appRepo)
 
 		tmpDirApp := t.TempDir()
@@ -86,7 +99,7 @@ func TestSourceHelloWorld(t *testing.T) {
 			gitAppRun("clone", "--branch", "v0.10.1", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
-			gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
+			// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 			gitAppRun("config", "init.defaultBranch", "main")
 			gitAppRun("config", "http.postBuffer", "157286400")
 			gitAppRun("checkout", "-b", "main")
