@@ -34,10 +34,10 @@ import (
 
 func TestSingleProjectSourceCymbalBank(t *testing.T) {
 
-	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-	gitUrl := setupOutput.GetStringOutput("gitlab_url")
-	gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
-	gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
+	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+	gitUrl := setup.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
