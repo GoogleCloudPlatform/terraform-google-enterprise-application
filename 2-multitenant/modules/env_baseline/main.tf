@@ -243,10 +243,10 @@ module "gke-standard" {
 }
 
 resource "google_container_node_pool" "arm_node_pool" {
-  for_each = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
+  for_each = var.cluster_type != "AUTOPILOT" ? { for k, v in data.google_compute_subnetwork.default : k => v if v.region == "us-central1" } : {}
 
   name       = "arm-node-pool"
-  cluster    = module.gke-standard.name
+  cluster    = module.gke-standard[each.key].name
   location   = each.value.region
   node_count = 1
 
