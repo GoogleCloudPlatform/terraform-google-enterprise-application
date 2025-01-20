@@ -244,7 +244,7 @@ module "gke-standard" {
 }
 
 resource "google_container_node_pool" "arm_node_pool" {
-  count = var.cluster_type != "AUTOPILOT" ? [1] : []
+  count = var.cluster_type != "AUTOPILOT" ? 1 : 0
 
   name     = "arm-node-pool"
   project  = local.cluster_project_id
