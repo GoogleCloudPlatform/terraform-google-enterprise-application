@@ -1,3 +1,3 @@
 module github.com/GoogleContainerTools/skaffold/examples/getting-started
 
-go 1.22
+go 1.18
