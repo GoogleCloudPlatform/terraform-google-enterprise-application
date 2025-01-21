@@ -49,7 +49,7 @@ resource "google_service_account" "int_test" {
   create_ignore_already_exists = true
 }
 
-resource "google_project_iam_member" "int_test" {
+resource "google_project_iam_member" "int_test_connection_admin" {
   project = local.project_id
   role    = "roles/cloudbuild.connectionAdmin"
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
