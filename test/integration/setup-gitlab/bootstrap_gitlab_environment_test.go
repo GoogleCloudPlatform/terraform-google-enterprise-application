@@ -85,7 +85,21 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	repos := []string{"eab-multitenant", "eab-fleetscope", "eab-applicationfactory"}
+	repos := []string{
+		// 1-boostrap repositories
+		"eab-multitenant",
+		"eab-fleetscope",
+		"eab-applicationfactory",
+		// 4-appfactory repositories
+		"balancereader-i-r",
+		"contacts-i-r",
+		"frontend-i-r",
+		"ledgerwriter-i-r",
+		"transactionhistory-i-r",
+		"userservice-i-r",
+		"cymbalshop-i-r",
+	}
+
 	for _, repo := range repos {
 		p := &gitlab.CreateProjectOptions{
 			Name:                 gitlab.Ptr(repo),
@@ -101,7 +115,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Log(project.Name)
 	}
 
-	root := "../../../1-bootstrap"
+	root := "../../.."
 
 	// Replace gitlab.com/user with custom self hosted URL using the root namespace
 	replacement := fmt.Sprintf("%s/root", url)
@@ -134,16 +148,23 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	}
 
 	// Print tfvars to output for debug
-	file, err := os.Open("../../../1-bootstrap/terraform.tfvars")
-	if err != nil {
-		t.Fatal(err)
+	printFiles := []string{
+		"../../../1-bootstrap/terraform.tfvars",
+		"../../../examples/multitenant-applications/4-appfactory/terraform.tfvars",
 	}
-	defer func() {
-		if err = file.Close(); err != nil {
+
+	for _, filePath := range printFiles {
+
+		file, err := os.Open(filePath)
+		if err != nil {
 			t.Fatal(err)
 		}
-	}()
-
-	b, err := io.ReadAll(file)
-	t.Log(string(b))
+		defer func() {
+			if err = file.Close(); err != nil {
+				t.Fatal(err)
+			}
+		}()
+		b, err := io.ReadAll(file)
+		t.Log(string(b))
+	}
 }
