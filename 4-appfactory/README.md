@@ -31,7 +31,7 @@ It will also create an Application Folder to group your admin projects under it,
 
 ## Usage
 
-You have 3 Git providers options for this step, Cloud Source Repositories (CSR), Github and Gitlab, if you are using Github or Gitlab you will need to take additional steps that are described in the following sections:
+You have 3 Git provider options for this step: Cloud Source Repositories (CSR), Github, and Gitlab. If you are using Github or Gitlab you will need to take additional steps that are described in the following sections:
 
 - [Cloud Build with Github Pre-requisites](#cloud-build-with-github-pre-requisites)
 - [Cloud Build with Gitlab Pre-requisites](#cloud-build-with-gitlab-pre-requisites)
