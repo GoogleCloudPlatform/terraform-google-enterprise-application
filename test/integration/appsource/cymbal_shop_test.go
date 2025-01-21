@@ -113,6 +113,7 @@ func TestSourceCymbalShop(t *testing.T) {
 
 			gitAppRun("add", ".")
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
+			gitAppRun("push", "google", ":main")
 			gitAppRun("push", "--all", "google", "-f")
 
 			lastCommit := gitApp.GetLatestCommit()
