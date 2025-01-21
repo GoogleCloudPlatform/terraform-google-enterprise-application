@@ -178,8 +178,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 
 				gitAppRun("add", ".")
 				gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
-				gitAppRun("push", "google", ":main")
-				gitAppRun("push", "--all", "google", "-f")
+				gitAppRun("push", "google", "main")
 
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
@@ -205,7 +204,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 								}
 								gitAppRun("add", ".")
 								gitApp.CommitWithMsg("retries build", []string{"--allow-empty"})
-								gitAppRun("push", "--all", "google", "-f")
+								gitAppRun("push", "google", "main")
 								lastCommit = gitApp.GetLatestCommit()
 								t.Logf("New commit for %s is: %s", serviceName, lastCommit)
 								buildListCmd = fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
