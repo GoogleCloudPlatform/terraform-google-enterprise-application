@@ -1,0 +1,41 @@
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: default-flavor # This ResourceFlavor will be used for all the resources
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: cluster-queue
+spec:
+  namespaceSelector: {} # Available to all namespaces
+  queueingStrategy: BestEffortFIFO # Default queueing strategy
+  resourceGroups:
+  - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage"]
+    flavors:
+    - name: "default-flavor"
+      resources:
+      - name: "cpu"
+        nominalQuota: 10
+      - name: "memory"
+        nominalQuota: 10Gi
+      - name: "nvidia.com/gpu"
+        nominalQuota: 10
+      - name: "ephemeral-storage"
+        nominalQuota: 10Gi
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  namespace: team-a # LocalQueue under team-a namespace
+  name: lq-team-a
+spec:
+  clusterQueue: cluster-queue # Point to the ClusterQueue
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  namespace: team-b # LocalQueue under team-b namespace
+  name: lq-team-b
+spec:
+  clusterQueue: cluster-queue # Point to the ClusterQueue
