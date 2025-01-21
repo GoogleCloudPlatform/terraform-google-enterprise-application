@@ -50,6 +50,12 @@ resource "google_service_account" "int_test" {
 }
 
 resource "google_project_iam_member" "int_test" {
+  project = local.project_id
+  role    = "roles/cloudbuild.connectionAdmin"
+  member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
+resource "google_project_iam_member" "int_test" {
   for_each = toset(local.int_required_roles)
 
   project = local.project_id
