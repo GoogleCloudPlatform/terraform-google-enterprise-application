@@ -23,23 +23,10 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
-
-func getTokenFromSecretManager(t *testing.T, secretName string, secretProject string) (string, error) {
-	t.Log("Retrieving secret from secret manager.")
-	cmd := fmt.Sprintf("secrets versions access latest --project=%s --secret=%s", secretProject, secretName)
-	args := strings.Fields(cmd)
-	gcloudCmd := shell.Command{
-		Command: "gcloud",
-		Args:    args,
-		Logger:  logger.Discard,
-	}
-	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
-}
 
 // connects to a Google Cloud VM instance using SSH and retrieves the logs from the VM's Startup Script service
 func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, instanceProject string) (string, error) {
@@ -77,7 +64,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		time.Sleep(3 * time.Minute)
 	}
 
-	token, err := getTokenFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,6 +85,14 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"transactionhistory-i-r",
 		"userservice-i-r",
 		"cymbalshop-i-r",
+		// 5-appinfra repositories
+		"eab-cymbal-bank-frontend",
+		"eab-cymbal-bank-accounts-contacts",
+		"eab-cymbal-bank-accounts-userservice",
+		"eab-cymbal-bank-ledger-ledgerwriter",
+		"eab-cymbal-bank-ledger-transactionhistory",
+		"eab-cymbal-bank-ledger-balancereader",
+		"eab-cymbal-shop-cymbalshop",
 	}
 
 	for _, repo := range repos {
@@ -106,6 +101,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 			Description:          gitlab.Ptr("Test Repo"),
 			InitializeWithReadme: gitlab.Ptr(true),
 			Visibility:           gitlab.Ptr(gitlab.PrivateVisibility),
+			DefaultBranch:        gitlab.Ptr("master"),
 		}
 		project, _, err := git.Projects.CreateProject(p)
 		if err != nil {
@@ -151,6 +147,8 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	printFiles := []string{
 		"../../../1-bootstrap/terraform.tfvars",
 		"../../../examples/multitenant-applications/4-appfactory/terraform.tfvars",
+		"../../../examples/multitenant-applications/5-appinfra/cymbal-bank/accounts-contacts/envs/shared/terraform.tfvars",
+		"../../../examples/multitenant-applications/5-appinfra/cymbal-shop/cymbalshop/envs/shared/terraform.tfvars",
 	}
 
 	for _, filePath := range printFiles {
@@ -166,5 +164,38 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		}()
 		b, err := io.ReadAll(file)
 		t.Log(string(b))
+	}
+
+	// single project repository replacement
+
+	single_project_root := "../../../examples/standalone_single_project"
+
+	// Replace gitlab.com/user with custom self hosted URL using the root namespace
+	err = testutils.ReplacePatternInFile("https://gitlab.com/user", replacement, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace https://gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("https://gitlab.com", url, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace webhook secret id
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace gitlab token secret ids
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_API_SECRET_ID", gitlabTokenSecretId, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
 	}
 }
