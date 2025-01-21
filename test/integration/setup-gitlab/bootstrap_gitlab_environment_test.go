@@ -101,6 +101,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 			Description:          gitlab.Ptr("Test Repo"),
 			InitializeWithReadme: gitlab.Ptr(true),
 			Visibility:           gitlab.Ptr(gitlab.PrivateVisibility),
+			DefaultBranch:        gitlab.Ptr("master"),
 		}
 		project, _, err := git.Projects.CreateProject(p)
 		if err != nil {
