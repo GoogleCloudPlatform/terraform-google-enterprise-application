@@ -35,6 +35,18 @@ import (
 
 func TestSourceCymbalBank(t *testing.T) {
 
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+	gitUrl := setupOutput.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
+
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	appName := "cymbal-bank"
 
@@ -82,7 +94,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				mapPath = fmt.Sprintf("%s/%s", servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].ServiceName)
 			}
 			t.Logf("ServicePath: %s, MapPath: %s", servicePath, mapPath)
-			appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", servicesInfoMap[serviceName].ProjectID, appName, serviceName)
+			appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
 			tmpDirApp := t.TempDir()
 			dbFrom := fmt.Sprintf("%s/%s-db/k8s/overlays", appSourcePath, servicesInfoMap[serviceName].TeamName)
 			dbTo := fmt.Sprintf("%s/src/%s/%s-db/k8s/overlays", tmpDirApp, servicesInfoMap[serviceName].TeamName, servicesInfoMap[serviceName].TeamName)
@@ -114,7 +126,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
-				gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
+				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 				gitAppRun("config", "init.defaultBranch", "main")
 				gitAppRun("config", "http.postBuffer", "157286400")
 				gitAppRun("checkout", "-b", "main")
@@ -170,7 +182,7 @@ func TestSourceCymbalBank(t *testing.T) {
 
 				gitAppRun("add", ".")
 				gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
-				gitAppRun("push", "--all", "google", "-f")
+				gitAppRun("push", "google", "main")
 
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
@@ -196,7 +208,7 @@ func TestSourceCymbalBank(t *testing.T) {
 								}
 								gitAppRun("add", ".")
 								gitApp.CommitWithMsg("retries build", []string{"--allow-empty"})
-								gitAppRun("push", "--all", "google", "-f")
+								gitAppRun("push", "google", "main")
 								lastCommit = gitApp.GetLatestCommit()
 								t.Logf("New commit for %s is: %s", serviceName, lastCommit)
 								buildListCmd = fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)

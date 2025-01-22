@@ -105,7 +105,6 @@ func TestAppInfra(t *testing.T) {
 				)
 				appService.DefineVerify(func(assert *assert.Assertions) {
 					appService.DefaultVerify(assert)
-					repoName := fmt.Sprintf("eab-%s-%s", servicesInfoMap[fullServiceName].ApplicationName, fullServiceName)
 
 					prj := gcloud.Runf(t, "projects describe %s", servicesInfoMap[fullServiceName].ProjectID)
 					projectNumber := prj.Get("projectNumber").String()
@@ -190,11 +189,6 @@ func TestAppInfra(t *testing.T) {
 							assert.Subset(bucketSaListMembers, []string{fmt.Sprintf("serviceAccount:%s", cloudDeployServiceAccountEmail)}, fmt.Sprintf("Bucket %s should have storage.objectViewer role for SA %s.", bucketName, cloudDeployServiceAccountEmail))
 						}
 					}
-
-					// Source Repo Test
-					repoPath := fmt.Sprintf("projects/%s/repos/%s", servicesInfoMap[fullServiceName].ProjectID, repoName)
-					sourceOp := gcloud.Runf(t, "source repos describe %s --project %s", repoName, servicesInfoMap[fullServiceName].ProjectID)
-					assert.Equal(sourceOp.Get("name").String(), repoPath, fmt.Sprintf("Full name of repository should be %s.", repoPath))
 
 					// Project IAM
 					computeSARoles := []string{

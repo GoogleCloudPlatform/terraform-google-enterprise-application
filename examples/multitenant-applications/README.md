@@ -32,6 +32,8 @@ This example requires:
 
 ## Usage
 
+Please note that some steps in this documentation are specific to the selected Git provider. These steps are clearly marked at the beginning of each instruction. For example, if a step applies only to GitHub users, it will be labeled with "(GitHub only)."
+
 ### Deploying with Google Cloud Build
 
 The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
@@ -211,8 +213,7 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
    export remote_state_bucket=$(terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
-
-1. Clone the repositories for each service and initialize:
+1. (CSR Only) Clone the repositories for each service and initialize:
 
     ```bash
     mkdir cymbal-bank
@@ -224,6 +225,36 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
     gcloud source repos clone $ledgerwriter_repository --project=$ledgerwriter_project
     gcloud source repos clone $transactionhistory_repository --project=$transactionhistory_project
     ```
+
+1. (GitHub Only) When using GitHub, clone the repositories for each service and initialize with the following commands.
+
+    ```bash
+    mkdir cymbal-bank
+    cd cymbal-bank
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$balancereader_repository.git
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$userservice_repository.git
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$frontend_repository.git
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$contacts_repository.git
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$ledgerwriter_repository.git
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$transactionhistory_repository.git
+    ```
+
+    > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, clone the repositories for each service and initialize with the following commands.
+
+    ```bash
+    mkdir cymbal-bank
+    cd cymbal-bank
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$balancereader_repository.git
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$userservice_repository.git
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$frontend_repository.git
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$contacts_repository.git
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$ledgerwriter_repository.git
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$transactionhistory_repository.git
+    ```
+
+    > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Copy terraform code for each service repository and replace backend bucket:
 
@@ -494,11 +525,27 @@ This stage will create the CI/CD pipeline for the service, and application speci
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
-1. Clone the repositories for each service and initialize:
+1. (CSR Only) Clone the repositories for each service and initialize:
 
     ```bash
     gcloud source repos clone $cymbalshop_infra_repo --project=$cymbalshop_project
     ```
+
+1. (GitHub Only) When using GitHub, clone the repository for the service and initialize with the following command.
+
+    ```bash
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$cymbalshop_infra_repo.git
+    ```
+
+    > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, clone the repository for the service and initialize with the following command.
+
+    ```bash
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$cymbalshop_infra_repo.git
+    ```
+
+    > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Copy terraform code for each service repository and replace backend bucket:
 
@@ -689,7 +736,7 @@ The steps below assume that you are checked out on the same level as `terraform-
         echo userservice_repository=$userservice_repository
         ```
 
-1. Add remote source repositories.
+1. (CSR Only) Add remote source repositories.
 
     ```bash
     git remote add frontend https://source.developers.google.com/p/$frontend_project/r/eab-cymbal-bank-frontend
@@ -699,6 +746,32 @@ The steps below assume that you are checked out on the same level as `terraform-
     git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/eab-cymbal-bank-ledger-transactionhistory
     git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/eab-cymbal-bank-ledger-balancereader
     ```
+
+1. (GitHub Only) When using GitHub, add the remote source repositories with the following commands.
+
+    ```bash
+    git remote add frontend https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-frontend.git
+    git remote add contacts https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-accounts-contacts.git
+    git remote add userservice https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-accounts-userservice.git
+    git remote add ledgerwriter https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-ledgerwriter.git
+    git remote add transactionhistory https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-transactionhistory.git
+    git remote add balancereader https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-balancereader.git
+    ```
+
+    > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, add the remote source repositories with the following commands.
+
+    ```bash
+    git remote add frontend https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-frontend.git
+    git remote add contacts https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-accounts-contacts.git
+    git remote add userservice https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-accounts-userservice.git
+    git remote add ledgerwriter https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-ledgerwriter.git
+    git remote add transactionhistory https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-transactionhistory.git
+    git remote add balancereader https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-balancereader.git
+    ```
+
+    > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Push `main` branch to each remote:
 
@@ -732,11 +805,27 @@ The steps below assume that you are checked out on the same level as `terraform-
     git checkout -b main
     ```
 
-1. Add the remote source repository, this repository will host your application source code:
+1. (CSR Only) Add the remote source repository, this repository will host your application source code:
 
     ```bash
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
+
+1. (GitHub Only) When using GitHub, add the remote source repository with the following command.
+
+    ```bash
+    git remote add origin https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-shop-cymbalshop.git
+    ```
+
+    > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, add the remote source repository with the following command.
+
+    ```bash
+    git remote add origin https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-shop-cymbalshop.git
+    ```
+
+    > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 
@@ -1029,11 +1118,27 @@ All services have common infrastructure under `envs/shared`.
     echo cymbalshop_project=$cymbalshop_project
     ```
 
-1. Add the remote source repository, this repository will host your application source code:
+1. (CSR Only) Add the remote source repository, this repository will host your application source code:
 
     ```bash
     git remote add google https://source.developers.google.com/p/$cymbalshop_project/r/eab-cymbal-shop-cymbalshop
     ```
+
+1. (GitHub Only) When using GitHub, add the remote source repository with the following command.
+
+    ```bash
+    git remote add origin https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-shop-cymbalshop.git
+    ```
+
+    > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, add the remote source repository with the following command.
+
+    ```bash
+    git remote add origin https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-shop-cymbalshop.git
+    ```
+
+    > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Overwrite the repository source code with the overlays defined in `examples/cymbal-shop`:
 
@@ -1135,7 +1240,7 @@ The steps below assume that you are checked out on the same level as `terraform-
     git commit -m "Override codebase with updated assets"
     ```
 
-1. Add remote source repositories.
+1. (CSR Only) Add remote source repositories.
 
     ```bash
     git remote add frontend https://source.developers.google.com/p/$frontend_project/r/eab-cymbal-bank-frontend
@@ -1145,6 +1250,32 @@ The steps below assume that you are checked out on the same level as `terraform-
     git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/eab-cymbal-bank-ledger-transactionhistory
     git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/eab-cymbal-bank-ledger-balancereader
     ```
+
+1. (GitHub Only) When using GitHub, add the remote source repositories with the following commands.
+
+    ```bash
+    git remote add frontend https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-frontend.git
+    git remote add contacts https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-accounts-contacts.git
+    git remote add userservice https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-accounts-userservice.git
+    git remote add ledgerwriter https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-ledgerwriter.git
+    git remote add transactionhistory https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-transactionhistory.git
+    git remote add balancereader https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-balancereader.git
+    ```
+
+    > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
+
+1. (GitLab Only) When using GitLab, add the remote source repositories with the following commands.
+
+    ```bash
+    git remote add frontend https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-frontend.git
+    git remote add contacts https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-accounts-contacts.git
+    git remote add userservice https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-accounts-userservice.git
+    git remote add ledgerwriter https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-ledgerwriter.git
+    git remote add transactionhistory https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-transactionhistory.git
+    git remote add balancereader https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-balancereader.git
+    ```
+
+    > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
 
 1. Push `main` branch to each remote:
 
