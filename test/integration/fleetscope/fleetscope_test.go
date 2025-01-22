@@ -30,7 +30,7 @@ import (
 
 // will create config-management-system
 func createConfigSyncNamespace(t *testing.T) (string, error) {
-	cmd := fmt.Sprintf("create ns config-management-system")
+	cmd := "create ns config-management-system"
 	args := strings.Fields(cmd)
 	kubectlCmd := shell.Command{
 		Command: "kubectl",
