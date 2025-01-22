@@ -28,16 +28,31 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
-// will create config-management-system
-// func createConfigSyncNamespace(t *testing.T) (string, error) {
-// 	cmd := "create ns config-management-system"
-// 	args := strings.Fields(cmd)
-// 	kubectlCmd := shell.Command{
-// 		Command: "kubectl",
-// 		Args:    args,
-// 	}
-// 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
-// }
+func retrieveNamespace(t *testing.T) (string, error) {
+	cmd := "get ns config-management-system"
+	args := strings.Fields(cmd)
+	kubectlCmd := shell.Command{
+		Command: "kubectl",
+		Args:    args,
+	}
+	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+}
+
+func configureConfigSyncNamespace(t *testing.T) (string, error) {
+	_, err := retrieveNamespace(t)
+	if err != nil {
+		cmd := "create ns config-management-system"
+		args := strings.Fields(cmd)
+		kubectlCmd := shell.Command{
+			Command: "kubectl",
+			Args:    args,
+		}
+		return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+	} else {
+		fmt.Println("Namespace already exists")
+		return "", err
+	}
+}
 
 // Create token credentials on config-management-system namespace
 func createTokenCredentials(t *testing.T, user string, token string) (string, error) {
@@ -52,12 +67,12 @@ func createTokenCredentials(t *testing.T, user string, token string) (string, er
 
 // To use config-sync with a gitlab token, the namespace and credentials (token) must exist before running fleetscope code
 func applyPreRequisites(t *testing.T, token string) error {
-	// _, err := createConfigSyncNamespace(t)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	_, err := configureConfigSyncNamespace(t)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	_, err := createTokenCredentials(t, "root", token)
+	_, err = createTokenCredentials(t, "root", token)
 	if err != nil {
 		t.Fatal(err)
 	}
