@@ -38,13 +38,13 @@ kubectl apply -f setup.yaml
 Then run a dummy job on team-a, on file `job-team-a.yaml`:
 
 ```bash
-kubectl apply -f job-team-a.yaml
+kubectl create -f job-team-a.yaml
 ```
 
 Then run a dummy job on team-b, on file `job-team-b.yaml`:
 
 ```bash
-kubectl apply -f job-team-a.yaml
+kubectl create -f job-team-b.yaml
 ```
 
 The jobs are 3 parallel pods that sleep for 3 seconds, they will request CPU, GPU and Storage, you can create multiple the commandns above multiple times to simulate teams deploying jobs in parallel and observe the ClusterQueue behaviour using `kubectl get clusterqueue cluster-queue -o wide`.
