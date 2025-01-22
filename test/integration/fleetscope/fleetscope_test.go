@@ -29,15 +29,15 @@ import (
 )
 
 // will create config-management-system
-func createConfigSyncNamespace(t *testing.T) (string, error) {
-	cmd := "create ns config-management-system"
-	args := strings.Fields(cmd)
-	kubectlCmd := shell.Command{
-		Command: "kubectl",
-		Args:    args,
-	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
-}
+// func createConfigSyncNamespace(t *testing.T) (string, error) {
+// 	cmd := "create ns config-management-system"
+// 	args := strings.Fields(cmd)
+// 	kubectlCmd := shell.Command{
+// 		Command: "kubectl",
+// 		Args:    args,
+// 	}
+// 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+// }
 
 // Create token credentials on config-management-system namespace
 func createTokenCredentials(t *testing.T, user string, token string) (string, error) {
@@ -52,12 +52,12 @@ func createTokenCredentials(t *testing.T, user string, token string) (string, er
 
 // To use config-sync with a gitlab token, the namespace and credentials (token) must exist before running fleetscope code
 func applyPreRequisites(t *testing.T, token string) error {
-	_, err := createConfigSyncNamespace(t)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// _, err := createConfigSyncNamespace(t)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
-	_, err = createTokenCredentials(t, "root", token)
+	_, err := createTokenCredentials(t, "root", token)
 	if err != nil {
 		t.Fatal(err)
 	}
