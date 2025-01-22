@@ -18,18 +18,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/shell"
-)
-
-const (
-	sleepBetweenRetries time.Duration = time.Duration(60) * time.Second
-	maxRetries          int           = 30
-	namespace                         = "cymbalshops-development"
-	service                           = "frontend-external"
 )
 
 func getLogs(t *testing.T) (string, error) {

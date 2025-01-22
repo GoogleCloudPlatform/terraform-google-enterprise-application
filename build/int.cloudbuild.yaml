@@ -209,7 +209,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestHelloWorldE2E --stage verify --verbose"]
     waitFor:
       - hello-world-app-deployment
-  
+
   - id: appinfra-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
