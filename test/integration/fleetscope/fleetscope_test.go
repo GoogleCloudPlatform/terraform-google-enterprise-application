@@ -23,9 +23,47 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
+
+// will create config-management-system
+func createConfigSyncNamespace(t *testing.T) (string, error) {
+	cmd := fmt.Sprintf("create ns config-management-system")
+	args := strings.Fields(cmd)
+	kubectlCmd := shell.Command{
+		Command: "kubectl",
+		Args:    args,
+	}
+	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+}
+
+// Create token credentials on config-management-system namespace
+func createTokenCredentials(t *testing.T, user string, token string) (string, error) {
+	cmd := fmt.Sprintf("create secret generic git-creds --namespace=config-management-system --from-literal=username=%s --from-literal=token=%s", user, token)
+	args := strings.Fields(cmd)
+	kubectlCmd := shell.Command{
+		Command: "kubectl",
+		Args:    args,
+	}
+	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+}
+
+// To use config-sync with a gitlab token, the namespace and credentials (token) must exist before running fleetscope code
+func applyPreRequisites(t *testing.T, token string) error {
+	_, err := createConfigSyncNamespace(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = createTokenCredentials(t, "root", token)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return err
+}
 
 func TestFleetscope(t *testing.T) {
 	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
@@ -38,6 +76,13 @@ func TestFleetscope(t *testing.T) {
 		"bucket": backend_bucket,
 	}
 
+	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
+	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
@@ -47,9 +92,29 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 			)
 
+			// retrieve cluster location and fleet membership from 2-multitenant
+			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
+			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
+			clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
+
+			// extract clusterName from fleet membership id
+			splitClusterMembership := strings.Split(clusterMembership, "/")
+			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
+
+			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+
+			err = applyPreRequisites(t, token)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			config_sync_url := fmt.Sprintf("%s/root/config-sync-%s.git", setup.GetStringOutput("gitlab_url"), envName)
+
 			vars := map[string]interface{}{
-				"remote_state_bucket": backend_bucket,
-				"namespace_ids":       setup.GetJsonOutput("teams").Value().(map[string]interface{}),
+				"remote_state_bucket":        backend_bucket,
+				"namespace_ids":              setup.GetJsonOutput("teams").Value().(map[string]interface{}),
+				"config_sync_secret_type":    "token",
+				"config_sync_repository_url": config_sync_url,
 			}
 
 			fleetscope := tft.NewTFBlueprintTest(t,

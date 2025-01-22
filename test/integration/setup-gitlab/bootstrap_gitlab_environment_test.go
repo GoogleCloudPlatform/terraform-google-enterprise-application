@@ -95,6 +95,11 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"eab-cymbal-shop-cymbalshop",
 	}
 
+	for _, envName := range testutils.EnvNames(t) {
+		repoConfig := fmt.Sprintf("config-sync-%s", envName)
+		repos = append(repos, repoConfig)
+	}
+
 	for _, repo := range repos {
 		p := &gitlab.CreateProjectOptions{
 			Name:                 gitlab.Ptr(repo),
