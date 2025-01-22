@@ -2,8 +2,6 @@
 
 You will setup two tenant teams where each team has its own namespace and each team creates Jobs that share global resources. You also configure Kueue to schedule the Jobs based on resource quotas that you define.
 
-To run this you must install queue
-
 ## Kueue installation
 
 Make sure the following conditions are met before installing:
@@ -53,6 +51,6 @@ The jobs are 3 parallel pods that sleep for 3 seconds, they will request CPU, GP
 
 ## Reference
 
-- Kueue <https://kueue.sigs.k8s.io/docs/>
-- keueue in gke intro <https://cloud.google.com/kubernetes-engine/docs/tutorials/kueue-intro>
-- <https://github.com/GoogleCloudPlatform/kubernetes-engine-samples>
+- [Kueue Documentation](https://kueue.sigs.k8s.io/docs/)
+- [Kueue in GKE Introduction](https://cloud.google.com/kubernetes-engine/docs/tutorials/kueue-intro)
+- [Kubernetes Engine Samples](https://github.com/GoogleCloudPlatform/kubernetes-engine-samples)
