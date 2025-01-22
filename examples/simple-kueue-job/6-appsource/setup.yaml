@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-a
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-b
+  labels:
+    team: "b"
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: default-flavor # if we don’t need to manage quotas for the different flavors of a resource separately, we use a ResourceFlavor without any labels or taints
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: cluster-queue
+spec:
+  namespaceSelector: {} # To allow workloads from all namespaces the empty selector is used {}
+  queueingStrategy: BestEffortFIFO # Workloads are ordered first by priority and then by .metadata.creationTimestamp - except that older Workloads that can’t be admitted will not block newer Workloads that fit in the available quota
+  resourceGroups:
+  - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage"]
+    flavors:
+    - name: "default-flavor"
+      resources:
+      # The sum of the CPU requests is less than or equal to 10
+      - name: "cpu"
+        nominalQuota: 10
+      # The sum of the memory requests is less than or equal to 10Gi
+      - name: "memory"
+        nominalQuota: 10Gi
+      # The sum of GPU requests is less than or equal to 10
+      - name: "nvidia.com/gpu"
+        nominalQuota: 10
+      # The sum of the storage used is less than or equal to 10Gi
+      - name: "ephemeral-storage"
+        nominalQuota: 10Gi
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  namespace: team-a # LocalQueue under team-a namespace
+  name: lq-team-a
+spec:
+  clusterQueue: cluster-queue
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  namespace: team-b # LocalQueue under team-b namespace
+  name: lq-team-b
+spec:
+  clusterQueue: cluster-queue

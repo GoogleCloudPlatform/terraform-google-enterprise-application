@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  namespace: team-a # Job under team-a namespace
-  generateName: sample-job-team-a-
+  namespace: team-b # Job under team-b namespace
+  generateName: sample-job-team-b-
   annotations:
-    kueue.x-k8s.io/queue-name: lq-team-a # Point to the LocalQueue
+    kueue.x-k8s.io/queue-name: lq-team-b # Point to the LocalQueue
 spec:
   ttlSecondsAfterFinished: 60 # Job will be deleted after 60 seconds
   parallelism: 3 # This Job will have 3 replicas running at the same time
