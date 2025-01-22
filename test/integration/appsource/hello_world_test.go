@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,6 +33,18 @@ import (
 )
 
 func TestSourceHelloWorld(t *testing.T) {
+
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+	gitUrl := setupOutput.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 
@@ -54,7 +67,7 @@ func TestSourceHelloWorld(t *testing.T) {
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
-		appRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/eab-%s-%s", projectID, appName, serviceName)
+		appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
 		t.Logf("source-repo: %s", appRepo)
 
 		tmpDirApp := t.TempDir()
@@ -100,7 +113,7 @@ func TestSourceHelloWorld(t *testing.T) {
 
 			gitAppRun("add", ".")
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
-			gitAppRun("push", "--all", "google", "-f")
+			gitAppRun("push", "google", "main")
 
 			lastCommit := gitApp.GetLatestCommit()
 			// filter builds triggered based on pushed commit sha
@@ -114,7 +127,7 @@ func TestSourceHelloWorld(t *testing.T) {
 						if retriesBuildTrigger%3 == 0 {
 							// force push to trigger build 1 more time
 							t.Logf("Force push again to try trigger build for commit %s", lastCommit)
-							gitAppRun("push", "--all", "google", "-f")
+							gitAppRun("push", "google", "main")
 						}
 						retriesBuildTrigger++
 						return true, nil
