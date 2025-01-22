@@ -20,9 +20,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/shell"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
 const (
@@ -42,6 +42,10 @@ func getLogs(t *testing.T) (string, error) {
 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
 }
 
+func connectToFleet(t *testing.T, clusterName string, location string, project string) {
+	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s --project=%s", clusterName, location, project)
+}
+
 func TestHelloWorldE2E(t *testing.T) {
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
 	// retrieve cluster location and fleet membership from 2-multitenant
@@ -53,7 +57,7 @@ func TestHelloWorldE2E(t *testing.T) {
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-	testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+	connectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 	t.Run("hello-world End-to-End Test", func(t *testing.T) {
 
 		logs, err := getLogs(t)
