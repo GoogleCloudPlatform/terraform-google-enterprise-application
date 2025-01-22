@@ -203,6 +203,13 @@ steps:
     waitFor:
       - cymbal-shop-app-deployment
 
+  - id: hello-world-e2e
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHelloWorldE2E --stage verify --verbose"]
+    waitFor:
+      - hello-world-app-deployment
+  
   - id: appinfra-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -214,6 +221,7 @@ steps:
     waitFor:
       - cymbal-bank-e2e
       - cymbal-shop-e2e
+      - hello-world-e2e
       - appinfra-verify
       - appfactory-verify
       - fleetscope-verify
