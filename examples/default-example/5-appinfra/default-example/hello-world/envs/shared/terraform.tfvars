@@ -23,11 +23,11 @@ buckets_force_destroy = "true"
 environment_names = ["development", "nonproduction", "production"]
 
 cloudbuildv2_repository_config = {
-  repo_type = "CSR"
+  repo_type = "GITLABv2"
   repositories = {
     "eab-default-example-hello-world" = {
       repository_name = "eab-default-example-hello-world"
-      repository_url  = ""
+      repository_url  = "https://gitlab.com/user/eab-default-example-hello-world.git"
     }
   }
 }

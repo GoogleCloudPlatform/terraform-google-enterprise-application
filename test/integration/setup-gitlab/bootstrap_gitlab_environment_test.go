@@ -85,6 +85,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"transactionhistory-i-r",
 		"userservice-i-r",
 		"cymbalshop-i-r",
+		"hello-world-i-r",
 		// 5-appinfra repositories
 		"eab-cymbal-bank-frontend",
 		"eab-cymbal-bank-accounts-contacts",
@@ -93,6 +94,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"eab-cymbal-bank-ledger-transactionhistory",
 		"eab-cymbal-bank-ledger-balancereader",
 		"eab-cymbal-shop-cymbalshop",
+		"eab-default-example-hello-world",
 	}
 
 	for _, repo := range repos {

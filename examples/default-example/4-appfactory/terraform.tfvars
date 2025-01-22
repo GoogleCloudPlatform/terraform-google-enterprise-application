@@ -40,39 +40,45 @@ applications = {
 }
 
 cloudbuildv2_repository_config = {
-  repo_type = "CSR"
+  repo_type = "GITLABv2"
   repositories = {
-    "balancereader" = {
-      repository_name = "balancereader"
-      repository_url  = ""
+    balancereader = {
+      repository_name = "balancereader-i-r"
+      repository_url  = "https://gitlab.com/user/balancereader-i-r.git"
     }
-    "contacts" = {
-      repository_name = "contacts"
-      repository_url  = ""
+    contacts = {
+      repository_name = "contacts-i-r"
+      repository_url  = "https://gitlab.com/user/contacts-i-r.git"
     }
-    "frontend" = {
-      repository_name = "frontend"
-      repository_url  = ""
+    frontend = {
+      repository_name = "frontend-i-r"
+      repository_url  = "https://gitlab.com/user/frontend-i-r.git"
     }
-    "ledgerwriter" = {
-      repository_name = "ledgerwriter"
-      repository_url  = ""
+    ledgerwriter = {
+      repository_name = "ledgerwriter-i-r"
+      repository_url  = "https://gitlab.com/user/ledgerwriter-i-r.git"
     }
-    "transactionhistory" = {
-      repository_name = "transactionhistory"
-      repository_url  = ""
+    transactionhistory = {
+      repository_name = "transactionhistory-i-r"
+      repository_url  = "https://gitlab.com/user/transactionhistory-i-r.git"
     }
-    "userservice" = {
-      repository_name = "userservice"
-      repository_url  = ""
+    userservice = {
+      repository_name = "userservice-i-r"
+      repository_url  = "https://gitlab.com/user/userservice-i-r.git"
     }
-    "cymbalshop" = {
-      repository_name = "cymbalshop"
-      repository_url  = ""
+    cymbalshop = {
+      repository_name = "cymbalshop-i-r"
+      repository_url  = "https://gitlab.com/user/cymbalshop-i-r.git"
     }
-    "hello-world" = {
+    hello-world = {
       repository_name = "hello-world"
-      repository_url  = ""
+      repository_url  = "https://gitlab.com/user/hello-world-i-r.git"
     }
   }
+  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
+  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+  # If you are using a self-hosted instance, you may change the URL below accordingly
+  gitlab_enterprise_host_uri = "https://gitlab.com"
 }
