@@ -38,6 +38,16 @@ func retrieveNamespace(t *testing.T) (string, error) {
 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
 }
 
+func retrieveCreds(t *testing.T) (string, error) {
+	cmd := "get secret git-creds --namespace=config-management-system --format=yaml"
+	args := strings.Fields(cmd)
+	kubectlCmd := shell.Command{
+		Command: "kubectl",
+		Args:    args,
+	}
+	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+}
+
 func configureConfigSyncNamespace(t *testing.T) (string, error) {
 	_, err := retrieveNamespace(t)
 	if err != nil {
@@ -56,13 +66,37 @@ func configureConfigSyncNamespace(t *testing.T) (string, error) {
 
 // Create token credentials on config-management-system namespace
 func createTokenCredentials(t *testing.T, user string, token string) (string, error) {
-	cmd := fmt.Sprintf("create secret generic git-creds --namespace=config-management-system --from-literal=username=%s --from-literal=token=%s", user, token)
-	args := strings.Fields(cmd)
-	kubectlCmd := shell.Command{
-		Command: "kubectl",
-		Args:    args,
+	_, err := retrieveCreds(t)
+	if err != nil {
+		cmd := fmt.Sprintf("create secret generic git-creds --namespace=config-management-system --from-literal=username=%s --from-literal=token=%s", user, token)
+		args := strings.Fields(cmd)
+		kubectlCmd := shell.Command{
+			Command: "kubectl",
+			Args:    args,
+		}
+		return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+	} else {
+		// delete existing credentials
+		delete_cmd := "delete secret git-creds --namespace=config-management-system"
+		delete_cmd_args := strings.Fields(delete_cmd)
+		delete_shell_cmd := shell.Command{
+			Command: "kubectl",
+			Args:    delete_cmd_args,
+		}
+		_, err = shell.RunCommandAndGetStdOutE(t, delete_shell_cmd)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// create new credentials using token
+		cmd := fmt.Sprintf("create secret generic git-creds --namespace=config-management-system --from-literal=username=%s --from-literal=token=%s", user, token)
+		args := strings.Fields(cmd)
+		kubectlCmd := shell.Command{
+			Command: "kubectl",
+			Args:    args,
+		}
+		return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
 	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+
 }
 
 // To use config-sync with a gitlab token, the namespace and credentials (token) must exist before running fleetscope code
