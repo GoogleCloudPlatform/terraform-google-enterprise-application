@@ -39,7 +39,7 @@ func retrieveNamespace(t *testing.T) (string, error) {
 }
 
 func retrieveCreds(t *testing.T) (string, error) {
-	cmd := "get secret git-creds --namespace=config-management-system --format=yaml"
+	cmd := "get secret git-creds --namespace=config-management-system --output=yaml"
 	args := strings.Fields(cmd)
 	kubectlCmd := shell.Command{
 		Command: "kubectl",
