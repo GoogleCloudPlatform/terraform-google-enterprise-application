@@ -23,41 +23,24 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
-	"github.com/gruntwork-io/terratest/modules/shell"
+	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
-func retrieveNamespace(t *testing.T) (string, error) {
-	cmd := "get ns config-management-system"
-	args := strings.Fields(cmd)
-	kubectlCmd := shell.Command{
-		Command: "kubectl",
-		Args:    args,
-	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+func retrieveNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
+	return k8s.RunKubectlAndGetOutputE(t, options, "get", "ns", "config-management-system", "-o", "json")
 }
 
-func retrieveCreds(t *testing.T) (string, error) {
-	cmd := "get secret git-creds --namespace=config-management-system --output=yaml"
-	args := strings.Fields(cmd)
-	kubectlCmd := shell.Command{
-		Command: "kubectl",
-		Args:    args,
-	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+func retrieveCreds(t *testing.T, options *k8s.KubectlOptions) (string, error) {
+	return k8s.RunKubectlAndGetOutputE(t, options, "get", "secret", "git-creds", "--namespace=config-management-system", "--output=yaml")
 }
 
-func configureConfigSyncNamespace(t *testing.T) (string, error) {
-	_, err := retrieveNamespace(t)
+func configureConfigSyncNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
+	_, err := retrieveNamespace(t, options)
+	// namespace does not exist
 	if err != nil {
-		cmd := "create ns config-management-system"
-		args := strings.Fields(cmd)
-		kubectlCmd := shell.Command{
-			Command: "kubectl",
-			Args:    args,
-		}
-		return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+		return k8s.RunKubectlAndGetOutputE(t, options, "create", "ns", "config-management-system")
 	} else {
 		fmt.Println("Namespace already exists")
 		return "", err
@@ -65,48 +48,30 @@ func configureConfigSyncNamespace(t *testing.T) (string, error) {
 }
 
 // Create token credentials on config-management-system namespace
-func createTokenCredentials(t *testing.T, user string, token string) (string, error) {
-	_, err := retrieveCreds(t)
+func createTokenCredentials(t *testing.T, options *k8s.KubectlOptions, user string, token string) (string, error) {
+	_, err := retrieveCreds(t, options)
 	if err != nil {
-		cmd := fmt.Sprintf("create secret generic git-creds --namespace=config-management-system --from-literal=username=%s --from-literal=token=%s", user, token)
-		args := strings.Fields(cmd)
-		kubectlCmd := shell.Command{
-			Command: "kubectl",
-			Args:    args,
-		}
-		return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+		return k8s.RunKubectlAndGetOutputE(t, options, "create", "secret", "generic", "git-creds", "--namespace=config-management-system", fmt.Sprintf("--from-literal=username=%s", user), fmt.Sprintf("--from-literal=token=%s", token))
 	} else {
 		// delete existing credentials
-		delete_cmd := "delete secret git-creds --namespace=config-management-system"
-		delete_cmd_args := strings.Fields(delete_cmd)
-		delete_shell_cmd := shell.Command{
-			Command: "kubectl",
-			Args:    delete_cmd_args,
-		}
-		_, err = shell.RunCommandAndGetStdOutE(t, delete_shell_cmd)
+		_, err = k8s.RunKubectlAndGetOutputE(t, options, "delete", "secret", "git-creds", "--namespace=config-management-system")
 		if err != nil {
 			t.Fatal(err)
 		}
 		// create new credentials using token
-		cmd := fmt.Sprintf("create secret generic git-creds --namespace=config-management-system --from-literal=username=%s --from-literal=token=%s", user, token)
-		args := strings.Fields(cmd)
-		kubectlCmd := shell.Command{
-			Command: "kubectl",
-			Args:    args,
-		}
-		return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+		return k8s.RunKubectlAndGetOutputE(t, options, "create", "secret", "generic", "git-creds", "--namespace=config-management-system", fmt.Sprintf("--from-literal=username=%s", user), fmt.Sprintf("--from-literal=token=%s", token))
 	}
 
 }
 
 // To use config-sync with a gitlab token, the namespace and credentials (token) must exist before running fleetscope code
-func applyPreRequisites(t *testing.T, token string) error {
-	_, err := configureConfigSyncNamespace(t)
+func applyPreRequisites(t *testing.T, options *k8s.KubectlOptions, token string) error {
+	_, err := configureConfigSyncNamespace(t, options)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = createTokenCredentials(t, "root", token)
+	_, err = createTokenCredentials(t, options, "root", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -170,7 +135,8 @@ func TestFleetscope(t *testing.T) {
 			)
 
 			fleetscope.DefineApply(func(assert *assert.Assertions) {
-				err := applyPreRequisites(t, token)
+				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("gke_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+				err := applyPreRequisites(t, k8sOpts, token)
 				if err != nil {
 					t.Fatal(err)
 				}
