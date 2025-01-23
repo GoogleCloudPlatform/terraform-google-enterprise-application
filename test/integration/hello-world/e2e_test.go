@@ -15,7 +15,6 @@
 package helloworld_e2e
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -57,6 +56,8 @@ func TestHelloWorldE2E(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		fmt.Println(logs)
+		if !strings.Contains(logs, "Hello world!") {
+			t.Errorf("expected logs to contain 'Hello world!', but it did not")
+		}
 	})
 }
