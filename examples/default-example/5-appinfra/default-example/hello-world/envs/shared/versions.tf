@@ -14,26 +14,10 @@
  * limitations under the License.
  */
 
-apps = {
-  "cymbal-bank" : {
-    "ip_address_names" : [
-      "frontend-ip",
-    ]
-    "certificates" : {
-      "frontend-example-com" : ["frontend.example.com"]
-    }
-    "acronym" = "cb",
-  }
-  "cymbal-shop" : {
-    "ip_address_names" : [
-      "cymbal-shop-frontend-ip",
-    ]
-    "certificates" : {
-      "cymbal-shop-frontend-example-com" : ["cymbal-shop.frontend.example.com"]
-    }
-    "acronym" = "cs",
-  }
-  "default-example" : {
-    "acronym" = "de",
+terraform {
+  required_version = ">= 1.3"
+
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:appinfra/hello-world/shared/v0.3.0"
   }
 }

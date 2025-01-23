@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-apps = {
-  "cymbal-bank" : {
-    "ip_address_names" : [
-      "frontend-ip",
-    ]
-    "certificates" : {
-      "frontend-example-com" : ["frontend.example.com"]
-    }
-    "acronym" = "cb",
-  }
-  "cymbal-shop" : {
-    "ip_address_names" : [
-      "cymbal-shop-frontend-ip",
-    ]
-    "certificates" : {
-      "cymbal-shop-frontend-example-com" : ["cymbal-shop.frontend.example.com"]
-    }
-    "acronym" = "cs",
-  }
-  "default-example" : {
-    "acronym" = "de",
-  }
+output "clouddeploy_targets_names" {
+  description = "Cloud deploy targets names."
+  value       = module.app.clouddeploy_targets_names
+}
+
+output "service_repository_name" {
+  description = "The Source Repository name."
+  value       = module.app.service_repository_name
+}
+
+output "service_repository_project_id" {
+  description = "The Source Repository project id."
+  value       = module.app.service_repository_project_id
 }
