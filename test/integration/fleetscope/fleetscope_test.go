@@ -152,11 +152,6 @@ func TestFleetscope(t *testing.T) {
 
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
-			err = applyPreRequisites(t, token)
-			if err != nil {
-				t.Fatal(err)
-			}
-
 			config_sync_url := fmt.Sprintf("%s/root/config-sync-%s.git", setup.GetStringOutput("gitlab_url"), envName)
 
 			vars := map[string]interface{}{
@@ -173,6 +168,14 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 				tft.WithParallelism(1),
 			)
+
+			fleetscope.DefineApply(func(assert *assert.Assertions) {
+				err := applyPreRequisites(t, token)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fleetscope.DefaultApply(assert)
+			})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
