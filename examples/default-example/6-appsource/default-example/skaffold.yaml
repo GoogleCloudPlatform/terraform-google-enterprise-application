@@ -12,17 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.22 as builder
-WORKDIR /code
-COPY main.go .
-COPY go.mod .
-# `skaffold debug` sets SKAFFOLD_GO_GCFLAGS to disable compiler optimizations
-ARG SKAFFOLD_GO_GCFLAGS
-RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -trimpath -o /app main.go
-
-FROM alpine:3
-# Define GOTRACEBACK to mark this container as using the Go language runtime
-# for `skaffold debug` (https://skaffold.dev/docs/workflows/debug/).
-ENV GOTRACEBACK=single
-CMD ["./app"]
-COPY --from=builder /app .
+apiVersion: skaffold/v4beta10
+kind: Config
+build:
+  tagPolicy:
+    gitCommit:
+      variant: CommitSha
+  artifacts:
+  - image: skaffold-example
+    platforms: ["linux/arm64", "linux/amd64"]
+    custom:
+      buildCommand: |
+        docker buildx build --platform=$PLATFORMS --tag=$IMAGE --push .
+manifests:
+  rawYaml:
+  - k8s-pod.yaml
+profiles:
+- name: development
+  manifests:
+    rawYaml:
+    - k8s-pod-arm64.yaml
+- name: staging
+- name: production

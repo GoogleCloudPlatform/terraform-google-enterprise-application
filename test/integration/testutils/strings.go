@@ -34,6 +34,9 @@ var (
 		"cymbal-shop": {
 			"cymbalshop",
 		},
+		"default-example": {
+			"hello-world",
+		},
 	}
 
 	ServicesWithEnvProject = map[string][]string{
