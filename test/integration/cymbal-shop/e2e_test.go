@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/shell"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 
 	"github.com/gruntwork-io/terratest/modules/retry"
 )
@@ -46,9 +46,6 @@ func getServiceIpAddress(t *testing.T, serviceName string, namespace string) (st
 	}
 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
 }
-func connectToFleet(t *testing.T, clusterName string, location string, project string) {
-	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s --project=%s", clusterName, location, project)
-}
 
 func TestCymbalShopE2E(t *testing.T) {
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
@@ -61,7 +58,7 @@ func TestCymbalShopE2E(t *testing.T) {
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-	connectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+	testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 	t.Run("Cymbal-Shop End-to-End Test", func(t *testing.T) {
 		jar, err := cookiejar.New(nil)
 		if err != nil {

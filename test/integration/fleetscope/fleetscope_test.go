@@ -23,9 +23,61 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
+
+func retrieveNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
+	return k8s.RunKubectlAndGetOutputE(t, options, "get", "ns", "config-management-system", "-o", "json")
+}
+
+func retrieveCreds(t *testing.T, options *k8s.KubectlOptions) (string, error) {
+	return k8s.RunKubectlAndGetOutputE(t, options, "get", "secret", "git-creds", "--namespace=config-management-system", "--output=yaml")
+}
+
+func configureConfigSyncNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
+	_, err := retrieveNamespace(t, options)
+	// namespace does not exist
+	if err != nil {
+		return k8s.RunKubectlAndGetOutputE(t, options, "create", "ns", "config-management-system")
+	} else {
+		fmt.Println("Namespace already exists")
+		return "", err
+	}
+}
+
+// Create token credentials on config-management-system namespace
+func createTokenCredentials(t *testing.T, options *k8s.KubectlOptions, user string, token string) (string, error) {
+	_, err := retrieveCreds(t, options)
+	if err != nil {
+		return k8s.RunKubectlAndGetOutputE(t, options, "create", "secret", "generic", "git-creds", "--namespace=config-management-system", fmt.Sprintf("--from-literal=username=%s", user), fmt.Sprintf("--from-literal=token=%s", token))
+	} else {
+		// delete existing credentials
+		_, err = k8s.RunKubectlAndGetOutputE(t, options, "delete", "secret", "git-creds", "--namespace=config-management-system")
+		if err != nil {
+			t.Fatal(err)
+		}
+		// create new credentials using token
+		return k8s.RunKubectlAndGetOutputE(t, options, "create", "secret", "generic", "git-creds", "--namespace=config-management-system", fmt.Sprintf("--from-literal=username=%s", user), fmt.Sprintf("--from-literal=token=%s", token))
+	}
+
+}
+
+// To use config-sync with a gitlab token, the namespace and credentials (token) must exist before running fleetscope code
+func applyPreRequisites(t *testing.T, options *k8s.KubectlOptions, token string) error {
+	_, err := configureConfigSyncNamespace(t, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = createTokenCredentials(t, options, "root", token)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return err
+}
 
 func TestFleetscope(t *testing.T) {
 	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
@@ -38,6 +90,13 @@ func TestFleetscope(t *testing.T) {
 		"bucket": backend_bucket,
 	}
 
+	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
+	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
@@ -47,9 +106,24 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 			)
 
+			// retrieve cluster location and fleet membership from 2-multitenant
+			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
+			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
+			clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
+
+			// extract clusterName from fleet membership id
+			splitClusterMembership := strings.Split(clusterMembership, "/")
+			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
+
+			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+
+			config_sync_url := fmt.Sprintf("%s/root/config-sync-%s.git", setup.GetStringOutput("gitlab_url"), envName)
+
 			vars := map[string]interface{}{
-				"remote_state_bucket": backend_bucket,
-				"namespace_ids":       setup.GetJsonOutput("teams").Value().(map[string]interface{}),
+				"remote_state_bucket":        backend_bucket,
+				"namespace_ids":              setup.GetJsonOutput("teams").Value().(map[string]interface{}),
+				"config_sync_secret_type":    "token",
+				"config_sync_repository_url": config_sync_url,
 			}
 
 			fleetscope := tft.NewTFBlueprintTest(t,
@@ -60,6 +134,15 @@ func TestFleetscope(t *testing.T) {
 				tft.WithParallelism(1),
 			)
 
+			fleetscope.DefineApply(func(assert *assert.Assertions) {
+				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+				err := applyPreRequisites(t, k8sOpts, token)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fleetscope.DefaultApply(assert)
+			})
+
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
 
@@ -68,23 +151,6 @@ func TestFleetscope(t *testing.T) {
 				clusterMembershipIds := testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 				clusterProjectNumber := multitenant.GetStringOutput("cluster_project_number")
-
-				// Service Account
-				rootReconcilerRoles := []string{"roles/source.reader"}
-				rootReconcilerSa := fmt.Sprintf("root-reconciler@%s.iam.gserviceaccount.com", clusterProjectID)
-				iamReconcilerFilter := fmt.Sprintf("bindings.members:'serviceAccount:%s'", rootReconcilerSa)
-				iamReconcilerCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamReconcilerFilter, "--format", "json"})
-				projectPolicyOp := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", clusterProjectID), iamReconcilerCommonArgs).Array()
-				saReconcilerListRoles := testutils.GetResultFieldStrSlice(projectPolicyOp, "bindings.role")
-				assert.Subset(saReconcilerListRoles, rootReconcilerRoles, fmt.Sprintf("service account %s should have \"roles/source.reader\" project level role", rootReconcilerSa))
-
-				svcRoles := []string{"roles/iam.workloadIdentityUser"}
-				svcSa := fmt.Sprintf("%s.svc.id.goog[config-management-system/root-reconciler]", clusterProjectID)
-				iamSvcFilter := fmt.Sprintf("bindings.members:serviceAccount:'%s'", svcSa)
-				iamSvcCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", iamSvcFilter, "--format", "json"})
-				svcPolicyOp := gcloud.Run(t, fmt.Sprintf("iam service-accounts get-iam-policy %s --project %s", rootReconcilerSa, clusterProjectID), iamSvcCommonArgs).Array()
-				saSvcListRoles := testutils.GetResultFieldStrSlice(svcPolicyOp, "bindings.role")
-				assert.Subset(saSvcListRoles, svcRoles, fmt.Sprintf("service account %s should have \"roles/iam.workloadIdentityUser\" project level role", svcSa))
 
 				membershipNames := []string{}
 				for _, region := range clusterRegions {
@@ -126,10 +192,9 @@ func TestFleetscope(t *testing.T) {
 								membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", fleetProjectNumber, region, envName)
 								configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
 
-								assert.Equal("gcpserviceaccount", gkeFeatureOp.Get(configmanagementPath+".configSync.git.secretType").String(), fmt.Sprintf("Hub Feature %s should have git secret type equal to gcpserviceaccount", membershipName))
+								assert.Equal("token", gkeFeatureOp.Get(configmanagementPath+".configSync.git.secretType").String(), fmt.Sprintf("Hub Feature %s should have git secret type equal to 'token'", membershipName))
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 								assert.Equal("1.19.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
-								assert.Equal(rootReconcilerSa, gkeFeatureOp.Get(configmanagementPath+".configSync.git.gcpServiceAccountEmail").String(), fmt.Sprintf("Hub Feature %s should have git service account type equal to %s", membershipName, rootReconcilerSa))
 							}
 						}
 					case "policycontroller":
