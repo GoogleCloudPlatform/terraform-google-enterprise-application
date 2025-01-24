@@ -135,7 +135,7 @@ func TestFleetscope(t *testing.T) {
 			)
 
 			fleetscope.DefineApply(func(assert *assert.Assertions) {
-				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("gke_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 				err := applyPreRequisites(t, k8sOpts, token)
 				if err != nil {
 					t.Fatal(err)
