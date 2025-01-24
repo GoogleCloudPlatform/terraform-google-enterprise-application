@@ -40,6 +40,7 @@ module "multitenant_infra" {
   cluster_subnetworks    = module.vpc.subnets_self_links
   network_project_id     = var.project_id
   env                    = local.env
+  cluster_type           = "AUTOPILOT"
   create_cluster_project = false
   # ignore below vars because we are reusing an existing project
   org_id          = null
