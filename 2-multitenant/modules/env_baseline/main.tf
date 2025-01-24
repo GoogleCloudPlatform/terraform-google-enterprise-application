@@ -271,7 +271,7 @@ module "gke-autopilot" {
   region              = each.value.region
   network_project_id  = regex(local.projects_re, each.value.id)[0]
   network             = regex(local.networks_re, each.value.network)[0]
-  subnetwork          = each.value.name
+  subnetwork          = regex(local.subnetworks_re, local.subnets[each.key])[0]
   ip_range_pods       = each.value.secondary_ip_range[0].range_name
   ip_range_services   = each.value.secondary_ip_range[1].range_name
   release_channel     = var.cluster_release_channel
