@@ -38,7 +38,7 @@ steps:
     env:
       - 'TEAM=$_TEAM'
   - name: gcr.io/cloud-builders/gcloud
-    args: 
+    args:
       - "deploy"
       - "releases"
       - "create"

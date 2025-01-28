@@ -43,7 +43,7 @@ steps:
       - 'SERVICE=$_SERVICE'
   - name: gcr.io/cloud-builders/gcloud
     id: trigger-release
-    args: 
+    args:
       - "deploy"
       - "releases"
       - "create"

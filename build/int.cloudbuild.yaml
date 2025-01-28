@@ -38,7 +38,7 @@ steps:
       ]
     waitFor:
       - prepare
-  
+
   - id: vpc-sc
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -282,7 +282,7 @@ steps:
       ]
     waitFor:
       - multitenant-teardown
-  
+
   - id: vpcsc-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:

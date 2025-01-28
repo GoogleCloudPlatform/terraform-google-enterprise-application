@@ -24,121 +24,121 @@ locals {
   sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
 
   cicd_apps = {
-  "contacts" = {
-    application_name = "cymbal-bank"
-    service_name     = "contacts"
-    team_name        = "accounts"
-    repo_branch      = "main"
-    cloudbuildv2_repository_config = {
-      repo_type = "GITLABv2"
-      repositories = {
-        "eab-cymbal-bank-accounts-contacts" = {
-          repository_name = "eab-cymbal-bank-accounts-contacts"
-          repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-contacts.git"
+    "contacts" = {
+      application_name = "cymbal-bank"
+      service_name     = "contacts"
+      team_name        = "accounts"
+      repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "GITLABv2"
+        repositories = {
+          "eab-cymbal-bank-accounts-contacts" = {
+            repository_name = "eab-cymbal-bank-accounts-contacts"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-contacts.git"
+          }
         }
+        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+        gitlab_enterprise_host_uri                  = "https://gitlab.com"
       }
-      gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-      gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-      gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-      gitlab_enterprise_host_uri = "https://gitlab.com"
-    }
-  },
-  "userservice" = {
-    application_name = "cymbal-bank"
-    service_name     = "userservice"
-    team_name        = "accounts"
-    repo_branch      = "main"
-    cloudbuildv2_repository_config = {
-      repo_type = "GITLABv2"
-      repositories = {
-        "eab-cymbal-bank-accounts-userservice" = {
-          repository_name = "eab-cymbal-bank-accounts-userservice"
-          repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-userservice.git"
+    },
+    "userservice" = {
+      application_name = "cymbal-bank"
+      service_name     = "userservice"
+      team_name        = "accounts"
+      repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "GITLABv2"
+        repositories = {
+          "eab-cymbal-bank-accounts-userservice" = {
+            repository_name = "eab-cymbal-bank-accounts-userservice"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-userservice.git"
+          }
         }
+        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+        gitlab_enterprise_host_uri                  = "https://gitlab.com"
       }
-      gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-      gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-      gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-      gitlab_enterprise_host_uri = "https://gitlab.com"
-    }
-  },
-  "frontend" = {
-    application_name = "cymbal-bank"
-    service_name     = "frontend"
-    team_name        = "frontend"
-    repo_branch      = "main"
-    cloudbuildv2_repository_config = {
-      repo_type = "GITLABv2"
-      repositories = {
-        "eab-cymbal-bank-frontend" = {
-          repository_name = "eab-cymbal-bank-frontend"
-          repository_url  = "https://gitlab.com/user/eab-cymbal-bank-frontend.git"
+    },
+    "frontend" = {
+      application_name = "cymbal-bank"
+      service_name     = "frontend"
+      team_name        = "frontend"
+      repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "GITLABv2"
+        repositories = {
+          "eab-cymbal-bank-frontend" = {
+            repository_name = "eab-cymbal-bank-frontend"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-frontend.git"
+          }
         }
+        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+        gitlab_enterprise_host_uri                  = "https://gitlab.com"
       }
-      gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-      gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-      gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-      gitlab_enterprise_host_uri = "https://gitlab.com"
-    }
-  },
-  "balancereader" = {
-    application_name = "cymbal-bank"
-    service_name     = "balancereader"
-    team_name        = "ledger"
-    repo_branch      = "main"
-    cloudbuildv2_repository_config = {
-      repo_type = "GITLABv2"
-      repositories = {
-        "eab-cymbal-bank-ledger-balancereader" = {
-          repository_name = "eab-cymbal-bank-ledger-balancereader"
-          repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-balancereader.git"
+    },
+    "balancereader" = {
+      application_name = "cymbal-bank"
+      service_name     = "balancereader"
+      team_name        = "ledger"
+      repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "GITLABv2"
+        repositories = {
+          "eab-cymbal-bank-ledger-balancereader" = {
+            repository_name = "eab-cymbal-bank-ledger-balancereader"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-balancereader.git"
+          }
         }
+        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+        gitlab_enterprise_host_uri                  = "https://gitlab.com"
       }
-      gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-      gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-      gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-      gitlab_enterprise_host_uri = "https://gitlab.com"
-    }
-  },
-  "ledgerwriter" = {
-    application_name = "cymbal-bank"
-    service_name     = "ledgerwriter"
-    team_name        = "ledger"
-    repo_branch      = "main"
-    cloudbuildv2_repository_config = {
-      repo_type = "GITLABv2"
-      repositories = {
-        "eab-cymbal-bank-ledger-ledgerwriter" = {
-          repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
-          repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-ledgerwriter.git"
+    },
+    "ledgerwriter" = {
+      application_name = "cymbal-bank"
+      service_name     = "ledgerwriter"
+      team_name        = "ledger"
+      repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "GITLABv2"
+        repositories = {
+          "eab-cymbal-bank-ledger-ledgerwriter" = {
+            repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-ledgerwriter.git"
+          }
         }
+        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+        gitlab_enterprise_host_uri                  = "https://gitlab.com"
       }
-      gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-      gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-      gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-      gitlab_enterprise_host_uri = "https://gitlab.com"
-    }
-  },
-  "transactionhistory" = {
-    application_name = "cymbal-bank"
-    service_name     = "transactionhistory"
-    team_name        = "ledger"
-    repo_branch      = "main"
-    cloudbuildv2_repository_config = {
-      repo_type = "GITLABv2"
-      repositories = {
-        "eab-cymbal-bank-ledger-transactionhistory" = {
-          repository_name = "eab-cymbal-bank-ledger-transactionhistory"
-          repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-transactionhistory.git"
+    },
+    "transactionhistory" = {
+      application_name = "cymbal-bank"
+      service_name     = "transactionhistory"
+      team_name        = "ledger"
+      repo_branch      = "main"
+      cloudbuildv2_repository_config = {
+        repo_type = "GITLABv2"
+        repositories = {
+          "eab-cymbal-bank-ledger-transactionhistory" = {
+            repository_name = "eab-cymbal-bank-ledger-transactionhistory"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-transactionhistory.git"
+          }
         }
+        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+        gitlab_enterprise_host_uri                  = "https://gitlab.com"
       }
-      gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-      gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-      gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-      gitlab_enterprise_host_uri = "https://gitlab.com"
-    }
-  },
-}
+    },
+  }
 }
 
 module "cicd" {

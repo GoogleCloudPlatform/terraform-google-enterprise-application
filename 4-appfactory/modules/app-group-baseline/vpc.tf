@@ -141,10 +141,10 @@ resource "google_compute_router_nat" "nat_external_addresses" {
   count                              = var.create_admin_project ? 1 : 0
   name                               = "rn-${module.vpc[0].network_name}-${var.trigger_location}-egress"
   project                            = module.app_admin_project[0].project_id
-  router                             = google_compute_router.nat_router.name
+  router                             = google_compute_router.nat_router[0].name
   region                             = var.trigger_location
   nat_ip_allocate_option             = "MANUAL_ONLY"
-  nat_ips                            = google_compute_address.nat_external_addresses.*.self_link
+  nat_ips                            = google_compute_address.nat_external_addresses[*].self_link
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 
   log_config {
@@ -160,7 +160,7 @@ resource "google_compute_instance" "default" {
   project      = module.app_admin_project[0].project_id
   zone         = var.trigger_location
 
-  tags = [google_compute_router_nat.nat_external_addresses.name]
+  tags = [google_compute_router_nat.nat_external_addresses[0].name]
 
   boot_disk {
     initialize_params {
@@ -196,7 +196,7 @@ resource "google_compute_route" "instance_router_1" {
   project           = module.app_admin_project[0].project_id
   network           = module.vpc[0].network_self_link
   dest_range        = "0.0.0.0/1"
-  next_hop_instance = google_compute_instance.default.id
+  next_hop_instance = google_compute_instance.default[0].id
 }
 
 resource "google_compute_route" "instance_router_2" {
@@ -205,5 +205,5 @@ resource "google_compute_route" "instance_router_2" {
   project           = module.app_admin_project[0].project_id
   network           = module.vpc[0].network_self_link
   dest_range        = "128.0.0.0/1"
-  next_hop_instance = google_compute_instance.default.id
+  next_hop_instance = google_compute_instance.default[0].id
 }

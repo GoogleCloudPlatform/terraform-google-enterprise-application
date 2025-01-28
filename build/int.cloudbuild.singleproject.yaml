@@ -36,7 +36,7 @@ steps:
         "-c",
         "cft test run TestBootstrapGitlabVM --stage verify --verbose",
       ]
-  
+
   - id: vpc-sc
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -47,6 +47,8 @@ steps:
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
+      - "access_level_members=serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
+
   - id: single-project-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -96,7 +98,7 @@ steps:
         "-c",
         "cft test run TestStandaloneSingleProjectExample --stage teardown --verbose",
       ]
-  
+
   - id: vpcsc-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:

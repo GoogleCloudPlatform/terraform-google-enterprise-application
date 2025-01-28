@@ -16,7 +16,9 @@ package vpcsc
 
 import (
 	"fmt"
+	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -31,6 +33,7 @@ func TestVPCSC(t *testing.T) {
 	projectNumber := temp.GetTFSetupStringOutput("project_number")
 	serviceAccount := temp.GetTFSetupStringOutput("sa_email")
 	singleProject, _ := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
+	addAccessLevelMembers := strings.Split(os.Getenv("access_level_members"), ",")
 
 	accessLevelMembers := []string{
 		fmt.Sprintf("serviceAccount:%s@cloudbuild.gserviceaccount.com", projectNumber),
@@ -42,6 +45,8 @@ func TestVPCSC(t *testing.T) {
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
 	}
+	accessLevelMembers = append(accessLevelMembers, addAccessLevelMembers...)
+
 	vars := map[string]interface{}{
 		"access_level_members": accessLevelMembers,
 		"project_id":           projectID,

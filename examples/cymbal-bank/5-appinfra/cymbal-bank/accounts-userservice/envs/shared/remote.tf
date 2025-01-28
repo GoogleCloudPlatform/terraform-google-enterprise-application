@@ -25,7 +25,7 @@ locals {
     )
   )
   app_admin_project = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.userservice"].app_admin_project_id
-  network_id        = data.terraform_remote_state.outputs.app-group["cymbal-bank.userservice"].appfactory.network_id
+  network_id        = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.userservice"].network_id
 }
 
 data "terraform_remote_state" "multitenant" {
