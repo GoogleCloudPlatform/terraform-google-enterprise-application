@@ -23,6 +23,13 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | billing\_account | n/a |
 | common\_folder\_id | n/a |
 | envs | n/a |
+| gitlab\_instance\_name | n/a |
+| gitlab\_instance\_zone | n/a |
+| gitlab\_pat\_secret\_name | n/a |
+| gitlab\_project\_number | n/a |
+| gitlab\_secret\_project | n/a |
+| gitlab\_url | n/a |
+| gitlab\_webhook\_secret\_id | n/a |
 | org\_id | n/a |
 | project\_id | n/a |
 | project\_number | n/a |

@@ -53,8 +53,8 @@ func TestAppfactory(t *testing.T) {
 	}
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"
-	// use combined multitenat tfvars - will test cymbal-bank and cymbal-shop
-	from := "../../../examples/multitenant-applications/4-appfactory"
+	// use combined multitenant tfvars - will test cymbal-bank, cymbal-shop and hello-world
+	from := "../../../examples/default-example/4-appfactory"
 	err := cp.Copy(from, appFactoryPath)
 	if err != nil {
 		t.Fatal(err)
@@ -139,16 +139,7 @@ func TestAppfactory(t *testing.T) {
 
 					// check app infra repo
 					repositoryName := appData.Get("app_infra_repository_name").String()
-					repoURL := fmt.Sprintf("https://source.developers.google.com/p/%s/r/%s", adminProjectID, repositoryName)
-					repoOP := gcloud.Runf(t, "source repos describe %s --project %s", repositoryName, adminProjectID)
-					assert.Equal(repoURL, repoOP.Get("url").String(), "source repo %s should have url %s", repositoryName, repoURL)
-
-					// check workspace SA access to repo
 					repoSa := fmt.Sprintf("serviceAccount:tf-cb-%s@%s.iam.gserviceaccount.com", repositoryName, adminProjectID)
-					repoIamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", "bindings.role:roles/viewer", "--format", "json"})
-					repoIamPolicyOp := gcloud.Run(t, fmt.Sprintf("source repos get-iam-policy %s --project %s", repositoryName, adminProjectID), repoIamOpts).Array()[0]
-					listMembers := utils.GetResultStrSlice(repoIamPolicyOp.Get("bindings.members").Array())
-					assert.Contains(listMembers, repoSa, fmt.Sprintf("Service Account %s should have role roles/viewer on repo %s", repoSa, repositoryName))
 
 					// check cloudbuild workspace
 					// buckets
@@ -199,7 +190,10 @@ func TestAppfactory(t *testing.T) {
 						buildTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", triggerID, adminProjectID, triggerRegion)
 						filename := buildTrigger.Get("filename").String()
 						assert.Equal(trigger.file, filename, fmt.Sprintf("The filename for the trigger should be %s but got %s.", trigger.file, filename))
-						assert.Equal(repoName, buildTrigger.Get("triggerTemplate.repoName").String(), "the trigger should use the repo %s", repoName)
+						cbConnectionRepo := buildTrigger.Get("repositoryEventConfig.repository").String()
+						parts := strings.Split(cbConnectionRepo, "/")
+						createdName := parts[len(parts)-1]
+						assert.Equal(repoName, createdName, "the trigger should use the repo %s", repoName)
 					}
 
 					if slices.Contains(testutils.ServicesWithEnvProject[appName], serviceName) {

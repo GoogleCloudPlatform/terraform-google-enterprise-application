@@ -65,6 +65,13 @@ func TestAppInfra(t *testing.T) {
 			splitServiceName = strings.Split(fullServiceName, "-")
 			prefixServiceName = splitServiceName[0]
 			suffixServiceName = splitServiceName[len(splitServiceName)-1]
+
+			// hello-world does not have a team implicit in name
+			if fullServiceName == "hello-world" {
+				suffixServiceName = fullServiceName
+				prefixServiceName = fullServiceName
+			}
+
 			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, suffixServiceName)).String()
 			servicesInfoMap[fullServiceName] = ServiceInfos{
 				ApplicationName: appName,
@@ -98,7 +105,6 @@ func TestAppInfra(t *testing.T) {
 				)
 				appService.DefineVerify(func(assert *assert.Assertions) {
 					appService.DefaultVerify(assert)
-					repoName := fmt.Sprintf("eab-%s-%s", servicesInfoMap[fullServiceName].ApplicationName, fullServiceName)
 
 					prj := gcloud.Runf(t, "projects describe %s", servicesInfoMap[fullServiceName].ProjectID)
 					projectNumber := prj.Get("projectNumber").String()
@@ -184,11 +190,6 @@ func TestAppInfra(t *testing.T) {
 						}
 					}
 
-					// Source Repo Test
-					repoPath := fmt.Sprintf("projects/%s/repos/%s", servicesInfoMap[fullServiceName].ProjectID, repoName)
-					sourceOp := gcloud.Runf(t, "source repos describe %s --project %s", repoName, servicesInfoMap[fullServiceName].ProjectID)
-					assert.Equal(sourceOp.Get("name").String(), repoPath, fmt.Sprintf("Full name of repository should be %s.", repoPath))
-
 					// Project IAM
 					computeSARoles := []string{
 						"roles/cloudtrace.agent",
@@ -238,8 +239,11 @@ func TestAppInfra(t *testing.T) {
 						deployTargetOp := gcloud.Runf(t, "deploy targets describe %s --project %s --region %s --flatten Target", strings.TrimPrefix(targetName.String(), "cluster-"), servicesInfoMap[fullServiceName].ProjectID, region).Array()[0]
 						assert.Equal(cloudDeployServiceAccountEmail, deployTargetOp.Get("executionConfigs").Array()[0].Get("serviceAccount").String(), fmt.Sprintf("cloud deploy target %s should have service account %s", targetName, cloudDeployServiceAccountEmail))
 					}
-
 					buildTriggerName := fmt.Sprintf("%s-ci", fullServiceName)
+					if fullServiceName == "hello-world" {
+						buildTriggerName = "default-hello-world-ci"
+					}
+
 					ciServiceAccountPath := fmt.Sprintf("projects/%s/serviceAccounts/%s", servicesInfoMap[fullServiceName].ProjectID, ciServiceAccountEmail)
 					buildTriggerOp := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", buildTriggerName, servicesInfoMap[fullServiceName].ProjectID, region)
 					assert.Equal(ciServiceAccountPath, buildTriggerOp.Get("serviceAccount").String(), fmt.Sprintf("cloud build trigger %s should have service account %s", buildTriggerName, ciServiceAccountPath))

@@ -46,7 +46,7 @@ module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
   source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   project_id = local.admin_project_id
 
@@ -57,6 +57,9 @@ module "cloudbuild_repositories" {
     gitlab_read_authorizer_credential_secret_id = var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id
     gitlab_authorizer_credential_secret_id      = var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
     gitlab_webhook_secret_id                    = var.cloudbuildv2_repository_config.gitlab_webhook_secret_id
+    gitlab_enterprise_host_uri                  = var.cloudbuildv2_repository_config.gitlab_enterprise_host_uri
+    gitlab_enterprise_service_directory         = var.cloudbuildv2_repository_config.gitlab_enterprise_service_directory
+    gitlab_enterprise_ca_certificate            = var.cloudbuildv2_repository_config.gitlab_enterprise_ca_certificate
   }
   cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
 }
@@ -65,7 +68,7 @@ module "app_admin_project" {
   count = var.create_admin_project ? 1 : 0
 
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 18.0"
 
   random_project_id        = true
   random_project_id_length = 4
@@ -126,7 +129,7 @@ resource "google_sourcerepo_repository" "app_infra_repo" {
 
 module "tf_cloudbuild_workspace" {
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   project_id               = local.admin_project_id
   tf_repo_uri              = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].url : module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[var.service_name].id
@@ -177,7 +180,7 @@ resource "google_organization_iam_member" "builder_organization_browser" {
 // Create infra project
 module "app_infra_project" {
   source   = "terraform-google-modules/project-factory/google"
-  version  = "~> 17.0"
+  version  = "~> 18.0"
   for_each = var.create_infra_project ? var.envs : {}
 
   random_project_id        = true

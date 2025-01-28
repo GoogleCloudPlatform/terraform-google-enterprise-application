@@ -36,7 +36,7 @@ locals {
 
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 18.0"
 
   for_each = !var.single_project ? { (local.index) = true } : {}
 
@@ -131,7 +131,7 @@ resource "google_folder_iam_member" "common_folder_iam" {
 module "vpc_project" {
   for_each = !var.single_project ? { for i, folder in module.folders[local.index].ids : (i) => folder } : {}
   source   = "terraform-google-modules/project-factory/google"
-  version  = "~> 17.0"
+  version  = "~> 18.0"
 
   name                     = "eab-vpc-${each.key}"
   random_project_id        = "true"

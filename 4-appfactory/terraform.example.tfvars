@@ -63,11 +63,15 @@ applications = {
 }
 
 cloudbuildv2_repository_config = {
-  repo_type = "CSR"
+  repo_type = "GITLABv2"
   repositories = {
     "hello-world" = {
-      repository_name = "hello-world"
-      repository_url  = ""
+      repository_name = "hello-world-i-r"
+      repository_url  = "https://gitlab.com/<replace-with-user-or-group>/hello-world-i-r.git"
     }
   }
+  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
+  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
 }
