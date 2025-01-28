@@ -22,6 +22,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/tidwall/gjson"
@@ -130,4 +131,9 @@ func GetSecretFromSecretManager(t *testing.T, secretName string, secretProject s
 		Logger:  logger.Discard,
 	}
 	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
+}
+
+// Will connect to GKE private cluster using connect gateway, this allows running kubectl commands
+func ConnectToFleet(t *testing.T, clusterName string, location string, project string) {
+	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s --project=%s", clusterName, location, project)
 }

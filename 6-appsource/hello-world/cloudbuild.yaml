@@ -13,16 +13,16 @@
 # limitations under the License.
 
 steps:
-  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
     args: ['run', '--privileged', 'multiarch/qemu-user-static@sha256:fe60359c92e86a43cc87b3d906006245f77bfc0565676b80004cc666e4feb9f0']
     id: 'initialize-qemu'
-  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
     args: ['buildx', 'create', '--name', 'multiarch', "--use"]
     id: 'create-builder-and-use'
-  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
     args: ['buildx', 'inspect', '--bootstrap']
     id: 'show-target-build-platforms'
-  - name: 'gcr.io/cloud-builders/docker:20.10.3'
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
     entrypoint: sh
     args:
       - "-c"
