@@ -37,3 +37,4 @@ RUN apt-get update && \
 
 ENV PATH=/builder/terraform/:$PATH
 ENTRYPOINT ["terraform"]
+
