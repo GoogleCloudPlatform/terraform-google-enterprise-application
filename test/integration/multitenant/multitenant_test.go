@@ -141,7 +141,10 @@ func TestMultitenant(t *testing.T) {
 							} else if regexp.MustCompile(`^nap-.*`).FindString(pool.Get("name").String()) != "" {
 								assert.True(pool.Get("autoscaling.autoprovisioned").Bool(), "NodePool autoscaling autoprovisioned should enabled(true)")
 							} else {
-								t.Fatalf("Error: unknown node pool: %s", pool.Get("name").String())
+								// exception for custom regional restricted arm64 node pool
+								if pool.Get("name").String() != "regional-arm64-pool" {
+									t.Fatalf("Error: unknown node pool: %s", pool.Get("name").String())
+								}
 							}
 							// common to all valid node pools
 							assert.True(pool.Get("autoscaling.enabled").Bool(), "NodePool auto scaling should be enabled (true)")
