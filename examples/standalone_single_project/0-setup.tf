@@ -16,6 +16,11 @@
 
 # Setup
 
+locals {
+  subnet_ip                  = "10.0.0.0/28"
+  proxy_ip                   = "10.0.0.10"
+  private_service_connect_ip = "10.3.0.5"
+}
 module "vpc" {
   source  = "terraform-google-modules/network/google"
   version = "~> 10.0"
@@ -24,54 +29,13 @@ module "vpc" {
   network_name    = "eab-vpc-${local.env}"
   shared_vpc_host = false
 
-  egress_rules = [
-    {
-      name               = "allow-private-google-access"
-      priority           = 200
-      destination_ranges = [module.private_service_connect.private_service_connect_ip]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["443"]
-        }
-      ]
-    },
-  ]
-
-  ingress_rules = [
-    {
-      name     = "allow-private-to-nat-ingress"
-      priority = 210
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      allow = [
-        {
-          protocol = "icmp"
-        },
-        {
-          protocol = "tcp",
-        },
-        {
-          protocol = "udp"
-        },
-
-      ]
-      source_ranges = ["10.10.10.0/24"]
-      target_tags   = [google_compute_router_nat.nat_external_addresses.name]
-    }
-  ]
-
   subnets = [
     {
       subnet_name           = "eab-${local.short_env}-${var.region}"
-      subnet_ip             = "10.10.10.0/24"
+      subnet_ip             = local.subnet_ip
       subnet_region         = var.region
       subnet_private_access = true
-    },
+    }
   ]
 
   secondary_ranges = {
@@ -94,146 +58,93 @@ resource "google_project_service" "servicenetworking" {
   disable_on_destroy = false
 }
 
-resource "google_compute_global_address" "worker_range" {
-  name          = "cga-worker"
-  project       = module.vpc.project_id
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = module.vpc.network_id
-}
-
-resource "google_service_networking_connection" "worker_pool_conn" {
-  network                 = module.vpc.network_id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.worker_range.name]
-  depends_on              = [google_project_service.servicenetworking]
-}
-
 module "private_service_connect" {
   source                     = "terraform-google-modules/network/google//modules/private-service-connect"
   version                    = "~> 10.0"
-  project_id                 = module.vpc.project_id
+  project_id                 = var.project_id
   network_self_link          = module.vpc.network_self_link
-  private_service_connect_ip = "10.3.0.5"
+  private_service_connect_ip = local.private_service_connect_ip
   forwarding_rule_target     = "vpc-sc"
+  depends_on = [
+    google_project_service.servicenetworking
+  ]
 }
 
-resource "google_compute_router" "nat_router" {
-  name    = "cr-${module.vpc.network_name}-${var.region}-nat-router"
-  project = var.project_id
-  region  = var.region
-  network = module.vpc.network_self_link
-
-  bgp {
-    asn = 64512
-  }
-}
-
-resource "google_compute_address" "nat_external_addresses" {
-  project = var.project_id
-  name    = "ca-${module.vpc.network_name}-${var.region}"
-  region  = var.region
-}
-
-resource "google_compute_router_nat" "nat_external_addresses" {
-  name                               = "rn-${module.vpc.network_name}-${var.region}-egress"
-  project                            = var.project_id
-  router                             = google_compute_router.nat_router.name
-  region                             = var.region
-  nat_ip_allocate_option             = "MANUAL_ONLY"
-  nat_ips                            = [google_compute_address.nat_external_addresses.self_link]
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-
-  log_config {
-    filter = "TRANSLATIONS_ONLY"
-    enable = true
-  }
-}
-
-resource "google_service_account" "instance_sa" {
-  account_id   = "sa-proxy"
-  project      = var.project_id
-  display_name = "Service Account used to VM proxy machine."
-}
-
-resource "google_compute_instance" "default" {
-  name         = "vm-proxy"
-  machine_type = "n2-standard-2"
-  project      = var.project_id
-  zone         = "${var.region}-a"
-
-  tags = [google_compute_router_nat.nat_external_addresses.name]
-
-  boot_disk {
-    initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2204-lts"
-    }
+resource "null_resource" "generate_certificate" {
+  triggers = {
+    project_id = var.project_id
+    region     = var.region
   }
 
-  network_interface {
-    network    = module.vpc.network_name
-    subnetwork = module.vpc.subnets_self_links[0]
-
-    access_config {
-    }
-  }
-  can_ip_forward = true
-
-  metadata = {
-    foo = "bar"
+  provisioner "local-exec" {
+    when    = create
+    command = <<EOT
+      ${path.cwd}/helpers/generate_swp_certificate.sh \
+        ${var.project_id} \
+        ${var.region}
+    EOT
   }
 
-  metadata_startup_script = <<EOT
-    #! /bin/bash
-    set -e
-    sysctl -w net.ipv4.ip_forward=1
-    IFACE=$(ip -brief link | tail -1 | awk  {'print $1'})
-    iptables -t nat -A POSTROUTING -o "$IFACE" -j MASQUERADE
-  EOT
-
-  service_account {
-    email  = google_service_account.instance_sa.email
-    scopes = ["cloud-platform"]
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<EOT
+      gcloud certificate-manager certificates delete swp-certificate \
+        --location=${self.triggers.region} --project=${self.triggers.project_id} \
+        --quiet
+    EOT
   }
+
+  depends_on = [
+    module.vpc
+  ]
 }
 
-resource "google_compute_route" "instance_router_1" {
-  name              = "cr-${module.vpc.network_name}-${var.region}-instance-router-1"
-  project           = var.project_id
-  network           = module.vpc.network_self_link
-  dest_range        = "0.0.0.0/1"
-  next_hop_instance = google_compute_instance.default.id
-  priority          = 200
+resource "time_sleep" "wait_upload_certificate" {
+  create_duration = "1m"
+
+  depends_on = [
+    null_resource.generate_certificate
+  ]
 }
 
-resource "google_compute_route" "instance_router_2" {
-  name              = "cr-${module.vpc.network_name}-${var.region}-instance-router-2"
-  project           = var.project_id
-  network           = module.vpc.network_self_link
-  dest_range        = "128.0.0.0/1"
-  next_hop_instance = google_compute_instance.default.id
-  priority          = 200
-}
 
-resource "google_compute_route" "nat_egress_1" {
-  name             = "cr-${module.vpc.network_name}-${var.region}-nat-egress-1"
-  project          = var.project_id
-  network          = module.vpc.network_self_link
-  dest_range       = "0.0.0.0/1"
-  next_hop_gateway = "default-internet-gateway"
-  tags             = [google_compute_router_nat.nat_external_addresses.name]
-  priority         = 100
-}
+module "secure_web_proxy" {
+  source = "../../modules/secure-web-proxy"
 
-resource "google_compute_route" "nat_egress_2" {
-  name             = "cr-${module.vpc.network_name}-${var.region}-nat-egress-2"
-  project          = var.project_id
-  network          = module.vpc.network_self_link
-  dest_range       = "128.0.0.0/1"
-  next_hop_gateway = "default-internet-gateway"
-  tags             = [google_compute_router_nat.nat_external_addresses.name]
-  priority         = 100
+  project_id          = var.project_id
+  region              = var.region
+  network_id          = module.vpc.network_id
+  subnetwork_id       = "projects/${var.project_id}/regions/${var.region}/subnetworks/${module.vpc.subnets_names[0]}"
+  subnetwork_ip_range = local.subnet_ip
+  certificates        = ["projects/${var.project_id}/locations/${var.region}/certificates/swp-certificate"]
+  addresses           = [local.proxy_ip]
+  ports               = [443]
+  proxy_ip_range      = "10.129.0.0/23"
+
+  # This list of URL was obtained through Cloud Function imports
+  # It will change depending on what imports your CF are using.
+  url_lists = [
+    "*google.com/go*",
+    "*github.com/GoogleCloudPlatform*",
+    "*github.com/cloudevents*",
+    "*golang.org/x*",
+    "*google.golang.org/*",
+    "*github.com/golang/*",
+    "*github.com/google/*",
+    "*github.com/googleapis/*",
+    "*github.com/json-iterator/go",
+    "*dl.google.com/*",
+    "*debian.map.fastly.net/*",
+    "*deb.debian.org/*",
+    "*packages.cloud.google.com/*",
+    "*pypi.org/*"
+  ]
+
+  depends_on = [
+    module.vpc,
+    null_resource.generate_certificate,
+    time_sleep.wait_upload_certificate
+  ]
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
@@ -269,11 +180,8 @@ resource "time_sleep" "wait_propagation" {
   depends_on = [
     module.vpc,
     module.private_service_connect,
-    google_service_networking_connection.worker_pool_conn,
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
-    google_compute_address.nat_external_addresses,
-    google_compute_router_nat.nat_external_addresses,
-    google_compute_router.nat_router
+    module.secure_web_proxy
   ]
   create_duration  = "5m"
   destroy_duration = "5m"

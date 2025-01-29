@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,7 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5, < 7"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
-
-    null = {
-      source  = "hashicorp/null"
-      version = ">= 3.2.0"
-    }
-  }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-example/v0.3.0"
-  }
+output "global_address_name" {
+  description = "Google compute global address name."
+  value       = google_compute_global_address.private_ip_allocation.name
 }

@@ -34,13 +34,13 @@ locals {
         repositories = {
           "eab-cymbal-bank-accounts-contacts" = {
             repository_name = "eab-cymbal-bank-accounts-contacts"
-            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-contacts.git"
+            repository_url  = "https://104.154.215.29.nip.io/root/eab-cymbal-bank-accounts-contacts.git"
           }
         }
-        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-        gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        gitlab_authorizer_credential_secret_id      = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_read_authorizer_credential_secret_id = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_webhook_secret_id                    = "projects/eab-gitlab-self-hosted-abx4/secrets/gitlab-webhook"
+        gitlab_enterprise_host_uri                  = "https://104.154.215.29.nip.io"
       }
     },
     "userservice" = {
@@ -53,13 +53,13 @@ locals {
         repositories = {
           "eab-cymbal-bank-accounts-userservice" = {
             repository_name = "eab-cymbal-bank-accounts-userservice"
-            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-userservice.git"
+            repository_url  = "https://104.154.215.29.nip.io/root/eab-cymbal-bank-accounts-userservice.git"
           }
         }
-        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-        gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        gitlab_authorizer_credential_secret_id      = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_read_authorizer_credential_secret_id = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_webhook_secret_id                    = "projects/eab-gitlab-self-hosted-abx4/secrets/gitlab-webhook"
+        gitlab_enterprise_host_uri                  = "https://104.154.215.29.nip.io"
       }
     },
     "frontend" = {
@@ -72,13 +72,13 @@ locals {
         repositories = {
           "eab-cymbal-bank-frontend" = {
             repository_name = "eab-cymbal-bank-frontend"
-            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-frontend.git"
+            repository_url  = "https://104.154.215.29.nip.io/root/eab-cymbal-bank-frontend.git"
           }
         }
-        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-        gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        gitlab_authorizer_credential_secret_id      = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_read_authorizer_credential_secret_id = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_webhook_secret_id                    = "projects/eab-gitlab-self-hosted-abx4/secrets/gitlab-webhook"
+        gitlab_enterprise_host_uri                  = "https://104.154.215.29.nip.io"
       }
     },
     "balancereader" = {
@@ -91,13 +91,13 @@ locals {
         repositories = {
           "eab-cymbal-bank-ledger-balancereader" = {
             repository_name = "eab-cymbal-bank-ledger-balancereader"
-            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-balancereader.git"
+            repository_url  = "https://104.154.215.29.nip.io/root/eab-cymbal-bank-ledger-balancereader.git"
           }
         }
-        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-        gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        gitlab_authorizer_credential_secret_id      = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_read_authorizer_credential_secret_id = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_webhook_secret_id                    = "projects/eab-gitlab-self-hosted-abx4/secrets/gitlab-webhook"
+        gitlab_enterprise_host_uri                  = "https://104.154.215.29.nip.io"
       }
     },
     "ledgerwriter" = {
@@ -110,13 +110,13 @@ locals {
         repositories = {
           "eab-cymbal-bank-ledger-ledgerwriter" = {
             repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
-            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-ledgerwriter.git"
+            repository_url  = "https://104.154.215.29.nip.io/root/eab-cymbal-bank-ledger-ledgerwriter.git"
           }
         }
-        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-        gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        gitlab_authorizer_credential_secret_id      = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_read_authorizer_credential_secret_id = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_webhook_secret_id                    = "projects/eab-gitlab-self-hosted-abx4/secrets/gitlab-webhook"
+        gitlab_enterprise_host_uri                  = "https://104.154.215.29.nip.io"
       }
     },
     "transactionhistory" = {
@@ -129,13 +129,13 @@ locals {
         repositories = {
           "eab-cymbal-bank-ledger-transactionhistory" = {
             repository_name = "eab-cymbal-bank-ledger-transactionhistory"
-            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-transactionhistory.git"
+            repository_url  = "https://104.154.215.29.nip.io/root/eab-cymbal-bank-ledger-transactionhistory.git"
           }
         }
-        gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-        gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-        gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-        gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        gitlab_authorizer_credential_secret_id      = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_read_authorizer_credential_secret_id = "projects/907015832414/secrets/gitlab-pat-from-vm"
+        gitlab_webhook_secret_id                    = "projects/eab-gitlab-self-hosted-abx4/secrets/gitlab-webhook"
+        gitlab_enterprise_host_uri                  = "https://104.154.215.29.nip.io"
       }
     },
   }
@@ -169,7 +169,7 @@ module "cicd" {
 
   network_id = module.vpc.network_id
 
-  depends_on = [ time_sleep.wait_propagation ]
+  depends_on = [time_sleep.wait_propagation]
 }
 
 data "google_project" "project" {

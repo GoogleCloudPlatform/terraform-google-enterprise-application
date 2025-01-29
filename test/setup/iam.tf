@@ -22,6 +22,7 @@ locals {
     "roles/compute.networkUser"
     ] : [
     "roles/artifactregistry.admin",
+    "roles/certificatemanager.owner",
     "roles/cloudbuild.builds.builder",
     "roles/clouddeploy.serviceAgent",
     "roles/clouddeploy.admin",
