@@ -218,6 +218,9 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 							t.Logf("Build finished successfully %s. \n", build[0].Get("buildTriggerId"))
 							return false, nil
 						} else if latestWorkflowRunStatus == "FAILURE" {
+							logsCmd := fmt.Sprintf("builds log %s", build[0].Get("buildTriggerId").String())
+							logs := gcloud.Runf(t, logsCmd).String()
+							t.Logf("%s ci-build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
 							return false, fmt.Errorf("Build failed %s.", build[0].Get("buildTriggerId"))
 						}
 						return true, nil
