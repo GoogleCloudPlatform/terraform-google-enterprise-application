@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2024-2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ func GetLastSplitElement(value string, sep string) string {
 
 func EnvNames(t *testing.T) []string {
 	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
-	if branchName == "release-please--branches--main" {
+	if branchName == "release-please--branches--main" || strings.HasPrefix(branchName, "test-all/") {
 		return []string{
 			"development",
 			"nonproduction",
