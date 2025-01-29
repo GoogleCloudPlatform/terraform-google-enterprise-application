@@ -18,7 +18,8 @@ locals {
   int_required_roles = !var.single_project ? [
     "roles/owner",
     "roles/cloudbuild.workerPoolOwner",
-    "roles/dns.admin"
+    "roles/dns.admin",
+    "roles/compute.networkUser"
     ] : [
     "roles/artifactregistry.admin",
     "roles/cloudbuild.builds.builder",
@@ -27,6 +28,7 @@ locals {
     "roles/compute.networkAdmin",
     "roles/compute.securityAdmin",
     "roles/compute.admin",
+    "roles/compute.networkUser",
     "roles/container.admin",
     "roles/gkehub.editor",
     "roles/gkehub.scopeAdmin",

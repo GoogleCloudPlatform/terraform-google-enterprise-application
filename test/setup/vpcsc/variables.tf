@@ -29,6 +29,11 @@ variable "project_number" {
   type        = string
 }
 
+variable "gitlab_project_number" {
+  description = "The Gitlab project_id"
+  type        = string
+}
+
 variable "service_perimeter_mode" {
   description = "Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string

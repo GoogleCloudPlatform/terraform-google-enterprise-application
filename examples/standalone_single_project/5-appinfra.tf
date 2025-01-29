@@ -168,6 +168,8 @@ module "cicd" {
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
 
   network_id = module.vpc.network_id
+
+  depends_on = [ time_sleep.wait_propagation ]
 }
 
 data "google_project" "project" {
