@@ -176,6 +176,11 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					}
 				}
 
+				err = cp.Copy(fmt.Sprintf("%s/%s", appSourcePath, "other-overlays/e2e.Dockerfile"), fmt.Sprintf("%s/.github/workflows/ui-tests/Dockerfile", tmpDirApp))
+				if err != nil {
+					t.Fatal(err)
+				}
+
 				gitAppRun("add", ".")
 				gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 				gitAppRun("push", "google", "main")
