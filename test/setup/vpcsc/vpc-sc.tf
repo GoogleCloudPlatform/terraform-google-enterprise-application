@@ -185,7 +185,7 @@ module "regular_service_perimeter" {
   ] : []
 
   access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
-  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["RESTRICTED-SERVICES"] : []
+  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
   restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
   resources               = var.service_perimeter_mode == "ENFORCE" ? [var.project_number, var.gitlab_project_number] : []
   egress_policies = var.service_perimeter_mode == "ENFORCE" ? [

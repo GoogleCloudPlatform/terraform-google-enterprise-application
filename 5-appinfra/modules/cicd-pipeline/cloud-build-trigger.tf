@@ -70,7 +70,6 @@ resource "google_cloudbuild_worker_pool" "pool" {
   }
 
   depends_on = [
-    google_project_iam_member.compute_serviceAgent,
     google_project_iam_member.cloudbuild_serviceAgent
   ]
 }

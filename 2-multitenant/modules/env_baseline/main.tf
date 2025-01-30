@@ -345,8 +345,7 @@ module "gke-autopilot" {
     google_project_iam_member.gke_service_agent,
     google_project_iam_member.servicemesh_service_agent,
     google_project_iam_member.multiclusterdiscovery_service_agent,
-    google_project_service_identity.compute_sa,
-    google_project_iam_member.compute_serviceAgent
+    google_project_service_identity.compute_sa
   ]
 
   // Private Cluster Configuration

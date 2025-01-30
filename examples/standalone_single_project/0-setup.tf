@@ -156,6 +156,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
     resources = [
       "projects/342927644502",
       "projects/213358688945",
+      "projects/907015832414"
     ] //google project, bank of anthos
 
     operations {
@@ -166,6 +167,12 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
     }
     operations {
       service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "secretmanager.googleapis.com"
       method_selectors {
         method = "*"
       }
