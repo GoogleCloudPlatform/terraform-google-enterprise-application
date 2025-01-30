@@ -180,6 +180,11 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 				}
 
+				err = cp.Copy(fmt.Sprintf("%s/%s", appSourcePath, "other-overlays/e2e.Dockerfile"), fmt.Sprintf("%s/.github/workflows/ui-tests/Dockerfile", tmpDirApp))
+				if err != nil {
+					t.Fatal(err)
+				}
+
 				gitAppRun("add", ".")
 				gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 				gitAppRun("push", "google", "main")
@@ -220,6 +225,9 @@ func TestSourceCymbalBank(t *testing.T) {
 						if latestWorkflowRunStatus == "SUCCESS" {
 							return false, nil
 						} else if latestWorkflowRunStatus == "FAILURE" {
+							logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
+							logs := gcloud.Runf(t, logsCmd).String()
+							t.Logf("%s ci-build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
 							return false, errors.New("Build failed.")
 						}
 						return true, nil
