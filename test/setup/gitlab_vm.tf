@@ -151,6 +151,13 @@ resource "google_secret_manager_secret" "gitlab_webhook" {
   depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
+resource "google_secret_manager_secret_iam_member" "secret_iam_admin" {
+  project   = module.gitlab_project.project_id
+  secret_id = google_secret_manager_secret.gitlab_webhook.secret_id
+  role      = "roles/secretmanager.admin"
+  member    = google_service_account.int_test[local.index].member
+}
+
 resource "random_uuid" "random_webhook_secret" {
 }
 
