@@ -35,6 +35,20 @@ resource "google_project_iam_member" "metric_writer" {
   member = data.google_compute_default_service_account.compute_service_identity.member
 }
 
+resource "google_project_iam_member" "cloudbuild_serviceAgent" {
+  project = var.project_id
+  role    = "roles/cloudbuild.serviceAgent"
+
+  member = google_project_service_identity.cloudbuild_service_identity.member
+}
+
+resource "google_project_iam_member" "compute_serviceAgent" {
+  project = var.project_id
+  role    = "roles/compute.admin"
+
+  member = google_project_service_identity.compute_sa.member
+}
+
 resource "google_project_iam_member" "log_writer" {
   for_each = {
     "compute"      = data.google_compute_default_service_account.compute_service_identity.member,

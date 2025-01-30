@@ -68,4 +68,9 @@ resource "google_cloudbuild_worker_pool" "pool" {
     peered_network          = var.network_id
     peered_network_ip_range = "/29"
   }
+
+  depends_on = [
+    google_project_iam_member.compute_serviceAgent,
+    google_project_iam_member.cloudbuild_serviceAgent
+  ]
 }

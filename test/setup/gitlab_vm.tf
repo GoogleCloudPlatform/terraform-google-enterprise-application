@@ -67,7 +67,8 @@ resource "google_service_account_iam_member" "impersonate" {
 resource "google_project_iam_member" "int_test_gitlab_permissions" {
   for_each = toset([
     "roles/compute.instanceAdmin",
-    "roles/secretmanager.admin"
+    "roles/secretmanager.admin",
+    "roles/privilegedaccessmanager.projectServiceAgent"
   ])
   project = module.gitlab_project.project_id
   role    = each.value
