@@ -162,12 +162,6 @@ resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
   member  = google_project_service_identity.mcsd_cluster_project.member
 }
 
-resource "google_project_iam_member" "compute_serviceAgent" {
-  project = local.cluster_project_id
-  role    = "roles/compute.admin"
-  member  = google_project_service_identity.compute_sa.member
-}
-
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
   version = "~> 35.0"
@@ -240,7 +234,6 @@ module "gke-standard" {
     google_project_iam_member.servicemesh_service_agent,
     google_project_iam_member.multiclusterdiscovery_service_agent,
     google_project_service_identity.compute_sa,
-    google_project_iam_member.compute_serviceAgent
   ]
 
   // Private Cluster Configuration
@@ -345,7 +338,6 @@ module "gke-autopilot" {
     google_project_iam_member.gke_service_agent,
     google_project_iam_member.servicemesh_service_agent,
     google_project_iam_member.multiclusterdiscovery_service_agent,
-    google_project_service_identity.compute_sa
   ]
 
   // Private Cluster Configuration

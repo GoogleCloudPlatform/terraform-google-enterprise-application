@@ -189,6 +189,12 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Replace gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("gitlab.com", strings.ReplaceAll("https://", url, ""), single_project_root, "0-setup.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Replace webhook secret id
 	err = testutils.ReplacePatternInFile("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId, single_project_root, "5-appinfra.tf")
 	if err != nil {

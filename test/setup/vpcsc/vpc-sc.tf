@@ -176,7 +176,7 @@ module "regular_service_perimeter" {
         sources = { access_level = ["*"] }
       },
       to = {
-        resources = ["projects/213331819513", "projects/360590781837"], //service networking project
+        resources = ["projects/213331819513"], //service networking project
         operations = {
           "compute.googleapis.com" = { methods = ["*"] }
         }
@@ -194,7 +194,7 @@ module "regular_service_perimeter" {
         sources = { access_level = ["*"] }
       },
       to = {
-        resources = ["projects/213331819513", "projects/360590781837"], //service networking projects
+        resources = ["projects/213331819513"], //service networking projects
         operations = {
           "compute.googleapis.com" = { methods = ["*"] }
         }

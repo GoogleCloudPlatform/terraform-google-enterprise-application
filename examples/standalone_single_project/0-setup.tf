@@ -25,9 +25,9 @@ module "vpc" {
   source  = "terraform-google-modules/network/google"
   version = "~> 10.0"
 
-  project_id      = var.project_id
-  network_name    = "eab-vpc-${local.env}"
-  shared_vpc_host = false
+  project_id                             = var.project_id
+  network_name                           = "eab-vpc-${local.env}"
+  shared_vpc_host                        = false
   delete_default_internet_gateway_routes = "true"
 
   subnets = [
@@ -52,23 +52,23 @@ module "vpc" {
     ]
   }
 
-   firewall_rules = [
-    {
-      name      = "fw-e-shared-restricted-65535-e-d-all-all-all"
-      direction = "EGRESS"
-      priority  = 65535
+  firewall_rules = [
+    # {
+    #   name      = "fw-e-shared-restricted-65535-e-d-all-all-all"
+    #   direction = "EGRESS"
+    #   priority  = 65535
 
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
+    #   log_config = {
+    #     metadata = "INCLUDE_ALL_METADATA"
+    #   }
 
-      deny = [{
-        protocol = "all"
-        ports    = null
-      }]
+    #   deny = [{
+    #     protocol = "all"
+    #     ports    = null
+    #   }]
 
-      ranges = ["0.0.0.0/0"]
-    },
+    #   ranges = ["0.0.0.0/0"]
+    # },
     {
       name      = "fw-e-shared-restricted-65534-e-a-allow-google-apis-all-tcp-443"
       direction = "EGRESS"
@@ -83,7 +83,7 @@ module "vpc" {
         ports    = ["443"]
       }]
 
-      ranges      = [local.private_service_connect_ip]
+      ranges = [local.private_service_connect_ip]
     },
     {
       name      = "fw-i-allow-private-pools-1000"
