@@ -24,6 +24,9 @@ steps:
       - "--default-repo=$_CONTAINER_REGISTRY"
       - "--cache-file=/workspace/$_CACHE" # set _CACHE to anything other than "cache" e.g. "no-cache" to reset skaffold cache
       - "--module=$_SERVICE"
+    env:
+      - "HTTP_PROXY=$_HTTP_PROXY"
+      - "HTTPS_PROXY=$_HTTPS_PROXY"
   - name: gcr.io/cloud-builders/gsutil
     id: upload-skaffold-cache
     args: ['cp', '/workspace/$_CACHE',  $_CACHE_URI]
@@ -41,6 +44,8 @@ steps:
     env:
       - 'TEAM=$_TEAM'
       - 'SERVICE=$_SERVICE'
+      - "HTTP_PROXY=$_HTTP_PROXY"
+      - "HTTPS_PROXY=$_HTTPS_PROXY"
   - name: gcr.io/cloud-builders/gcloud
     id: trigger-release
     args:
@@ -53,6 +58,9 @@ steps:
       - "--skaffold-file=src/$_TEAM/$_SERVICE/skaffold.yaml"
       - "--region=$LOCATION"
       - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET/$SHORT_SHA"
+    env:
+      - "HTTP_PROXY=$_HTTP_PROXY"
+      - "HTTPS_PROXY=$_HTTPS_PROXY"
 options:
   logging: CLOUD_LOGGING_ONLY
   pool:

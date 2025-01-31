@@ -22,6 +22,9 @@ steps:
       - "--default-repo=$_CONTAINER_REGISTRY"
       - "--cache-file=/workspace/$_CACHE" # set _CACHE to anything other than "cache" e.g. "no-cache" to reset skaffold cache
       - "--module=$_TEAM"
+    env:
+      - "HTTP_PROXY=$_HTTP_PROXY"
+      - "HTTPS_PROXY=$_HTTPS_PROXY"
   - name: gcr.io/cloud-builders/gsutil
     args: ['cp', '/workspace/$_CACHE',  $_CACHE_URI]
   - name: gcr.io/k8s-skaffold/skaffold:v2.10.1 # python set up should be baked into a custom builder image to speed up build times
@@ -37,6 +40,8 @@ steps:
       skaffold test --build-artifacts=/workspace/artifacts.json --assume-yes
     env:
       - 'TEAM=$_TEAM'
+      - "HTTP_PROXY=$_HTTP_PROXY"
+      - "HTTPS_PROXY=$_HTTPS_PROXY"
   - name: gcr.io/cloud-builders/gcloud
     args:
       - "deploy"
@@ -48,6 +53,9 @@ steps:
       - "--skaffold-file=src/$_TEAM/skaffold.yaml"
       - "--region=$LOCATION"
       - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET/$SHORT_SHA"
+    env:
+      - "HTTP_PROXY=$_HTTP_PROXY"
+      - "HTTPS_PROXY=$_HTTPS_PROXY"
 options:
   logging: CLOUD_LOGGING_ONLY
   pool:
