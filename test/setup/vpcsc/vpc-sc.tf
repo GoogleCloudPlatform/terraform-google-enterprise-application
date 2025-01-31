@@ -167,7 +167,7 @@ module "regular_service_perimeter" {
   description    = "Perimeter shielding projects"
 
   access_levels_dry_run           = var.service_perimeter_mode == "DRY_RUN" ? [module.access_level_members.name] : []
-  vpc_accessible_services_dry_run = var.service_perimeter_mode == "DRY_RUN" ? ["RESTRICTED-SERVICES"] : []
+  vpc_accessible_services_dry_run = var.service_perimeter_mode == "DRY_RUN" ? ["*"] : []
   restricted_services_dry_run     = var.service_perimeter_mode == "DRY_RUN" ? local.supported_restricted_service : []
   resources_dry_run               = var.service_perimeter_mode == "DRY_RUN" ? [var.project_number, var.gitlab_project_number] : []
   egress_policies_dry_run = var.service_perimeter_mode == "DRY_RUN" ? [
@@ -194,7 +194,7 @@ module "regular_service_perimeter" {
         sources = { access_level = ["*"] }
       },
       to = {
-        resources = ["projects/213331819513"], //service networking projects
+        resources = ["projects/213331819513", "projects/360590781837"], //service networking projects
         operations = {
           "compute.googleapis.com" = { methods = ["*"] }
         }

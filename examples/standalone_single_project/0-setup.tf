@@ -28,6 +28,7 @@ module "vpc" {
   project_id      = var.project_id
   network_name    = "eab-vpc-${local.env}"
   shared_vpc_host = false
+  delete_default_internet_gateway_routes = "true"
 
   subnets = [
     {
@@ -49,6 +50,67 @@ module "vpc" {
         ip_cidr_range = "192.168.64.0/18"
       },
     ]
+  }
+
+   firewall_rules = [
+    {
+      name      = "fw-e-shared-restricted-65535-e-d-all-all-all"
+      direction = "EGRESS"
+      priority  = 65535
+
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+
+      deny = [{
+        protocol = "all"
+        ports    = null
+      }]
+
+      ranges = ["0.0.0.0/0"]
+    },
+    {
+      name      = "fw-e-shared-restricted-65534-e-a-allow-google-apis-all-tcp-443"
+      direction = "EGRESS"
+      priority  = 65534
+
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      deny = []
+      allow = [{
+        protocol = "tcp"
+        ports    = ["443"]
+      }]
+
+      ranges      = [local.private_service_connect_ip]
+    },
+    {
+      name      = "fw-i-allow-private-pools-1000"
+      direction = "INGRESS"
+      priority  = 1000
+
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+
+      allow = [{
+        protocol = "tcp"
+        ports    = ["443"]
+      }]
+
+      ranges = ["10.0.0.0/28", local.private_service_connect_ip]
+    }
+  ]
+}
+
+resource "google_dns_policy" "default_policy" {
+  project                   = var.project_id
+  name                      = "dns-default-policy"
+  enable_inbound_forwarding = true
+  enable_logging            = true
+  networks {
+    network_url = module.vpc.network_self_link
   }
 }
 
@@ -121,8 +183,6 @@ module "secure_web_proxy" {
   ports               = [443]
   proxy_ip_range      = "10.129.0.0/23"
 
-  # This list of URL was obtained through Cloud Function imports
-  # It will change depending on what imports your CF are using.
   url_lists = [
     "*google.com/go*",
     "*github.com/GoogleCloudPlatform*",
@@ -137,7 +197,8 @@ module "secure_web_proxy" {
     "*debian.map.fastly.net/*",
     "*deb.debian.org/*",
     "*packages.cloud.google.com/*",
-    "*pypi.org/*"
+    "*pypi.org/*",
+    "*gitlab.com/*" //gitlab IP
   ]
 
   depends_on = [
