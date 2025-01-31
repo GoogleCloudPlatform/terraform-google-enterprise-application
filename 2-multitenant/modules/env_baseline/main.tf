@@ -18,6 +18,7 @@ locals {
   networks_re           = "/networks/([^/]*)$"
   subnetworks_re        = "/subnetworks/([^/]*)$"
   projects_re           = "projects/([^/]*)/"
+  regions_re            = "regions/([^/]+)"
   cluster_project_id    = data.google_project.eab_cluster_project.project_id
   available_cidr_ranges = var.master_ipv4_cidr_blocks
 
@@ -27,6 +28,20 @@ locals {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
   }
 
+  arm_node_pool = { for k, v in local.subnets : k => (regex(local.regions_re, v)[0]) == "us-central1" ?
+    [
+      {
+        name            = "regional-arm64-pool"
+        machine_type    = "t2a-standard-4"
+        node_locations  = "us-central1-a,us-central1-b,us-central1-f"
+        strategy        = "SURGE"
+        max_surge       = 1
+        max_unavailable = 0
+        autoscaling     = true
+        location_policy = "BALANCED"
+      }
+    ] : []
+  }
 }
 
 resource "google_project_service_identity" "compute_sa" {
@@ -163,17 +178,17 @@ module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
   version = "~> 35.0"
 
-  for_each               = var.cluster_type != "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
-  name                   = "cluster-${each.value.region}-${var.env}"
+  for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
+  name                   = "cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
   master_ipv4_cidr_block = local.subnets_to_cidr[each.key]
   project_id             = local.cluster_project_id
   regional               = true
-  region                 = each.value.region
-  network_project_id     = regex(local.projects_re, each.value.id)[0]
-  network                = regex(local.networks_re, each.value.network)[0]
+  region                 = data.google_compute_subnetwork.default[each.key].region
+  network_project_id     = regex(local.projects_re, data.google_compute_subnetwork.default[each.key].id)[0]
+  network                = regex(local.networks_re, data.google_compute_subnetwork.default[each.key].network)[0]
   subnetwork             = regex(local.subnetworks_re, local.subnets[each.key])[0]
-  ip_range_pods          = each.value.secondary_ip_range[0].range_name
-  ip_range_services      = each.value.secondary_ip_range[1].range_name
+  ip_range_pods          = data.google_compute_subnetwork.default[each.key].secondary_ip_range[0].range_name
+  ip_range_services      = data.google_compute_subnetwork.default[each.key].secondary_ip_range[1].range_name
   release_channel        = var.cluster_release_channel
   gateway_api_channel    = "CHANNEL_STANDARD"
 
@@ -213,17 +228,18 @@ module "gke-standard" {
     "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
   }
 
-  node_pools = [
-    {
-      name            = "node-pool-1"
-      machine_type    = "e2-standard-4"
-      strategy        = "SURGE"
-      max_surge       = 1
-      max_unavailable = 0
-      autoscaling     = true
-      location_policy = "BALANCED"
-    }
-  ]
+  node_pools = concat(
+    [
+      {
+        name            = "node-pool-1"
+        machine_type    = "e2-standard-4"
+        strategy        = "SURGE"
+        max_surge       = 1
+        max_unavailable = 0
+        autoscaling     = true
+        location_policy = "BALANCED"
+      }
+  ], local.arm_node_pool[each.key])
 
   depends_on = [
     module.eab_cluster_project,
@@ -243,64 +259,9 @@ module "gke-standard" {
 
 }
 
-resource "google_container_node_pool" "arm_node_pool" {
-  count = var.cluster_type != "AUTOPILOT" ? 1 : 0
-
-  name     = "arm-node-pool"
-  project  = local.cluster_project_id
-  cluster  = module.gke-standard["0"].name
-  location = module.gke-standard["0"].location
-
-  node_count = 1
-
-  // locations with t2a nodes
-  node_locations = [
-    "us-central1-a",
-    "us-central1-b",
-    "us-central1-f"
-  ]
-
-  autoscaling {
-    min_node_count  = 1
-    max_node_count  = 100
-    location_policy = "BALANCED"
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  upgrade_settings {
-    strategy        = "SURGE"
-    max_surge       = 1
-    max_unavailable = 0
-  }
-
-  node_config {
-    machine_type    = "t2a-standard-4"
-    disk_size_gb    = 100
-    disk_type       = "pd-standard"
-    image_type      = "COS_CONTAINERD"
-    local_ssd_count = 0
-    oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"]
-    preemptible     = false
-
-    shielded_instance_config {
-      enable_integrity_monitoring = true
-      enable_secure_boot          = false
-    }
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-  }
-}
-
-
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 35.0"
+  version = "~> 34.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
@@ -310,7 +271,7 @@ module "gke-autopilot" {
   region              = each.value.region
   network_project_id  = regex(local.projects_re, each.value.id)[0]
   network             = regex(local.networks_re, each.value.network)[0]
-  subnetwork          = each.value.name
+  subnetwork          = regex(local.subnetworks_re, local.subnets[each.key])[0]
   ip_range_pods       = each.value.secondary_ip_range[0].range_name
   ip_range_services   = each.value.secondary_ip_range[1].range_name
   release_channel     = var.cluster_release_channel
