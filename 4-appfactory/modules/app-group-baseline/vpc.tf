@@ -81,13 +81,8 @@ module "vpc" {
       },
     ]
   }
-}
 
-resource "google_project_service" "servicenetworking" {
-  count              = var.create_admin_project ? 1 : 0
-  service            = "servicenetworking.googleapis.com"
-  project            = module.app_admin_project[0].project_id
-  disable_on_destroy = false
+  depends_on = [module.app_admin_project]
 }
 
 resource "google_compute_global_address" "worker_range" {
@@ -98,6 +93,8 @@ resource "google_compute_global_address" "worker_range" {
   address_type  = "INTERNAL"
   prefix_length = 16
   network       = module.vpc[0].network_id
+
+  depends_on = [module.vpc]
 }
 
 resource "google_service_networking_connection" "worker_pool_conn" {
@@ -105,7 +102,7 @@ resource "google_service_networking_connection" "worker_pool_conn" {
   network                 = module.vpc[0].network_id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.worker_range[0].name]
-  depends_on              = [google_project_service.servicenetworking]
+  depends_on              = [module.vpc, module.app_admin_project]
 }
 
 module "private_service_connect" {
@@ -116,4 +113,5 @@ module "private_service_connect" {
   network_self_link          = module.vpc[0].network_self_link
   private_service_connect_ip = "10.3.0.5"
   forwarding_rule_target     = "vpc-sc"
+  depends_on                 = [module.vpc]
 }

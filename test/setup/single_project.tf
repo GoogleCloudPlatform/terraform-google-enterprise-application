@@ -33,7 +33,7 @@ module "project_standalone" {
   activate_api_identities = [
     {
       api   = "compute.googleapis.com",
-      roles = []
+      roles = ["roles/compute.admin"]
     },
     {
       api = "cloudbuild.googleapis.com",

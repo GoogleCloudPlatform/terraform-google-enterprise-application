@@ -79,16 +79,18 @@ module "app_admin_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
   activate_apis = [
-    "iam.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "cloudfunctions.googleapis.com",
     "apikeys.googleapis.com",
+    "iam.googleapis.com",
+    "compute.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "clouddeploy.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "secretmanager.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
-    "clouddeploy.googleapis.com"
   ]
 
   vpc_service_control_attach_dry_run = true

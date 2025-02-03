@@ -145,9 +145,10 @@ module "vpc_project" {
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
+    "container.googleapis.com",
     "iam.googleapis.com",
     "serviceusage.googleapis.com",
-    "container.googleapis.com",
+    "servicenetworking.googleapis.com",
   ]
 }
 
