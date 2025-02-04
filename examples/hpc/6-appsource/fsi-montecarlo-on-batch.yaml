@@ -1,0 +1,121 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+blueprint_name: montecarlo-on-batch
+
+vars:
+  project_id:  ## Set GCP Project ID Here ##
+  deployment_name: montecarlo2
+  region: us-central1
+  zone: us-central1-a
+  cluster_name:  ## Set cluster name Here ##
+deployment_groups:
+- group: setup
+  modules:
+
+  - id: enable_apis
+    source: community/modules/project/service-enablement
+    settings:
+      gcp_service_list: [
+        "bigquery.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "container.googleapis.com",
+        "logging.googleapis.com",
+        "notebooks.googleapis.com",
+        "batch.googleapis.com",
+        "pubsub.googleapis.com",
+        "cloudbuild.googleapis.com",
+        "compute.googleapis.com"
+      ]
+
+- group: primary
+  modules:
+  - id: pubsub_topic
+    source: community/modules/pubsub/topic
+
+  - id: bq-dataset
+    source: community/modules/database/bigquery-dataset
+    settings:
+
+  - id: bq-table
+    source: community/modules/database/bigquery-table
+    use: [bq-dataset]
+    settings:
+      table_schema:
+        '
+        [
+          {
+            "name": "subscription_name", "type": "STRING"
+          },
+          {
+            "name": "message_id", "type": "STRING"
+          },
+          {
+            "name": "publish_time", "type": "TIMESTAMP"
+          },
+          {
+            "name": "simulation_results", "type": "RECORD", "mode": "REPEATED",
+            "fields": [
+              {
+                "name" : "price",
+                "type" : "NUMERIC"
+              }
+            ]
+          },
+          {
+            "name": "ticker", "type": "STRING"
+          }
+          ,{
+            "name": "epoch_time", "type": "INT64"
+          }
+          ,{
+            "name": "iteration", "type": "INT64"
+          }
+          ,{
+            "name": "start_date", "type": "STRING"
+          }
+          ,{
+            "name": "end_date", "type": "STRING"
+          }
+          ,{
+            "name": "attributes", "type": "STRING"
+          }
+        ]
+        '
+
+  - id: data_bucket
+    source: community/modules/file-system/cloud-storage-bucket
+    settings:
+      name_prefix: data_bucket
+      random_suffix: true
+      force_destroy: true
+      local_mount: /home/jupyter/data
+
+  - id: data_notebook
+    source: community/modules/compute/notebook
+    use: [data_bucket]
+    settings:
+      machine_type: n1-standard-4
+      instance_image: {"family": "workbench-instances", "name": null, "project": "cloud-notebooks-managed"}
+
+  - id: bq_subscription
+    source: community/modules/pubsub/bigquery-sub
+    use: [bq-table, pubsub_topic]
+
+- group: files
+  modules:
+
+  - id: tutorial_files
+    source: ./tutorial_files
+    use: [bq-dataset, bq-table, data_bucket, pubsub_topic]
