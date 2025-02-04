@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2024-2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/shell"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
 func getLogs(t *testing.T) (string, error) {
@@ -31,10 +31,6 @@ func getLogs(t *testing.T) (string, error) {
 		Args:    args,
 	}
 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
-}
-
-func connectToFleet(t *testing.T, clusterName string, location string, project string) {
-	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s --project=%s", clusterName, location, project)
 }
 
 func TestHelloWorldE2E(t *testing.T) {
@@ -48,7 +44,7 @@ func TestHelloWorldE2E(t *testing.T) {
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-	connectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+	testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 	t.Run("hello-world End-to-End Test", func(t *testing.T) {
 
 		logs, err := getLogs(t)
