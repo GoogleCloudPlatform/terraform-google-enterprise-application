@@ -173,7 +173,7 @@ module "regular_service_perimeter" {
   egress_policies_dry_run = var.service_perimeter_mode == "DRY_RUN" ? [
     {
       from = {
-        sources = { access_level = ["*"] }
+        identity_type = "ANY_IDENTITY"
       },
       to = {
         resources = ["projects/213331819513"], //service networking project
@@ -191,7 +191,7 @@ module "regular_service_perimeter" {
   egress_policies = var.service_perimeter_mode == "ENFORCE" ? [
     {
       from = {
-        sources = { access_level = ["*"] }
+        identity_type = "ANY_IDENTITY"
       },
       to = {
         resources = ["projects/213331819513"], //service networking projects
