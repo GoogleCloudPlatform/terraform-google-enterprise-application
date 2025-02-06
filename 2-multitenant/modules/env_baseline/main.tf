@@ -87,6 +87,7 @@ module "eab_cluster_project" {
     "multiclusterservicediscovery.googleapis.com",
     "trafficdirector.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "cloudtrace.googleapis.com"

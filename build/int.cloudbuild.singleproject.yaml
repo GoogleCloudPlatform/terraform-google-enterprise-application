@@ -121,4 +121,4 @@ options:
   env:
     - 'TF_PLUGIN_CACHE_DIR=""'
     - 'TF_VAR_branch_name=$BRANCH_NAME'
-    - "TF_VAR_service_perimeter_mode=ENFORCE"
+    - "TF_VAR_service_perimeter_mode=DRY_RUN"
