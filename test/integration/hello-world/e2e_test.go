@@ -15,6 +15,7 @@
 package helloworld_e2e
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -34,26 +35,31 @@ func getLogs(t *testing.T) (string, error) {
 }
 
 func TestHelloWorldE2E(t *testing.T) {
-	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
-	// retrieve cluster location and fleet membership from 2-multitenant
-	clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
-	clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
-	clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
+	for _, envName := range testutils.EnvNames(t) {
+		envName := envName
+		t.Run(envName, func(t *testing.T) {
+			multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s"), envName))
+			// retrieve cluster location and fleet membership from 2-multitenant
+			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
+			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
+			clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
 
-	// extract clusterName from fleet membership id
-	splitClusterMembership := strings.Split(clusterMembership, "/")
-	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
+			// extract clusterName from fleet membership id
+			splitClusterMembership := strings.Split(clusterMembership, "/")
+			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-	testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
-	t.Run("hello-world End-to-End Test", func(t *testing.T) {
+			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
-		logs, err := getLogs(t)
-		if err != nil {
-			t.Fatal(err)
-		}
+			logs, err := getLogs(t)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		if !strings.Contains(logs, "Hello world!") {
-			t.Errorf("expected logs to contain 'Hello world!', but it did not")
-		}
-	})
+			if !strings.Contains(logs, "Hello world!") {
+				t.Errorf("expected logs to contain 'Hello world!', but it did not")
+			}
+
+		})
+	}
+
 }
