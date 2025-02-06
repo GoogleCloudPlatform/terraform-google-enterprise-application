@@ -39,14 +39,6 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
 
 ## Usage
 
-### Apply Kueue Resources
-
-Run the following command to apply Kueue resources:
-
-```bash
-kubectl apply -f manifests/kueue-resources.yaml
-```
-
 ### Create Namespaces
 
 #### Add `hpc-team-a` and `hpc-team-b` Namespaces at the Fleetscope repository
@@ -65,29 +57,18 @@ The namespaces created at 3-fleetscope will be used in the application kubernete
 
 1. Apply changes by commiting to a named environment branch (`development`, `nonproduction`, `production`).
 
+### Apply Kueue Resources
+
+Run the following command to apply Kueue resources, this step should be run by a Batch Administrator and after the namespaces are created:
+
+```bash
+kubectl apply -f manifests/kueue-resources.yaml
+```
+
 ### Set Project for gcloud Commands
 
 ```bash
-gcloud config set project REPLACE_WITH_YOUR_PROJECT
-```
-
-### Create an artifact registry
-
-```bash
-gcloud artifacts repositories create research-images \
-    --repository-format=docker \
-    --location=us-central1 \
-    --description="Docker repository for HPC research images"
-```
-
-### Create Docker Container Image
-
-Change to the Docker source directory and submit the build:
-
-```bash
-cd src/docker
-gcloud builds submit --region=us-central1 --config cloudbuild.yaml
-cd ../..
+gcloud config set project REPLACE_WITH_YOUR_INFRA_PROJECT
 ```
 
 ### Run `gcluster` Blueprint
@@ -97,7 +78,7 @@ Navigate to the source directory and run the following command, make sure you re
 ```bash
 cd src
 
-PROJECT_ID=$(gcloud config get project)
+PROJECT_ID=REPLACE_WITH_YOUR_INFRA_PROJECT
 CLUSTER_NAME="REPLACE_WITH_CLUSTER_NAME"
 
 ~/cluster-toolkit/gcluster deploy fsi-montecarlo-on-batch.yaml --vars "project_id=$PROJECT_ID,cluster_name="$CLUSTER_NAME" --auto-approve
@@ -108,3 +89,5 @@ CLUSTER_NAME="REPLACE_WITH_CLUSTER_NAME"
 Follow the steps outlined in the following document, after the "Open the Vertex AI Workbench Notebook" section:
 
 [Open the Vertex AI Workbench Notebook](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/0e3134b8478f3ffaa12031d7fda3ac6b94e61b17/examples/research/monte-carlo#open-the-vertex-ai-workbench-notebook)
+
+Your Vertex AI Workbench Notebook will be created on the application infrastructure project.
