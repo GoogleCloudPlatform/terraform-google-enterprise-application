@@ -113,16 +113,16 @@ resource "google_compute_global_address" "worker_pool_range" {
   depends_on    = [module.vpc]
 }
 
-resource "google_service_networking_connection" "worker_pool_conn" {
+resource "google_service_networking_connection" "private_service_connect" {
   network                 = module.vpc.network_id
   service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.worker_pool_range.name]
+  reserved_peering_ranges = [google_compute_global_address.worker_pool_range.name, google_compute_global_address.private_ip_allocation.name]
   depends_on              = [module.vpc]
 }
 
 resource "google_compute_network_peering_routes_config" "peering_routes" {
   project              = var.project_id
-  peering              = google_service_networking_connection.worker_pool_conn.peering
+  peering              = google_service_networking_connection.private_service_connect.peering
   network              = local.network_name
   import_custom_routes = true
   export_custom_routes = true
@@ -180,81 +180,165 @@ module "private_service_connect" {
   ]
 }
 
-# resource "null_resource" "generate_certificate" {
-#   triggers = {
-#     project_id = var.project_id
-#     region     = var.region
-#   }
+resource "google_compute_subnetwork" "swp_subnetwork_proxy" {
+  name          = "sb-swp-${var.region}"
+  ip_cidr_range = "10.129.0.0/23"
+  project       = var.project_id
+  region        = var.region
+  network       = module.vpc.network_id
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  role          = "ACTIVE"
+}
 
-#   provisioner "local-exec" {
-#     when    = create
-#     command = <<EOT
-#       ${path.cwd}/helpers/generate_swp_certificate.sh \
-#         ${var.project_id} \
-#         ${var.region}
-#     EOT
-#   }
+module "swp_firewall_rule" {
+  source       = "terraform-google-modules/network/google//modules/firewall-rules"
+  version      = "~> 9.0"
+  project_id   = var.project_id
+  network_name = module.vpc.network_id
 
-#   provisioner "local-exec" {
-#     when    = destroy
-#     command = <<EOT
-#       gcloud certificate-manager certificates delete swp-certificate \
-#         --location=${self.triggers.region} --project=${self.triggers.project_id} \
-#         --quiet
-#     EOT
-#   }
+  rules = [{
+    name        = "fw-allow-tcp-443-egress-to-secure-web-proxy"
+    description = "Allow Cloud Build to connect in Secure Web Proxy"
+    direction   = "EGRESS"
+    priority    = 100
+    ranges      = ["10.129.0.0/23", local.subnet_ip]
+    source_tags = []
+    allow = [{
+      protocol = "tcp"
+      ports    = [443]
+    }]
+    deny = []
+    log_config = {
+      metadata = "INCLUDE_ALL_METADATA"
+    }
+  }]
+}
 
-#   depends_on = [
-#     module.vpc
-#   ]
-# }
+resource "google_compute_global_address" "private_ip_allocation" {
+  name          = "swp-cloud-function-internal-connection"
+  project       = var.project_id
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  prefix_length = 16
+  network       = module.vpc.network_id
+}
 
-# resource "time_sleep" "wait_upload_certificate" {
-#   create_duration = "1m"
+resource "time_sleep" "wait_network_config_propagation" {
+  create_duration  = "1m"
+  destroy_duration = "2m"
 
-#   depends_on = [
-#     null_resource.generate_certificate
-#   ]
-# }
+  depends_on = [
+    google_service_networking_connection.private_service_connect,
+    google_compute_subnetwork.swp_subnetwork_proxy
+  ]
+}
 
+resource "google_network_security_gateway_security_policy" "swp_security_policy" {
+  name        = "swp-security-policy"
+  project     = var.project_id
+  location    = var.region
+  description = "Secure Web Proxy security policy."
+}
 
-# module "secure_web_proxy" {
-#   source = "../../modules/secure-web-proxy"
+resource "google_network_security_url_lists" "swp_url_lists" {
+  name        = "swp-url-lists"
+  project     = var.project_id
+  location    = var.region
+  description = "Secure Web Proxy list of allowed URLs."
+  values      = [
+    "*google.com/go*",
+    "*github.com/GoogleCloudPlatform*",
+    "*github.com/cloudevents*",
+    "*golang.org/x*",
+    "*google.golang.org/*",
+    "*github.com/golang/*",
+    "*github.com/google/*",
+    "*github.com/googleapis/*",
+    "*github.com/json-iterator/go",
+    "*dl.google.com/*",
+    "*debian.map.fastly.net/*",
+    "*deb.debian.org/*",
+    "*packages.cloud.google.com/*",
+    "*pypi.org/*",
+    "*gitlab.com/*" //gitlab IP
+  ]
+}
 
-#   project_id          = var.project_id
-#   region              = var.region
-#   network_id          = module.vpc.network_id
-#   subnetwork_id       = "projects/${var.project_id}/regions/${var.region}/subnetworks/${module.vpc.subnets_names[0]}"
-#   subnetwork_ip_range = local.subnet_ip
-#   certificates        = ["projects/${var.project_id}/locations/${var.region}/certificates/swp-certificate"]
-#   addresses           = [local.proxy_ip]
-#   ports               = [443]
-#   proxy_ip_range      = "10.129.0.0/23"
+resource "google_network_security_gateway_security_policy_rule" "swp_security_policy_rule" {
+  name                    = "swp-security-policy-rule"
+  project                 = var.project_id
+  location                = var.region
+  gateway_security_policy = google_network_security_gateway_security_policy.swp_security_policy.name
+  enabled                 = true
+  description             = "Secure Web Proxy security policy rule."
+  priority                = 1
+  session_matcher         = "inUrlList(host(), '${google_network_security_url_lists.swp_url_lists.id}')"
+  tls_inspection_enabled  = false
+  basic_profile           = "ALLOW"
 
-#   url_lists = [
-#     "*google.com/go*",
-#     "*github.com/GoogleCloudPlatform*",
-#     "*github.com/cloudevents*",
-#     "*golang.org/x*",
-#     "*google.golang.org/*",
-#     "*github.com/golang/*",
-#     "*github.com/google/*",
-#     "*github.com/googleapis/*",
-#     "*github.com/json-iterator/go",
-#     "*dl.google.com/*",
-#     "*debian.map.fastly.net/*",
-#     "*deb.debian.org/*",
-#     "*packages.cloud.google.com/*",
-#     "*pypi.org/*",
-#     "*34.170.123.107.nip.io/*" //gitlab IP
-#   ]
+  depends_on = [
+    google_network_security_url_lists.swp_url_lists,
+    google_network_security_gateway_security_policy.swp_security_policy
+  ]
+}
 
-#   depends_on = [
-#     module.vpc,
-#     null_resource.generate_certificate,
-#     time_sleep.wait_upload_certificate
-#   ]
-# }
+resource "google_network_services_gateway" "secure_web_proxy" {
+  project                              = var.project_id
+  name                                 = "secure-web-proxy"
+  location                             = var.region
+  type                                 = "SECURE_WEB_GATEWAY"
+  addresses                            = [local.proxy_ip]
+  ports                                = [443]
+  certificate_urls                     = ["projects/${var.project_id}/locations/${var.region}/certificates/swp-certificate"]
+  gateway_security_policy              = google_network_security_gateway_security_policy.swp_security_policy.id
+  network                              = module.vpc.network_id
+  subnetwork                           = "projects/${var.project_id}/regions/${var.region}/subnetworks/${module.vpc.subnets_names[0]}"
+  scope                                = "samplescope"
+  delete_swg_autogen_router_on_destroy = true
+
+  depends_on = [
+    google_compute_subnetwork.swp_subnetwork_proxy,
+    google_service_networking_connection.private_service_connect,
+    google_network_security_gateway_security_policy_rule.swp_security_policy_rule
+  ]
+}
+
+resource "null_resource" "generate_certificate" {
+  triggers = {
+    project_id = var.project_id
+    region     = var.region
+  }
+
+  provisioner "local-exec" {
+    when    = create
+    command = <<EOT
+      ${path.cwd}/helpers/generate_swp_certificate.sh \
+        ${var.project_id} \
+        ${var.region}
+    EOT
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<EOT
+      gcloud certificate-manager certificates delete swp-certificate \
+        --location=${self.triggers.region} --project=${self.triggers.project_id} \
+        --quiet
+    EOT
+  }
+
+  depends_on = [
+    module.vpc
+  ]
+}
+
+resource "time_sleep" "wait_upload_certificate" {
+  create_duration = "1m"
+
+  depends_on = [
+    null_resource.generate_certificate
+  ]
+}
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0

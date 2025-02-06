@@ -189,6 +189,12 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Replace https://gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("https://gitlab.com", url, single_project_root, "3-fleetscope.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Replace gitlab.com with custom self hosted URL
 	err = testutils.ReplacePatternInFile("gitlab.com", strings.TrimPrefix(url, "https://"), single_project_root, "0-setup.tf")
 	if err != nil {
