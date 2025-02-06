@@ -36,4 +36,7 @@ apps = {
   "default-example" : {
     "acronym" = "de",
   }
+  "hpc": {
+    "acronym" = "hpc",
+  }
 }

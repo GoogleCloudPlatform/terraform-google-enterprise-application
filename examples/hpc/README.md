@@ -81,7 +81,7 @@ cd src
 PROJECT_ID=REPLACE_WITH_YOUR_INFRA_PROJECT
 CLUSTER_NAME="REPLACE_WITH_CLUSTER_NAME"
 
-~/cluster-toolkit/gcluster deploy fsi-montecarlo-on-batch.yaml --vars "project_id=$PROJECT_ID,cluster_name="$CLUSTER_NAME" --auto-approve
+~/cluster-toolkit/gcluster deploy fsi-montecarlo-on-batch.yaml --vars "project_id=$PROJECT_ID,cluster_name=$CLUSTER_NAME" --auto-approve
 ```
 
 ### Run the Simulation Jobs and Visualize the Results

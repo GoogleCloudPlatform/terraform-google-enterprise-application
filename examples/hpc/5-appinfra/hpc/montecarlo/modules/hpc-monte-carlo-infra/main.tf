@@ -26,6 +26,7 @@ resource "google_project_iam_member" "pubsub_viewer" {
 resource "google_project_service" "enable_apis" {
   for_each = toset([
     "bigquery.googleapis.com",
+    "storage.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "container.googleapis.com",
     "logging.googleapis.com",

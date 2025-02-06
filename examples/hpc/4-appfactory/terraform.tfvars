@@ -10,7 +10,7 @@ applications = {
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"
   repositories = {
-    balancereader = {
+    montecarlo = {
       repository_name = "montecarlo-i-r"
       repository_url  = "https://gitlab.com/user/montecarlo-i-r.git"
     }

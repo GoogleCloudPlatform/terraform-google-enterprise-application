@@ -1,4 +1,3 @@
-
 resource "google_service_account" "builder" {
   project    = var.infra_project
   account_id = "mc-builder"
@@ -26,9 +25,9 @@ resource "google_project_iam_member" "builder_object_user" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "builder" {
-  project    = google_artifact_registry_repository.tf_image.project
-  location   = google_artifact_registry_repository.tf_image.location
-  repository = google_artifact_registry_repository.tf_image.name
+  project    = google_artifact_registry_repository.research_images.project
+  location   = google_artifact_registry_repository.research_images.location
+  repository = google_artifact_registry_repository.research_images.name
   role       = "roles/artifactregistry.repoAdmin"
   member     = google_service_account.builder.member
 }
@@ -63,7 +62,7 @@ module "build_mc_run_image_image" {
   }
 
   create_cmd_entrypoint = "bash"
-  create_cmd_body       = "gcloud builds submit --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} --project=${var.infra_project} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} || ( sleep 45 && gcloud builds submit --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} --project=${var.infra_project} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} )"
+  create_cmd_body       = "gcloud builds submit ${path.module} --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} --project=${var.infra_project} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} || ( sleep 45 && gcloud builds submit ${path.module} --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} --project=${var.infra_project} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} )"
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }
