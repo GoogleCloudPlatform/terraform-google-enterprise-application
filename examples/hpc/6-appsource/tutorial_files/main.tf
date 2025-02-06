@@ -14,7 +14,8 @@
 
 locals {
   # This label allows for billing report tracking based on module.
-  bucket = replace(var.gcs_bucket_path, "gs://", "")
+  bucket               = replace(var.gcs_bucket_path, "gs://", "")
+  gke_cluster_endpoint = "https://${var.region}-connectgateway.googleapis.com/v1/projects/${data.google_project.cluster_project.number}/locations/${var.region}/gkeMemberships/${var.cluster_name}"
 }
 
 resource "random_id" "resource_name_suffix" {
@@ -22,19 +23,19 @@ resource "random_id" "resource_name_suffix" {
 }
 
 data "google_project" "cluster_project" {
-    project_id = var.project_id
+  project_id = var.project_id
 }
 
 # settings.toml
 data "template_file" "settings_toml" {
   template = file("${path.module}/settings.tpl.toml")
   vars = {
-    project_id   = var.project_id
-    topic_id     = var.topic_id
-    topic_schema = var.topic_schema
-    bucket_name  = local.bucket
-    region       = var.region
-    gke_cluster_endpoint ="https://${var.region}-connectgateway.googleapis.com/v1/projects/${data.google_project.cluster_project.project_number}/locations/${var.region}/gkeMemberships/${var.cluster_name}"
+    project_id           = var.project_id
+    topic_id             = var.topic_id
+    topic_schema         = var.topic_schema
+    bucket_name          = local.bucket
+    region               = var.region
+    gke_cluster_endpoint = local.gke_cluster_endpoint
   }
 }
 resource "google_storage_bucket_object" "settings_obj_toml" {

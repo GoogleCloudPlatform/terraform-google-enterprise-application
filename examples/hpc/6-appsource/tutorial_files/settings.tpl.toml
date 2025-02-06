@@ -7,7 +7,7 @@ gke_cluster_endpoint = "${gke_cluster_endpoint}"
 
 # Namespace and Service account
 service_account_name="default"
-namespace="hpc-team-b"
+namespace="hpc-team-b-development"
 
 # set container and command
 container = {image_uri="us-central1-docker.pkg.dev/${project_id}/research-images/mc_run"}
@@ -19,7 +19,7 @@ args = ["--project_id=${project_id}",
 
 # Limits and config for job
 limits={cpu="1000m", memory="1Gi"}
-node_selector={"cloud.google.com/compute-class"="spot-capacity"}
+node_selector={"cloud.google.com/gke-spot"="true"}
 job_annotations={"kueue.x-k8s.io/queue-name"="lq-hpc-team-b"}
 backoff_limit=50
 
