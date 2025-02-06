@@ -231,3 +231,28 @@ module "vpc" {
     ]
   }
 }
+
+resource "google_compute_router" "nat_router" {
+  for_each = module.vpc
+
+  name    = "nat-router-us-central-1"
+  region  = "us-central1"
+  network = each.value.network_self_link
+  project = each.value.project_id
+}
+
+resource "google_compute_router_nat" "cloud_nat" {
+  for_each = module.vpc
+
+  name                               = "cloud-nat"
+  router                             = google_compute_router.nat_router[each.key].name
+  region                             = google_compute_router.nat_router[each.key].region
+  project                            = each.value.project_id
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
