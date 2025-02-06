@@ -38,7 +38,7 @@ func TestHelloWorldE2E(t *testing.T) {
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
-			multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s"), envName))
+			multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 			// retrieve cluster location and fleet membership from 2-multitenant
 			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
 			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
