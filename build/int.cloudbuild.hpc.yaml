@@ -139,13 +139,13 @@ steps:
     waitFor:
       - appinfra-apply
 
-  - id: monte-carlo-simulation
+  - id: monte-carlo-simulation-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestHPCMonteCarlo --stage verify --verbose",
+        "cft test run TestHPCMonteCarloE2E --stage verify --verbose",
       ]
     waitFor:
       - appinfra-apply

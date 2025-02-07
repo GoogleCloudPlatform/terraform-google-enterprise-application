@@ -45,6 +45,12 @@ data "google_compute_default_service_account" "default" {
   project = var.infra_project
 }
 
+resource "google_compute_network" "default" {
+  name                    = "default"
+  project                 = var.infra_project
+  auto_create_subnetworks = true
+}
+
 
 // TODO: Define exactly where permissions below on fleet scope and fleet project should be assigned - maybe this should be a PR from the team to the 2-multitenant repo, so a platform engineer can approve the role grant
 resource "google_project_iam_member" "compute_sa_roles" {

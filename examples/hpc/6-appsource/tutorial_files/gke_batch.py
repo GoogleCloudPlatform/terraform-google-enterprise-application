@@ -71,7 +71,7 @@ class KubernetesBatchJobs:
             gke_cluster_endpoint = get_setting("gke_cluster_endpoint", settings)
             print(f"gke-endpoint: {gke_cluster_endpoint}")
             # Obtain Google authentication credentials
-            creds, _ = google.auth.default()
+            creds, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
             auth_req = google.auth.transport.requests.Request()
             # Refresh the token
             creds.refresh(auth_req)
