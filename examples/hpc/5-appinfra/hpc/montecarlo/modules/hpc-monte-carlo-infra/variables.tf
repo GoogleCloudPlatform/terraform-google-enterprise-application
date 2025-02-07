@@ -16,11 +16,14 @@ variable "bucket_force_destroy" {
   default     = false
 }
 
-
 variable "cluster_project_number" {
   type = string
 }
 
 variable "env" {
   type = string
+}
+
+variable "cluster_service_accounts" {
+  type = map(any)
 }

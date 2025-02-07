@@ -15,26 +15,17 @@
 package hpc
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/gruntwork-io/terratest/modules/shell"
+	"github.com/gruntwork-io/terratest/modules/k8s"
+	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
-func getLogs(t *testing.T) (string, error) {
-	cmd := "logs getting-started --pod-running-timeout=30s"
-	args := strings.Fields(cmd)
-	kubectlCmd := shell.Command{
-		Command: "kubectl",
-		Args:    args,
-	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
-}
-
-func connectToFleet(t *testing.T, clusterName string, location string, project string) {
-	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s --project=%s", clusterName, location, project)
+func installKueue(t *testing.T, options *k8s.KubectlOptions) (string, error) {
+	return k8s.RunKubectlAndGetOutputE(t, options, "apply", "--server-side", "-f", "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml")
 }
 
 func TestHPCMonteCarlo(t *testing.T) {
@@ -48,16 +39,18 @@ func TestHPCMonteCarlo(t *testing.T) {
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-	connectToFleet(t, clusterName, clusterLocation, clusterProjectId)
-	t.Run("hpc-monte-carlo-simulation Test", func(t *testing.T) {
+	testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+	k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
-		logs, err := getLogs(t)
+	_, err := installKueue(t, k8sOpts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Run("hpc-monte-carlo-simulation Test", func(t *testing.T) {
+		out, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		if !strings.Contains(logs, "Hello world!") {
-			t.Errorf("expected logs to contain 'Hello world!', but it did not")
-		}
+		t.Logf("%s", out)
 	})
 }

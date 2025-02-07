@@ -32,6 +32,15 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
   member     = google_service_account.builder.member
 }
 
+resource "google_artifact_registry_repository_iam_member" "allow_cluster_sa_download" {
+  for_each   = var.cluster_service_accounts
+  project    = google_artifact_registry_repository.research_images.project
+  location   = google_artifact_registry_repository.research_images.location
+  repository = google_artifact_registry_repository.research_images.name
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:${each.value}"
+}
+
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "60s"
 

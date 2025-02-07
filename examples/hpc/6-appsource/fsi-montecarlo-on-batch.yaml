@@ -15,11 +15,12 @@
 blueprint_name: montecarlo-on-batch
 
 vars:
-  project_id:  ## Set GCP Project ID Here ##
+  project_id:  ## Set GCP Infra Project ID Here ##
   deployment_name: montecarlo2
   region: us-central1
   zone: us-central1-a
   cluster_name:  ## Set cluster name Here ##
+  cluster_project:  ## Set the GCP GKE Cluster Project 
 deployment_groups:
 - group: setup
   modules:

@@ -19,7 +19,7 @@ export GKEBATCH_REGION=${region}
 export GKEBATCH_PROJECT_ID=${project_id}
 export GKEBATCH_BUCKETNAME=${bucket_name}
 
-gcloud container clusters get-credentials $GKEBATCH_CLUSTER_NAME \
+gcloud container fleet memberships get-credentials $GKEBATCH_CLUSTER_NAME \
     --location=$GKEBATCH_REGION \
     --project=$GKEBATCH_PROJECT_ID
 

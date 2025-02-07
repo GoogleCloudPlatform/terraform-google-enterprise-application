@@ -33,6 +33,12 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
   gcloud container fleet memberships get-credentials CLUSTER-NAME --project=YOUR-CLUSTER-PROJECT --location=YOUR-CLUSTER-REGION
   ```
 
+  If you have access to specific namespace, you can run:
+
+  ```bash
+  gcloud container fleet scopes namespaces get-credentials NAMESPACE
+  ```
+
 - **Cluster Toolkit (gcluster)**
 
     This guide assumes you have `gcluster` installed on your home directory. More information on how to setup gcluster in the following [link](https://cloud.google.com/cluster-toolkit/docs/setup/configure-environment#local-shell)
@@ -76,12 +82,11 @@ gcloud config set project REPLACE_WITH_YOUR_INFRA_PROJECT
 Navigate to the source directory and run the following command, make sure you replace CLUSTER_NAME with your environment's cluster name:
 
 ```bash
-cd src
-
 PROJECT_ID=REPLACE_WITH_YOUR_INFRA_PROJECT
-CLUSTER_NAME="REPLACE_WITH_CLUSTER_NAME"
+CLUSTER_NAME=REPLACE_WITH_CLUSTER_NAME
+CLUSTER_PROJECT=REPLACE_WITH_CLUSTER_PROJECT
 
-~/cluster-toolkit/gcluster deploy fsi-montecarlo-on-batch.yaml --vars "project_id=$PROJECT_ID,cluster_name=$CLUSTER_NAME" --auto-approve
+~/cluster-toolkit/gcluster deploy fsi-montecarlo-on-batch.yaml --vars "project_id=$PROJECT_ID,cluster_name=$CLUSTER_NAME,cluster_project=$CLUSTER_PROJECT" --auto-approve
 ```
 
 ### Run the Simulation Jobs and Visualize the Results

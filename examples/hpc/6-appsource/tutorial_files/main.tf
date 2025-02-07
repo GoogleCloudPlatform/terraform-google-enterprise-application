@@ -23,7 +23,7 @@ resource "random_id" "resource_name_suffix" {
 }
 
 data "google_project" "cluster_project" {
-  project_id = var.project_id
+  project_id = var.cluster_project
 }
 
 # settings.toml
@@ -49,7 +49,7 @@ data "template_file" "run_me_first_sh" {
   template = file("${path.module}/run_me_first.tpl.sh")
   vars = {
     cluster_name = var.cluster_name
-    project_id   = var.project_id
+    project_id   = var.cluster_project
     bucket_name  = local.bucket
     region       = var.region
   }

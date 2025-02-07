@@ -40,3 +40,33 @@ resource "google_project_service" "enable_apis" {
   service            = each.key
   disable_on_destroy = false
 }
+
+data "google_compute_default_service_account" "default" {
+  project = var.infra_project
+}
+
+
+// TODO: Define exactly where this permission should be assigned - maybe this should be a PR from the team to the 2-multitenant repo, so a platform engineer can approve the role grant
+resource "google_project_iam_member" "compute_sa_roles" {
+  for_each = toset([
+    "roles/gkehub.connect",
+    "roles/gkehub.viewer",
+    "roles/gkehub.gatewayReader",
+    "roles/gkehub.scopeEditorProjectLevel"
+  ])
+  role    = each.key
+  project = var.cluster_project
+  member  = data.google_compute_default_service_account.default.member
+}
+
+# module "fleet_app_operator_permissions" {
+#   source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-app-operator-permissions"
+#   version = "~> 35.0"
+
+#   for_each = var.namespace_ids
+
+#   fleet_project_id = var.fleet_project_id
+#   scope_id         = google_gke_hub_scope.fleet-scope[each.key].scope_id
+#   groups           = [each.value]
+#   role             = "ADMIN"
+# }

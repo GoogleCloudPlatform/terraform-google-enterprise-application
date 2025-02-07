@@ -17,6 +17,12 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "cluster_project" {
+  description = "Project that hosts the GKE Cluster"
+  type        = string
+}
+
+
 variable "project_id" {
   description = "ID of project in which GCS bucket will be created."
   type        = string
