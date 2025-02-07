@@ -21,10 +21,10 @@ locals {
 module "provision-monte-carlo-infra" {
   source = "../../modules/hpc-monte-carlo-infra"
 
-  infra_project           = local.app_project_id
-  cluster_project         = local.cluster_project_id
-  cluster_project_number  = local.cluster_project_number
-  region                  = "us-central1"
-  env                     = local.env
+  infra_project            = local.app_project_id
+  cluster_project          = local.cluster_project_id
+  cluster_project_number   = local.cluster_project_number
+  region                   = "us-central1"
+  env                      = local.env
   cluster_service_accounts = local.cluster_service_accounts
 }
