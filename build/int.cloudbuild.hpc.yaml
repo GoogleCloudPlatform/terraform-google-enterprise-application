@@ -1,0 +1,152 @@
+timeout: 14400s
+steps:
+  - id: prepare
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "source /usr/local/bin/task_helper_functions.sh && prepare_environment",
+      ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_folder_id=$_FOLDER_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+      - "TF_VAR_single_project=false"
+
+  - id: bootstrap-gitlab-vm
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestBootstrapGitlabVM --stage verify --verbose",
+      ]
+    waitFor:
+      - prepare
+
+  # Distinct init stages for tf output state passing
+  - id: bootstrap-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestBootstrap --stage init --verbose"]
+    waitFor:
+      - prepare
+      - bootstrap-gitlab-vm
+
+  - id: bootstrap-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestBootstrap --stage apply --verbose"]
+    waitFor:
+      - bootstrap-init
+  - id: bootstrap-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestBootstrap --stage verify --verbose"]
+    waitFor:
+      - bootstrap-apply
+
+  - id: multitenant-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestMultitenant --stage init --verbose"]
+    waitFor:
+      - bootstrap-apply
+  - id: multitenant-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestMultitenant --stage apply --verbose",
+      ]
+    waitFor:
+      - multitenant-init
+  - id: multitenant-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestMultitenant --stage verify --verbose",
+      ]
+    waitFor:
+      - multitenant-apply
+
+  - id: fleetscope-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestFleetscope --stage init --verbose"]
+    waitFor:
+      - multitenant-apply
+  - id: fleetscope-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestFleetscope --stage apply --verbose"]
+    waitFor:
+      - fleetscope-init
+  - id: fleetscope-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestFleetscope --stage verify --verbose",
+      ]
+    waitFor:
+      - fleetscope-apply
+  
+  - id: appfactory-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHPCAppfactory --stage init --verbose"]
+    waitFor:
+      - fleetscope-apply
+  - id: appfactory-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHPCAppfactory --stage apply --verbose"]
+    waitFor:
+      - appfactory-init
+  - id: appfactory-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestHPCAppfactory --stage verify --verbose",
+      ]
+    waitFor:
+      - appfactory-apply
+
+  - id: appinfra-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHPCAppInfra --stage init --verbose"]
+    waitFor:
+      - appfactory-apply
+  - id: appinfra-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHPCAppInfra --stage apply --verbose"]
+    waitFor:
+      - appinfra-init
+  - id: appinfra-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHPCAppInfra --stage verify --verbose"]
+    waitFor:
+      - appinfra-apply
+
+  - id: monte-carlo-simulation
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestHPCMonteCarlo --stage verify --verbose",
+      ]
+    waitFor:
+      - appinfra-apply
+      - fleetscope-verify
