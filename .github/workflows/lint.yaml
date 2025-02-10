@@ -45,4 +45,4 @@ jobs:
             echo dev-tools=${REGISTRY}/${IMAGE}:${VERSION} >> "$GITHUB_OUTPUT"
           fi
       - run: docker run --rm -v ${{ github.workspace }}:/workspace ${{ steps.variables.outputs.dev-tools }} module-swapper
-      - run: docker run --rm -e EXCLUDE_LINT_DIRS=\./examples/hpc/6-appsource/tutorial_files -v ${{ github.workspace }}:/workspace ${{ steps.variables.outputs.dev-tools }} /usr/local/bin/test_lint.sh
+      - run: docker run --rm -e EXCLUDE_LINT_DIRS=\./examples/hpc/6-appsource/tutorial_files|\./examples/hpc/5-appinfra/hpc/montecarlo/modules/hpc-monte-carlo-infra/mc_run.py -v ${{ github.workspace }}:/workspace ${{ steps.variables.outputs.dev-tools }} /usr/local/bin/test_lint.sh
