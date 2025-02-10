@@ -28,7 +28,7 @@ locals {
     !var.single_project ? ["cymbalshops"] : []
   )
 
-  index          = !var.single_project ? "multitenant" : "single_project"
+  index          = !var.single_project ? "multitenant" : "single"
   project_id     = [for i, value in merge(module.project, module.project_standalone) : value.project_id][0]
   project_number = [for i, value in merge(module.project, module.project_standalone) : value.project_number][0]
 }

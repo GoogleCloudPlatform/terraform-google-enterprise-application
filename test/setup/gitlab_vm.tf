@@ -14,46 +14,14 @@
  * limitations under the License.
  */
 
-module "gitlab_project" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "~> 18.0"
-
-
-  name                     = "eab-gitlab-self-hosted"
-  random_project_id        = "true"
-  random_project_id_length = 4
-  org_id                   = var.org_id
-  folder_id                = var.folder_id
-  billing_account          = var.billing_account
-  deletion_policy          = "DELETE"
-  default_service_account  = "KEEP"
-
-  auto_create_network = true
-
-  activate_apis = [
-    "compute.googleapis.com",
-    "iam.googleapis.com",
-    "secretmanager.googleapis.com",
-    "servicemanagement.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com"
-  ]
-}
-
-resource "time_sleep" "wait_gitlab_project_apis" {
-  depends_on = [module.gitlab_project]
-
-  create_duration = "30s"
-}
-
 resource "google_service_account" "gitlab_vm" {
   account_id   = "gitlab-vm-sa"
-  project      = module.gitlab_project.project_id
+  project      = local.project_id
   display_name = "Custom SA for VM Instance"
 }
 
 resource "google_project_iam_member" "secret_manager_admin_vm_instance" {
-  project = module.gitlab_project.project_id
+  project = local.project_id
   role    = "roles/secretmanager.admin"
   member  = google_service_account.gitlab_vm.member
 }
@@ -70,14 +38,14 @@ resource "google_project_iam_member" "int_test_gitlab_permissions" {
     "roles/secretmanager.admin",
     "roles/privilegedaccessmanager.projectServiceAgent"
   ])
-  project = module.gitlab_project.project_id
+  project = local.project_id
   role    = each.value
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
 resource "google_compute_instance" "default" {
   name         = "gitlab"
-  project      = module.gitlab_project.project_id
+  project      = local.project_id
   machine_type = "n2-standard-4"
   zone         = "us-central1-a"
 
@@ -90,7 +58,9 @@ resource "google_compute_instance" "default" {
   }
 
   network_interface {
-    network = "default"
+    network            = module.vpc[local.index].network_name
+    subnetwork         = module.vpc[local.index].subnets_names[0]
+    subnetwork_project = local.project_id
 
     access_config {
       // Ephemeral public IP
@@ -105,14 +75,14 @@ resource "google_compute_instance" "default" {
     scopes = ["cloud-platform"]
   }
 
-  depends_on = [time_sleep.wait_gitlab_project_apis]
+  # depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
 
 resource "google_compute_firewall" "allow_http" {
   name    = "allow-http"
-  network = "default"
-  project = module.gitlab_project.project_id
+  network = module.vpc[local.index].network_name
+  project = local.project_id
 
   allow {
     protocol = "tcp"
@@ -122,13 +92,13 @@ resource "google_compute_firewall" "allow_http" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["git-vm"]
 
-  depends_on = [time_sleep.wait_gitlab_project_apis]
+  # depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
 resource "google_compute_firewall" "allow_https" {
   name    = "allow-https"
-  network = "default"
-  project = module.gitlab_project.project_id
+  network = module.vpc[local.index].network_name
+  project = local.project_id
 
   allow {
     protocol = "tcp"
@@ -138,21 +108,21 @@ resource "google_compute_firewall" "allow_https" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["git-vm"]
 
-  depends_on = [time_sleep.wait_gitlab_project_apis]
+  # depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
 resource "google_secret_manager_secret" "gitlab_webhook" {
-  project   = module.gitlab_project.project_id
+  project   = local.project_id
   secret_id = "gitlab-webhook"
   replication {
     auto {}
   }
 
-  depends_on = [time_sleep.wait_gitlab_project_apis]
+  # depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_iam_admin" {
-  project   = module.gitlab_project.project_id
+  project   = local.project_id
   secret_id = google_secret_manager_secret.gitlab_webhook.secret_id
   role      = "roles/secretmanager.admin"
   member    = google_service_account.int_test[local.index].member
@@ -175,15 +145,19 @@ output "gitlab_pat_secret_name" {
 }
 
 output "gitlab_project_number" {
-  value = module.gitlab_project.project_number
+  value = local.project_number
 }
 
 output "gitlab_url" {
   value = "https://${google_compute_instance.default.network_interface[0].access_config[0].nat_ip}.nip.io"
 }
 
+output "gitlab_internal_ip" {
+  value = google_compute_instance.default.network_interface[0].network_ip
+}
+
 output "gitlab_secret_project" {
-  value = module.gitlab_project.project_id
+  value = local.project_id
 }
 
 output "gitlab_instance_zone" {

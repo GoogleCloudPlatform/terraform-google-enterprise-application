@@ -24,12 +24,12 @@ locals {
 module "fleetscope_infra" {
   source = "../../3-fleetscope/modules/env_baseline"
 
-  env                    = local.env
-  cluster_project_id     = local.cluster_project_id
-  network_project_id     = local.network_project_id
-  fleet_project_id       = local.fleet_project_id
-  namespace_ids          = var.teams
-  cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
-  config_sync_secret_type = "token"
+  env                        = local.env
+  cluster_project_id         = local.cluster_project_id
+  network_project_id         = local.network_project_id
+  fleet_project_id           = local.fleet_project_id
+  namespace_ids              = var.teams
+  cluster_membership_ids     = module.multitenant_infra.cluster_membership_ids
+  config_sync_secret_type    = "token"
   config_sync_repository_url = "https://gitlab.com/user/root/config-sync-${local.env}.git"
 }

@@ -31,7 +31,7 @@ output "sa_key" {
 }
 
 output "envs" {
-  value = { for env, vpc in module.vpc : env => {
+  value = var.single_project ? {} : { for env, vpc in module.vpc : env => {
     org_id             = var.org_id
     folder_id          = module.folders[local.index].ids[env]
     billing_account    = var.billing_account
@@ -39,6 +39,26 @@ output "envs" {
     network_self_link  = vpc.network_self_link,
     subnets_self_links = vpc.subnets_self_links,
   } }
+}
+
+output "network_name" {
+  value = var.single_project ? module.vpc[local.index].network_name : null
+}
+
+output "network_id" {
+  value = var.single_project ? module.vpc[local.index].network_id : null
+}
+
+output "network_self_link" {
+  value = var.single_project ? module.vpc[local.index].network_self_link : null
+}
+
+output "subnetwork_name" {
+  value = var.single_project ? module.vpc[local.index].subnets_names[0] : null
+}
+
+output "subnetwork_self_link" {
+  value = var.single_project ? module.vpc[local.index].subnets_self_links[0] : null
 }
 
 output "common_folder_id" {

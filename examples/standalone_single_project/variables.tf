@@ -19,6 +19,31 @@ variable "project_id" {
   description = "Google Cloud project ID in which to deploy all example resources"
 }
 
+variable "network_name" {
+  type        = string
+  description = "Network name"
+}
+
+variable "network_self_link" {
+  type        = string
+  description = "Network self-link"
+}
+
+variable "network_id" {
+  type        = string
+  description = "Network id"
+}
+
+variable "subnetwork_name" {
+  type        = string
+  description = "Sub-Network name"
+}
+
+variable "subnetwork_self_link" {
+  type        = string
+  description = "Sub-Network self-link"
+}
+
 variable "region" {
   type        = string
   description = "Google Cloud region for deployments"

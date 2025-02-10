@@ -157,10 +157,10 @@ module "cicd" {
   app_build_trigger_yaml = "src/${each.value.team_name}/cloudbuild.yaml"
 
   additional_substitutions = {
-    _SERVICE     = each.value.service_name
-    _TEAM        = each.value.team_name
-    _HTTP_PROXY  = "http://${local.proxy_ip}:443"
-    _HTTPS_PROXY = "http://${local.proxy_ip}:443"
+    _SERVICE = each.value.service_name
+    _TEAM    = each.value.team_name
+    # _HTTP_PROXY  = "http://${local.proxy_ip}:443"
+    # _HTTPS_PROXY = "http://${local.proxy_ip}:443"
   }
 
   ci_build_included_files = ["src/${each.value.team_name}/**", "src/components/**"]
@@ -169,7 +169,7 @@ module "cicd" {
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
 
-  network_id = module.vpc.network_id
+  network_id = var.network_id
 
   depends_on = [time_sleep.wait_propagation]
 }

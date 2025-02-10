@@ -37,7 +37,7 @@ module "multitenant_infra" {
   source = "../../2-multitenant/modules/env_baseline"
 
   apps                   = local.apps
-  cluster_subnetworks    = [module.vpc.subnets_self_links[0]]
+  cluster_subnetworks    = [var.subnetwork_self_link]
   network_project_id     = var.project_id
   env                    = local.env
   cluster_type           = "AUTOPILOT"
