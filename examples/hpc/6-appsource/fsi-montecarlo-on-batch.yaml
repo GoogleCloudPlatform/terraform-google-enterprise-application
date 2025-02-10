@@ -20,7 +20,7 @@ vars:
   region: us-central1
   zone: us-central1-a
   cluster_name:  ## Set cluster name Here ##
-  cluster_project:  ## Set the GCP GKE Cluster Project 
+  cluster_project:  ## Set the GCP GKE Cluster Project
 deployment_groups:
 - group: setup
   modules:

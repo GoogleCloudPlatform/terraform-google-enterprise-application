@@ -256,3 +256,24 @@ Change directory to /examples/research/monte-carlo
 ```bash
 terraform destroy
 ```
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| cluster\_name | Name of the GKE Cluster to use for job submission | `string` | n/a | yes |
+| cluster\_project | Project that hosts the GKE Cluster | `string` | n/a | yes |
+| dataset\_id | Bigquery dataset id | `string` | n/a | yes |
+| gcs\_bucket\_path | Bucket name | `string` | `null` | no |
+| project\_id | ID of project in which GCS bucket will be created. | `string` | n/a | yes |
+| region | Region to run project | `string` | n/a | yes |
+| table\_id | Bigquery table id | `string` | n/a | yes |
+| topic\_id | Pubsub Topic Name | `string` | n/a | yes |
+| topic\_schema | Pubsub Topic schema | `string` | n/a | yes |
+
+## Outputs
+
+No outputs.
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

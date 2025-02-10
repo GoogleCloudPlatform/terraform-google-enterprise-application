@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 // These values are retrieved from the saved terraform state of the execution
 // of previous step using the terraform_remote_state data source.
 locals {
-  cluster_project_id = data.terraform_remote_state.multitenant.outputs.cluster_project_id
+  cluster_project_id       = data.terraform_remote_state.multitenant.outputs.cluster_project_id
   cluster_service_accounts = data.terraform_remote_state.multitenant.outputs.cluster_service_accounts
-  cluster_project_number = data.terraform_remote_state.multitenant.outputs.cluster_project_number
-  app_project_id     = data.terraform_remote_state.appfactory.outputs.app-group["hpc.montecarlo"].app_infra_project_ids[local.env]
+  cluster_project_number   = data.terraform_remote_state.multitenant.outputs.cluster_project_number
+  app_project_id           = data.terraform_remote_state.appfactory.outputs.app-group["hpc.montecarlo"].app_infra_project_ids[local.env]
 }
 
 data "terraform_remote_state" "multitenant" {

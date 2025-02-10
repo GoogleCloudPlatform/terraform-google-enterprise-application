@@ -4,12 +4,12 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
 
 ## Requirements
 
-- **Docker Registry Connectivity**  
+- **Docker Registry Connectivity**
   If you are using a private cluster with private nodes, they must be able to fetch Kueue Docker images from `registry.k8s.io`. This can be done by adding Cloud NAT to the private nodes network.
 
-- **Kueue**  
+- **Kueue**
   Install Kueue by running the following command:
-  
+
   ```bash
   kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
   ```
@@ -21,12 +21,12 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
   > ```
 
   Wait for Kueue installation to complete:
-  
+
   ```bash
   kubectl wait deploy/kueue-controller-manager -nkueue-system --for=condition=available --timeout=5m
   ```
 
-- **Kubectl with Cluster Connection**  
+- **Kubectl with Cluster Connection**
   If using a private cluster, you can use Connect Gateway.
 
   ```bash
