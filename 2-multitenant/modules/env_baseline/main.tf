@@ -193,7 +193,7 @@ resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 35.0"
+  version = "~> 36.0"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
   name                   = "cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
@@ -279,7 +279,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 35.0"
+  version = "~> 36.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
@@ -294,7 +294,6 @@ module "gke-autopilot" {
   ip_range_services   = each.value.secondary_ip_range[1].range_name
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
-  enable_gcfs         = true
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   enable_cost_allocation              = true

@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2024-2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,14 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
+	"github.com/alexflint/go-filemutex"
 	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/tidwall/gjson"
+)
+
+const (
+	credsMutexFilename = "creds.lock"
 )
 
 // fileExists check if a give file exists
@@ -135,5 +140,19 @@ func GetSecretFromSecretManager(t *testing.T, secretName string, secretProject s
 
 // Will connect to GKE private cluster using connect gateway, this allows running kubectl commands
 func ConnectToFleet(t *testing.T, clusterName string, location string, project string) {
+	CredsMutex, err := filemutex.New(filepath.Join(os.TempDir(), credsMutexFilename))
+	if err != nil {
+		t.Fatalf("creds lock file <%s> could not created: %v", filepath.Join(os.TempDir(), credsMutexFilename), err)
+	}
+
+	// allow only single gcloud/write
+	if err := CredsMutex.Lock(); err != nil {
+		t.Fatalf("Could not acquire creds lock: %v", err)
+	}
+	defer func() {
+		if err := CredsMutex.Unlock(); err != nil {
+			t.Fatalf("Could not release creds lock: %v", err)
+		}
+	}()
 	gcloud.Runf(t, "container fleet memberships get-credentials %s --location=%s --project=%s", clusterName, location, project)
 }

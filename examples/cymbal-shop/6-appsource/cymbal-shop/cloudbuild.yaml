@@ -13,7 +13,7 @@
 # limitations under the License.
 
 steps:
-  - name: gcr.io/k8s-skaffold/skaffold:v2.14.0
+  - name: gcr.io/k8s-skaffold/skaffold:v2.14.1
     args:
       - "skaffold"
       - "build"
