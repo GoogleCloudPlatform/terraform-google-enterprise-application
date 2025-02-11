@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2025 Google LLC
  *
@@ -85,7 +84,7 @@ resource "google_project_iam_member" "compute_sa_roles" {
 # TODO: Define exactly where to apply rbacrolebindings
 module "fleet_app_operator_permissions" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-app-operator-permissions"
-  version = "~> 35.0"
+  version = "~> 36.0"
 
   for_each = toset(["a", "b"])
 

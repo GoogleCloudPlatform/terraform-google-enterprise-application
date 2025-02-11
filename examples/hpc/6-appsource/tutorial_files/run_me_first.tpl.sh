@@ -13,20 +13,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+# shellcheck disable=SC2154
 export GKEBATCH_CLUSTER_NAME=${cluster_name}
 export GKEBATCH_REGION=${region}
 export GKEBATCH_PROJECT_ID=${project_id}
 export GKEBATCH_BUCKETNAME=${bucket_name}
 
-gcloud container fleet memberships get-credentials $GKEBATCH_CLUSTER_NAME \
-    --location=$GKEBATCH_REGION \
-    --project=$GKEBATCH_PROJECT_ID
+gcloud container fleet memberships get-credentials "$GKEBATCH_CLUSTER_NAME" \
+    --location="$GKEBATCH_REGION" \
+    --project="$GKEBATCH_PROJECT_ID"
 
-gcloud config set project $GKEBATCH_PROJECT_ID
-export GKEBATCH_PROJECT_NUMBER=`gcloud projects list \
+gcloud config set project "$GKEBATCH_PROJECT_ID"
+GKEBATCH_PROJECT_NUMBER=$(gcloud projects list \
 --filter="$(gcloud config get-value project)" \
---format="value(PROJECT_NUMBER)"`
+--format="value(PROJECT_NUMBER)")
+
+export GKEBATCH_PROJECT_NUMBER
 
 python3 -m pip install -q -r requirements.txt
 sudo apt-get install kubectl google-cloud-cli-gke-gcloud-auth-plugin
