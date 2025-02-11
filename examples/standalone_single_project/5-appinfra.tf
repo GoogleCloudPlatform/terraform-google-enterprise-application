@@ -159,8 +159,6 @@ module "cicd" {
   additional_substitutions = {
     _SERVICE = each.value.service_name
     _TEAM    = each.value.team_name
-    # _HTTP_PROXY  = "http://${local.proxy_ip}:443"
-    # _HTTPS_PROXY = "http://${local.proxy_ip}:443"
   }
 
   ci_build_included_files = ["src/${each.value.team_name}/**", "src/components/**"]
@@ -170,8 +168,6 @@ module "cicd" {
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
 
   network_id = var.network_id
-
-  depends_on = [time_sleep.wait_propagation]
 }
 
 data "google_project" "project" {
@@ -207,7 +203,6 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
 
 
 resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" ? 1 : 0
   perimeter = var.service_perimeter_name
   ingress_from {
     identities = local.sa_cb

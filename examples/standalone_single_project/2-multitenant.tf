@@ -18,8 +18,6 @@
 
 locals {
   env       = "development"
-  short_env = "develop"
-
   apps = {
     "cymbal-bank" : {
       "ip_address_names" : [

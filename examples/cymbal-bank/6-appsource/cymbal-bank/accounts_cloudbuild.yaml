@@ -48,9 +48,9 @@ steps:
       - "releases"
       - "create"
       - "$_TEAM-$SHORT_SHA-$$DATE-$$TIME"
-      - "--delivery-pipeline=$_TEAM"
+      - "--delivery-pipeline=$_SERVICE"
       - "--build-artifacts=/workspace/artifacts.json"
-      - "--skaffold-file=src/$_TEAM/skaffold.yaml"
+      - "--skaffold-file=src/$_TEAM/$_SERVICE/skaffold.yaml"
       - "--region=$LOCATION"
       - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET/$SHORT_SHA"
     env:
