@@ -24,42 +24,6 @@ module "vpc" {
   network_name    = "eab-vpc-${each.key}"
   shared_vpc_host = !var.single_project
 
-  egress_rules = [
-    {
-      name     = "allow-private-google-access"
-      priority = 200
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      destination_ranges = [
-        "34.126.0.0/18",
-        "199.36.153.8/30",
-      ]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["443"]
-        }
-      ]
-    },
-    {
-      name     = "allow-private-google-access-ipv6"
-      priority = 200
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      destination_ranges = [
-        "2600:2d00:2:2000::/64",
-        "2001:4860:8040::/42"
-      ]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["443"]
-        }
-      ]
-    }
-  ]
   ingress_rules = [
     {
       name     = "allow-ssh"
@@ -75,50 +39,22 @@ module "vpc" {
         }
       ]
     },
-    {
-      name     = "allow-internal"
-      priority = 65534
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      source_ranges = ["10.128.0.0/9"]
-      allow = [
-        {
-          protocol = "tcp"
-        },
-        {
-          protocol = "udp"
-        },
-        {
-          protocol = "icmp"
-        }
-      ]
-    },
-
-    {
-      name     = "allow-icmp"
-      priority = 65534
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      source_ranges = ["0.0.0.0/0"]
-      allow = [
-        {
-          protocol = "icmp"
-        }
-      ]
-    }
   ]
 
   subnets = concat([
     {
       subnet_name           = "eab-${each.key}-us-central1"
-      subnet_ip             = "10.10.10.0/24"
+      subnet_ip             = "10.1.20.0/24"
+      subnet_region         = "us-central1"
+      subnet_private_access = true
+      }, {
+      subnet_name           = "nat-subnet"
+      subnet_ip             = "10.1.0.0/24"
       subnet_region         = "us-central1"
       subnet_private_access = true
       }], !var.single_project ? [{
       subnet_name           = "eab-${each.key}-us-east4"
-      subnet_ip             = "10.10.20.0/24"
+      subnet_ip             = "10.1.10.0/24"
       subnet_region         = "us-east4"
       subnet_private_access = true
   }] : [])
@@ -164,12 +100,13 @@ resource "google_project_service" "servicenetworking" {
   disable_on_destroy = false
 }
 
-resource "google_compute_global_address" "worker_range" {
+resource "google_compute_global_address" "google_services" {
   for_each      = module.vpc
-  name          = "cga-worker"
+  name          = "google-services"
   project       = each.value.project_id
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
+  address       = "10.2.0.0"
   prefix_length = 24
   network       = each.value.network_id
 }
@@ -178,7 +115,7 @@ resource "google_service_networking_connection" "worker_pool_conn" {
   for_each                = module.vpc
   network                 = each.value.network_id
   service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.worker_range[each.key].name]
+  reserved_peering_ranges = [google_compute_global_address.google_services[each.key].name]
   depends_on              = [google_project_service.servicenetworking]
 }
 
@@ -196,17 +133,10 @@ module "private_service_connect" {
 resource "google_compute_network_peering_routes_config" "peering_routes" {
   for_each             = module.vpc
   project              = each.value.project_id
-  peering              = google_service_networking_connection.private_service_connect[each.key].peering
+  peering              = google_service_networking_connection.worker_pool_conn[each.key].peering
   network              = each.value.network_name
   import_custom_routes = true
   export_custom_routes = true
-}
-
-resource "google_service_networking_connection" "private_service_connect" {
-  for_each                = module.vpc
-  network                 = each.value.network_id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.worker_range[each.key].name]
 }
 
 module "firewall_rules" {
@@ -217,26 +147,130 @@ module "firewall_rules" {
   network_name = each.value.network_name
 
   rules = [{
-    name                    = "fw-b-cbpools-100-i-a-all-all-all-service-networking"
-    description             = "allow ingress from the IPs configured for service networking"
+    name                    = "allow-pool-to-nat"
     direction               = "INGRESS"
-    priority                = 100
+    priority                = 1000
     source_tags             = null
     source_service_accounts = null
-    target_tags             = null
+    target_tags             = ["nat-gateway"]
     target_service_accounts = null
 
-    ranges = ["${google_compute_global_address.worker_range[each.key].address}/${google_compute_global_address.worker_range[each.key].prefix_length}"]
+    ranges = ["${google_compute_global_address.google_services[each.key].address}/${google_compute_global_address.google_services[each.key].prefix_length}"]
 
     allow = [{
       protocol = "all"
       ports    = null
     }]
 
-    deny = []
-
     log_config = {
       metadata = "INCLUDE_ALL_METADATA"
     }
-  }]
+    },
+    {
+      name          = "default-allow-icmp"
+      description   = "Allow ICMP from anywhere"
+      direction     = "INGRESS"
+      priority      = 65534
+      source_ranges = ["0.0.0.0/0"]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      allow = [{
+        protocol = "icmp"
+      }]
+    }
+  ]
+}
+
+resource "google_compute_address" "cloud_build_nat" {
+  for_each     = module.vpc
+  project      = module.vpc[each.key].project_id
+  address_type = "EXTERNAL"
+  name         = "cloud-build-nat"
+  network_tier = "PREMIUM"
+  region       = "us-central1"
+}
+
+resource "google_compute_instance" "vm-proxy" {
+  for_each     = module.vpc
+  project      = module.vpc[each.key].project_id
+  name         = "cloud-build-nat-vm"
+  machine_type = "n2-standard-2"
+  zone         = "us-central1-a"
+
+  tags = ["direct-gateway-access", "nat-gateway"]
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-1404-trusty-v20160627"
+    }
+  }
+
+  network_interface {
+    network            = module.vpc[each.key].network_name
+    subnetwork         = module.vpc[each.key].subnets_names[1]
+    subnetwork_project = module.vpc[each.key].project_id
+
+    access_config {
+      nat_ip = google_compute_address.cloud_build_nat[each.key].address
+    }
+  }
+
+  can_ip_forward = true
+
+  metadata = {
+    enable-oslogin = "true"
+    startup-script = "sysctl -w net.ipv4.ip_forward=1\niptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F: '{print $2}') -j MASQUERADE"
+  }
+
+  # metadata_startup_script = <<EOT
+  # sysctl -w net.ipv4.ip_forward=1
+  # iptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F: '{print $2}') -j MASQUERADE
+  # EOT
+
+  service_account {
+    scopes = ["cloud-platform"]
+  }
+}
+
+resource "google_compute_route" "through-nat1" {
+  for_each          = module.vpc
+  name              = "through-nat1"
+  project           = module.vpc[each.key].project_id
+  dest_range        = "0.0.0.0/1"
+  network           = module.vpc[each.key].network_name
+  next_hop_instance = google_compute_instance.vm-proxy[each.key].id
+  priority          = 1000
+}
+
+resource "google_compute_route" "through-nat2" {
+  for_each          = module.vpc
+  project           = module.vpc[each.key].project_id
+  name              = "through-nat2"
+  dest_range        = "128.0.0.0/1"
+  network           = module.vpc[each.key].network_name
+  next_hop_instance = google_compute_instance.vm-proxy[each.key].id
+  priority          = 1000
+}
+
+resource "google_compute_route" "direct-to-gateway1" {
+  for_each         = module.vpc
+  name             = "direct-to-gateway1"
+  project          = module.vpc[each.key].project_id
+  dest_range       = "0.0.0.0/1"
+  network          = module.vpc[each.key].network_name
+  next_hop_gateway = "default-internet-gateway"
+  tags             = ["direct-gateway-access"]
+  priority         = 10
+}
+
+resource "google_compute_route" "direct-to-gateway2" {
+  for_each         = module.vpc
+  name             = "direct-to-gateway2"
+  project          = module.vpc[each.key].project_id
+  dest_range       = "128.0.0.0/1"
+  network          = module.vpc[each.key].network_name
+  next_hop_gateway = "default-internet-gateway"
+  tags             = ["direct-gateway-access"]
+  priority         = 10
 }

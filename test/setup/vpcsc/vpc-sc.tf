@@ -166,11 +166,11 @@ module "regular_service_perimeter" {
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
 
-  access_levels_dry_run           = var.service_perimeter_mode == "DRY_RUN" ? [module.access_level_members.name] : []
-  vpc_accessible_services_dry_run = var.service_perimeter_mode == "DRY_RUN" ? ["*"] : []
-  restricted_services_dry_run     = var.service_perimeter_mode == "DRY_RUN" ? local.supported_restricted_service : []
-  resources_dry_run               = var.service_perimeter_mode == "DRY_RUN" ? [var.project_number, var.gitlab_project_number] : []
-  egress_policies_dry_run = var.service_perimeter_mode == "DRY_RUN" ? [
+  access_levels_dry_run           = [module.access_level_members.name]
+  vpc_accessible_services_dry_run = ["*"]
+  restricted_services_dry_run     = local.supported_restricted_service
+  resources_dry_run               = [var.project_number, var.gitlab_project_number]
+  egress_policies_dry_run = [
     {
       from = {
         identity_type = "ANY_IDENTITY"
@@ -181,8 +181,27 @@ module "regular_service_perimeter" {
           "compute.googleapis.com" = { methods = ["*"] }
         }
       }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/342927644502",
+          "projects/213358688945",
+          "projects/907015832414"
+        ] //google project, bank of anthos
+        operations = {
+          "cloudbuild.googleapis.com"       = { methods = ["*"] }
+          "artifactregistry.googleapis.com" = { methods = ["*"] }
+          "secretmanager.googleapis.com"    = { methods = ["*"] }
+          "logging.googleapis.com"          = { methods = ["*"] }
+        }
+
+      }
     }
-  ] : []
+  ]
 
   access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
   vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
@@ -198,6 +217,25 @@ module "regular_service_perimeter" {
         operations = {
           "compute.googleapis.com" = { methods = ["*"] }
         }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/342927644502",
+          "projects/213358688945",
+          "projects/907015832414"
+        ] //google project, bank of anthos
+        operations = {
+          "cloudbuild.googleapis.com"       = { methods = ["*"] }
+          "artifactregistry.googleapis.com" = { methods = ["*"] }
+          "secretmanager.googleapis.com"    = { methods = ["*"] }
+          "logging.googleapis.com"          = { methods = ["*"] }
+        }
+
       }
     }
   ] : []
