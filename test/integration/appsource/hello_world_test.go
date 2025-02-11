@@ -180,7 +180,7 @@ func TestSourceHelloWorld(t *testing.T) {
 								promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s", releaseName, serviceName, region, nextTargetId)
 								t.Logf("Promoting release to next target: %s", nextTargetId)
 								// Execute the promote command
-								gcloud.Runf(t, promoteCmd).String()
+								gcloud.Runf(t, promoteCmd)
 							}
 						}
 						return false, nil
