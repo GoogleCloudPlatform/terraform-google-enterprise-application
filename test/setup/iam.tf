@@ -100,11 +100,38 @@ resource "google_project_iam_member" "cb_service_agent_role" {
   depends_on = [module.project, module.project_standalone]
 }
 
-resource "google_project_iam_member" "compute_service_agent_role" {
+resource "google_project_iam_member" "google_services_network_user_role" {
   for_each = { for i, value in merge(module.project, module.project_standalone) : (i) => value }
   project  = each.value.project_id
   role     = "roles/compute.networkUser"
   member   = "serviceAccount:${local.project_number}@cloudservices.gserviceaccount.com"
+
+  depends_on = [module.project, module.project_standalone]
+}
+
+resource "google_project_iam_member" "compute_engine_service_agent_role" {
+  for_each = { for i, value in merge(module.project, module.project_standalone) : (i) => value }
+  project  = each.value.project_id
+  role     = "roles/compute.serviceAgent"
+  member   = "serviceAccount:service-${local.project_number}@compute-system.iam.gserviceaccount.com"
+
+  depends_on = [module.project, module.project_standalone]
+}
+
+resource "google_project_iam_member" "compute_engine_service_usage_role" {
+  for_each = { for i, value in merge(module.project, module.project_standalone) : (i) => value }
+  project  = each.value.project_id
+  role     = "roles/serviceusage.serviceUsageConsumer"
+  member   = "serviceAccount:service-${local.project_number}@compute-system.iam.gserviceaccount.com"
+
+  depends_on = [module.project, module.project_standalone]
+}
+
+resource "google_project_iam_member" "compute_engine_default_service_agent_role" {
+  for_each = { for i, value in merge(module.project, module.project_standalone) : (i) => value }
+  project  = each.value.project_id
+  role     = "roles/compute.serviceAgent"
+  member   = "serviceAccount:${local.project_number}-compute@developer.gserviceaccount.com"
 
   depends_on = [module.project, module.project_standalone]
 }
