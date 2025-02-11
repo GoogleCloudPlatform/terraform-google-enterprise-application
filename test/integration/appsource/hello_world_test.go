@@ -103,7 +103,6 @@ func TestSourceHelloWorld(t *testing.T) {
 			gitAppRun("config", "http.postBuffer", "157286400")
 			gitAppRun("checkout", "-b", "main")
 			gitAppRun("remote", "add", "google", appRepo)
-			gitAppRun("push", "google", ":main")
 
 			// copy contents from 6-appsource to the cloned repository
 			err := cp.Copy(appSourcePath, tmpDirApp)
