@@ -17,7 +17,7 @@
 # 2-multitenantl
 
 locals {
-  env       = "development"
+  env = "development"
   apps = {
     "cymbal-bank" : {
       "ip_address_names" : [
