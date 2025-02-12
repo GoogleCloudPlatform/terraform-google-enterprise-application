@@ -38,3 +38,9 @@ variable "single_project" {
   description = "The example which will be tested, if is true, single project infra will be created; if is false multitentant infra will be created"
   type        = bool
 }
+
+variable "create_cloud_nat" {
+  description = "Create NAT router on cluster network."
+  type        = bool
+  default     = false
+}
