@@ -32,6 +32,10 @@ module "project_standalone" {
 
   activate_api_identities = [
     {
+      api   = "artifactregistry.googleapis.com",
+      roles = ["roles/artifactregistry.serviceAgent"]
+    },
+    {
       api   = "compute.googleapis.com",
       roles = []
     },

@@ -80,8 +80,6 @@ module "vpc" {
         ip_cidr_range = "192.168.192.0/18"
       },
   ] } : {})
-
-  depends_on = [google_project_iam_member.int_test_vpc]
 }
 
 resource "google_dns_policy" "default_policy" {

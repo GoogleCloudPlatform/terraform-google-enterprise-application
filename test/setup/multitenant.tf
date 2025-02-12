@@ -49,8 +49,6 @@ module "project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  svpc_host_project_id = module.vpc_project[local.envs[0]].project_id
-
   activate_apis = [
     "accesscontextmanager.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -87,6 +85,8 @@ module "project" {
       roles = ["roles/cloudconfig.serviceAgent"]
     }
   ]
+
+  depends_on = [module.vpc]
 }
 # Create mock common folder
 module "folder_common" {
@@ -145,7 +145,7 @@ module "vpc_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  enable_shared_vpc_host_project = !var.single_project
+  # enable_shared_vpc_host_project = !var.single_project
 
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
@@ -155,4 +155,11 @@ module "vpc_project" {
     "serviceusage.googleapis.com",
     "servicenetworking.googleapis.com",
   ]
+}
+
+resource "google_compute_shared_vpc_service_project" "shared_vpc_attachment" {
+  for_each        = !var.single_project ? { (local.index) = true } : {}
+  provider        = google-beta
+  host_project    = module.vpc_project[local.envs[0]].project_id
+  service_project = module.project[local.index].project_id
 }
