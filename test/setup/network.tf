@@ -223,11 +223,6 @@ resource "google_compute_instance" "vm-proxy" {
     startup-script = "sysctl -w net.ipv4.ip_forward=1\niptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F: '{print $2}') -j MASQUERADE"
   }
 
-  # metadata_startup_script = <<EOT
-  # sysctl -w net.ipv4.ip_forward=1
-  # iptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F: '{print $2}') -j MASQUERADE
-  # EOT
-
   service_account {
     scopes = ["cloud-platform"]
   }
