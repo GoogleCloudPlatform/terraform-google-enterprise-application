@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-    bucket = "bkt-prj-b-seed-tfstate-3dfe"
-    prefix = "terraform/bootstrap"
-  }
+project_id = "<YOUR-PROJECT-ID>"
+network_id = "<YOUR-NETWORK-ID>"
+subnetwork_self_link = "<YOUR-CLUSTER-SUBNETWORK-SELF-LINK>"
+teams = {
+  "namespace" = "your-group@yourdomain.com",
 }
+service_perimeter_name = "<YOUR-SERVICE-PERIMETER-NAME>"
+service_perimeter_mode = "DRY_RUN"
