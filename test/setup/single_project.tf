@@ -32,12 +32,12 @@ module "project_standalone" {
 
   activate_api_identities = [
     {
-      api = "compute.googleapis.com",
-      roles = [
-        "roles/compute.admin",
-        "roles/compute.serviceAgent",
-        "roles/serviceusage.serviceUsageConsumer"
-      ]
+      api   = "compute.googleapis.com",
+      roles = []
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkUser", "roles/serviceusage.serviceUsageConsumer", "roles/container.serviceAgent"]
     },
     {
       api = "cloudbuild.googleapis.com",

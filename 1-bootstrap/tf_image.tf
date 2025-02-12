@@ -52,6 +52,12 @@ resource "google_project_iam_member" "builder_object_user" {
   role    = "roles/storage.objectUser"
 }
 
+resource "google_project_iam_member" "builder_logging_writer" {
+  member  = google_service_account.builder.member
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+}
+
 resource "google_artifact_registry_repository_iam_member" "builder" {
   project    = google_artifact_registry_repository.tf_image.project
   location   = google_artifact_registry_repository.tf_image.location

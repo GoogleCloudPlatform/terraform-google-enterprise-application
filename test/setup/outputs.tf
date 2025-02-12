@@ -46,7 +46,7 @@ output "network_name" {
 }
 
 output "network_id" {
-  value = var.single_project ? module.vpc[local.index].network_id : null
+  value = var.single_project ? module.vpc[local.index].network_id : module.vpc[local.envs[0]].network_id
 }
 
 output "network_project_number" {

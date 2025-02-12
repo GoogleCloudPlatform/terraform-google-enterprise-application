@@ -33,6 +33,8 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | gitlab\_webhook\_secret\_id | n/a |
 | network\_id | n/a |
 | network\_name | n/a |
+| network\_project\_id | n/a |
+| network\_project\_number | n/a |
 | network\_self\_link | n/a |
 | org\_id | n/a |
 | project\_id | n/a |

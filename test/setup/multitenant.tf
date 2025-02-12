@@ -49,18 +49,21 @@ module "project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
+  svpc_host_project_id = module.vpc_project[local.envs[0]].project_id
+
   activate_apis = [
+    "accesscontextmanager.googleapis.com",
+    "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
-    "compute.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
     "iam.googleapis.com",
-    "storage-api.googleapis.com",
     "servicemanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "accesscontextmanager.googleapis.com"
+    "storage-api.googleapis.com",
   ]
 
   activate_api_identities = [
@@ -141,6 +144,8 @@ module "vpc_project" {
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+
+  enable_shared_vpc_host_project = !var.single_project
 
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
