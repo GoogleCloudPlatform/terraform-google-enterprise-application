@@ -99,7 +99,8 @@ module "tf_cloudbuild_workspace" {
   cloudbuild_sa_roles = {
     "roles" = {
       project_id = var.project_id
-    roles = local.cb_config[each.key].roles }
+      roles      = local.cb_config[each.key].roles
+    }
   }
 
   substitutions = {
@@ -107,8 +108,24 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = google_artifact_registry_repository.tf_image.project
     "_GAR_REPOSITORY"               = google_artifact_registry_repository.tf_image.name
     "_DOCKER_TAG_VERSION_TERRAFORM" = local.docker_tag_version_terraform
+    _PRIVATE_POOL                   = google_cloudbuild_worker_pool.pool.id
   }
-
+  enable_worker_pool = true
   # Branches to run the build
   tf_apply_branches = var.tf_apply_branches
+}
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool-bootstrap"
+  project  = var.project_id
+  location = var.location
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = var.network_id
+    peered_network_ip_range = "/29"
+  }
 }
