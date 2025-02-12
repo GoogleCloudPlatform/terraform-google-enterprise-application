@@ -69,6 +69,14 @@ resource "google_project_iam_member" "int_test" {
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
+resource "google_project_iam_member" "int_test_vpc" {
+  for_each = module.vpc_project
+
+  project = each.value.project_id
+  role    = "roles/compute.networkAdmin"
+  member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
 resource "google_organization_iam_member" "organizationServiceAgent_role" {
   org_id = var.org_id
   role   = "roles/privilegedaccessmanager.organizationServiceAgent"

@@ -49,6 +49,14 @@ output "network_id" {
   value = var.single_project ? module.vpc[local.index].network_id : null
 }
 
+output "network_project_number" {
+  value = [for value in module.vpc_project : value.project_number]
+}
+
+output "network_project_id" {
+  value = [for value in module.vpc_project : value.project_id]
+}
+
 output "network_self_link" {
   value = var.single_project ? module.vpc[local.index].network_self_link : null
 }

@@ -25,8 +25,13 @@ variable "project_id" {
 }
 
 variable "project_number" {
-  description = "The project_id"
+  description = "The project_number"
   type        = string
+}
+
+variable "network_project_number" {
+  description = "The Networks project_number"
+  type        = list(string)
 }
 
 variable "gitlab_project_number" {
