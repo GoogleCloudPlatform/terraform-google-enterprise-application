@@ -96,10 +96,9 @@ func TestSourceHelloWorld(t *testing.T) {
 				}
 			}
 
-			gitAppRun("clone", "--branch", "v0.10.1", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
+			gitAppRun("init", tmpDirApp)
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
-			gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 			gitAppRun("config", "init.defaultBranch", "main")
 			gitAppRun("config", "http.postBuffer", "157286400")
 			gitAppRun("checkout", "-b", "main")
@@ -172,6 +171,17 @@ func TestSourceHelloWorld(t *testing.T) {
 					latestRolloutState := rollouts[0].Get("state").String()
 					if latestRolloutState == "SUCCEEDED" {
 						t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
+						// if the application has more than one deploy target, promote it
+						if len(deployTargets.Array()) > 1 {
+							// start promoting for n+1
+							for i := 1; i < len(deployTargets.Array()); i++ {
+								nextTargetId := deployTargets.Array()[i]
+								promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s", releaseName, serviceName, region, nextTargetId)
+								t.Logf("Promoting release to next target: %s", nextTargetId)
+								// Execute the promote command
+								gcloud.Runf(t, promoteCmd)
+							}
+						}
 						return false, nil
 					} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
 						t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
