@@ -30,5 +30,14 @@ var (
 
 		// Error 400: Service account service-{}@gcp-sa-mcsd.iam.gserviceaccount.com does not exist.*"
 		".*Error 400: Service account service-.*@gcp-sa-mcsd.iam.gserviceaccount.com does not exist.*": "Multi-cluster Service Discovery Service Account does not exist.",
+
+		// Error code 16, message: Request had invalid authentication credentials.*
+		".*Error code 16, message: Request had invalid authentication credentials.*": "Request had invalid authentication credentials.",
+
+		// Error waiting for Creating Repository: Error code 13, message: Internal error encountered.
+		".*Error code 13, message: Internal error encountered*": "Internal error encountered",
+
+		// generic::permission_denied: Request is prohibited by organization's policy.
+		".*Request is prohibited by organization's policy*.": "VPC-SC propagation.",
 	}
 )

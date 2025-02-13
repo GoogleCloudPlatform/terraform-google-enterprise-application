@@ -84,4 +84,5 @@ module "components" {
 
   service_perimeter_mode = var.service_perimeter_mode
   service_perimeter_name = var.service_perimeter_name
+  shared_vpc_project_id  = var.shared_vpc_project_id
 }

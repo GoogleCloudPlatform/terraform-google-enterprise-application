@@ -170,6 +170,12 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
+variable "shared_vpc_project_id" {
+  description = "Shared VPC Project ID."
+  type        = string
+  default     = null
+}
+
 variable "service_perimeter_name" {
   description = "Service perimeter full name."
   type        = string

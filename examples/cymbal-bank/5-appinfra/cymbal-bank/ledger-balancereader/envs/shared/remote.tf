@@ -25,7 +25,6 @@ locals {
     )
   )
   app_admin_project = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.balancereader"].app_admin_project_id
-  network_id        = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.balancereader"].network_id
 }
 
 data "terraform_remote_state" "multitenant" {

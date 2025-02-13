@@ -48,6 +48,6 @@ module "app" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  network_id = local.network_id[0]
+  network_id = var.network_id
 
 }

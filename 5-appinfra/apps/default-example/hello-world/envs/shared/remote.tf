@@ -25,7 +25,6 @@ locals {
     )
   )
   app_admin_project = data.terraform_remote_state.appfactory.outputs.app-group["default-example.hello-world"].app_admin_project_id
-  network_id        = distinct({ for item in data.terraform_remote_state.multitenant : (item.outputs.env) => values(item.outputs.network_id) })
 }
 
 data "terraform_remote_state" "multitenant" {
