@@ -146,12 +146,10 @@ func TestAppInfra(t *testing.T) {
 					assert.Subset(arRegistrySaListMembers, arRegistryIAMMembers, fmt.Sprintf("artifact registry %s should have artifactregistry.reader.", arRegistryIAMMembers))
 
 					cloudDeployServiceAccountEmail := fmt.Sprintf("deploy-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID)
-					//TODO: Is this needed? (no return captured/asserted)
-					//gcloud.Runf(t, "iam service-accounts describe %s --project %s", cloudDeployServiceAccountEmail, servicesInfoMap[fullServiceName].ProjectID)
+					gcloud.Runf(t, "iam service-accounts describe %s --project %s", cloudDeployServiceAccountEmail, servicesInfoMap[fullServiceName].ProjectID)
 
 					ciServiceAccountEmail := fmt.Sprintf("ci-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID)
-					//TODO: Is this needed? (no return captured/asserted)
-					//gcloud.Runf(t, "iam service-accounts describe %s --project %s", ciServiceAccountEmail, servicesInfoMap[fullServiceName].ProjectID)
+					gcloud.Runf(t, "iam service-accounts describe %s --project %s", ciServiceAccountEmail, servicesInfoMap[fullServiceName].ProjectID)
 
 					cloudBuildBucketNames := []string{
 						fmt.Sprintf("build-cache-%s-%s", servicesInfoMap[fullServiceName].ServiceName, projectNumber),
