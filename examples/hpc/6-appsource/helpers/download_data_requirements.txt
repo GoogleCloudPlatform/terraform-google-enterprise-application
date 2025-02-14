@@ -1,7 +1,0 @@
-absl-py
-google-auth
-google-cloud
-google-cloud-storage
-yfinance
-PyYAML
-pandas

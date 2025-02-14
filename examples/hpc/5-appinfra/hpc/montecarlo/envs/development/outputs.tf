@@ -14,6 +14,3 @@
  * limitations under the License.
  */
 
-output "stocks_data_bucket_name" {
-  value = module.provision-monte-carlo-infra.stocks_data_bucket_name
-}

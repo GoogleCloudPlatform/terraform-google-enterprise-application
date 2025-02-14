@@ -5,7 +5,5 @@ google-cloud
 google-cloud-batch
 google-cloud-pubsub
 google-cloud-bigquery
-google-cloud-storage
 yfinance
 PyYAML
-pandas

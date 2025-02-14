@@ -81,7 +81,7 @@ func deployClusterToolkitBlueprint(t *testing.T, projectID string, clusterName s
 	}
 }
 
-func getNotebookBucketUrl(t *testing.T) string {
+func getBucketUrl(t *testing.T) string {
 	gclusterPrimaryGroupOutputPath := "/workspace/examples/hpc/6-appsource/montecarlo2/primary"
 	cmd := shell.Command{
 		Command: "terraform",
@@ -100,10 +100,10 @@ func getNotebookBucketUrl(t *testing.T) string {
 }
 
 func runBatchJobs(t *testing.T) {
-	notebookBucketUrl := getNotebookBucketUrl(t)
-	gcloud.Runf(t, "storage cp -r %s /tmp", notebookBucketUrl)
-	notebookBucketName := strings.TrimPrefix(notebookBucketUrl, "gs://")
-	codeDirectory := fmt.Sprintf("/tmp/%s", notebookBucketName)
+	bucketUrl := getBucketUrl(t)
+	gcloud.Runf(t, "storage cp -r %s /tmp", bucketUrl)
+	bucketName := strings.TrimPrefix(bucketUrl, "gs://")
+	codeDirectory := fmt.Sprintf("/tmp/%s", bucketName)
 
 	// Create a virtual environment
 	venvCmd := shell.Command{
@@ -146,51 +146,6 @@ func runBatchJobs(t *testing.T) {
 	}
 }
 
-func runDownloadDataScript(t *testing.T, infraProject string) {
-	codeDirectory := "/workspace/examples/hpc/6-appinfra/helpers"
-	stocksBucketName := fmt.Sprintf("%s-stocks-historical-data", infraProject)
-
-	// Create a virtual environment
-	venvCmd := shell.Command{
-		Command:    "python3",
-		WorkingDir: codeDirectory,
-		Args: []string{
-			"-m", "venv", "/tmp/download-data",
-		},
-	}
-	_, err := shell.RunCommandAndGetStdOutE(t, venvCmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	pipCmd := shell.Command{
-		Command:    "/tmp/download-data/bin/python",
-		WorkingDir: codeDirectory,
-		Args: []string{
-			"-m", "pip", "install",
-			"-q",
-			"-r",
-			"download_data_requirements.txt",
-		},
-	}
-	_, err = shell.RunCommandAndGetStdOutE(t, pipCmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	downloadDataCmd := shell.Command{
-		Command:    "/tmp/download-data/bin/python",
-		WorkingDir: codeDirectory,
-		Args: []string{
-			"download_data.py", fmt.Sprintf("--bucket_name=%s", stocksBucketName),
-		},
-	}
-	_, err = shell.RunCommandAndGetStdOutE(t, downloadDataCmd)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestHPCMonteCarloE2E(t *testing.T) {
 	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
 	// retrieve cluster location and fleet membership from 2-multitenant
@@ -221,9 +176,6 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		t.Log("Running 'download_data.py' python script to download historical ticker data and upload to bucket:")
-		runDownloadDataScript(t, infraProject)
 
 		t.Log("Deploying Cluster Blueprint:")
 		setupClusterToolkitInTmpDirectory(t)

@@ -91,35 +91,6 @@ CLUSTER_PROJECT=REPLACE_WITH_CLUSTER_PROJECT
 
 ### Run the Simulation Jobs and Visualize the Results
 
-#### Requisites before running
-
-Before running the jobs, historical stocks data must be download and uploaded to a bucket, which will then be used by the containers that run the jobs. This allows isolating the container from the internet and running the simulation in a Secure environment.
-
-You can find an auxiliary script on `helpers` named `download_data.py`. Which will use `yfinance` library to download stocks data and a Google Cloud Storage Python Client will upload this data in the required format with the required parameters. Here is a step-by-step to download the data and upload it.
-
-**IMPORTANT**: The script must be run in an authenticated environment that has access to the internet. It will use Application Default Credentials (ADC) to authenticate with the bucket that was created on 5-appinfra stage.
-
-1. Navigate to `helpers` directory.
-
-1. Before running the Script, you will need to download the script dependencies, by running:
-
-```bash
-pip install -r download_data_requirements.txt
-```
-
-1. A bucket is created in 5-appinfra stage and is passed as a flag (`--bucket_name=YOUR_BUCKET_NAME`) to the script, you should use this bucket as the parameter. It follows the naming `${var.infra_project}-stocks-historical-data`. Alternatively, if you have access to the terraform state, you may also retrieve the bucket name by running `terraform -chdir="../../5-appinfra/envs/development" output -raw stocks_data_bucket_name`.
-
-1. To download data for all tickers that will be used for the simulation, execute the script by running:
-
-```bash
-BUCKET_NAME=YOUR_BUCKET_NAME
-python3 dowload_data.py --bucket_name=$BUCKET_NAME
-```
-
-After uploading the data to the bucket, you may proceed.
-
-#### Follow the tutorial on the original repository
-
 Follow the steps outlined in the following document, after the "Open the Vertex AI Workbench Notebook" section:
 
 [Open the Vertex AI Workbench Notebook](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/0e3134b8478f3ffaa12031d7fda3ac6b94e61b17/examples/research/monte-carlo#open-the-vertex-ai-workbench-notebook)

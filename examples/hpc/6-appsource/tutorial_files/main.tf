@@ -36,10 +36,8 @@ data "template_file" "settings_toml" {
     bucket_name          = local.bucket
     region               = var.region
     gke_cluster_endpoint = local.gke_cluster_endpoint
-    stocks_bucket_name   = "${var.project_id}-stocks-historical-data"
   }
 }
-
 resource "google_storage_bucket_object" "settings_obj_toml" {
   name    = "settings.toml"
   content = data.template_file.settings_toml.rendered
