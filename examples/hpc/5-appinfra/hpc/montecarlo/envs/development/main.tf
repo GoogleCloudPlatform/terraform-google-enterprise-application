@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/* TODO: When renaming the environment, consider updating:
+ * - the cluster environment in (2-multitenant)
+ * - the fleetscope namespace suffixes (3-fleetscope)
+ * - the infrastructure project in (4-appfactory)
+ */
 locals {
   env = "development"
 }
