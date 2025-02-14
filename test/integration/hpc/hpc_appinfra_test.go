@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
@@ -86,6 +87,17 @@ func TestHPCAppInfra(t *testing.T) {
 				)
 				appService.DefineVerify(func(assert *assert.Assertions) {
 					appService.DefaultVerify(assert)
+				})
+
+				appService.DefineTeardown(func(assert *assert.Assertions) {
+					infraProjectID := appFactory.GetJsonOutput("app-group").Get("hpc\\.montecarlo.app_infra_project_ids.development").String()
+					zone := "us-central1-a"
+					instances := gcloud.Runf(t, "workbench instances list --location=%s --project=%s", zone, infraProjectID).Array()
+					for _, instance := range instances {
+						name := instance.Get("name")
+						gcloud.Runf(t, "workbench instances delete %s --location=%s --project=%s", name, zone, infraProjectID)
+					}
+					appService.DefaultTeardown(assert)
 				})
 				appService.Test()
 			})
