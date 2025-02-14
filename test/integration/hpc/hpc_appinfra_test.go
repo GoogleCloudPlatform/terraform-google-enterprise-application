@@ -74,7 +74,8 @@ func TestHPCAppInfra(t *testing.T) {
 				t.Parallel()
 
 				vars := map[string]interface{}{
-					"remote_state_bucket": remoteState,
+					"remote_state_bucket":  remoteState,
+					"bucket_force_destroy": "true",
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
