@@ -172,7 +172,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestAppInfra --stage teardown --verbose",
+        "cft test run TestHPCAppInfra --stage teardown --verbose",
       ]
     waitFor:
       - monte-carlo-simulation-e2e
@@ -188,7 +188,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestAppfactory --stage teardown --verbose",
+        "cft test run TestHPCAppfactory --stage teardown --verbose",
       ]
     waitFor:
       - appinfra-teardown
