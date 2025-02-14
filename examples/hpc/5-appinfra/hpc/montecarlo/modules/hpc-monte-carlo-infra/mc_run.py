@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2024-2025 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# flake8: noqa
 
 
 """
@@ -25,7 +24,8 @@ import numpy
 import os
 import time
 import yfinance as yf
-
+from google.cloud import storage
+import pandas as pd
 from absl import app
 from absl import flags
 from avro.io import DatumWriter, BinaryEncoder
@@ -37,6 +37,7 @@ from google.cloud.pubsub import SchemaServiceClient
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string("project_id", None, "Google Cloud Project ID")
+flags.DEFINE_string("bucket_name", None, "Bucket where ticker data is located")
 flags.DEFINE_string("incoming_topic_id", None, "Pubsub Topic ID for Pubsub to Bigquery")
 flags.DEFINE_string(
     "incoming_topic_schema", None, "Pubsub Schema for Pubsub to Bigquery"
@@ -64,7 +65,7 @@ flags.DEFINE_boolean("print_raw", True, "Dump raw data.")
 flags.mark_flag_as_required("project_id")
 flags.mark_flag_as_required("incoming_topic_id")
 flags.mark_flag_as_required("incoming_topic_schema")
-
+flags.mark_flag_as_required("bucket_name")
 
 class VaRSimulator:
     def __init__(self):
@@ -73,6 +74,7 @@ class VaRSimulator:
         self.end_date = f'{(datetime.strptime(FLAGS.start_date,"%Y-%m-%d") + timedelta(days = FLAGS.calendar_days)).date()}'
         self.calendar_days = FLAGS.calendar_days
         self.epoch_time = FLAGS.epoch_time
+        self.bucket_name = FLAGS.bucket_name
         self.iteration = 1
 
     def get_data(self):
@@ -80,10 +82,11 @@ class VaRSimulator:
 
     def get_historical_data_yahoo(self):
         # get historical market data: https://pypi.org/project/yfinance/
-
-        self.raw_data = yf.Ticker(self.ticker).history(
-            start=self.start_date, end=self.end_date
-        )
+        client = storage.Client()
+        bucket = client.bucket(self.bucket_name)
+        blob = bucket.blob(f"{self.ticker}_{self.start_date}_{self.end_date}.csv")
+        csv_string = blob.download_as_text()
+        self.raw_data = pd.read_csv(io.StringIO(csv_string), index_col=0, parse_dates=True)
         self.data = self.raw_data.Close
         if len(self.data) == 0:
             print(f"No data for ticker {self.ticker}")

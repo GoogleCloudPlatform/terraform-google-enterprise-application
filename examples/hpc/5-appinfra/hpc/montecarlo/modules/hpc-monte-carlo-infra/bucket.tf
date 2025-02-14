@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
-output "stocks_data_bucket_name" {
-  value = module.provision-monte-carlo-infra.stocks_data_bucket_name
+resource "google_storage_bucket" "stocks_data" {
+  name          = "${var.infra_project}-stocks-historical-data"
+  location      = var.region
+  force_destroy = var.bucket_force_destroy
+
+  public_access_prevention    = "enforced"
+  uniform_bucket_level_access = true
 }

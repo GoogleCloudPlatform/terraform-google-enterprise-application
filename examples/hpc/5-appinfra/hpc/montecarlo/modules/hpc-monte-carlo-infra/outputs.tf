@@ -15,5 +15,5 @@
  */
 
 output "stocks_data_bucket_name" {
-  value = module.provision-monte-carlo-infra.stocks_data_bucket_name
+  value = google_storage_bucket.stocks_data.name
 }

@@ -50,3 +50,9 @@ variable "cluster_service_accounts" {
   description = "A map of service accounts emails associated with the Kubernetes cluster, these will be granted access to created Docker images."
   type        = map(any)
 }
+
+variable "bucket_force_destroy" {
+  description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
+  type        = bool
+  default     = false
+}
