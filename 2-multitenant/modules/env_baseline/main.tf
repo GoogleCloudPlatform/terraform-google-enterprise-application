@@ -39,6 +39,7 @@ locals {
         max_unavailable = 0
         autoscaling     = true
         location_policy = "BALANCED"
+        sandbox_enabled = true
       }
     ] : []
   }
