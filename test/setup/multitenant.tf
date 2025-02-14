@@ -32,6 +32,8 @@ locals {
       }
     ]
   ]) : []
+
+  create_nat_iterator = var.create_cloud_nat ? module.vpc : {}
 }
 
 module "project" {
@@ -242,7 +244,7 @@ resource "google_compute_router" "nat_router" {
 }
 
 resource "google_compute_router_nat" "cloud_nat" {
-  for_each = module.vpc
+  for_each = local.create_nat_iterator
 
   name                               = "cloud-nat"
   router                             = google_compute_router.nat_router[each.key].name

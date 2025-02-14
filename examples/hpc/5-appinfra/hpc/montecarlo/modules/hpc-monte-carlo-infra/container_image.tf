@@ -79,7 +79,7 @@ resource "google_artifact_registry_repository" "research_images" {
 
 module "build_mc_run_image_image" {
   source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.1"
+  version = "~> 3.5"
   upgrade = false
 
   create_cmd_triggers = {
@@ -87,7 +87,20 @@ module "build_mc_run_image_image" {
   }
 
   create_cmd_entrypoint = "bash"
-  create_cmd_body       = "gcloud builds submit ${path.module} --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} --project=${var.infra_project} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} || ( sleep 45 && gcloud builds submit ${path.module} --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} --project=${var.infra_project} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} )"
+
+  create_cmd_body = <<EOF
+gcloud builds submit ${path.module} \
+  --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} \
+  --project=${var.infra_project} \
+  --service-account=${google_service_account.builder.id} \
+  --gcs-log-dir=${google_storage_bucket.build_logs.url} || (
+    sleep 45 && gcloud builds submit ${path.module} \
+      --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} \
+      --project=${var.infra_project} \
+      --service-account=${google_service_account.builder.id} \
+      --gcs-log-dir=${google_storage_bucket.build_logs.url}
+  )
+EOF
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }

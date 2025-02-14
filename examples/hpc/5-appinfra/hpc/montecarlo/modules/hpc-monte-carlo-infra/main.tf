@@ -16,27 +16,26 @@
 
 locals {
   docker_tag_version_terraform = "v1"
+  teams_suffix                 = ["a", "b"]
 }
 
-resource "google_project_iam_member" "storage_objectuser" {
-  for_each = toset(["a", "b"])
-  project  = var.infra_project
-  role     = "roles/storage.objectUser"
-  member   = "principalSet://iam.googleapis.com/projects/${var.cluster_project_number}/locations/global/workloadIdentityPools/${var.cluster_project}.svc.id.goog/namespace/hpc-team-${each.value}-${var.env}"
-}
+resource "google_project_iam_member" "team_roles" {
+  for_each = {
+    for o in flatten([
+      for team in local.teams_suffix : [
+        for role in ["roles/storage.objectUser", "roles/pubsub.publisher", "roles/pubsub.viewer"] :
+        {
+          "team" : team,
+          "role" : role
+        }
+      ]
+    ]) :
+    "${o.team}/${o.role}" => o
+  }
 
-resource "google_project_iam_member" "pubsub_publisher" {
-  for_each = toset(["a", "b"])
-  project  = var.infra_project
-  role     = "roles/pubsub.publisher"
-  member   = "principalSet://iam.googleapis.com/projects/${var.cluster_project_number}/locations/global/workloadIdentityPools/${var.cluster_project}.svc.id.goog/namespace/hpc-team-${each.value}-${var.env}"
-}
-
-resource "google_project_iam_member" "pubsub_viewer" {
-  for_each = toset(["a", "b"])
-  project  = var.infra_project
-  role     = "roles/pubsub.viewer"
-  member   = "principalSet://iam.googleapis.com/projects/${var.cluster_project_number}/locations/global/workloadIdentityPools/${var.cluster_project}.svc.id.goog/namespace/hpc-team-${each.value}-${var.env}"
+  project = var.infra_project
+  role    = each.value.role
+  member  = "principalSet://iam.googleapis.com/projects/${var.cluster_project_number}/locations/global/workloadIdentityPools/${var.cluster_project}.svc.id.goog/namespace/hpc-team-${each.value.team}-${var.env}"
 }
 
 resource "google_project_service" "enable_apis" {
@@ -86,7 +85,7 @@ module "fleet_app_operator_permissions" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-app-operator-permissions"
   version = "~> 36.0"
 
-  for_each = toset(["a", "b"])
+  for_each = toset(local.teams_suffix)
 
   fleet_project_id = var.cluster_project
   scope_id         = "hpc-team-${each.value}-${var.env}"

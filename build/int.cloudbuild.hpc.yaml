@@ -165,6 +165,67 @@ steps:
     waitFor:
       - appinfra-apply
       - fleetscope-verify
+
+  - id: appinfra-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestAppInfra --stage teardown --verbose",
+      ]
+    waitFor:
+      - monte-carlo-simulation-e2e
+      - appinfra-verify
+      - appfactory-verify
+      - fleetscope-verify
+      - multitenant-verify
+      - bootstrap-verify
+
+  - id: appfactory-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestAppfactory --stage teardown --verbose",
+      ]
+    waitFor:
+      - appinfra-teardown
+
+  - id: fleetscope-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestFleetscope --stage teardown --verbose",
+      ]
+    waitFor:
+      - appfactory-teardown
+
+  - id: multitenant-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestMultitenant --stage teardown --verbose",
+      ]
+    waitFor:
+      - fleetscope-teardown
+
+  - id: bootstrap-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestBootstrap --stage teardown --verbose",
+      ]
+    waitFor:
+      - multitenant-teardown
+
 tags:
   - "ci"
   - "integration"
@@ -172,7 +233,6 @@ substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
   _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.23"
 options:
-  machineType: E2_HIGHCPU_8
   env:
     - 'TF_PLUGIN_CACHE_DIR=""'
     - 'TF_VAR_branch_name=$BRANCH_NAME'
