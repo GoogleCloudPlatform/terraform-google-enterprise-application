@@ -16,6 +16,7 @@
 
 resource "google_storage_bucket" "stocks_data" {
   name          = "${var.infra_project}-stocks-historical-data"
+  project       = var.infra_project
   location      = var.region
   force_destroy = var.bucket_force_destroy
 

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+# flake8: noqa
 
 """
 Run MC simulation for VaR portfolio risk
@@ -23,7 +23,6 @@ import io
 import numpy
 import os
 import time
-import yfinance as yf
 from google.cloud import storage
 import pandas as pd
 from absl import app

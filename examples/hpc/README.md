@@ -103,18 +103,18 @@ You can find an auxiliary script on `helpers` named `download_data.py`. Which wi
 
 1. Before running the Script, you will need to download the script dependencies, by running:
 
-```bash
-pip install -r download_data_requirements.txt
-```
+    ```bash
+    pip install -r download_data_requirements.txt
+    ```
 
 1. A bucket is created in 5-appinfra stage and is passed as a flag (`--bucket_name=YOUR_BUCKET_NAME`) to the script, you should use this bucket as the parameter. It follows the naming `${var.infra_project}-stocks-historical-data`. Alternatively, if you have access to the terraform state, you may also retrieve the bucket name by running `terraform -chdir="../../5-appinfra/envs/development" output -raw stocks_data_bucket_name`.
 
 1. To download data for all tickers that will be used for the simulation, execute the script by running:
 
-```bash
-BUCKET_NAME=YOUR_BUCKET_NAME
-python3 dowload_data.py --bucket_name=$BUCKET_NAME
-```
+    ```bash
+    BUCKET_NAME=YOUR_BUCKET_NAME
+    python3 dowload_data.py --bucket_name=$BUCKET_NAME
+    ```
 
 After uploading the data to the bucket, you may proceed.
 
