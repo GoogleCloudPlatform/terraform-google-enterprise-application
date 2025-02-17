@@ -147,7 +147,7 @@ func runBatchJobs(t *testing.T) {
 }
 
 func runDownloadDataScript(t *testing.T, infraProject string) {
-	codeDirectory := "/workspace/examples/hpc/6-appinfra/helpers"
+	codeDirectory := "/workspace/examples/hpc/6-appsource/helpers"
 	stocksBucketName := fmt.Sprintf("%s-stocks-historical-data", infraProject)
 
 	// Create a virtual environment

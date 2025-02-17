@@ -16,5 +16,5 @@
 
 output "stocks_data_bucket_name" {
   description = "Stocks Historical Data Bucket Name"
-  value = google_storage_bucket.stocks_data.name
+  value       = google_storage_bucket.stocks_data.name
 }
