@@ -43,3 +43,50 @@ module "app" {
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
   network_id                     = var.network_id
 }
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "golang_egress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+  }
+  egress_to {
+    resources = [
+      "projects/912338787515", //proxy-golang-org-prod
+    ]
+
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  egress_from {
+    identities = ["serviceAccount:${module.app.cloudbuild_service_account}"]
+  }
+  egress_to {
+    resources = [
+      "projects/696221446882", //projects/gedc315ac199a0d61p-tp
+    ]
+
+    operations {
+      service_name = "iam.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
