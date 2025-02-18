@@ -26,10 +26,10 @@ data "http" "kueue_source" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "cluster_service_accounts_reader" {
-  for_each   = var.cluster_service_accounts
+  for_each   = toset(var.cluster_service_accounts)
   repository = google_artifact_registry_repository.k8s.repository_id
   role       = "roles/artifactregistry.reader"
-  member     = each.value
+  member     = "serviceAccount:${each.value}"
 }
 
 resource "local_file" "downloaded_file" {
