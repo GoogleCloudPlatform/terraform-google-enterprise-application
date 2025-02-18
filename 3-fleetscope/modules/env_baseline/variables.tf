@@ -46,7 +46,7 @@ variable "cluster_membership_ids" {
 
 variable "cluster_service_accounts" {
   description = "Cluster nodes services accounts."
-  type        = map(string)
+  type        = list(string)
 }
 
 variable "additional_project_role_identities" {

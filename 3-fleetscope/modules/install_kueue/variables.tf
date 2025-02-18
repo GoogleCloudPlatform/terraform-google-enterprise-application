@@ -53,5 +53,5 @@ variable "cluster_project" {
 
 variable "cluster_service_accounts" {
   description = "Cluster nodes services accounts."
-  type        = map(string)
+  type        = list(string)
 }
