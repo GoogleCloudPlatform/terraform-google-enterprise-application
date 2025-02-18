@@ -25,6 +25,13 @@ data "http" "kueue_source" {
   url = var.url
 }
 
+resource "google_artifact_registry_repository_iam_member" "cluster_service_accounts_reader" {
+  for_each   = var.cluster_service_accounts
+  repository = google_artifact_registry_repository.k8s.repository_id
+  role       = "roles/artifactregistry.reader"
+  member     = each.value
+}
+
 resource "local_file" "downloaded_file" {
   content  = replace(data.http.kueue_source.body, var.k8s_registry, local.repository_url)
   filename = "${path.module}/kueue-${var.cluster_name}.yaml"
@@ -59,5 +66,8 @@ module "install_kueue_private_registry" {
   gcloud container fleet memberships get-credentials ${var.cluster_name} --location=${var.cluster_region} --project=${var.cluster_project} && kubectl apply --server-side -f ${path.module}/kueue-${var.cluster_name}.yaml
   EOF
 
-  module_depends_on = [local_file.downloaded_file]
+  module_depends_on = [
+    local_file.downloaded_file,
+    google_artifact_registry_repository_iam_member.cluster_service_accounts_reader
+  ]
 }

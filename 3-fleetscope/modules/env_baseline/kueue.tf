@@ -19,13 +19,14 @@ locals {
 }
 
 module "kueue" {
-  for_each        = toset(var.cluster_membership_ids)
-  source          = "../install_kueue"
-  url             = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
-  project_id      = regex(local.fleet_membership_regex, each.value)[0]
-  region          = "us-central1"
-  k8s_registry    = "registry.k8s.io"
-  cluster_name    = regex(local.fleet_membership_regex, each.value)[2]
-  cluster_region  = regex(local.fleet_membership_regex, each.value)[1]
-  cluster_project = regex(local.fleet_membership_regex, each.value)[0]
+  for_each                 = toset(var.cluster_membership_ids)
+  source                   = "../install_kueue"
+  url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
+  project_id               = regex(local.fleet_membership_regex, each.value)[0]
+  region                   = "us-central1"
+  k8s_registry             = "registry.k8s.io"
+  cluster_name             = regex(local.fleet_membership_regex, each.value)[2]
+  cluster_region           = regex(local.fleet_membership_regex, each.value)[1]
+  cluster_project          = regex(local.fleet_membership_regex, each.value)[0]
+  cluster_service_accounts = var.cluster_service_accounts
 }

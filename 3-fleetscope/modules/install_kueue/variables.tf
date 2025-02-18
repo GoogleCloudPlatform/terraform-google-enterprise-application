@@ -50,3 +50,8 @@ variable "cluster_project" {
   description = "Project ID for the Kubernetes cluster"
   type        = string
 }
+
+variable "cluster_service_accounts" {
+  description = "Cluster nodes services accounts."
+  type        = map(string)
+}
