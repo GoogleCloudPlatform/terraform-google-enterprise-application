@@ -31,7 +31,7 @@ output "sa_key" {
 }
 
 output "envs" {
-  value = var.single_project ? {} : { for env, vpc in module.vpc : env => {
+  value = var.single_project ? {} : { for env, vpc in module.cluster_vpc : env => {
     org_id             = var.org_id
     folder_id          = module.folders[local.index].ids[env]
     billing_account    = var.billing_account
@@ -41,12 +41,24 @@ output "envs" {
   } }
 }
 
-output "network_name" {
-  value = var.single_project ? module.vpc[local.index].network_name : null
+output "workerpool_network_name" {
+  value = module.vpc.network_name
 }
 
-output "network_id" {
-  value = var.single_project ? module.vpc[local.index].network_id : module.vpc[local.envs[0]].network_id
+output "workerpool_network_id" {
+  value = module.vpc.network_id
+}
+
+output "workerpool_network_self_link" {
+  value = module.vpc.network_self_link
+}
+
+output "single_project_cluster_subnetwork_name" {
+  value = var.single_project ? module.vpc.subnets_names[1] : null
+}
+
+output "single_project_cluster_subnetwork_self_link" {
+  value = var.single_project ? module.vpc.subnets_self_links[1] : null
 }
 
 output "network_project_number" {
@@ -55,18 +67,6 @@ output "network_project_number" {
 
 output "network_project_id" {
   value = [for value in module.vpc_project : value.project_id]
-}
-
-output "network_self_link" {
-  value = var.single_project ? module.vpc[local.index].network_self_link : null
-}
-
-output "subnetwork_name" {
-  value = var.single_project ? module.vpc[local.index].subnets_names[0] : null
-}
-
-output "subnetwork_self_link" {
-  value = var.single_project ? module.vpc[local.index].subnets_self_links[0] : null
 }
 
 output "common_folder_id" {

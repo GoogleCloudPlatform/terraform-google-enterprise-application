@@ -19,7 +19,7 @@ variable "project_id" {
   type        = string
 }
 
-variable "network_id" {
+variable "workerpool_network_id" {
   description = "The network definition that the workers are peered to. Must be in the format projects/{project}/global/networks/{network}, where {project} is a project number, such as 12345, and {network} is the name of a VPC network in the project."
   type        = string
 }

@@ -85,8 +85,6 @@ module "project" {
       roles = ["roles/cloudconfig.serviceAgent"]
     }
   ]
-
-  depends_on = [module.vpc]
 }
 # Create mock common folder
 module "folder_common" {
@@ -145,8 +143,6 @@ module "vpc_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  # enable_shared_vpc_host_project = !var.single_project
-
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
@@ -157,9 +153,64 @@ module "vpc_project" {
   ]
 }
 
-resource "google_compute_shared_vpc_service_project" "shared_vpc_attachment" {
-  for_each        = !var.single_project ? { (local.index) = true } : {}
-  provider        = google-beta
-  host_project    = module.vpc_project[local.envs[0]].project_id
-  service_project = module.project[local.index].project_id
+module "cluster_vpc" {
+  for_each = !var.single_project ? module.vpc_project : {}
+  source   = "terraform-google-modules/network/google"
+  version  = "~> 10.0"
+
+  project_id      = each.value.project_id
+  network_name    = "eab-vpc-${each.key}"
+  shared_vpc_host = !var.single_project
+
+  ingress_rules = [
+    {
+      name     = "allow-ssh"
+      priority = 65534
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["0.0.0.0/0"]
+      allow = [
+        {
+          protocol = "tcp"
+          ports    = ["22"]
+        }
+      ]
+    },
+  ]
+
+  subnets = [
+    {
+      subnet_name           = "eab-${each.key}-us-central1"
+      subnet_ip             = "10.1.20.0/24"
+      subnet_region         = "us-central1"
+      subnet_private_access = true
+      }, {
+      subnet_name           = "eab-${each.key}-us-east4"
+      subnet_ip             = "10.1.10.0/24"
+      subnet_region         = "us-east4"
+      subnet_private_access = true
+  }]
+
+  secondary_ranges = {
+    "eab-${each.key}-us-central1" = [
+      {
+        range_name    = "eab-${each.key}-us-central1-secondary-01"
+        ip_cidr_range = "192.168.0.0/18"
+      },
+      {
+        range_name    = "eab-${each.key}-us-central1-secondary-02"
+        ip_cidr_range = "192.168.64.0/18"
+      },
+    ],
+    "eab-${each.key}-us-east4" = [
+      {
+        range_name    = "eab-${each.key}-us-east4-secondary-01"
+        ip_cidr_range = "192.168.128.0/18"
+      },
+      {
+        range_name    = "eab-${each.key}-us-east4-secondary-02"
+        ip_cidr_range = "192.168.192.0/18"
+      },
+  ] }
 }

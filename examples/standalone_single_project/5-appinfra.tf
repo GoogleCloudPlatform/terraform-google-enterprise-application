@@ -167,7 +167,7 @@ module "cicd" {
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
 
-  network_id = var.network_id
+  workerpool_network_id = var.workerpool_network_id
 }
 
 data "google_project" "project" {

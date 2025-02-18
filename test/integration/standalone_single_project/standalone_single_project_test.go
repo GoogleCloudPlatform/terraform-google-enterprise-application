@@ -47,6 +47,7 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 		"project_id":             projectID,
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
+		"subnetwork_self_link":   setupOutput.GetTFSetupStringOutput("single_project_cluster_subnetwork_self_link"),
 	}
 
 	// wire setup output project_id to example var.project_id

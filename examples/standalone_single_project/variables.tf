@@ -19,7 +19,7 @@ variable "project_id" {
   description = "Google Cloud project ID in which to deploy all example resources"
 }
 
-variable "network_id" {
+variable "workerpool_network_id" {
   type        = string
   description = "Network id"
 }

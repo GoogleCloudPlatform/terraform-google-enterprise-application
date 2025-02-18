@@ -39,27 +39,5 @@ module "app" {
   buckets_force_destroy = var.buckets_force_destroy
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
-  network_id                     = var.network_id
+  workerpool_network_id          = var.workerpool_network_id
 }
-
-resource "google_access_context_manager_service_perimeter_egress_policy" "storage_egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identity_type = "ANY_IDENTITY"
-  }
-  egress_to {
-    resources = ["projects/213358688945"]
-
-    operations {
-      service_name = "storage.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-

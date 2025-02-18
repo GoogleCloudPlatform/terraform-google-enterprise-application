@@ -125,7 +125,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
     no_external_ip = true
   }
   network_config {
-    peered_network          = var.network_id
+    peered_network          = var.workerpool_network_id
     peered_network_ip_range = "/29"
   }
 }

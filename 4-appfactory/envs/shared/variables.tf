@@ -176,6 +176,11 @@ variable "shared_vpc_project_id" {
   default     = null
 }
 
+variable "workerpool_network_id" {
+  description = "Network id where Cloud Build Worker Pool will be peered."
+  type        = string
+}
+
 variable "service_perimeter_name" {
   description = "Service perimeter full name."
   type        = string

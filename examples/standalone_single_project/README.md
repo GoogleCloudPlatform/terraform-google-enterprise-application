@@ -311,13 +311,13 @@ the steps below assume that you are checked out on the same level as `terraform-
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| network\_id | Network id | `string` | n/a | yes |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
 | service\_perimeter\_mode | Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | Service perimeter full name. | `string` | `null` | no |
 | subnetwork\_self\_link | Sub-Network self-link | `string` | n/a | yes |
 | teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | n/a | yes |
+| workerpool\_network\_id | Network id | `string` | n/a | yes |
 
 ## Outputs
 

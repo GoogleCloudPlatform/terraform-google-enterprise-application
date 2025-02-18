@@ -152,11 +152,27 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = var.gar_project_id
     "_GAR_REPOSITORY"               = var.gar_repository_name
     "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
+    "_PRIVATE_POOL"                 = google_cloudbuild_worker_pool.pool.id
   }
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
+}
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool-${var.service_name}"
+  project  = local.admin_project_id
+  location = var.trigger_location
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = var.workerpool_network_id
+    peered_network_ip_range = "/29"
+  }
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {

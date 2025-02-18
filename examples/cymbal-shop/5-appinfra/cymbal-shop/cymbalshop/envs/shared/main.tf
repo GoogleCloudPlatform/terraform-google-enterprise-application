@@ -41,28 +41,5 @@ module "app" {
   buckets_force_destroy = var.buckets_force_destroy
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
-  network_id                     = var.network_id
-}
-
-resource "google_access_context_manager_service_perimeter_egress_policy" "golang_egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identity_type = "ANY_IDENTITY"
-  }
-  egress_to {
-    resources = [
-      "projects/912338787515", //proxy-golang-org-prod
-    ]
-
-    operations {
-      service_name = "storage.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
+  workerpool_network_id          = var.workerpool_network_id
 }

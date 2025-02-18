@@ -18,6 +18,7 @@
 | shared\_vpc\_project\_id | Shared VPC Project ID. | `string` | `null` | no |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"us-central1"` | no |
+| workerpool\_network\_id | Network id where Cloud Build Worker Pool will be peered. | `string` | n/a | yes |
 
 ## Outputs
 
