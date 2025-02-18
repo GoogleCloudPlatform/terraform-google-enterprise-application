@@ -7,6 +7,19 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
 - **Docker Registry Connectivity**
   If you are using a private cluster with private nodes, they must be able to fetch Kueue Docker images from `registry.k8s.io`. This can be done by adding Cloud NAT to the private nodes network, having your own NAT setup on your cluster network, or by using Artifact Registry Remote Repositories.
 
+- **Kubectl with Cluster Connection**
+  If using a private cluster, you can use Connect Gateway.
+
+  ```bash
+  gcloud container fleet memberships get-credentials CLUSTER-NAME --project=YOUR-CLUSTER-PROJECT --location=YOUR-CLUSTER-REGION
+  ```
+
+  If you have access to specific namespace, you can run:
+
+  ```bash
+  gcloud container fleet scopes namespaces get-credentials NAMESPACE
+  ```
+
 - **Kueue**
   Install Kueue by running the following command:
 
@@ -26,19 +39,6 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
   kubectl wait deploy/kueue-controller-manager -nkueue-system --for=condition=available --timeout=5m
   ```
 
-- **Kubectl with Cluster Connection**
-  If using a private cluster, you can use Connect Gateway.
-
-  ```bash
-  gcloud container fleet memberships get-credentials CLUSTER-NAME --project=YOUR-CLUSTER-PROJECT --location=YOUR-CLUSTER-REGION
-  ```
-
-  If you have access to specific namespace, you can run:
-
-  ```bash
-  gcloud container fleet scopes namespaces get-credentials NAMESPACE
-  ```
-
 - **Cluster Toolkit (gcluster)**
 
     This guide assumes you have `gcluster` installed on your home directory. More information on how to setup gcluster in the following [link](https://cloud.google.com/cluster-toolkit/docs/setup/configure-environment#local-shell)
@@ -49,7 +49,7 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
 
 #### Add `hpc-team-a` and `hpc-team-b` Namespaces at the Fleetscope repository
 
-The namespaces created at 3-fleetscope will be used in the application kubernetes manifests, when specifying where the workload will run. Typically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
+Typically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
 1. Navigate to Fleetscope repository and add the hpc-team-a and hpc-team-b namespaces at `terraform.tfvars`, if the namespace was not created already:
 
@@ -61,15 +61,17 @@ The namespaces created at 3-fleetscope will be used in the application kubernete
     }
    ```
 
-1. Apply changes by commiting to a named environment branch (`development`, `nonproduction`, `production`).
+1. Apply changes by commiting to a named environment branch (`development`, `nonproduction`, `production`). After the build associated with the fleetscope repository finishes it's execution, the namespaces should be present in the cluster.
 
 ### Apply Kueue Resources
 
-Run the following command to apply Kueue resources, this step should be run by a Batch Administrator and after the namespaces are created:
+Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator and after the namespaces are created:
 
 ```bash
 kubectl apply -f manifests/kueue-resources.yaml
 ```
+
+The queues that are created in this step will later be used to schedule batch jobs.
 
 ### Set Project for gcloud Commands
 
@@ -79,7 +81,9 @@ gcloud config set project REPLACE_WITH_YOUR_INFRA_PROJECT
 
 ### Run `gcluster` Blueprint
 
-Navigate to the source directory and run the following command, make sure you replace CLUSTER_NAME with your environment's cluster name:
+The `fsi-montecarlo-on-batch.yaml` file contains a blueprint that is deployed with `gcluster` (cluster-toolkit). It will create a notebook instance on the infrastructure project, alongs with the it's dependencies.
+
+To deploy the blueprint, navigate to the source directory and run the following command, make sure you replace CLUSTER_NAME with your environment's cluster name:
 
 ```bash
 PROJECT_ID=REPLACE_WITH_YOUR_INFRA_PROJECT
@@ -93,28 +97,30 @@ CLUSTER_PROJECT=REPLACE_WITH_CLUSTER_PROJECT
 
 #### Requisites before running
 
-Before running the jobs, historical stocks data must be download and uploaded to a bucket, which will then be used by the containers that run the jobs. This allows isolating the container from the internet and running the simulation in a Secure environment.
+Before running the jobs, historical stocks data must be downloaded and uploaded to a bucket, which will then be used by the containers that run the batch jobs. This procedure allows isolating the container from the external network and running the simulation in a Secure environment.
 
-You can find an auxiliary script on `helpers` named `download_data.py`. Which will use `yfinance` library to download stocks data and a Google Cloud Storage Python Client will upload this data in the required format with the required parameters. Here is a step-by-step to download the data and upload it.
+You will find an auxiliary script on `helpers` directory named `download_data.py`. The script will use `yfinance` library to download stocks data and a Google Cloud Storage Python Client to upload this data in the required format for the application. Here is a step-by-step to download the data and upload it using the script.
 
 **IMPORTANT**: The script must be run in an authenticated environment that has access to the internet. It will use Application Default Credentials (ADC) to authenticate with the bucket that was created on 5-appinfra stage.
 
 1. Navigate to `helpers` directory.
 
-1. Before running the Script, you will need to download the script dependencies, by running:
+1. Before running the Script, you will need to install the script dependencies, by running:
 
     ```bash
     pip install -r download_data_requirements.txt
     ```
 
-1. A bucket is created in 5-appinfra stage and is passed as a flag (`--bucket_name=YOUR_BUCKET_NAME`) to the script, you should use this bucket as the parameter. It follows the naming `${var.infra_project}-stocks-historical-data`. Alternatively, if you have access to the terraform state, you may also retrieve the bucket name by running `terraform -chdir="../../5-appinfra/envs/development" output -raw stocks_data_bucket_name`.
+1. A bucket is created in 5-appinfra stage and is passed as a flag (`--bucket_name=YOUR_BUCKET_NAME`) to the script, you should the bucket created on 5-appinfra for this purpose. The bucket follows the naming `${var.infra_project}-stocks-historical-data`. Alternatively, if you have access to the terraform state, you may also retrieve the bucket name by running `terraform -chdir="../../5-appinfra/envs/development" output -raw stocks_data_bucket_name`.
 
-1. To download data for all tickers that will be used for the simulation, execute the script by running:
+1. To download data for all tickers that will be used for the simulation, execute the script by running the following command:
 
     ```bash
     BUCKET_NAME=YOUR_BUCKET_NAME
     python3 dowload_data.py --bucket_name=$BUCKET_NAME
     ```
+
+    > NOTE: Please be aware that the script processes a significant amount of stock data. As a result, it may take approximately 10 minutes to complete, depending on your machine's specifications and your network bandwidth.
 
 After uploading the data to the bucket, you may proceed.
 
@@ -124,4 +130,4 @@ Follow the steps outlined in the following document, after the "Open the Vertex 
 
 [Open the Vertex AI Workbench Notebook](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/0e3134b8478f3ffaa12031d7fda3ac6b94e61b17/examples/research/monte-carlo#open-the-vertex-ai-workbench-notebook)
 
-Your Vertex AI Workbench Notebook will be created on the application infrastructure project.
+**IMPORTANT**: Your Vertex AI Workbench Instance will be located on the application infrastructure project that was created on 4-appfactory.
