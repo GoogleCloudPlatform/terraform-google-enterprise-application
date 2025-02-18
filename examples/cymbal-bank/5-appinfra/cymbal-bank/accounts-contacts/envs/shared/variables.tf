@@ -100,3 +100,35 @@ variable "network_id" {
   description = "Network id where Cloud Build Worker Pool will be peered."
   type        = string
 }
+
+variable "service_perimeter_name" {
+  description = "Service perimeter full name."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
+}
+
+variable "service_perimeter_name" {
+  description = "Service perimeter full name."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
+}

@@ -31,5 +31,5 @@ module "fleetscope_infra" {
   namespace_ids              = var.teams
   cluster_membership_ids     = module.multitenant_infra.cluster_membership_ids
   config_sync_secret_type    = "token"
-  config_sync_repository_url = "https://gitlab.com/user/root/config-sync-${local.env}.git"
+  config_sync_repository_url = "https://34.67.78.92.nip.io/user/root/config-sync-${local.env}.git"
 }
