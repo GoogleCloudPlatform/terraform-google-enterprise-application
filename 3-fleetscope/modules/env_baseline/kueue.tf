@@ -20,10 +20,9 @@ locals {
 
 module "kueue" {
   for_each        = toset(var.cluster_membership_ids)
-  source          = "../kueue_module"
+  source          = "../install_kueue"
   url             = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
   project_id      = regex(local.fleet_membership_regex, each.value)[0]
-  kueue_version   = "v0.10.1"
   region          = "us-central1"
   k8s_registry    = "registry.k8s.io"
   cluster_name    = regex(local.fleet_membership_regex, each.value)[2]
