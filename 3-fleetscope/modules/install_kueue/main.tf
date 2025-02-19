@@ -67,7 +67,7 @@ module "install_kueue_private_registry" {
   EOF
 
   module_depends_on = [
-    local_file.downloaded_file,
-    google_artifact_registry_repository_iam_member.cluster_service_accounts_reader
+    local_file.downloaded_file.filename,
+    google_artifact_registry_repository_iam_member.cluster_service_accounts_reader.role
   ]
 }
