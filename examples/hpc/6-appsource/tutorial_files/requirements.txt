@@ -1,0 +1,8 @@
+absl_py
+dynaconf
+kubernetes==32.0.0
+protobuf
+PyYAML
+tabulate
+termcolor
+google-auth
