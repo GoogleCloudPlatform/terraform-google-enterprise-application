@@ -201,15 +201,14 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
-variable "workerpool_network_id" {
-  description = "Network id where Cloud Build Worker Pool will be peered."
+variable "workerpool_network_project_id" {
+  description = "Project id where Cloud Build Worker Pool network is hosted."
   type        = string
 }
 
-variable "shared_vpc_project_id" {
-  description = "Shared VPC Project ID for infra project."
+variable "workerpool_network_id" {
+  description = "Network id where Cloud Build Worker Pool will be peered."
   type        = string
-  default     = null
 }
 
 variable "service_perimeter_name" {

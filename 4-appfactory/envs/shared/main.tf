@@ -82,8 +82,8 @@ module "components" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  service_perimeter_mode = var.service_perimeter_mode
-  service_perimeter_name = var.service_perimeter_name
-  shared_vpc_project_id  = var.shared_vpc_project_id
-  workerpool_network_id  = var.workerpool_network_id
+  service_perimeter_mode        = var.service_perimeter_mode
+  service_perimeter_name        = var.service_perimeter_name
+  workerpool_network_id         = var.workerpool_network_id
+  workerpool_network_project_id = var.workerpool_network_project_id
 }

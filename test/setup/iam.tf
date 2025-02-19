@@ -19,7 +19,8 @@ locals {
     "roles/owner",
     "roles/cloudbuild.workerPoolOwner",
     "roles/dns.admin",
-    "roles/compute.networkUser"
+    "roles/compute.networkAdmin",
+    "roles/privilegedaccessmanager.projectServiceAgent",
     ] : [
     "roles/artifactregistry.admin",
     "roles/certificatemanager.owner",
@@ -77,9 +78,23 @@ resource "google_project_iam_member" "int_test_vpc" {
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
+resource "google_project_iam_member" "int_test_iam" {
+  for_each = module.vpc_project
+
+  project = each.value.project_id
+  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+  member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
 resource "google_organization_iam_member" "organizationServiceAgent_role" {
   org_id = var.org_id
   role   = "roles/privilegedaccessmanager.organizationServiceAgent"
+  member = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
+resource "google_organization_iam_member" "organization_xpn_role" {
+  org_id = var.org_id
+  role   = "roles/compute.xpnAdmin"
   member = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 

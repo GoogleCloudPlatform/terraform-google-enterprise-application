@@ -44,6 +44,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | teams | n/a |
 | workerpool\_network\_id | n/a |
 | workerpool\_network\_name | n/a |
+| workerpool\_network\_project\_id | n/a |
 | workerpool\_network\_self\_link | n/a |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

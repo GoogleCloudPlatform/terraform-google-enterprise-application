@@ -97,7 +97,7 @@ module "app_admin_project" {
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
-  svpc_host_project_id = var.shared_vpc_project_id
+  svpc_host_project_id = var.workerpool_network_project_id
 
   activate_api_identities = [
     {
@@ -118,7 +118,11 @@ module "app_admin_project" {
     {
       api   = "config.googleapis.com",
       roles = ["roles/cloudconfig.serviceAgent"]
-    }
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkUser", "roles/serviceusage.serviceUsageConsumer", "roles/container.serviceAgent"]
+    },
   ]
 
 }
@@ -218,5 +222,5 @@ module "app_infra_project" {
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
-  svpc_host_project_id = var.shared_vpc_project_id
+  svpc_host_project_id = each.value.network_project_id
 }

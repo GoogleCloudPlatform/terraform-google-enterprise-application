@@ -170,10 +170,9 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
-variable "shared_vpc_project_id" {
-  description = "Shared VPC Project ID."
+variable "workerpool_network_project_id" {
+  description = "Project id where Cloud Build Worker Pool network is hosted."
   type        = string
-  default     = null
 }
 
 variable "workerpool_network_id" {
