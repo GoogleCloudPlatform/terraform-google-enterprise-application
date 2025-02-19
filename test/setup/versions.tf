@@ -23,7 +23,8 @@ terraform {
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = ">= 6.6"
+      // temporary fix <= 6.20.0 due to issue https://github.com/hashicorp/terraform-provider-google/issues/21493
+      version = ">= 6.6, <= 6.20.0"
     }
   }
 }
