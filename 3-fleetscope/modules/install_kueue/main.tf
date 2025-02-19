@@ -27,7 +27,9 @@ data "http" "kueue_source" {
 
 resource "google_artifact_registry_repository_iam_member" "cluster_service_accounts_reader" {
   for_each   = toset(var.cluster_service_accounts)
+
   repository = google_artifact_registry_repository.k8s.repository_id
+  project    = var.cluster_project
   role       = "roles/artifactregistry.reader"
   member     = "serviceAccount:${each.value}"
 }
