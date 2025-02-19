@@ -35,6 +35,8 @@ resource "google_artifact_registry_repository_iam_member" "cluster_service_accou
 resource "local_file" "downloaded_file" {
   content  = replace(data.http.kueue_source.body, var.k8s_registry, local.repository_url)
   filename = "${path.module}/kueue-${var.cluster_name}.yaml"
+
+  depends_on = [google_artifact_registry_repository_iam_member.cluster_service_accounts_reader]
 }
 
 resource "google_artifact_registry_repository" "k8s" {
@@ -68,6 +70,5 @@ module "install_kueue_private_registry" {
 
   module_depends_on = [
     local_file.downloaded_file.filename,
-    google_artifact_registry_repository_iam_member.cluster_service_accounts_reader.role
   ]
 }
