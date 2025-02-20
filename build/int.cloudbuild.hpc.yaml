@@ -236,3 +236,4 @@ options:
   env:
     - 'TF_PLUGIN_CACHE_DIR=""'
     - 'TF_VAR_branch_name=$BRANCH_NAME'
+    - 'INSTALL_KUEUE=true'
