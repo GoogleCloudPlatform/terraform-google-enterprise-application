@@ -29,7 +29,8 @@ resource "google_artifact_registry_repository_iam_member" "cluster_service_accou
   for_each = toset(var.cluster_service_accounts)
 
   repository = google_artifact_registry_repository.k8s.repository_id
-  project    = var.cluster_project
+  project    = google_artifact_registry_repository.k8s.project
+  location   = google_artifact_registry_repository.k8s.location
   role       = "roles/artifactregistry.reader"
   member     = "serviceAccount:${each.value}"
 }
