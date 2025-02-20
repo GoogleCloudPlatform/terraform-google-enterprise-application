@@ -26,7 +26,7 @@ data "http" "kueue_source" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "cluster_service_accounts_reader" {
-  for_each   = toset(var.cluster_service_accounts)
+  for_each = toset(var.cluster_service_accounts)
 
   repository = google_artifact_registry_repository.k8s.repository_id
   project    = var.cluster_project
@@ -50,8 +50,10 @@ resource "google_artifact_registry_repository" "k8s" {
   mode          = "REMOTE_REPOSITORY"
   remote_repository_config {
     description = "Kubernetes Registry Remote Repository"
-    common_repository {
-      uri = "https://${var.k8s_registry}"
+    docker_repository {
+      custom_repository {
+        uri = "https://${var.k8s_registry}"
+      }
     }
   }
 }
