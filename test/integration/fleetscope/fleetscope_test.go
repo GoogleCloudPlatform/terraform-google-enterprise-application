@@ -137,12 +137,6 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_repository_url": config_sync_url,
 			}
 
-			// install keueue on 3-fleetscope if environment variable INSTALL_KUEUE is true
-			if strings.ToLower(os.Getenv("INSTALL_KUEUE")) == "true" {
-				// by renaming kueue.tf.example to kueue.tf the module will install kueue
-				renameKueueFile(t)
-			}
-
 			fleetscope := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
@@ -150,6 +144,15 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 				tft.WithParallelism(1),
 			)
+
+			fleetscope.DefineInit(func(assert *assert.Assertions) {
+				// install keueue on 3-fleetscope if environment variable INSTALL_KUEUE is true
+				if strings.ToLower(os.Getenv("INSTALL_KUEUE")) == "true" {
+					// by renaming kueue.tf.example to kueue.tf the module will install kueue
+					renameKueueFile(t)
+				}
+				fleetscope.DefaultInit(assert)
+			})
 
 			fleetscope.DefineApply(func(assert *assert.Assertions) {
 				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
