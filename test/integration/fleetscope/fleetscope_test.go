@@ -35,7 +35,7 @@ func renameKueueFile(t *testing.T) {
 	tf_file_new := "../../../3-fleetscope/modules/env_baseline/kueue.tf"
 	err := os.Rename(tf_file_old, tf_file_new)
 	if err != nil {
-		t.Fatal()
+		t.Fatal(err)
 	}
 }
 
