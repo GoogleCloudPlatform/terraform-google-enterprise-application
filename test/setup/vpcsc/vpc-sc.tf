@@ -251,6 +251,32 @@ module "regular_service_perimeter" {
           "artifactregistry.googleapis.com" = { methods = ["*"] }
         }
       }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/912338787515", //proxy-golang-org-prod
+        ]
+        operations = {
+          "storage.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/213358688945",
+        ]
+        operations = {
+          "storage.googleapis.com" = { methods = ["*"] }
+        }
+      }
     }
   ] : []
 }

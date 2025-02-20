@@ -165,7 +165,7 @@ module "tf_cloudbuild_workspace" {
 }
 
 resource "google_cloudbuild_worker_pool" "pool" {
-  name     = "cb-pool-${var.service_name}"
+  name     = "cb-pool-infra-${var.service_name}"
   project  = local.admin_project_id
   location = var.trigger_location
   worker_config {

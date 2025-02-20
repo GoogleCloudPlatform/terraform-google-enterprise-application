@@ -56,7 +56,7 @@ resource "google_cloudbuild_trigger" "ci" {
 }
 
 resource "google_cloudbuild_worker_pool" "pool" {
-  name     = "cb-pool-${local.service_clean}"
+  name     = "cb-pool-app-${local.service_clean}"
   project  = var.project_id
   location = var.region
   worker_config {
