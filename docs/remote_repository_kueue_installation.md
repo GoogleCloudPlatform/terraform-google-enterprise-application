@@ -11,7 +11,7 @@ Artifact Registry remote repositories allow you to cache artifacts from upstream
 The Terraform module `install_kueue`, located within the [3-fleetscope](../3-fleetscope/modules/install_kueue) directory, automates the setup of Kueue in a secure manner. This module performs the following key tasks:
 
 1. **Creates an Artifact Registry Remote Repository**: It establishes a dedicated repository for proxying and caching Kueue images.
-  
+
 2. **Downloads and Updates Kueue Installation Manifests**: The module fetches the necessary installation manifests for Kueue from Github. It modifies the manifests to redirect image references from the original Kubernetes registry to the newly created Artifact Registry Repository.
 
 3. **Applies Manifests**: The module utilizes the `terraform-google-gcloud` Terraform module to apply the updated manifests directly to your private GKE cluster by using ConnectGateway.
@@ -23,7 +23,7 @@ This eliminates the need to expose your GKE nodes to an external network during 
 Before using the `install_kueue` module, ensure the following requirements are met:
 
 - **Private GKE Cluster registered to a Fleet**: You must have an operational Private GKE Cluster in a Fleet. ConnectGateway requires the cluster to be in a Fleet.
-  
+
 - **Connect Gateway**: Connect Gateway must be enabled, it is used to securely connect to the Private Cluster, without having to expose a Control Plane External IP.
 
 ### Adding the Terraform Module to `3-fleetscope`
@@ -33,16 +33,22 @@ Fleetscope is a Good Stage to install Kueue, alongside other cluster installatio
 1. Create a new file under `3-fleetscope/modules/env_baseline`, named `kueue.tf` and add the following code to it:
 
     ```terraform
+    locals {
+        fleet_membership_regex = "projects/([^/]+)/locations/([^/]+)/memberships/([^/]+)"
+    }
+
     module "kueue" {
-        source          = "../kueue_module"
-        url             = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
-        project_id      = # CLUSTER PROJECT
-        kueue_version   = "v0.10.1"
-        region          = "us-central1"
-        k8s_registry    = "registry.k8s.io"
-        cluster_name    = # CLUSTER NAME
-        cluster_region  = # CLUSTER REGION
-        cluster_project = # CLUSTER PROJECT
+        for_each                 = toset(var.cluster_membership_ids)
+
+        source                   = "../install_kueue"
+        url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
+        project_id               = regex(local.fleet_membership_regex, each.value)[0]
+        region                   = "us-central1"
+        k8s_registry             = "registry.k8s.io"
+        cluster_name             = regex(local.fleet_membership_regex, each.value)[2]
+        cluster_region           = regex(local.fleet_membership_regex, each.value)[1]
+        cluster_project          = regex(local.fleet_membership_regex, each.value)[0]
+        cluster_service_accounts = var.cluster_service_accounts
     }
     ```
 

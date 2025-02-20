@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-output "applied_manifest" {
-  description = "The manifest that was applied to the cluster."
-  value       = local.applied_manifest
+terraform {
+  required_version = ">= 1.3"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 6.6, < 7"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.4.5"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.5.2"
+    }
+  }
 }

@@ -19,8 +19,6 @@ locals {
   applied_manifest = local_file.downloaded_file.content
 }
 
-provider "http" {}
-
 data "http" "kueue_source" {
   url = var.url
 }

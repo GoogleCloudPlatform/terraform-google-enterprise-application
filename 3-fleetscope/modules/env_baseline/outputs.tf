@@ -14,3 +14,7 @@
  * limitations under the License.
  */
 
+output "cluster_service_accounts" {
+  description = "Cluster Service Accounts"
+  value       = var.cluster_service_accounts
+}
