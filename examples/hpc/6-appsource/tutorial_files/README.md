@@ -1,11 +1,11 @@
 # Running batch jobs on GKE
 
-Running a job on kubernetes using the Batch and Jobs API is reasonably simple if you use GKE Autopilot.
+Running a job on Kubernetes using the Batch and Jobs API is reasonably simple if you use GKE Autopilot.
 Autopilot will scale up nodes to provide the requirements of the Pod created for your Job submission.
 
 ## Introduction
 
-In this demo we use the [Python kubernetes API](https://github.com/kubernetes-client/python/)
+In this demo we use the [Python Kubernetes API](https://github.com/kubernetes-client/python/)
 to submit pods on a Kubernetes cluster.
 
 To populate the basic settings for the Job, we use `settings.toml`, which is
@@ -20,14 +20,12 @@ The overall structure of this tutorial is as follows:
   [Kueue](https://cloud.google.com/kubernetes-engine/docs/tutorials/kueue-intro).
 * The output of the Monte Carlo simulation is published to a
   [PubSub](https://cloud.google.com/pubsub/docs/overview) topic.
-* The PubSub data is entered into [BigQuery](https://cloud.google.com/bigquery)
-via a [PubSub BigQuery subscription](https://cloud.google.com/pubsub/docs/bigquery)
+* The PubSub data is entered into [BigQuery](https://cloud.google.com/bigquery) via a [PubSub BigQuery subscription](https://cloud.google.com/pubsub/docs/bigquery)
 * The data is visualized via a
   [Vertex AI Workbench](https://cloud.google.com/vertex-ai-workbench)
   [Jupyter Notebook](https://jupyter.org/)
 
 <img src="https://services.google.com/fh/files/blogs/gke_arch.png" width="800" />
-
 
 ## Cost to run
 The following elements of this tutorial will result in charges to your billing

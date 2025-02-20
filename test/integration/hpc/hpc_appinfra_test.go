@@ -51,6 +51,7 @@ func TestHPCAppInfra(t *testing.T) {
 
 	for appName, serviceNames := range map[string][]string{"hpc": {"montecarlo"}} {
 		appName := appName
+		serviceNames := serviceNames
 		appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
 		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 		for _, fullServiceName := range serviceNames {
