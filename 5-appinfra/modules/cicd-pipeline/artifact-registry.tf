@@ -43,3 +43,10 @@ resource "google_artifact_registry_repository_iam_member" "container_member" {
     google_artifact_registry_repository.container_registry
   ]
 }
+
+resource "google_artifact_registry_vpcsc_config" "allow_artifact_registry" {
+  provider     = google-beta
+  project      = var.project_id
+  location     = var.region
+  vpcsc_policy = "ALLOW"
+}
