@@ -16,13 +16,14 @@
 
 locals {
   fleet_membership_regex = "projects/([^/]+)/locations/([^/]+)/memberships/([^/]+)"
+  kueue_version          = "v0.10.1"
 }
 
 module "kueue" {
-  for_each                 = toset(var.cluster_membership_ids)
+  for_each = toset(var.cluster_membership_ids)
 
   source                   = "../install_kueue"
-  url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
+  url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/${local.kueue_version}/manifests.yaml"
   project_id               = regex(local.fleet_membership_regex, each.value)[0]
   region                   = "us-central1"
   k8s_registry             = "registry.k8s.io"
