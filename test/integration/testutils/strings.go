@@ -23,20 +23,20 @@ import (
 
 var (
 	ServicesNames = map[string][]string{
-		// "cymbal-bank": {
-		// 	"accounts-contacts",
-		// 	"accounts-userservice",
-		// 	"frontend",
-		// 	"ledger-balancereader",
-		// 	"ledger-ledgerwriter",
-		// 	"ledger-transactionhistory",
-		// },
+		"cymbal-bank": {
+			"accounts-contacts",
+			"accounts-userservice",
+			"frontend",
+			"ledger-balancereader",
+			"ledger-ledgerwriter",
+			"ledger-transactionhistory",
+		},
 		"cymbal-shop": {
 			"cymbalshop",
 		},
-		// "default-example": {
-		// 	"hello-world",
-		// },
+		"default-example": {
+			"hello-world",
+		},
 	}
 
 	ServicesWithEnvProject = map[string][]string{
