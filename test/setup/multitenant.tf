@@ -32,6 +32,8 @@ locals {
       }
     ]
   ]) : []
+
+  create_nat_iterator = var.create_cloud_nat ? module.cluster_vpc : {}
 }
 
 module "project" {
@@ -223,4 +225,29 @@ module "cluster_private_service_connect" {
   network_self_link          = each.value.network_self_link
   private_service_connect_ip = "10.3.0.5"
   forwarding_rule_target     = "vpc-sc"
+}
+
+resource "google_compute_router" "nat_router" {
+  for_each = module.cluster_vpc
+
+  name    = "nat-router-us-central-1"
+  region  = "us-central1"
+  network = each.value.network_self_link
+  project = each.value.project_id
+}
+
+resource "google_compute_router_nat" "cloud_nat" {
+  for_each = local.create_nat_iterator
+
+  name                               = "cloud-nat"
+  router                             = google_compute_router.nat_router[each.key].name
+  region                             = google_compute_router.nat_router[each.key].region
+  project                            = each.value.project_id
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
 }

@@ -25,7 +25,7 @@ locals {
     "cb-frontend",
     "cb-accounts",
     "cb-ledger"],
-    !var.single_project ? ["cymbalshops"] : []
+    !var.single_project ? ["cymbalshops", "hpc-team-a", "hpc-team-b"] : []
   )
 
   index          = !var.single_project ? "multitenant" : "single"

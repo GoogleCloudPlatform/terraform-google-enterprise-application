@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,12 @@
  * limitations under the License.
  */
 
-apps = {
-  "cymbal-bank" : {
-    "ip_address_names" : [
-      "frontend-ip",
-    ]
-    "certificates" : {
-      "frontend-example-com" : ["frontend.example.com"]
-    }
-    "acronym" = "cb",
-  }
-  "cymbal-shop" : {
-    "ip_address_names" : [
-      "cymbal-shop-frontend-ip",
-    ]
-    "certificates" : {
-      "cymbal-shop-frontend-example-com" : ["cymbal-shop.frontend.example.com"]
-    }
-    "acronym" = "cs",
-  }
-  "default-example" : {
-    "acronym" = "de",
-  }
-  "hpc" : {
-    "acronym" = "hpc",
-  }
+resource "google_storage_bucket" "stocks_data" {
+  name          = "${var.infra_project}-stocks-historical-data"
+  project       = var.infra_project
+  location      = var.region
+  force_destroy = var.bucket_force_destroy
+
+  public_access_prevention    = "enforced"
+  uniform_bucket_level_access = true
 }

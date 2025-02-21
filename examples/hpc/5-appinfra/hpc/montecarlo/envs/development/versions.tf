@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,13 @@
  * limitations under the License.
  */
 
-apps = {
-  "cymbal-bank" : {
-    "ip_address_names" : [
-      "frontend-ip",
-    ]
-    "certificates" : {
-      "frontend-example-com" : ["frontend.example.com"]
+terraform {
+  required_version = ">= 1.3"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 6.6, < 7"
     }
-    "acronym" = "cb",
-  }
-  "cymbal-shop" : {
-    "ip_address_names" : [
-      "cymbal-shop-frontend-ip",
-    ]
-    "certificates" : {
-      "cymbal-shop-frontend-example-com" : ["cymbal-shop.frontend.example.com"]
-    }
-    "acronym" = "cs",
-  }
-  "default-example" : {
-    "acronym" = "de",
-  }
-  "hpc" : {
-    "acronym" = "hpc",
   }
 }

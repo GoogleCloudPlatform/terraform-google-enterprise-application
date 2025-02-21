@@ -49,4 +49,6 @@ resource "google_artifact_registry_vpcsc_config" "allow_artifact_registry" {
   project      = var.project_id
   location     = var.region
   vpcsc_policy = "ALLOW"
+
+  depends_on = [google_artifact_registry_repository.container_registry]
 }
