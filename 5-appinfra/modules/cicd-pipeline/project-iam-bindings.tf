@@ -35,6 +35,13 @@ resource "google_project_iam_member" "metric_writer" {
   member = data.google_compute_default_service_account.compute_service_identity.member
 }
 
+resource "google_project_iam_member" "cloudbuild_serviceAgent" {
+  project = var.project_id
+  role    = "roles/cloudbuild.serviceAgent"
+
+  member = google_project_service_identity.cloudbuild_service_identity.member
+}
+
 resource "google_project_iam_member" "log_writer" {
   for_each = {
     "compute"      = data.google_compute_default_service_account.compute_service_identity.member,
@@ -116,7 +123,7 @@ module "cb-gke-project-iam-bindings" {
   for_each   = local.gke_projects
   project_id = each.value
 
-  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor"]
+  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor", "roles/cloudbuild.workerPoolUser"]
   prefix                  = "serviceAccount"
   service_account_address = google_service_account.cloud_build.email
 }

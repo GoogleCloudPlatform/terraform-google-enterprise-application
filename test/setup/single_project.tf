@@ -32,8 +32,16 @@ module "project_standalone" {
 
   activate_api_identities = [
     {
+      api   = "artifactregistry.googleapis.com",
+      roles = ["roles/artifactregistry.serviceAgent"]
+    },
+    {
       api   = "compute.googleapis.com",
       roles = []
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkUser", "roles/serviceusage.serviceUsageConsumer", "roles/container.serviceAgent"]
     },
     {
       api = "cloudbuild.googleapis.com",
@@ -53,6 +61,7 @@ module "project_standalone" {
   ]
 
   activate_apis = [
+    "accesscontextmanager.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",
@@ -67,15 +76,25 @@ module "project_standalone" {
     "container.googleapis.com",
     "gkehub.googleapis.com",
     "iam.googleapis.com",
+    "iap.googleapis.com",
     "mesh.googleapis.com",
+    "monitoring.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
+    "networkmanagement.googleapis.com",
     "secretmanager.googleapis.com",
     "servicemanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "storage-api.googleapis.com",
     "trafficdirector.googleapis.com",
   ]
+}
+
+resource "google_project_service_identity" "gke_identity_cluster_project" {
+  provider = google-beta
+  project  = local.project_id
+  service  = "container.googleapis.com"
 }

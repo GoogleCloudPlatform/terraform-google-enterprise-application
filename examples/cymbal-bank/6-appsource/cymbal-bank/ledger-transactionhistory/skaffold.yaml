@@ -71,4 +71,3 @@ profiles:
     kustomize:
       paths:
       - k8s/overlays/production
-

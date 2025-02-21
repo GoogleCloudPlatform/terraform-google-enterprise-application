@@ -107,7 +107,6 @@ resource "google_compute_instance" "default" {
   depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
-
 resource "google_compute_firewall" "allow_http" {
   name    = "allow-http"
   network = "default"
@@ -172,6 +171,10 @@ output "gitlab_project_number" {
 
 output "gitlab_url" {
   value = "https://${google_compute_instance.default.network_interface[0].access_config[0].nat_ip}.nip.io"
+}
+
+output "gitlab_internal_ip" {
+  value = google_compute_instance.default.network_interface[0].network_ip
 }
 
 output "gitlab_secret_project" {

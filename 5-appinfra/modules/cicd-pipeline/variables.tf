@@ -136,3 +136,8 @@ variable "cloudbuildv2_repository_config" {
   }
 
 }
+
+variable "workerpool_network_id" {
+  description = "The network id to be used by private worker pool."
+  type        = string
+}

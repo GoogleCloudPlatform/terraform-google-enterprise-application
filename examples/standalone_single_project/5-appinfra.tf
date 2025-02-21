@@ -20,6 +20,9 @@
 locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
+
+  sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
+
   cicd_apps = {
     "contacts" = {
       application_name = "cymbal-bank"
@@ -163,4 +166,61 @@ module "cicd" {
   buckets_force_destroy = true
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
+
+  workerpool_network_id = var.workerpool_network_id
+}
+
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
+resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    identities = local.sa_cb
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = [
+      "projects/${data.google_project.project.number}",
+    ]
+
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    identities = local.sa_cb
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = [
+      "projects/${data.google_project.project.number}",
+    ]
+
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
 }

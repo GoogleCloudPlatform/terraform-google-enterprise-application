@@ -79,17 +79,25 @@ module "app_admin_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
   activate_apis = [
-    "iam.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "cloudfunctions.googleapis.com",
     "apikeys.googleapis.com",
+    "iam.googleapis.com",
+    "compute.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "clouddeploy.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "secretmanager.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
-    "clouddeploy.googleapis.com"
   ]
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  vpc_service_control_perimeter_name = var.service_perimeter_name
+
+  svpc_host_project_id = var.workerpool_network_project_id
 
   activate_api_identities = [
     {
@@ -110,7 +118,11 @@ module "app_admin_project" {
     {
       api   = "config.googleapis.com",
       roles = ["roles/cloudconfig.serviceAgent"]
-    }
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkUser", "roles/serviceusage.serviceUsageConsumer", "roles/container.serviceAgent"]
+    },
   ]
 
 }
@@ -144,11 +156,27 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = var.gar_project_id
     "_GAR_REPOSITORY"               = var.gar_repository_name
     "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
+    "_PRIVATE_POOL"                 = google_cloudbuild_worker_pool.pool.id
   }
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
+}
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool-infra-${var.service_name}"
+  project  = local.admin_project_id
+  location = var.trigger_location
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = var.workerpool_network_id
+    peered_network_ip_range = "/29"
+  }
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
@@ -189,4 +217,10 @@ module "app_infra_project" {
   activate_apis            = var.infra_project_apis
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  vpc_service_control_perimeter_name = var.service_perimeter_name
+
+  svpc_host_project_id = each.value.network_project_id
 }

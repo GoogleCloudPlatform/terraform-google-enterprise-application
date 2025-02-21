@@ -169,3 +169,30 @@ variable "cloudbuildv2_repository_config" {
   }
 
 }
+
+variable "workerpool_network_project_id" {
+  description = "Project id where Cloud Build Worker Pool network is hosted."
+  type        = string
+}
+
+variable "workerpool_network_id" {
+  description = "Network id where Cloud Build Worker Pool will be peered."
+  type        = string
+}
+
+variable "service_perimeter_name" {
+  description = "Service perimeter full name."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = "ENFORCE"
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
+}
