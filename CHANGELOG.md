@@ -8,6 +8,38 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.4.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.3.0...v0.4.0) (2025-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Update Terraform GoogleCloudPlatform/cloud-armor/google to v4 ([#317](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/317))
+* use gitlab self-hosted VM on ci - bootstrap stage ([#300](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/300))
+
+### Features
+
+* add hello world testing ([#326](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/326)) ([74af8c0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/74af8c069badac7e23db9ff9e12c2669b367b01a))
+* add multiple credential type options for config sync git repo ([#314](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/314)) ([35ef757](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/35ef75785b80727735552f7a2ab8e8389bfac7b7))
+* **appfactory:** use gitlab on 4-appfactory and update docs for other git providers ([#319](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/319)) ([c8d5c65](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/c8d5c6590cde9714bda4a5eca018105c96ae8ff9))
+* **appinfra:** replace CSR with Gitlab on 5-appinfra ([#325](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/325)) ([0c56f5a](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/0c56f5a6af9219a28ee6aa59c588a08569360a6f))
+* **CI:** add support for testing all environments in hello-world example ([#357](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/357)) ([5ec4161](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/5ec4161e6a286ae02d0ac79a014ca55ac34e33d3))
+* **CI:** use a gitlab repository for config-sync-repo ([#328](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/328)) ([4942b47](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/4942b471e3f087fb3a173ffa8c5fa6178c49f8ad))
+* **hello-world:** enable gvisor ([#324](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/324)) ([d135783](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/d135783f539641d96237cc2d290c737c7e13e4f0))
+* **HPC:** add monte carlo simulation example to blueprint ([#360](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/360)) ([229110e](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/229110e885560d985b8c2f31e6401b8aceb4afd1))
+* **HPC:** add trigger int.cloudbuild.hpc.yaml ([#361](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/361)) ([b44f445](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/b44f4458b960f3b93d98f1a7feb2cb7aa6fc57ac))
+* use gitlab self-hosted VM on ci - bootstrap stage ([#300](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/300)) ([e8f9a1a](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/e8f9a1a0467eb649d4462325da0aa628e2c8a16c))
+* use regional restricted node pool by filtering regions with regex ([#336](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/336)) ([d5cad74](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/d5cad748482498ce7bbc794431e5f0e3c2a9f260))
+
+
+### Bug Fixes
+
+* **deps:** Update Terraform GoogleCloudPlatform/cloud-armor/google to v4 ([#317](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/317)) ([11e0821](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/11e0821d6834a3b7c2a546d1a509e15ce5754884))
+* **deps:** Update Terraform terraform-google-modules/bootstrap/google to v11 ([#318](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/318)) ([e561f51](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/e561f51b3719db0744dbfba3f2d97889530c5e94))
+* **deps:** Update Terraform terraform-google-modules/kubernetes-engine/google to v35 ([#349](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/349)) ([af85d69](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/af85d6943170abcc9d46ef068116002e3e4e4c47))
+* **deps:** Update Terraform terraform-google-modules/kubernetes-engine/google to v36 ([#355](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/355)) ([862e6cb](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/862e6cb347ac2f624d3678fe3df57837fdd99a95))
+* **deps:** Update Terraform terraform-google-modules/project-factory/google to v18 ([#322](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/322)) ([ef22bac](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/ef22bacf81a11890ffce890e2d5cb6b370fbf1db))
+* fixing cymbal-bank signature error on e2e image and improve logs ([#344](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/344)) ([07a8106](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/07a8106b2dba5d23b87c15cde07311d2edc4fa05))
+
 ## [0.3.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.2.0...v0.3.0) (2024-12-30)
 
 
