@@ -26,12 +26,13 @@ locals {
 module "env" {
   source = "../../modules/env_baseline"
 
-  env                    = local.env
-  cluster_project_id     = local.cluster_project_id
-  network_project_id     = local.network_project_id
-  fleet_project_id       = local.fleet_project_id
-  namespace_ids          = var.namespace_ids
-  cluster_membership_ids = local.cluster_membership_ids
+  env                      = local.env
+  cluster_project_id       = local.cluster_project_id
+  network_project_id       = local.network_project_id
+  fleet_project_id         = local.fleet_project_id
+  namespace_ids            = var.namespace_ids
+  cluster_membership_ids   = local.cluster_membership_ids
+  cluster_service_accounts = values(local.cluster_service_accounts)
 
   config_sync_secret_type    = var.config_sync_secret_type
   config_sync_repository_url = var.config_sync_repository_url

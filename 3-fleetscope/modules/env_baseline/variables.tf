@@ -44,6 +44,11 @@ variable "cluster_membership_ids" {
   type        = list(string)
 }
 
+variable "cluster_service_accounts" {
+  description = "Cluster nodes services accounts."
+  type        = list(string)
+}
+
 variable "additional_project_role_identities" {
   description = <<-EOF
   (Optional) A list of additional identities to assign roles at the project level for the fleet project. Use the following formats for specific Kubernetes identities:

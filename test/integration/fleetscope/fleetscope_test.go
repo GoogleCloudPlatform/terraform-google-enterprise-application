@@ -16,6 +16,7 @@ package fleetscope
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"testing"
@@ -28,6 +29,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
+
+func renameKueueFile(t *testing.T) {
+	tf_file_old := "../../../3-fleetscope/modules/env_baseline/kueue.tf.example"
+	tf_file_new := "../../../3-fleetscope/modules/env_baseline/kueue.tf"
+	err := os.Rename(tf_file_old, tf_file_new)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
 func retrieveNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
 	return k8s.RunKubectlAndGetOutputE(t, options, "get", "ns", "config-management-system", "-o", "json")
@@ -134,6 +144,15 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 				tft.WithParallelism(1),
 			)
+
+			fleetscope.DefineInit(func(assert *assert.Assertions) {
+				// install keueue on 3-fleetscope if environment variable INSTALL_KUEUE is true
+				if strings.ToLower(os.Getenv("INSTALL_KUEUE")) == "true" {
+					// by renaming kueue.tf.example to kueue.tf the module will install kueue
+					renameKueueFile(t)
+				}
+				fleetscope.DefaultInit(assert)
+			})
 
 			fleetscope.DefineApply(func(assert *assert.Assertions) {
 				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
@@ -246,7 +265,7 @@ func TestFleetscope(t *testing.T) {
 						for _, memberShipName := range membershipNamesProjectNumber {
 							dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
 							controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-							retryStatus := []string {"PROVISIONING", "STALLED"}
+							retryStatus := []string{"PROVISIONING", "STALLED"}
 							if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
 								retry = true
 							} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
