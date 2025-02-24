@@ -57,19 +57,20 @@ resource "google_artifact_registry_repository" "k8s" {
   }
 }
 
-module "install_kueue_private_registry" {
-  source                = "terraform-google-modules/gcloud/google"
-  version               = "~> 3.5"
-  upgrade               = false
-  additional_components = ["kubectl"]
+module "kubectl" {
+  source  = "terraform-google-modules/gcloud/google//modules/kubectl-fleet-wrapper"
+  version = "~> 3.5"
+
+  skip_download = true
   create_cmd_triggers = {
     "url" = var.url
   }
 
-  create_cmd_entrypoint = "bash"
-  create_cmd_body       = <<-EOF
-  gcloud container fleet memberships get-credentials ${var.cluster_name} --location=${var.cluster_region} --project=${var.cluster_project} && kubectl apply --server-side -f ${path.module}/kueue-${var.cluster_name}.yaml
-  EOF
+  membership_project_id   = var.project_id
+  membership_name         = module.gke.name
+  membership_location     = module.gke.location
+  kubectl_create_command  = "kubectl apply --server-side -f ${path.module}/kueue-${var.cluster_name}.yaml"
+  kubectl_destroy_command = "kubectl delete -f ${path.module}/kueue-${var.cluster_name}.yaml"
 
   module_depends_on = [
     local_file.downloaded_file.filename,
