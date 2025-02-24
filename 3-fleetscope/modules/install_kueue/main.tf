@@ -70,7 +70,7 @@ module "kubectl" {
   membership_name         = var.cluster_name
   membership_location     = var.cluster_region
   kubectl_create_command  = "kubectl apply --server-side -f ${path.module}/kueue-${var.cluster_name}.yaml"
-  kubectl_destroy_command = ""
+  kubectl_destroy_command = "kubectl delete -f ${path.module}/kueue-${var.cluster_name}.yaml || exit 1"
 
   module_depends_on = [
     local_file.downloaded_file.filename,
