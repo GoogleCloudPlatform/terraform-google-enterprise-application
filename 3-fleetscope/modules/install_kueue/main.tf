@@ -66,9 +66,9 @@ module "kubectl" {
     "url" = var.url
   }
 
-  membership_project_id   = var.project_id
-  membership_name         = module.gke.name
-  membership_location     = module.gke.location
+  membership_project_id   = var.cluster_project
+  membership_name         = var.cluster_name
+  membership_location     = var.cluster_region
   kubectl_create_command  = "kubectl apply --server-side -f ${path.module}/kueue-${var.cluster_name}.yaml"
   kubectl_destroy_command = "kubectl delete -f ${path.module}/kueue-${var.cluster_name}.yaml"
 
