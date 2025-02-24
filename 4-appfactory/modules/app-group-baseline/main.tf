@@ -93,6 +93,9 @@ module "app_admin_project" {
     "sourcerepo.googleapis.com",
   ]
 
+  disable_services_on_destroy = false
+  disable_dependent_services  = false
+
   vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
