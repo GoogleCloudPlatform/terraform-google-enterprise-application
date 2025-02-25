@@ -15,10 +15,11 @@
  */
 
 locals {
-  fleet_project_id       = data.terraform_remote_state.multitenant.outputs.fleet_project_id
-  cluster_project_id     = data.terraform_remote_state.multitenant.outputs.cluster_project_id
-  network_project_id     = data.terraform_remote_state.multitenant.outputs.network_project_id
-  cluster_membership_ids = data.terraform_remote_state.multitenant.outputs.cluster_membership_ids
+  fleet_project_id         = data.terraform_remote_state.multitenant.outputs.fleet_project_id
+  cluster_project_id       = data.terraform_remote_state.multitenant.outputs.cluster_project_id
+  network_project_id       = data.terraform_remote_state.multitenant.outputs.network_project_id
+  cluster_membership_ids   = data.terraform_remote_state.multitenant.outputs.cluster_membership_ids
+  cluster_service_accounts = data.terraform_remote_state.multitenant.outputs.cluster_service_accounts
 }
 
 data "terraform_remote_state" "multitenant" {
