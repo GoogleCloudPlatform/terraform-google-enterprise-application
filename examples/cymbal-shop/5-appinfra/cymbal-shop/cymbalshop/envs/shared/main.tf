@@ -41,5 +41,6 @@ module "app" {
   buckets_force_destroy = var.buckets_force_destroy
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
-  workerpool_network_id          = var.workerpool_network_id
+
+  private_worker_pool = { private_worker_pool_id = local.app_admin_worker_pool }
 }

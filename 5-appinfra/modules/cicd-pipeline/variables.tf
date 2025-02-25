@@ -137,7 +137,15 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
-variable "workerpool_network_id" {
-  description = "The network id to be used by private worker pool."
-  type        = string
+variable "private_worker_pool" {
+  description = "The Private Worker Pool id to be used by Cloud Build. If not provided, a new one will be created and workerpool_network_id must be provided."
+  type = object({
+    private_worker_pool_id = optional(string)
+    workerpool_network_id  = optional(string)
+  })
+
+  validation {
+    condition     = (var.private_worker_pool.workerpool_network_id == null && var.private_worker_pool.private_worker_pool_id != null) || (var.private_worker_pool.workerpool_network_id != null && var.private_worker_pool.private_worker_pool_id == null)
+    error_message = "If a Worker Pool ID is not provided, a network must be provided to create a new Private Worker Pool."
+  }
 }

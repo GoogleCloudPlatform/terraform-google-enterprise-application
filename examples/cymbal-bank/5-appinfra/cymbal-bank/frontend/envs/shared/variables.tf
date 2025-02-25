@@ -95,8 +95,3 @@ variable "cloudbuildv2_repository_config" {
   }
 
 }
-
-variable "workerpool_network_id" {
-  description = "Network id where Cloud Build Worker Pool will be peered."
-  type        = string
-}

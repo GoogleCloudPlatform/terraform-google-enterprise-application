@@ -24,7 +24,8 @@ locals {
       [for item in data.terraform_remote_state.multitenant : values(item.outputs.cluster_service_accounts)]
     )
   )
-  app_admin_project = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-shop.cymbalshop"].app_admin_project_id
+  app_admin_project     = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-shop.cymbalshop"].app_admin_project_id
+  app_admin_worker_pool = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-shop.cymbalshop"].app_infra_private_worker_pool_id
 }
 
 data "terraform_remote_state" "multitenant" {

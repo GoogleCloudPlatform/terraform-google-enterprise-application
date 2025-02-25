@@ -44,6 +44,11 @@ output "cb_service_accounts_emails" {
   value       = local.cb_service_accounts_emails
 }
 
+output "cb_private_worker_pool_id" {
+  description = "Private Worker Pool id for Cloud Build."
+  value       = google_cloudbuild_worker_pool.pool.id
+}
+
 output "tf_project_id" {
   description = "Google Artifact registry terraform project id."
   value       = google_artifact_registry_repository.tf_image.project

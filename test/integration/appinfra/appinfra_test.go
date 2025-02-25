@@ -95,7 +95,6 @@ func TestAppInfra(t *testing.T) {
 					"remote_state_bucket":   remoteState,
 					"buckets_force_destroy": "true",
 					"environment_names":     testutils.EnvNames(t),
-					"workerpool_network_id": appFactory.GetTFSetupStringOutput("workerpool_network_id"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,

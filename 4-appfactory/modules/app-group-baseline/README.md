@@ -39,6 +39,7 @@
 | app\_cloudbuild\_workspace\_logs\_bucket\_name | Logs bucket name for the application workspace. |
 | app\_cloudbuild\_workspace\_plan\_trigger\_id | ID of the plan cloud build trigger. |
 | app\_cloudbuild\_workspace\_state\_bucket\_name | Terraform state bucket name for the application workspace. |
+| app\_infra\_private\_worker\_pool\_id | Private Worker Pool id for Cloud Build. |
 | app\_infra\_project\_ids | Application environment projects IDs. |
 | app\_infra\_repository\_name | Name of the application infrastructure repository. |
 | app\_infra\_repository\_url | URL of the application infrastructure repository. |

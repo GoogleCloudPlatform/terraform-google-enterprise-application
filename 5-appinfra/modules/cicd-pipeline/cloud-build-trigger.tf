@@ -47,7 +47,7 @@ resource "google_cloudbuild_trigger" "ci" {
       _SOURCE_STAGING_BUCKET     = "gs://${google_storage_bucket.release_source_development.name}"
       _CACHE                     = local.cache_filename
       _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
-      _WORKER_POOL               = google_cloudbuild_worker_pool.pool.id
+      _WORKER_POOL               = local.private_worker_pool
     },
     var.additional_substitutions
   )
@@ -56,6 +56,7 @@ resource "google_cloudbuild_trigger" "ci" {
 }
 
 resource "google_cloudbuild_worker_pool" "pool" {
+  count    = var.private_worker_pool.private_worker_pool_id == null ? 1 : 0
   name     = "cb-pool-app-${local.service_clean}"
   project  = var.project_id
   location = var.region
@@ -65,7 +66,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
     no_external_ip = true
   }
   network_config {
-    peered_network          = var.workerpool_network_id
+    peered_network          = var.private_worker_pool.workerpool_network_id
     peered_network_ip_range = "/29"
   }
 
