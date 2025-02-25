@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,12 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: cb-ledger-development
-resources:
-  - ../../base
-  - anthos-service-mesh-security-config.yaml
-components:
-  - ../../../../../components/development
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: cb-frontend-development
+spec:
+  mtls:
+    mode: STRICT 
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: cb-frontend-development-isolation
+  namespace: cb-frontend-development
+spec:
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        namespaces: ["cb-frontend-development", "cb-accounts-development", "cb-ledger-development"]

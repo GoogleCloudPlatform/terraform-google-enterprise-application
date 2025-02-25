@@ -18,6 +18,7 @@ namespace: cb-frontend-development
 resources:
   - ../../base
   - destinationrule.yaml
+  - anthos-service-mesh-security-config.yaml
 components:
   - ../../../../components/development
 
