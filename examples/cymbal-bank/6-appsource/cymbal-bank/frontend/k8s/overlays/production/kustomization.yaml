@@ -17,5 +17,6 @@ kind: Kustomization
 namespace: cb-frontend-production
 resources:
   - ../../base
+  - anthos-service-mesh-security-config.yaml
 components:
   - ../../../../components/production

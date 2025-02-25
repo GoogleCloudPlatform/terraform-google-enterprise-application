@@ -18,6 +18,7 @@ namespace: cb-accounts-production
 resources:
   - ../../base
   - namespace.yaml
+  - anthos-service-mesh-security-config.yaml
 components:
   - ../../../../../components/production
   - ../../../../../components/cloud-sql
