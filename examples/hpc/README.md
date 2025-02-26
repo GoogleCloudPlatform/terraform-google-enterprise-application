@@ -5,7 +5,7 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
 ## Requirements
 
 - **Docker Registry Connectivity**
-  If you are using a private cluster with private nodes, they must be able to fetch Kueue Docker images from `registry.k8s.io`. This can be done by adding Cloud NAT to the private nodes network, having your own NAT setup on your cluster network, or by using Artifact Registry Remote Repositories.
+  If you are using a private cluster with private nodes, they must be able to fetch Kueue Docker images from `registry.k8s.io`. This can be done by adding Cloud NAT to the private nodes network, having your own NAT setup on your cluster network, or by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md).
 
 - **Kubectl with Cluster Connection**
   If using a private cluster, you can use Connect Gateway.
