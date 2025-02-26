@@ -16,6 +16,7 @@
 
 locals {
   docker_tag_version_terraform = "v1"
+  namespace                    = "${var.team}-${var.env}"
 }
 
 resource "google_project_iam_member" "team_roles" {
@@ -27,7 +28,7 @@ resource "google_project_iam_member" "team_roles" {
 
   project = var.infra_project
   role    = each.value
-  member  = "principalSet://iam.googleapis.com/projects/${var.cluster_project_number}/locations/global/workloadIdentityPools/${var.cluster_project}.svc.id.goog/namespace/${var.team}"
+  member  = "principalSet://iam.googleapis.com/projects/${var.cluster_project_number}/locations/global/workloadIdentityPools/${var.cluster_project}.svc.id.goog/namespace/${local.namespace}"
 }
 
 resource "google_project_service" "enable_apis" {
@@ -78,7 +79,7 @@ module "fleet_app_operator_permissions" {
   version = "~> 36.0"
 
   fleet_project_id = var.cluster_project
-  scope_id         = var.team
+  scope_id         = local.namespace
   users            = [data.google_compute_default_service_account.default.email]
   role             = "ADMIN"
 }
