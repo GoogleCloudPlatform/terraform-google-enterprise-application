@@ -8,7 +8,7 @@ Artifact Registry remote repositories allow you to cache artifacts from upstream
 
 ## Secure Kueue Installation
 
-The Terraform module `install_kueue`, located within the [3-fleetscope](../3-fleetscope/modules/install_kueue) directory, automates the setup of Kueue in a secure manner. This module performs the following key tasks:
+The Terraform module `private_install_manifest`, located within the [3-fleetscope](../3-fleetscope/modules/private_install_manifest) directory, automates the setup of Kueue in a secure manner. This module performs the following key tasks:
 
 1. **Creates an Artifact Registry Remote Repository**: It establishes a dedicated repository for proxying and caching Kueue images.
 
@@ -20,7 +20,7 @@ This eliminates the need to expose your GKE nodes to an external network during 
 
 ### Prerequisites
 
-Before using the `install_kueue` module, ensure the following requirements are met:
+Before using the `private_install_manifest` module, ensure the following requirements are met:
 
 - **Private GKE Cluster registered to a Fleet**: You must have an operational Private GKE Cluster in a Fleet. ConnectGateway requires the cluster to be in a Fleet.
 
@@ -40,7 +40,7 @@ Fleetscope is a Good Stage to install Kueue, alongside other cluster installatio
     module "kueue" {
         for_each                 = toset(var.cluster_membership_ids)
 
-        source                   = "../install_kueue"
+        source                   = "../private_install_manifest"
         url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
         project_id               = regex(local.fleet_membership_regex, each.value)[0]
         region                   = "us-central1"

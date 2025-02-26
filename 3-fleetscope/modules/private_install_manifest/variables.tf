@@ -15,9 +15,8 @@
  */
 
 variable "url" {
-  description = "URL for Kueue manifests"
+  description = "URL for manifests"
   type        = string
-  default     = "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml"
 }
 
 variable "project_id" {
