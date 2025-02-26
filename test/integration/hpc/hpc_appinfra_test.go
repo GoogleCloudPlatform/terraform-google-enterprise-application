@@ -51,8 +51,8 @@ func TestHPCAppInfra(t *testing.T) {
 
 	for appName, serviceNames := range map[string][]string{
 		"hpc": {
-			"team-a",
-			"team-b",
+			"hpc-team-a",
+			"hpc-team-b",
 		}} {
 		appName := appName
 		serviceNames := serviceNames
@@ -95,7 +95,7 @@ func TestHPCAppInfra(t *testing.T) {
 				})
 
 				appService.DefineTeardown(func(assert *assert.Assertions) {
-					for _, team := range []string{"team-a", "team-b"} {
+					for _, team := range []string{"hpc-team-a", "hpc-team-b"} {
 						path := fmt.Sprintf("hpc\\.%s.app_infra_project_ids.development", team)
 						infraProjectID := appFactory.GetJsonOutput("app-group").Get(path).String()
 						zone := "us-central1-a"
