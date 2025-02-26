@@ -39,6 +39,16 @@ resource "random_string" "prefix" {
   upper   = false
 }
 
+# Create mock seed folder
+module "folder_seed" {
+  source              = "terraform-google-modules/folders/google"
+  version             = "~> 5.0"
+  prefix              = random_string.prefix.result
+  parent              = "folders/${var.folder_id}"
+  names               = ["seed"]
+  deletion_protection = false
+}
+
 data "google_organization" "org" {
   organization = var.org_id
 }

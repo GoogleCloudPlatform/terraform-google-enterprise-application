@@ -22,7 +22,6 @@ output "app-group" {
       app_admin_project_id : value.app_admin_project_id,
       app_infra_repository_name : value.app_infra_repository_name,
       app_infra_repository_url : value.app_infra_repository_url,
-      app_infra_private_worker_pool_id : value.app_infra_private_worker_pool_id,
       app_cloudbuild_workspace_apply_trigger_id : value.app_cloudbuild_workspace_apply_trigger_id,
       app_cloudbuild_workspace_plan_trigger_id : value.app_cloudbuild_workspace_plan_trigger_id,
       app_cloudbuild_workspace_artifacts_bucket_name : value.app_cloudbuild_workspace_artifacts_bucket_name,

@@ -23,7 +23,7 @@ module "gitlab_project" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = var.folder_id
+  folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"

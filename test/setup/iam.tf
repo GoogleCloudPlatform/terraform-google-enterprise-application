@@ -62,6 +62,13 @@ resource "google_project_iam_member" "int_test_connection_admin" {
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
+resource "google_folder_iam_member" "int_test_connection_admin" {
+  for_each = toset(["roles/resourcemanager.projectCreator", "roles/owner"])
+  folder   = module.folder_seed.id
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
 resource "google_project_iam_member" "int_test" {
   for_each = toset(local.int_required_roles)
 
@@ -95,6 +102,12 @@ resource "google_organization_iam_member" "organizationServiceAgent_role" {
 resource "google_organization_iam_member" "organization_xpn_role" {
   org_id = var.org_id
   role   = "roles/compute.xpnAdmin"
+  member = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
+resource "google_organization_iam_member" "orgPolicyAdmin_role" {
+  org_id = var.org_id
+  role   = "roles/orgpolicy.policyAdmin"
   member = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 

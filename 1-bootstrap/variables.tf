@@ -19,6 +19,21 @@ variable "project_id" {
   type        = string
 }
 
+variable "org_id" {
+  description = "Organization ID"
+  type        = string
+}
+
+variable "folder_id" {
+  description = "Folder ID"
+  type        = string
+}
+
+variable "billing_account" {
+  description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
+  type        = string
+}
+
 variable "workerpool_network_id" {
   description = "The network definition that the workers are peered to. Must be in the format projects/{project}/global/networks/{network}, where {project} is a project number, such as 12345, and {network} is the name of a VPC network in the project."
   type        = string
@@ -158,4 +173,27 @@ variable "cloudbuildv2_repository_config" {
     error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
   }
 
+}
+
+variable "workerpool_network_project_id" {
+  description = "Workepool network project."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_name" {
+  description = "Service perimeter full name."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = "ENFORCE"
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
 }

@@ -29,11 +29,6 @@ output "app_infra_repository_url" {
   value       = local.use_csr ? google_sourcerepo_repository.app_infra_repo[0].url : module.cloudbuild_repositories[0].cloud_build_repositories_2nd_gen_repositories[var.service_name].url
 }
 
-output "app_infra_private_worker_pool_id" {
-  description = "Private Worker Pool id for Cloud Build."
-  value       = google_cloudbuild_worker_pool.pool.id
-}
-
 output "app_cloudbuild_workspace_apply_trigger_id" {
   description = "ID of the apply cloud build trigger."
   value       = module.tf_cloudbuild_workspace.cloudbuild_apply_trigger_id

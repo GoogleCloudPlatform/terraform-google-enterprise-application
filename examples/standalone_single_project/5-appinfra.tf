@@ -141,6 +141,22 @@ locals {
   }
 }
 
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool-single-project"
+  project  = var.project_id
+  location = var.region
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = var.workerpool_network_id
+    peered_network_ip_range = "/29"
+  }
+}
+
 module "cicd" {
   source   = "../../5-appinfra/modules/cicd-pipeline"
   for_each = local.cicd_apps
@@ -167,7 +183,7 @@ module "cicd" {
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
 
-  private_worker_pool = { workerpool_network_id = var.workerpool_network_id }
+  workerpool_id = google_cloudbuild_worker_pool.pool.id
 }
 
 data "google_project" "project" {

@@ -26,8 +26,7 @@
 | service\_perimeter\_name | Service perimeter full name. | `string` | `null` | no |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"global"` | no |
-| workerpool\_network\_id | Network id where Cloud Build Worker Pool will be peered. | `string` | n/a | yes |
-| workerpool\_network\_project\_id | Project id where Cloud Build Worker Pool network is hosted. | `string` | n/a | yes |
+| workerpool\_id | Private Worker pool id. | `string` | n/a | yes |
 
 ## Outputs
 
@@ -39,7 +38,6 @@
 | app\_cloudbuild\_workspace\_logs\_bucket\_name | Logs bucket name for the application workspace. |
 | app\_cloudbuild\_workspace\_plan\_trigger\_id | ID of the plan cloud build trigger. |
 | app\_cloudbuild\_workspace\_state\_bucket\_name | Terraform state bucket name for the application workspace. |
-| app\_infra\_private\_worker\_pool\_id | Private Worker Pool id for Cloud Build. |
 | app\_infra\_project\_ids | Application environment projects IDs. |
 | app\_infra\_repository\_name | Name of the application infrastructure repository. |
 | app\_infra\_repository\_url | URL of the application infrastructure repository. |

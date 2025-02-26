@@ -42,7 +42,7 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
   execution_configs {
     artifact_storage = "gs://${google_storage_bucket.delivery_artifacts[split("-", each.value)[length(split("-", each.value)) - 1]].name}"
     service_account  = google_service_account.cloud_deploy.email
-    worker_pool      = local.private_worker_pool
+    worker_pool      = var.workerpool_id
     usages = [
       "RENDER",
       "DEPLOY"

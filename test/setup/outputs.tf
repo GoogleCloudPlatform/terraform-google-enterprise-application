@@ -17,8 +17,13 @@
 output "project_id" {
   value = local.project_id
 }
+
 output "project_number" {
   value = local.project_number
+}
+
+output "folder_id" {
+  value = module.folder_seed.id
 }
 
 output "sa_email" {

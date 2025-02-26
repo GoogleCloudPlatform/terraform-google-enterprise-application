@@ -13,9 +13,8 @@
 # limitations under the License.
 
 locals {
-  cache_filename      = "cache"
-  full_service        = var.team_name == var.service_name ? var.service_name : "${var.team_name}-${var.service_name}"
-  service_clean       = replace(local.full_service, "/", "-")
-  container_registry  = google_artifact_registry_repository.container_registry
-  private_worker_pool = var.private_worker_pool.private_worker_pool_id == null ? google_cloudbuild_worker_pool.pool[0].id : var.private_worker_pool.private_worker_pool_id
+  cache_filename     = "cache"
+  full_service       = var.team_name == var.service_name ? var.service_name : "${var.team_name}-${var.service_name}"
+  service_clean      = replace(local.full_service, "/", "-")
+  container_registry = google_artifact_registry_repository.container_registry
 }

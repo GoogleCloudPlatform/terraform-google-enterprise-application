@@ -24,7 +24,7 @@ module "project_standalone" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = var.folder_id
+  folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
 
@@ -82,6 +82,7 @@ module "project_standalone" {
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
     "networkmanagement.googleapis.com",
+    "orgpolicy.googleapis.com",
     "secretmanager.googleapis.com",
     "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",

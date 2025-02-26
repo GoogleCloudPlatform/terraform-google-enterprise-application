@@ -60,18 +60,27 @@ steps:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage init --verbose"]
     waitFor:
       - vpc-sc
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
   - id: bootstrap-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage apply --verbose"]
     waitFor:
       - bootstrap-init
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
   - id: bootstrap-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage verify --verbose"]
     waitFor:
       - bootstrap-apply
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
 
   - id: multitenant-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -283,6 +292,9 @@ steps:
       ]
     waitFor:
       - multitenant-teardown
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
 
   - id: vpcsc-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"

@@ -46,7 +46,7 @@ module "project" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = var.folder_id
+  folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
@@ -58,6 +58,7 @@ module "project" {
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",
+    "orgpolicy.googleapis.com",
     "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
@@ -95,7 +96,7 @@ module "folder_common" {
   source              = "terraform-google-modules/folders/google"
   version             = "~> 5.0"
   prefix              = random_string.prefix.result
-  parent              = "folders/${var.folder_id}"
+  parent              = module.folder_seed.id
   names               = ["common"]
   deletion_protection = false
 }
@@ -108,7 +109,7 @@ module "folders" {
   version = "~> 5.0"
 
   prefix              = random_string.prefix.result
-  parent              = "folders/${var.folder_id}"
+  parent              = module.folder_seed.id
   names               = local.envs
   deletion_protection = false
 }
