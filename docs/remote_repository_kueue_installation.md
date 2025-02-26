@@ -30,7 +30,7 @@ Before using the `private_install_manifest` module, ensure the following require
 
 Fleetscope is a Good Stage to install Kueue, alongside other cluster installations, such as Config Sync and Service Mesh. To do so, you must add the module call inside `3-fleetscope/modules/env_baseline` base module.
 
-1. Create a new file under `3-fleetscope/modules/env_baseline`, named `kueue.tf` and add the following code to it:
+1. Create a new file under `3-fleetscope/modules/env_baseline`, named `kueue.tf` and add the following code to it (you can find an example `.tf` file [here](../3-fleetscope/modules/env_baseline/kueue.tf.example)):
 
     ```terraform
     locals {
