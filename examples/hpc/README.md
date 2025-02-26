@@ -65,7 +65,7 @@ Typically, the application namespace will be created on 3-fleetscope and specifi
 
 ### Apply Kueue Resources
 
-Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator and after the namespaces are created:
+Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator, after the namespaces are created and should be ran only once:
 
 ```bash
 kubectl apply -f manifests/kueue-resources.yaml
@@ -83,7 +83,7 @@ gcloud config set project REPLACE_WITH_YOUR_INFRA_PROJECT
 
 The `fsi-montecarlo-on-batch.yaml` file contains a blueprint that is deployed with `gcluster` (cluster-toolkit). It will create a notebook instance on the infrastructure project, alongs with the it's dependencies.
 
-To deploy the blueprint, navigate to the source directory and run the following command, make sure you replace CLUSTER_NAME with your environment's cluster name:
+To deploy the blueprint, navigate to the source directory and run the following command, make sure you replace CLUSTER_NAME with your environment's cluster name, use your team infrastructure project that was created on 4-appfactory for the `PROJECT_ID`:
 
 ```bash
 PROJECT_ID=REPLACE_WITH_YOUR_INFRA_PROJECT

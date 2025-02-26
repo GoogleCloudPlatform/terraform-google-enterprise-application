@@ -1,6 +1,11 @@
 applications = {
   "hpc" = {
-    "montecarlo" = {
+    // team-a and team-b will have their own infrastructure project
+    "team-a" = {
+      create_infra_project = true
+      create_admin_project = true
+    },
+    "team-b" = {
       create_infra_project = true
       create_admin_project = true
     }

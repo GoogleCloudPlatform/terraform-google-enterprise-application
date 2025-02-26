@@ -20,7 +20,7 @@ locals {
   cluster_project_id       = data.terraform_remote_state.multitenant.outputs.cluster_project_id
   cluster_service_accounts = data.terraform_remote_state.multitenant.outputs.cluster_service_accounts
   cluster_project_number   = data.terraform_remote_state.multitenant.outputs.cluster_project_number
-  app_project_id           = data.terraform_remote_state.appfactory.outputs.app-group["hpc.montecarlo"].app_infra_project_ids[local.env]
+  app_project_id           = data.terraform_remote_state.appfactory.outputs.app-group["hpc.team-a"].app_infra_project_ids[local.env]
 }
 
 data "terraform_remote_state" "multitenant" {

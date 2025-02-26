@@ -49,7 +49,11 @@ func TestHPCAppInfra(t *testing.T) {
 	servicesInfoMap := make(map[string]ServiceInfos)
 	// region := "us-central1" // TODO: Move to terraform.tfvars?
 
-	for appName, serviceNames := range map[string][]string{"hpc": {"montecarlo"}} {
+	for appName, serviceNames := range map[string][]string{
+		"hpc": {
+			"team-a",
+			"team-b",
+		}} {
 		appName := appName
 		serviceNames := serviceNames
 		appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
@@ -91,13 +95,17 @@ func TestHPCAppInfra(t *testing.T) {
 				})
 
 				appService.DefineTeardown(func(assert *assert.Assertions) {
-					infraProjectID := appFactory.GetJsonOutput("app-group").Get("hpc\\.montecarlo.app_infra_project_ids.development").String()
-					zone := "us-central1-a"
-					instances := gcloud.Runf(t, "workbench instances list --location=%s --project=%s", zone, infraProjectID).Array()
-					for _, instance := range instances {
-						name := instance.Get("name")
-						gcloud.Runf(t, "workbench instances delete %s --location=%s --project=%s", name, zone, infraProjectID)
+					for _, team := range []string{"team-a", "team-b"} {
+						path := fmt.Sprintf("hpc\\.%s.app_infra_project_ids.development", team)
+						infraProjectID := appFactory.GetJsonOutput("app-group").Get(path).String()
+						zone := "us-central1-a"
+						instances := gcloud.Runf(t, "workbench instances list --location=%s --project=%s", zone, infraProjectID).Array()
+						for _, instance := range instances {
+							name := instance.Get("name")
+							gcloud.Runf(t, "workbench instances delete %s --location=%s --project=%s", name, zone, infraProjectID)
+						}
 					}
+
 					appService.DefaultTeardown(assert)
 				})
 				appService.Test()
