@@ -18,7 +18,7 @@ metadata:
   namespace: cb-accounts-production
 spec:
   mtls:
-    mode: STRICT 
+    mode: STRICT
 ---
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
