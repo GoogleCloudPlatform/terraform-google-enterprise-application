@@ -111,15 +111,41 @@ Apply the modifications by pushing code to a named branch, after updating the va
 
 Under [5-appinfra](./5-appinfra/) you will find the two environment folders. They just need to be copied to you AppInfra Pipeline repository and pushed to a named branch.
 
-#### More Information on Permissions
+#### More Information on Permissions within the Developer Platform
 
 The team members will run the code through a [Vertex AI Workbench Instance](https://cloud.google.com/vertex-ai/docs/workbench/instances/). They must have permission to connect to the instance and the instance will have permission to apply changes on their respective team namespace.
 
 If the team member belongs to the `hpc-team` group defined in `3-fleetscope`, they will have `ADMIN` permissions on the namespace (see module `fleet_app_operator_permissions` on [3-fleetscope](../../3-fleetscope/modules/env_baseline/main.tf)).
 
-If the team member wants to manage kubernetes resources outside the instance,the user will also need permission to connect to the cluster using ConnectGateway. For more information on managing ConnectGateway, refer to the following [documentation](https://cloud.google.com/kubernetes-engine/enterprise/multicluster-management/gateway/setup).
+If the team member wants to manage kubernetes resources outside the instance, the user will also need permission to connect to the cluster using ConnectGateway. For more information on managing ConnectGateway, refer to the following [documentation](https://cloud.google.com/kubernetes-engine/enterprise/multicluster-management/gateway/setup).
 
 If the user lacks the necessary privileges to assign these permissions, they can submit a pull request (PR) to the 3-fleetscope repository. This will allow the relevant personnel in charge of the cluster to review and address the request. Basic Kubernetes RBAC roles can be assigned using terraform with the following [module](https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/tree/v36.0.2/modules/fleet-app-operator-permissions).
+
+##### Examples PR's requesting permission assignment
+
+For example, the user can open a PR to 3-fleetscope `terraform.tfvars` file adding an identity to the namespace ADMIN permissions.
+
+```diff
+additional_namespace_identities = {
++  "hpc-team-b" = ["vertex-ai-instance-sa@infra-project-id.iam.gserviceaccount.com"]
+}
+```
+
+And add Terraform Code to assign ConnectGateway permissions:
+
+```diff
++resource "google_project_iam_member" "compute_sa_roles" {
++  for_each = toset([
++    "roles/gkehub.connect",
++    "roles/gkehub.viewer",
++    "roles/gkehub.gatewayReader",
++    "roles/gkehub.scopeEditorProjectLevel"
++  ])
++  role    = each.key
++  project = var.fleet_project_id
++  member  = "serviceAccount:vertex-ai-instance-sa@infra-project-id.iam.gserviceaccount.com"
+}
+```
 
 ### Apply Kueue Resources
 
