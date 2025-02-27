@@ -30,9 +30,12 @@ import (
 func renameFleetscopeFile(t *testing.T) {
 	tf_file_old := "../../../5-appinfra/modules/hpc-monte-carlo-infra/fleetscope.tf.example"
 	tf_file_new := "../../../5-appinfra/modules/hpc-monte-carlo-infra/fleetscope.tf"
-	err := os.Rename(tf_file_old, tf_file_new)
-	if err != nil {
-		t.Fatal(err)
+	// if file does not exist, create it by renaming
+	if _, err := os.Stat(tf_file_new); err != nil {
+		err = os.Rename(tf_file_old, tf_file_new)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -57,7 +60,9 @@ func TestHPCAppInfra(t *testing.T) {
 	}
 
 	servicesInfoMap := make(map[string]ServiceInfos)
-	// region := "us-central1" // TODO: Move to terraform.tfvars?
+
+	// Apply permissions that the user would apply on 3-fleetscope after 5-appinfra
+	renameFleetscopeFile(t)
 
 	for appName, serviceNames := range map[string][]string{
 		"hpc": {
@@ -100,12 +105,6 @@ func TestHPCAppInfra(t *testing.T) {
 					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 					tft.WithBackendConfig(backendConfig),
 				)
-
-				appService.DefineInit(func(assert *assert.Assertions) {
-					// Apply permissions that the user would apply on 3-fleetscope after 5-appinfra
-					renameFleetscopeFile(t)
-					appService.DefaultInit(assert)
-				})
 
 				appService.DefineVerify(func(assert *assert.Assertions) {
 					appService.DefaultVerify(assert)
