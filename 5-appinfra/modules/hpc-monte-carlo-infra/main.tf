@@ -51,6 +51,7 @@ resource "google_project_service" "enable_apis" {
 
 // TODO: use custom service account after PR is merged:  https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3736
 data "google_compute_default_service_account" "default" {
+  # tflint-ignore: terraform_unused_declarations
   project = var.infra_project
 }
 
