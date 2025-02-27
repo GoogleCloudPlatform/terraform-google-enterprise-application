@@ -63,6 +63,64 @@ Typically, the application namespace will be created on 3-fleetscope and specifi
 
 1. Apply changes by commiting to a named environment branch (`development`, `nonproduction`, `production`). After the build associated with the fleetscope repository finishes it's execution, the namespaces should be present in the cluster.
 
+### Create Teams Environments and Infrastructure
+
+#### Create projects in 4-appfactory
+
+You will find an example [terraform.tfvars](./4-appfactory/terraform.tfvars) in this example to create `hpc-team-a` and `hpc-team-b`.
+
+```diff
+applications = {
++  "hpc" = {
++    "hpc-team-a" = {
++      create_infra_project = true
++      create_admin_project = true
++    },
++    "hpc-team-b" = {
++      create_infra_project = true
++      create_admin_project = true
++    }
++  }
+}
+
+cloudbuildv2_repository_config = {
+  repo_type = "GITLABv2"
+  repositories = {
++    hpc-team-a = {
++      repository_name = "hpc-team-a-i-r"
++      repository_url  = "https://gitlab.com/user/hpc-team-a-i-r.git"
++    },
++    hpc-team-b = {
++      repository_name = "hpc-team-b-i-r"
++      repository_url  = "https://gitlab.com/user/hpc-team-b-i-r.git"
++    }
+  }
+  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
+  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+  # If you are using a self-hosted instance, you may change the URL below accordingly
+  gitlab_enterprise_host_uri = "https://gitlab.com"
+}
+
+```
+
+Apply the modifications by pushing code to a named branch, after updating the variables.
+
+#### Deploy baseline infrastructure in 5-appinfra
+
+Under [5-appinfra](./5-appinfra/) you will find the two environment folders. They just need to be copied to you AppInfra Pipeline repository and pushed to a named branch.
+
+#### More Information on Permissions
+
+The team members will run the code through a [Vertex AI Workbench Instance](https://cloud.google.com/vertex-ai/docs/workbench/instances/). They must have permission to connect to the instance and the instance will have permission to apply changes on their respective team namespace.
+
+If the team member belongs to the `hpc-team` group defined in `3-fleetscope`, they will have `ADMIN` permissions on the namespace (see module `fleet_app_operator_permissions` on [3-fleetscope](../../3-fleetscope/modules/env_baseline/main.tf)).
+
+If the team member wants to manage kubernetes resources outside the instance,the user will also need permission to connect to the cluster using ConnectGateway. For more information on managing ConnectGateway, refer to the following [documentation](https://cloud.google.com/kubernetes-engine/enterprise/multicluster-management/gateway/setup).
+
+If the user lacks the necessary privileges to assign these permissions, they can submit a pull request (PR) to the 3-fleetscope repository. This will allow the relevant personnel in charge of the cluster to review and address the request. Basic Kubernetes RBAC roles can be assigned using terraform with the following [module](https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/tree/v36.0.2/modules/fleet-app-operator-permissions).
+
 ### Apply Kueue Resources
 
 Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator, after the namespaces are created and should be ran only once:

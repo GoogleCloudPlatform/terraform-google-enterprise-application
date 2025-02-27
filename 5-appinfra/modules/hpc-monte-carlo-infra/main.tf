@@ -49,16 +49,17 @@ resource "google_project_service" "enable_apis" {
   disable_on_destroy = false
 }
 
+// TODO: use custom service account after PR is merged:  https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3735
 data "google_compute_default_service_account" "default" {
   project = var.infra_project
 }
 
+// TODO: use Shared VPC after PR is merged: https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3671
 resource "google_compute_network" "default" {
   name                    = "default"
   project                 = var.infra_project
   auto_create_subnetworks = true
 }
-
 
 // TODO: Define exactly where permissions below on fleet scope and fleet project should be assigned - maybe this should be a PR from the team to the 2-multitenant repo, so a platform engineer can approve the role grant
 resource "google_project_iam_member" "compute_sa_roles" {
