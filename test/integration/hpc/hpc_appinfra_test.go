@@ -28,8 +28,8 @@ import (
 )
 
 func renameFleetscopeFile(t *testing.T) {
-	tf_file_old := "../../../examples/hpc/5-appinfra/hpc/hpc-team-b/modules/hpc-monte-carlo-infra/fleetscope.tf.example"
-	tf_file_new := "../../../examples/hpc/5-appinfra/hpc/hpc-team-b/modules/hpc-monte-carlo-infra/fleetscope.tf"
+	tf_file_old := "../../../5-appinfra/modules/hpc-monte-carlo-infra/fleetscope.tf.example"
+	tf_file_new := "../../../5-appinfra/modules/hpc-monte-carlo-infra/fleetscope.tf"
 	err := os.Rename(tf_file_old, tf_file_new)
 	if err != nil {
 		t.Fatal(err)
@@ -104,6 +104,7 @@ func TestHPCAppInfra(t *testing.T) {
 				appService.DefineInit(func(assert *assert.Assertions) {
 					// Apply permissions that the user would apply on 3-fleetscope after 5-appinfra
 					renameFleetscopeFile(t)
+					appService.DefaultInit(assert)
 				})
 
 				appService.DefineVerify(func(assert *assert.Assertions) {
