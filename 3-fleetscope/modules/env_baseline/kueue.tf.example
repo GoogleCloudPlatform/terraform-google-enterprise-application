@@ -22,7 +22,7 @@ locals {
 module "kueue" {
   for_each = toset(var.cluster_membership_ids)
 
-  source                   = "../install_kueue"
+  source                   = "../private_install_manifest"
   url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/${local.kueue_version}/manifests.yaml"
   project_id               = regex(local.fleet_membership_regex, each.value)[0]
   region                   = "us-central1"

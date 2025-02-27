@@ -19,8 +19,11 @@ locals {
   applied_manifest = local_file.downloaded_file.content
 }
 
-data "http" "kueue_source" {
+data "http" "manifest_source" {
   url = var.url
+}
+
+resource "random_uuid" "uid" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "cluster_service_accounts_reader" {
@@ -34,8 +37,8 @@ resource "google_artifact_registry_repository_iam_member" "cluster_service_accou
 }
 
 resource "local_file" "downloaded_file" {
-  content  = replace(data.http.kueue_source.response_body, var.k8s_registry, local.repository_url)
-  filename = "${path.module}/kueue-${var.cluster_name}.yaml"
+  content  = replace(data.http.manifest_source.response_body, var.k8s_registry, local.repository_url)
+  filename = "${path.module}/manifest-${random_uuid.uid.result}-${var.cluster_name}.yaml"
 
   depends_on = [google_artifact_registry_repository_iam_member.cluster_service_accounts_reader]
 }
@@ -69,8 +72,8 @@ module "kubectl" {
   membership_project_id   = var.cluster_project
   membership_name         = var.cluster_name
   membership_location     = var.cluster_region
-  kubectl_create_command  = "kubectl apply --server-side -f ${path.module}/kueue-${var.cluster_name}.yaml"
-  kubectl_destroy_command = "kubectl delete -f ${path.module}/kueue-${var.cluster_name}.yaml || exit 0"
+  kubectl_create_command  = "kubectl apply --server-side -f ${path.module}/manifest-${random_uuid.uid.result}-${var.cluster_name}.yaml"
+  kubectl_destroy_command = "kubectl delete -f ${path.module}/manifest-${random_uuid.uid.result}-${var.cluster_name}.yaml || exit 0"
 
   module_depends_on = [
     local_file.downloaded_file.filename,
