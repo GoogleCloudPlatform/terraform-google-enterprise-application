@@ -24,9 +24,9 @@ module "project_workerpool" {
   org_id                   = var.org_id
   folder_id                = var.folder_id
   billing_account          = var.billing_account
-  # svpc_host_project_id     = var.workerpool_network_project_id
-  deletion_policy         = "DELETE"
-  default_service_account = "KEEP"
+  svpc_host_project_id     = var.workerpool_network_project_id
+  deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
 
   vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
@@ -49,14 +49,6 @@ module "project_workerpool" {
   ]
 }
 
-//wait project be added to VPC-SC before attach project as a service on network host project
-resource "google_compute_shared_vpc_service_project" "shared_vpc_attachment" {
-  provider        = google-beta
-  host_project    = var.workerpool_network_project_id
-  service_project = module.project_workerpool.project_id
-  depends_on      = [module.project_workerpool]
-}
-
 resource "google_cloudbuild_worker_pool" "pool" {
   name     = "cb-pool-bootstrap"
   project  = module.project_workerpool.project_id
@@ -70,7 +62,6 @@ resource "google_cloudbuild_worker_pool" "pool" {
     peered_network          = var.workerpool_network_id
     peered_network_ip_range = "/29"
   }
-  depends_on = [google_compute_shared_vpc_service_project.shared_vpc_attachment]
 }
 
 resource "google_org_policy_policy" "allowed_worker_pools" {
