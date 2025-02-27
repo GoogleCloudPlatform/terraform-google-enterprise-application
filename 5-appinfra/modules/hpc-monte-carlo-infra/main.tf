@@ -49,7 +49,7 @@ resource "google_project_service" "enable_apis" {
   disable_on_destroy = false
 }
 
-// TODO: use custom service account after PR is merged:  https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3735
+// TODO: use custom service account after PR is merged:  https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3736
 data "google_compute_default_service_account" "default" {
   project = var.infra_project
 }
