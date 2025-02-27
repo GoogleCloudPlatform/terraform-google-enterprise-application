@@ -81,3 +81,19 @@ variable "config_sync_repository_url" {
   type        = string
   default     = ""
 }
+
+variable "additional_namespace_identities" {
+  description = <<-EOF
+  A map where the key is the namespace name, defining the list of user identities that should be assigned admin permissions within that namespace. The format includes the following properties:
+  - **namespace_name** (Required): The name of the Kubernetes namespace where the users will be granted permissions.
+  - **user_identities** (Required): A list of email addresses corresponding to the user identities that will be assigned admin permissions in the specified namespace.
+  
+  Example:
+  {
+    "namespace1" = ["user1@domain.com", "user2@domain.com"],
+    "namespace2" = ["user3@domain.com"]
+  }
+  EOF
+  type        = map(list(string))
+  default     = null
+}

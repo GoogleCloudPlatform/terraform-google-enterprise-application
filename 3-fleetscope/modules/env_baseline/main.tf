@@ -68,3 +68,15 @@ module "fleet_app_operator_permissions" {
   groups           = [each.value]
   role             = "ADMIN"
 }
+
+module "additional_fleet_app_operator_permissions" {
+  for_each = var.additional_namespace_identities
+
+  source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-app-operator-permissions"
+  version = "~> 36.0"
+
+  fleet_project_id = var.fleet_project_id
+  scope_id         = "${each.key}-${var.env}"
+  users            = each.value
+  role             = "ADMIN"
+}
