@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// TODO: use custom service account after PR is merged:  https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3736
+data "google_compute_default_service_account" "default" {
+  # tflint-ignore: all
+  project = var.infra_project
+}
 // TODO: Define exactly where permissions below on fleet scope and fleet project should be assigned - maybe this should be a PR from the team to the 2-multitenant repo, so a platform engineer can approve the role grant
 resource "google_project_iam_member" "compute_sa_roles" {
   for_each = toset([
