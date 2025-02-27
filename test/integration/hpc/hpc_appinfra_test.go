@@ -16,6 +16,7 @@ package hpc
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -25,6 +26,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
+
+func renameFleetscopeFile(t *testing.T) {
+	tf_file_old := "../../../examples/hpc/5-appinfra/hpc/hpc-team-b/modules/hpc-monte-carlo-infra/fleetscope.tf.example"
+	tf_file_new := "../../../examples/hpc/5-appinfra/hpc/hpc-team-b/modules/hpc-monte-carlo-infra/fleetscope.tf"
+	err := os.Rename(tf_file_old, tf_file_new)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
 func TestHPCAppInfra(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
@@ -90,6 +100,12 @@ func TestHPCAppInfra(t *testing.T) {
 					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 					tft.WithBackendConfig(backendConfig),
 				)
+
+				appService.DefineInit(func(assert *assert.Assertions) {
+					// Apply permissions that the user would apply on 3-fleetscope after 5-appinfra
+					renameFleetscopeFile(t)
+				})
+
 				appService.DefineVerify(func(assert *assert.Assertions) {
 					appService.DefaultVerify(assert)
 				})
