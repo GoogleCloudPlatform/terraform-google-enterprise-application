@@ -93,6 +93,8 @@ CLUSTER_PROJECT=REPLACE_WITH_CLUSTER_PROJECT
 ~/cluster-toolkit/gcluster deploy fsi-montecarlo-on-batch.yaml --vars "project_id=$PROJECT_ID,cluster_name=$CLUSTER_NAME,cluster_project=$CLUSTER_PROJECT" --auto-approve
 ```
 
+> NOTE: the example code is deployed for `hpc-team-b`. If you wish to deploy the example on `hpc-team-a` environment, you will need to adjust `settings.tpl.toml` and change the namespace and LocalQueue name.
+
 ### Run the Simulation Jobs and Visualize the Results
 
 #### Requisites before running
