@@ -37,9 +37,10 @@ locals {
     }
   )
 
-  org_ids           = distinct([for env in var.envs : env.org_id])
-  use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
-  service_repo_name = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
+  org_ids             = distinct([for env in var.envs : env.org_id])
+  use_csr             = var.cloudbuildv2_repository_config.repo_type == "CSR"
+  service_repo_name   = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
+  worker_pool_project = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
 }
 
 module "cloudbuild_repositories" {
@@ -157,13 +158,18 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = var.gar_project_id
     "_GAR_REPOSITORY"               = var.gar_repository_name
     "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
+    "_PRIVATE_POOL"                 = var.workerpool_id
   }
 
-  enable_worker_pool        = true
-  worker_pool_id            = var.workerpool_id
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
+}
+
+resource "google_project_iam_member" "cloud_build_user" {
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
