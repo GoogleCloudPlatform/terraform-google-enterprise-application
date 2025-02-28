@@ -16,6 +16,7 @@ package fleetscope
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"testing"
@@ -27,7 +28,17 @@ import (
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/tidwall/gjson"
 )
+
+func renameKueueFile(t *testing.T) {
+	tf_file_old := "../../../3-fleetscope/modules/env_baseline/kueue.tf.example"
+	tf_file_new := "../../../3-fleetscope/modules/env_baseline/kueue.tf"
+	err := os.Rename(tf_file_old, tf_file_new)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
 func retrieveNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
 	return k8s.RunKubectlAndGetOutputE(t, options, "get", "ns", "config-management-system", "-o", "json")
@@ -100,8 +111,22 @@ func TestFleetscope(t *testing.T) {
 
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
+		// retrieve namespaces from test/setup, they will be used to create the specific namespaces with the environment suffix
+		setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+		setupNamespaces := setupOutput.GetJsonOutput("teams")
+		var namespacesSlice []string
+		setupNamespaces.ForEach(func(key, value gjson.Result) bool {
+			namespacesSlice = append(namespacesSlice, key.String())
+			return true // keep iterating
+		})
+
 		t.Run(envName, func(t *testing.T) {
 			t.Parallel()
+			// each namespace will have the current environment suffixed
+			var currentEnvNamespaces []string
+			for _, namespace := range namespacesSlice {
+				currentEnvNamespaces = append(currentEnvNamespaces, fmt.Sprintf("%s-%s", namespace, envName))
+			}
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
 				tft.WithBackendConfig(backendConfig),
@@ -127,6 +152,8 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_repository_url": config_sync_url,
 			}
 
+			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+
 			fleetscope := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
@@ -135,8 +162,17 @@ func TestFleetscope(t *testing.T) {
 				tft.WithParallelism(1),
 			)
 
+			fleetscope.DefineInit(func(assert *assert.Assertions) {
+				// install keueue on 3-fleetscope if environment variable INSTALL_KUEUE is true
+				if strings.ToLower(os.Getenv("INSTALL_KUEUE")) == "true" {
+					// by renaming kueue.tf.example to kueue.tf the module will install kueue
+					renameKueueFile(t)
+				}
+				fleetscope.DefaultInit(assert)
+			})
+
 			fleetscope.DefineApply(func(assert *assert.Assertions) {
-				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+				// this function will create necessary requirements for config-sync with gitlab
 				err := applyPreRequisites(t, k8sOpts, token)
 				if err != nil {
 					t.Fatal(err)
@@ -146,6 +182,37 @@ func TestFleetscope(t *testing.T) {
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
+				// get kubectl namespaces and store them on currentClusterNamespaces slice
+				output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !gjson.Valid(output) {
+					t.Fatalf("Error parsing output, invalid json: %s", output)
+				}
+				jsonOutput := gjson.Parse(output)
+				var currentClusterNamespaces []string
+				jsonOutput.Get("items").ForEach(func(key, value gjson.Result) bool {
+					currentClusterNamespaces = append(currentClusterNamespaces, value.Get("metadata.name").String())
+					return true // keep iterating
+				})
+
+				for _, namespace := range currentEnvNamespaces {
+					// Check if the namespace exists in currentClusterNamespaces
+					exists := false
+					for _, clusterNamespace := range currentClusterNamespaces {
+						if namespace == clusterNamespace {
+							exists = true
+							break
+						}
+					}
+
+					if exists {
+						t.Logf("Namespace '%s' exists in the current cluster.\n", namespace)
+					} else {
+						t.Fatalf("Namespace '%s' does not exist in the current cluster.\n", namespace)
+					}
+				}
 
 				// Multitenant Outputs
 				clusterRegions := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")
@@ -246,7 +313,7 @@ func TestFleetscope(t *testing.T) {
 						for _, memberShipName := range membershipNamesProjectNumber {
 							dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
 							controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-							retryStatus := []string {"PROVISIONING", "STALLED"}
+							retryStatus := []string{"PROVISIONING", "STALLED"}
 							if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
 								retry = true
 							} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
