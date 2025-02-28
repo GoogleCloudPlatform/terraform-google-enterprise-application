@@ -27,10 +27,6 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
-func installKueue(t *testing.T, options *k8s.KubectlOptions) (string, error) {
-	return k8s.RunKubectlAndGetOutputE(t, options, "apply", "--server-side", "-f", "https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml")
-}
-
 func createKueueResources(t *testing.T, options *k8s.KubectlOptions) (string, error) {
 	return k8s.RunKubectlAndGetOutputE(t, options, "apply", "-f", "../../../examples/hpc/6-appsource/manifests/kueue-resources.yaml")
 }
@@ -207,10 +203,6 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 	k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
-	_, err := installKueue(t, k8sOpts)
-	if err != nil {
-		t.Fatal(err)
-	}
 	t.Run("hpc-monte-carlo-simulation Test", func(t *testing.T) {
 		_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {

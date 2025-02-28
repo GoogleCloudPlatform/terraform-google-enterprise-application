@@ -146,3 +146,11 @@ resource "google_organization_iam_member" "app_factory_org_organization_service_
   member = "serviceAccount:${each.value.email}"
   org_id = each.value.org_id
 }
+
+resource "google_project_iam_member" "cloud_build_user" {
+  for_each = local.cb_service_accounts_emails
+
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${each.value}"
+  project = module.project_workerpool.project_id
+}
