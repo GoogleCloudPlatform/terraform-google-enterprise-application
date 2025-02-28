@@ -37,9 +37,10 @@ locals {
     }
   )
 
-  org_ids           = distinct([for env in var.envs : env.org_id])
-  use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
-  service_repo_name = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
+  org_ids             = distinct([for env in var.envs : env.org_id])
+  use_csr             = var.cloudbuildv2_repository_config.repo_type == "CSR"
+  service_repo_name   = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
+  worker_pool_project = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
 }
 
 module "cloudbuild_repositories" {
@@ -79,17 +80,26 @@ module "app_admin_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
   activate_apis = [
-    "iam.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "cloudfunctions.googleapis.com",
     "apikeys.googleapis.com",
+    "iam.googleapis.com",
+    "compute.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "clouddeploy.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "secretmanager.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
-    "clouddeploy.googleapis.com"
   ]
+
+  disable_services_on_destroy = false
+  disable_dependent_services  = false
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  vpc_service_control_perimeter_name = var.service_perimeter_name
 
   activate_api_identities = [
     {
@@ -110,7 +120,11 @@ module "app_admin_project" {
     {
       api   = "config.googleapis.com",
       roles = ["roles/cloudconfig.serviceAgent"]
-    }
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkUser", "roles/serviceusage.serviceUsageConsumer", "roles/container.serviceAgent"]
+    },
   ]
 
 }
@@ -144,11 +158,18 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = var.gar_project_id
     "_GAR_REPOSITORY"               = var.gar_repository_name
     "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
+    "_PRIVATE_POOL"                 = var.workerpool_id
   }
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
+}
+
+resource "google_project_iam_member" "cloud_build_user" {
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
@@ -189,4 +210,10 @@ module "app_infra_project" {
   activate_apis            = var.infra_project_apis
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  vpc_service_control_perimeter_name = var.service_perimeter_name
+
+  svpc_host_project_id = each.value.network_project_id
 }

@@ -20,6 +20,9 @@
 locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
+
+  sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
+
   cicd_apps = {
     "contacts" = {
       application_name = "cymbal-bank"
@@ -138,6 +141,22 @@ locals {
   }
 }
 
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool-single-project"
+  project  = var.project_id
+  location = var.region
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = var.workerpool_network_id
+    peered_network_ip_range = "/29"
+  }
+}
+
 module "cicd" {
   source   = "../../5-appinfra/modules/cicd-pipeline"
   for_each = local.cicd_apps
@@ -163,4 +182,61 @@ module "cicd" {
   buckets_force_destroy = true
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
+
+  workerpool_id = google_cloudbuild_worker_pool.pool.id
+}
+
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
+resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    identities = local.sa_cb
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = [
+      "projects/${data.google_project.project.number}",
+    ]
+
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    identities = local.sa_cb
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = [
+      "projects/${data.google_project.project.number}",
+    ]
+
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
 }

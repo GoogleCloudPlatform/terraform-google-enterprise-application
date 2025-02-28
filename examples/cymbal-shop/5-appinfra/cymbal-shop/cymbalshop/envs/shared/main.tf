@@ -41,4 +41,6 @@ module "app" {
   buckets_force_destroy = var.buckets_force_destroy
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
+
+  workerpool_id = data.terraform_remote_state.bootstrap.outputs.cb_private_worker_pool_id
 }

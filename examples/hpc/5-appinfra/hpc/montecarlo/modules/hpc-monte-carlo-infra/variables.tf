@@ -50,3 +50,8 @@ variable "cluster_service_accounts" {
   description = "A map of service accounts emails associated with the Kubernetes cluster, these will be granted access to created Docker images."
   type        = map(any)
 }
+
+variable "workerpool_id" {
+  description = "Private Worker pool id."
+  type        = string
+}

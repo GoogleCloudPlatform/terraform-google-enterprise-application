@@ -18,11 +18,13 @@
 | repo\_name | Short version of repository to sync ACM configs from & use source for CI (e.g. 'bank-of-anthos' for https://www.github.com/GoogleCloudPlatform/bank-of-anthos) | `string` | n/a | yes |
 | service\_name | service name (e.g. 'transactionhistory') | `string` | n/a | yes |
 | team\_name | Team name (e.g. 'ledger'). This will be the prefix to the service CI Build Trigger Name. | `string` | n/a | yes |
+| workerpool\_id | Private Worker pool id. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| cloudbuild\_service\_account | Service Account created to run Cloud Build. |
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | service\_repository\_name | The Source Repository name. |
 | service\_repository\_project\_id | The Source Repository project id. |

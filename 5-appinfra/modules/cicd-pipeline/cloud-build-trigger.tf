@@ -47,9 +47,16 @@ resource "google_cloudbuild_trigger" "ci" {
       _SOURCE_STAGING_BUCKET     = "gs://${google_storage_bucket.release_source_development.name}"
       _CACHE                     = local.cache_filename
       _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
+      _WORKER_POOL               = var.workerpool_id
     },
     var.additional_substitutions
   )
 
   service_account = google_service_account.cloud_build.id
+}
+
+resource "google_project_iam_member" "pool_user" {
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
