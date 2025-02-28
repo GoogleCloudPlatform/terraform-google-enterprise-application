@@ -24,10 +24,11 @@ locals {
 module "fleetscope_infra" {
   source = "../../3-fleetscope/modules/env_baseline"
 
-  env                    = local.env
-  cluster_project_id     = local.cluster_project_id
-  network_project_id     = local.network_project_id
-  fleet_project_id       = local.fleet_project_id
-  namespace_ids          = var.teams
-  cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
+  env                      = local.env
+  cluster_project_id       = local.cluster_project_id
+  network_project_id       = local.network_project_id
+  fleet_project_id         = local.fleet_project_id
+  namespace_ids            = var.teams
+  cluster_membership_ids   = module.multitenant_infra.cluster_membership_ids
+  cluster_service_accounts = values(module.multitenant_infra.cluster_service_accounts)
 }
