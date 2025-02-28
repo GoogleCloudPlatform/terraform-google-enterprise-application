@@ -36,6 +36,4 @@ module "env" {
 
   config_sync_secret_type    = var.config_sync_secret_type
   config_sync_repository_url = var.config_sync_repository_url
-
-  additional_namespace_identities = var.additional_namespace_identities
 }
