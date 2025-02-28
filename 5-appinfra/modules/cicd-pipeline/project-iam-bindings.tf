@@ -116,6 +116,17 @@ resource "google_project_iam_member" "container_admin" {
   member = each.value
 }
 
+resource "google_project_iam_member" "workerPool_user" {
+  for_each = {
+    "cloud_deploy" = google_service_account.cloud_deploy.member,
+    "cloud_build"  = google_service_account.cloud_build.member,
+  }
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+
+  member = each.value
+}
+
 // added to avoid overwriten of roles for each app service deploy service account, since GKE projects are shared between services
 module "cb-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"

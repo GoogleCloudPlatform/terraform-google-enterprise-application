@@ -157,9 +157,10 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = var.gar_project_id
     "_GAR_REPOSITORY"               = var.gar_repository_name
     "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
-    "_PRIVATE_POOL"                 = var.workerpool_id
   }
 
+  enable_worker_pool        = true
+  worker_pool_id            = var.workerpool_id
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
