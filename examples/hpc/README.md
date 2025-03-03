@@ -21,23 +21,26 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
   ```
 
 - **Kueue**
-  Install Kueue by running the following command:
 
-  ```bash
-  kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
-  ```
+  - Option 1 (Cluster Network with NAT): Install Kueue by running the following command:
 
-  > **Note:** To uninstall a released version from your cluster, run:
-  >
-  > ```bash
-  > kubectl delete -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
-  > ```
+      ```bash
+      kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
+      ```
 
-  Wait for Kueue installation to complete:
+      > **Note:** To uninstall a released version from your cluster, run:
+      >
+      > ```bash
+      > kubectl delete -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
+      > ```
 
-  ```bash
-  kubectl wait deploy/kueue-controller-manager -nkueue-system --for=condition=available --timeout=5m
-  ```
+      Wait for Kueue installation to complete:
+
+      ```bash
+      kubectl wait deploy/kueue-controller-manager -nkueue-system --for=condition=available --timeout=5m
+      ```
+
+  - Option 2: Install Kueue by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md)
 
 - **Cluster Toolkit (gcluster)**
 
