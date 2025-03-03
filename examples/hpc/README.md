@@ -22,7 +22,7 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
 
 - **Kueue**
 
-  - Option 1 (Cluster Network with NAT): Install Kueue by running the following command:
+  - **Option 1 (Cluster Network with NAT)**: Install Kueue by running the following command:
 
       ```bash
       kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
@@ -40,7 +40,7 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
       kubectl wait deploy/kueue-controller-manager -nkueue-system --for=condition=available --timeout=5m
       ```
 
-  - Option 2: Install Kueue by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md)
+  - **Option 2**: Install Kueue by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md)
 
 - **Cluster Toolkit (gcluster)**
 
