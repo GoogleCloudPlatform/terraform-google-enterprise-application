@@ -195,7 +195,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
-	infraProject := appFactory.GetJsonOutput("app-group").Get("hpc\\.montecarlo.app_infra_project_ids.development").String()
+	infraProject := appFactory.GetJsonOutput("app-group").Get("hpc\\.hpc-team-b.app_infra_project_ids.development").String()
 	// extract clusterName from fleet membership id
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]

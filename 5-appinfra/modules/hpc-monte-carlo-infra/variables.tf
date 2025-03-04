@@ -50,3 +50,8 @@ variable "cluster_service_accounts" {
   description = "A map of service accounts emails associated with the Kubernetes cluster, these will be granted access to created Docker images."
   type        = map(any)
 }
+
+variable "team" {
+  description = "Environment Team, must be the same as the fleet scope team"
+  type        = string
+}
