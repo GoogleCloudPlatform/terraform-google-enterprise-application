@@ -17,5 +17,6 @@ kind: Kustomization
 namespace: cb-accounts-development
 resources:
   - ../../base
+  - anthos-service-mesh-security-config.yaml
 components:
   - ../../../../../components/development

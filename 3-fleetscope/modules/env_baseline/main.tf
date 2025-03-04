@@ -45,6 +45,11 @@ resource "google_gke_hub_namespace" "fleet-ns" {
   labels = {
     "istio-injection" = "enabled"
   }
+  namespace_labels = {
+    "istio-injection" = "enabled"
+  }
+
+  depends_on = [google_gke_hub_feature.mesh_feature]
 }
 
 resource "google_gke_hub_membership_binding" "membership-binding" {
