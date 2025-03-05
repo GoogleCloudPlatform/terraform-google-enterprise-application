@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-output "ai_training_data_bucket_name" {
-  description = "AI Training Example Bucket Name"
-  value       = google_storage_bucket.gpu_training.name
-}
-
-output "remote_repository_url" {
-  description = "Remote Repository Base URL"
-  value       = local.repository_url
+output "image_url" {
+  description = "AI Image URL"
+  value       = local.image_url
 }

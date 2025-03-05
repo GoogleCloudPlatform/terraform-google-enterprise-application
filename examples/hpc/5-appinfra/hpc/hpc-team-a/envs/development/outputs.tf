@@ -19,7 +19,7 @@ output "ai_training_data_bucket_name" {
   value       = module.provision-ai-training-infra.ai_training_data_bucket_name
 }
 
-output "remote_repository_url" {
-  description = "Remote Repository Base URL"
-  value       = module.provision-ai-training-infra.remote_repository_url
+output "image_url" {
+  description = "AI Image URL"
+  value       = module.provision-ai-training-infra.image_url
 }

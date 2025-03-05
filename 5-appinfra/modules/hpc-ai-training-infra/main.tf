@@ -15,6 +15,8 @@
  */
 
 locals {
+  docker_tag_version_terraform = "v1"
+  image_url                    = "${google_artifact_registry_repository.private_images.location}-docker.pkg.dev/${google_artifact_registry_repository.private_images.project}/${google_artifact_registry_repository.private_images.repository_id}/ai-train:${local.docker_tag_version_terraform}"
   namespace                    = "${var.team}-${var.env}"
 }
 

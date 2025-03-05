@@ -232,6 +232,8 @@ Follow the steps outlined in the following document, after the "Open the Vertex 
 
 ## Use Case 2: HPC AI Model Training with GPU (Team: `hpc-team-a`)
 
+This use case is based on the following example: [Training with a Single GPU on Google Cloud](https://github.com/GoogleCloudPlatform/ai-on-gke/tree/main/tutorials-and-examples/gpu-examples/training-single-gpu).
+
 ### Step 1: Connect to the Cluster
 
 Before proceeding, ensure that the user is a member of the `hpc-team-a` group and has the necessary permissions to connect using ConnectGateway:
@@ -254,35 +256,14 @@ Replace the placeholders as follows:
 
 ### Step 2: Deploy the Example
 
-1. Clone `ai-on-gke` repository:
-
-    ```bash
-    git clone https://github.com/GoogleCloudPlatform/ai-on-gke/ /tmp/ai-on-gke
-    ```
-
-1. Retrieve the value for `BUCKET_NAME` variable:
+1. Retrieve the value for `IMAGE_URL` variable:
 
     ```bash
     terraform -chdir=./5-appinfra/hpc/hpc-team-a/envs/development init
-    export BUCKET_NAME="terraform -chdir=./5-appinfra/hpc/hpc-team-a/envs/development output -raw ai_training_data_bucket_name"
+    export IMAGE_URL="terraform -chdir=./5-appinfra/hpc/hpc-team-a/envs/development output -raw image_url"
     ```
 
-    > NOTE: If you don't have access to the terraform state, the BUCKET_NAME format is: `INFRA_PROJECT-gpu-training` where `INFRA_PROJECT` is your hpc-team-a infrastructure project ID.
-
-1. To upload your example data to the AI training bucket, use the following command:
-
-    ```bash
-    gcloud storage cp /tmp/ai-on-gke/tutorials-and-examples/gpu-examples/training-single-gpu/src/tensorflow-mnist-example gs://$BUCKET_NAME --recursive
-    ```
-
-1. Retrieve the value for `AR_REMOTE_REPO` variable:
-
-    ```bash
-    terraform -chdir=./5-appinfra/hpc/hpc-team-a/envs/development init
-    export AR_REMOTE_REPO="terraform -chdir=./5-appinfra/hpc/hpc-team-a/envs/development output -raw remote_repository_url"
-    ```
-
-    > NOTE: If you don't have access to the terraform state, the AR_REMOTE_REPO format is: `us-central1-docker.pkg.dev/INFRA_PROJECT/dockerhub` where `INFRA_PROJECT` is your hpc-team-a infrastructure project ID.
+    > NOTE: If you don't have access to the terraform state, the IMAGE_URL format is: `us-central1-docker.pkg.dev/INFRA_PROJECT/private-images/ai-train:v1` where `INFRA_PROJECT` is your hpc-team-a infrastructure project ID.
 
 1. Run the job on `hpc-team-a-development` using the namespace LocalQueue and the variables retrieved above:
 

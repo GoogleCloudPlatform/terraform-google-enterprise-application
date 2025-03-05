@@ -268,8 +268,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 			tft.WithBackendConfig(backendConfig),
 		)
 
-		bucketTeamA := appInfraTeamA.GetStringOutput("ai_training_data_bucket_name")
-		artifactRemoteRepoURL := appInfraTeamA.GetStringOutput("remote_repository_url")
+		imageURL := appInfraTeamA.GetStringOutput("image_url")
 
 		// configure git to clone ai-on-gke repository
 		tmpDirApp := t.TempDir()
@@ -282,20 +281,11 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 		}
 		gitAppRun("clone", "--branch", "v1.10", "https://github.com/GoogleCloudPlatform/ai-on-gke.git", tmpDirApp)
 
-		// upload data to bucket
-		mnistExamplePath := "tutorials-and-examples/gpu-examples/training-single-gpu/src/tensorflow-mnist-example"
-		gcloud.Runf(t, "storage cp -r %s/%s gs://%s", tmpDirApp, mnistExamplePath, bucketTeamA)
-
 		manifestDir := "../../../examples/hpc/6-appsource/manifests"
 		manifestFile := "ai-training-job.yaml"
 		manifestFullPath := fmt.Sprintf("%s/%s", manifestDir, manifestFile)
 		// run the kubectl job replacing vars
-		err = testutils.ReplacePatternInFile("$AR_REMOTE_REPO", artifactRemoteRepoURL, manifestDir, manifestFile)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		err = testutils.ReplacePatternInFile("$BUCKET_NAME", bucketTeamA, manifestDir, manifestFile)
+		err = testutils.ReplacePatternInFile("$IMAGE_URL", imageURL, manifestDir, manifestFile)
 		if err != nil {
 			t.Fatal(err)
 		}
