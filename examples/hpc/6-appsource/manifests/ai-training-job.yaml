@@ -19,13 +19,13 @@ metadata:
   labels:
     kueue.x-k8s.io/queue-name: lq-hpc-team-a
 spec:
+  suspend: true
   template:
     metadata:
       name: mnist
       annotations:
         gke-gcsfuse/volumes: "true"
     spec:
-      suspend: true
       nodeSelector:
         cloud.google.com/gke-accelerator: nvidia-tesla-t4
       tolerations:
