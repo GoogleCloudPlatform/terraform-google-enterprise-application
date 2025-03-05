@@ -136,3 +136,8 @@ variable "cloudbuildv2_repository_config" {
   }
 
 }
+
+variable "workerpool_id" {
+  description = "Private Worker pool id."
+  type        = string
+}

@@ -26,3 +26,8 @@ output "service_repository_project_id" {
   description = "The Source Repository project id."
   value       = local.use_csr ? google_sourcerepo_repository.app_repo[0].project : var.project_id
 }
+
+output "cloudbuild_service_account" {
+  description = "Service Account created to run Cloud Build."
+  value       = google_service_account.cloud_build.email
+}

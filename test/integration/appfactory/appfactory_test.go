@@ -36,14 +36,20 @@ func TestAppfactory(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	vpcsc := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../setup/vpcsc"),
+	)
+
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
 	}
 
 	vars := map[string]interface{}{
-		"remote_state_bucket":  backend_bucket,
-		"bucket_force_destroy": "true",
+		"remote_state_bucket":    backend_bucket,
+		"bucket_force_destroy":   "true",
+		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
+		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
 	}
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"

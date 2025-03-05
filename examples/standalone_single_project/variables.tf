@@ -19,6 +19,16 @@ variable "project_id" {
   description = "Google Cloud project ID in which to deploy all example resources"
 }
 
+variable "workerpool_network_id" {
+  type        = string
+  description = "Network id"
+}
+
+variable "subnetwork_self_link" {
+  type        = string
+  description = "Sub-Network self-link"
+}
+
 variable "region" {
   type        = string
   description = "Google Cloud region for deployments"
@@ -28,4 +38,21 @@ variable "region" {
 variable "teams" {
   type        = map(string)
   description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
+}
+
+variable "service_perimeter_name" {
+  description = "Service perimeter full name."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = "ENFORCE"
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
 }

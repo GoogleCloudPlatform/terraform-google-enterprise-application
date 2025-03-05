@@ -81,4 +81,8 @@ module "components" {
 
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
+
+  service_perimeter_mode = var.service_perimeter_mode
+  service_perimeter_name = var.service_perimeter_name
+  workerpool_id          = data.terraform_remote_state.bootstrap.outputs.cb_private_worker_pool_id
 }

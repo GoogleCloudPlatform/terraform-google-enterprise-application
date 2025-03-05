@@ -93,12 +93,14 @@ gcloud builds submit ${path.module} \
   --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} \
   --project=${var.infra_project} \
   --service-account=${google_service_account.builder.id} \
-  --gcs-log-dir=${google_storage_bucket.build_logs.url} || (
+  --gcs-log-dir=${google_storage_bucket.build_logs.url} \
+  --worker-pool=${var.workerpool_id} || (
     sleep 45 && gcloud builds submit ${path.module} \
       --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} \
       --project=${var.infra_project} \
       --service-account=${google_service_account.builder.id} \
-      --gcs-log-dir=${google_storage_bucket.build_logs.url}
+      --gcs-log-dir=${google_storage_bucket.build_logs.url} \
+      --worker-pool=${var.workerpool_id}
   )
 EOF
 
