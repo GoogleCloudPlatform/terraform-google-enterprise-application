@@ -313,7 +313,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 			if strings.Contains(jobsOutput, "Training finished") {
 				break
 			}
-			time.Sleep(1 * time.Minute)
+			time.Sleep(2 * time.Minute)
 		}
 	})
 }
