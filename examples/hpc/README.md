@@ -272,7 +272,7 @@ Replace the placeholders as follows:
 1. To upload your example data to the AI training bucket, use the following command:
 
     ```bash
-    gcloud storage cp /tmp/tutorials-and-examples/gpu-examples/training-single-gpu/src/tensorflow-mnist-example gs://$BUCKET_NAME --recursive
+    gcloud storage cp /tmp/ai-on-gke/tutorials-and-examples/gpu-examples/training-single-gpu/src/tensorflow-mnist-example gs://$BUCKET_NAME --recursive
     ```
 
 1. Retrieve the value for `AR_REMOTE_REPO` variable:
