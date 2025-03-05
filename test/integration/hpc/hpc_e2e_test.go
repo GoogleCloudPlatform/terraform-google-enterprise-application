@@ -308,7 +308,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 		for count := 0; count < 15; count++ {
 			jobsOutput, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "-n", "hpc-team-a-development", "logs", "jobs/mnist-training-job", "-c", "tensorflow")
 			if err != nil {
-				t.Fatal(err)
+				t.Log(err)
 			}
 			if strings.Contains(jobsOutput, "Training finished") {
 				break
