@@ -19,7 +19,7 @@ locals {
 }
 
 resource "google_artifact_registry_repository_iam_member" "cluster_service_accounts_reader" {
-  for_each = toset(var.cluster_service_accounts)
+  for_each = var.cluster_service_accounts
 
   repository = google_artifact_registry_repository.dockerhub.repository_id
   project    = google_artifact_registry_repository.dockerhub.project
@@ -41,4 +41,6 @@ resource "google_artifact_registry_repository" "dockerhub" {
       public_repository = "DOCKER_HUB"
     }
   }
+
+  depends_on = [google_project_service.enable_apis]
 }

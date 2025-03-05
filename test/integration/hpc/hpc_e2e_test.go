@@ -205,6 +205,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
 	t.Run("hpc-monte-carlo-simulation Test", func(t *testing.T) {
+		t.Parallel()
 		_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {
 			t.Fatal(err)
@@ -240,6 +241,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	})
 
 	t.Run("hpc-ai-training Test", func(t *testing.T) {
+		t.Parallel()
 		_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {
 			t.Fatal(err)
@@ -261,7 +263,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 		}
 
 		appInfraTeamA := tft.NewTFBlueprintTest(t,
-			tft.WithTFDir("../../../examples/hpc/5-appinfra/hpc/hpc-team-a/envs/development/backend.tf"),
+			tft.WithTFDir("../../../examples/hpc/5-appinfra/hpc/hpc-team-a/envs/development"),
 			tft.WithVars(vars),
 			tft.WithBackendConfig(backendConfig),
 		)
@@ -284,7 +286,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 		mnistExamplePath := "tutorials-and-examples/gpu-examples/training-single-gpu/src/tensorflow-mnist-example"
 		gcloud.Runf(t, "storage cp -r %s/%s gs://%s", tmpDirApp, mnistExamplePath, bucketTeamA)
 
-		manifestDir := "../../../6-appsource/manifests"
+		manifestDir := "../../../examples/hpc/6-appsource/manifests"
 		manifestFile := "ai-training-job.yaml"
 		manifestFullPath := fmt.Sprintf("%s/%s", manifestDir, manifestFile)
 		// run the kubectl job replacing vars

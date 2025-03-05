@@ -37,6 +37,7 @@ resource "google_project_service" "enable_apis" {
     "logging.googleapis.com",
     "batch.googleapis.com",
     "cloudbuild.googleapis.com",
+    "artifactregistry.googleapis.com",
   ])
   project            = var.infra_project
   service            = each.key
