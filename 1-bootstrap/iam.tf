@@ -147,6 +147,34 @@ resource "google_organization_iam_member" "app_factory_org_organization_service_
   org_id = each.value.org_id
 }
 
+resource "google_organization_iam_member" "organizationServiceAgent_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  role     = "roles/privilegedaccessmanager.organizationServiceAgent"
+  org_id   = var.org_id
+  member   = "serviceAccount:${each.value.email}"
+}
+
+resource "google_organization_iam_member" "organization_xpn_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  org_id   = each.value.org_id
+  role     = "roles/compute.xpnAdmin"
+  member   = "serviceAccount:${each.value.email}"
+}
+
+resource "google_organization_iam_member" "orgPolicyAdmin_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  role     = "roles/orgpolicy.policyAdmin"
+  member   = "serviceAccount:${each.value.email}"
+  org_id   = each.value.org_id
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  role     = "roles/accesscontextmanager.policyAdmin"
+  org_id   = var.org_id
+  member   = "serviceAccount:${each.value.email}"
+}
+
 resource "google_project_iam_member" "cloud_build_user" {
   for_each = local.cb_service_accounts_emails
 

@@ -195,6 +195,41 @@ resource "google_organization_iam_member" "builder_organization_browser" {
   role     = "roles/browser"
 }
 
+resource "google_organization_iam_member" "app_factory_org_organization_service_agent" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/privilegedaccessmanager.organizationServiceAgent"
+}
+
+resource "google_organization_iam_member" "organizationServiceAgent_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/privilegedaccessmanager.organizationServiceAgent"
+}
+
+resource "google_organization_iam_member" "organization_xpn_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/compute.xpnAdmin"
+}
+
+resource "google_organization_iam_member" "orgPolicyAdmin_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/orgpolicy.policyAdmin"
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/accesscontextmanager.policyAdmin"
+}
+
 // Create infra project
 module "app_infra_project" {
   source   = "terraform-google-modules/project-factory/google"
