@@ -55,3 +55,8 @@ variable "workerpool_id" {
   description = "Private Worker pool id."
   type        = string
 }
+
+variable "team" {
+  description = "Environment Team, must be the same as the fleet scope team"
+  type        = string
+}

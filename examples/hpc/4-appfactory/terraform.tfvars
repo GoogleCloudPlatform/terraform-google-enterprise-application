@@ -1,6 +1,11 @@
 applications = {
   "hpc" = {
-    "montecarlo" = {
+    // team-a and team-b will have their own infrastructure project
+    "hpc-team-a" = {
+      create_infra_project = true
+      create_admin_project = true
+    },
+    "hpc-team-b" = {
       create_infra_project = true
       create_admin_project = true
     }
@@ -10,9 +15,13 @@ applications = {
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"
   repositories = {
-    montecarlo = {
-      repository_name = "montecarlo-i-r"
-      repository_url  = "https://gitlab.com/user/montecarlo-i-r.git"
+    hpc-team-a = {
+      repository_name = "hpc-team-a-i-r"
+      repository_url  = "https://gitlab.com/user/hpc-team-a-i-r.git"
+    },
+    hpc-team-b = {
+      repository_name = "hpc-team-b-i-r"
+      repository_url  = "https://gitlab.com/user/hpc-team-b-i-r.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME

@@ -86,7 +86,8 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"userservice-i-r",
 		"cymbalshop-i-r",
 		"hello-world-i-r",
-		"montecarlo-i-r",
+		"hpc-team-a-i-r",
+		"hpc-team-b-i-r",
 		// 5-appinfra repositories
 		"eab-cymbal-bank-frontend",
 		"eab-cymbal-bank-accounts-contacts",
