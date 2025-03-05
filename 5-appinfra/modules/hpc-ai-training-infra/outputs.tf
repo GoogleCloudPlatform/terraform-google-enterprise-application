@@ -16,10 +16,10 @@
 
 output "ai_training_data_bucket_name" {
   description = "AI Training Example Bucket Name"
-  value       = module.provision-ai-training-infra.ai_training_data_bucket_name
+  value       = google_storage_bucket.gpu_training.name
 }
 
 output "remote_repository_url" {
   description = "Remote Repository Base URL"
-  value       = module.provision-ai-training-infra.remote_repository_url
+  value       = local.repository_url
 }

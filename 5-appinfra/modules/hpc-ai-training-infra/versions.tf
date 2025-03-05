@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-output "ai_training_data_bucket_name" {
-  description = "AI Training Example Bucket Name"
-  value       = module.provision-ai-training-infra.ai_training_data_bucket_name
-}
-
-output "remote_repository_url" {
-  description = "Remote Repository Base URL"
-  value       = module.provision-ai-training-infra.remote_repository_url
+terraform {
+  required_version = ">= 1.3"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 6.6, < 7"
+    }
+  }
 }

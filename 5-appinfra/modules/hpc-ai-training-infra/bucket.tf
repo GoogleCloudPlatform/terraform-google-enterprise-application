@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-output "ai_training_data_bucket_name" {
-  description = "AI Training Example Bucket Name"
-  value       = module.provision-ai-training-infra.ai_training_data_bucket_name
-}
+resource "google_storage_bucket" "gpu_training" {
+  name          = "${var.infra_project}-gpu-training"
+  project       = var.infra_project
+  location      = var.region
+  force_destroy = var.bucket_force_destroy
 
-output "remote_repository_url" {
-  description = "Remote Repository Base URL"
-  value       = module.provision-ai-training-infra.remote_repository_url
+  public_access_prevention    = "enforced"
+  uniform_bucket_level_access = true
 }
