@@ -14,50 +14,6 @@
  * limitations under the License.
  */
 
-
-locals {
-  docker_tag_version_terraform = "v1"
-  teams_suffix                 = ["a", "b"]
-}
-
-resource "google_project_iam_member" "team_roles" {
-  for_each = {
-    for o in flatten([
-      for team in local.teams_suffix : [
-        for role in ["roles/storage.objectUser", "roles/pubsub.publisher", "roles/pubsub.viewer"] :
-        {
-          "team" : team,
-          "role" : role
-        }
-      ]
-    ]) :
-    "${o.team}/${o.role}" => o
-  }
-
-  project = var.infra_project
-  role    = each.value.role
-  member  = "principalSet://iam.googleapis.com/projects/${var.cluster_project_number}/locations/global/workloadIdentityPools/${var.cluster_project}.svc.id.goog/namespace/hpc-team-${each.value.team}-${var.env}"
-}
-
-resource "google_project_service" "enable_apis" {
-  for_each = toset([
-    "artifactregistry.googleapis.com",
-    "batch.googleapis.com",
-    "bigquery.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "compute.googleapis.com",
-    "container.googleapis.com",
-    "logging.googleapis.com",
-    "notebooks.googleapis.com",
-    "pubsub.googleapis.com",
-    "storage.googleapis.com",
-  ])
-  project            = var.infra_project
-  service            = each.key
-  disable_on_destroy = false
-}
-
 // TODO: use custom service account after PR is merged:  https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3736
 data "google_compute_default_service_account" "default" {
   # tflint-ignore: all
