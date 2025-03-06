@@ -66,10 +66,31 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
   member     = google_service_account.builder.member
 }
 
+resource "google_project_iam_member" "tf_workerpool_user" {
+  member  = google_service_account.builder.member
+  project = module.project_workerpool.project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+}
+
+resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
+  member  = google_service_account.builder.member
+  project = module.project_workerpool.project_id
+  role    = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "tf_cloud_build_builder" {
+  member  = google_service_account.builder.member
+  project = module.project_workerpool.project_id
+  role    = "roles/cloudbuild.builds.builder"
+}
+
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "60s"
 
   depends_on = [
+    google_project_iam_member.tf_workerpool_user,
+    google_project_iam_member.worker_pool_builder_logging_writer,
+    google_project_iam_member.tf_cloud_build_builder,
     google_artifact_registry_repository_iam_member.builder,
     google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,

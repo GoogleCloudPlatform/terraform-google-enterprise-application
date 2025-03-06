@@ -166,10 +166,22 @@ module "tf_cloudbuild_workspace" {
   tf_apply_branches         = var.tf_apply_branches
 }
 
-resource "google_project_iam_member" "cloud_build_user" {
-  role    = "roles/cloudbuild.workerPoolUser"
+resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = local.worker_pool_project
+  role    = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "cloud_build_builder" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.builds.builder"
+}
+
+resource "google_project_iam_member" "cloud_build_user" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
