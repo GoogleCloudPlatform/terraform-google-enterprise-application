@@ -67,6 +67,15 @@ resource "time_sleep" "wait_iam_propagation" {
   ]
 }
 
+
+resource "time_sleep" "wait_api" {
+  create_duration = "20s"
+
+  depends_on = [
+    google_project_service.enable_apis
+  ]
+}
+
 resource "google_artifact_registry_repository" "private_images" {
   location      = var.region
   project       = var.infra_project
@@ -74,7 +83,9 @@ resource "google_artifact_registry_repository" "private_images" {
   description   = "Docker repository for private images"
   format        = "DOCKER"
 
-  depends_on = [google_project_service.enable_apis]
+  depends_on = [
+    time_sleep.wait_api
+  ]
 }
 
 module "build_ai_run_image_image" {
