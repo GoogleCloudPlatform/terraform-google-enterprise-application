@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-output "ai_training_data_bucket_name" {
-  description = "AI Training Example Bucket Name"
-  value       = module.provision-ai-training-infra.ai_training_data_bucket_name
-}
-
 output "image_url" {
   description = "AI Image URL"
   value       = module.provision-ai-training-infra.image_url
