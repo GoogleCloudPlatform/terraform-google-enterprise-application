@@ -49,7 +49,7 @@ for (( i=1; i<=$MAX_TRIES; i++)); do
 
   # Stop execution upon reaching MAX_TRIES iterations
   if [ "$i" -eq $MAX_TRIES ]; then
-        echo "Reached limit of $MAX_TRIES tries"
+        echo "ERROR: Reached limit of $MAX_TRIES tries"
         exit 1
   fi
 done
