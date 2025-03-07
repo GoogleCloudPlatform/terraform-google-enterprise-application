@@ -182,3 +182,17 @@ resource "google_project_iam_member" "cloud_build_user" {
   member  = "serviceAccount:${each.value}"
   project = module.project_workerpool.project_id
 }
+
+resource "google_project_iam_member" "cb_worker_pool_builder_logging_writer" {
+  for_each = local.cb_service_accounts_emails
+  member   = "serviceAccount:${each.value}"
+  project  = module.project_workerpool.project_id
+  role     = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "cloud_build_builder" {
+  for_each = local.cb_service_accounts_emails
+  member   = "serviceAccount:${each.value}"
+  project  = module.project_workerpool.project_id
+  role     = "roles/cloudbuild.builds.builder"
+}

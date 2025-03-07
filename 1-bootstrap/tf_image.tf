@@ -18,6 +18,10 @@ locals {
   docker_tag_version_terraform = "v1"
 }
 
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 resource "google_artifact_registry_repository" "tf_image" {
   project       = var.project_id
   location      = var.location
@@ -68,6 +72,12 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
 
 resource "google_project_iam_member" "tf_workerpool_user" {
   member  = google_service_account.builder.member
+  project = module.project_workerpool.project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+}
+
+resource "google_project_iam_member" "identity_workerpool_user" {
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
   project = module.project_workerpool.project_id
   role    = "roles/cloudbuild.workerPoolUser"
 }
