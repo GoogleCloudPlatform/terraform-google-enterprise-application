@@ -28,6 +28,8 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
+const AI_ON_GKE_GIT_TAG = "v1.10"
+
 func createKueueResources(t *testing.T, options *k8s.KubectlOptions) (string, error) {
 	return k8s.RunKubectlAndGetOutputE(t, options, "apply", "-f", "../../../examples/hpc/6-appsource/manifests/kueue-resources.yaml")
 }
@@ -279,7 +281,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		gitAppRun("clone", "--branch", "v1.10", "https://github.com/GoogleCloudPlatform/ai-on-gke.git", tmpDirApp)
+		gitAppRun("clone", "--branch", AI_ON_GKE_GIT_TAG, "https://github.com/GoogleCloudPlatform/ai-on-gke.git", tmpDirApp)
 
 		manifestDir := "../../../examples/hpc/6-appsource/manifests"
 		manifestFile := "ai-training-job.yaml"

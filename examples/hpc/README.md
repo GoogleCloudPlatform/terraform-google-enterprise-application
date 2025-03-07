@@ -1,6 +1,6 @@
 # HPC Batch Jobs Use Cases
 
-This document presents two use cases that demonstrate the utilization of  `kueue` to manage multi-team batch jobs withing a Cluster.
+This document presents two use cases that demonstrate the utilization of `kueue` to manage multi-team batch jobs within a Cluster.
 
 ### Use Cases:
 
@@ -123,7 +123,7 @@ Under [5-appinfra](./5-appinfra/) you will find the two environment folders. The
 
 ##### Apply Kueue Resources
 
-Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator, after the namespaces are created and should be ran only once:
+Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator, after the namespaces are created and should be run only once:
 
 ```bash
 kubectl apply -f manifests/kueue-resources.yaml
