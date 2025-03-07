@@ -31,7 +31,7 @@ echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
 MAX_TRIES=100
 # Wait for the server to handle authentication requests
-for (( i=1; i<=$MAX_TRIES; i++)); do
+for (( i=1; i<=MAX_TRIES; i++)); do
   RESPONSE_BODY=$(curl "$URL")
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
