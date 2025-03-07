@@ -167,7 +167,7 @@ module "regular_service_perimeter" {
   description    = "Perimeter shielding projects"
 
   access_levels_dry_run           = [module.access_level_members.name]
-  vpc_accessible_services_dry_run = ["RESTRICTED-SERVICES"]
+  vpc_accessible_services_dry_run = ["*"]
   restricted_services_dry_run     = local.supported_restricted_service
   resources_dry_run               = distinct(concat([var.project_number, var.gitlab_project_number], var.network_project_number))
   egress_policies_dry_run = [
@@ -224,7 +224,7 @@ module "regular_service_perimeter" {
   ]
 
   access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
-  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["RESTRICTED-SERVICES"] : []
+  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
   restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
   resources               = var.service_perimeter_mode == "ENFORCE" ? distinct(concat([var.project_number, var.gitlab_project_number], var.network_project_number)) : []
   egress_policies = var.service_perimeter_mode == "ENFORCE" ? [
