@@ -50,7 +50,6 @@ steps:
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
-      - "TF_LOG=DEBUG"
     waitFor:
       - bootstrap-gitlab-vm
 
