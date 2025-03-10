@@ -82,6 +82,24 @@ resource "google_project_iam_member" "identity_workerpool_user" {
   role    = "roles/cloudbuild.workerPoolUser"
 }
 
+resource "google_project_iam_member" "identity_build_builder" {
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  project = module.project_workerpool.project_id
+  role    = "roles/cloudbuild.builds.builder"
+}
+
+resource "google_project_iam_member" "identity_log_viewer" {
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  project = module.project_workerpool.project_id
+  role    = "roles/logging.viewer"
+}
+
+resource "google_project_iam_member" "identity_log_writer" {
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  project = module.project_workerpool.project_id
+  role    = "roles/logging.logWriter"
+}
+
 resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
   member  = google_service_account.builder.member
   project = module.project_workerpool.project_id
