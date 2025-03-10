@@ -29,8 +29,9 @@ PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/pro
 URL="https://$EXTERNAL_IP.nip.io"
 echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
+MAX_TRIES=100
 # Wait for the server to handle authentication requests
-for i in {1..100}; do
+for (( i=1; i<=MAX_TRIES; i++)); do
   RESPONSE_BODY=$(curl "$URL")
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
@@ -46,4 +47,9 @@ for i in {1..100}; do
       sleep 5
   fi
 
+  # Stop execution upon reaching MAX_TRIES iterations
+  if [ "$i" -eq $MAX_TRIES ]; then
+        echo "ERROR: Reached limit of $MAX_TRIES tries"
+        exit 1
+  fi
 done
