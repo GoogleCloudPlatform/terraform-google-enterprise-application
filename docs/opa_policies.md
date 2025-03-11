@@ -89,6 +89,16 @@ kubectl get constraint -l policycontroller.gke.io/bundleName=pss-baseline-v2022 
 You can also see policies summary on GKE Dashboard, for example:
 ![dashboard](./images/policies_dashboard.png)
 
+### Enforcing policy to `warn` or `deny`
+
+Once you've reviewed policy violations on your cluster, you can consider changing the enforcement mode so the Admission Controller will either warn on or even deny block non-compliant resource from getting applied to the cluster. Here is an example on how to update it to warn:
+
+```bash
+kubectl get constraint -l policycontroller.gke.io/bundleName=pss-baseline-v2022 -o name | xargs -I {} kubectl patch {} --type='json' -p='[{"op":"replace","path":"/spec/enforcementAction","value":"warn"}]'
+```
+
+> **Warning**: The deny enforcement action should be used with care as it can potentially block required changes resulting in interruption to critical workloads or the cluster.
+
 ## Additional Policies
 
 You have three options for adding new policies:
