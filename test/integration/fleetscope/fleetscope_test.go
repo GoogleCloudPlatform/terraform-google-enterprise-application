@@ -276,8 +276,6 @@ func TestFleetscope(t *testing.T) {
 								assert.Equal("INSTALL_SPEC_ENABLED", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.installSpec").String(), fmt.Sprintf("Hub Feature %s policy controller should be INSTALL_SPEC_ENABLED", membershipName))
 								assert.Equal("ALL", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.policyContent.templateLibrary.installation").String(), fmt.Sprintf("Hub Feature %s policy controller templateLibrary should be ALL", membershipName))
 
-								state := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID).Get("policycontroller.state")
-								assert.Equal("ACTIVE", state, fmt.Sprintf("Policy Controller for membership %s should be equal to ACTIVE", membershipName))
 							}
 						}
 					}
@@ -328,8 +326,26 @@ func TestFleetscope(t *testing.T) {
 						return retry, nil
 					}
 				}
-				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
 
+				pollPolicyControllerState := func() func() (bool, error) {
+					return func() (bool, error) {
+						for _, membershipName := range membershipNamesProjectNumber {
+							gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+							if len(gcloudCmdOutput.Array()) < 1 {
+								return true, nil
+							}
+							admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.admission.state").String()
+							auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.audit.state").String()
+							return !(auditState == "ACTIVE" && admissionState == "ACTIVE"), nil
+						}
+						return true, nil
+					}
+					// policyContentState
+					// pss-baseline-v2022.state = active
+					// policy-essentials-v2022
+				}
+				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
+				utils.Poll(t, pollPolicyControllerState(), 6, 20*time.Second)
 			})
 
 			fleetscope.Test()
