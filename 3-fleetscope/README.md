@@ -18,6 +18,7 @@ The following resources are created:
 - Service Mesh
 - Multicluster Ingress
 - Multicluster Service
+- Policy Controller
 
 ## Prerequisites
 
@@ -237,3 +238,7 @@ If you receive any errors or made any changes to the Terraform config or `terraf
 1. Repeat the same series of terraform commands but replace `-chdir=./envs/production` with `-chdir=./envs/nonproduction` to deploy the nonproduction environment.
 
 1. Repeat the same series of terraform commands but replace `-chdir=./envs/production` with `-chdir=./envs/development` to deploy the development environment.
+
+### Policy Controller
+
+For more information on Policies, refer to the [following documentation](../docs/opa_policies.md)

@@ -275,6 +275,9 @@ func TestFleetscope(t *testing.T) {
 
 								assert.Equal("INSTALL_SPEC_ENABLED", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.installSpec").String(), fmt.Sprintf("Hub Feature %s policy controller should be INSTALL_SPEC_ENABLED", membershipName))
 								assert.Equal("ALL", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.policyContent.templateLibrary.installation").String(), fmt.Sprintf("Hub Feature %s policy controller templateLibrary should be ALL", membershipName))
+
+								state := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s", membershipName).Get("policycontroller.state")
+								assert.Equal("ACTIVE", state, fmt.Sprintf("Policy Controller for membership %s should be equal to ACTIVE", membershipName))
 							}
 						}
 					}
