@@ -124,6 +124,26 @@ For more information about the Cymbal Shop application, please visit [microservi
 
 This example demonstrates modifications necessary to deploy two separate application in the cluster, the applications are named `cymbal-bank` and `cymbal-shop`. `cymbal-bank` microservices will be deployed across differente namespaces, to represent different teams, and each microservice will have its own `admin` project, which hosts the CI/CD pipeline for the microservice. `cymbal-shop` microservices will be deployed into a single namespace and all pipelines into a single `admin` project. See the 4-appfactory [terraform.tfvars](./examples/multitenant-applications/4-appfactory/terraform.tfvars) for more information on how these projects are specified.
 
+## HPC Use Cases
+
+In the `examples/hpc` directory, you will find code samples and detailed instructions for provisioning two distinct use cases utilizing `Kueue` to efficiently manage batch jobs across multiple teams within the developer platform.
+
+## Use Cases
+
+### 1. Monte Carlo Financial Analysis
+
+This use case demonstrates how to implement simulation for financial analysis. The example includes setup instructions to get started with running high-performance calculations batch jobs.
+
+### 2. AI Training on GKE Using GPU and TensorFlow
+
+This use case showcases the process of training AI models using Google Kubernetes Engine (GKE) with GPU support and TensorFlow. The documentation provides guidance on configuring the environment and creating machine learning training jobs.
+
+## Team Structure
+
+Each team, namely **hpc-team-a** and **hpc-team-b**, will operate within their own dedicated tenants, infrastructure projects, and environments for executing their applications. The shared resources between the two teams is the cluster created in `2-multitenant` and the kueue's [ClusterQueue](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/):
+
+For a more detailed guide on how to set up and deploy these use cases, please refer to the code and instructions provided in the `examples/hpc` directory.
+
 ## Contributing
 
 Refer to the [contribution guidelines](./CONTRIBUTING.md) for

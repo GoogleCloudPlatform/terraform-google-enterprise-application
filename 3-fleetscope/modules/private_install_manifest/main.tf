@@ -73,7 +73,7 @@ module "kubectl" {
   membership_name         = var.cluster_name
   membership_location     = var.cluster_region
   kubectl_create_command  = "kubectl apply --server-side -f ${path.module}/manifest-${random_uuid.uid.result}-${var.cluster_name}.yaml"
-  kubectl_destroy_command = "kubectl delete -f ${path.module}/manifest-${random_uuid.uid.result}-${var.cluster_name}.yaml || exit 0"
+  kubectl_destroy_command = "timeout 300s kubectl delete -f ${path.module}/manifest-${random_uuid.uid.result}-${var.cluster_name}.yaml || exit 0"
 
   module_depends_on = [
     local_file.downloaded_file.filename,

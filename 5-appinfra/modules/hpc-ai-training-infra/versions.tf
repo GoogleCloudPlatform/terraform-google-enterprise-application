@@ -15,8 +15,15 @@
  */
 
 terraform {
-  backend "gcs" {
-    bucket = "UPDATE_INFRA_REPO_STATE"
-    prefix = "terraform/appinfra/hpc/hpc-team-b/development"
+  required_version = ">= 1.3"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 6.6, < 7"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12.0"
+    }
   }
 }
