@@ -76,3 +76,42 @@ resource "google_org_policy_policy" "allowed_worker_pools" {
     }
   }
 }
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Egress from cloud build to new projects."
+  egress_from {
+    identities = [for repo in local.expanded_environment_with_service_accounts : "serviceAccount:${repo.email}"]
+  }
+  egress_to {
+    resources = ["*"]
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iam.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudresourcemanager.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "container.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
