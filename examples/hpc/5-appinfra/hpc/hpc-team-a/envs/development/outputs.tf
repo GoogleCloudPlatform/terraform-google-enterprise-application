@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-output "stocks_data_bucket_name" {
-  description = "Stocks Historical Data Bucket Name"
-  value       = module.provision-monte-carlo-infra.stocks_data_bucket_name
+output "image_url" {
+  description = "AI Image URL"
+  value       = module.provision-ai-training-infra.image_url
 }

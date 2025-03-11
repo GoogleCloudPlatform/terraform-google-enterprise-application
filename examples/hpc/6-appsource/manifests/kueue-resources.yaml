@@ -51,7 +51,7 @@ apiVersion: kueue.x-k8s.io/v1beta1
 kind: LocalQueue
 metadata:
   namespace: hpc-team-a-development # LocalQueue under hpc-team-a namespace
-  name: hpc-team-a
+  name: lq-hpc-team-a
 spec:
   clusterQueue: cluster-queue # Point to the ClusterQueue
 ---

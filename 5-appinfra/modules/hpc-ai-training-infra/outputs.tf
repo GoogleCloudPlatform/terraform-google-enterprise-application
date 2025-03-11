@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-    bucket = "UPDATE_INFRA_REPO_STATE"
-    prefix = "terraform/appinfra/hpc/hpc-team-b/development"
-  }
+output "image_url" {
+  description = "AI Image URL"
+  value       = local.image_url
 }

@@ -1,8 +1,17 @@
-# HPC Example
+# HPC Batch Jobs Use Cases
 
-This document is an adaptation from [Google Cloud Platform's Risk and Research Blueprints](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/main/examples/research/monte-carlo).
+This document presents two use cases that demonstrate the utilization of `kueue` to manage multi-team batch jobs within a Cluster.
 
-## Requirements
+### Use Cases:
+
+- [Use Case 1: HPC Financial Analysis Using Monte Carlo Simulations (Team: `hpc-team-b`)](#use-case-1-hpc-financial-analysis-using-monte-carlo-simulations-team-hpc-team-b)
+- [Use Case 2: HPC AI Model Training with GPU (Team: `hpc-team-a`)](#use-case-2-hpc-ai-model-training-with-gpu-team-hpc-team-a)
+
+## Use Case 1: HPC Financial Analysis Using Monte Carlo Simulations (Team: `hpc-team-b`)
+
+This example is an adaptation from [Google Cloud Platform's Risk and Research Blueprints](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/main/examples/research/monte-carlo).
+
+### Requirements
 
 - **Docker Registry Connectivity**
   If you are using a private cluster with private nodes, they must be able to fetch Kueue Docker images from `registry.k8s.io`. This can be done by adding Cloud NAT to the private nodes network, having your own NAT setup on your cluster network, or by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md).
@@ -46,11 +55,9 @@ This document is an adaptation from [Google Cloud Platform's Risk and Research B
 
     This guide assumes you have `gcluster` installed on your home directory. More information on how to setup gcluster in the following [link](https://cloud.google.com/cluster-toolkit/docs/setup/configure-environment#local-shell)
 
-## Usage
+#### Create Namespaces
 
-### Create Namespaces
-
-#### Add `hpc-team-a` and `hpc-team-b` Namespaces at the Fleetscope repository
+##### Add `hpc-team-a` and `hpc-team-b` Namespaces at the Fleetscope repository
 
 Typically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
 
@@ -66,9 +73,9 @@ Typically, the application namespace will be created on 3-fleetscope and specifi
 
 1. Apply changes by commiting to a named environment branch (`development`, `nonproduction`, `production`). After the build associated with the fleetscope repository finishes it's execution, the namespaces should be present in the cluster.
 
-### Create Teams Environments and Infrastructure
+#### Create Teams Environments and Infrastructure
 
-#### Create projects in 4-appfactory
+##### Create projects in 4-appfactory
 
 You will find an example [terraform.tfvars](./4-appfactory/terraform.tfvars) in this example to create `hpc-team-a` and `hpc-team-b`.
 
@@ -110,11 +117,23 @@ cloudbuildv2_repository_config = {
 
 Apply the modifications by pushing code to a named branch, after updating the variables.
 
-#### Deploy baseline infrastructure in 5-appinfra
+##### Deploy baseline infrastructure in 5-appinfra
 
 Under [5-appinfra](./5-appinfra/) you will find the two environment folders. They just need to be copied to you AppInfra Pipeline repository and pushed to a named branch.
 
-#### More Information on Permissions within the Developer Platform
+##### Apply Kueue Resources
+
+Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator, after the namespaces are created and should be run only once:
+
+```bash
+kubectl apply -f manifests/kueue-resources.yaml
+```
+
+The queues that are created in this step will later be used to schedule batch jobs.
+
+### Usage
+
+#### Permissions within the Developer Platform
 
 The team members will run the code through a [Vertex AI Workbench Instance](https://cloud.google.com/vertex-ai/docs/workbench/instances/). They must have permission to connect to the instance and the instance will have permission to apply changes on their respective team namespace.
 
@@ -150,23 +169,13 @@ And add Terraform Code to assign ConnectGateway permissions:
 }
 ```
 
-### Apply Kueue Resources
-
-Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator, after the namespaces are created and should be ran only once:
-
-```bash
-kubectl apply -f manifests/kueue-resources.yaml
-```
-
-The queues that are created in this step will later be used to schedule batch jobs.
-
-### Set Project for gcloud Commands
+#### Set Project for gcloud Commands
 
 ```bash
 gcloud config set project REPLACE_WITH_YOUR_INFRA_PROJECT
 ```
 
-### Run `gcluster` Blueprint
+#### Run `gcluster` Blueprint
 
 The `fsi-montecarlo-on-batch.yaml` file contains a blueprint that is deployed with `gcluster` (cluster-toolkit). It will create a notebook instance on the infrastructure project, alongs with the it's dependencies.
 
@@ -182,9 +191,9 @@ CLUSTER_PROJECT=REPLACE_WITH_CLUSTER_PROJECT
 
 > NOTE: the example code is deployed for `hpc-team-b`. If you wish to deploy the example on `hpc-team-a` environment, you will need to adjust `settings.tpl.toml` and change the namespace and LocalQueue name.
 
-### Run the Simulation Jobs and Visualize the Results
+#### Run the Simulation Jobs and Visualize the Results
 
-#### Requisites before running
+##### Requisites before running
 
 Before running the jobs, historical stocks data must be downloaded and uploaded to a bucket, which will then be used by the containers that run the batch jobs. This procedure allows isolating the container from the external network and running the simulation in a Secure environment.
 
@@ -213,10 +222,57 @@ You will find an auxiliary script on `helpers` directory named `download_data.py
 
 After uploading the data to the bucket, you may proceed.
 
-#### Follow the tutorial on the original repository
+##### Follow the tutorial on the original repository
 
 Follow the steps outlined in the following document, after the "Open the Vertex AI Workbench Notebook" section:
 
 [Open the Vertex AI Workbench Notebook](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/0e3134b8478f3ffaa12031d7fda3ac6b94e61b17/examples/research/monte-carlo#open-the-vertex-ai-workbench-notebook)
 
 **IMPORTANT**: Your Vertex AI Workbench Instance will be located on the application infrastructure project that was created on 4-appfactory.
+
+## Use Case 2: HPC AI Model Training with GPU (Team: `hpc-team-a`)
+
+This use case is based on the following example: [Training with a Single GPU on Google Cloud](https://github.com/GoogleCloudPlatform/ai-on-gke/tree/main/tutorials-and-examples/gpu-examples/training-single-gpu).
+
+### Step 1: Connect to the Cluster
+
+Before proceeding, ensure that the user is a member of the `hpc-team-a` group and has the necessary permissions to connect using ConnectGateway:
+
+- **roles/gkehub.connect**
+- **roles/gkehub.viewer**
+- **roles/gkehub.gatewayReader**
+
+Once confirmed, execute the following command to connect to your cluster:
+
+```bash
+gcloud container fleet memberships get-credentials CLUSTER-NAME --project=YOUR-CLUSTER-PROJECT --location=YOUR-CLUSTER-REGION
+```
+
+Replace the placeholders as follows:
+
+- `CLUSTER-NAME`: The name of your cluster.
+- `YOUR-CLUSTER-PROJECT`: The project ID where your cluster is located.
+- `YOUR-CLUSTER-REGION`: The region of your cluster.
+
+### Step 2: Deploy the Example
+
+1. Retrieve the value for `IMAGE_URL` variable:
+
+    ```bash
+    terraform -chdir=./5-appinfra/hpc/hpc-team-a/envs/development init
+    export IMAGE_URL="terraform -chdir=./5-appinfra/hpc/hpc-team-a/envs/development output -raw image_url"
+    ```
+
+    > NOTE: If you don't have access to the terraform state, the IMAGE_URL format is: `us-central1-docker.pkg.dev/INFRA_PROJECT/private-images/ai-train:v1` where `INFRA_PROJECT` is your hpc-team-a infrastructure project ID.
+
+1. Run the job on `hpc-team-a-development` using the namespace LocalQueue and the variables retrieved above:
+
+    ```bash
+    envsubst < ./6-appsource/manifests/ai-training-job.yaml | kubectl -n hpc-team-a-development apply -f -
+    ```
+
+1. Validate your job finished by looking at the Container Logs, search for "Training finished. Model saved":
+
+    ```bash
+    kubectl -n hpc-team-a-development logs jobs/mnist-training-job -c tensorflow
+    ```
