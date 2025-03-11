@@ -95,6 +95,8 @@ For all the available bundles, see [Policy Controller Bundles on GKE](https://cl
 
 for all available contraints template library refer to: <https://cloud.google.com/kubernetes-engine/enterprise/policy-controller/docs/latest/reference/constraint-template-library>
 
+for instructions on using constraint library see: https://cloud.google.com/kubernetes-engine/enterprise/policy-controller/docs/how-to/creating-policy-controller-constraints
+
 ### Adding Custom Policies
 custom:
 <https://cloud.google.com/kubernetes-engine/enterprise/policy-controller/docs/how-to/write-custom-constraint-templates>
