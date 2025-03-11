@@ -28,6 +28,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/tidwall/gjson"
 )
 
 func renameKueueFile(t *testing.T) {
@@ -110,8 +111,22 @@ func TestFleetscope(t *testing.T) {
 
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
+		// retrieve namespaces from test/setup, they will be used to create the specific namespaces with the environment suffix
+		setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+		setupNamespaces := setupOutput.GetJsonOutput("teams")
+		var namespacesSlice []string
+		setupNamespaces.ForEach(func(key, value gjson.Result) bool {
+			namespacesSlice = append(namespacesSlice, key.String())
+			return true // keep iterating
+		})
+
 		t.Run(envName, func(t *testing.T) {
 			t.Parallel()
+			// each namespace will have the current environment suffixed
+			var currentEnvNamespaces []string
+			for _, namespace := range namespacesSlice {
+				currentEnvNamespaces = append(currentEnvNamespaces, fmt.Sprintf("%s-%s", namespace, envName))
+			}
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
 				tft.WithBackendConfig(backendConfig),
@@ -137,6 +152,8 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_repository_url": config_sync_url,
 			}
 
+			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+
 			fleetscope := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
@@ -155,7 +172,7 @@ func TestFleetscope(t *testing.T) {
 			})
 
 			fleetscope.DefineApply(func(assert *assert.Assertions) {
-				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+				// this function will create necessary requirements for config-sync with gitlab
 				err := applyPreRequisites(t, k8sOpts, token)
 				if err != nil {
 					t.Fatal(err)
@@ -165,6 +182,37 @@ func TestFleetscope(t *testing.T) {
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
+				// get kubectl namespaces and store them on currentClusterNamespaces slice
+				output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !gjson.Valid(output) {
+					t.Fatalf("Error parsing output, invalid json: %s", output)
+				}
+				jsonOutput := gjson.Parse(output)
+				var currentClusterNamespaces []string
+				jsonOutput.Get("items").ForEach(func(key, value gjson.Result) bool {
+					currentClusterNamespaces = append(currentClusterNamespaces, value.Get("metadata.name").String())
+					return true // keep iterating
+				})
+
+				for _, namespace := range currentEnvNamespaces {
+					// Check if the namespace exists in currentClusterNamespaces
+					exists := false
+					for _, clusterNamespace := range currentClusterNamespaces {
+						if namespace == clusterNamespace {
+							exists = true
+							break
+						}
+					}
+
+					if exists {
+						t.Logf("Namespace '%s' exists in the current cluster.\n", namespace)
+					} else {
+						t.Fatalf("Namespace '%s' does not exist in the current cluster.\n", namespace)
+					}
+				}
 
 				// Multitenant Outputs
 				clusterRegions := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")

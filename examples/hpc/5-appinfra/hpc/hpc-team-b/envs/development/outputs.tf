@@ -14,21 +14,7 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 6.6, < 7"
-    }
-    http = {
-      source  = "hashicorp/http"
-      version = ">= 3.4.5"
-    }
-    local = {
-      source  = "hashicorp/local"
-      version = ">= 2.5.2"
-    }
-  }
+output "stocks_data_bucket_name" {
+  description = "Stocks Historical Data Bucket Name"
+  value       = module.provision-monte-carlo-infra.stocks_data_bucket_name
 }
