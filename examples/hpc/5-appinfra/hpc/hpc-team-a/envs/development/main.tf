@@ -33,6 +33,5 @@ module "provision-ai-training-infra" {
   env                      = local.env
   cluster_service_accounts = local.cluster_service_accounts
   bucket_force_destroy     = var.bucket_force_destroy
-  workerpool_id            = data.terraform_remote_state.bootstrap.outputs.cb_private_worker_pool_id
   team                     = "hpc-team-a"
 }
