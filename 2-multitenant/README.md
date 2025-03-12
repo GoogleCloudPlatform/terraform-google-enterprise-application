@@ -53,7 +53,7 @@ Please note that some steps in this documentation are specific to the selected G
 1. (Github Only) When using Github with Cloud Build, clone the repository with the following command.
 
     ```bash
-    git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/eab-multitenant.git
+    git clone https://34.69.7.16.nip.io/root/eab-multitenant.git
     ```
 
 1. (Gitlab Only) When using Gitlab with Cloud Build, clone the repository with the following command.
@@ -68,12 +68,12 @@ Please note that some steps in this documentation are specific to the selected G
     cd eab-multitenant
     git checkout -b plan
 
-    cp -r ../terraform-google-enterprise-application/2-multitenant/* .
-    cp ../terraform-example-foundation/build/cloudbuild-tf-* .
-    cp ../terraform-example-foundation/build/tf-wrapper.sh .
+    cp -r ../2-multitenant/* .
+    cp ../../terraform-example-foundation/build/cloudbuild-tf-* .
+    cp ../../terraform-example-foundation/build/tf-wrapper.sh .
     chmod 755 ./tf-wrapper.sh
 
-    cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+    cp -RT ../../terraform-example-foundation/policy-library/ ./policy-library
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' cloudbuild-tf-*
     ```
 

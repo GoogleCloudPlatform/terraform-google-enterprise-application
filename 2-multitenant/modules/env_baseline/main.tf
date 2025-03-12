@@ -78,6 +78,7 @@ module "eab_cluster_project" {
   vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
+  vpc_service_control_sleep_duration = "2m"
 
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api

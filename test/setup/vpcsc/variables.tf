@@ -19,24 +19,9 @@ variable "org_id" {
   type        = string
 }
 
-variable "project_id" {
-  description = "The project_id"
-  type        = string
-}
-
-variable "project_number" {
-  description = "The project_number"
-  type        = string
-}
-
-variable "network_project_number" {
-  description = "The Networks project_number"
+variable "protected_projects" {
+  description = "The projects number to be protected."
   type        = list(string)
-}
-
-variable "gitlab_project_number" {
-  description = "The Gitlab project_id"
-  type        = string
 }
 
 variable "service_perimeter_mode" {

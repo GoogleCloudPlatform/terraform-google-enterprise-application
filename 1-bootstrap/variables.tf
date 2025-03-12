@@ -181,19 +181,8 @@ variable "workerpool_network_project_id" {
   default     = null
 }
 
-variable "service_perimeter_name" {
-  description = "Service perimeter full name."
+variable "access_level_name" {
+  description = "Access Level full name."
   type        = string
   default     = null
-}
-
-variable "service_perimeter_mode" {
-  description = "Service perimeter mode: ENFORCE, DRY_RUN."
-  type        = string
-  default     = "ENFORCE"
-
-  validation {
-    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
-    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
-  }
 }

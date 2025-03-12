@@ -28,11 +28,11 @@ module "project_workerpool" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
-  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
-  vpc_service_control_perimeter_name = var.service_perimeter_name
-  vpc_service_control_sleep_duration = "5m"
-  disable_services_on_destroy        = false
+  # vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  # vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  # vpc_service_control_perimeter_name = var.service_perimeter_name
+  # vpc_service_control_sleep_duration = "5m"
+  disable_services_on_destroy = false
 
   activate_apis = [
     "accesscontextmanager.googleapis.com",
@@ -77,41 +77,8 @@ resource "google_org_policy_policy" "allowed_worker_pools" {
   }
 }
 
-resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
-  perimeter = var.service_perimeter_name
-  title     = "Egress from cloud build to new projects."
-  egress_from {
-    identities = [for repo in local.expanded_environment_with_service_accounts : "serviceAccount:${repo.email}"]
-  }
-  egress_to {
-    resources = ["*"]
-    operations {
-      service_name = "compute.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-    operations {
-      service_name = "iam.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-    operations {
-      service_name = "cloudresourcemanager.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-    operations {
-      service_name = "container.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  access_level = var.access_level_name
+
+  members = concat([for sa in local.cb_service_accounts_emails : "serviceAccount:${sa}"], [google_service_account.builder.member])
 }

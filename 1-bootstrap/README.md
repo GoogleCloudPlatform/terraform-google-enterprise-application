@@ -266,6 +266,7 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| access\_level\_name | Access Level full name. | `string` | `null` | no |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |
@@ -276,8 +277,6 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Organization ID | `string` | n/a | yes |
 | project\_id | Project ID for initial resources | `string` | n/a | yes |
-| service\_perimeter\_mode | Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
-| service\_perimeter\_name | Service perimeter full name. | `string` | `null` | no |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"us-central1"` | no |
 | workerpool\_network\_id | The network definition that the workers are peered to. Must be in the format projects/{project}/global/networks/{network}, where {project} is a project number, such as 12345, and {network} is the name of a VPC network in the project. | `string` | n/a | yes |

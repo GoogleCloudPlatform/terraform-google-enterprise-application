@@ -29,11 +29,12 @@ import (
 func TestVPCSC(t *testing.T) {
 	vpcPath := "../../setup/vpcsc"
 	temp := tft.NewTFBlueprintTest(t, tft.WithTFDir(vpcPath))
-	projectID := temp.GetTFSetupStringOutput("project_id")
 	projectNumber := temp.GetTFSetupStringOutput("project_number")
+	networkProjectsNumber := temp.GetTFSetupOutputListVal("network_project_number")
 	serviceAccount := temp.GetTFSetupStringOutput("sa_email")
 	singleProject, _ := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
 	addAccessLevelMembers := strings.Split(os.Getenv("access_level_members"), ",")
+	protected_projects := []string{}
 
 	accessLevelMembers := []string{
 		fmt.Sprintf("serviceAccount:%s@cloudbuild.gserviceaccount.com", projectNumber),
@@ -42,15 +43,18 @@ func TestVPCSC(t *testing.T) {
 		fmt.Sprintf("serviceAccount:%s", serviceAccount),
 	}
 	if singleProject {
+		protected_projects = append(protected_projects, projectNumber)
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gcp-sa-artifactregistry.iam.gserviceaccount.com", projectNumber))
+	} else {
+		protected_projects = append(protected_projects, networkProjectsNumber...)
 	}
 	accessLevelMembers = append(accessLevelMembers, addAccessLevelMembers...)
 
 	vars := map[string]interface{}{
 		"access_level_members": accessLevelMembers,
-		"project_id":           projectID,
+		"protected_projects":   protected_projects,
 	}
 
 	vpcsc := tft.NewTFBlueprintTest(t,

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-output "project_id" {
-  value = var.project_id
+output "protected_projects" {
+  value = var.protected_projects
 }
 
 output "service_perimeter_name" {
@@ -25,7 +25,7 @@ output "service_perimeter_name" {
 
 output "access_level_name" {
   description = "Access level name."
-  value       = module.access_level_members.name
+  value       = module.access_level_members.name_id
 }
 
 output "service_perimeter_mode" {
