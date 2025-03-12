@@ -327,42 +327,43 @@ func TestFleetscope(t *testing.T) {
 					}
 				}
 
-				pollPolicyControllerState := func() func() (bool, error) {
-					return func() (bool, error) {
-						booleans := make([]bool, len(membershipNamesProjectNumber))
-						for i, membershipName := range membershipNamesProjectNumber {
-							gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
-							if len(gcloudCmdOutput.Array()) < 1 {
-								return true, nil
-							}
-							admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.admission.state").String()
-							auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.audit.state").String()
-							booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
+				pollPolicyControllerState := func() (bool, error) {
+					booleans := make([]bool, len(membershipNamesProjectNumber))
+					t.Logf("Will validate installation on clusters: %s", membershipNamesProjectNumber)
+					for i, membershipName := range membershipNamesProjectNumber {
+						gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						if len(gcloudCmdOutput.Array()) < 1 {
+							return true, nil
 						}
-						// stop retrying when all clusters have the policy controller in the active state
-						return !testutils.AllTrue(booleans), nil
+						admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.admission.state").String()
+						t.Logf("admissionState: %s", admissionState)
+						auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.audit.state").String()
+						t.Logf("auditState: %s", auditState)
+						booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
+						t.Logf("booleans[%s]: %s", i, booleans[i])
 					}
+					t.Logf("booleans: %s", booleans)
+					// stop retrying when all clusters have the policy controller in the active state
+					return !testutils.AllTrue(booleans), nil
 				}
 
-				pollPoliciesInstallationState := func() func() (bool, error) {
-					return func() (bool, error) {
-						booleans := make([]bool, len(membershipNamesProjectNumber))
-						for i, membershipName := range membershipNamesProjectNumber {
-							gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
-							if len(gcloudCmdOutput.Array()) < 1 {
-								return true, nil
-							}
-							admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.pss-baseline-v2022.state").String()
-							auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.policy-essentials-v2022.state").String()
-							booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
+				pollPoliciesInstallationState := func() (bool, error) {
+					booleans := make([]bool, len(membershipNamesProjectNumber))
+					for i, membershipName := range membershipNamesProjectNumber {
+						gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						if len(gcloudCmdOutput.Array()) < 1 {
+							return true, nil
 						}
-						// stop retrying when all clusters have the policy controller in the active state
-						return !testutils.AllTrue(booleans), nil
+						admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.pss-baseline-v2022.state").String()
+						auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.policy-essentials-v2022.state").String()
+						booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
 					}
+					return !testutils.AllTrue(booleans), nil
 				}
+
 				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
-				utils.Poll(t, pollPolicyControllerState(), 6, 20*time.Second)
-				utils.Poll(t, pollPoliciesInstallationState(), 6, 20*time.Second)
+				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
+				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
 			})
 
 			fleetscope.Test()
