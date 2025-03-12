@@ -329,16 +329,18 @@ func TestFleetscope(t *testing.T) {
 
 				pollPolicyControllerState := func() func() (bool, error) {
 					return func() (bool, error) {
-						for _, membershipName := range membershipNamesProjectNumber {
+						booleans := make([]bool, len(membershipNamesProjectNumber))
+						for i, membershipName := range membershipNamesProjectNumber {
 							gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
 							if len(gcloudCmdOutput.Array()) < 1 {
 								return true, nil
 							}
 							admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.admission.state").String()
 							auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.audit.state").String()
-							return !(auditState == "ACTIVE" && admissionState == "ACTIVE"), nil
+							booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
 						}
-						return true, nil
+						// stop retrying when all clusters have the policy controller in the active state
+						return !testutils.AllTrue(booleans), nil
 					}
 					// policyContentState
 					// pss-baseline-v2022.state = active
