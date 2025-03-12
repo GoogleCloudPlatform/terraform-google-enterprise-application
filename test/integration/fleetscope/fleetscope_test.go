@@ -340,9 +340,9 @@ func TestFleetscope(t *testing.T) {
 						auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.audit.state").String()
 						t.Logf("auditState: %s", auditState)
 						booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
-						t.Logf("booleans[%s]: %s", i, booleans[i])
+						t.Logf("booleans[%d]: %s", i, booleans[i])
 					}
-					t.Logf("booleans: %s", booleans)
+					t.Logf("booleans: %v", booleans)
 					// stop retrying when all clusters have the policy controller in the active state
 					return !testutils.AllTrue(booleans), nil
 				}
