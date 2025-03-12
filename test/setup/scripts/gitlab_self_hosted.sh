@@ -31,7 +31,7 @@ echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
 MAX_TRIES=100
 # Wait for the server to handle authentication requests
-for (( i=1; i<=$MAX_TRIES; i++)); do
+for (( i=1; i<=MAX_TRIES; i++)); do
   RESPONSE_BODY=$(curl "$URL")
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
@@ -49,7 +49,7 @@ for (( i=1; i<=$MAX_TRIES; i++)); do
 
   # Stop execution upon reaching MAX_TRIES iterations
   if [ "$i" -eq $MAX_TRIES ]; then
-        echo "Reached limit of $MAX_TRIES tries"
+        echo "ERROR: Reached limit of $MAX_TRIES tries"
         exit 1
   fi
 done
