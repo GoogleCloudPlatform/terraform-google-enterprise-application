@@ -146,10 +146,11 @@ func TestFleetscope(t *testing.T) {
 			config_sync_url := fmt.Sprintf("%s/root/config-sync-%s.git", setup.GetStringOutput("gitlab_url"), envName)
 
 			vars := map[string]interface{}{
-				"remote_state_bucket":        backend_bucket,
-				"namespace_ids":              setup.GetJsonOutput("teams").Value().(map[string]interface{}),
-				"config_sync_secret_type":    "token",
-				"config_sync_repository_url": config_sync_url,
+				"remote_state_bucket":         backend_bucket,
+				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
+				"config_sync_secret_type":     "token",
+				"config_sync_repository_url":  config_sync_url,
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b"},
 			}
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")

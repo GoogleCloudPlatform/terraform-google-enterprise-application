@@ -36,4 +36,6 @@ module "env" {
 
   config_sync_secret_type    = var.config_sync_secret_type
   config_sync_repository_url = var.config_sync_repository_url
+
+  disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }
