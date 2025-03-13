@@ -171,113 +171,113 @@ module "regular_service_perimeter" {
   vpc_accessible_services_dry_run = ["*"]
   restricted_services_dry_run     = local.supported_restricted_service
   resources_dry_run               = var.protected_projects
-  # egress_policies_dry_run = [
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     },
-  #     to = {
-  #       resources = ["projects/213331819513"], //service networking project
-  #       operations = {
-  #         "compute.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   },
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     }
-  #     to = {
-  #       resources = [
-  #         "projects/682719828243" // projects/bank-of-anthos-ci/locations/us-central1/repositories/bank-of-anthos
-  #       ]
-  #       operations = {
-  #         "artifactregistry.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   },
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     }
-  #     to = {
-  #       resources = [
-  #         "projects/912338787515", //proxy-golang-org-prod
-  #       ]
-  #       operations = {
-  #         "storage.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   },
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     }
-  #     to = {
-  #       resources = [
-  #         "projects/213358688945",
-  #       ]
-  #       operations = {
-  #         "storage.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   }
-  # ]
+  egress_policies_dry_run = [
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      },
+      to = {
+        resources = ["projects/213331819513"], //service networking project
+        operations = {
+          "compute.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/682719828243" // projects/bank-of-anthos-ci/locations/us-central1/repositories/bank-of-anthos
+        ]
+        operations = {
+          "artifactregistry.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/912338787515", //proxy-golang-org-prod
+        ]
+        operations = {
+          "storage.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/213358688945",
+        ]
+        operations = {
+          "storage.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    }
+  ]
 
   access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
   vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
   restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
   resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : []
-  # egress_policies = var.service_perimeter_mode == "ENFORCE" ? [
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     },
-  #     to = {
-  #       resources = ["projects/213331819513"], //service networking projects
-  #       operations = {
-  #         "compute.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   },
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     }
-  #     to = {
-  #       resources = [
-  #         "projects/682719828243" // projects/bank-of-anthos-ci/locations/us-central1/repositories/bank-of-anthos
-  #       ]
-  #       operations = {
-  #         "artifactregistry.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   },
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     }
-  #     to = {
-  #       resources = [
-  #         "projects/912338787515", //proxy-golang-org-prod
-  #       ]
-  #       operations = {
-  #         "storage.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   },
-  #   {
-  #     from = {
-  #       identity_type = "ANY_IDENTITY"
-  #     }
-  #     to = {
-  #       resources = [
-  #         "projects/213358688945",
-  #       ]
-  #       operations = {
-  #         "storage.googleapis.com" = { methods = ["*"] }
-  #       }
-  #     }
-  #   }
-  # ] : []
+  egress_policies = var.service_perimeter_mode == "ENFORCE" ? [
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      },
+      to = {
+        resources = ["projects/213331819513"], //service networking projects
+        operations = {
+          "compute.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/682719828243" // projects/bank-of-anthos-ci/locations/us-central1/repositories/bank-of-anthos
+        ]
+        operations = {
+          "artifactregistry.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/912338787515", //proxy-golang-org-prod
+        ]
+        operations = {
+          "storage.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/213358688945",
+        ]
+        operations = {
+          "storage.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    }
+  ] : []
 }

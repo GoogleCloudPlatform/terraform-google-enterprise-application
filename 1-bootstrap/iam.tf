@@ -196,3 +196,19 @@ resource "google_project_iam_member" "cloud_build_builder" {
   project  = module.project_workerpool.project_id
   role     = "roles/cloudbuild.builds.builder"
 }
+
+resource "google_project_iam_member" "secretManager_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+
+  project = var.cloudbuildv2_repository_config.secret_project_id
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${each.value.email}"
+}
+
+resource "google_project_iam_member" "iamPolicy_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+
+  project = module.project_workerpool.project_id
+  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+  member  = "serviceAccount:${each.value.email}"
+}

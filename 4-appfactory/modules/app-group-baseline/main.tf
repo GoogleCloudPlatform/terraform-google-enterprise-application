@@ -41,6 +41,17 @@ locals {
   use_csr             = var.cloudbuildv2_repository_config.repo_type == "CSR"
   service_repo_name   = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
   worker_pool_project = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
+
+  secret_id             = var.cloudbuildv2_repository_config.github_secret_id != null ? var.cloudbuildv2_repository_config.github_secret_id : var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
+  secret_project_number = regex("projects/([^/]*)/", local.secret_id)[0]
+}
+
+data "google_project" "admin_project" {
+  project_id = local.admin_project_id
+}
+
+data "google_project" "workerpool_project" {
+  project_id = local.worker_pool_project
 }
 
 module "cloudbuild_repositories" {
@@ -63,6 +74,8 @@ module "cloudbuild_repositories" {
     gitlab_enterprise_ca_certificate            = var.cloudbuildv2_repository_config.gitlab_enterprise_ca_certificate
   }
   cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
+
+  depends_on = [google_access_context_manager_service_perimeter_egress_policy.egress_policy, google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy]
 }
 
 module "app_admin_project" {
@@ -178,8 +191,14 @@ resource "google_project_iam_member" "cloud_build_builder" {
   role    = "roles/cloudbuild.builds.builder"
 }
 
-resource "google_project_iam_member" "cloud_build_user" {
+resource "google_project_iam_member" "workerPoolUser_cb_sa" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+}
+
+resource "google_project_iam_member" "workerPoolUser_cb_si" {
+  member  = "serviceAccount:${data.google_project.workerpool_project.number}@cloudbuild.gserviceaccount.com"
   project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
 }
@@ -263,4 +282,128 @@ module "app_infra_project" {
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
   svpc_host_project_id = each.value.network_project_id
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  egress_from {
+    identities = ["serviceAccount:service-${data.google_project.admin_project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
+  }
+  egress_to {
+    resources = ["projects/${local.secret_project_number}"]
+    operations {
+      service_name = "secretmanager.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "cloudbuild_egress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  egress_from {
+    identities = ["serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "cloudbuild_egress_policy" {
+  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  egress_from {
+    identities = ["serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_policy" {
+  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  egress_from {
+    identities = ["serviceAccount:service-${module.app_admin_project[0].project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
+  }
+  egress_to {
+    resources = ["projects/${local.secret_project_number}"]
+    operations {
+      service_name = "secretmanager.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "cloudbuild_ingress_policy" {
+  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    sources {
+      resource = "projects/${data.google_project.workerpool_project.number}"
+    }
+  }
+  ingress_to {
+    resources = ["projects/${data.google_project.admin_project.number}"]
+    operations {
+      service_name = "logging.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
+  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    sources {
+      resource = "projects/${data.google_project.workerpool_project.number}"
+    }
+  }
+  ingress_to {
+    resources = ["projects/${data.google_project.admin_project.number}"]
+    operations {
+      service_name = "logging.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
