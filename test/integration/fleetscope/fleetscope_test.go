@@ -329,20 +329,15 @@ func TestFleetscope(t *testing.T) {
 
 				pollPolicyControllerState := func() (bool, error) {
 					booleans := make([]bool, len(membershipNamesProjectNumber))
-					t.Logf("Will validate installation on clusters: %s", membershipNamesProjectNumber)
 					for i, membershipName := range membershipNamesProjectNumber {
 						gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
 						if len(gcloudCmdOutput.Array()) < 1 {
 							return true, nil
 						}
 						admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.admission.state").String()
-						t.Logf("admissionState: %s", admissionState)
 						auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.audit.state").String()
-						t.Logf("auditState: %s", auditState)
 						booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
-						t.Logf("booleans[%d]: %t", i, booleans[i])
 					}
-					t.Logf("booleans: %v", booleans)
 					// stop retrying when all clusters have the policy controller in the active state
 					return !testutils.AllTrue(booleans), nil
 				}
@@ -354,9 +349,10 @@ func TestFleetscope(t *testing.T) {
 						if len(gcloudCmdOutput.Array()) < 1 {
 							return true, nil
 						}
-						admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.pss-baseline-v2022.state").String()
-						auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.policy-essentials-v2022.state").String()
-						booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
+						pss := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.bundleStates.pss-baseline-v2022.state").String()
+						policyessentials := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.bundleStates.policy-essentials-v2022.state").String()
+						booleans[i] = (pss == "ACTIVE" && policyessentials == "ACTIVE")
+						t.Logf("booleans[%d]: %v", i, booleans[i])
 					}
 					return !testutils.AllTrue(booleans), nil
 				}
