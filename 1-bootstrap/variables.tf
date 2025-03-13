@@ -136,6 +136,7 @@ variable "cloudbuildv2_repository_config" {
     gitlab_enterprise_host_uri                  = optional(string)
     gitlab_enterprise_service_directory         = optional(string)
     gitlab_enterprise_ca_certificate            = optional(string)
+    secret_project_id                           = optional(string)
   })
 
   # If cloudbuildv2 is not configured, then auto-creation with CSR will be used
@@ -161,16 +162,18 @@ variable "cloudbuildv2_repository_config" {
         var.cloudbuildv2_repository_config.github_app_id_secret_id != null &&
         var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id == null &&
         var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id == null &&
-        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id == null
+        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id == null &&
+        var.cloudbuildv2_repository_config.secret_project_id != null
         ) : var.cloudbuildv2_repository_config.repo_type == "GITLABv2" ? (
         var.cloudbuildv2_repository_config.github_secret_id == null &&
         var.cloudbuildv2_repository_config.github_app_id_secret_id == null &&
         var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id != null &&
         var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id != null &&
-        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id != null
+        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id != null &&
+        var.cloudbuildv2_repository_config.secret_project_id != null
       ) : var.cloudbuildv2_repository_config.repo_type == "CSR" ? true : false
     )
-    error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
+    error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined. Also, if you are using Secrets, provide the project_id where is hosted."
   }
 
 }

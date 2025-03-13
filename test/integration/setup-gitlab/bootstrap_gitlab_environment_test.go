@@ -147,6 +147,12 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Replace secret project_id
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SECRET_PROJECT_ID", gitlabSecretProject, root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, root)
 	if err != nil {
 		t.Fatal(err)
