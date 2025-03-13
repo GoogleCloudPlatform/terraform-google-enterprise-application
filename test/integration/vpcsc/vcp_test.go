@@ -35,6 +35,14 @@ func TestVPCSC(t *testing.T) {
 	singleProject, _ := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
 	addAccessLevelMembers := strings.Split(os.Getenv("access_level_members"), ",")
 	protected_projects := []string{}
+	orgID := temp.GetTFSetupStringOutput("org_id")
+
+	if testutils.GetOrgACMPolicyID(t, orgID) == "" {
+		_, err := testutils.CreateOrgACMPolicyID(t, orgID)
+		if err != nil {
+			t.Errorf("Error creatin ACM Policy, %s", err)
+		}
+	}
 
 	accessLevelMembers := []string{
 		fmt.Sprintf("serviceAccount:%s@cloudbuild.gserviceaccount.com", projectNumber),
