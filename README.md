@@ -53,9 +53,11 @@ example-organization
 
 The purpose of this stage is to deploy the per-environment fleet resources via the fleetscope infrastructure pipeline. This stage does not create any new projects, but creates resources within the existing multitenant infrastructure projects.
 
-The fleet-scope pipeline manages configuration and resources related to [GKE Fleets](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). This stage manages the creation of namespaces in the GKE clusters via [team scopes and fleet namespaces](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management#fleet_team_management_overview). This pipeline also enables the [Config Sync](https://cloud.google.com/anthos-config-management/docs/config-sync-overview) and [Service Mesh](https://cloud.google.com/service-mesh/docs) features for the fleet and thus the member clusters.
+The fleet-scope pipeline manages configuration and resources related to [GKE Fleets](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). This stage manages the creation of namespaces in the GKE clusters via [team scopes and fleet namespaces](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management#fleet_team_management_overview). This pipeline also enables the [Config Sync](https://cloud.google.com/anthos-config-management/docs/config-sync-overview), [Service Mesh](https://cloud.google.com/service-mesh/docs), and [Policy Controller](https://cloud.google.com/kubernetes-engine/enterprise/policy-controller/docs/overview) features for the fleet and thus the member clusters.
 
 [Fleet team management](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management-overview) makes it easier for platform admins to provision and manage the necessary infrastructure resources that application and service teams might need to run their workloads, with the appropriate access control. Each team acts as a separate "tenant" on your fleet. In this repository, for demonstration purposes, the `ADMIN` permission is assigned on the fleet scope for each Group/Namespace.
+
+Based on the open source [Open Policy Agent Gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/docs/) project, [Policy Controller](https://cloud.google.com/kubernetes-engine/enterprise/policy-controller/docs/overview) is fully integrated with Google Cloud, includes a built-in dashboard, for observability, and comes with a full library of pre-built policies for common security and compliance controls.
 
 ### [4. app-factory](/4-app-factory/)
 
