@@ -81,3 +81,9 @@ variable "config_sync_repository_url" {
   type        = string
   default     = ""
 }
+
+variable "disable_istio_on_namespaces" {
+  type    = list(string)
+  description = "List the namespaces where you don't want the service mesh to be enabled (i.e. sidecar proxy injection). Ensure that the namespace names match exactly with those defined in 'var.namespace_ids'."
+  default = []
+}
