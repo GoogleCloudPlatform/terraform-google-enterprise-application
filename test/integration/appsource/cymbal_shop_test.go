@@ -113,7 +113,7 @@ func TestSourceCymbalShop(t *testing.T) {
 
 			gitAppRun("add", ".")
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
-			gitAppRun("push", "google", "main")
+			gitAppRun("push", "google", "main", "--force")
 
 			lastCommit := gitApp.GetLatestCommit()
 			// filter builds triggered based on pushed commit sha
@@ -127,7 +127,7 @@ func TestSourceCymbalShop(t *testing.T) {
 						if retriesBuildTrigger%3 == 0 {
 							// force push to trigger build 1 more time
 							t.Logf("Force push again to try trigger build for commit %s", lastCommit)
-							gitAppRun("push", "google", "main")
+							gitAppRun("push", "google", "main", "--force")
 						}
 						retriesBuildTrigger++
 						return true, nil

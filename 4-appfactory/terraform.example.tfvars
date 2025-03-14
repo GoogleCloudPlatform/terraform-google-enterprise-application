@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-billing_account     = "REPLACE_WITH_BILLING_ACCOUNT"
-common_folder_id    = "REPLACE_WITH_COMMON_FOLDER_ID"
-org_id              = "REPLACE_WITH_YOUR_ORGANIZATION_ID"
-remote_state_bucket = "REMOTE_STATE_BUCKET"
+billing_account        = "REPLACE_WITH_BILLING_ACCOUNT"
+common_folder_id       = "REPLACE_WITH_COMMON_FOLDER_ID"
+org_id                 = "REPLACE_WITH_YOUR_ORGANIZATION_ID"
+remote_state_bucket    = "REMOTE_STATE_BUCKET"
+service_perimeter_name = "REPLACE_WITH_YOUR_SERVICE_PERIMETER"
+service_perimeter_mode = "ENFORCE"
 envs = {
   "development" = {
     "billing_account"    = "{BILLING_ACCOUNT}"

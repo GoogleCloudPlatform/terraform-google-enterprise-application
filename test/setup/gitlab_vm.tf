@@ -23,7 +23,7 @@ module "gitlab_project" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = var.folder_id
+  folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
@@ -107,7 +107,6 @@ resource "google_compute_instance" "default" {
   depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
-
 resource "google_compute_firewall" "allow_http" {
   name    = "allow-http"
   network = "default"
@@ -172,6 +171,10 @@ output "gitlab_project_number" {
 
 output "gitlab_url" {
   value = "https://${google_compute_instance.default.network_interface[0].access_config[0].nat_ip}.nip.io"
+}
+
+output "gitlab_internal_ip" {
+  value = google_compute_instance.default.network_interface[0].network_ip
 }
 
 output "gitlab_secret_project" {
