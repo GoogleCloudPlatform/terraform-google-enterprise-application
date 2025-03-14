@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cymbal-bank-isolation
+  namespace: cb-accounts-development
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: In
+          values:
+          - cb-frontend-development
+          - cb-accounts-development
+          - cb-ledger-development
+  policyTypes:
+  - Egress
+  - Ingress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cymbal-bank-isolation
+  namespace: cb-frontend-development
+spec:
+  policyTypes:
+  - Egress
+  - Ingress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cymbal-bank-isolation
+  namespace: cb-ledger-development
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: In
+          values:
+          - cb-frontend-development
+          - cb-accounts-development
+          - cb-ledger-development
+  policyTypes:
+  - Egress
+  - Ingress

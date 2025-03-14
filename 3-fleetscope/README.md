@@ -247,7 +247,7 @@ Namespace network isolation is an aspect of Kubernetes security that helps to li
 - Frontend namespace will allow ingress traffic.
 - Cymbal-Bank example namespaces will be able to communicate with each other by allowing ingress from the necessary specific namespaces.
 
-You have two options in applying network policies, add directly to the fleetscope pipeline or use `config-sync` to deploy across multi-cluster environments. See below.
+You have three options in applying network policies, add directly to the fleetscope pipeline or use `config-sync` to deploy across multi-cluster environments, or directly applying the yaml manifest to the cluster. See below.
 
 ### Apply on Fleetscope Pipeline
 
@@ -269,3 +269,11 @@ Here is an example on how to call this module on the fleetscope pipeline:
 1. Alternatively, the user might chose to use `config-sync` to sync network policies instead of directly applying the resources on the fleetscope pipeline. Here is a tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source)
 
 For more information on namespace isolation see this [documentation](../docs/namespace_isolation.md).
+
+### Directly Applying manifests
+
+1. Alternatively, the user might want to directly apply the manifest, an example manifest is available at [cymbal-bank-isolation-example.yaml](./cymbal-bank-isolation-example.yaml). You can apply if by running:
+
+    ```bash
+    kubectl apply -f cymbal-bank-isolation-example.yaml
+    ```
