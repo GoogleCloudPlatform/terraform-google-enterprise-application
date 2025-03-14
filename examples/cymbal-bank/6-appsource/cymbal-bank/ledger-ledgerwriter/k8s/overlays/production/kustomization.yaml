@@ -17,7 +17,6 @@ kind: Kustomization
 namespace: cb-ledger-production
 resources:
   - ../../base
-  - anthos-service-mesh-security-config.yaml
 components:
   - ../../../../../components/production
   - ../../../../../components/cloud-sql

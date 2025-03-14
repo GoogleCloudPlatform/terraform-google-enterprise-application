@@ -19,7 +19,6 @@ resources:
   - ../../base
   - namespace.yaml
   - destinationrule.yaml
-  - anthos-service-mesh-security-config.yaml
 components:
   - ../../../../components/staging
 

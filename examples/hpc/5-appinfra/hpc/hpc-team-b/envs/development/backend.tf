@@ -17,6 +17,6 @@
 terraform {
   backend "gcs" {
     bucket = "UPDATE_INFRA_REPO_STATE"
-    prefix = "terraform/appinfra/hpc/montecarlo/development"
+    prefix = "terraform/appinfra/hpc/hpc-team-b/development"
   }
 }

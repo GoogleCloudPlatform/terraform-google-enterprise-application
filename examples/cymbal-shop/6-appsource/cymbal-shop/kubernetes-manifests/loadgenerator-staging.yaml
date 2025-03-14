@@ -65,7 +65,6 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-          runAsUser: 1337
         image: busybox:latest
         env:
         - name: FRONTEND_ADDR
