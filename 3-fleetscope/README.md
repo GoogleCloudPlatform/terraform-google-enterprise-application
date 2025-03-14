@@ -247,7 +247,7 @@ Namespace network isolation is an aspect of Kubernetes security that helps to li
 - Frontend namespace will allow ingress traffic.
 - Cymbal-Bank example namespaces will be able to communicate with each other by allowing ingress from the necessary specific namespaces.
 
-You have three options in applying network policies, add directly to the fleetscope pipeline or use `config-sync` to deploy across multi-cluster environments, or directly applying the yaml manifest to the cluster. See below.
+You have three options in applying network policies: add directly to the fleetscope pipeline, use `config-sync` to deploy across multi-cluster environments, or directly applying the yaml manifest to the cluster. See below.
 
 ### Apply on Fleetscope Pipeline
 
