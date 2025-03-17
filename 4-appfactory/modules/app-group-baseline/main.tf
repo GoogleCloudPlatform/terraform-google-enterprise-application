@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 locals {
   admin_project_id = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project_id
   cloudbuild_sa_roles = merge(var.create_infra_project ? { for env in keys(var.envs) : env => {
@@ -54,6 +55,11 @@ data "google_project" "workerpool_project" {
   project_id = local.worker_pool_project
 }
 
+data "google_project" "gar_project" {
+  project_id = var.gar_project_id
+}
+
+
 module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
@@ -75,7 +81,7 @@ module "cloudbuild_repositories" {
   }
   cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
 
-  depends_on = [google_access_context_manager_service_perimeter_egress_policy.egress_policy, google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy]
+  depends_on = [google_access_context_manager_service_perimeter_egress_policy.cloudbuild_egress_policy, google_access_context_manager_service_perimeter_dry_run_egress_policy.cloudbuild_egress_policy]
 }
 
 module "app_admin_project" {
@@ -197,10 +203,16 @@ resource "google_project_iam_member" "workerPoolUser_cb_sa" {
   role    = "roles/cloudbuild.workerPoolUser"
 }
 
-resource "google_project_iam_member" "workerPoolUser_cb_si" {
-  member  = "serviceAccount:${data.google_project.workerpool_project.number}@cloudbuild.gserviceaccount.com"
+resource "google_project_iam_member" "log_writer_cb_si" {
+  member  = "serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"
   project = local.worker_pool_project
-  role    = "roles/cloudbuild.workerPoolUser"
+  role    = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "service_agent_cb_si" {
+  member  = "serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.builds.builder"
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
@@ -282,128 +294,4 @@ module "app_infra_project" {
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
   svpc_host_project_id = each.value.network_project_id
-}
-
-resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identities = ["serviceAccount:service-${data.google_project.admin_project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
-  }
-  egress_to {
-    resources = ["projects/${local.secret_project_number}"]
-    operations {
-      service_name = "secretmanager.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_egress_policy" "cloudbuild_egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identities = ["serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"]
-  }
-  egress_to {
-    resources = ["projects/${data.google_project.workerpool_project.number}"]
-    operations {
-      service_name = "cloudbuild.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "cloudbuild_egress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identities = ["serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"]
-  }
-  egress_to {
-    resources = ["projects/${data.google_project.workerpool_project.number}"]
-    operations {
-      service_name = "cloudbuild.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identities = ["serviceAccount:service-${module.app_admin_project[0].project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
-  }
-  egress_to {
-    resources = ["projects/${local.secret_project_number}"]
-    operations {
-      service_name = "secretmanager.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "cloudbuild_ingress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  ingress_from {
-    sources {
-      resource = "projects/${data.google_project.workerpool_project.number}"
-    }
-  }
-  ingress_to {
-    resources = ["projects/${data.google_project.admin_project.number}"]
-    operations {
-      service_name = "logging.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  ingress_from {
-    sources {
-      resource = "projects/${data.google_project.workerpool_project.number}"
-    }
-  }
-  ingress_to {
-    resources = ["projects/${data.google_project.admin_project.number}"]
-    operations {
-      service_name = "logging.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
 }
