@@ -276,6 +276,7 @@ func TestFleetscope(t *testing.T) {
 
 								assert.Equal("INSTALL_SPEC_ENABLED", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.installSpec").String(), fmt.Sprintf("Hub Feature %s policy controller should be INSTALL_SPEC_ENABLED", membershipName))
 								assert.Equal("ALL", gkeFeatureOp.Get(policycontrollerPath+".policyControllerHubConfig.policyContent.templateLibrary.installation").String(), fmt.Sprintf("Hub Feature %s policy controller templateLibrary should be ALL", membershipName))
+
 							}
 						}
 					}
@@ -326,8 +327,40 @@ func TestFleetscope(t *testing.T) {
 						return retry, nil
 					}
 				}
-				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
 
+				pollPolicyControllerState := func() (bool, error) {
+					booleans := make([]bool, len(membershipNamesProjectNumber))
+					for i, membershipName := range membershipNamesProjectNumber {
+						gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						if len(gcloudCmdOutput.Array()) < 1 {
+							return true, nil
+						}
+						admissionState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.admission.state").String()
+						auditState := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.componentStates.audit.state").String()
+						booleans[i] = (auditState == "ACTIVE" && admissionState == "ACTIVE")
+					}
+					// stop retrying when all clusters have the policy controller in the active state
+					return !testutils.AllTrue(booleans), nil
+				}
+
+				pollPoliciesInstallationState := func() (bool, error) {
+					booleans := make([]bool, len(membershipNamesProjectNumber))
+					for i, membershipName := range membershipNamesProjectNumber {
+						gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						if len(gcloudCmdOutput.Array()) < 1 {
+							return true, nil
+						}
+						pss := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.bundleStates.pss-baseline-v2022.state").String()
+						policyessentials := gcloudCmdOutput.Get("membershipStates").Get(membershipName).Get("policycontroller.policyContentState.bundleStates.policy-essentials-v2022.state").String()
+						booleans[i] = (pss == "ACTIVE" && policyessentials == "ACTIVE")
+						t.Logf("booleans[%d]: %v", i, booleans[i])
+					}
+					return !testutils.AllTrue(booleans), nil
+				}
+
+				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
+				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
+				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
 			})
 
 			fleetscope.Test()

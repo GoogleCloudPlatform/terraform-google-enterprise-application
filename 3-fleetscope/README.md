@@ -18,6 +18,7 @@ The following resources are created:
 - Service Mesh
 - Multicluster Ingress
 - Multicluster Service
+- Policy Controller
 
 ## Prerequisites
 
@@ -240,40 +241,19 @@ If you receive any errors or made any changes to the Terraform config or `terraf
 
 ## Namespace Network-Level Isolation Example
 
-Namespace network isolation is an aspect of Kubernetes security that helps to limit the access of different services and components within the cluster. You can find an example namespace isolation using Network Policies on the [cymbal-bank-isolation](./modules/cymbal-bank-isolation) terraform module. This example will enforce the following:
+Namespace network isolation is an aspect of Kubernetes security that helps to limit the access of different services and components within the cluster. You can find an example namespace isolation using Network Policies for Cymbal Bank This example will enforce the following:
 
 - Namespaces pods will deny all ingress traffic.
 - Namespaces pods will allow all egress traffic.
 - Frontend namespace will allow ingress traffic.
 - Cymbal-Bank example namespaces will be able to communicate with each other by allowing ingress from the necessary specific namespaces.
 
-You have three options in applying network policies: add directly to the fleetscope pipeline, use `config-sync` to deploy across multi-cluster environments, or directly applying the yaml manifest to the cluster. See below.
-
-### Apply on Fleetscope Pipeline
-
-Here is an example on how to call this module on the fleetscope pipeline:
-
-1. Add on [modules/env_baseline](./modules/env_baseline/) a terraform file calling the module:
-
-    ```terraform
-    module "cymbal-bank-isolation" {
-    source   = "../cymbal-bank-isolation"
-
-    env                   = var.env
-    cluster_membership_id = local.cluster_membership_ids[0]
-    }
-    ```
-
 ### Use Config Sync for Network Policies
 
-1. Alternatively, the user might chose to use `config-sync` to sync network policies instead of directly applying the resources on the fleetscope pipeline. Here is a tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source)
+1. To use `config-sync` to sync network policies instead of directly applying the resources on the fleetscope pipeline. Here is a tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source)
 
 For more information on namespace isolation see this [documentation](../docs/namespace_isolation.md).
 
-### Directly Applying manifests
+### Policy Controller
 
-1. Alternatively, the user might want to directly apply the manifest, an example manifest is available at [cymbal-bank-isolation-example.yaml](./cymbal-bank-isolation-example.yaml). You can apply if by running:
-
-    ```bash
-    kubectl apply -f cymbal-bank-isolation-example.yaml
-    ```
+For more information on Policies, refer to the [following documentation](../docs/opa_policies.md)
