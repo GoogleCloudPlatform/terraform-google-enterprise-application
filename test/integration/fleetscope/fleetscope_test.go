@@ -203,10 +203,13 @@ func TestFleetscope(t *testing.T) {
 				// copy files to repo and push to sync branch
 				policiesPath := fmt.Sprintf("../../../3-fleetscope/config-sync/cymbal-bank-network-policies-%s.yaml", envName)
 				t.Logf("Copying from %s to %s", policiesPath, tmpDirApp)
-				err = cp.Copy(policiesPath, tmpDirApp)
+				err = cp.Copy(policiesPath, fmt.Sprintf("%s/cymbal-bank-network-policies-%s.yaml", tmpDirApp, envName))
 				if err != nil {
 					t.Fatal(err)
 				}
+				gitAppRun("config", "user.email", "eab-robot@example.com")
+				gitAppRun("config", "user.name", "EAB Robot")
+				gitAppRun("checkout", "master")
 				gitAppRun("add", ".")
 				gitAppRun("commit", "-am", "Add cymbal bank network policies")
 				gitAppRun("push", "origin", "master")
