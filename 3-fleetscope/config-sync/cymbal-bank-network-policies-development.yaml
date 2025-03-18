@@ -11,12 +11,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+apiVersion: configmanagement.gke.io/v1
+kind: NamespaceSelector
+metadata:
+   name: accounts-selector
+spec:
+  mode: dynamic
+  selector:
+    matchLabels:
+      fleet.gke.io/fleet-scope: cb-accounts-development
+---
+apiVersion: configmanagement.gke.io/v1
+kind: NamespaceSelector
+metadata:
+   name: ledger-selector
+spec:
+  mode: dynamic
+  selector:
+    matchLabels:
+      fleet.gke.io/fleet-scope: cb-ledger-development
+---
+apiVersion: configmanagement.gke.io/v1
+kind: NamespaceSelector
+metadata:
+   name: frontend-selector
+spec:
+  mode: dynamic
+  selector:
+    matchLabels:
+      fleet.gke.io/fleet-scope: cb-frontend-development
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: cymbal-bank-isolation
-  namespace: cb-accounts-development
+  annotations:
+    configmanagement.gke.io/namespace-selector: accounts-selector
 spec:
   ingress:
   - from:
@@ -31,20 +61,24 @@ spec:
   policyTypes:
   - Egress
   - Ingress
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: cymbal-bank-isolation
-  namespace: cb-frontend-development
+  annotations:
+    configmanagement.gke.io/namespace-selector: frontend-selector
 spec:
   policyTypes:
   - Egress
   - Ingress
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: cymbal-bank-isolation
-  namespace: cb-ledger-development
+  annotations:
+    configmanagement.gke.io/namespace-selector: ledger-selector
 spec:
   ingress:
   - from:
