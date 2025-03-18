@@ -103,7 +103,7 @@ func TestFleetscope(t *testing.T) {
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
 	}
-
+	gitUrl := setup.GetStringOutput("gitlab_url")
 	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
 	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
@@ -114,8 +114,7 @@ func TestFleetscope(t *testing.T) {
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		// retrieve namespaces from test/setup, they will be used to create the specific namespaces with the environment suffix
-		setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-		setupNamespaces := setupOutput.GetJsonOutput("teams")
+		setupNamespaces := setup.GetJsonOutput("teams")
 		var namespacesSlice []string
 		setupNamespaces.ForEach(func(key, value gjson.Result) bool {
 			namespacesSlice = append(namespacesSlice, key.String())
@@ -184,6 +183,7 @@ func TestFleetscope(t *testing.T) {
 			})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
+				fleetscope.DefaultVerify(assert)
 
 				// create temporary directory to host config-sync repo
 				tmpDirApp := t.TempDir()
@@ -195,14 +195,6 @@ func TestFleetscope(t *testing.T) {
 					}
 				}
 				// retrieve gitlab credentials
-				setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-				gitUrl := setupOutput.GetStringOutput("gitlab_url")
-				gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
-				gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
-				token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
-				if err != nil {
-					t.Fatal(err)
-				}
 				hostNameWithPath := strings.Split(gitUrl, "https://")[1]
 				authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root/config-sync-%s", token, hostNameWithPath, envName)
 				// clone config-sync repository using credentials
@@ -219,7 +211,6 @@ func TestFleetscope(t *testing.T) {
 				gitAppRun("commit", "-am", "Add cymbal bank network policies")
 				gitAppRun("push", "origin", "master")
 
-				fleetscope.DefaultVerify(assert)
 				// get kubectl namespaces and store them on currentClusterNamespaces slice
 				output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
 				if err != nil {
