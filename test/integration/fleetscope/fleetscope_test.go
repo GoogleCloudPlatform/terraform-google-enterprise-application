@@ -184,41 +184,40 @@ func TestFleetscope(t *testing.T) {
 			})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
-				if envName == "development" {
-					// create temporary directory to host config-sync repo
-					tmpDirApp := t.TempDir()
-					gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
-					gitAppRun := func(args ...string) {
-						_, err := gitApp.RunCmdE(args...)
-						if err != nil {
-							t.Fatal(err)
-						}
-					}
-					// retrieve gitlab credentials
-					setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-					gitUrl := setupOutput.GetStringOutput("gitlab_url")
-					gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
-					gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
-					token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
-					if err != nil {
-						t.Fatal(err)
-					}
-					hostNameWithPath := strings.Split(gitUrl, "https://")[1]
-					authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root/config-sync-development", token, hostNameWithPath)
-					// clone config-sync repository using credentials
-					gitAppRun("clone", authenticatedUrl, tmpDirApp)
 
-					// copy files to repo and push to sync branch
-					policiesPath := "../../../3-fleetscope/config-sync/cymbal-bank-network-policies-development.yaml"
-					t.Logf("Copying from %s to %s", policiesPath, tmpDirApp)
-					err = cp.Copy(policiesPath, tmpDirApp)
+				// create temporary directory to host config-sync repo
+				tmpDirApp := t.TempDir()
+				gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
+				gitAppRun := func(args ...string) {
+					_, err := gitApp.RunCmdE(args...)
 					if err != nil {
 						t.Fatal(err)
 					}
-					gitAppRun("add", ".")
-					gitAppRun("commit", "-am", "Add cymbal bank network policies - development")
-					gitAppRun("push", "origin", "master")
 				}
+				// retrieve gitlab credentials
+				setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+				gitUrl := setupOutput.GetStringOutput("gitlab_url")
+				gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
+				gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
+				token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+				if err != nil {
+					t.Fatal(err)
+				}
+				hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+				authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root/config-sync-%s", token, hostNameWithPath, envName)
+				// clone config-sync repository using credentials
+				gitAppRun("clone", authenticatedUrl, tmpDirApp)
+
+				// copy files to repo and push to sync branch
+				policiesPath := fmt.Sprintf("../../../3-fleetscope/config-sync/cymbal-bank-network-policies-%s.yaml", envName)
+				t.Logf("Copying from %s to %s", policiesPath, tmpDirApp)
+				err = cp.Copy(policiesPath, tmpDirApp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				gitAppRun("add", ".")
+				gitAppRun("commit", "-am", "Add cymbal bank network policies")
+				gitAppRun("push", "origin", "master")
 
 				fleetscope.DefaultVerify(assert)
 				// get kubectl namespaces and store them on currentClusterNamespaces slice
