@@ -16,7 +16,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "bkt-ci-enterprise-application-u9oh-tf-state"
+    bucket = "bkt-ci-enterprise-application-9ne2-tf-state"
     prefix = "terraform/appfactory/shared"
   }
 }

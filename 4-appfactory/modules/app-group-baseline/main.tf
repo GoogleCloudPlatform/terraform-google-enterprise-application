@@ -55,10 +55,10 @@ data "google_project" "workerpool_project" {
   project_id = local.worker_pool_project
 }
 
-data "google_project" "gar_project" {
-  project_id = var.gar_project_id
+data "google_project" "clusters_projects" {
+  for_each   = toset(var.cluster_projects_ids)
+  project_id = each.value
 }
-
 
 module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
@@ -191,6 +191,12 @@ resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
   role    = "roles/logging.logWriter"
 }
 
+resource "google_project_iam_member" "worker_pool_roles_privilegedaccessmanager_projectServiceAgent" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+}
+
 resource "google_project_iam_member" "cloud_build_builder" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = local.worker_pool_project
@@ -201,6 +207,12 @@ resource "google_project_iam_member" "workerPoolUser_cb_sa" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
+}
+
+resource "google_project_iam_member" "connection_admin_cb_sa" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.admin_project_id
+  role    = "roles/cloudbuild.connectionAdmin"
 }
 
 resource "google_project_iam_member" "log_writer_cb_si" {
@@ -294,4 +306,10 @@ module "app_infra_project" {
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
   svpc_host_project_id = each.value.network_project_id
+}
+
+resource "google_project_iam_member" "secretManager_admin" {
+  project = var.cloudbuildv2_repository_config.secret_project_id
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }

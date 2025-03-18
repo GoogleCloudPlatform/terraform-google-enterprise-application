@@ -59,7 +59,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 resource "google_access_context_manager_service_perimeter_egress_policy" "cloudbuild_egress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Cloud Build and Logging Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  title     = "Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     sources {
@@ -71,6 +71,12 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudb
     resources = ["projects/${data.google_project.workerpool_project.number}"]
     operations {
       service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "clouddeploy.googleapis.com"
       method_selectors {
         method = "*"
       }
@@ -90,7 +96,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudb
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "cloudbuild_egress_policy" {
   count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Cloud Build and Logging Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  title     = "Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     sources {
@@ -107,6 +113,12 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
       }
     }
     operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
       service_name = "logging.googleapis.com"
       method_selectors {
         method = "*"
@@ -118,19 +130,24 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   }
 }
 
-resource "google_access_context_manager_service_perimeter_ingress_policy" "logging_ingress_policy" {
+resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Logging Ingress from ${data.google_project.workerpool_project.project_id} to ${data.google_project.admin_project.project_id}"
-  ingress_from {
-    sources {
-      resource = "projects/${data.google_project.workerpool_project.number}"
+  title     = "Cloud Deploy from ${data.google_project.admin_project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.clusters_projects
+      content {
+        resource = "projects/${sources.value.number}"
+      }
     }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
-  ingress_to {
-    resources = ["projects/${data.google_project.admin_project.number}"]
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
     operations {
-      service_name = "logging.googleapis.com"
+      service_name = "clouddeploy.googleapis.com"
       method_selectors {
         method = "*"
       }
@@ -141,19 +158,24 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "loggi
   }
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "logging_ingress_policy" {
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_policy" {
   count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Logging Ingress from ${data.google_project.workerpool_project.project_id} to ${data.google_project.admin_project.project_id}"
-  ingress_from {
-    sources {
-      resource = "projects/${data.google_project.workerpool_project.number}"
+  title     = "Cloud Deploy Egress from ${[for project in var.cluster_projects_ids : project]} to ${data.google_project.workerpool_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.clusters_projects
+      content {
+        resource = "projects/${sources.value.number}"
+      }
     }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
-  ingress_to {
-    resources = ["projects/${data.google_project.admin_project.number}"]
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
     operations {
-      service_name = "logging.googleapis.com"
+      service_name = "clouddeploy.googleapis.com"
       method_selectors {
         method = "*"
       }
@@ -164,62 +186,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   }
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "storage_logging_ingress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  title     = "Logging Ingress from ${data.google_project.gar_project.project_id} to ${data.google_project.admin_project.project_id}"
-  ingress_from {
-    identity_type = "ANY_IDENTITY"
-    sources {
-      resource = "projects/${data.google_project.gar_project.number}"
-    }
-  }
-  ingress_to {
-    resources = ["projects/${data.google_project.admin_project.number}"]
-    operations {
-      service_name = "storage.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-    operations {
-      service_name = "logging.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_ingress_policy" "storage_logging_ingress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
-  perimeter = var.service_perimeter_name
-  title     = "Logging Ingress from ${data.google_project.gar_project.project_id} to ${data.google_project.admin_project.project_id}"
-  ingress_from {
-    identity_type = "ANY_IDENTITY"
-    sources {
-      resource = "projects/${data.google_project.gar_project.number}"
-    }
-  }
-  ingress_to {
-    resources = ["projects/${data.google_project.admin_project.number}"]
-    operations {
-      service_name = "storage.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-    operations {
-      service_name = "logging.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  access_level = var.access_level_name
+  members      = ["serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"]
 }

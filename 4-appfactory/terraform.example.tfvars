@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-billing_account        = "REPLACE_WITH_BILLING_ACCOUNT"
-common_folder_id       = "REPLACE_WITH_COMMON_FOLDER_ID"
-org_id                 = "REPLACE_WITH_YOUR_ORGANIZATION_ID"
-remote_state_bucket    = "REMOTE_STATE_BUCKET"
-service_perimeter_name = "REPLACE_WITH_YOUR_SERVICE_PERIMETER"
-service_perimeter_mode = "ENFORCE"
+billing_account     = "REPLACE_WITH_BILLING_ACCOUNT"
+common_folder_id    = "REPLACE_WITH_COMMON_FOLDER_ID"
+org_id              = "REPLACE_WITH_YOUR_ORGANIZATION_ID"
+remote_state_bucket = "REMOTE_STATE_BUCKET"
 envs = {
   "development" = {
     "billing_account"    = "{BILLING_ACCOUNT}"
@@ -76,4 +74,5 @@ cloudbuildv2_repository_config = {
   gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
   gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
   gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+  secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
 }
