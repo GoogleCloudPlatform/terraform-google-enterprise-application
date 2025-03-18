@@ -250,9 +250,44 @@ Namespace network isolation is an aspect of Kubernetes security that helps to li
 
 ### Use Config Sync for Network Policies
 
-1. To use `config-sync` to sync network policies instead of directly applying the resources on the fleetscope pipeline. Here is a tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source)
+To use `config-sync` you will need to clone you config-sync repository and add the policies there. Commit it and wait for the next sync. Here is a detailed tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source). The steps below will show an example for cymbal-bank.
 
-For more information on namespace isolation see this [documentation](../docs/namespace_isolation.md).
+1. Clone `config-sync` repository.
+
+    ```bash
+    git clone https://YOUR-GIT-INSTANCE/YOUR-NAMESPACE/config-sync-development.git
+    ```
+
+1. Checkout to sync branch:
+
+    ```bash
+    cd config-sync-development
+    git checkout master
+    ```
+
+1. Copy example policies from `terraform-google-enterprise-applicaiton` repository to the `config-sync` repository:
+
+    ```bash
+    cp ../terraform-google-enterprise-applicaiton/3-fleetscope/config-sync/cymbal-bank-network-policies-development.yaml .
+    ```
+
+1. Commit and push changes:
+
+    ```bash
+    git add .
+    git commit -am "Add cymbal bank network policies - development"
+    git push origin master
+    ```
+
+1. Wait until the resources are synced. You can check status by using `nomos` command line. This requires you having your `kubeconfig` configured to connect to the cluster. Or by accessing the Config Management Console on [https://console.cloud.google.com/kubernetes/config_management/dashboard](https://console.cloud.google.com/kubernetes/config_management/dashboard).
+
+    ```bash
+    nomos status
+    ```
+
+    > NOTE: For more information on nomos command line, see this [documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/nomos-command)
+
+For more information on namespace isolation options see this [documentation](../docs/namespace_isolation.md).
 
 ### Policy Controller
 

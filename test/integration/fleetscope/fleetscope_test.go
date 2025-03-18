@@ -23,9 +23,11 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/gruntwork-io/terratest/modules/k8s"
+	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	"github.com/tidwall/gjson"
@@ -182,6 +184,42 @@ func TestFleetscope(t *testing.T) {
 			})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
+				if envName == "development" {
+					// create temporary directory to host config-sync repo
+					tmpDirApp := t.TempDir()
+					gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
+					gitAppRun := func(args ...string) {
+						_, err := gitApp.RunCmdE(args...)
+						if err != nil {
+							t.Fatal(err)
+						}
+					}
+					// retrieve gitlab credentials
+					setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+					gitUrl := setupOutput.GetStringOutput("gitlab_url")
+					gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
+					gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
+					token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+					if err != nil {
+						t.Fatal(err)
+					}
+					hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+					authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root/config-sync-development", token, hostNameWithPath)
+					// clone config-sync repository using credentials
+					gitAppRun("clone", authenticatedUrl, tmpDirApp)
+
+					// copy files to repo and push to sync branch
+					policiesPath := "../../../3-fleetscope/config-sync/cymbal-bank-network-policies-development.yaml"
+					t.Logf("Copying from %s to %s", policiesPath, tmpDirApp)
+					err = cp.Copy(policiesPath, tmpDirApp)
+					if err != nil {
+						t.Fatal(err)
+					}
+					gitAppRun("add", ".")
+					gitAppRun("commit", "-am", "Add cymbal bank network policies - development")
+					gitAppRun("push", "origin", "master")
+				}
+
 				fleetscope.DefaultVerify(assert)
 				// get kubectl namespaces and store them on currentClusterNamespaces slice
 				output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
