@@ -48,5 +48,6 @@ module "app" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  workerpool_id = data.terraform_remote_state.bootstrap.outputs.cb_private_worker_pool_id
+  workerpool_id     = data.terraform_remote_state.bootstrap.outputs.cb_private_worker_pool_id
+  access_level_name = var.access_level_name
 }

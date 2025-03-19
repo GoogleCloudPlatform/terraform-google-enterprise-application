@@ -116,13 +116,26 @@ resource "google_project_iam_member" "container_admin" {
   member = each.value
 }
 
-resource "google_project_iam_member" "workerPool_user" {
+resource "google_project_iam_member" "cloudbuild_service_account" {
   for_each = {
-    "cloud_deploy" = google_service_account.cloud_deploy.member,
-    "cloud_build"  = google_service_account.cloud_build.member,
+    "cloud_deploy"  = google_service_account.cloud_deploy.member,
+    "cloud_build"   = google_service_account.cloud_build.member,
+    "service_agent" = google_project_service_identity.cloudbuild_service_identity.member,
   }
   project = local.worker_pool_project
-  role    = "roles/cloudbuild.workerPoolUser"
+  role    = "roles/cloudbuild.builds.builder"
+
+  member = each.value
+}
+
+resource "google_project_iam_member" "logging_writer" {
+  for_each = {
+    "cloud_deploy"  = google_service_account.cloud_deploy.member,
+    "cloud_build"   = google_service_account.cloud_build.member,
+    "service_agent" = google_project_service_identity.cloudbuild_service_identity.member,
+  }
+  project = local.worker_pool_project
+  role    = "roles/logging.logWriter"
 
   member = each.value
 }

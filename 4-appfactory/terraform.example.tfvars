@@ -21,6 +21,7 @@ remote_state_bucket = "REMOTE_STATE_BUCKET"
 
 service_perimeter_name        = "accessPolicies/000000000000000/servicePerimeters/sp_gke_enterprise_XXXXX"
 service_perimeter_mode        = "ENFORCE"
+access_level_name = "accessPolicies/000000000000000/accessLevels/ac_gke_enterprise_XXXXX"
 
 envs = {
   "development" = {

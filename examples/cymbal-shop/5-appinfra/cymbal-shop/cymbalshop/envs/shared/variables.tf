@@ -93,3 +93,9 @@ variable "cloudbuildv2_repository_config" {
     error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
   }
 }
+
+variable "access_level_name" {
+  description = "Access Level full name."
+  type        = string
+  default     = null
+}

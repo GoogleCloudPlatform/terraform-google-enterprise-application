@@ -40,3 +40,8 @@ resource "google_service_account_iam_member" "cloud_build_token_creator_cloud_de
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:${google_service_account.cloud_build.email}"
 }
+
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  access_level = var.access_level_name
+  members      = [google_service_account.cloud_deploy.member, google_service_account.cloud_build.member]
+}

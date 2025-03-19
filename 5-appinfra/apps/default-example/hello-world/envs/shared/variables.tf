@@ -95,3 +95,9 @@ variable "cloudbuildv2_repository_config" {
   }
 
 }
+
+variable "access_level_name" {
+  description = "Access Level full name."
+  type        = string
+  default     = null
+}
