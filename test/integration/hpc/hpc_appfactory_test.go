@@ -50,6 +50,7 @@ func TestHPCAppfactory(t *testing.T) {
 		"bucket_force_destroy":   "true",
 		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
+		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
 	}
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"
