@@ -17,9 +17,9 @@
 # GitLab Installation
 apt-get update
 apt-get install -y curl openssh-server ca-certificates tzdata perl jq
-curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | bash
-apt-get install gitlab-ee
-
+curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+apt-get install gitlab-ce=17.6.5-ce.0
+# apt-get install gitlab-ce
 
 # Retrieve values from Metadata Server
 EXTERNAL_IP=$(curl http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google")
@@ -29,7 +29,7 @@ PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/pro
 URL="https://$EXTERNAL_IP.nip.io"
 echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
-MAX_TRIES=100
+MAX_TRIES=75
 # Wait for the server to handle authentication requests
 for (( i=1; i<=MAX_TRIES; i++)); do
   RESPONSE_BODY=$(curl "$URL")
