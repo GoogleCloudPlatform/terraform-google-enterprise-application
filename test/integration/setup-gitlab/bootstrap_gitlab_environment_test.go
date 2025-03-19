@@ -53,7 +53,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	gitlabTokenSecretId := fmt.Sprintf("projects/%s/secrets/%s", gitlabSecretProjectNumber, gitlabPersonalTokenSecretName)
 
 	// Periodically read logs from startup script running on the VM instance
-	for count := 0; count < 10; count++ {
+	for count := 0; count < 120; count++ {
 		logs, err := readLogsFromVm(t, instanceName, instanceZone, gitlabSecretProject)
 		if err != nil {
 			t.Fatal(err)
@@ -61,7 +61,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		if strings.Contains(logs, "Finished Google Compute Engine Startup Scripts") {
 			break
 		}
-		time.Sleep(3 * time.Minute)
+		time.Sleep(10 * time.Second)
 	}
 
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)

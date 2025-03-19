@@ -29,7 +29,7 @@ PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/pro
 URL="https://$EXTERNAL_IP.nip.io"
 echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
-MAX_TRIES=100
+MAX_TRIES=75
 # Wait for the server to handle authentication requests
 for (( i=1; i<=MAX_TRIES; i++)); do
   RESPONSE_BODY=$(curl "$URL")
@@ -41,10 +41,15 @@ for (( i=1; i<=MAX_TRIES; i++)); do
       echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
       break
   else
-      echo "$i: GitLab is not ready for sign-in operations. Waiting 5 seconds and will try again."
+      echo "$i: GitLab is not ready for sign-in operations. Waiting 10 seconds and will try again."
       echo "Command Output:"
       echo "$RESPONSE_BODY"
-      sleep 5
+      sleep 10
+  fi
+
+  if [ "$i" -eq $((MAX_TRIES / 2)) ]; then
+        echo "WARNING: Reached $(($MAX_TRIES / 2)) tries, will try reconfiguring"
+        gitlab-ctl reconfigure
   fi
 
   # Stop execution upon reaching MAX_TRIES iterations
