@@ -39,6 +39,9 @@ for (( i=1; i<=MAX_TRIES; i++)); do
       gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$personal_token'); token.save!"
       echo "personal_token=$(echo "$personal_token" | head -c 3)*********"
       echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
+      echo "waiting propagation time"
+      sleep 10
+      gcloud secrets describe gitlab-pat-from-vm --project="$PROJECT_ID"
       break
   else
       echo "$i: GitLab is not ready for sign-in operations. Waiting 10 seconds and will try again."
