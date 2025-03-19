@@ -17,9 +17,8 @@
 # GitLab Installation
 apt-get update
 apt-get install -y curl openssh-server ca-certificates tzdata perl jq
-curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | bash
-apt-get install gitlab-ee
-
+curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+apt-get install gitlab-ce
 
 # Retrieve values from Metadata Server
 EXTERNAL_IP=$(curl http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google")
@@ -29,7 +28,7 @@ PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/pro
 URL="https://$EXTERNAL_IP.nip.io"
 echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
-MAX_TRIES=100
+MAX_TRIES=75
 # Wait for the server to handle authentication requests
 for (( i=1; i<=MAX_TRIES; i++)); do
   RESPONSE_BODY=$(curl "$URL")
@@ -38,7 +37,11 @@ for (( i=1; i<=MAX_TRIES; i++)); do
       personal_token=$(tr -dc "[:alnum:]" < /dev/random | head -c 20)
       gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$personal_token'); token.save!"
       echo "personal_token=$(echo "$personal_token" | head -c 3)*********"
-      echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
+      if gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID"; then
+        echo -n "$personal_token" | gcloud secrets versions add gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
+      else
+        echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
+      fi
       break
   else
       echo "$i: GitLab is not ready for sign-in operations. Waiting 5 seconds and will try again."
