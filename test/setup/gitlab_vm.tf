@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 locals {
-  cloudbuild_consumer_project_number = module.project.project_number
+  cloudbuild_consumer_project_number = [for i, value in merge(module.project, module.project_standalone) : value.project_number][0]
 }
 
 module "gitlab_project" {
@@ -200,6 +200,7 @@ resource "google_service_directory_endpoint" "gitlab" {
   endpoint_id = "gitlab-endpoint"
   service     = google_service_directory_service.gitlab.id
 
+  network = "projects/${module.gitlab_project.project_number}/locations/global/networks/default"
   address = google_compute_instance.default.network_interface[0].network_ip
   port    = 443
 }
@@ -223,8 +224,15 @@ resource "google_dns_managed_zone" "sd_zone" {
 
 resource "google_project_iam_member" "sd_viewer" {
   project = module.gitlab_project.project_id
-  role = "roles/servicedirectory.viewer"
-  member = "service-${local.cloudbuild_consumer_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-${local.cloudbuild_consumer_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+// allow cloudbuild on consumer project to access network on gitlab project
+resource "google_project_iam_member" "access_network" {
+  project = module.gitlab_project.project_id
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-${local.cloudbuild_consumer_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 // ===========================
