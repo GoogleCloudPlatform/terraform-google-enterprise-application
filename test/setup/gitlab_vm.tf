@@ -16,8 +16,10 @@
 locals {
   cloudbuild_consumer_project_number = module.gitlab_project.project_number
   bootstrap_project_number           = [for k, v in merge(module.project, module.project_standalone) : v.project_number][0]
-  gitlab_network_id                  = "projects/${module.gitlab_project.project_number}/locations/global/networks/default"
+  gitlab_network_name                = "default"
+  gitlab_network_id                  = "projects/${module.gitlab_project.project_number}/locations/global/networks/${local.gitlab_network_name}"
   gitlab_network_id_without_location = replace(local.gitlab_network_id, "locations/", "")
+  gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${local.gitlab_network_name}"
 }
 
 module "gitlab_project" {
@@ -99,7 +101,7 @@ resource "google_compute_instance" "default" {
   }
 
   network_interface {
-    network = "default"
+    network = local.gitlab_network_name
 
     access_config {
       // Ephemeral public IP
@@ -119,7 +121,7 @@ resource "google_compute_instance" "default" {
 
 resource "google_compute_firewall" "allow_service_networking" {
   name    = "allow-service-networking"
-  network = "default"
+  network = local.gitlab_network_name
   project = module.gitlab_project.project_id
 
   allow {
@@ -133,7 +135,7 @@ resource "google_compute_firewall" "allow_service_networking" {
 
 resource "google_compute_firewall" "allow_http" {
   name    = "allow-http"
-  network = "default"
+  network = local.gitlab_network_name
   project = module.gitlab_project.project_id
 
   allow {
@@ -149,7 +151,7 @@ resource "google_compute_firewall" "allow_http" {
 
 resource "google_compute_firewall" "allow_https" {
   name    = "allow-https"
-  network = "default"
+  network = local.gitlab_network_name
   project = module.gitlab_project.project_id
 
   allow {
@@ -208,13 +210,13 @@ resource "google_service_directory_namespace" "gitlab" {
 
 resource "google_service_directory_service" "gitlab" {
   provider   = google-beta
-  service_id = "gitlab-service"
+  service_id = "gitlab"
   namespace  = google_service_directory_namespace.gitlab.id
 }
 
 resource "google_service_directory_endpoint" "gitlab" {
   provider    = google-beta
-  endpoint_id = "gitlab-endpoint"
+  endpoint_id = "endpoint"
   service     = google_service_directory_service.gitlab.id
 
   network = local.gitlab_network_id
@@ -226,7 +228,7 @@ resource "google_dns_managed_zone" "sd_zone" {
   provider = google-beta
 
   name        = "peering-zone"
-  dns_name    = "gitlab.example.com."
+  dns_name    = "example.com."
   description = "Example private DNS Service Directory zone for Gitlab Instance"
   project     = module.gitlab_project.project_id
 
@@ -235,6 +237,12 @@ resource "google_dns_managed_zone" "sd_zone" {
   service_directory_config {
     namespace {
       namespace_url = google_service_directory_namespace.gitlab.id
+    }
+  }
+
+  private_visibility_config {
+    networks {
+      network_url = local.gitlab_network_url
     }
   }
 }
@@ -301,6 +309,16 @@ resource "google_cloudbuild_worker_pool" "pool" {
 
   depends_on = [google_service_networking_connection.worker_pool_conn]
 }
+
+# resource "google_service_networking_peered_dns_domain" "name" {
+#   project    = module.gitlab_project.project_id
+#   name       = "example-com"
+#   network    = "default"
+#   dns_suffix = "example.com."
+#   service    = "gitlab-service"
+
+#   depends_on = [ google_dns_managed_zone.sd_zone ]
+# }
 
 // ===========================
 //          OUTPUTS
