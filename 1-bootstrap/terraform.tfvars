@@ -21,7 +21,9 @@ cloudbuildv2_repository_config = {
   # If you are using a self-hosted instance, you may change the URL below accordingly
   gitlab_enterprise_host_uri = "https://gitlab.com"
   # .pem string
-  gitlab_enterprise_ca_certificate = "REPLACE_WITH_SSL_CERT"
+  gitlab_enterprise_ca_certificate = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
   # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
   gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
 }
