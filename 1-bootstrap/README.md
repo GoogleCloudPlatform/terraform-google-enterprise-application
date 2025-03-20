@@ -202,6 +202,16 @@ example-organization
     └── prj-c-eab-bootstrap
 ```
 
+##### Worker Pool Requirements
+
+If the project in which you're starting the build is different from the project in which your private pool exists, grant the WorkerPool User role to the service account you are using with your trigger on the workerpool project where your builds are created:
+
+```bash
+gcloud projects add-iam-policy-binding PRIVATEPOOL_PROJECT_ID \
+   --member=serviceAccount:SERVICE_ACCOUNT \
+   --role=roles/cloudbuild.workerPoolUser
+```
+
 #### Step-by-Step
 
 1. The next instructions assume that you are in the `terraform-google-enterprise-application/1-bootstrap` folder.

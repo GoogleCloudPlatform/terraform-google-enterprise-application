@@ -107,8 +107,13 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = google_artifact_registry_repository.tf_image.project
     "_GAR_REPOSITORY"               = google_artifact_registry_repository.tf_image.name
     "_DOCKER_TAG_VERSION_TERRAFORM" = local.docker_tag_version_terraform
+    "_PRIVATE_POOL"                 = var.worker_pool_id
   }
 
   # Branches to run the build
   tf_apply_branches = var.tf_apply_branches
+}
+
+variable "worker_pool_id" {
+  type = string
 }

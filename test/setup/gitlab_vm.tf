@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 locals {
-  cloudbuild_consumer_project_number = [for i, value in merge(module.project, module.project_standalone) : value.project_number][0]
+  cloudbuild_consumer_project_number = module.gitlab_project.project_number
+  gitlab_network_id                  = "projects/${module.gitlab_project.project_number}/locations/global/networks/default"
+  gitlab_network_id_without_location = replace(local.gitlab_network_id, "locations/", "")
 }
 
 module "gitlab_project" {
@@ -42,7 +44,8 @@ module "gitlab_project" {
     "cloudbilling.googleapis.com",
     "storage.googleapis.com",
     "servicedirectory.googleapis.com",
-    "dns.googleapis.com"
+    "dns.googleapis.com",
+    "cloudbuild.googleapis.com"
   ]
 }
 
@@ -113,6 +116,19 @@ resource "google_compute_instance" "default" {
   depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
+resource "google_compute_firewall" "allow_service_networking" {
+  name    = "allow-service-networking"
+  network = "default"
+  project = module.gitlab_project.project_id
+
+  allow {
+    protocol = "all"
+  }
+
+  source_ranges = ["35.199.192.0/19"]
+
+  depends_on = [time_sleep.wait_gitlab_project_apis]
+}
 
 resource "google_compute_firewall" "allow_http" {
   name    = "allow-http"
@@ -200,7 +216,7 @@ resource "google_service_directory_endpoint" "gitlab" {
   endpoint_id = "gitlab-endpoint"
   service     = google_service_directory_service.gitlab.id
 
-  network = "projects/${module.gitlab_project.project_number}/locations/global/networks/default"
+  network = local.gitlab_network_id
   address = google_compute_instance.default.network_interface[0].network_ip
   port    = 443
 }
@@ -233,6 +249,57 @@ resource "google_project_iam_member" "access_network" {
   project = module.gitlab_project.project_id
   role    = "roles/servicedirectory.pscAuthorizedService"
   member  = "serviceAccount:service-${local.cloudbuild_consumer_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "access_pool" {
+  project = module.gitlab_project.project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:service-${[for k, v in merge(module.project, module.project_standalone) : v.project_number][0]}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "cb_sa" {
+  project = module.gitlab_project.project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${[for k, v in merge(module.project, module.project_standalone) : v.project_number][0]}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_compute_global_address" "worker_range" {
+  project       = module.gitlab_project.project_id
+  name          = "worker-pool-range"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = local.gitlab_network_id_without_location
+}
+
+resource "google_service_networking_connection" "worker_pool_conn" {
+  network                 = local.gitlab_network_id_without_location
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.worker_range.name]
+  depends_on              = [google_project_service.servicenetworking]
+}
+
+resource "google_project_service" "servicenetworking" {
+  project            = module.gitlab_project.project_id
+  service            = "servicenetworking.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool"
+  project  = module.gitlab_project.project_id
+  location = "us-central1"
+  worker_config {
+    disk_size_gb = 100
+    machine_type = "e2-standard-4"
+    # no_external_ip = true
+  }
+  network_config {
+    peered_network          = local.gitlab_network_id_without_location
+    peered_network_ip_range = "/29"
+  }
+
+  depends_on = [google_service_networking_connection.worker_pool_conn]
 }
 
 // ===========================
@@ -272,4 +339,8 @@ output "gitlab_internal_ip" {
 
 output "gitlab_service_directory" {
   value = google_service_directory_service.gitlab.id
+}
+
+output "worker_pool_id" {
+  value = google_cloudbuild_worker_pool.pool.id
 }
