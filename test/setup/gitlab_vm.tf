@@ -244,4 +244,7 @@ output "gitlab_instance_zone" {
 output "gitlab_instance_name" {
   value = google_compute_instance.default.name
 }
-// ===========================
+
+output "gitlab_internal_ip" {
+  value = google_compute_instance.default.network_interface[0].network_ip
+}
