@@ -17,6 +17,7 @@ package bootstrap_gitlab
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -39,12 +40,21 @@ func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, inst
 }
 
 func TestBootstrapGitlabVM(t *testing.T) {
+	caCert, err := ioutil.ReadFile("/usr/local/share/ca-certificates/gitlab.crt")
+
+	if err != nil {
+		t.Fatalf("Failed to read CA certificate: %v", err)
+	}
+
 	// Retrieve output values from test setup
 	setup := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup"),
 	)
-	url := setup.GetStringOutput("gitlab_url")
+
 	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
+	external_url := setup.GetStringOutput("gitlab_url")
+	url := "https://gitlab.example.com"
+	serviceDirectory := setup.GetStringOutput("gitlab_service_directory")
 	gitlabSecretProjectNumber := setup.GetStringOutput("gitlab_project_number")
 	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
 	gitlabWebhookSecretId := setup.GetStringOutput("gitlab_webhook_secret_id")
@@ -68,7 +78,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	git, err := gitlab.NewClient(token, gitlab.WithBaseURL(url))
+	git, err := gitlab.NewClient(token, gitlab.WithBaseURL(external_url))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,6 +133,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	root := "../../.."
 
 	// Replace gitlab.com/user with custom self hosted URL using the root namespace
+
 	replacement := fmt.Sprintf("%s/root", url)
 	err = testutils.ReplacePatternInTfVars("https://gitlab.com/user", replacement, root)
 	if err != nil {
@@ -131,6 +142,18 @@ func TestBootstrapGitlabVM(t *testing.T) {
 
 	// Replace https://gitlab.com with custom self hosted URL
 	err = testutils.ReplacePatternInTfVars("https://gitlab.com", url, root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace SSL Cert
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SSL_CERT", string(caCert), root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace Service Directory
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SERVICE_DIRECTORY", serviceDirectory, root)
 	if err != nil {
 		t.Fatal(err)
 	}
