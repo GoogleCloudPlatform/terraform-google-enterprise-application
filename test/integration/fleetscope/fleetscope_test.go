@@ -23,9 +23,11 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/gruntwork-io/terratest/modules/k8s"
+	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	"github.com/tidwall/gjson"
@@ -101,7 +103,7 @@ func TestFleetscope(t *testing.T) {
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
 	}
-
+	gitUrl := setup.GetStringOutput("gitlab_url")
 	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
 	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
@@ -112,8 +114,7 @@ func TestFleetscope(t *testing.T) {
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		// retrieve namespaces from test/setup, they will be used to create the specific namespaces with the environment suffix
-		setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-		setupNamespaces := setupOutput.GetJsonOutput("teams")
+		setupNamespaces := setup.GetJsonOutput("teams")
 		var namespacesSlice []string
 		setupNamespaces.ForEach(func(key, value gjson.Result) bool {
 			namespacesSlice = append(namespacesSlice, key.String())
@@ -146,10 +147,11 @@ func TestFleetscope(t *testing.T) {
 			config_sync_url := fmt.Sprintf("%s/root/config-sync-%s.git", setup.GetStringOutput("gitlab_url"), envName)
 
 			vars := map[string]interface{}{
-				"remote_state_bucket":        backend_bucket,
-				"namespace_ids":              setup.GetJsonOutput("teams").Value().(map[string]interface{}),
-				"config_sync_secret_type":    "token",
-				"config_sync_repository_url": config_sync_url,
+				"remote_state_bucket":         backend_bucket,
+				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
+				"config_sync_secret_type":     "token",
+				"config_sync_repository_url":  config_sync_url,
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b"},
 			}
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
@@ -182,6 +184,36 @@ func TestFleetscope(t *testing.T) {
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
+
+				// create temporary directory to host config-sync repo
+				tmpDirApp := t.TempDir()
+				gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
+				gitAppRun := func(args ...string) {
+					_, err := gitApp.RunCmdE(args...)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+				// retrieve gitlab credentials
+				hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+				authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root/config-sync-%s", token, hostNameWithPath, envName)
+				// clone config-sync repository using credentials
+				gitAppRun("clone", authenticatedUrl, tmpDirApp)
+
+				// copy files to repo and push to sync branch
+				policiesPath := fmt.Sprintf("../../../3-fleetscope/config-sync/cymbal-bank-network-policies-%s.yaml", envName)
+				t.Logf("Copying from %s to %s", policiesPath, tmpDirApp)
+				err = cp.Copy(policiesPath, fmt.Sprintf("%s/cymbal-bank-network-policies-%s.yaml", tmpDirApp, envName))
+				if err != nil {
+					t.Fatal(err)
+				}
+				gitAppRun("config", "user.email", "eab-robot@example.com")
+				gitAppRun("config", "user.name", "EAB Robot")
+				gitAppRun("checkout", "master")
+				gitAppRun("add", ".")
+				gitAppRun("commit", "-am", "Add cymbal bank network policies")
+				gitAppRun("push", "origin", "master")
+
 				// get kubectl namespaces and store them on currentClusterNamespaces slice
 				output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
 				if err != nil {
@@ -360,6 +392,19 @@ func TestFleetscope(t *testing.T) {
 				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
 				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
 				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
+
+				// validate no errors in config sync
+				output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+				if err != nil {
+					t.Fatal(err)
+				}
+				// jsonpath adds ' character to string, that need to be removed for a valid json
+				output = strings.ReplaceAll(output, "'", "")
+				assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
+				jsonOutput = gjson.Parse(output)
+				assert.Equal("{}", jsonOutput.Get("rendering.errorSummary").String(), "rootsync 'rendering' output should not contain errors.")
+				assert.Equal("{}", jsonOutput.Get("source.errorSummary").String(), "rootsync  'source' output should not contain errors.")
+				assert.Equal("{}", jsonOutput.Get("sync.errorSummary").String(), "rootsync 'sync' output should not contain errors.")
 			})
 
 			fleetscope.Test()
