@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+locals {
+  cloudbuild_consumer_project_number = module.project.project_number
+}
 
 module "gitlab_project" {
   source  = "terraform-google-modules/project-factory/google"
@@ -218,6 +221,12 @@ resource "google_dns_managed_zone" "sd_zone" {
   }
 }
 
+resource "google_project_iam_member" "sd_viewer" {
+  project = module.gitlab_project.project_id
+  role = "roles/servicedirectory.viewer"
+  member = "service-${local.cloudbuild_consumer_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
 // ===========================
 //          OUTPUTS
 // ===========================
@@ -251,4 +260,8 @@ output "gitlab_instance_name" {
 
 output "gitlab_internal_ip" {
   value = google_compute_instance.default.network_interface[0].network_ip
+}
+
+output "gitlab_service_directory" {
+  value = google_service_directory_service.gitlab.id
 }

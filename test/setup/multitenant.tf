@@ -61,7 +61,8 @@ module "project" {
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudbilling.googleapis.com"
+    "cloudbilling.googleapis.com",
+    "servicedirectory.googleapis.com"
   ]
 
   activate_api_identities = [

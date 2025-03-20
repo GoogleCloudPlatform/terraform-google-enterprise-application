@@ -24,10 +24,7 @@ apt-get install gitlab-ee
 # Retrieve values from Metadata Server
 EXTERNAL_IP=$(curl http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google")
 PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/project-id -H "Metadata-Flavor: Google")
-
-# Host GitLab on External IP with Lets-Encrypt SSL Certificate
 URL="https://$EXTERNAL_IP.nip.io"
-# echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
 
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes \
 -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=gitlab.example.com" \
@@ -41,7 +38,7 @@ cp gitlab.* /etc/gitlab/ssl
 gcloud storage cp gitlab.crt gs://$PROJECT_ID-ssl-cert
 
 cat > /etc/gitlab/gitlab.rb <<EOF
-external_url 'https://gitlab.example.com'
+external_url "$URL"
 nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.crt"
 nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.key"
 letsencrypt['enable'] = false
