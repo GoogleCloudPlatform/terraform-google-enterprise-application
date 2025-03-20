@@ -42,6 +42,10 @@ func TestAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	vpcsc := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../setup/vpcsc"),
+	)
+
 	type ServiceInfos struct {
 		ApplicationName string
 		ProjectID       string
@@ -95,6 +99,7 @@ func TestAppInfra(t *testing.T) {
 					"remote_state_bucket":   remoteState,
 					"buckets_force_destroy": "true",
 					"environment_names":     testutils.EnvNames(t),
+					"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,

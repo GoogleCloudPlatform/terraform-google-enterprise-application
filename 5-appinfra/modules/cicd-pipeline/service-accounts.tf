@@ -42,6 +42,7 @@ resource "google_service_account_iam_member" "cloud_build_token_creator_cloud_de
 }
 
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
   members      = [google_service_account.cloud_deploy.member, google_service_account.cloud_build.member]
 }

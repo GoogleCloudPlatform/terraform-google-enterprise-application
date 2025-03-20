@@ -15,7 +15,7 @@
  */
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "secret_manager_egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "Secret Manager Egress from ${data.google_project.admin_project.project_id} to ${local.secret_project_number}"
   egress_from {
@@ -36,7 +36,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "secret
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "secret_manager_egress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
+  count     = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "Secret Manager Egress from ${data.google_project.admin_project.project_id} to ${local.secret_project_number}"
   egress_from {
@@ -187,6 +187,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 }
 
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
   members      = ["serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"]
 }

@@ -118,9 +118,10 @@ resource "google_project_iam_member" "container_admin" {
 
 resource "google_project_iam_member" "cloudbuild_service_account" {
   for_each = {
-    "cloud_deploy"  = google_service_account.cloud_deploy.member,
-    "cloud_build"   = google_service_account.cloud_build.member,
-    "service_agent" = google_project_service_identity.cloudbuild_service_identity.member,
+    "cloud_deploy"     = google_service_account.cloud_deploy.member,
+    "cloud_build"      = google_service_account.cloud_build.member,
+    "cb_service_agent" = google_project_service_identity.cloudbuild_service_identity.member,
+    "cd_service_agent" = google_project_service_identity.cloud_deploy_sa.member,
   }
   project = local.worker_pool_project
   role    = "roles/cloudbuild.builds.builder"
@@ -130,9 +131,10 @@ resource "google_project_iam_member" "cloudbuild_service_account" {
 
 resource "google_project_iam_member" "logging_writer" {
   for_each = {
-    "cloud_deploy"  = google_service_account.cloud_deploy.member,
-    "cloud_build"   = google_service_account.cloud_build.member,
-    "service_agent" = google_project_service_identity.cloudbuild_service_identity.member,
+    "cloud_deploy"     = google_service_account.cloud_deploy.member,
+    "cloud_build"      = google_service_account.cloud_build.member,
+    "service_agent"    = google_project_service_identity.cloudbuild_service_identity.member,
+    "cd_service_agent" = google_project_service_identity.cloud_deploy_sa.member,
   }
   project = local.worker_pool_project
   role    = "roles/logging.logWriter"
