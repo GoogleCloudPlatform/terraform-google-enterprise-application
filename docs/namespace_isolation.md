@@ -30,4 +30,4 @@ Istio operates at Layer 7 (L7) of the OSI model, allowing for more granular cont
 
 ## Examples in this Repository
 
-Network policies are configured on 3-fleetscope in this repository.
+Network policies for cymbal-bank isolation are configured on 3-fleetscope in this repository.
