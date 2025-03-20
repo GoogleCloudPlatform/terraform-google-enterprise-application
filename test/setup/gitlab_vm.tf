@@ -15,6 +15,7 @@
  */
 locals {
   cloudbuild_consumer_project_number = module.gitlab_project.project_number
+  bootstrap_project_number           = [for k, v in merge(module.project, module.project_standalone) : v.project_number][0]
   gitlab_network_id                  = "projects/${module.gitlab_project.project_number}/locations/global/networks/default"
   gitlab_network_id_without_location = replace(local.gitlab_network_id, "locations/", "")
 }
@@ -241,26 +242,25 @@ resource "google_dns_managed_zone" "sd_zone" {
 resource "google_project_iam_member" "sd_viewer" {
   project = module.gitlab_project.project_id
   role    = "roles/servicedirectory.viewer"
-  member  = "serviceAccount:service-${local.cloudbuild_consumer_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  member  = "serviceAccount:service-${local.bootstrap_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
-// allow cloudbuild on consumer project to access network on gitlab project
 resource "google_project_iam_member" "access_network" {
   project = module.gitlab_project.project_id
   role    = "roles/servicedirectory.pscAuthorizedService"
-  member  = "serviceAccount:service-${local.cloudbuild_consumer_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  member  = "serviceAccount:service-${local.bootstrap_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
-resource "google_project_iam_member" "access_pool" {
+resource "google_project_iam_member" "cb_agent_pool_user" {
   project = module.gitlab_project.project_id
   role    = "roles/cloudbuild.workerPoolUser"
-  member  = "serviceAccount:service-${[for k, v in merge(module.project, module.project_standalone) : v.project_number][0]}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  member  = "serviceAccount:service-${local.bootstrap_project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
-resource "google_project_iam_member" "cb_sa" {
+resource "google_project_iam_member" "cb_sa_pool_user" {
   project = module.gitlab_project.project_id
   role    = "roles/cloudbuild.workerPoolUser"
-  member  = "serviceAccount:${[for k, v in merge(module.project, module.project_standalone) : v.project_number][0]}@cloudbuild.gserviceaccount.com"
+  member  = "serviceAccount:${local.bootstrap_project_number}@cloudbuild.gserviceaccount.com"
 }
 
 resource "google_compute_global_address" "worker_range" {

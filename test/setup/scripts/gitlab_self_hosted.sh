@@ -38,7 +38,7 @@ cp gitlab.* /etc/gitlab/ssl
 gcloud storage cp gitlab.crt gs://$PROJECT_ID-ssl-cert
 
 cat > /etc/gitlab/gitlab.rb <<EOF
-external_url "$URL"
+external_url "https://gitlab.example.com"
 nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.crt"
 nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.key"
 letsencrypt['enable'] = false
