@@ -36,7 +36,8 @@ module "gitlab_project" {
     "secretmanager.googleapis.com",
     "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com"
+    "cloudbilling.googleapis.com",
+    "storage.googleapis.com"
   ]
 }
 
@@ -158,6 +159,64 @@ resource "google_secret_manager_secret_version" "gitlab_webhook" {
   secret_data = random_uuid.random_webhook_secret.result
 }
 
+resource "google_storage_bucket" "ssl_cert" {
+  name          = "${module.gitlab_project.project_id}-ssl-cert"
+  project       = module.gitlab_project.project_id
+  location      = "us-central1"
+  force_destroy = true
+
+  public_access_prevention    = "enforced"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "storage_admin" {
+  bucket = google_storage_bucket.ssl_cert.name
+  role   = "roles/storage.admin"
+  member = google_service_account.gitlab_vm.member
+}
+
+// PRIVATE DNS CONFIGURATION
+
+resource "google_service_directory_namespace" "gitlab" {
+  provider     = google-beta
+  namespace_id = "gitlab-namespace"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "gitlab" {
+  provider   = google-beta
+  service_id = "gitlab-service"
+  namespace  = google_service_directory_namespace.gitlab.id
+}
+
+resource "google_service_directory_endpoint" "gitlab" {
+  provider    = google-beta
+  endpoint_id = "gitlab-endpoint"
+  service     = google_service_directory_service.gitlab.id
+
+  address = google_compute_instance.default.network_interface[0].network_ip
+  port    = 443
+}
+
+resource "google_dns_managed_zone" "sd_zone" {
+  provider = google-beta
+
+  name        = "peering-zone"
+  dns_name    = "gitlab.example.com."
+  description = "Example private DNS Service Directory zone for Gitlab Instance"
+
+  visibility = "private"
+
+  service_directory_config {
+    namespace {
+      namespace_url = google_service_directory_namespace.gitlab.id
+    }
+  }
+}
+
+// ===========================
+//          OUTPUTS
+// ===========================
 output "gitlab_webhook_secret_id" {
   value = google_secret_manager_secret.gitlab_webhook.id
 }
@@ -185,3 +244,4 @@ output "gitlab_instance_zone" {
 output "gitlab_instance_name" {
   value = google_compute_instance.default.name
 }
+// ===========================

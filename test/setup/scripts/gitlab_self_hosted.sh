@@ -27,7 +27,27 @@ PROJECT_ID=$(curl http://metadata.google.internal/computeMetadata/v1/project/pro
 
 # Host GitLab on External IP with Lets-Encrypt SSL Certificate
 URL="https://$EXTERNAL_IP.nip.io"
-echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
+# echo "external_url \"$URL\"" > /etc/gitlab/gitlab.rb && gitlab-ctl reconfigure
+
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes \
+-subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=gitlab.example.com" \
+-addext "subjectAltName=DNS:gitlab.example.com"
+
+mv key.pem gitlab.key
+mv cert.pem gitlab.crt
+
+mkdir -p /etc/gitlab/ssl
+cp gitlab.* /etc/gitlab/ssl
+gcloud storage cp gitlab.crt gs://$PROJECT_ID-ssl-cert
+
+cat > /etc/gitlab/gitlab.rb <<EOF
+external_url 'https://gitlab.example.com'
+nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.crt"
+nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.key"
+letsencrypt['enable'] = false
+EOF
+
+gitlab-ctl reconfigure
 
 MAX_TRIES=100
 # Wait for the server to handle authentication requests
