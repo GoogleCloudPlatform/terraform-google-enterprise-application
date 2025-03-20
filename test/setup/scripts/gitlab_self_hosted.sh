@@ -31,7 +31,7 @@ URL="https://$EXTERNAL_IP.nip.io"
 
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes \
 -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=gitlab.example.com" \
--addext "subjectAltName=DNS:gitlab.example.com"
+-addext "subjectAltName=DNS:gitlab.example.com, IP:$EXTERNAL_IP, DNS:$EXTERNAL_IP.nip.io"
 
 mv key.pem gitlab.key
 mv cert.pem gitlab.crt
@@ -49,22 +49,31 @@ EOF
 
 gitlab-ctl reconfigure
 
-MAX_TRIES=100
+# cp gitlab.crt /usr/local/share/ca-certificates/gitlab.pem
+# update-ca-certificates
+# ls -l /etc/ssl/certs | grep gitlab
+# curl external_ip
+
+MAX_TRIES=50
 # Wait for the server to handle authentication requests
 for (( i=1; i<=MAX_TRIES; i++)); do
-  RESPONSE_BODY=$(curl "$URL")
+  RESPONSE_BODY=$(curl --cacert /etc/gitlab/ssl/gitlab.crt "$URL")
 
   if echo "$RESPONSE_BODY" | grep -q "You are .*redirected"; then
       personal_token=$(tr -dc "[:alnum:]" < /dev/random | head -c 20)
       gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$personal_token'); token.save!"
       echo "personal_token=$(echo "$personal_token" | head -c 3)*********"
-      echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
+      if gcloud secrets describe gitlab-pat-from-vm --project="$PROJECT_ID"; then
+        echo -n "$personal_token" | gcloud secrets versions add gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
+      else
+        echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
+      fi
       break
   else
-      echo "$i: GitLab is not ready for sign-in operations. Waiting 5 seconds and will try again."
+      echo "$i: GitLab is not ready for sign-in operations. Waiting 10 seconds and will try again."
       echo "Command Output:"
       echo "$RESPONSE_BODY"
-      sleep 5
+      sleep 10
   fi
 
   # Stop execution upon reaching MAX_TRIES iterations

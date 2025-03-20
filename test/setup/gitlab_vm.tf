@@ -37,7 +37,9 @@ module "gitlab_project" {
     "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com",
-    "storage.googleapis.com"
+    "storage.googleapis.com",
+    "servicedirectory.googleapis.com",
+    "dns.googleapis.com"
   ]
 }
 
@@ -181,6 +183,7 @@ resource "google_service_directory_namespace" "gitlab" {
   provider     = google-beta
   namespace_id = "gitlab-namespace"
   location     = "us-central1"
+  project      = module.gitlab_project.project_id
 }
 
 resource "google_service_directory_service" "gitlab" {
@@ -204,6 +207,7 @@ resource "google_dns_managed_zone" "sd_zone" {
   name        = "peering-zone"
   dns_name    = "gitlab.example.com."
   description = "Example private DNS Service Directory zone for Gitlab Instance"
+  project     = module.gitlab_project.project_id
 
   visibility = "private"
 
