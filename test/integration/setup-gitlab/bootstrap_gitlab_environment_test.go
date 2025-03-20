@@ -39,6 +39,30 @@ func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, inst
 	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
 }
 
+func TestValidateStartupScript(t *testing.T) {
+	// Retrieve output values from test setup
+	setup := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../setup"),
+	)
+	instanceName := setup.GetStringOutput("gitlab_instance_name")
+	instanceZone := setup.GetStringOutput("gitlab_instance_zone")
+	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
+	// Periodically read logs from startup script running on the VM instance
+	for count := 0; count < 10; count++ {
+		logs, err := readLogsFromVm(t, instanceName, instanceZone, gitlabSecretProject)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if strings.Contains(logs, "Finished Google Compute Engine Startup Scripts") {
+			if strings.Contains(logs, "exit status 1") {
+				t.Fatal("ERROR: Startup Script finished with invalid exit status.")
+			}
+			break
+		}
+		time.Sleep(3 * time.Minute)
+	}
+}
 func TestBootstrapGitlabVM(t *testing.T) {
 	caCert, err := ioutil.ReadFile("/usr/local/share/ca-certificates/gitlab.crt")
 
@@ -58,21 +82,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	gitlabSecretProjectNumber := setup.GetStringOutput("gitlab_project_number")
 	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
 	gitlabWebhookSecretId := setup.GetStringOutput("gitlab_webhook_secret_id")
-	instanceName := setup.GetStringOutput("gitlab_instance_name")
-	instanceZone := setup.GetStringOutput("gitlab_instance_zone")
 	gitlabTokenSecretId := fmt.Sprintf("projects/%s/secrets/%s", gitlabSecretProjectNumber, gitlabPersonalTokenSecretName)
-
-	// Periodically read logs from startup script running on the VM instance
-	for count := 0; count < 10; count++ {
-		logs, err := readLogsFromVm(t, instanceName, instanceZone, gitlabSecretProject)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if strings.Contains(logs, "Finished Google Compute Engine Startup Scripts") {
-			break
-		}
-		time.Sleep(3 * time.Minute)
-	}
 
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {

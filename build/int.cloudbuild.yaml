@@ -28,6 +28,14 @@ steps:
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
       - "TF_VAR_single_project=false"
 
+  - id: wait-startup-script
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    script: |
+      #!/bin/bash
+      cft test run TestValidateStartupScript --stage verify --verbose
+    waitFor:
+      - prepare
+
   - id: bootstrap-gitlab-vm
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     script: |
@@ -41,7 +49,7 @@ steps:
           echo ERROR: Was not able to download certificate and update system bundle.
       fi
     waitFor:
-      - prepare
+      - wait-startup-script
 
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
