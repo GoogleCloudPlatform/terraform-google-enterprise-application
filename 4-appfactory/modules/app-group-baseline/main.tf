@@ -40,6 +40,9 @@ locals {
   org_ids           = distinct([for env in var.envs : env.org_id])
   use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
   service_repo_name = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
+
+  // If the user specify a Cloud Build Worker Pool, utilize it in the trigger
+  optional_worker_pool = var.worker_pool_id != "" ? { "_PRIVATE_POOL" = var.worker_pool_id } : {}
 }
 
 module "cloudbuild_repositories" {
@@ -139,12 +142,12 @@ module "tf_cloudbuild_workspace" {
   buckets_force_destroy    = var.bucket_force_destroy
   cloudbuild_sa_roles      = local.cloudbuild_sa_roles
 
-  substitutions = {
+  substitutions = merge({
     "_GAR_REGION"                   = var.location
     "_GAR_PROJECT_ID"               = var.gar_project_id
     "_GAR_REPOSITORY"               = var.gar_repository_name
     "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
-  }
+  }, optional_worker_pool)
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
