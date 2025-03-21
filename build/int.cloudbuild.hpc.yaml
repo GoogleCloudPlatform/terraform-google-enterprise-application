@@ -40,14 +40,30 @@ steps:
     waitFor:
       - prepare
 
+  - id: vpc-sc
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
+      ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "access_level_members=serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
+    waitFor:
+      - bootstrap-gitlab-vm
+
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage init --verbose"]
     waitFor:
-      - prepare
-      - bootstrap-gitlab-vm
+      - vpc-sc
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
 
   - id: bootstrap-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -55,12 +71,18 @@ steps:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage apply --verbose"]
     waitFor:
       - bootstrap-init
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
   - id: bootstrap-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestBootstrap --stage verify --verbose"]
     waitFor:
       - bootstrap-apply
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
 
   - id: multitenant-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -225,6 +247,20 @@ steps:
       ]
     waitFor:
       - multitenant-teardown
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+
+  - id: vpcsc-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestVPCSC  --stage teardown --verbose",
+      ]
+    waitFor:
+      - multitenant-teardown
 
 tags:
   - "ci"
@@ -236,4 +272,5 @@ options:
   env:
     - 'TF_PLUGIN_CACHE_DIR=""'
     - 'TF_VAR_branch_name=$BRANCH_NAME'
+    - "TF_VAR_service_perimeter_mode=ENFORCE"
     - 'INSTALL_KUEUE=true'

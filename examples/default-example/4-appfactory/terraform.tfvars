@@ -81,4 +81,5 @@ cloudbuildv2_repository_config = {
   gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
   # If you are using a self-hosted instance, you may change the URL below accordingly
   gitlab_enterprise_host_uri = "https://gitlab.com"
+  secret_project_id          = "REPLACE_WITH_SECRET_PROJECT_ID"
 }

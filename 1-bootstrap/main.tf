@@ -99,7 +99,8 @@ module "tf_cloudbuild_workspace" {
   cloudbuild_sa_roles = {
     "roles" = {
       project_id = var.project_id
-    roles = local.cb_config[each.key].roles }
+      roles      = local.cb_config[each.key].roles
+    }
   }
 
   substitutions = {
@@ -107,6 +108,7 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = google_artifact_registry_repository.tf_image.project
     "_GAR_REPOSITORY"               = google_artifact_registry_repository.tf_image.name
     "_DOCKER_TAG_VERSION_TERRAFORM" = local.docker_tag_version_terraform
+    "_PRIVATE_POOL"                 = google_cloudbuild_worker_pool.pool.id
   }
 
   # Branches to run the build
