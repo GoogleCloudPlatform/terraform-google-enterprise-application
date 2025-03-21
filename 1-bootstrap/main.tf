@@ -34,6 +34,9 @@ locals {
   use_csr                    = var.cloudbuildv2_repository_config.repo_type == "CSR"
   csr_repos                  = local.use_csr ? { for k, v in var.cloudbuildv2_repository_config.repositories : k => v.repository_name } : {}
   cb_service_accounts_emails = { for k, v in module.tf_cloudbuild_workspace : k => reverse(split("/", v.cloudbuild_sa))[0] }
+
+  // If the user specify a Cloud Build Worker Pool, utilize it in the trigger
+  optional_worker_pool = var.worker_pool_id != "" ? { "_PRIVATE_POOL" = var.worker_pool_id } : {}
 }
 
 resource "google_sourcerepo_repository" "gcp_repo" {
@@ -102,12 +105,12 @@ module "tf_cloudbuild_workspace" {
     roles = local.cb_config[each.key].roles }
   }
 
-  substitutions = {
+  substitutions = merge({
     "_GAR_REGION"                   = var.location
     "_GAR_PROJECT_ID"               = google_artifact_registry_repository.tf_image.project
     "_GAR_REPOSITORY"               = google_artifact_registry_repository.tf_image.name
     "_DOCKER_TAG_VERSION_TERRAFORM" = local.docker_tag_version_terraform
-  }
+  }, local.optional_worker_pool)
 
   # Branches to run the build
   tf_apply_branches = var.tf_apply_branches

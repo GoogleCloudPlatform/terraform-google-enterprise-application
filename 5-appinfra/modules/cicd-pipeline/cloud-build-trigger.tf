@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+locals {
+  # If the user specify a Cloud Build Worker Pool, utilize it in the trigger
+  optional_worker_pool = var.worker_pool_id != "" ? { "_PRIVATE_POOL" = var.worker_pool_id } : {}
+}
 # CI trigger configuration
 resource "google_cloudbuild_trigger" "ci" {
   name     = "${local.service_clean}-ci"
@@ -48,7 +52,7 @@ resource "google_cloudbuild_trigger" "ci" {
       _CACHE                     = local.cache_filename
       _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
     },
-    var.additional_substitutions
+    var.additional_substitutions, local.optional_worker_pool
   )
 
   service_account = google_service_account.cloud_build.id
