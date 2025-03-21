@@ -26,7 +26,7 @@ locals {
         "roles/storage.admin", "roles/iam.serviceAccountAdmin",
         "roles/artifactregistry.admin", "roles/clouddeploy.admin",
         "roles/cloudbuild.builds.editor", "roles/privilegedaccessmanager.projectServiceAgent",
-        "roles/iam.serviceAccountUser", "roles/source.admin"
+        "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin"
       ]
     } },
     {
