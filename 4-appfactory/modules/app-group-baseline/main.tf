@@ -65,6 +65,12 @@ module "cloudbuild_repositories" {
     gitlab_enterprise_ca_certificate            = var.cloudbuildv2_repository_config.gitlab_enterprise_ca_certificate
   }
   cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
+
+  depends_on = [time_sleep.wait_propagation]
+}
+
+resource "time_sleep" "wait_propagation" {
+  create_duration = "30s"
 }
 
 module "app_admin_project" {
