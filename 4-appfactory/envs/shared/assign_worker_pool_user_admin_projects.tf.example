@@ -1,7 +1,18 @@
 
+// ============== TERRAFOM SCRIPT - CLOUD BUILD WORKER POOL PERMISSIONS ==============
+// This is an optional terraform script
+// - Assigns workerPoolUser to Cloud Build Service Agent and Service Account
+// - Allows the use of worker pool in separate project
+// - Admin projects will be able to build images using workerpool
+// ******************
+// ** REQUIREMENTS **
+// ******************
+// To run this script in AppFactory Pipeline:
+// - Application Factory Pipeline SA must have `roles/resourcemanager.projectIamAdmin` on the workerpool project
+
 locals {
   projects_re         = "projects/([^/]+)/"
-  worker_pool_project = regex(projects_re, var.worker_pool_id)[0]
+  worker_pool_project = regex(local.projects_re, var.worker_pool_id)[0]
 }
 
 data "google_project" "admin_projects" {
@@ -13,12 +24,12 @@ resource "google_project_iam_member" "assign_permissions" {
   for_each = module.components
   project  = local.worker_pool_project
   role     = "roles/cloudbuild.workerPoolUser"
-  member   = "service-${data.google_project.admin_projects[each.key].number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  member   = "serviceAccount:service-${data.google_project.admin_projects[each.key].number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "assign_permissions_service_agent" {
   for_each = module.components
   project  = local.worker_pool_project
   role     = "roles/cloudbuild.workerPoolUser"
-  member   = "${data.google_project.admin_projects[each.key].number}@cloudbuild.gserviceaccount.com"
+  member   = "serviceAccount:${data.google_project.admin_projects[each.key].number}@cloudbuild.gserviceaccount.com"
 }
