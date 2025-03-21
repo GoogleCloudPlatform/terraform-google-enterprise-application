@@ -62,7 +62,7 @@ module "project" {
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "cloudbilling.googleapis.com",
-    "servicedirectory.googleapis.com"
+    "servicedirectory.googleapis.com",
   ]
 
   activate_api_identities = [
@@ -236,7 +236,7 @@ module "vpc" {
 }
 
 resource "google_compute_router" "nat_router" {
-  for_each = module.vpc
+  for_each = local.create_nat_iterator
 
   name    = "nat-router-us-central-1"
   region  = "us-central1"

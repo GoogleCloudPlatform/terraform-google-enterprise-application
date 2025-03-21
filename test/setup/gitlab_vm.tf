@@ -47,6 +47,7 @@ module "gitlab_project" {
     "cloudbilling.googleapis.com",
     "storage.googleapis.com",
     "servicedirectory.googleapis.com",
+    "servicenetworking.googleapis.com",
     "dns.googleapis.com",
     "cloudbuild.googleapis.com"
   ]
