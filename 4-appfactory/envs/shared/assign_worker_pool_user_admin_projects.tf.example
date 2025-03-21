@@ -1,0 +1,24 @@
+
+locals {
+  projects_re         = "projects/([^/]+)/"
+  worker_pool_project = regex(projects_re, var.worker_pool_id)[0]
+}
+
+data "google_project" "admin_projects" {
+  for_each   = module.components
+  project_id = each.value.app_admin_project_id
+}
+
+resource "google_project_iam_member" "assign_permissions" {
+  for_each = module.components
+  project  = local.worker_pool_project
+  role     = "roles/cloudbuild.workerPoolUser"
+  member   = "service-${data.google_project.admin_projects[each.key].number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "assign_permissions_service_agent" {
+  for_each = module.components
+  project  = local.worker_pool_project
+  role     = "roles/cloudbuild.workerPoolUser"
+  member   = "${data.google_project.admin_projects[each.key].number}@cloudbuild.gserviceaccount.com"
+}
