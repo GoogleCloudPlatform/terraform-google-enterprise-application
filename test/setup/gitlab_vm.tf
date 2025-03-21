@@ -332,13 +332,22 @@ resource "google_cloudbuild_worker_pool" "pool" {
   depends_on = [google_service_networking_connection.worker_pool_conn]
 }
 
+resource "time_sleep" "wait_service_network_peering" {
+  depends_on = [google_service_networking_connection.worker_pool_conn]
+
+  create_duration = "30s"
+}
+
 resource "google_service_networking_peered_dns_domain" "name" {
   project    = module.gitlab_project.project_id
   name       = "example-com"
   network    = local.gitlab_network_name
   dns_suffix = "example.com."
 
-  depends_on = [ google_dns_managed_zone.sd_zone ]
+  depends_on = [
+    google_dns_managed_zone.sd_zone,
+    time_sleep.wait_service_network_peering
+  ]
 }
 
 // ===========================
