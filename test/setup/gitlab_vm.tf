@@ -22,6 +22,12 @@ locals {
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${local.gitlab_network_name}"
 }
 
+resource "google_project_iam_member" "allow_gitlab_bucket_download" {
+  project = module.gitlab_project.project_id
+  role    = "roles/storage.objectUser"
+  member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
 module "gitlab_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 18.0"
