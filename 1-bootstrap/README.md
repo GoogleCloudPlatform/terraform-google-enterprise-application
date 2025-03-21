@@ -305,6 +305,20 @@ gcloud projects add-iam-policy-binding $WORKER_POOL_PROJECT \
       --role=roles/cloudbuild.workerPoolUser
 ```
 
+#### Allow Application Factory Pipeline Service Account to Assign Permissions on Worker Pool Project
+
+Application Factory Pipeline, when using worker pools, will assign the permissions to Admin (CI/CD) projects. Because of this, the Application Factory Pipeline Service account must have `roles/resourcemanager.projectIamAdmin` role on the Worker Pool Host Project. This can be done by running the bash script below (requires `jq` to be installed). Remember to replace `REPLACE_WITH_WORKER_POOL_PROJECT_ID` with your environment's specific project id.
+
+```bash
+WORKER_POOL_PROJECT_ID=REPLACE_WITH_WORKER_POOL_PROJECT_ID
+OUTPUT=$(terraform -chdir=../1-bootstrap output -json cb_service_accounts_emails)
+
+APPFACTORY_SA=$(echo $OUTPUT | jq -r '.applicationfactory')
+gcloud projects add-iam-policy-binding $WORKER_POOL_PROJECT_ID \
+--member=serviceAccount:$APPFACTORY_SA \
+--role=roles/resourcemanager.projectIamAdmin
+```
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
