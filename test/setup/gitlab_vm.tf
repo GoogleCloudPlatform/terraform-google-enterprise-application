@@ -119,6 +119,43 @@ resource "google_compute_instance" "default" {
   depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
+resource "google_secret_manager_secret" "gitlab_webhook" {
+  project   = module.gitlab_project.project_id
+  secret_id = "gitlab-webhook"
+  replication {
+    auto {}
+  }
+
+  depends_on = [time_sleep.wait_gitlab_project_apis]
+}
+
+resource "random_uuid" "random_webhook_secret" {
+}
+
+resource "google_secret_manager_secret_version" "gitlab_webhook" {
+  secret      = google_secret_manager_secret.gitlab_webhook.id
+  secret_data = random_uuid.random_webhook_secret.result
+}
+
+// ================================
+//          FIREWALL RULES
+// ================================
+
+resource "google_compute_firewall" "allow_iap_ssh" {
+  name    = "allow-iap-ssh"
+  network = local.gitlab_network_name
+  project = module.gitlab_project.project_id
+
+  allow {
+    ports    = [22]
+    protocol = "tcp"
+  }
+
+  source_ranges = ["35.235.240.0/20"]
+
+  depends_on = [time_sleep.wait_gitlab_project_apis]
+}
+
 resource "google_compute_firewall" "allow_service_networking" {
   name    = "allow-service-networking"
   network = local.gitlab_network_name
@@ -165,23 +202,9 @@ resource "google_compute_firewall" "allow_https" {
   depends_on = [time_sleep.wait_gitlab_project_apis]
 }
 
-resource "google_secret_manager_secret" "gitlab_webhook" {
-  project   = module.gitlab_project.project_id
-  secret_id = "gitlab-webhook"
-  replication {
-    auto {}
-  }
-
-  depends_on = [time_sleep.wait_gitlab_project_apis]
-}
-
-resource "random_uuid" "random_webhook_secret" {
-}
-
-resource "google_secret_manager_secret_version" "gitlab_webhook" {
-  secret      = google_secret_manager_secret.gitlab_webhook.id
-  secret_data = random_uuid.random_webhook_secret.result
-}
+// =======================================================
+//          GITLAB WORKER POOL AND PRIVATE DNS CONFIG
+// =======================================================
 
 resource "google_storage_bucket" "ssl_cert" {
   name          = "${module.gitlab_project.project_id}-ssl-cert"
@@ -198,8 +221,6 @@ resource "google_storage_bucket_iam_member" "storage_admin" {
   role   = "roles/storage.admin"
   member = google_service_account.gitlab_vm.member
 }
-
-// PRIVATE DNS CONFIGURATION
 
 resource "google_service_directory_namespace" "gitlab" {
   provider     = google-beta
@@ -310,15 +331,14 @@ resource "google_cloudbuild_worker_pool" "pool" {
   depends_on = [google_service_networking_connection.worker_pool_conn]
 }
 
-# resource "google_service_networking_peered_dns_domain" "name" {
-#   project    = module.gitlab_project.project_id
-#   name       = "example-com"
-#   network    = "default"
-#   dns_suffix = "example.com."
-#   service    = "gitlab-service"
+resource "google_service_networking_peered_dns_domain" "name" {
+  project    = module.gitlab_project.project_id
+  name       = "example-com"
+  network    = local.gitlab_network_name
+  dns_suffix = "example.com."
 
-#   depends_on = [ google_dns_managed_zone.sd_zone ]
-# }
+  depends_on = [ google_dns_managed_zone.sd_zone ]
+}
 
 // ===========================
 //          OUTPUTS

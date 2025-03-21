@@ -281,7 +281,7 @@ Triggers:
 - Fleetscope Pipeline Trigger
 - Appfactory Pipeline Trigger
 
-You must retrieve their service accounts and grant the permission above, this can by running fetching the terraform output `cb_service_accounts_emails` and running the command above. The `PRIVATEPOOL_PROJECT_ID` is the project where your Private Worker Pools are located.
+You must retrieve their service accounts and grant the permission above, this can by running fetching the terraform output `cb_service_accounts_emails` (`terraform output -json cb_service_accounts_emails`) and running the command above. The `PRIVATEPOOL_PROJECT_ID` is the project where your Private Worker Pools are located.
 
 ## Inputs
 
