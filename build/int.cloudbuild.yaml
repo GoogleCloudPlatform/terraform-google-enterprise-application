@@ -38,8 +38,10 @@ steps:
 
   - id: bootstrap-gitlab-vm
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    script: |
-      #!/bin/bash
+    args:
+      - bash
+      - -c
+      - |
       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
       update-ca-certificates
 
