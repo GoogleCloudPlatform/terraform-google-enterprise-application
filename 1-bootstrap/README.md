@@ -202,16 +202,6 @@ example-organization
     └── prj-c-eab-bootstrap
 ```
 
-##### Worker Pool Requirements
-
-If the project in which you're starting the build is different from the project in which your private pool exists, grant the WorkerPool User role to the service account you are using with your trigger on the workerpool project where your builds are created:
-
-```bash
-gcloud projects add-iam-policy-binding PRIVATEPOOL_PROJECT_ID \
-   --member=serviceAccount:SERVICE_ACCOUNT \
-   --role=roles/cloudbuild.workerPoolUser
-```
-
 #### Step-by-Step
 
 1. The next instructions assume that you are in the `terraform-google-enterprise-application/1-bootstrap` folder.
@@ -272,6 +262,27 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
    ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+### Cloud Build Private Worker Pool Requirements
+
+If the project in which you're starting the build is different from the project in which your private pool exists, grant the WorkerPool User role to the service account you are using with your trigger on the workerpool project where your builds are created:
+
+```bash
+gcloud projects add-iam-policy-binding PRIVATEPOOL_PROJECT_ID \
+   --member=serviceAccount:SERVICE_ACCOUNT \
+   --role=roles/cloudbuild.workerPoolUser
+```
+
+You have 3 triggers created in this step.
+
+Triggers:
+
+- Multitenant Pipeline Trigger
+- Fleetscope Pipeline Trigger
+- Appfactory Pipeline Trigger
+
+You must retrieve their service accounts and grant the permission above, this can by running fetching the terraform output `cb_service_accounts_emails` and running the command above. The `PRIVATEPOOL_PROJECT_ID` is the project where your Private Worker Pools are located.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
