@@ -157,7 +157,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	}
 
 	// Replace SSL Cert
-	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SSL_CERT", string(caCert), root)
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SSL_CERT\n", string(caCert), root)
 	if err != nil {
 		t.Fatal(err)
 	}
