@@ -28,6 +28,12 @@ resource "google_project_iam_member" "allow_gitlab_bucket_download" {
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
+resource "google_project_iam_member" "allow_gitlab_iam_policy_edit" {
+  project = module.gitlab_project.project_id
+  role    = "roles/resourcemanager.projectIamAdmin"
+  member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
+}
+
 module "gitlab_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 18.0"
