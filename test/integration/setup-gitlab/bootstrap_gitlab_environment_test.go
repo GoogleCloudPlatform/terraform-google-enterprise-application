@@ -17,7 +17,6 @@ package bootstrap_gitlab
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -64,7 +63,7 @@ func TestValidateStartupScript(t *testing.T) {
 	}
 }
 func TestBootstrapGitlabVM(t *testing.T) {
-	caCert, err := ioutil.ReadFile("/usr/local/share/ca-certificates/gitlab.crt")
+	caCert, err := os.ReadFile("/usr/local/share/ca-certificates/gitlab.crt")
 
 	if err != nil {
 		t.Fatalf("Failed to read CA certificate: %v", err)
