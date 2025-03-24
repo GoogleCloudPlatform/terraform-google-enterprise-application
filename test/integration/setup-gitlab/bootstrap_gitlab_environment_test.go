@@ -241,13 +241,13 @@ func TestBootstrapGitlabVM(t *testing.T) {
 	}
 
 	// Replace SSL Cert
-	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SSL_CERT\n", string(caCert), single_project_root)
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_SSL_CERT\n", string(caCert), single_project_root, "5-appinfra.tf")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Replace Service Directory
-	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SERVICE_DIRECTORY", serviceDirectory, single_project_root)
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_SERVICE_DIRECTORY", serviceDirectory, single_project_root, "5-appinfra.tf")
 	if err != nil {
 		t.Fatal(err)
 	}
