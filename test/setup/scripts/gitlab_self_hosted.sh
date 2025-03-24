@@ -82,5 +82,16 @@ for (( i=1; i<=MAX_TRIES; i++)); do
   fi
 done
 
+
+# Fail if certificate is not present
 gcloud storage cp /etc/gitlab/ssl/gitlab.crt gs://"${PROJECT_ID}"-ssl-cert
 gcloud storage cp gs://"${PROJECT_ID}"-ssl-cert/gitlab.crt /tmp/gitlab.crt || (echo "ERROR: Certificate is not available in bucket" && exit 1)
+
+# Fail if secret is not present
+if gcloud secrets describe gitlab-pat-from-vm --project="$PROJECT_ID"; then
+  echo "Secret exists" && exit 0
+else
+  echo "Secret does not exist, will try creating it again:"
+  echo "personal_token=$(echo "$personal_token" | head -c 3)*********"
+  (echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-) || exit 1
+fi
