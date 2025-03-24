@@ -136,7 +136,46 @@ locals {
       }
     },
   }
+
+  projects_re         = "projects/([^/]+)/"
+  worker_pool_project = regex(local.projects_re, var.worker_pool_id)[0]
 }
+
+data "google_project" "admin_projects" {
+  project_id = var.project_id
+}
+
+resource "google_project_iam_member" "assign_permissions" {
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "assign_permissions_service_agent" {
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${data.google_project.admin_projects.number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sd_viewer" {
+  project = local.worker_pool_project
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "access_network" {
+  project = local.worker_pool_project
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_propagation" {
+  create_duration = "30s"
+
+  depends_on = [google_project_iam_member.assign_permissions]
+}
+
+
 
 module "cicd" {
   source   = "../../5-appinfra/modules/cicd-pipeline"
@@ -163,4 +202,7 @@ module "cicd" {
   buckets_force_destroy = true
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
+  worker_pool_id                 = var.worker_pool_id
+
+  depends_on = [time_sleep.wait_propagation]
 }
