@@ -30,7 +30,7 @@ steps:
 
   - id: wait-startup-script
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args: 
+    args:
       ["/bin/bash", "-c", "cft test run TestValidateStartupScript --stage verify --verbose"]
     waitFor:
       - prepare
