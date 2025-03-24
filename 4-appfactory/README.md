@@ -143,7 +143,7 @@ Please note that some steps in this documentation are specific to the selected G
 1. (Gitlab Only) When using Gitlab with Cloud Build, clone the repository with the following command.
 
     ```bash
-    git clone https://34.42.176.163.nip.io/root/eab-applicationfactory.git
+    git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/eab-applicationfactory.git
     ```
 
 1. Initialize the git repository, copy `4-appfactory` code into the repository, Cloud Build yaml files and terraform wrapper script:
@@ -152,12 +152,12 @@ Please note that some steps in this documentation are specific to the selected G
     cd eab-applicationfactory
     git checkout -b plan
 
-    cp -r ../4-appfactory/* .
-    cp ../../terraform-example-foundation/build/cloudbuild-tf-* .
-    cp ../../terraform-example-foundation/build/tf-wrapper.sh .
+    cp -r ../terraform-google-enterprise-application/4-appfactory/* .
+    cp ../terraform-example-foundation/build/cloudbuild-tf-* .
+    cp ../terraform-example-foundation/build/tf-wrapper.sh .
     chmod 755 ./tf-wrapper.sh
 
-    cp -RT ../../terraform-example-foundation/policy-library/ ./policy-library
+    cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' cloudbuild-tf-*
     ```
 
@@ -176,7 +176,7 @@ Please note that some steps in this documentation are specific to the selected G
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../1-bootstrap/" output -raw state_bucket)
+   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
 
    echo "remote_state_bucket = ${remote_state_bucket}"
 
