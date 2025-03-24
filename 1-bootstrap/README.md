@@ -262,76 +262,20 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
    ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-### (Required if using Worker Pools) Cloud Build Private Worker Pool Requirements
-
-If you are not using worker pools or your worker pools are in the same project as the builds, you can skip this step.
-
-If the project in which you're starting the build is different from the project in which your private pool exists, grant the WorkerPool User role to the service account you are using with your trigger on the workerpool project where your builds are created and also to the Cloud Build Service Agent and Cloud Build Service Account.
-
-#### Giving Permission to Trigger Service Accounts
-
-You can use the following bash script to assign the required permissions to the trigger service accounts, remember to replace the placeholder REPLACE_WITH_YOUR_PROJECT with your actual worker pool project id, this script requires that you have `jq` tool installed.
-
-```bash
-WORKER_POOL_PROJECT=REPLACE_WITH_YOUR_PROJECT
-OUTPUT=$(terraform output -json cb_service_accounts_emails)
-
-
-SAS=($(echo $OUTPUT | jq -r '.applicationfactory') $(echo $OUTPUT | jq -r '.fleetscope') $(echo $OUTPUT | jq -r '.multitenant'))
-
-
-for SA in ${SAS[@]}; do
-   gcloud projects add-iam-policy-binding $WORKER_POOL_PROJECT \
-       --member=serviceAccount:$SA \
-       --role=roles/cloudbuild.workerPoolUser
-done
-```
-
-#### Giving Permissions to Cloud Build Service Agent and Cloud Build Service Account
-
-You can use the following bash script to assign the required permissions to the agents, remember to replace the placeholder REPLACE_WITH_YOUR_PROJECT with your actual worker pool project id.
-
-```bash
-WORKER_POOL_PROJECT=REPLACE_WITH_YOUR_PROJECT
-TRIGGER_PROJECT_ID=$(terraform output -raw project_id)
-TRIGGER_PROJECT_NUMBER=$(gcloud projects describe $TRIGGER_PROJECT_ID --format='value(projectNumber)')
-
-gcloud projects add-iam-policy-binding $WORKER_POOL_PROJECT \
-      --member=serviceAccount:service-$TRIGGER_PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com \
-      --role=roles/cloudbuild.workerPoolUser
-gcloud projects add-iam-policy-binding $WORKER_POOL_PROJECT \
-      --member=serviceAccount:$TRIGGER_PROJECT_NUMBER@cloudbuild.gserviceaccount.com \
-      --role=roles/cloudbuild.workerPoolUser
-```
-
-#### Allow Application Factory Pipeline Service Account to Assign Permissions on Worker Pool Project
-
-Application Factory Pipeline, when using worker pools, will assign the permissions to Admin (CI/CD) projects. Because of this, the Application Factory Pipeline Service account must have `roles/resourcemanager.projectIamAdmin` role on the Worker Pool Host Project. This can be done by running the bash script below (requires `jq` to be installed). Remember to replace `REPLACE_WITH_WORKER_POOL_PROJECT_ID` with your environment's specific project id.
-
-```bash
-WORKER_POOL_PROJECT_ID=REPLACE_WITH_WORKER_POOL_PROJECT_ID
-OUTPUT=$(terraform -chdir=../1-bootstrap output -json cb_service_accounts_emails)
-
-APPFACTORY_SA=$(echo $OUTPUT | jq -r '.applicationfactory')
-gcloud projects add-iam-policy-binding $WORKER_POOL_PROJECT_ID \
---member=serviceAccount:$APPFACTORY_SA \
---role=roles/resourcemanager.projectIamAdmin
-```
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |
-| cloudbuildv2\_repository\_config | Configuration for integrating repositories with Cloud Build v2:<br>  - repo\_type: Specifies the type of repository. Supported types are 'GITHUBv2', 'GITLABv2', and 'CSR'.<br>  - repositories: A map of repositories to be created. The key must match the exact name of the repository. Each repository is defined by:<br>      - repository\_name: The name of the repository.<br>      - repository\_url: The URL of the repository.<br>  - github\_secret\_id: (Optional) The personal access token for GitHub authentication.<br>  - github\_app\_id\_secret\_id: (Optional) The application ID for a GitHub App used for authentication.<br>  - gitlab\_read\_authorizer\_credential\_secret\_id: (Optional) The read authorizer credential for GitLab access.<br>  - gitlab\_authorizer\_credential\_secret\_id: (Optional) The authorizer credential for GitLab access.<br>  - gitlab\_webhook\_secret\_id: (Optional) The secret ID for the GitLab WebHook.<br>  - gitlab\_enterprise\_host\_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is <https://gitlab.com>.<br>  - gitlab\_enterprise\_service\_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.<br>  - gitlab\_enterprise\_ca\_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.<br>Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.<br>Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.<br>Note: If 'cloudbuildv2\_repository\_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default. | <pre>object({<br>    repo_type = string # Supported values are: GITHUBv2, GITLABv2 and CSR<br>    # repositories to be created<br>    repositories = object({<br>      multitenant = object({<br>        repository_name = optional(string, "eab-multitenant")<br>        repository_url  = string<br>      }),<br>      applicationfactory = object({<br>        repository_name = optional(string, "eab-applicationfactory")<br>        repository_url  = string<br>      }),<br>      fleetscope = object({<br>        repository_name = optional(string, "eab-fleetscope")<br>        repository_url  = string<br>      }),<br>    })<br>    # Credential Config for each repository type<br>    github_secret_id                            = optional(string)<br>    github_app_id_secret_id                     = optional(string)<br>    gitlab_read_authorizer_credential_secret_id = optional(string)<br>    gitlab_authorizer_credential_secret_id      = optional(string)<br>    gitlab_webhook_secret_id                    = optional(string)<br>    gitlab_enterprise_host_uri                  = optional(string)<br>    gitlab_enterprise_service_directory         = optional(string)<br>    gitlab_enterprise_ca_certificate            = optional(string)<br>  })</pre> | <pre>{<br>  "repo_type": "CSR",<br>  "repositories": {<br>    "applicationfactory": {<br>      "repository_url": ""<br>    },<br>    "fleetscope": {<br>      "repository_url": ""<br>    },<br>    "multitenant": {<br>      "repository_url": ""<br>    }<br>  }<br>}</pre> | no |
+| cloudbuildv2\_repository\_config | Configuration for integrating repositories with Cloud Build v2:<br>  - repo\_type: Specifies the type of repository. Supported types are 'GITHUBv2', 'GITLABv2', and 'CSR'.<br>  - repositories: A map of repositories to be created. The key must match the exact name of the repository. Each repository is defined by:<br>      - repository\_name: The name of the repository.<br>      - repository\_url: The URL of the repository.<br>  - github\_secret\_id: (Optional) The personal access token for GitHub authentication.<br>  - github\_app\_id\_secret\_id: (Optional) The application ID for a GitHub App used for authentication.<br>  - gitlab\_read\_authorizer\_credential\_secret\_id: (Optional) The read authorizer credential for GitLab access.<br>  - gitlab\_authorizer\_credential\_secret\_id: (Optional) The authorizer credential for GitLab access.<br>  - gitlab\_webhook\_secret\_id: (Optional) The secret ID for the GitLab WebHook.<br>  - gitlab\_enterprise\_host\_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.<br>  - gitlab\_enterprise\_service\_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.<br>  - gitlab\_enterprise\_ca\_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.<br>Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.<br>Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.<br>Note: If 'cloudbuildv2\_repository\_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default. | <pre>object({<br>    repo_type = string # Supported values are: GITHUBv2, GITLABv2 and CSR<br>    # repositories to be created<br>    repositories = object({<br>      multitenant = object({<br>        repository_name = optional(string, "eab-multitenant")<br>        repository_url  = string<br>      }),<br>      applicationfactory = object({<br>        repository_name = optional(string, "eab-applicationfactory")<br>        repository_url  = string<br>      }),<br>      fleetscope = object({<br>        repository_name = optional(string, "eab-fleetscope")<br>        repository_url  = string<br>      }),<br>    })<br>    # Credential Config for each repository type<br>    github_secret_id                            = optional(string)<br>    github_app_id_secret_id                     = optional(string)<br>    gitlab_read_authorizer_credential_secret_id = optional(string)<br>    gitlab_authorizer_credential_secret_id      = optional(string)<br>    gitlab_webhook_secret_id                    = optional(string)<br>    gitlab_enterprise_host_uri                  = optional(string)<br>    gitlab_enterprise_service_directory         = optional(string)<br>    gitlab_enterprise_ca_certificate            = optional(string)<br>  })</pre> | <pre>{<br>  "repo_type": "CSR",<br>  "repositories": {<br>    "applicationfactory": {<br>      "repository_url": ""<br>    },<br>    "fleetscope": {<br>      "repository_url": ""<br>    },<br>    "multitenant": {<br>      "repository_url": ""<br>    }<br>  }<br>}</pre> | no |
 | common\_folder\_id | Folder ID in which to create all application admin projects, must be prefixed with 'folders/' | `string` | n/a | yes |
 | envs | Environments | <pre>map(object({<br>    billing_account    = string<br>    folder_id          = string<br>    network_project_id = string<br>    network_self_link  = string<br>    org_id             = string<br>    subnets_self_links = list(string)<br>  }))</pre> | n/a | yes |
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | project\_id | Project ID for initial resources | `string` | n/a | yes |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"us-central1"` | no |
+| worker\_pool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step. <br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the <br>`roles/cloudbuild.workerPoolUser` role to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`<br><br>If this variable is left undefined, Worker Pool will not be used for the Cloud Build Triggers. | `string` | `""` | no |
 
 ## Outputs
 
