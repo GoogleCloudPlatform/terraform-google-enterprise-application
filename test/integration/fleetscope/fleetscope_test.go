@@ -201,7 +201,7 @@ func TestFleetscope(t *testing.T) {
 				gitAppRun("clone", authenticatedUrl, tmpDirApp)
 
 				// copy files to repo and push to sync branch
-				policiesPath := fmt.Sprintf("../../../3-fleetscope/config-sync/cymbal-bank-network-policies-%s.yaml", envName)
+				policiesPath := fmt.Sprintf("../../../examples/cymbal-bank/3-fleetscope/config-sync/cymbal-bank-network-policies-%s.yaml", envName)
 				t.Logf("Copying from %s to %s", policiesPath, tmpDirApp)
 				err = cp.Copy(policiesPath, fmt.Sprintf("%s/cymbal-bank-network-policies-%s.yaml", tmpDirApp, envName))
 				if err != nil {
@@ -403,7 +403,7 @@ func TestFleetscope(t *testing.T) {
 				assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
 				jsonOutput = gjson.Parse(output)
 				assert.Equal("{}", jsonOutput.Get("rendering.errorSummary").String(), "rootsync 'rendering' output should not contain errors.")
-				assert.Equal("{}", jsonOutput.Get("source.errorSummary").String(), "rootsync  'source' output should not contain errors.")
+				assert.Equal("{}", jsonOutput.Get("source.errorSummary").String(), "rootsync 'source' output should not contain errors.")
 				assert.Equal("{}", jsonOutput.Get("sync.errorSummary").String(), "rootsync 'sync' output should not contain errors.")
 			})
 

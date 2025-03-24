@@ -34,12 +34,12 @@ Config Sync is installed in this step when running the Terraform code. Before in
 
 Config Sync supports the following mechanisms for authentication:
 
-* SSH key pair (ssh)
-* Cookiefile (cookiefile)
-* Token (token)
-* Google service account (gcpserviceaccount)
-* Compute Engine default service account (gcenode)
-* GitHub App (githubapp)
+- SSH key pair (ssh)
+- Cookiefile (cookiefile)
+- Token (token)
+- Google service account (gcpserviceaccount)
+- Compute Engine default service account (gcenode)
+- GitHub App (githubapp)
 
 The example below shows configuration steps for the `token` mechanism, using Gitlab as the Git provider, for more information please check the [following documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync).
 
@@ -59,8 +59,8 @@ After you create and obtain the personal access token in Gitlab, add it to a new
 
     Replace the following:
 
-    - `USERNAME`: the username that you want to use.
-    - `TOKEN`: the token that you created in the previous step.
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
 
 - (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
 
@@ -75,9 +75,9 @@ After you create and obtain the personal access token in Gitlab, add it to a new
 
     Replace the following:
 
-    - `USERNAME`: the username that you want to use.
-    - `TOKEN`: the token that you created in the previous step.
-    - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+  - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
 
 > NOTE: Config Sync must be able to fetch your Git server, this means you might need to adjust your firewall rules to allow GKE pods to reach that server or create a Cloud NAT Router to allow accessing the Github/Gitlab or Bitbucket SaaS servers.
 
@@ -161,7 +161,7 @@ Please note that some steps in this documentation are specific to the selected G
 
 1. Update the `terraform.tfvars` file with values for your environment.
 
-1. Commit and push changes. Because the plan branch is not a named environment branch, pushing your plan branch triggers terraform plan but not terraform apply. Review the plan output in your Cloud Build project. https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Commit and push changes. Because the plan branch is not a named environment branch, pushing your plan branch triggers terraform plan but not terraform apply. Review the plan output in your Cloud Build project. <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git add .
@@ -169,21 +169,21 @@ Please note that some steps in this documentation are specific to the selected G
     git push --set-upstream origin plan
     ```
 
-1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout -b development
     git push origin development
     ```
 
-1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout -b nonproduction
     git push origin nonproduction
     ```
 
-1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout -b production
@@ -250,7 +250,7 @@ Namespace network isolation is an aspect of Kubernetes security that helps to li
 
 ### Use Config Sync for Network Policies
 
-To use `config-sync` you will need to clone you config-sync repository and add the policies there. Commit it and wait for the next sync. Here is a detailed tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source). The steps below will show an example for cymbal-bank.
+To use `config-sync` you will need to clone you config-sync repository and add the policies there. Commit it and wait for the next sync. Here is a detailed tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source). The steps below will show an example for [cymbal-bank](../examples/cymbal-bank) application.
 
 1. Clone `config-sync` repository.
 
@@ -268,7 +268,7 @@ To use `config-sync` you will need to clone you config-sync repository and add t
 1. Copy example policies from `terraform-google-enterprise-applicaiton` repository to the `config-sync` repository:
 
     ```bash
-    cp ../terraform-google-enterprise-applicaiton/3-fleetscope/config-sync/cymbal-bank-network-policies-development.yaml .
+    cp ../terraform-google-enterprise-applicaiton/examples/cymbal-bank/3-fleetscope/config-sync/cymbal-bank-network-policies-development.yaml .
     ```
 
 1. Commit and push changes:
