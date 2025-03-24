@@ -38,7 +38,7 @@ steps:
     timeout: 1200s
   - name: gcr.io/cloud-builders/gcloud
     id: trigger-release
-    args: 
+    args:
       - "deploy"
       - "releases"
       - "create"
