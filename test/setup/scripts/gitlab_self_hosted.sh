@@ -61,8 +61,10 @@ for (( i=1; i<=MAX_TRIES; i++)); do
       gitlab-rails runner "token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'read_api', 'read_user'], name: 'Automation token', expires_at: 365.days.from_now); token.set_token('$personal_token'); token.save!"
       echo "personal_token=$(echo "$personal_token" | head -c 3)*********"
       if gcloud secrets describe gitlab-pat-from-vm --project="$PROJECT_ID"; then
+        echo "Secret already exists. Will create new secret version for existing 'gitlab-pat-from-vm'."
         echo -n "$personal_token" | gcloud secrets versions add gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
       else
+        echo "Secret does not already exists. Will create secret 'gitlab-pat-from-vm'."
         echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-
       fi
       break
