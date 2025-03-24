@@ -70,7 +70,7 @@ module "cloudbuild_repositories" {
 }
 
 resource "time_sleep" "wait_propagation" {
-  create_duration = "30s"
+  create_duration = "45s"
 }
 
 module "app_admin_project" {
