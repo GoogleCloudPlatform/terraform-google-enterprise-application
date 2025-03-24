@@ -80,4 +80,5 @@ for (( i=1; i<=MAX_TRIES; i++)); do
   fi
 done
 
+gcloud storage cp /etc/gitlab/ssl/gitlab.crt gs://"${PROJECT_ID}"-ssl-cert
 gcloud storage cp gs://"${PROJECT_ID}"-ssl-cert/gitlab.crt /tmp/gitlab.crt || (echo "ERROR: Certificate is not available in bucket" && exit 1)
