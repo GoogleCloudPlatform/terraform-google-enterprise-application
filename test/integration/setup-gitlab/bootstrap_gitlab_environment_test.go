@@ -47,7 +47,7 @@ func TestValidateStartupScript(t *testing.T) {
 	instanceZone := setup.GetStringOutput("gitlab_instance_zone")
 	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
 	// Periodically read logs from startup script running on the VM instance
-	for count := 0; count < 10; count++ {
+	for count := 0; count < 100; count++ {
 		logs, err := readLogsFromVm(t, instanceName, instanceZone, gitlabSecretProject)
 		if err != nil {
 			t.Fatal(err)
@@ -59,7 +59,7 @@ func TestValidateStartupScript(t *testing.T) {
 			}
 			break
 		}
-		time.Sleep(3 * time.Minute)
+		time.Sleep(12 * time.Second)
 	}
 }
 func TestBootstrapGitlabVM(t *testing.T) {
