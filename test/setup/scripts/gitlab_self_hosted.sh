@@ -35,7 +35,7 @@ mv cert.pem gitlab.crt
 
 mkdir -p /etc/gitlab/ssl
 cp gitlab.* /etc/gitlab/ssl
-gcloud storage cp gitlab.crt gs://${PROJECT_ID}-ssl-cert
+gcloud storage cp gitlab.crt gs://"${PROJECT_ID}"-ssl-cert
 
 cat > /etc/gitlab/gitlab.rb <<EOF
 external_url "https://gitlab.example.com"
@@ -80,4 +80,4 @@ for (( i=1; i<=MAX_TRIES; i++)); do
   fi
 done
 
-gcloud storage cp gs://${PROJECT_ID}-ssl-cert /tmp/gitlab.crt || (echo "ERROR: Certificate is not available in bucket" && exit 1)
+gcloud storage cp gs://"${PROJECT_ID}"-ssl-cert /tmp/gitlab.crt || (echo "ERROR: Certificate is not available in bucket" && exit 1)
