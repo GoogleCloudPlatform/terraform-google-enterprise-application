@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -178,7 +179,8 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 				for _, memberShipName := range membershipNamesProjectNumber {
 					dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
 					controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-					if dataPlaneManagement == "PROVISIONING" || controlPlaneManagement == "PROVISIONING" {
+					retryStatus := []string{"PROVISIONING", "STALLED"}
+					if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
 						retry = true
 					} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
 						generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
