@@ -58,7 +58,7 @@ def get_historical_data_yahoo(ticker, start_date, end_date):
         return raw_data
     except AttributeError as e:
         print(f"ERROR: {e}")
-        tickers_with_problems.append(ticker)    
+        tickers_with_problems.append(ticker)
 
 
 def main(argv):
