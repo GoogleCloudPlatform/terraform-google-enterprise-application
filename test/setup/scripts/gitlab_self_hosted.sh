@@ -91,7 +91,8 @@ gcloud storage cp gs://"${PROJECT_ID}"-ssl-cert/gitlab.crt /tmp/gitlab.crt || (e
 if gcloud secrets describe gitlab-pat-from-vm --project="$PROJECT_ID"; then
   echo "Secret exists" && exit 0
 else
-  echo "Secret does not exist, will try creating it again:"
-  echo "personal_token=$(echo "$personal_token" | head -c 3)*********"
-  (echo -n "$personal_token" | gcloud secrets create gitlab-pat-from-vm --project="$PROJECT_ID" --data-file=-) || exit 1
+  echo "Secret does not exist, will try waiting for propagation time."
+  sleep 45
+  # Exit with success if the secret exists after the wait time.
+  (gcloud secrets describe gitlab-pat-from-vm --project="$PROJECT_ID" && echo "Secret now exists" && exit 0) || exit 1
 fi
