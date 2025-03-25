@@ -66,7 +66,7 @@ module "cloudbuild_repositories" {
   }
   cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
 
-  depends_on = [time_sleep.wait_propagation]
+  depends_on = [time_sleep.wait_propagation, google_project_iam_member.access_network]
 }
 
 resource "time_sleep" "wait_propagation" {
