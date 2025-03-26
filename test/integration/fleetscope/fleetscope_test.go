@@ -184,6 +184,11 @@ func TestFleetscope(t *testing.T) {
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
+				// disable SSL Verify for config-sync
+				_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "patch", "rootsync", "root-sync", "--namespace=config-management-system", "--type=json", "-p", `[{"op": "add", "path": "/spec/git/noSSLVerify", "value": true}]`)
+				if err != nil {
+					t.Fatal(err)
+				}
 
 				// create temporary directory to host config-sync repo
 				tmpDirApp := t.TempDir()
