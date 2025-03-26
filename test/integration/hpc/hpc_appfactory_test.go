@@ -16,6 +16,7 @@ package hpc
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"testing"
@@ -30,6 +31,17 @@ import (
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
+func renameWorkerPoolFile(t *testing.T) {
+	tf_file_old := "../../../4-appfactory/modules/app-group-baseline/additional_workerpool_permissions.tf.example"
+	tf_file_new := "../../../4-appfactory/modules/app-group-baseline/additional_workerpool_permissions.tf"
+	// if file does not exist, create it by renaming
+	if _, err := os.Stat(tf_file_new); err != nil {
+		err = os.Rename(tf_file_old, tf_file_new)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}
 func TestHPCAppfactory(t *testing.T) {
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -54,6 +66,8 @@ func TestHPCAppfactory(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Apply additional permissions required to use workerpools on 4-appfactory
+	renameWorkerPoolFile(t)
 	t.Run(appFactoryPath, func(t *testing.T) {
 		t.Parallel()
 

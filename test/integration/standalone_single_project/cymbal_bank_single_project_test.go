@@ -176,6 +176,15 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					}
 				}
 
+				// override default cloudbuild.yaml to allow workpool specification on application CI build
+				cloudBuildPath := fmt.Sprintf("%s/cloudbuild-files/%s/cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName)
+				newCloudBuildPath := fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName)
+				t.Logf("(cloudbuild.yaml) Copying from %s -> %s", cloudBuildPath, newCloudBuildPath)
+				err = cp.Copy(cloudBuildPath, newCloudBuildPath)
+				if err != nil {
+					t.Fatal(err)
+				}
+
 				err = cp.Copy(fmt.Sprintf("%s/%s", appSourcePath, "other-overlays/e2e.Dockerfile"), fmt.Sprintf("%s/.github/workflows/ui-tests/Dockerfile", tmpDirApp))
 				if err != nil {
 					t.Fatal(err)

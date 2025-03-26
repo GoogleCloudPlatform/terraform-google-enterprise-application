@@ -48,3 +48,5 @@ options:
   logging: CLOUD_LOGGING_ONLY
   env:
     - 'DOCKER_CLI_EXPERIMENTAL=enabled'
+  pool:
+    name: '${_PRIVATE_POOL}'

@@ -38,6 +38,12 @@ locals {
         gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
         gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
         gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+        gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+        # .pem string
+        gitlab_enterprise_ca_certificate = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
       }
     },
     "userservice" = {
@@ -57,6 +63,12 @@ locals {
         gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
         gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
         gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+        gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+        # .pem string
+        gitlab_enterprise_ca_certificate = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
       }
     },
     "frontend" = {
@@ -76,6 +88,12 @@ locals {
         gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
         gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
         gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+        gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+        # .pem string
+        gitlab_enterprise_ca_certificate = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
       }
     },
     "balancereader" = {
@@ -95,6 +113,12 @@ locals {
         gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
         gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
         gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+        gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+        # .pem string
+        gitlab_enterprise_ca_certificate = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
       }
     },
     "ledgerwriter" = {
@@ -114,6 +138,12 @@ locals {
         gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
         gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
         gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+        gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+        # .pem string
+        gitlab_enterprise_ca_certificate = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
       }
     },
     "transactionhistory" = {
@@ -133,10 +163,55 @@ locals {
         gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
         gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
         gitlab_enterprise_host_uri                  = "https://gitlab.com"
+        # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+        gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+        # .pem string
+        gitlab_enterprise_ca_certificate = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
       }
     },
   }
+
+  projects_re         = "projects/([^/]+)/"
+  worker_pool_project = regex(local.projects_re, var.worker_pool_id)[0]
 }
+
+data "google_project" "admin_projects" {
+  project_id = var.project_id
+}
+
+resource "google_project_iam_member" "assign_permissions" {
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "assign_permissions_service_agent" {
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${data.google_project.admin_projects.number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sd_viewer" {
+  project = local.worker_pool_project
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "access_network" {
+  project = local.worker_pool_project
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_propagation" {
+  create_duration = "30s"
+
+  depends_on = [google_project_iam_member.assign_permissions]
+}
+
+
 
 module "cicd" {
   source   = "../../5-appinfra/modules/cicd-pipeline"
@@ -163,4 +238,7 @@ module "cicd" {
   buckets_force_destroy = true
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
+  worker_pool_id                 = var.worker_pool_id
+
+  depends_on = [time_sleep.wait_propagation]
 }
