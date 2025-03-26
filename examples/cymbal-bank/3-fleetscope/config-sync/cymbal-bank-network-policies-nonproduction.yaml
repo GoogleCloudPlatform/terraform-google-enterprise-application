@@ -48,7 +48,10 @@ metadata:
   annotations:
     configmanagement.gke.io/namespace-selector: accounts-selector
 spec:
+  podSelector: {}
   ingress:
+  - from:
+    - podSelector: {}
   - from:
     - namespaceSelector:
         matchExpressions:
@@ -58,8 +61,8 @@ spec:
           - cb-frontend-nonproduction
           - cb-accounts-nonproduction
           - cb-ledger-nonproduction
+          - istio-system
   policyTypes:
-  - Egress
   - Ingress
 ---
 apiVersion: networking.k8s.io/v1
@@ -69,6 +72,7 @@ metadata:
   annotations:
     configmanagement.gke.io/namespace-selector: frontend-selector
 spec:
+  podSelector: {}
   policyTypes:
   - Egress
   - Ingress
@@ -80,7 +84,10 @@ metadata:
   annotations:
     configmanagement.gke.io/namespace-selector: ledger-selector
 spec:
+  podSelector: {}
   ingress:
+  - from:
+    - podSelector: {}
   - from:
     - namespaceSelector:
         matchExpressions:
@@ -90,6 +97,6 @@ spec:
           - cb-frontend-nonproduction
           - cb-accounts-nonproduction
           - cb-ledger-nonproduction
+          - istio-system
   policyTypes:
-  - Egress
   - Ingress
