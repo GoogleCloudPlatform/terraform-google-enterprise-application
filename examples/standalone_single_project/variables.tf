@@ -29,3 +29,20 @@ variable "teams" {
   type        = map(string)
   description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
 }
+
+variable "worker_pool_id" {
+  description = <<-EOT
+    Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
+
+    The expected format is:
+    `projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.
+
+    If you are using worker pools from a different project, ensure that you grant the
+    `roles/cloudbuild.workerPoolUser` role to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:
+    `service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`
+
+    If this variable is left undefined, Worker Pool will not be used for the Cloud Build Triggers.
+  EOT
+  type        = string
+  default     = ""
+}

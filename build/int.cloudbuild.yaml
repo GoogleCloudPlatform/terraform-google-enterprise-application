@@ -28,16 +28,28 @@ steps:
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
       - "TF_VAR_single_project=false"
 
-  - id: bootstrap-gitlab-vm
+  - id: wait-startup-script
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestBootstrapGitlabVM --stage verify --verbose",
-      ]
+      ["/bin/bash", "-c", "cft test run TestValidateStartupScript --stage verify --verbose"]
     waitFor:
       - prepare
+
+  - id: bootstrap-gitlab-vm
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestBootstrapGitlabVM --stage verify --verbose || exit 1
+        else
+            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
+        fi
+    waitFor:
+      - wait-startup-script
 
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
@@ -155,36 +167,51 @@ steps:
 
   - id: cymbal-bank-app-deployment
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
     args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestSourceCymbalBank --stage verify --verbose",
-      ]
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSourceCymbalBank --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
     waitFor:
       - appinfra-apply
       - fleetscope-verify
 
   - id: cymbal-shop-app-deployment
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
     args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestSourceCymbalShop --stage verify --verbose",
-      ]
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSourceCymbalShop --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
     waitFor:
       - appinfra-apply
       - fleetscope-verify
 
   - id: hello-world-app-deployment
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
     args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestSourceHelloWorld --stage verify --verbose",
-      ]
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSourceHelloWorld --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
     waitFor:
       - appinfra-apply
       - fleetscope-verify

@@ -32,3 +32,5 @@ steps:
       - "--region=$LOCATION"
 options:
   logging: CLOUD_LOGGING_ONLY
+  pool:
+    name: '${_PRIVATE_POOL}'
