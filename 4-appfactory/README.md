@@ -31,6 +31,8 @@ It will also create an Application Folder to group your admin projects under it,
 
 ## Usage
 
+### Git Provider
+
 You have 3 Git provider options for this step: Cloud Source Repositories (CSR), Github, and Gitlab. If you are using Github or Gitlab you will need to take additional steps that are described in the following sections:
 
 - [Cloud Build with Github Pre-requisites](#cloud-build-with-github-pre-requisites)
@@ -106,6 +108,20 @@ To proceed with Gitlab as your git provider you will need:
     ```bash
     gcloud projects add-iam-policy-binding $GIT_SECRET_PROJECT --role=roles/secretmanager.admin --member=serviceAccount:tf-cb-eab-applicationfactory@YOUR-CLOUDBUILD-PROJECT.iam.gserviceaccount.com
     ```
+
+### Worker Pool Requirements
+
+If you are not using Worker Pools you can skip this step. If you are using Worker Pools, an additional step must be taken before deploying.
+
+There is a terraform script that will assign required permissions on the Worker Pool Host Project and requires `var.worker_pool_id` to be specified on the 4-appfactory `terraform.tfvars` file. The script is located at [./modules/app-group-baseline/additional_workerpool_permissions.tf.example](./modules/app-group-baseline/additional_workerpool_permissions.tf.example).
+
+1. Enable the permission assignment terraform script on `app-group-baseline` module.
+
+    ```bash
+    mv ./modules/app-group-baseline/additional_workerpool_permissions.tf.example ./modules/app-group-baseline/additional_workerpool_permissions.tf
+    ```
+
+After renaming the file to `additional_workerpool_permissions.tf`, when you run the pipeline, the required permissions will automatically be assigned on the Worker Pool Host Project.
 
 ### Deploying with Google Cloud Build
 
