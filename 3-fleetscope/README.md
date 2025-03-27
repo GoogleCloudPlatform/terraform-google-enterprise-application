@@ -265,10 +265,10 @@ To use `config-sync` you will need to clone you config-sync repository and add t
     git checkout master
     ```
 
-1. Copy example policies from `terraform-google-enterprise-applicaiton` repository to the `config-sync` repository:
+1. Copy example policies from `terraform-google-enterprise-applicaiton` repository to the `config-sync` repository (development environment):
 
     ```bash
-    cp ../terraform-google-enterprise-applicaiton/examples/cymbal-bank/3-fleetscope/config-sync/cymbal-bank-network-policies-development.yaml .
+    cp ../terraform-google-enterprise-applicaiton/examples/cymbal-bank/3-fleetscope/config-sync/development/cymbal-bank-network-policies-development.yaml .
     ```
 
 1. Commit and push changes:
