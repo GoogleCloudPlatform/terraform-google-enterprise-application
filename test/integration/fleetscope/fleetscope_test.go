@@ -87,7 +87,7 @@ func TestFleetscope(t *testing.T) {
 			vars := map[string]interface{}{
 				"remote_state_bucket":         backend_bucket,
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
-				"config_sync_secret_type":     nil,
+				"config_sync_secret_type":     "none",
 				"config_sync_repository_url":  "https://github.com/caetano-colin/terraform-google-enterprise-application",
 				"config_sync_policy_dir":      "examples/cymbal-bank/3-fleetscope/config-sync",
 				"config_sync_branch":          "cymbal-bank-isolation",
