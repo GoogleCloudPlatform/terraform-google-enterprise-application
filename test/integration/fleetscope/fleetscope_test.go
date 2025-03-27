@@ -184,11 +184,6 @@ func TestFleetscope(t *testing.T) {
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
-				// disable SSL Verify for config-sync
-				_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "patch", "rootsync", "root-sync", "--namespace=config-management-system", "--type=json", "-p", `[{"op": "add", "path": "/spec/git/noSSLVerify", "value": true}]`)
-				if err != nil {
-					t.Fatal(err)
-				}
 
 				// create temporary directory to host config-sync repo
 				tmpDirApp := t.TempDir()
@@ -301,6 +296,12 @@ func TestFleetscope(t *testing.T) {
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 								assert.Equal("1.19.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 							}
+							// disable SSL Verify for config-sync
+							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "patch", "rootsync", "root-sync", "--namespace=config-management-system", "--type=json", "-p", `[{"op": "add", "path": "/spec/git/noSSLVerify", "value": true}]`)
+							if err != nil {
+								t.Fatal(err)
+							}
+
 						}
 					case "policycontroller":
 						// GKE Policy Controller Membership
