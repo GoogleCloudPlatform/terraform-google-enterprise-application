@@ -23,11 +23,9 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/gruntwork-io/terratest/modules/k8s"
-	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	"github.com/tidwall/gjson"
@@ -42,57 +40,6 @@ func renameKueueFile(t *testing.T) {
 	}
 }
 
-func retrieveNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
-	return k8s.RunKubectlAndGetOutputE(t, options, "get", "ns", "config-management-system", "-o", "json")
-}
-
-func retrieveCreds(t *testing.T, options *k8s.KubectlOptions) (string, error) {
-	return k8s.RunKubectlAndGetOutputE(t, options, "get", "secret", "git-creds", "--namespace=config-management-system", "--output=yaml")
-}
-
-func configureConfigSyncNamespace(t *testing.T, options *k8s.KubectlOptions) (string, error) {
-	_, err := retrieveNamespace(t, options)
-	// namespace does not exist
-	if err != nil {
-		return k8s.RunKubectlAndGetOutputE(t, options, "create", "ns", "config-management-system")
-	} else {
-		fmt.Println("Namespace already exists")
-		return "", err
-	}
-}
-
-// Create token credentials on config-management-system namespace
-func createTokenCredentials(t *testing.T, options *k8s.KubectlOptions, user string, token string) (string, error) {
-	_, err := retrieveCreds(t, options)
-	if err != nil {
-		return k8s.RunKubectlAndGetOutputE(t, options, "create", "secret", "generic", "git-creds", "--namespace=config-management-system", fmt.Sprintf("--from-literal=username=%s", user), fmt.Sprintf("--from-literal=token=%s", token))
-	} else {
-		// delete existing credentials
-		_, err = k8s.RunKubectlAndGetOutputE(t, options, "delete", "secret", "git-creds", "--namespace=config-management-system")
-		if err != nil {
-			t.Fatal(err)
-		}
-		// create new credentials using token
-		return k8s.RunKubectlAndGetOutputE(t, options, "create", "secret", "generic", "git-creds", "--namespace=config-management-system", fmt.Sprintf("--from-literal=username=%s", user), fmt.Sprintf("--from-literal=token=%s", token))
-	}
-
-}
-
-// To use config-sync with a gitlab token, the namespace and credentials (token) must exist before running fleetscope code
-func applyPreRequisites(t *testing.T, options *k8s.KubectlOptions, token string) error {
-	_, err := configureConfigSyncNamespace(t, options)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, err = createTokenCredentials(t, options, "root", token)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return err
-}
-
 func TestFleetscope(t *testing.T) {
 	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -102,13 +49,6 @@ func TestFleetscope(t *testing.T) {
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
-	}
-	gitUrl := setup.GetStringOutput("gitlab_url")
-	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
-	gitlabPersonalTokenSecretName := setup.GetStringOutput("gitlab_pat_secret_name")
-	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
-	if err != nil {
-		t.Fatal(err)
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
@@ -144,13 +84,13 @@ func TestFleetscope(t *testing.T) {
 
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
-			config_sync_url := fmt.Sprintf("%s/root/config-sync-%s.git", setup.GetStringOutput("gitlab_url"), envName)
-
 			vars := map[string]interface{}{
 				"remote_state_bucket":         backend_bucket,
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
-				"config_sync_secret_type":     "token",
-				"config_sync_repository_url":  config_sync_url,
+				"config_sync_secret_type":     nil,
+				"config_sync_repository_url":  "https://github.com/caetano-colin/terraform-google-enterprise-application",
+				"config_sync_policy_dir":      "examples/cymbal-bank/3-fleetscope/config-sync",
+				"config_sync_branch":          "cymbal-bank-isolation",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b"},
 			}
 
@@ -174,45 +114,11 @@ func TestFleetscope(t *testing.T) {
 			})
 
 			fleetscope.DefineApply(func(assert *assert.Assertions) {
-				// this function will create necessary requirements for config-sync with gitlab
-				err := applyPreRequisites(t, k8sOpts, token)
-				if err != nil {
-					t.Fatal(err)
-				}
 				fleetscope.DefaultApply(assert)
 			})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
-
-				// create temporary directory to host config-sync repo
-				tmpDirApp := t.TempDir()
-				gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
-				gitAppRun := func(args ...string) {
-					_, err := gitApp.RunCmdE(args...)
-					if err != nil {
-						t.Fatal(err)
-					}
-				}
-				// retrieve gitlab credentials
-				hostNameWithPath := strings.Split(gitUrl, "https://")[1]
-				authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root/config-sync-%s", token, hostNameWithPath, envName)
-				// clone config-sync repository using credentials
-				gitAppRun("clone", authenticatedUrl, tmpDirApp)
-
-				// copy files to repo and push to sync branch
-				policiesPath := fmt.Sprintf("../../../examples/cymbal-bank/3-fleetscope/config-sync/cymbal-bank-network-policies-%s.yaml", envName)
-				t.Logf("Copying from %s to %s", policiesPath, tmpDirApp)
-				err = cp.Copy(policiesPath, fmt.Sprintf("%s/cymbal-bank-network-policies-%s.yaml", tmpDirApp, envName))
-				if err != nil {
-					t.Fatal(err)
-				}
-				gitAppRun("config", "user.email", "eab-robot@example.com")
-				gitAppRun("config", "user.name", "EAB Robot")
-				gitAppRun("checkout", "master")
-				gitAppRun("add", ".")
-				gitAppRun("commit", "-am", "Add cymbal bank network policies")
-				gitAppRun("push", "origin", "master")
 
 				// get kubectl namespaces and store them on currentClusterNamespaces slice
 				output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
@@ -392,12 +298,6 @@ func TestFleetscope(t *testing.T) {
 				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
 				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
 				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
-
-				// disable SSL Verify for config-sync
-				_, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "patch", "rootsync", "root-sync", "--namespace=config-management-system", "--type=json", "-p", `[{"op": "add", "path": "/spec/git/noSSLVerify", "value": true}]`)
-				if err != nil {
-					t.Fatal(err)
-				}
 
 				pollConfigSync := func() (bool, error) {
 					booleans := make([]bool, 3)
