@@ -296,12 +296,6 @@ func TestFleetscope(t *testing.T) {
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 								assert.Equal("1.19.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 							}
-							// disable SSL Verify for config-sync
-							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "patch", "rootsync", "root-sync", "--namespace=config-management-system", "--type=json", "-p", `[{"op": "add", "path": "/spec/git/noSSLVerify", "value": true}]`)
-							if err != nil {
-								t.Fatal(err)
-							}
-
 						}
 					case "policycontroller":
 						// GKE Policy Controller Membership
@@ -399,18 +393,31 @@ func TestFleetscope(t *testing.T) {
 				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
 				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
 
-				// validate no errors in config sync
-				output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+				// disable SSL Verify for config-sync
+				_, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "patch", "rootsync", "root-sync", "--namespace=config-management-system", "--type=json", "-p", `[{"op": "add", "path": "/spec/git/noSSLVerify", "value": true}]`)
 				if err != nil {
 					t.Fatal(err)
 				}
-				// jsonpath adds ' character to string, that need to be removed for a valid json
-				output = strings.ReplaceAll(output, "'", "")
-				assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
-				jsonOutput = gjson.Parse(output)
-				assert.Equal("{}", jsonOutput.Get("rendering.errorSummary").String(), "rootsync 'rendering' output should not contain errors.")
-				assert.Equal("{}", jsonOutput.Get("source.errorSummary").String(), "rootsync 'source' output should not contain errors.")
-				assert.Equal("{}", jsonOutput.Get("sync.errorSummary").String(), "rootsync 'sync' output should not contain errors.")
+
+				pollConfigSync := func() (bool, error) {
+					booleans := make([]bool, 3)
+					// validate no errors in config sync
+					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+					if err != nil {
+						t.Fatal(err)
+					}
+					// jsonpath adds ' character to string, that need to be removed for a valid json
+					output = strings.ReplaceAll(output, "'", "")
+					assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
+					jsonOutput = gjson.Parse(output)
+					booleans[0] = jsonOutput.Get("rendering.errorSummary").String() == "{}"
+					booleans[1] = jsonOutput.Get("source.errorSummary").String() == "{}"
+					booleans[2] = jsonOutput.Get("sync.errorSummary").String() == "{}"
+					// keep retrying if any of the above fields contains errors
+					return !testutils.AllTrue(booleans), nil
+				}
+				utils.Poll(t, pollConfigSync, 10, 15*time.Second)
+
 			})
 
 			fleetscope.Test()
