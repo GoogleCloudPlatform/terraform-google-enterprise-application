@@ -49,6 +49,7 @@ func TestVPCSC(t *testing.T) {
 		fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber),
 		fmt.Sprintf("serviceAccount:%s@cloudservices.gserviceaccount.com", projectNumber),
 		fmt.Sprintf("serviceAccount:%s", serviceAccount),
+		"serviceAccount:cloud-build@system.gserviceaccount.com",
 	}
 	if singleProject {
 		protected_projects = append(protected_projects, projectNumber)
