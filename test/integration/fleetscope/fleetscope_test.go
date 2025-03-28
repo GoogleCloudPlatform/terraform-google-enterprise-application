@@ -309,13 +309,12 @@ func TestFleetscope(t *testing.T) {
 				assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
 				jsonOutput = gjson.Parse(output)
 				t.Logf("jsonOutput: %v", jsonOutput.String())
-				t.Logf("rendering.errorSummary equals nil: %v", jsonOutput.Get("rendering.errorSummary").String() == nil)
 				t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
 				t.Logf("sync.errorSummary equals '': %v", jsonOutput.Get("sync.errorSummary").String() == "")
 
-				assert.Nil(jsonOutput.Get("sync.errorSummary").String(), "sync should have no errors.")
-				assert.Nil(jsonOutput.Get("source.errorSummary").String(), "source should have no errors.")
-				assert.Nil(jsonOutput.Get("rendering.errorSummary").String(), "rendering should have no errors.")
+				assert.Empty(jsonOutput.Get("sync.errorSummary").String(), "sync should have no errors.")
+				assert.Empty(jsonOutput.Get("source.errorSummary").String(), "source should have no errors.")
+				assert.Empty(jsonOutput.Get("rendering.errorSummary").String(), "rendering should have no errors.")
 			})
 
 			fleetscope.Test()
