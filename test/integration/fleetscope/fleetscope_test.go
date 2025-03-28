@@ -300,7 +300,6 @@ func TestFleetscope(t *testing.T) {
 				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
 
 				pollConfigSync := func() (bool, error) {
-					booleans := make([]bool, 3)
 					// validate no errors in config sync
 					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 					if err != nil {
@@ -310,11 +309,8 @@ func TestFleetscope(t *testing.T) {
 					output = strings.ReplaceAll(output, "'", "")
 					assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
 					jsonOutput = gjson.Parse(output)
-					booleans[0] = jsonOutput.Get("rendering.errorSummary").String() == "{}"
-					booleans[1] = jsonOutput.Get("source.errorSummary").String() == "{}"
-					booleans[2] = jsonOutput.Get("sync.errorSummary").String() == "{}"
 					// keep retrying if any of the above fields contains errors
-					return !testutils.AllTrue(booleans), nil
+					return !(jsonOutput.Get("rendering.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("sync.errorSummary").String() == "{}"), nil
 				}
 				utils.Poll(t, pollConfigSync, 10, 15*time.Second)
 
