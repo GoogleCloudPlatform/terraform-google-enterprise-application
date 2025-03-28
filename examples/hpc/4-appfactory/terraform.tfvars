@@ -36,4 +36,5 @@ cloudbuildv2_repository_config = {
   gitlab_enterprise_ca_certificate = <<EOF
 REPLACE_WITH_SSL_CERT
 EOF
+  secret_project_id                = "REPLACE_WITH_SECRET_PROJECT_ID"
 }

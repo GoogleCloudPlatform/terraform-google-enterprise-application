@@ -113,7 +113,7 @@ To proceed with Gitlab as your git provider you will need:
 
 If you are not using Worker Pools you can skip this step. If you are using Worker Pools, an additional step must be taken before deploying.
 
-There is a terraform script that will assign required permissions on the Worker Pool Host Project and requires `var.worker_pool_id` to be specified on the 4-appfactory `terraform.tfvars` file. The script is located at [./modules/app-group-baseline/additional_workerpool_permissions.tf.example](./modules/app-group-baseline/additional_workerpool_permissions.tf.example).
+There is a terraform script that will assign required permissions on the Worker Pool Host Project and requires `var.workerpool_id` to be specified on the 4-appfactory `terraform.tfvars` file. The script is located at [./modules/app-group-baseline/additional_workerpool_permissions.tf.example](./modules/app-group-baseline/additional_workerpool_permissions.tf.example).
 
 1. Enable the permission assignment terraform script on `app-group-baseline` module.
 

@@ -23,11 +23,10 @@ steps:
     args: ['buildx', 'inspect', '--bootstrap']
     id: 'show-target-build-platforms'
   - name: 'gcr.io/cloud-builders/docker:20.10.24'
-    entrypoint: sh
+    entrypoint: bash
     args:
       - "-c"
       - |
-        apk add --no-cache curl
         curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
         install skaffold /usr/local/bin/
         skaffold build --file-output=/workspace/artifacts.json --default-repo=$_CONTAINER_REGISTRY --cache-artifacts=false

@@ -51,6 +51,18 @@ steps:
     waitFor:
       - wait-startup-script
 
+  - id: vpc-sc
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
+      ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "access_level_members=serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
+
   - id: single-project-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -106,6 +118,17 @@ steps:
         "cft test run TestStandaloneSingleProjectExample --stage teardown --verbose",
       ]
 
+  - id: vpcsc-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestVPCSC  --stage teardown --verbose",
+      ]
+    waitFor:
+      - single-project-teardown
+
 tags:
   - "ci"
   - "integration"
@@ -117,3 +140,4 @@ options:
   env:
     - 'TF_PLUGIN_CACHE_DIR=""'
     - 'TF_VAR_branch_name=$BRANCH_NAME'
+    - "TF_VAR_service_perimeter_mode=ENFORCE"

@@ -30,7 +30,7 @@ import (
 
 // connects to a Google Cloud VM instance using SSH and retrieves the logs from the VM's Startup Script service
 func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, instanceProject string) (string, error) {
-	args := []string{"compute", "ssh", instanceName, fmt.Sprintf("--zone=%s", instanceZone), fmt.Sprintf("--project=%s", instanceProject), "--command=journalctl -u google-startup-scripts.service -n 20"}
+	args := []string{"compute", "ssh", instanceName, fmt.Sprintf("--zone=%s", instanceZone), fmt.Sprintf("--project=%s", instanceProject), "-q", "--command=journalctl -u google-startup-scripts.service -n 20"}
 	gcloudCmd := shell.Command{
 		Command: "gcloud",
 		Args:    args,
@@ -179,6 +179,12 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Replace secret project_id
+	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_SECRET_PROJECT_ID", gitlabSecretProject, root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	err = testutils.ReplacePatternInTfVars("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, root)
 	if err != nil {
 		t.Fatal(err)
@@ -219,6 +225,18 @@ func TestBootstrapGitlabVM(t *testing.T) {
 
 	// Replace https://gitlab.com with custom self hosted URL
 	err = testutils.ReplacePatternInFile("https://gitlab.com", url, single_project_root, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace https://gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("https://gitlab.com", url, single_project_root, "3-fleetscope.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("gitlab.com", strings.TrimPrefix(url, "https://"), single_project_root, "0-setup.tf")
 	if err != nil {
 		t.Fatal(err)
 	}

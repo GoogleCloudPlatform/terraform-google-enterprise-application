@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 locals {
   admin_project_id = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project_id
   cloudbuild_sa_roles = merge(var.create_infra_project ? { for env in keys(var.envs) : env => {
@@ -37,12 +38,26 @@ locals {
     }
   )
 
-  org_ids           = distinct([for env in var.envs : env.org_id])
-  use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
-  service_repo_name = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
+  org_ids             = distinct([for env in var.envs : env.org_id])
+  use_csr             = var.cloudbuildv2_repository_config.repo_type == "CSR"
+  service_repo_name   = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
+  worker_pool_project = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
 
-  // If the user specify a Cloud Build Worker Pool, utilize it in the trigger
-  optional_worker_pool = var.worker_pool_id != "" ? { "_PRIVATE_POOL" = var.worker_pool_id } : {}
+  secret_id             = var.cloudbuildv2_repository_config.github_secret_id != null ? var.cloudbuildv2_repository_config.github_secret_id : var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
+  secret_project_number = regex("projects/([^/]*)/", local.secret_id)[0]
+}
+
+data "google_project" "admin_project" {
+  project_id = local.admin_project_id
+}
+
+data "google_project" "workerpool_project" {
+  project_id = local.worker_pool_project
+}
+
+data "google_project" "clusters_projects" {
+  for_each   = toset(var.cluster_projects_ids)
+  project_id = each.value
 }
 
 module "cloudbuild_repositories" {
@@ -71,6 +86,8 @@ module "cloudbuild_repositories" {
 
 resource "time_sleep" "wait_propagation" {
   create_duration = "120s"
+
+  depends_on = [google_access_context_manager_service_perimeter_egress_policy.cloudbuild_egress_policy, google_access_context_manager_service_perimeter_dry_run_egress_policy.cloudbuild_egress_policy]
 }
 
 module "app_admin_project" {
@@ -88,17 +105,26 @@ module "app_admin_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
   activate_apis = [
-    "iam.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "cloudfunctions.googleapis.com",
     "apikeys.googleapis.com",
+    "iam.googleapis.com",
+    "compute.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "clouddeploy.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "secretmanager.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
-    "clouddeploy.googleapis.com"
   ]
+
+  disable_services_on_destroy = false
+  disable_dependent_services  = false
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  vpc_service_control_perimeter_name = var.service_perimeter_name
 
   activate_api_identities = [
     {
@@ -119,7 +145,11 @@ module "app_admin_project" {
     {
       api   = "config.googleapis.com",
       roles = ["roles/cloudconfig.serviceAgent"]
-    }
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkUser", "roles/serviceusage.serviceUsageConsumer", "roles/container.serviceAgent"]
+    },
   ]
 
 }
@@ -153,11 +183,54 @@ module "tf_cloudbuild_workspace" {
     "_GAR_PROJECT_ID"               = var.gar_project_id
     "_GAR_REPOSITORY"               = var.gar_repository_name
     "_DOCKER_TAG_VERSION_TERRAFORM" = var.docker_tag_version_terraform
-  }, local.optional_worker_pool)
+    "_PRIVATE_POOL"                 = var.workerpool_id
+  })
 
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
+}
+
+resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "worker_pool_roles_privilegedaccessmanager_projectServiceAgent" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+}
+
+resource "google_project_iam_member" "cloud_build_builder" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.builds.builder"
+}
+
+resource "google_project_iam_member" "workerPoolUser_cb_sa" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+}
+
+resource "google_project_iam_member" "connection_admin_cb_sa" {
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = local.admin_project_id
+  role    = "roles/cloudbuild.connectionAdmin"
+}
+
+resource "google_project_iam_member" "log_writer_cb_si" {
+  member  = "serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"
+  project = local.worker_pool_project
+  role    = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "service_agent_cb_si" {
+  member  = "serviceAccount:${data.google_project.admin_project.number}@cloudbuild.gserviceaccount.com"
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.builds.builder"
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
@@ -183,6 +256,41 @@ resource "google_organization_iam_member" "builder_organization_browser" {
   role     = "roles/browser"
 }
 
+resource "google_organization_iam_member" "app_factory_org_organization_service_agent" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/privilegedaccessmanager.organizationServiceAgent"
+}
+
+resource "google_organization_iam_member" "organizationServiceAgent_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/privilegedaccessmanager.organizationServiceAgent"
+}
+
+resource "google_organization_iam_member" "organization_xpn_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/compute.xpnAdmin"
+}
+
+resource "google_organization_iam_member" "orgPolicyAdmin_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/orgpolicy.policyAdmin"
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/accesscontextmanager.policyAdmin"
+}
+
 // Create infra project
 module "app_infra_project" {
   source   = "terraform-google-modules/project-factory/google"
@@ -198,4 +306,16 @@ module "app_infra_project" {
   activate_apis            = var.infra_project_apis
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  vpc_service_control_perimeter_name = var.service_perimeter_name
+
+  svpc_host_project_id = each.value.network_project_id
+}
+
+resource "google_project_iam_member" "secretManager_admin" {
+  project = var.cloudbuildv2_repository_config.secret_project_id
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }

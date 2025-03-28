@@ -35,8 +35,13 @@ func TestBootstrap(t *testing.T) {
 
 	triggerRegion := "us-central1"
 
+	vpcsc := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../setup/vpcsc"),
+	)
+
 	vars := map[string]interface{}{
 		"bucket_force_destroy": true,
+		"access_level_name":    vpcsc.GetStringOutput("access_level_name"),
 	}
 
 	bootstrap := tft.NewTFBlueprintTest(t,
