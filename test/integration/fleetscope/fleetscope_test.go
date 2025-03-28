@@ -320,13 +320,16 @@ func TestFleetscope(t *testing.T) {
 						return jsonOutput.Get("sync.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("rendering.errorSummary").String() == "{}"
 					}
 					noError = noErrors()
+					t.Logf("noError var: %v", noError)
 					if noError {
 						break
 					} else {
 						time.Sleep(60 * time.Second)
 					}
 				}
-				assert.True(noError, "config-sync should have no errors.")
+				if !noError {
+					t.Fatal("ERROR: config-sync should not have errors.")
+				}
 
 			})
 
