@@ -308,13 +308,22 @@ func TestFleetscope(t *testing.T) {
 				output = strings.ReplaceAll(output, "'", "")
 				assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
 				jsonOutput = gjson.Parse(output)
-				t.Logf("jsonOutput: %v", jsonOutput.String())
-				t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
-				t.Logf("sync.errorSummary equals '': %v", jsonOutput.Get("sync.errorSummary").String() == "")
 
-				assert.Equal(jsonOutput.Get("sync.errorSummary").String(), "{}", "sync should have no errors.")
-				assert.Equal(jsonOutput.Get("source.errorSummary").String(), "{}", "source should have no errors.")
-				assert.Equal(jsonOutput.Get("rendering.errorSummary").String(), "{}", "rendering should have no errors.")
+				t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
+				t.Logf("sync.errorSummary equals {}: %v", jsonOutput.Get("sync.errorSummary").String() == "{}")
+				t.Logf("rendering.errorSummary equals {}: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}")
+
+				noErrors := func() bool {
+					t.Logf("noError() jsonOutput: %v", jsonOutput.String())
+
+					t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
+					t.Logf("sync.errorSummary equals {}: %v", jsonOutput.Get("sync.errorSummary").String() == "{}")
+					t.Logf("rendering.errorSummary equals {}: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}")
+
+					return jsonOutput.Get("sync.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("rendering.errorSummary").String() == "{}"
+				}
+
+				assert.True(noErrors(), "config-sync should have no errors.")
 			})
 
 			fleetscope.Test()
