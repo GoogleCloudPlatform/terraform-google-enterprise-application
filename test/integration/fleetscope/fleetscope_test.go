@@ -299,21 +299,19 @@ func TestFleetscope(t *testing.T) {
 				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
 				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
 
-				pollConfigSync := func() (bool, error) {
-					// validate no errors in config sync
-					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
-					if err != nil {
-						t.Fatal(err)
-					}
-					// jsonpath adds ' character to string, that need to be removed for a valid json
-					output = strings.ReplaceAll(output, "'", "")
-					assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
-					jsonOutput = gjson.Parse(output)
-					// keep retrying if any of the above fields contains errors
-					return !(jsonOutput.Get("rendering.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("sync.errorSummary").String() == "{}"), nil
+				// validate no errors in config sync
+				output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+				if err != nil {
+					t.Fatal(err)
 				}
-				utils.Poll(t, pollConfigSync, 10, 15*time.Second)
-
+				// jsonpath adds ' character to string, that need to be removed for a valid json
+				output = strings.ReplaceAll(output, "'", "")
+				assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
+				jsonOutput = gjson.Parse(output)
+				t.Logf("jsonOutput: %v", jsonOutput)
+				assert.Equal(jsonOutput.Get("rendering.errorSummary").String(), "{}")
+				assert.Equal(jsonOutput.Get("source.errorSummary").String(), "{}")
+				assert.Equal(jsonOutput.Get("sync.errorSummary").String(), "{}")
 			})
 
 			fleetscope.Test()
