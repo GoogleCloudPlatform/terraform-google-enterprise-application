@@ -82,6 +82,8 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
         sync_repo                 = local.use_csr ? google_sourcerepo_repository.acm_repo[0].url : var.config_sync_repository_url
         secret_type               = var.config_sync_secret_type
         gcp_service_account_email = local.use_csr ? google_service_account.root_reconciler[0].email : null
+        policy_dir                = var.config_sync_policy_dir
+        sync_branch               = var.config_sync_branch
       }
     }
   }
