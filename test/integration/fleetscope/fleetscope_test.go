@@ -299,31 +299,35 @@ func TestFleetscope(t *testing.T) {
 				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
 				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
 
-				// validate no errors in config sync
-				output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
-				if err != nil {
-					t.Fatal(err)
+				noError := false
+				for count := 0; count < 10; count++ {
+					// validate no errors in config sync
+					output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+					if err != nil {
+						t.Fatal(err)
+					}
+					// jsonpath adds ' character to string, that need to be removed for a valid json
+					output = strings.ReplaceAll(output, "'", "")
+					assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
+					jsonOutput = gjson.Parse(output)
+					noErrors := func() bool {
+						t.Logf("noError() jsonOutput: %v", jsonOutput.String())
+
+						t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
+						t.Logf("sync.errorSummary equals {}: %v", jsonOutput.Get("sync.errorSummary").String() == "{}")
+						t.Logf("rendering.errorSummary equals {}: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}")
+
+						return jsonOutput.Get("sync.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("rendering.errorSummary").String() == "{}"
+					}
+					noError = noErrors()
+					if noError {
+						break
+					} else {
+						time.Sleep(60 * time.Second)
+					}
 				}
-				// jsonpath adds ' character to string, that need to be removed for a valid json
-				output = strings.ReplaceAll(output, "'", "")
-				assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
-				jsonOutput = gjson.Parse(output)
+				assert.True(noError, "config-sync should have no errors.")
 
-				t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
-				t.Logf("sync.errorSummary equals {}: %v", jsonOutput.Get("sync.errorSummary").String() == "{}")
-				t.Logf("rendering.errorSummary equals {}: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}")
-
-				noErrors := func() bool {
-					t.Logf("noError() jsonOutput: %v", jsonOutput.String())
-
-					t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
-					t.Logf("sync.errorSummary equals {}: %v", jsonOutput.Get("sync.errorSummary").String() == "{}")
-					t.Logf("rendering.errorSummary equals {}: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}")
-
-					return jsonOutput.Get("sync.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("rendering.errorSummary").String() == "{}"
-				}
-
-				assert.True(noErrors(), "config-sync should have no errors.")
 			})
 
 			fleetscope.Test()
