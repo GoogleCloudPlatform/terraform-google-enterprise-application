@@ -19,6 +19,26 @@ variable "project_id" {
   type        = string
 }
 
+variable "org_id" {
+  description = "Organization ID"
+  type        = string
+}
+
+variable "folder_id" {
+  description = "Folder ID"
+  type        = string
+}
+
+variable "billing_account" {
+  description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
+  type        = string
+}
+
+variable "workerpool_network_id" {
+  description = "The network definition that the workers are peered to. Must be in the format projects/{project}/global/networks/{network}, where {project} is a project number, such as 12345, and {network} is the name of a VPC network in the project."
+  type        = string
+}
+
 variable "bucket_prefix" {
   description = "Name prefix to use for buckets created."
   type        = string
@@ -86,6 +106,7 @@ variable "cloudbuildv2_repository_config" {
     - gitlab_enterprise_host_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.
     - gitlab_enterprise_service_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
     - gitlab_enterprise_ca_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.
+    - secret_project_id: (Optional) The project id where the secret is stored.
   Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.
   Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.
   Note: If 'cloudbuildv2_repository_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default.
@@ -116,6 +137,7 @@ variable "cloudbuildv2_repository_config" {
     gitlab_enterprise_host_uri                  = optional(string)
     gitlab_enterprise_service_directory         = optional(string)
     gitlab_enterprise_ca_certificate            = optional(string)
+    secret_project_id                           = optional(string)
   })
 
   # If cloudbuildv2 is not configured, then auto-creation with CSR will be used
@@ -141,21 +163,35 @@ variable "cloudbuildv2_repository_config" {
         var.cloudbuildv2_repository_config.github_app_id_secret_id != null &&
         var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id == null &&
         var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id == null &&
-        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id == null
+        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id == null &&
+        var.cloudbuildv2_repository_config.secret_project_id != null
         ) : var.cloudbuildv2_repository_config.repo_type == "GITLABv2" ? (
         var.cloudbuildv2_repository_config.github_secret_id == null &&
         var.cloudbuildv2_repository_config.github_app_id_secret_id == null &&
         var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id != null &&
         var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id != null &&
-        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id != null
+        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id != null &&
+        var.cloudbuildv2_repository_config.secret_project_id != null
       ) : var.cloudbuildv2_repository_config.repo_type == "CSR" ? true : false
     )
-    error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
+    error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined. Also, if you are using Secrets, provide the project_id where is hosted."
   }
 
 }
 
-variable "worker_pool_id" {
+variable "workerpool_network_project_id" {
+  description = "Workepool network project."
+  type        = string
+  default     = null
+}
+
+variable "access_level_name" {
+  description = "Access Level full name."
+  type        = string
+  default     = null
+}
+
+variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
 

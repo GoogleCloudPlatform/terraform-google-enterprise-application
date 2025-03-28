@@ -36,7 +36,7 @@ locals {
   cb_service_accounts_emails = { for k, v in module.tf_cloudbuild_workspace : k => reverse(split("/", v.cloudbuild_sa))[0] }
 
   // If the user specify a Cloud Build Worker Pool, utilize it in the trigger
-  optional_worker_pool = var.worker_pool_id != "" ? { "_PRIVATE_POOL" = var.worker_pool_id } : {}
+  optional_worker_pool = var.workerpool_id != "" ? { "_PRIVATE_POOL" = var.workerpool_id } : {}
 }
 
 resource "google_sourcerepo_repository" "gcp_repo" {
@@ -102,7 +102,8 @@ module "tf_cloudbuild_workspace" {
   cloudbuild_sa_roles = {
     "roles" = {
       project_id = var.project_id
-    roles = local.cb_config[each.key].roles }
+      roles      = local.cb_config[each.key].roles
+    }
   }
 
   substitutions = merge({

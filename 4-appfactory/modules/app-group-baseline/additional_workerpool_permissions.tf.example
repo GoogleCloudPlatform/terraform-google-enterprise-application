@@ -10,11 +10,6 @@
 // To run this script in AppFactory Pipeline:
 // - Application Factory Pipeline SA must have `roles/resourcemanager.projectIamAdmin` on the workerpool project
 
-locals {
-  projects_re         = "projects/([^/]+)/"
-  worker_pool_project = regex(local.projects_re, var.worker_pool_id)[0]
-}
-
 data "google_project" "admin_projects" {
   project_id = local.admin_project_id
 }

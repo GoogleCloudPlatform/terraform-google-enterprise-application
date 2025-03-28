@@ -33,5 +33,7 @@ module "provision-monte-carlo-infra" {
   env                      = local.env
   cluster_service_accounts = local.cluster_service_accounts
   bucket_force_destroy     = var.bucket_force_destroy
+  workerpool_id            = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
   team                     = "hpc-team-b"
+  access_level_name        = var.access_level_name
 }

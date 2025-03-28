@@ -38,7 +38,14 @@ data "terraform_remote_state" "multitenant" {
   }
 }
 
+data "terraform_remote_state" "bootstrap" {
+  backend = "gcs"
 
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/bootstrap"
+  }
+}
 
 data "terraform_remote_state" "appfactory" {
   backend = "gcs"
