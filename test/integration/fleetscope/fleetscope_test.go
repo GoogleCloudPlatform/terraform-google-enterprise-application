@@ -312,9 +312,9 @@ func TestFleetscope(t *testing.T) {
 				t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
 				t.Logf("sync.errorSummary equals '': %v", jsonOutput.Get("sync.errorSummary").String() == "")
 
-				assert.Empty(jsonOutput.Get("sync.errorSummary").String(), "sync should have no errors.")
-				assert.Empty(jsonOutput.Get("source.errorSummary").String(), "source should have no errors.")
-				assert.Empty(jsonOutput.Get("rendering.errorSummary").String(), "rendering should have no errors.")
+				assert.Equal(jsonOutput.Get("sync.errorSummary").String(), "{}", "sync should have no errors.")
+				assert.Equal(jsonOutput.Get("source.errorSummary").String(), "{}", "source should have no errors.")
+				assert.Equal(jsonOutput.Get("rendering.errorSummary").String(), "{}", "rendering should have no errors.")
 			})
 
 			fleetscope.Test()
