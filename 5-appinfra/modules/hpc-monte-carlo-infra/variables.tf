@@ -51,6 +51,17 @@ variable "cluster_service_accounts" {
   type        = map(any)
 }
 
+variable "workerpool_id" {
+  description = "Private Worker pool id."
+  type        = string
+}
+
+variable "access_level_name" {
+  description = "Access Level full name."
+  type        = string
+  default     = null
+}
+
 variable "team" {
   description = "Environment Team, must be the same as the fleet scope team"
   type        = string

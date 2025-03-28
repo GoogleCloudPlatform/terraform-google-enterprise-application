@@ -5,6 +5,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| access\_level\_name | Access Level full name. | `string` | `null` | no |
 | additional\_substitutions | A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (\_). | `map(string)` | `{}` | no |
 | app\_build\_trigger\_yaml | Path to the Cloud Build YAML file for the application | `string` | n/a | yes |
 | buckets\_force\_destroy | When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
@@ -18,12 +19,13 @@
 | repo\_name | Short version of repository to sync ACM configs from & use source for CI (e.g. 'bank-of-anthos' for https://www.github.com/GoogleCloudPlatform/bank-of-anthos) | `string` | n/a | yes |
 | service\_name | service name (e.g. 'transactionhistory') | `string` | n/a | yes |
 | team\_name | Team name (e.g. 'ledger'). This will be the prefix to the service CI Build Trigger Name. | `string` | n/a | yes |
-| worker\_pool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`<br><br>If this variable is left undefined, Worker Pool will not be used for the Cloud Build Triggers. | `string` | `""` | no |
+| workerpool\_id | Private Worker pool id. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| cloudbuild\_service\_account | Service Account created to run Cloud Build. |
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | service\_repository\_name | The Source Repository name. |
 | service\_repository\_project\_id | The Source Repository project id. |

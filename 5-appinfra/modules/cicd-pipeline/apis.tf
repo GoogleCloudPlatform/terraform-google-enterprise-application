@@ -36,5 +36,6 @@ module "enabled_google_apis" {
     "meshconfig.googleapis.com",
     "meshtelemetry.googleapis.com",
     "iam.googleapis.com",
+    "servicenetworking.googleapis.com"
   ]
 }

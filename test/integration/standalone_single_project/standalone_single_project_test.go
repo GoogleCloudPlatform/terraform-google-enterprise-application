@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -38,12 +39,21 @@ import (
 func TestStandaloneSingleProjectExample(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t)
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
 	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
+	service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
+
+	vars := map[string]interface{}{
+		"project_id":             projectID,
+		"service_perimeter_mode": service_perimeter_mode,
+		"service_perimeter_name": service_perimeter_name,
+		"subnetwork_self_link":   setupOutput.GetTFSetupStringOutput("single_project_cluster_subnetwork_self_link"),
+	}
 
 	// wire setup output project_id to example var.project_id
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
-		tft.WithVars(map[string]interface{}{"project_id": projectID}),
+		tft.WithVars(vars),
 		tft.WithTFDir("../../../examples/standalone_single_project"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
@@ -169,7 +179,8 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 				for _, memberShipName := range membershipNamesProjectNumber {
 					dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
 					controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-					if dataPlaneManagement == "PROVISIONING" || controlPlaneManagement == "PROVISIONING" {
+					retryStatus := []string{"PROVISIONING", "STALLED"}
+					if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
 						retry = true
 					} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
 						generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()

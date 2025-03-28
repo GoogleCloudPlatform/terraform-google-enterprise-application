@@ -12,7 +12,7 @@
 
 locals {
   projects_re         = "projects/([^/]+)/"
-  worker_pool_project = regex(local.projects_re, var.worker_pool_id)[0]
+  worker_pool_project = regex(local.projects_re, var.workerpool_id)[0]
 }
 
 data "google_project" "admin_projects" {

@@ -51,6 +51,12 @@ resource "google_project_service_identity" "compute_sa" {
   service  = "compute.googleapis.com"
 }
 
+data "google_compute_default_service_account" "compute_sa" {
+  project = local.cluster_project_id
+
+  depends_on = [google_project_service_identity.compute_sa]
+}
+
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
@@ -68,6 +74,11 @@ module "eab_cluster_project" {
   shared_vpc_subnets       = var.cluster_subnetworks
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
+  vpc_service_control_perimeter_name = var.service_perimeter_name
+  vpc_service_control_sleep_duration = "2m"
 
   // Skip disabling APIs for gkehub.googleapis.com
   // https://cloud.google.com/anthos/fleet-management/docs/troubleshooting#error_when_disabling_the_fleet_api
@@ -87,6 +98,7 @@ module "eab_cluster_project" {
     "multiclusterservicediscovery.googleapis.com",
     "trafficdirector.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "cloudtrace.googleapis.com"
@@ -169,6 +181,12 @@ resource "google_project_iam_member" "servicemesh_service_agent" {
   depends_on = [module.eab_cluster_project, google_project_service_identity.fleet_meshconfig_sa]
 }
 
+resource "google_project_iam_member" "compute_serviceAgent" {
+  project = local.cluster_project_id
+  role    = "roles/compute.admin"
+  member  = data.google_compute_default_service_account.compute_sa.member
+}
+
 resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
   project = local.cluster_project_id
   role    = "roles/multiclusterservicediscovery.serviceAgent"
@@ -247,7 +265,8 @@ module "gke-standard" {
     google_project_iam_member.gke_service_agent,
     google_project_iam_member.servicemesh_service_agent,
     google_project_iam_member.multiclusterdiscovery_service_agent,
-    google_project_service_identity.compute_sa
+    data.google_compute_default_service_account.compute_sa,
+    google_project_iam_member.compute_serviceAgent
   ]
 
   // Private Cluster Configuration
@@ -296,7 +315,7 @@ module "gke-autopilot" {
     google_project_iam_member.gke_service_agent,
     google_project_iam_member.servicemesh_service_agent,
     google_project_iam_member.multiclusterdiscovery_service_agent,
-    google_project_service_identity.compute_sa
+    data.google_compute_default_service_account.compute_sa
   ]
 
   // Private Cluster Configuration
