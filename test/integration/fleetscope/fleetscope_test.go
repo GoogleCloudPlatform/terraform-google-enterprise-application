@@ -91,7 +91,7 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_repository_url":  "https://github.com/caetano-colin/terraform-google-enterprise-application",
 				"config_sync_policy_dir":      "examples/cymbal-bank/3-fleetscope/config-sync/development",
 				"config_sync_branch":          "cymbal-bank-isolation",
-				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b"},
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
 			}
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
