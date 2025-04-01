@@ -89,7 +89,7 @@ func TestFleetscope(t *testing.T) {
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 				"config_sync_secret_type":     "none",
 				"config_sync_repository_url":  "https://github.com/caetano-colin/terraform-google-enterprise-application",
-				"config_sync_policy_dir":      "examples/cymbal-bank/3-fleetscope/config-sync/development",
+				"config_sync_policy_dir":      fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName),
 				"config_sync_branch":          "cymbal-bank-isolation",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
 			}
