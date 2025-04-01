@@ -187,20 +187,20 @@ resource "google_project_iam_member" "cloud_build_user" {
 
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:${each.value}"
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
 }
 
 resource "google_project_iam_member" "cb_worker_pool_builder_logging_writer" {
   for_each = local.cb_service_accounts_emails
   member   = "serviceAccount:${each.value}"
-  project  = module.project_workerpool.project_id
+  project  = local.worker_pool_project
   role     = "roles/logging.logWriter"
 }
 
 resource "google_project_iam_member" "cloud_build_builder" {
   for_each = local.cb_service_accounts_emails
   member   = "serviceAccount:${each.value}"
-  project  = module.project_workerpool.project_id
+  project  = local.worker_pool_project
   role     = "roles/cloudbuild.builds.builder"
 }
 
@@ -223,7 +223,7 @@ resource "google_project_iam_member" "secret_iam_policy_admin" {
 resource "google_project_iam_member" "iamPolicy_admin" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
 
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/privilegedaccessmanager.projectServiceAgent"
   member  = "serviceAccount:${each.value.email}"
 }

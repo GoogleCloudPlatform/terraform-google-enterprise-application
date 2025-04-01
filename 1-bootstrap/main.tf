@@ -37,6 +37,9 @@ locals {
 
   // If the user specify a Cloud Build Worker Pool, utilize it in the trigger
   optional_worker_pool = var.workerpool_id != "" ? { "_PRIVATE_POOL" = var.workerpool_id } : {}
+
+  projects_re         = "projects/([^/]+)/"
+  worker_pool_project = regex(local.projects_re, var.workerpool_id)[0]
 }
 
 resource "google_sourcerepo_repository" "gcp_repo" {

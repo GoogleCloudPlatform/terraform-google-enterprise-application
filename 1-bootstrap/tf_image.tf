@@ -72,43 +72,43 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
 
 resource "google_project_iam_member" "tf_workerpool_user" {
   member  = google_service_account.builder.member
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
 }
 
 resource "google_project_iam_member" "identity_workerpool_user" {
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
 }
 
 resource "google_project_iam_member" "identity_build_builder" {
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/cloudbuild.builds.builder"
 }
 
 resource "google_project_iam_member" "identity_log_viewer" {
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/logging.viewer"
 }
 
 resource "google_project_iam_member" "identity_log_writer" {
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/logging.logWriter"
 }
 
 resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
   member  = google_service_account.builder.member
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/logging.logWriter"
 }
 
 resource "google_project_iam_member" "tf_cloud_build_builder" {
   member  = google_service_account.builder.member
-  project = module.project_workerpool.project_id
+  project = local.worker_pool_project
   role    = "roles/cloudbuild.builds.builder"
 }
 

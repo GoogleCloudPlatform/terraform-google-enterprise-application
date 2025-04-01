@@ -51,7 +51,7 @@
 
 # resource "google_cloudbuild_worker_pool" "pool" {
 #   name     = "cb-pool-bootstrap"
-#   project  = module.project_workerpool.project_id
+#   project  = local.worker_pool_project
 #   location = var.location
 #   worker_config {
 #     disk_size_gb   = 100
