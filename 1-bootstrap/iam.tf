@@ -182,6 +182,28 @@ resource "google_organization_iam_member" "policyAdmin_role" {
   member   = "serviceAccount:${each.value.email}"
 }
 
+resource "google_project_iam_member" "cloud_build_user" {
+  for_each = local.cb_service_accounts_emails
+
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${each.value}"
+  project = module.project_workerpool.project_id
+}
+
+resource "google_project_iam_member" "cb_worker_pool_builder_logging_writer" {
+  for_each = local.cb_service_accounts_emails
+  member   = "serviceAccount:${each.value}"
+  project  = module.project_workerpool.project_id
+  role     = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "cloud_build_builder" {
+  for_each = local.cb_service_accounts_emails
+  member   = "serviceAccount:${each.value}"
+  project  = module.project_workerpool.project_id
+  role     = "roles/cloudbuild.builds.builder"
+}
+
 resource "google_project_iam_member" "secretManager_admin" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
 
