@@ -158,10 +158,31 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
   }
 }
 
+resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_policy_to_gke_cluster" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Cloud Deploy from ${data.google_project.admin_project.project_id} to GKE Cluster Projects"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+  }
+  egress_to {
+    resources = [for project in data.google_project.clusters_projects : "projects/${project.number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_policy" {
   count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Cloud Deploy Egress from ${[for project in var.cluster_projects_ids : project]} to ${data.google_project.workerpool_project.project_id}"
+  title     = "Cloud Deploy Egress from ${join(", ", var.cluster_projects_ids)} to ${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     dynamic "sources" {
