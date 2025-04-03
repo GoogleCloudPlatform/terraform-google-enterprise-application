@@ -31,31 +31,12 @@ spec:
     matchLabels:
       fleet.gke.io/fleet-scope: cb-ledger-development
 ---
-apiVersion: configmanagement.gke.io/v1
-kind: NamespaceSelector
-metadata:
-   name: frontend-selector
-spec:
-  mode: dynamic
-  selector:
-    matchLabels:
-      fleet.gke.io/fleet-scope: cb-frontend-development
----
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: cymbal-bank-isolation
   annotations:
     configmanagement.gke.io/namespace-selector: accounts-selector
-spec:
-  podSelector: {}
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: cymbal-bank-isolation
-  annotations:
-    configmanagement.gke.io/namespace-selector: frontend-selector
 spec:
   podSelector: {}
 ---
