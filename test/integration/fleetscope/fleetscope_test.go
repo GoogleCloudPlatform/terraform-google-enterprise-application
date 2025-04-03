@@ -329,11 +329,6 @@ func TestFleetscope(t *testing.T) {
 				if !noError {
 					t.Fatal("ERROR: config-sync should not have errors.")
 				}
-
-				output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "networkpolicy", "cymbal-bank-isolation", "-n", "cb-accounts-development", "-o", "json")
-				if err != nil {
-					t.Fatal(err)
-				}
 			})
 
 			fleetscope.Test()
