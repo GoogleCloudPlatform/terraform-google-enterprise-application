@@ -33,7 +33,7 @@ func TestVPCSC(t *testing.T) {
 	networkProjectsNumber := temp.GetTFSetupOutputListVal("network_project_number")
 	serviceAccount := temp.GetTFSetupStringOutput("sa_email")
 	singleProject, _ := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
-	addAccessLevelMembers := strings.Split(os.Getenv("access_level_members"), ",")
+	addAccessLevelMembers := strings.Split(os.Getenv("TF_VAR_access_level_members"), ",")
 	protected_projects := []string{}
 	orgID := temp.GetTFSetupStringOutput("org_id")
 
@@ -60,7 +60,7 @@ func TestVPCSC(t *testing.T) {
 		protected_projects = append(protected_projects, networkProjectsNumber...)
 	}
 	accessLevelMembers = append(accessLevelMembers, addAccessLevelMembers...)
-
+	t.Logf("accessLevelMembers: %v", accessLevelMembers)
 	vars := map[string]interface{}{
 		"access_level_members": accessLevelMembers,
 		"protected_projects":   protected_projects,

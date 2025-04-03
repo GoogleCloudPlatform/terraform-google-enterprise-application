@@ -354,18 +354,4 @@ module "regular_service_perimeter" {
       }
     }
   ] : []
-  // allow access_level_members to view logs / access troubleshooting tokens inside perimeter
-  ingress_policies = var.service_perimeter_mode == "ENFORCE" ? [
-    {
-      from = {
-        identities = var.access_level_members
-      }
-      to = {
-        resources = ["*"]
-        operations = {
-          "*" = "*"
-        }
-      }
-    }
-  ] : []
 }
