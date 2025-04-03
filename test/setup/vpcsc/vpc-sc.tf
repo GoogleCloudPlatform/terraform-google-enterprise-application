@@ -361,8 +361,10 @@ module "regular_service_perimeter" {
         identities = var.access_level_members
       }
       to = {
-        resources  = ["*"]
-        operations = ["*"]
+        resources = ["*"]
+        operations = {
+          "*" = "*"
+        }
       }
     }
   ] : []
