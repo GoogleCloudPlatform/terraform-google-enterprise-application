@@ -39,6 +39,18 @@ metadata:
     configmanagement.gke.io/namespace-selector: accounts-selector
 spec:
   podSelector: {}
+  ingress:
+    - from:
+        - podSelector: {}
+    - from:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cb-accounts-development
+                  - cb-frontend-development
+                  - cb-ledger-development
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
