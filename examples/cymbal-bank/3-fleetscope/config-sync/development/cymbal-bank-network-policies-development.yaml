@@ -60,3 +60,15 @@ metadata:
     configmanagement.gke.io/namespace-selector: ledger-selector
 spec:
   podSelector: {}
+  ingress:
+    - from:
+        - podSelector: {}
+    - from:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cb-accounts-development
+                  - cb-frontend-development
+                  - cb-ledger-development
