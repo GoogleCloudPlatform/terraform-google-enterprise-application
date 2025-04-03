@@ -82,3 +82,42 @@ spec:
                   - cb-accounts-development
                   - cb-frontend-development
                   - cb-ledger-development
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cymbal-bank-isolation
+  annotations:
+    configmanagement.gke.io/namespace-selector: frontend-selector
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+        - port: 80
+    - from:
+        - podSelector: {}
+    - from:
+        - namespaceSelector: {}
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+        - port: 80
+    - to:
+        - podSelector: {}
+    - to:
+        - namespaceSelector: {}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
