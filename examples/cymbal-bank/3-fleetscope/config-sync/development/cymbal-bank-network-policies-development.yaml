@@ -92,9 +92,7 @@ metadata:
 spec:
   podSelector: {}
   ingress:
-    - from:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-      ports:
-        - port: 443
-        - port: 80
+    - from: 
+      - podSelector: {}  # Allows traffic from all pods in the cluster
+      - namespaceSelector: {}  # Allows traffic from all namespaces
+      - ipBlock: {}  # Allows traffic from all IPs
