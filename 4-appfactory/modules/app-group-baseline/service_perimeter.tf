@@ -179,6 +179,28 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
   }
 }
 
+resource "google_access_context_manager_service_perimeter_egress_policy" "service_directory_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Allow Service Directory from ${data.google_project.admin_project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "servicedirectory.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+}
+
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_policy" {
   count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
