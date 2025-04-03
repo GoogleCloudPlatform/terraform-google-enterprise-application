@@ -24,22 +24,22 @@ spec:
 apiVersion: configmanagement.gke.io/v1
 kind: NamespaceSelector
 metadata:
-   name: ledger-selector
-spec:
-  mode: dynamic
-  selector:
-    matchLabels:
-      fleet.gke.io/fleet-scope: cb-ledger-production
----
-apiVersion: configmanagement.gke.io/v1
-kind: NamespaceSelector
-metadata:
    name: frontend-selector
 spec:
   mode: dynamic
   selector:
     matchLabels:
       fleet.gke.io/fleet-scope: cb-frontend-production
+---
+apiVersion: configmanagement.gke.io/v1
+kind: NamespaceSelector
+metadata:
+   name: ledger-selector
+spec:
+  mode: dynamic
+  selector:
+    matchLabels:
+      fleet.gke.io/fleet-scope: cb-ledger-production
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -50,32 +50,17 @@ metadata:
 spec:
   podSelector: {}
   ingress:
-  - from:
-    - podSelector: {}
-  - from:
-    - namespaceSelector:
-        matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: In
-          values:
-          - cb-frontend-production
-          - cb-accounts-production
-          - cb-ledger-production
-          - istio-system
-  policyTypes:
-  - Ingress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: cymbal-bank-isolation
-  annotations:
-    configmanagement.gke.io/namespace-selector: frontend-selector
-spec:
-  podSelector: {}
-  policyTypes:
-  - Egress
-  - Ingress
+    - from:
+        - podSelector: {}
+    - from:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cb-accounts-production
+                  - cb-frontend-production
+                  - cb-ledger-production
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -86,17 +71,30 @@ metadata:
 spec:
   podSelector: {}
   ingress:
-  - from:
-    - podSelector: {}
-  - from:
-    - namespaceSelector:
-        matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: In
-          values:
-          - cb-frontend-production
-          - cb-accounts-production
-          - cb-ledger-production
-          - istio-system
+    - from:
+        - podSelector: {}
+    - from:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - cb-accounts-production
+                  - cb-frontend-production
+                  - cb-ledger-production
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cymbal-bank-isolation
+  annotations:
+    configmanagement.gke.io/namespace-selector: frontend-selector
+spec:
+  podSelector: {}
+  ingress:
+  - {}
+  egress:
+  - {}
   policyTypes:
+  - Egress
   - Ingress
