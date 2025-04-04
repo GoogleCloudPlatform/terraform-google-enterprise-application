@@ -243,7 +243,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
   perimeter = var.service_perimeter_name
   title     = "Ingress from [${data.google_project.admin_project.project_id}, ${data.google_project.workerpool_project.project_id}] to Deployment API's"
   ingress_from {
-    identity_type = "any_identity"
+    identity_type = "ANY_IDENTITY"
     sources {
       resource = "projects/${data.google_project.admin_project.number}"
     }
