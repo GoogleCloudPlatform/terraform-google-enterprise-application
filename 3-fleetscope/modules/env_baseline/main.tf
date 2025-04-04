@@ -19,6 +19,8 @@ locals {
 
   scope_membership = { for idx, val in setproduct(keys(var.namespace_ids), var.cluster_membership_ids) :
   "${val[0]}-${idx}" => val }
+
+  namespace_labels = { for ns, group in var.namespace_ids : ns => contains(var.disable_istio_on_namespaces, ns) ? {} : { "istio-injection" = "enabled" } }
 }
 
 resource "random_string" "suffix" {
@@ -42,9 +44,10 @@ resource "google_gke_hub_namespace" "fleet-ns" {
   scope              = google_gke_hub_scope.fleet-scope[each.key].name
   project            = google_gke_hub_scope.fleet-scope[each.key].project
 
-  labels = {
-    "istio-injection" = "enabled"
-  }
+  labels           = local.namespace_labels[each.key]
+  namespace_labels = local.namespace_labels[each.key]
+
+  depends_on = [google_gke_hub_feature.mesh_feature]
 }
 
 resource "google_gke_hub_membership_binding" "membership-binding" {

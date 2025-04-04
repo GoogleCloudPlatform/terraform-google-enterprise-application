@@ -34,12 +34,12 @@ Config Sync is installed in this step when running the Terraform code. Before in
 
 Config Sync supports the following mechanisms for authentication:
 
-* SSH key pair (ssh)
-* Cookiefile (cookiefile)
-* Token (token)
-* Google service account (gcpserviceaccount)
-* Compute Engine default service account (gcenode)
-* GitHub App (githubapp)
+- SSH key pair (ssh)
+- Cookiefile (cookiefile)
+- Token (token)
+- Google service account (gcpserviceaccount)
+- Compute Engine default service account (gcenode)
+- GitHub App (githubapp)
 
 The example below shows configuration steps for the `token` mechanism, using Gitlab as the Git provider, for more information please check the [following documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync).
 
@@ -59,8 +59,8 @@ After you create and obtain the personal access token in Gitlab, add it to a new
 
     Replace the following:
 
-    - `USERNAME`: the username that you want to use.
-    - `TOKEN`: the token that you created in the previous step.
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
 
 - (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
 
@@ -75,9 +75,9 @@ After you create and obtain the personal access token in Gitlab, add it to a new
 
     Replace the following:
 
-    - `USERNAME`: the username that you want to use.
-    - `TOKEN`: the token that you created in the previous step.
-    - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+  - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
 
 > NOTE: Config Sync must be able to fetch your Git server, this means you might need to adjust your firewall rules to allow GKE pods to reach that server or create a Cloud NAT Router to allow accessing the Github/Gitlab or Bitbucket SaaS servers.
 
@@ -161,7 +161,7 @@ Please note that some steps in this documentation are specific to the selected G
 
 1. Update the `terraform.tfvars` file with values for your environment.
 
-1. Commit and push changes. Because the plan branch is not a named environment branch, pushing your plan branch triggers terraform plan but not terraform apply. Review the plan output in your Cloud Build project. https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Commit and push changes. Because the plan branch is not a named environment branch, pushing your plan branch triggers terraform plan but not terraform apply. Review the plan output in your Cloud Build project. <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git add .
@@ -169,21 +169,21 @@ Please note that some steps in this documentation are specific to the selected G
     git push --set-upstream origin plan
     ```
 
-1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to development. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout -b development
     git push origin development
     ```
 
-1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to nonproduction. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout -b nonproduction
     git push origin nonproduction
     ```
 
-1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to production. Because this is a named environment branch, pushing to this branch triggers both terraform plan and terraform apply. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID>
 
     ```bash
     git checkout -b production
@@ -239,7 +239,56 @@ If you receive any errors or made any changes to the Terraform config or `terraf
 
 1. Repeat the same series of terraform commands but replace `-chdir=./envs/production` with `-chdir=./envs/development` to deploy the development environment.
 
+## Namespace Network-Level Isolation Example
+
+Namespace network isolation is an aspect of Kubernetes security that helps to limit the access of different services and components within the cluster. You can find an example namespace isolation using Network Policies for Cymbal Bank This example will enforce the following:
+
+- Namespaces pods will deny all ingress traffic.
+- Namespaces pods will allow all egress traffic.
+- Frontend namespace will allow ingress traffic.
+- Cymbal-Bank example namespaces will be able to communicate with each other by allowing ingress from the necessary specific namespaces.
+
+### Use Config Sync for Network Policies
+
+To use `config-sync` you will need to clone you config-sync repository and add the policies there. Commit it and wait for the next sync. Here is a detailed tutorial on [how to setup network policies with config-sync](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/fleet-tenancy#set-up-source). The steps below will show an example for [cymbal-bank](../examples/cymbal-bank) application.
+
+1. Clone `config-sync` repository.
+
+    ```bash
+    git clone https://YOUR-GIT-INSTANCE/YOUR-NAMESPACE/config-sync-development.git
+    ```
+
+1. Checkout to sync branch:
+
+    ```bash
+    cd config-sync-development
+    git checkout master
+    ```
+
+1. Copy example policies from `terraform-google-enterprise-applicaiton` repository to the `config-sync` repository (development environment):
+
+    ```bash
+    cp ../terraform-google-enterprise-applicaiton/examples/cymbal-bank/3-fleetscope/config-sync/development/cymbal-bank-network-policies-development.yaml .
+    ```
+
+1. Commit and push changes:
+
+    ```bash
+    git add .
+    git commit -am "Add cymbal bank network policies - development"
+    git push origin master
+    ```
+
+1. Wait until the resources are synced. You can check status by using `nomos` command line. This requires you having your `kubeconfig` configured to connect to the cluster. Or by accessing the Config Management Console on [https://console.cloud.google.com/kubernetes/config_management/dashboard](https://console.cloud.google.com/kubernetes/config_management/dashboard).
+
+    ```bash
+    nomos status
+    ```
+
+    > NOTE: For more information on nomos command line, see this [documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/nomos-command)
+
+For more information on namespace isolation options see this [documentation](../docs/namespace_isolation.md).
+
 ### Policy Controller
 
 For more information on Policies, refer to the [following documentation](../docs/opa_policies.md)
-
