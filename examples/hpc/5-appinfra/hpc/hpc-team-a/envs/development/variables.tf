@@ -24,3 +24,9 @@ variable "bucket_force_destroy" {
   type        = bool
   default     = false
 }
+
+variable "access_level_name" {
+  description = "Access Level full name."
+  type        = string
+  default     = null
+}
