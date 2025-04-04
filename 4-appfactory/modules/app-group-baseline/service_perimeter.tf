@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+###############################################
+#              EGRESS POLICIES                #
+###############################################
+
 resource "google_access_context_manager_service_perimeter_egress_policy" "secret_manager_egress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
@@ -219,6 +223,73 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     resources = ["projects/${data.google_project.workerpool_project.number}"]
     operations {
       service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+###############################################
+#              INGRESS POLICIES               #
+###############################################
+
+# This ingress policy configures the necessary permissions for Cloud Deploy and Worker Pool to deploy the workload on the GKE cluster project
+resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Ingress from [${data.google_project.admin_project.project_id}, ${data.google_project.workerpool_project.project_id}] to Deployment API's"
+  ingress_from {
+    identity_type = "any_identity"
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    sources {
+      resource = "projects/${data.google_project.workerpool_project.number}"
+    }
+  }
+  ingress_to {
+    resources = ["*"]
+    operations {
+      service_name = "logging.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "gkehub.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "connectgateway.googleapis.com"
       method_selectors {
         method = "*"
       }
