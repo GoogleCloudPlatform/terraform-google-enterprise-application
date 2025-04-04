@@ -61,6 +61,13 @@ resource "google_project_iam_member" "bootstrap_project_viewer" {
   project = var.project_id
 }
 
+resource "google_project_iam_member" "builder_object_user_cb" {
+  for_each = local.cb_service_accounts_emails
+  member   = "serviceAccount:${each.value}"
+  project  = var.project_id
+  role     = "roles/storage.objectUser"
+}
+
 # Billing Account IAM Bindings
 # This resource assigns the 'billing.user' role to service accounts for billing purposes.
 
@@ -145,4 +152,78 @@ resource "google_organization_iam_member" "app_factory_org_organization_service_
   role   = "roles/privilegedaccessmanager.organizationServiceAgent"
   member = "serviceAccount:${each.value.email}"
   org_id = each.value.org_id
+}
+
+resource "google_organization_iam_member" "organizationServiceAgent_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  role     = "roles/privilegedaccessmanager.organizationServiceAgent"
+  org_id   = var.org_id
+  member   = "serviceAccount:${each.value.email}"
+}
+
+resource "google_organization_iam_member" "organization_xpn_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  org_id   = each.value.org_id
+  role     = "roles/compute.xpnAdmin"
+  member   = "serviceAccount:${each.value.email}"
+}
+
+resource "google_organization_iam_member" "orgPolicyAdmin_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  role     = "roles/orgpolicy.policyAdmin"
+  member   = "serviceAccount:${each.value.email}"
+  org_id   = each.value.org_id
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  role     = "roles/accesscontextmanager.policyAdmin"
+  org_id   = var.org_id
+  member   = "serviceAccount:${each.value.email}"
+}
+
+resource "google_project_iam_member" "cloud_build_user" {
+  for_each = local.cb_service_accounts_emails
+
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${each.value}"
+  project = module.project_workerpool.project_id
+}
+
+resource "google_project_iam_member" "cb_worker_pool_builder_logging_writer" {
+  for_each = local.cb_service_accounts_emails
+  member   = "serviceAccount:${each.value}"
+  project  = module.project_workerpool.project_id
+  role     = "roles/logging.logWriter"
+}
+
+resource "google_project_iam_member" "cloud_build_builder" {
+  for_each = local.cb_service_accounts_emails
+  member   = "serviceAccount:${each.value}"
+  project  = module.project_workerpool.project_id
+  role     = "roles/cloudbuild.builds.builder"
+}
+
+resource "google_project_iam_member" "secretManager_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+
+  project = var.cloudbuildv2_repository_config.secret_project_id
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${each.value.email}"
+}
+
+resource "google_project_iam_member" "secret_iam_policy_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+
+  project = var.cloudbuildv2_repository_config.secret_project_id
+  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+  member  = "serviceAccount:${each.value.email}"
+}
+
+resource "google_project_iam_member" "iamPolicy_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+
+  project = module.project_workerpool.project_id
+  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+  member  = "serviceAccount:${each.value.email}"
 }

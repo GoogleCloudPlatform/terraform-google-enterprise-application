@@ -43,7 +43,7 @@ module "gitlab_project" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = var.folder_id
+  folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
@@ -314,7 +314,7 @@ resource "google_compute_global_address" "worker_range" {
   network       = local.gitlab_network_id_without_location
 }
 
-resource "google_service_networking_connection" "worker_pool_conn" {
+resource "google_service_networking_connection" "worker_pool_conn_1" {
   network                 = local.gitlab_network_id_without_location
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.worker_range.name]
@@ -381,6 +381,10 @@ output "gitlab_url" {
   value = "https://${google_compute_instance.default.network_interface[0].access_config[0].nat_ip}.nip.io"
 }
 
+output "gitlab_internal_ip" {
+  value = google_compute_instance.default.network_interface[0].network_ip
+}
+
 output "gitlab_secret_project" {
   value = module.gitlab_project.project_id
 }
@@ -393,14 +397,10 @@ output "gitlab_instance_name" {
   value = google_compute_instance.default.name
 }
 
-output "gitlab_internal_ip" {
-  value = google_compute_instance.default.network_interface[0].network_ip
-}
-
 output "gitlab_service_directory" {
   value = google_service_directory_service.gitlab.id
 }
 
-output "worker_pool_id" {
+output "workerpool_id" {
   value = google_cloudbuild_worker_pool.pool.id
 }

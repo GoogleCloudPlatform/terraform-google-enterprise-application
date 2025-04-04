@@ -17,6 +17,7 @@
 locals {
   docker_tag_version_terraform = "v1"
   namespace                    = "${var.team}-${var.env}"
+  worker_pool_project          = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
 }
 
 resource "google_project_iam_member" "team_roles" {
@@ -54,4 +55,10 @@ resource "google_compute_network" "default" {
   name                    = "default"
   project                 = var.infra_project
   auto_create_subnetworks = true
+}
+
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  count        = var.access_level_name != null ? 1 : 0
+  access_level = var.access_level_name
+  members      = [google_service_account.builder.member]
 }

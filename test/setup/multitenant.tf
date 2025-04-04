@@ -33,7 +33,7 @@ locals {
     ]
   ]) : []
 
-  create_nat_iterator = var.create_cloud_nat ? module.vpc : {}
+  create_nat_iterator = var.create_cloud_nat ? module.cluster_vpc : {}
 }
 
 module "project" {
@@ -46,22 +46,25 @@ module "project" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = var.folder_id
+  folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
   activate_apis = [
+    "accesscontextmanager.googleapis.com",
+    "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
-    "compute.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
     "iam.googleapis.com",
-    "storage-api.googleapis.com",
+    "orgpolicy.googleapis.com",
     "servicemanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudbilling.googleapis.com",
+    "storage-api.googleapis.com",
     "servicedirectory.googleapis.com",
   ]
 
@@ -94,7 +97,7 @@ module "folder_common" {
   source              = "terraform-google-modules/folders/google"
   version             = "~> 5.0"
   prefix              = random_string.prefix.result
-  parent              = "folders/${var.folder_id}"
+  parent              = module.folder_seed.id
   names               = ["common"]
   deletion_protection = false
 }
@@ -107,7 +110,7 @@ module "folders" {
   version = "~> 5.0"
 
   prefix              = random_string.prefix.result
-  parent              = "folders/${var.folder_id}"
+  parent              = module.folder_seed.id
   names               = local.envs
   deletion_protection = false
 }
@@ -147,96 +150,87 @@ module "vpc_project" {
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
+    "container.googleapis.com",
     "iam.googleapis.com",
     "serviceusage.googleapis.com",
-    "container.googleapis.com"
+    "servicenetworking.googleapis.com",
   ]
 }
 
-# Create VPC networks
-module "vpc" {
-  for_each = module.vpc_project
+module "cluster_vpc" {
+  for_each = !var.single_project ? module.vpc_project : {}
   source   = "terraform-google-modules/network/google"
   version  = "~> 10.0"
 
   project_id      = each.value.project_id
   network_name    = "eab-vpc-${each.key}"
-  shared_vpc_host = true
+  shared_vpc_host = !var.single_project
 
-  egress_rules = [
+  ingress_rules = [
     {
-      name     = "allow-private-google-access"
-      priority = 200
-      destination_ranges = [
-        "34.126.0.0/18",
-        "199.36.153.8/30",
-      ]
+      name     = "allow-ssh"
+      priority = 65534
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["0.0.0.0/0"]
       allow = [
         {
           protocol = "tcp"
-          ports    = ["443"]
+          ports    = ["22"]
         }
       ]
     },
-    {
-      name     = "allow-private-google-access-ipv6"
-      priority = 200
-      destination_ranges = [
-        "2600:2d00:0002:2000::/64",
-        "2001:4860:8040::/42"
-      ]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["443"]
-        }
-      ]
-    }
   ]
-
 
   subnets = [
     {
-      subnet_name           = "eab-${each.key}-region01"
-      subnet_ip             = "10.10.10.0/24"
+      subnet_name           = "eab-${each.key}-us-central1"
+      subnet_ip             = "10.1.20.0/24"
       subnet_region         = "us-central1"
       subnet_private_access = true
-    },
-    {
-      subnet_name           = "eab-${each.key}-region02"
-      subnet_ip             = "10.10.20.0/24"
+      }, {
+      subnet_name           = "eab-${each.key}-us-east4"
+      subnet_ip             = "10.1.10.0/24"
       subnet_region         = "us-east4"
       subnet_private_access = true
-    },
-  ]
+  }]
 
   secondary_ranges = {
-    "eab-${each.key}-region01" = [
+    "eab-${each.key}-us-central1" = [
       {
-        range_name    = "eab-${each.key}-region01-secondary-01"
+        range_name    = "eab-${each.key}-us-central1-secondary-01"
         ip_cidr_range = "192.168.0.0/18"
       },
       {
-        range_name    = "eab-${each.key}-region01-secondary-02"
+        range_name    = "eab-${each.key}-us-central1-secondary-02"
         ip_cidr_range = "192.168.64.0/18"
       },
-    ]
-
-    "eab-${each.key}-region02" = [
+    ],
+    "eab-${each.key}-us-east4" = [
       {
-        range_name    = "eab-${each.key}-region02-secondary-01"
+        range_name    = "eab-${each.key}-us-east4-secondary-01"
         ip_cidr_range = "192.168.128.0/18"
       },
       {
-        range_name    = "eab-${each.key}-region02-secondary-02"
+        range_name    = "eab-${each.key}-us-east4-secondary-02"
         ip_cidr_range = "192.168.192.0/18"
       },
-    ]
-  }
+  ] }
+}
+
+module "cluster_private_service_connect" {
+  for_each                   = module.cluster_vpc
+  source                     = "terraform-google-modules/network/google//modules/private-service-connect"
+  version                    = "~> 10.0"
+  project_id                 = each.value.project_id
+  network_self_link          = each.value.network_self_link
+  private_service_connect_ip = "10.3.0.5"
+  forwarding_rule_target     = "vpc-sc"
 }
 
 resource "google_compute_router" "nat_router" {
-  for_each = local.create_nat_iterator
+  for_each = module.cluster_vpc
 
   name    = "nat-router-us-central-1"
   region  = "us-central1"

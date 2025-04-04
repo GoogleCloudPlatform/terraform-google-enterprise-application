@@ -57,6 +57,12 @@ resource "google_artifact_registry_repository_iam_member" "allow_cluster_sa_down
   member     = "serviceAccount:${each.value}"
 }
 
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  count        = var.access_level_name != null ? 1 : 0
+  access_level = var.access_level_name
+  members      = [google_service_account.builder.member]
+}
+
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "60s"
 
@@ -64,9 +70,9 @@ resource "time_sleep" "wait_iam_propagation" {
     google_artifact_registry_repository_iam_member.builder,
     google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,
+    google_access_context_manager_access_level_condition.access-level-conditions,
   ]
 }
-
 
 resource "time_sleep" "wait_api" {
   create_duration = "20s"
@@ -104,12 +110,14 @@ gcloud builds submit ${path.module} \
   --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
   --project=${var.infra_project} \
   --service-account=${google_service_account.builder.id} \
-  --gcs-log-dir=${google_storage_bucket.build_logs.url} || (
+  --gcs-log-dir=${google_storage_bucket.build_logs.url} \
+  --worker-pool=${var.workerpool_id} || (
     sleep 45 && gcloud builds submit ${path.module} \
       --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
       --project=${var.infra_project} \
       --service-account=${google_service_account.builder.id} \
-      --gcs-log-dir=${google_storage_bucket.build_logs.url}
+      --gcs-log-dir=${google_storage_bucket.build_logs.url}\
+      --worker-pool=${var.workerpool_id}
   )
 EOF
 

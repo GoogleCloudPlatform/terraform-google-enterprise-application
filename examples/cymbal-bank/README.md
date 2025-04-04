@@ -505,19 +505,24 @@ The steps below assume that you are checked out on the same level as `terraform-
         cp -r $APP_SOURCE_DIR_PATH/accounts-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/accounts/accounts-db/k8s/overlays
 
         cp -r $APP_SOURCE_DIR_PATH/components $BANK_OF_ANTHOS_PATH/src/
+
+        cp -r $APP_SOURCE_DIR_PATH/other-overlays/e2e.Dockerfile $BANK_OF_ANTHOS_PATH/.github/workflows/ui-tests/Dockerfile
         ```
 
   - Override `skaffold.yaml` files:
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/frontend/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/frontend
+        cp -r $APP_SOURCE_DIR_PATH/frontend_cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/frontend/cloudbuild.yaml
 
         cp -r $APP_SOURCE_DIR_PATH/ledger-ledgerwriter/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/ledgerwriter
         cp -r $APP_SOURCE_DIR_PATH/ledger-transactionhistory/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/transactionhistory
         cp -r $APP_SOURCE_DIR_PATH/ledger-balancereader/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/balancereader
+        cp -r $APP_SOURCE_DIR_PATH/ledger_cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/ledger/cloudbuild.yaml
 
         cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/userservice
         cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/contacts
+        cp -r $APP_SOURCE_DIR_PATH/accounts_cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/accounts/cloudbuild.yaml
         ```
 
   - Update `k8s` overlays:
