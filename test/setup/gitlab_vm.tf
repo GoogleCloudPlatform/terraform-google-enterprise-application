@@ -314,7 +314,7 @@ resource "google_compute_global_address" "worker_range" {
   network       = local.gitlab_network_id_without_location
 }
 
-resource "google_service_networking_connection" "worker_pool_conn_1" {
+resource "google_service_networking_connection" "gitlab_worker_pool_conn" {
   network                 = local.gitlab_network_id_without_location
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.worker_range.name]
@@ -341,11 +341,11 @@ resource "google_cloudbuild_worker_pool" "pool" {
     peered_network_ip_range = "/29"
   }
 
-  depends_on = [google_service_networking_connection.worker_pool_conn]
+  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
 }
 
 resource "time_sleep" "wait_service_network_peering" {
-  depends_on = [google_service_networking_connection.worker_pool_conn]
+  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
 
   create_duration = "30s"
 }
