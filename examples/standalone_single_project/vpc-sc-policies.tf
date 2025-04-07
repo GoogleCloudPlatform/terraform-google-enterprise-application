@@ -91,3 +91,54 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "servic
     }
   }
 }
+
+resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    identities = local.sa_cb
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = [
+      "projects/${data.google_project.project.number}",
+    ]
+
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
+  perimeter = var.service_perimeter_name
+  ingress_from {
+    identities = local.sa_cb
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = [
+      "projects/${data.google_project.project.number}",
+    ]
+
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}

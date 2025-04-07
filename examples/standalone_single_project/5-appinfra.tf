@@ -197,45 +197,6 @@ resource "google_cloudbuild_worker_pool" "pool" {
   }
 }
 
-resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
-  }
-  egress_to {
-    resources = [for project_number in local.secret_project_numbers : "projects/${project_number}"]
-    operations {
-      service_name = "secretmanager.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_policy" {
-  perimeter = var.service_perimeter_name
-  egress_from {
-    identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
-  }
-  egress_to {
-    resources = [for project_number in local.secret_project_numbers : "projects/${project_number}"]
-    operations {
-      service_name = "secretmanager.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 data "google_project" "admin_projects" {
   project_id = var.project_id
 }
@@ -307,60 +268,13 @@ module "cicd" {
 
   workerpool_id = var.workerpool_id == null ? google_cloudbuild_worker_pool.pool[0].id : var.workerpool_id
 
-  depends_on = [google_access_context_manager_service_perimeter_egress_policy.egress_policy, google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy]
+  depends_on = [
+    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy
+  ]
 }
 
 data "google_project" "project" {
   project_id = var.project_id
-}
-
-resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
-  perimeter = var.service_perimeter_name
-  ingress_from {
-    identities = local.sa_cb
-    sources {
-      access_level = "*"
-    }
-  }
-  ingress_to {
-    resources = [
-      "projects/${data.google_project.project.number}",
-    ]
-
-    operations {
-      service_name = "cloudbuild.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
-  perimeter = var.service_perimeter_name
-  ingress_from {
-    identities = local.sa_cb
-    sources {
-      access_level = "*"
-    }
-  }
-  ingress_to {
-    resources = [
-      "projects/${data.google_project.project.number}",
-    ]
-
-    operations {
-      service_name = "cloudbuild.googleapis.com"
-      method_selectors {
-        method = "*"
-      }
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
 }
