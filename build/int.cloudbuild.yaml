@@ -27,7 +27,7 @@ steps:
       - "TF_VAR_folder_id=$_FOLDER_ID"
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
       - "TF_VAR_single_project=false"
-      - "TF_VAR_create_cloud_nat=false"
+      - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
 
   - id: wait-startup-script
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -135,12 +135,17 @@ steps:
       - fleetscope-init
   - id: fleetscope-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
     args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestFleetscope --stage verify --verbose",
-      ]
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestFleetscope --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
     waitFor:
       - fleetscope-apply
 

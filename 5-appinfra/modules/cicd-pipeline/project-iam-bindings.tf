@@ -160,6 +160,7 @@ module "deploy-gke-project-iam-bindings" {
   for_each   = local.gke_projects
   project_id = each.value
 
+  // TODO: grant less permissive roles and grant scope/team namespace specific high privileged roles
   project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor"]
   prefix                  = "serviceAccount"
   service_account_address = google_service_account.cloud_deploy.email
