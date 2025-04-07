@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+locals {
+  infra_projects = [for key, value in module.app_infra_project : value.project_id]
+}
+
 ###############################################
 #              EGRESS POLICIES                #
 ###############################################
@@ -230,6 +234,31 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   }
   lifecycle {
     create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "hpc_allow_infra_projects_to_use_workerpool" {
+  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "HPC - Allow from [${join(", ", local.infra_projects)}] to ${data.google_project.workerpool_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = module.app_infra_project
+      content {
+        resource = "projects/${sources.value.project_number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
 }
 
