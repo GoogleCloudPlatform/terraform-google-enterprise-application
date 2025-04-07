@@ -15,7 +15,8 @@
  */
 
 locals {
-  infra_projects = [for key, value in module.app_infra_project : value.project_id]
+  infra_projects            = [for key, value in module.app_infra_project : value.project_id]
+  hpc_specific_applications = ["hpc-team-a", "hpc-team-b"]
 }
 
 ###############################################
@@ -238,7 +239,8 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "hpc_allow_infra_projects_to_use_workerpool" {
-  count     = var.service_perimeter_mode == "ENFORCE" ? 1 : 0
+  // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
+  count     = var.service_perimeter_mode == "ENFORCE" && contains(local.hpc_specific_applications, var.service_name) ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "HPC - Allow from [${join(", ", local.infra_projects)}] to ${data.google_project.workerpool_project.project_id}"
   egress_from {
