@@ -241,7 +241,7 @@ If you receive any errors or made any changes to the Terraform config or `terraf
 
 ## Namespace Network-Level Isolation Example
 
-Namespace network isolation is an aspect of Kubernetes security that helps to limit the access of different services and components within the cluster. You can find an example namespace isolation using Network Policies for Cymbal Bank This example will enforce the following:
+Namespace network isolation is an aspect of Kubernetes security that helps to limit the access of different services and components within the cluster. You can find an example namespace isolation using Network Policies for Cymbal Bank. This example will enforce the following:
 
 - Namespaces pods will deny all ingress traffic.
 - Namespaces pods will allow all egress traffic.
