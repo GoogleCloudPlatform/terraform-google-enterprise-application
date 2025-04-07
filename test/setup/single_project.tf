@@ -91,6 +91,7 @@ module "project_standalone" {
     "sqladmin.googleapis.com",
     "storage-api.googleapis.com",
     "trafficdirector.googleapis.com",
+    "servicedirectory.googleapis.com",
   ]
 }
 
