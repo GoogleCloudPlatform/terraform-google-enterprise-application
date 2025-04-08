@@ -271,7 +271,8 @@ module "cicd" {
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy
+    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy,
+    google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment
   ]
 }
 
