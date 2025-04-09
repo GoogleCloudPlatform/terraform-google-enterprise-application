@@ -16,7 +16,7 @@
 locals {
   cloudbuild_consumer_project_number = module.gitlab_project.project_number
   bootstrap_project_number           = [for k, v in merge(module.project, module.project_standalone) : v.project_number][0]
-  gitlab_network_name                = "default"
+  gitlab_network_name                = module.vpc.network_name
   gitlab_network_id                  = "projects/${module.gitlab_project.project_number}/locations/global/networks/${local.gitlab_network_name}"
   gitlab_network_id_without_location = replace(local.gitlab_network_id, "locations/", "")
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${local.gitlab_network_name}"
@@ -115,10 +115,11 @@ resource "google_compute_instance" "default" {
 
   network_interface {
     network = local.gitlab_network_name
-
     access_config {
       // Ephemeral public IP
     }
+    subnetwork         = "gitlab-vm-subnet"
+    subnetwork_project = module.vpc.project_id
   }
 
   metadata_startup_script = file("./scripts/gitlab_self_hosted.sh")
@@ -310,7 +311,7 @@ resource "google_compute_global_address" "worker_range" {
   name          = "worker-pool-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = 24
   network       = local.gitlab_network_id_without_location
 }
 
@@ -332,9 +333,9 @@ resource "google_cloudbuild_worker_pool" "pool" {
   project  = module.gitlab_project.project_id
   location = "us-central1"
   worker_config {
-    disk_size_gb = 100
-    machine_type = "e2-standard-4"
-    # no_external_ip = true
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
   }
   network_config {
     peered_network          = local.gitlab_network_id_without_location
