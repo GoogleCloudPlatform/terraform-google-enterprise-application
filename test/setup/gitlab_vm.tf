@@ -105,7 +105,7 @@ resource "google_compute_instance" "default" {
   machine_type = "n2-standard-4"
   zone         = "us-central1-a"
 
-  tags = ["git-vm"]
+  tags = ["git-vm", "direct-gateway-access"]
 
   boot_disk {
     initialize_params {
