@@ -15,6 +15,9 @@
  */
 
 locals {
+  nat_proxy_vm_ip_range = "10.1.1.0/24"
+  gitlab_vm_ip_range    = "10.2.2.0/24"
+
   single_project_network = {
     subnet_name           = "eab-develop-us-central1"
     subnet_ip             = "10.1.20.0/24"
@@ -63,13 +66,13 @@ module "vpc" {
   subnets = concat([
     {
       subnet_name           = "nat-subnet"
-      subnet_ip             = "10.1.1.0/24"
+      subnet_ip             = local.nat_proxy_vm_ip_range
       subnet_region         = "us-central1"
       subnet_private_access = true
     },
     {
       subnet_name           = "gitlab-vm-subnet"
-      subnet_ip             = "10.2.2.0/24"
+      subnet_ip             = local.gitlab_vm_ip_range
       subnet_region         = "us-central1"
       subnet_private_access = true
     }
@@ -119,6 +122,9 @@ resource "google_compute_network_peering_routes_config" "peering_routes" {
   network              = module.vpc.network_name
   import_custom_routes = true
   export_custom_routes = true
+  // explicitly allow the peering for public ip address
+  import_subnet_routes_with_public_ip = true
+  export_subnet_routes_with_public_ip = true
 }
 
 module "firewall_rules" {
@@ -197,38 +203,51 @@ resource "google_compute_instance" "vm-proxy" {
 
   can_ip_forward = true
 
-  metadata = {
-    // This script configures the VM to do IP Forwarding
-    startup-script = <<-EOF
-    sysctl -w net.ipv4.ip_forward=1
-    echo "Creating iptables NAT rule"
-    iptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F: '{print $2}') -j MASQUERADE"
-
-    EOF
-  }
+  // This script configures the VM to do IP Forwarding
+  metadata_startup_script = "sysctl -w net.ipv4.ip_forward=1 && iptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F: '{print $2}') -j MASQUERADE"
 
   service_account {
     scopes = ["cloud-platform"]
   }
 }
 
-// This route will route packets to the NAT VM
+#  This route will route packets to the NAT VM
 resource "google_compute_route" "through-nat" {
-  name              = "through-nat"
+  name              = "through-nat-range1"
   project           = module.vpc.project_id
-  dest_range        = "0.0.0.0/0"
+  dest_range        = "0.0.0.0/1"
   network           = module.vpc.network_name
   next_hop_instance = google_compute_instance.vm-proxy.id
   priority          = 10
 }
 
-// This route allow the NAT VM to reach the internet with it's external IP address
-resource "google_compute_route" "direct-to-gateway-" {
-  name             = "direct-to-gateway"
+resource "google_compute_route" "through-nat2" {
+  name              = "through-nat-range2"
+  project           = module.vpc.project_id
+  dest_range        = "128.0.0.0/1"
+  network           = module.vpc.network_name
+  next_hop_instance = google_compute_instance.vm-proxy.id
+  priority          = 10
+}
+
+# This route allow the NAT VM to reach the internet with it's external IP address
+
+resource "google_compute_route" "direct-to-gateway" {
+  name             = "direct-to-gateway-range1"
   project          = module.vpc.project_id
-  dest_range       = "0.0.0.0/0"
+  dest_range       = "0.0.0.0/1"
   network          = module.vpc.network_name
   next_hop_gateway = "default-internet-gateway"
   tags             = ["direct-gateway-access"]
-  priority         = 1
+  priority         = 5
+}
+
+resource "google_compute_route" "direct-to-gateway2" {
+  name             = "direct-to-gateway-range2"
+  project          = module.vpc.project_id
+  dest_range       = "128.0.0.0/1"
+  network          = module.vpc.network_name
+  next_hop_gateway = "default-internet-gateway"
+  tags             = ["direct-gateway-access"]
+  priority         = 5
 }
