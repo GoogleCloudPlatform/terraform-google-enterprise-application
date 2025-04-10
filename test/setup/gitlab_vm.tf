@@ -66,7 +66,7 @@ module "gitlab_project" {
 }
 
 resource "time_sleep" "wait_gitlab_project_apis" {
-  depends_on = [module.gitlab_project]
+  depends_on = [module.gitlab_project, module.vpc]
 
   create_duration = "30s"
 }
@@ -125,7 +125,6 @@ resource "google_compute_instance" "default" {
   metadata_startup_script = file("./scripts/gitlab_self_hosted.sh")
 
   service_account {
-    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     email  = google_service_account.gitlab_vm.email
     scopes = ["cloud-platform"]
   }

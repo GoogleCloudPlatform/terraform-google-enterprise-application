@@ -330,7 +330,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
     create_before_destroy = true
   }
 
-  depends_on = [ google_access_context_manager_service_perimeter_egress_policy.service_directory_policy ]
+  depends_on = [google_access_context_manager_service_perimeter_egress_policy.service_directory_policy]
 }
 
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
