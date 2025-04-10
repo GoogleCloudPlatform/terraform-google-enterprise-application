@@ -46,4 +46,8 @@ module "multitenant_infra" {
   billing_account        = null
   service_perimeter_name = var.service_perimeter_name
   service_perimeter_mode = var.service_perimeter_mode
+
+  depends_on = [
+    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy
+  ]
 }
