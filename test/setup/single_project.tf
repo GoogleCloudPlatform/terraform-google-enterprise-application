@@ -100,3 +100,36 @@ resource "google_project_service_identity" "gke_identity_cluster_project" {
   project  = local.project_id
   service  = "container.googleapis.com"
 }
+
+module "single_project_vpc" {
+  count = var.single_project ? 1 : 0
+
+  source  = "terraform-google-modules/network/google"
+  version = "~> 10.0"
+
+  project_id      = local.project_id
+  network_name    = "cluster-vpc"
+  shared_vpc_host = false
+
+  subnets = [
+    {
+      subnet_name           = "eab-cluster-net-us-central1"
+      subnet_ip             = "10.1.20.0/24"
+      subnet_region         = "us-central1"
+      subnet_private_access = true
+    }
+  ]
+
+  secondary_ranges = {
+    "eab-cluster-net-us-central1" = [
+      {
+        range_name    = "eab-cluster-net-us-central1-secondary-01"
+        ip_cidr_range = "192.168.0.0/18"
+      },
+      {
+        range_name    = "eab-cluster-net-us-central1-secondary-02"
+        ip_cidr_range = "192.168.64.0/18"
+      },
+    ],
+  }
+}

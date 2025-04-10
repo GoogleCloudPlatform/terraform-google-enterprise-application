@@ -17,24 +17,6 @@
 locals {
   nat_proxy_vm_ip_range = "10.1.1.0/24"
   gitlab_vm_ip_range    = "10.2.2.0/24"
-
-  single_project_network = {
-    subnet_name           = "eab-develop-us-central1"
-    subnet_ip             = "10.1.20.0/24"
-    subnet_region         = "us-central1"
-    subnet_private_access = true
-  }
-  single_project_secondary = {
-    "eab-develop-us-central1" = [
-      {
-        range_name    = "eab-develop-us-central1-secondary-01"
-        ip_cidr_range = "192.168.0.0/18"
-      },
-      {
-        range_name    = "eab-develop-us-central1-secondary-02"
-        ip_cidr_range = "192.168.64.0/18"
-      },
-  ] }
 }
 
 module "vpc" {
@@ -63,7 +45,7 @@ module "vpc" {
     },
   ]
 
-  subnets = concat([
+  subnets = [
     {
       subnet_name           = "nat-subnet"
       subnet_ip             = local.nat_proxy_vm_ip_range
@@ -76,9 +58,7 @@ module "vpc" {
       subnet_region         = "us-central1"
       subnet_private_access = true
     }
-  ], var.single_project ? [local.single_project_network] : [])
-
-  secondary_ranges = var.single_project ? local.single_project_secondary : {}
+  ]
 }
 
 # resource "google_dns_policy" "default_policy" {
