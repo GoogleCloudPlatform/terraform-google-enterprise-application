@@ -97,7 +97,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "servic
     operations {
       service_name = "compute.googleapis.com"
       method_selectors {
-        method = "compute.v1.SubnetworksService.Get"
+        method = "SubnetworksService.Get"
       }
     }
   }
