@@ -35,6 +35,13 @@ resource "google_project_iam_member" "metric_writer" {
   member = data.google_compute_default_service_account.compute_service_identity.member
 }
 
+resource "google_project_iam_member" "cloudbuild_serviceAgent" {
+  project = var.project_id
+  role    = "roles/cloudbuild.serviceAgent"
+
+  member = google_project_service_identity.cloudbuild_service_identity.member
+}
+
 resource "google_project_iam_member" "log_writer" {
   for_each = {
     "compute"      = data.google_compute_default_service_account.compute_service_identity.member,
@@ -109,6 +116,32 @@ resource "google_project_iam_member" "container_admin" {
   member = each.value
 }
 
+resource "google_project_iam_member" "cloudbuild_service_account" {
+  for_each = {
+    "cloud_deploy"     = google_service_account.cloud_deploy.member,
+    "cloud_build"      = google_service_account.cloud_build.member,
+    "cb_service_agent" = google_project_service_identity.cloudbuild_service_identity.member,
+    "cd_service_agent" = google_project_service_identity.cloud_deploy_sa.member,
+  }
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.builds.builder"
+
+  member = each.value
+}
+
+resource "google_project_iam_member" "logging_writer" {
+  for_each = {
+    "cloud_deploy"     = google_service_account.cloud_deploy.member,
+    "cloud_build"      = google_service_account.cloud_build.member,
+    "service_agent"    = google_project_service_identity.cloudbuild_service_identity.member,
+    "cd_service_agent" = google_project_service_identity.cloud_deploy_sa.member,
+  }
+  project = local.worker_pool_project
+  role    = "roles/logging.logWriter"
+
+  member = each.value
+}
+
 // added to avoid overwriten of roles for each app service deploy service account, since GKE projects are shared between services
 module "cb-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"
@@ -116,7 +149,7 @@ module "cb-gke-project-iam-bindings" {
   for_each   = local.gke_projects
   project_id = each.value
 
-  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor"]
+  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor", "roles/cloudbuild.workerPoolUser"]
   prefix                  = "serviceAccount"
   service_account_address = google_service_account.cloud_build.email
 }

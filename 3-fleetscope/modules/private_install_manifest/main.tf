@@ -60,6 +60,14 @@ resource "google_artifact_registry_repository" "k8s" {
   }
 }
 
+resource "google_artifact_registry_vpcsc_config" "vpcsc_config" {
+  count        = var.vpcsc_policy == "ALLOW" ? 1 : 0
+  provider     = google-beta
+  location     = google_artifact_registry_repository.k8s.location
+  project      = google_artifact_registry_repository.k8s.project
+  vpcsc_policy = var.vpcsc_policy
+}
+
 module "kubectl" {
   source  = "terraform-google-modules/gcloud/google//modules/kubectl-fleet-wrapper"
   version = "~> 3.5"

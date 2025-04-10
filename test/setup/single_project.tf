@@ -24,7 +24,7 @@ module "project_standalone" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = var.folder_id
+  folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
 
@@ -32,8 +32,16 @@ module "project_standalone" {
 
   activate_api_identities = [
     {
+      api   = "artifactregistry.googleapis.com",
+      roles = ["roles/artifactregistry.serviceAgent"]
+    },
+    {
       api   = "compute.googleapis.com",
       roles = []
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkUser", "roles/serviceusage.serviceUsageConsumer", "roles/container.serviceAgent"]
     },
     {
       api = "cloudbuild.googleapis.com",
@@ -53,6 +61,7 @@ module "project_standalone" {
   ]
 
   activate_apis = [
+    "accesscontextmanager.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",
@@ -67,15 +76,60 @@ module "project_standalone" {
     "container.googleapis.com",
     "gkehub.googleapis.com",
     "iam.googleapis.com",
+    "iap.googleapis.com",
     "mesh.googleapis.com",
+    "monitoring.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
+    "networkmanagement.googleapis.com",
+    "orgpolicy.googleapis.com",
     "secretmanager.googleapis.com",
     "servicemanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "storage-api.googleapis.com",
     "trafficdirector.googleapis.com",
+    "servicedirectory.googleapis.com",
   ]
+}
+
+resource "google_project_service_identity" "gke_identity_cluster_project" {
+  provider = google-beta
+  project  = local.project_id
+  service  = "container.googleapis.com"
+}
+
+module "single_project_vpc" {
+  count = var.single_project ? 1 : 0
+
+  source  = "terraform-google-modules/network/google"
+  version = "~> 10.0"
+
+  project_id      = local.project_id
+  network_name    = "cluster-vpc"
+  shared_vpc_host = false
+
+  subnets = [
+    {
+      subnet_name           = "eab-cluster-net-us-central1"
+      subnet_ip             = "10.1.20.0/24"
+      subnet_region         = "us-central1"
+      subnet_private_access = true
+    }
+  ]
+
+  secondary_ranges = {
+    "eab-cluster-net-us-central1" = [
+      {
+        range_name    = "eab-cluster-net-us-central1-secondary-01"
+        ip_cidr_range = "192.168.0.0/18"
+      },
+      {
+        range_name    = "eab-cluster-net-us-central1-secondary-02"
+        ip_cidr_range = "192.168.64.0/18"
+      },
+    ],
+  }
 }

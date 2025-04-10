@@ -28,14 +28,25 @@ locals {
     !var.single_project ? ["cymbalshops", "hpc-team-a", "hpc-team-b"] : []
   )
 
-  index      = !var.single_project ? "multitenant" : "single_project"
-  project_id = [for i, value in merge(module.project, module.project_standalone) : value.project_id][0]
+  index          = !var.single_project ? "multitenant" : "single"
+  project_id     = [for i, value in merge(module.project, module.project_standalone) : value.project_id][0]
+  project_number = [for i, value in merge(module.project, module.project_standalone) : value.project_number][0]
 }
 
 resource "random_string" "prefix" {
   length  = 6
   special = false
   upper   = false
+}
+
+# Create mock seed folder
+module "folder_seed" {
+  source              = "terraform-google-modules/folders/google"
+  version             = "~> 5.0"
+  prefix              = random_string.prefix.result
+  parent              = "folders/${var.folder_id}"
+  names               = ["seed"]
+  deletion_protection = false
 }
 
 data "google_organization" "org" {

@@ -20,6 +20,9 @@
 locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
+
+  sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
+
   cicd_apps = {
     "contacts" = {
       application_name = "cymbal-bank"
@@ -172,9 +175,26 @@ EOF
       }
     },
   }
+  projects_re            = "projects/([^/]+)/"
+  worker_pool_project    = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : null
+  secret_project_numbers = distinct(compact([for cicd in local.cicd_apps : try(regex("projects/([^/]*)/", cicd.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0], null)]))
+}
 
-  projects_re         = "projects/([^/]+)/"
-  worker_pool_project = regex(local.projects_re, var.worker_pool_id)[0]
+
+resource "google_cloudbuild_worker_pool" "pool" {
+  count    = var.workerpool_id == null ? 1 : 0
+  name     = "cb-pool-single-project"
+  project  = var.project_id
+  location = var.region
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = var.workerpool_network_id
+    peered_network_ip_range = "/29"
+  }
 }
 
 data "google_project" "admin_projects" {
@@ -182,24 +202,28 @@ data "google_project" "admin_projects" {
 }
 
 resource "google_project_iam_member" "assign_permissions" {
+  count   = local.worker_pool_project != null ? 1 : 0
   project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "assign_permissions_service_agent" {
+  count   = local.worker_pool_project != null ? 1 : 0
   project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:${data.google_project.admin_projects.number}@cloudbuild.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "sd_viewer" {
+  count   = local.worker_pool_project != null ? 1 : 0
   project = local.worker_pool_project
   role    = "roles/servicedirectory.viewer"
   member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "access_network" {
+  count   = local.worker_pool_project != null ? 1 : 0
   project = local.worker_pool_project
   role    = "roles/servicedirectory.pscAuthorizedService"
   member  = "serviceAccount:service-${data.google_project.admin_projects.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
@@ -208,10 +232,13 @@ resource "google_project_iam_member" "access_network" {
 resource "time_sleep" "wait_propagation" {
   create_duration = "30s"
 
-  depends_on = [google_project_iam_member.assign_permissions]
+  depends_on = [
+    google_project_iam_member.assign_permissions,
+    google_project_iam_member.assign_permissions_service_agent,
+    google_project_iam_member.sd_viewer,
+    google_project_iam_member.access_network,
+  ]
 }
-
-
 
 module "cicd" {
   source   = "../../5-appinfra/modules/cicd-pipeline"
@@ -238,7 +265,17 @@ module "cicd" {
   buckets_force_destroy = true
 
   cloudbuildv2_repository_config = each.value.cloudbuildv2_repository_config
-  worker_pool_id                 = var.worker_pool_id
 
-  depends_on = [time_sleep.wait_propagation]
+  workerpool_id = var.workerpool_id == null ? google_cloudbuild_worker_pool.pool[0].id : var.workerpool_id
+
+  depends_on = [
+    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy,
+    google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment
+  ]
+}
+
+data "google_project" "project" {
+  project_id = var.project_id
 }

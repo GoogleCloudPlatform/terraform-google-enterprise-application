@@ -18,13 +18,25 @@ output "project_id" {
   value = local.project_id
 }
 
+output "project_number" {
+  value = local.project_number
+}
+
+output "folder_id" {
+  value = module.folder_seed.id
+}
+
+output "sa_email" {
+  value = google_service_account.int_test[local.index].email
+}
+
 output "sa_key" {
   value     = google_service_account_key.int_test.private_key
   sensitive = true
 }
 
 output "envs" {
-  value = { for env, vpc in module.vpc : env => {
+  value = var.single_project ? {} : { for env, vpc in module.cluster_vpc : env => {
     org_id             = var.org_id
     folder_id          = module.folders[local.index].ids[env]
     billing_account    = var.billing_account
@@ -32,6 +44,38 @@ output "envs" {
     network_self_link  = vpc.network_self_link,
     subnets_self_links = vpc.subnets_self_links,
   } }
+}
+
+output "workerpool_network_name" {
+  value = module.vpc.network_name
+}
+
+output "workerpool_network_id" {
+  value = module.vpc.network_id
+}
+
+output "workerpool_network_project_id" {
+  value = module.vpc.project_id
+}
+
+output "workerpool_network_self_link" {
+  value = module.vpc.network_self_link
+}
+
+output "single_project_cluster_subnetwork_name" {
+  value = var.single_project ? module.single_project_vpc[0].subnets_names[0] : null
+}
+
+output "single_project_cluster_subnetwork_self_link" {
+  value = var.single_project ? module.single_project_vpc[0].subnets_self_links[0] : null
+}
+
+output "network_project_number" {
+  value = [for value in module.vpc_project : value.project_number]
+}
+
+output "network_project_id" {
+  value = [for value in module.vpc_project : value.project_id]
 }
 
 output "common_folder_id" {
@@ -48,4 +92,8 @@ output "billing_account" {
 
 output "teams" {
   value = { for team, group in module.group : team => module.group[team].id }
+}
+
+output "single_project" {
+  value = var.single_project
 }

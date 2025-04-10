@@ -31,4 +31,5 @@ module "kueue" {
   cluster_region           = regex(local.fleet_membership_regex, each.value)[1]
   cluster_project          = regex(local.fleet_membership_regex, each.value)[0]
   cluster_service_accounts = var.cluster_service_accounts
+  vpcsc_policy             = "ALLOW"
 }
