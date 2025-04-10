@@ -63,11 +63,11 @@ output "workerpool_network_self_link" {
 }
 
 output "single_project_cluster_subnetwork_name" {
-  value = var.single_project ? module.vpc.subnets_names[0] : null
+  value = var.single_project ? module.single_project_vpc[0].subnets_names[0] : null
 }
 
 output "single_project_cluster_subnetwork_self_link" {
-  value = var.single_project ? module.vpc.subnets_self_links[0] : null
+  value = var.single_project ? module.single_project_vpc[0].subnets_self_links[0] : null
 }
 
 output "network_project_number" {
