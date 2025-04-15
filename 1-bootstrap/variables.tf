@@ -19,11 +19,6 @@ variable "project_id" {
   type        = string
 }
 
-variable "org_id" {
-  description = "Organization ID"
-  type        = string
-}
-
 variable "bucket_prefix" {
   description = "Name prefix to use for buckets created."
   type        = string
