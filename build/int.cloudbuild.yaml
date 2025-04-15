@@ -263,14 +263,16 @@ steps:
     waitFor:
       - hello-world-app-deployment
 
-  - id: appinfra-teardown
+  - id: restore-vpc-sc-perimeter
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestAppInfra --stage teardown --verbose",
+        "cft test run TestVPCSC --stage apply --verbose",
       ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
     waitFor:
       - cymbal-bank-e2e
       - cymbal-shop-e2e
@@ -280,6 +282,17 @@ steps:
       - fleetscope-verify
       - multitenant-verify
       - bootstrap-verify
+
+  - id: appinfra-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestAppInfra --stage teardown --verbose",
+      ]
+    waitFor:
+      - restore-vpc-sc-perimeter
 
   - id: appfactory-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"

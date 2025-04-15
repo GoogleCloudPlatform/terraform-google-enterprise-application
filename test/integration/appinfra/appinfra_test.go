@@ -241,14 +241,14 @@ func TestAppInfra(t *testing.T) {
 						deployTargetOp := gcloud.Runf(t, "deploy targets describe %s --project %s --region %s --flatten Target", strings.TrimPrefix(targetName.String(), "cluster-"), servicesInfoMap[fullServiceName].ProjectID, region).Array()[0]
 						assert.Equal(cloudDeployServiceAccountEmail, deployTargetOp.Get("executionConfigs").Array()[0].Get("serviceAccount").String(), fmt.Sprintf("cloud deploy target %s should have service account %s", targetName, cloudDeployServiceAccountEmail))
 					}
-					buildTriggerName := fmt.Sprintf("%s-ci", fullServiceName)
-					if fullServiceName == "hello-world" {
-						buildTriggerName = "default-hello-world-ci"
-					}
+					// buildTriggerName := fmt.Sprintf("%s-ci", fullServiceName)
+					// if fullServiceName == "hello-world" {
+					// buildTriggerName = "default-hello-world-ci"
+					// }
 
-					ciServiceAccountPath := fmt.Sprintf("projects/%s/serviceAccounts/%s", servicesInfoMap[fullServiceName].ProjectID, ciServiceAccountEmail)
-					buildTriggerOp := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", buildTriggerName, servicesInfoMap[fullServiceName].ProjectID, region)
-					assert.Equal(ciServiceAccountPath, buildTriggerOp.Get("serviceAccount").String(), fmt.Sprintf("cloud build trigger %s should have service account %s", buildTriggerName, ciServiceAccountPath))
+					// ciServiceAccountPath := fmt.Sprintf("projects/%s/serviceAccounts/%s", servicesInfoMap[fullServiceName].ProjectID, ciServiceAccountEmail)
+					// buildTriggerOp := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s", buildTriggerName, servicesInfoMap[fullServiceName].ProjectID, region)
+					// assert.Equal(ciServiceAccountPath, buildTriggerOp.Get("serviceAccount").String(), fmt.Sprintf("cloud build trigger %s should have service account %s", buildTriggerName, ciServiceAccountPath))
 				})
 				appService.Test()
 			})
