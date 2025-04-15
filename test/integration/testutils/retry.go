@@ -41,5 +41,7 @@ var (
 
 		// generic::permission_denied: Request is prohibited by organization's policy.
 		".*Request is prohibited by organization's policy*.": "VPC-SC propagation.",
+
+		".*does not match the eTag of the current version of the Access Policy.*": "VPC-SC eTag consistency.",
 	}
 )
