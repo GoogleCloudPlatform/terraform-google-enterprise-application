@@ -40,18 +40,6 @@ resource "google_project_iam_member" "builder_object_user" {
   role    = "roles/storage.objectUser"
 }
 
-resource "google_project_iam_member" "workerpool_builds_builder" {
-  member  = google_service_account.builder.member
-  project = local.worker_pool_project
-  role    = "roles/cloudbuild.builds.builder"
-}
-
-resource "google_project_iam_member" "workerpool_logging_writer" {
-  member  = google_service_account.builder.member
-  project = local.worker_pool_project
-  role    = "roles/logging.logWriter"
-}
-
 resource "google_artifact_registry_repository_iam_member" "builder" {
   project    = google_artifact_registry_repository.research_images.project
   location   = google_artifact_registry_repository.research_images.location
@@ -76,8 +64,6 @@ resource "time_sleep" "wait_iam_propagation" {
     google_artifact_registry_repository_iam_member.builder,
     google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,
-    google_project_iam_member.workerpool_builds_builder,
-    google_project_iam_member.workerpool_builds_builder,
     google_access_context_manager_access_level_condition.access-level-conditions,
   ]
 }

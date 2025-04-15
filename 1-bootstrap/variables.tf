@@ -164,12 +164,6 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
-variable "access_level_name" {
-  description = "Access Level full name."
-  type        = string
-  default     = null
-}
-
 variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
@@ -185,4 +179,10 @@ variable "workerpool_id" {
   EOT
   type        = string
   default     = ""
+}
+
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name."
+  type        = string
+  default     = null
 }

@@ -26,7 +26,7 @@ variable "bucket_force_destroy" {
 }
 
 variable "access_level_name" {
-  description = "Access Level full name."
+  description = "(VPC-SC) Access Level full name."
   type        = string
   default     = null
 }

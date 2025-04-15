@@ -51,9 +51,4 @@ envs = {
 }
 
 project_id = "REPLACE_WITH_YOUR_PROJECT"
-
-folder_id                     = "folders/XXXXXXXXXX"
-workerpool_network_project_id = "eab-vpc-development-xxxx"
-billing_account               = "000000-000000-000000"
-service_perimeter_name        = "accessPolicies/000000000000000/servicePerimeters/sp_gke_enterprise_XXXXX"
-service_perimeter_mode        = "ENFORCE"
+workerpool_id = "projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME"

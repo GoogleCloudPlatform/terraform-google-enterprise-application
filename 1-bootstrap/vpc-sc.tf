@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-variable "remote_state_bucket" {
-  description = "Backend bucket to load Terraform Remote State Data from previous steps."
-  type        = string
-}
-
-variable "bucket_force_destroy" {
-  description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
-  type        = bool
-  default     = false
-}
-
-variable "access_level_name" {
-  description = "(VPC-SC) Access Level full name."
-  type        = string
-  default     = null
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  count        = var.access_level_name != null ? 1 : 0
+  access_level = var.access_level_name
+  members      = concat([for sa in local.cb_service_accounts_emails : "serviceAccount:${sa}"], [google_service_account.builder.member])
 }

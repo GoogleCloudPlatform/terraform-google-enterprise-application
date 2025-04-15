@@ -3,7 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| access\_level\_name | Access Level full name. | `string` | `null` | no |
+| access\_level\_name | (VPC-SC) Access Level full name. | `string` | `null` | no |
 | acronym | The acronym of the application. | `string` | n/a | yes |
 | admin\_project\_id | The admin project id associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`. | `string` | n/a | yes |
 | billing\_account | Billing Account ID for application admin project resources. | `string` | n/a | yes |
