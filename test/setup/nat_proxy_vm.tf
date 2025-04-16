@@ -61,41 +61,6 @@ module "vpc" {
   ]
 }
 
-# resource "google_dns_policy" "default_policy" {
-#   project                   = module.vpc.project_id
-#   name                      = "dp-b-cbpools-default-policy"
-#   enable_inbound_forwarding = true
-#   enable_logging            = true
-#   networks {
-#     network_url = module.vpc.network_self_link
-#   }
-# }
-
-# resource "google_compute_global_address" "google_services" {
-#   name          = "google-services"
-#   project       = module.vpc.project_id
-#   purpose       = "VPC_PEERING"
-#   address_type  = "INTERNAL"
-#   address       = "10.2.0.0"
-#   prefix_length = 24
-#   network       = module.vpc.network_id
-# }
-
-# resource "google_service_networking_connection" "worker_pool_conn" {
-#   network                 = module.vpc.network_id
-#   service                 = "servicenetworking.googleapis.com"
-#   reserved_peering_ranges = [google_compute_global_address.google_services.name]
-# }
-
-# module "private_service_connect" {
-#   source                     = "terraform-google-modules/network/google//modules/private-service-connect"
-#   version                    = "~> 10.0"
-#   project_id                 = module.vpc.project_id
-#   network_self_link          = module.vpc.network_self_link
-#   private_service_connect_ip = "10.3.0.5"
-#   forwarding_rule_target     = "vpc-sc"
-# }
-
 resource "google_compute_network_peering_routes_config" "peering_routes" {
   project              = module.vpc.project_id
   peering              = google_service_networking_connection.gitlab_worker_pool_conn.peering
@@ -192,6 +157,7 @@ resource "google_compute_instance" "vm-proxy" {
 }
 
 #  This route will route packets to the NAT VM
+
 resource "google_compute_route" "through-nat" {
   name              = "through-nat-range1"
   project           = module.vpc.project_id
