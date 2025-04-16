@@ -25,7 +25,7 @@ variable "protected_projects" {
 }
 
 variable "service_perimeter_mode" {
-  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string
   default     = "DRY_RUN"
 

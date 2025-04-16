@@ -3,7 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| access\_level\_name | (VPC-SC) Access Level full name. | `string` | `null` | no |
+| access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | acronym | The acronym of the application. | `string` | n/a | yes |
 | admin\_project\_id | The admin project id associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`. | `string` | n/a | yes |
 | billing\_account | Billing Account ID for application admin project resources. | `string` | n/a | yes |
@@ -23,8 +23,8 @@
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Google Cloud Organization ID. | `string` | n/a | yes |
 | service\_name | The name of a single service application. | `string` | `"demo-app"` | no |
-| service\_perimeter\_mode | Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | n/a | yes |
-| service\_perimeter\_name | Service perimeter full name. | `string` | `null` | no |
+| service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | n/a | yes |
+| service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"global"` | no |
 | workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`<br><br>If this variable is left undefined, Worker Pool will not be used for the Cloud Build Triggers. | `string` | `""` | no |

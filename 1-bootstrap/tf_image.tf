@@ -56,12 +56,6 @@ resource "google_project_iam_member" "builder_object_user" {
   role    = "roles/storage.objectUser"
 }
 
-resource "google_project_iam_member" "builder_logging_writer" {
-  member  = google_service_account.builder.member
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-}
-
 resource "google_artifact_registry_repository_iam_member" "builder" {
   project    = google_artifact_registry_repository.tf_image.project
   location   = google_artifact_registry_repository.tf_image.location
@@ -71,45 +65,13 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
 }
 
 resource "google_project_iam_member" "tf_workerpool_user" {
-  member  = google_service_account.builder.member
+  for_each = toset(
+    "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
+    google_service_account.builder.member
+  )
+  member  = each.value
   project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
-}
-
-resource "google_project_iam_member" "identity_workerpool_user" {
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = local.worker_pool_project
-  role    = "roles/cloudbuild.workerPoolUser"
-}
-
-resource "google_project_iam_member" "identity_build_builder" {
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = local.worker_pool_project
-  role    = "roles/cloudbuild.builds.builder"
-}
-
-resource "google_project_iam_member" "identity_log_viewer" {
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = local.worker_pool_project
-  role    = "roles/logging.viewer"
-}
-
-resource "google_project_iam_member" "identity_log_writer" {
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-  project = local.worker_pool_project
-  role    = "roles/logging.logWriter"
-}
-
-resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
-  member  = google_service_account.builder.member
-  project = local.worker_pool_project
-  role    = "roles/logging.logWriter"
-}
-
-resource "google_project_iam_member" "tf_cloud_build_builder" {
-  member  = google_service_account.builder.member
-  project = local.worker_pool_project
-  role    = "roles/cloudbuild.builds.builder"
 }
 
 resource "time_sleep" "wait_iam_propagation" {
@@ -117,8 +79,6 @@ resource "time_sleep" "wait_iam_propagation" {
 
   depends_on = [
     google_project_iam_member.tf_workerpool_user,
-    google_project_iam_member.worker_pool_builder_logging_writer,
-    google_project_iam_member.tf_cloud_build_builder,
     google_artifact_registry_repository_iam_member.builder,
     google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,

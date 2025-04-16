@@ -29,7 +29,7 @@ output "access_level_name" {
 }
 
 output "service_perimeter_mode" {
-  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   value       = var.service_perimeter_mode
 }
 

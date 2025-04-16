@@ -3,7 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| access\_level\_name | (VPC-SC) Access Level full name. | `string` | `null` | no |
+| access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | applications | A map where the key is the application name, containing the configuration for each microservice under the application. Each microservice has the following properties:<br>- **admin\_project\_id** (Optional): Admin project associated with the microservice. This hosts microservice specific CI/CD pipelines. If set, `create_admin_project` must be `false`.<br>- **create\_infra\_project** (Required): Indicates whether an infrastructure project should be created for the microservice (one infra project will be created per environment defines in var.envs).<br>- **create\_admin\_project** (Required): Indicates whether a Admin project should be created for the microservice. | <pre>map(map(object({<br>    admin_project_id     = optional(string, null)<br>    create_infra_project = bool<br>    create_admin_project = bool<br>  })))</pre> | n/a | yes |
 | billing\_account | Billing Account ID for application admin project resources. | `string` | n/a | yes |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
@@ -14,8 +14,8 @@
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Google Cloud Organization ID. | `string` | n/a | yes |
 | remote\_state\_bucket | Backend bucket to load Terraform Remote State Data from previous steps. | `string` | n/a | yes |
-| service\_perimeter\_mode | Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
-| service\_perimeter\_name | Service perimeter full name. | `string` | `null` | no |
+| service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
+| service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"us-central1"` | no |
 

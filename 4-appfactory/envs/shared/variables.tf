@@ -175,19 +175,19 @@ variable "cloudbuildv2_repository_config" {
 }
 
 variable "access_level_name" {
-  description = "(VPC-SC) Access Level full name."
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
   type        = string
   default     = null
 }
 
 variable "service_perimeter_name" {
-  description = "Service perimeter full name."
+  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
   type        = string
   default     = null
 }
 
 variable "service_perimeter_mode" {
-  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string
   default     = "ENFORCE"
 

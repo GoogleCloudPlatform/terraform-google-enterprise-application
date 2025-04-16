@@ -181,12 +181,6 @@ resource "google_project_iam_member" "servicemesh_service_agent" {
   depends_on = [module.eab_cluster_project, google_project_service_identity.fleet_meshconfig_sa]
 }
 
-resource "google_project_iam_member" "compute_serviceAgent" {
-  project = local.cluster_project_id
-  role    = "roles/compute.admin"
-  member  = data.google_compute_default_service_account.compute_sa.member
-}
-
 resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
   project = local.cluster_project_id
   role    = "roles/multiclusterservicediscovery.serviceAgent"
@@ -266,7 +260,6 @@ module "gke-standard" {
     google_project_iam_member.servicemesh_service_agent,
     google_project_iam_member.multiclusterdiscovery_service_agent,
     data.google_compute_default_service_account.compute_sa,
-    google_project_iam_member.compute_serviceAgent
   ]
 
   // Private Cluster Configuration

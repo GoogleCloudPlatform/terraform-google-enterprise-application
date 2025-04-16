@@ -93,13 +93,13 @@ variable "master_ipv4_cidr_blocks" {
 }
 
 variable "service_perimeter_name" {
-  description = "Service perimeter full name."
+  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
   type        = string
   default     = null
 }
 
 variable "service_perimeter_mode" {
-  description = "Service perimeter mode: ENFORCE, DRY_RUN."
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string
   default     = null
 }

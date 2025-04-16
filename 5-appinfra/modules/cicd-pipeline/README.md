@@ -5,7 +5,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| access\_level\_name | (VPC-SC) Access Level full name. | `string` | `null` | no |
+| access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | additional\_substitutions | A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (\_). | `map(string)` | `{}` | no |
 | app\_build\_trigger\_yaml | Path to the Cloud Build YAML file for the application | `string` | n/a | yes |
 | buckets\_force\_destroy | When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |

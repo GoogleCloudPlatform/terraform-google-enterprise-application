@@ -154,7 +154,7 @@ variable "cloudbuildv2_repository_config" {
         var.cloudbuildv2_repository_config.secret_project_id != null
       ) : var.cloudbuildv2_repository_config.repo_type == "CSR" ? true : false
     )
-    error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined. Also, if you are using Secrets, provide the project_id where is hosted."
+    error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined. Provide the project_id where secrets are hosted on 'secret_project_id'."
   }
 
 }
@@ -177,7 +177,7 @@ variable "workerpool_id" {
 }
 
 variable "access_level_name" {
-  description = "(VPC-SC) Access Level full name."
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
   type        = string
   default     = null
 }
