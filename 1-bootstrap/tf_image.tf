@@ -18,6 +18,10 @@ locals {
   docker_tag_version_terraform = "v1"
 }
 
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 resource "google_artifact_registry_repository" "tf_image" {
   project       = var.project_id
   location      = var.location
@@ -60,10 +64,22 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
   member     = google_service_account.builder.member
 }
 
+resource "google_project_iam_member" "tf_workerpool_user" {
+  for_each = toset([
+    "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
+    google_service_account.builder.member
+    ]
+  )
+  member  = each.value
+  project = local.worker_pool_project
+  role    = "roles/cloudbuild.workerPoolUser"
+}
+
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "60s"
 
   depends_on = [
+    google_project_iam_member.tf_workerpool_user,
     google_artifact_registry_repository_iam_member.builder,
     google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,
@@ -81,7 +97,7 @@ module "build_terraform_image" {
   }
 
   create_cmd_entrypoint = "bash"
-  create_cmd_body       = "gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} || ( sleep 45 && gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} )"
+  create_cmd_body       = "gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} --worker-pool=${var.workerpool_id} || ( sleep 45 && gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url}  --worker-pool=${var.workerpool_id}  )"
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }

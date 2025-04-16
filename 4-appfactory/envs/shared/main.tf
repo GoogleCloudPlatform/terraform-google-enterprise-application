@@ -80,5 +80,9 @@ module "components" {
   create_infra_project = each.value.service.create_infra_project
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
-  worker_pool_id                 = var.worker_pool_id
+
+  service_perimeter_mode = var.service_perimeter_mode
+  service_perimeter_name = var.service_perimeter_name
+  access_level_name      = var.access_level_name
+  workerpool_id          = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
 }

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+service_perimeter_name = "accessPolicies/REPLACE_YOUR_ACM_ID/servicePerimeters/REPLACE_WITH_YOUT_SERVICE_PERIMETER_NAME"
+service_perimeter_mode = "ENFORCE"
+
 envs = {
   "development" = {
     "billing_account"    = "{BILLING_ACCOUNT}"

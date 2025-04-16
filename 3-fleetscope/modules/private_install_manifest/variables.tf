@@ -54,3 +54,14 @@ variable "cluster_service_accounts" {
   description = "Cluster nodes services accounts."
   type        = list(string)
 }
+
+variable "vpcsc_policy" {
+  description = "By default, Artifact Registry denies access to upstream sources if you have not explicitly granted access. Allowed values: ['DENY', 'ALLOW']"
+  type        = string
+  default     = "DENY"
+
+  validation {
+    condition     = contains(["DENY", "ALLOW"], var.vpcsc_policy)
+    error_message = "The variable values must be 'ALLOW' or 'DENY'"
+  }
+}

@@ -50,4 +50,5 @@ envs = {
   }
 }
 
-project_id = "REPLACE_WITH_YOUR_PROJECT"
+project_id    = "REPLACE_WITH_YOUR_PROJECT"
+workerpool_id = "projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME"

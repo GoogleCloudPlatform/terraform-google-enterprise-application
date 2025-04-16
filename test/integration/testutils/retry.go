@@ -32,5 +32,16 @@ var (
 		".*Error 400: Service account service-.*@gcp-sa-mcsd.iam.gserviceaccount.com does not exist.*": "Multi-cluster Service Discovery Service Account does not exist.",
 
 		".*Error waiting for Creating Connection: Error code 9, message: Failed to verify authorizer_credential.*.": "servicedirectory.networks.access propagation time",
+
+		// Request had invalid authentication credentials.*
+		".*Request had invalid authentication credentials.*": "Request had invalid authentication credentials.",
+
+		// Error waiting for Creating Repository: Error code 13, message: Internal error encountered.
+		".Internal error encountered*": "Internal error encountered",
+
+		// generic::permission_denied: Request is prohibited by organization's policy.
+		".*Request is prohibited by organization's policy*.": "VPC-SC propagation.",
+
+		".*does not match the eTag of the current version of the Access Policy.*": "VPC-SC eTag consistency.",
 	}
 )

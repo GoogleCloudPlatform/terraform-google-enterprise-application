@@ -24,6 +24,19 @@ resource "google_project_service_identity" "cloudbuild_service_identity" {
   service = "cloudbuild.googleapis.com"
 }
 
+resource "google_project_service_identity" "cloud_deploy_sa" {
+  provider = google-beta
+
+  project = var.project_id
+  service = "clouddeploy.googleapis.com"
+}
+
+resource "google_project_service_identity" "compute_sa" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "compute.googleapis.com"
+}
+
 data "google_compute_default_service_account" "compute_service_identity" {
   project = var.project_id
 }

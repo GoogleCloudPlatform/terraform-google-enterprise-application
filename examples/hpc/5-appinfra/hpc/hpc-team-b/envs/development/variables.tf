@@ -24,3 +24,9 @@ variable "bucket_force_destroy" {
   type        = bool
   default     = false
 }
+
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}

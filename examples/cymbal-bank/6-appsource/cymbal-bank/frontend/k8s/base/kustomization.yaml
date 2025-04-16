@@ -19,7 +19,7 @@ commonLabels:
   team: frontend
 resources:
   - frontend.yaml
-  - virtualservice.yaml
+  # - virtualservice.yaml uncomment if using service mesh
 components:
   - ../../../components/add-tmp-dir
   - ../../../components/add-public-key-volume

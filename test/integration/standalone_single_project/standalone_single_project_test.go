@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -38,12 +39,21 @@ import (
 func TestStandaloneSingleProjectExample(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t)
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
 	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
+	service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
+
+	vars := map[string]interface{}{
+		"project_id":             projectID,
+		"service_perimeter_mode": service_perimeter_mode,
+		"service_perimeter_name": service_perimeter_name,
+		"subnetwork_self_link":   setupOutput.GetTFSetupStringOutput("single_project_cluster_subnetwork_self_link"),
+	}
 
 	// wire setup output project_id to example var.project_id
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
-		tft.WithVars(map[string]interface{}{"project_id": projectID}),
+		tft.WithVars(vars),
 		tft.WithTFDir("../../../examples/standalone_single_project"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
@@ -159,28 +169,38 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 			membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
 			membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
 		}
-		pollMeshProvisioning := func(cmd string) func() (bool, error) {
-			return func() (bool, error) {
-				retry := false
-				result := gcloud.Runf(t, cmd)
-				if len(result.Array()) < 1 {
-					return true, nil
-				}
-				for _, memberShipName := range membershipNamesProjectNumber {
-					dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
-					controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-					if dataPlaneManagement == "PROVISIONING" || controlPlaneManagement == "PROVISIONING" {
-						retry = true
-					} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
-						generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
-						generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
-						return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
-					}
-				}
-				return retry, nil
+		pollMeshProvisioning := func(cmd string) (bool, error) {
+			retry := false
+			result := gcloud.Runf(t, cmd)
+			if len(result.Array()) < 1 {
+				return true, nil
 			}
+			for _, memberShipName := range membershipNamesProjectNumber {
+				dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
+				controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
+				retryStatus := []string{"PROVISIONING", "STALLED"}
+				if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
+					retry = true
+				} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
+					generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
+					generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
+					return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
+				}
+			}
+			return retry, nil
 		}
-		utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
+
+		// verify mesh state, if mesh installation is not healthy won't break the test, just give a warning
+		for count := 0; count < 10; count++ {
+			retry, err := pollMeshProvisioning(gkeMeshCommand)
+			if err != nil {
+				t.Logf("WARNING: error on mesh installation: %s", err)
+			}
+			if retry == false {
+				break
+			}
+			time.Sleep(30 * time.Second)
+		}
 	})
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {

@@ -19,4 +19,5 @@ cloudbuildv2_repository_config = {
   gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
   gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
   gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+  secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
 }

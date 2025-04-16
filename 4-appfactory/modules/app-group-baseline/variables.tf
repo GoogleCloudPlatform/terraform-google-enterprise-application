@@ -156,6 +156,7 @@ variable "cloudbuildv2_repository_config" {
     - gitlab_enterprise_host_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.
     - gitlab_enterprise_service_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
     - gitlab_enterprise_ca_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.
+    - secret_project_id: (Optional) The project id where the secret is stored.
   Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.
   Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.
   Note: If 'cloudbuildv2_repository_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default.
@@ -178,6 +179,7 @@ variable "cloudbuildv2_repository_config" {
     gitlab_enterprise_host_uri                  = optional(string)
     gitlab_enterprise_service_directory         = optional(string)
     gitlab_enterprise_ca_certificate            = optional(string)
+    secret_project_id                           = optional(string)
   })
 
   validation {
@@ -187,13 +189,15 @@ variable "cloudbuildv2_repository_config" {
         var.cloudbuildv2_repository_config.github_app_id_secret_id != null &&
         var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id == null &&
         var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id == null &&
-        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id == null
+        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id == null &&
+        var.cloudbuildv2_repository_config.secret_project_id != null
         ) : var.cloudbuildv2_repository_config.repo_type == "GITLABv2" ? (
         var.cloudbuildv2_repository_config.github_secret_id == null &&
         var.cloudbuildv2_repository_config.github_app_id_secret_id == null &&
         var.cloudbuildv2_repository_config.gitlab_read_authorizer_credential_secret_id != null &&
         var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id != null &&
-        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id != null
+        var.cloudbuildv2_repository_config.gitlab_webhook_secret_id != null &&
+        var.cloudbuildv2_repository_config.secret_project_id != null
       ) : var.cloudbuildv2_repository_config.repo_type == "CSR" ? true : false
     )
     error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
@@ -201,7 +205,7 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
-variable "worker_pool_id" {
+variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
 
@@ -216,4 +220,26 @@ variable "worker_pool_id" {
   EOT
   type        = string
   default     = ""
+}
+
+variable "service_perimeter_name" {
+  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
+  type        = string
+  default     = null
+}
+
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
 }

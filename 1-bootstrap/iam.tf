@@ -131,18 +131,10 @@ resource "google_folder_iam_member" "app_factory_folder_viewer" {
   folder = var.common_folder_id
 }
 
-resource "google_organization_iam_member" "app_factory_org_browser" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+resource "google_project_iam_member" "cloud_build_worker_pool_user" {
+  for_each = local.cb_service_accounts_emails
 
-  role   = "roles/browser"
-  member = "serviceAccount:${each.value.email}"
-  org_id = each.value.org_id
-}
-
-resource "google_organization_iam_member" "app_factory_org_organization_service_agent" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
-
-  role   = "roles/privilegedaccessmanager.organizationServiceAgent"
-  member = "serviceAccount:${each.value.email}"
-  org_id = each.value.org_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${each.value}"
+  project = local.worker_pool_project
 }

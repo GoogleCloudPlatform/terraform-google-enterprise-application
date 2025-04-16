@@ -19,6 +19,16 @@ variable "project_id" {
   description = "Google Cloud project ID in which to deploy all example resources"
 }
 
+variable "workerpool_network_id" {
+  type        = string
+  description = "Network id"
+}
+
+variable "subnetwork_self_link" {
+  type        = string
+  description = "Sub-Network self-link"
+}
+
 variable "region" {
   type        = string
   description = "Google Cloud region for deployments"
@@ -30,7 +40,24 @@ variable "teams" {
   description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
 }
 
-variable "worker_pool_id" {
+variable "service_perimeter_name" {
+  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = "ENFORCE"
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
+}
+
+variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
 

@@ -55,3 +55,9 @@ resource "google_compute_network" "default" {
   project                 = var.infra_project
   auto_create_subnetworks = true
 }
+
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  count        = var.access_level_name != null ? 1 : 0
+  access_level = var.access_level_name
+  members      = [google_service_account.builder.member]
+}

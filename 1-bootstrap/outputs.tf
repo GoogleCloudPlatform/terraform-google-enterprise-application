@@ -58,3 +58,8 @@ output "tf_tag_version_terraform" {
   description = "Docker tag version terraform."
   value       = local.docker_tag_version_terraform
 }
+
+output "cb_private_workerpool_id" {
+  description = "Private Worker Pool ID used for Cloud Build Triggers."
+  value       = var.workerpool_id
+}

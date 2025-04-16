@@ -91,3 +91,15 @@ variable "master_ipv4_cidr_blocks" {
   type        = list(string)
   default     = ["10.11.10.0/28", "10.11.20.0/28"]
 }
+
+variable "service_perimeter_name" {
+  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = null
+}

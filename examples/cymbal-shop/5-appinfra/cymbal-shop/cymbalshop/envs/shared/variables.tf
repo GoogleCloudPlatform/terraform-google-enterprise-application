@@ -92,22 +92,10 @@ variable "cloudbuildv2_repository_config" {
     )
     error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
   }
-
 }
 
-variable "worker_pool_id" {
-  description = <<-EOT
-    Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
-
-    The expected format is:
-    `projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.
-
-    If you are using worker pools from a different project, ensure that you grant the
-    `roles/cloudbuild.workerPoolUser` role to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:
-    `service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`
-
-    If this variable is left undefined, Worker Pool will not be used for the Cloud Build Triggers.
-  EOT
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
   type        = string
-  default     = ""
+  default     = null
 }
