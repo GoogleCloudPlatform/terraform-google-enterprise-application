@@ -145,7 +145,7 @@ variable "workerpool_id" {
     `projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.
 
     If you are using worker pools from a different project, ensure that you grant the
-    `roles/cloudbuild.workerPoolUser` role to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:
+    `roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:
     `service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`
   EOT
   type        = string
