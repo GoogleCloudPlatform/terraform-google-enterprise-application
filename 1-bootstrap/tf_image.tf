@@ -65,9 +65,10 @@ resource "google_artifact_registry_repository_iam_member" "builder" {
 }
 
 resource "google_project_iam_member" "tf_workerpool_user" {
-  for_each = toset(
+  for_each = toset([
     "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
     google_service_account.builder.member
+    ]
   )
   member  = each.value
   project = local.worker_pool_project
