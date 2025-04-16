@@ -182,6 +182,31 @@ To proceed with Gitlab as your git provider you will need:
    }
    ```
 
+### Worker Pool Requirements
+
+A worker pool must be defined to run within a VPC-SC Perimeter. You can find an example Worker Pool without external IP that peers a Gitlab Instance Internal IP on `test/setup` directory.
+
+```terraform
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool"
+  project  = module.gitlab_project.project_id
+  location = "us-central1"
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = local.gitlab_network_id_without_location
+    peered_network_ip_range = "/24"
+  }
+
+  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
+}
+```
+
+The code above creates the Worker Pool. The peered VPC is a VPC that contains a Git Instance and a NAT VM. You can also find the necessary firewall rules, peerings and configurations to make the Private Worker Pool work. See [gitlab_vm.tf](../test/setup/gitlab_vm.tf) file and [nat_proxy_vm.tf](../test/setup/nat_proxy_vm.tf) file for more information. The same pool can be utilized in multiple steps. Reserving a wider IP range allows more concurrent builds. A /24 range allows 254 hosts.
+
 ### Deploying with Cloud Build
 
 #### Deploying on Enterprise Foundation blueprint
