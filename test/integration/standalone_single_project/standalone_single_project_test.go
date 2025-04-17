@@ -169,37 +169,30 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 			membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
 			membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
 		}
-		pollMeshProvisioning := func(cmd string) (bool, error) {
-			retry := false
-			result := gcloud.Runf(t, cmd)
-			if len(result.Array()) < 1 {
-				return true, nil
-			}
-			for _, memberShipName := range membershipNamesProjectNumber {
-				dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
-				controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-				retryStatus := []string{"PROVISIONING", "STALLED"}
-				if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
-					retry = true
-				} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
-					generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
-					generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
-					return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
+		pollMeshProvisioning := func(cmd string) func() (bool, error) {
+			return func() (bool, error) {
+				retry := false
+				result := gcloud.Runf(t, cmd)
+				if len(result.Array()) < 1 {
+					return true, nil
 				}
+				for _, memberShipName := range membershipNamesProjectNumber {
+					dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
+					controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
+					retryStatus := []string{"PROVISIONING", "STALLED"}
+					if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
+						retry = true
+					} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
+						generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
+						generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
+						return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
+					}
+				}
+				return retry, nil
 			}
-			return retry, nil
 		}
-
-		// verify mesh state, if mesh installation is not healthy won't break the test, just give a warning
-		for count := 0; count < 10; count++ {
-			retry, err := pollMeshProvisioning(gkeMeshCommand)
-			if err != nil {
-				t.Logf("WARNING: error on mesh installation: %s", err)
-			}
-			if retry == false {
-				break
-			}
-			time.Sleep(30 * time.Second)
+		if envName != "development" {
+			utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 10, 60*time.Second)
 		}
 	})
 

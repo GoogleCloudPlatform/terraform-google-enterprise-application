@@ -182,6 +182,31 @@ To proceed with Gitlab as your git provider you will need:
    }
    ```
 
+### Worker Pool Requirements
+
+A worker pool must be defined to run within a VPC-SC Perimeter. You can find an example Worker Pool without external IP that peers a Gitlab Instance Internal IP on `test/setup` directory.
+
+```terraform
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "cb-pool"
+  project  = module.gitlab_project.project_id
+  location = "us-central1"
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = "e2-standard-4"
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = local.gitlab_network_id_without_location
+    peered_network_ip_range = "/24"
+  }
+
+  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
+}
+```
+
+The code above creates the Worker Pool. The peered VPC is a VPC that contains a Git Instance and a NAT VM. You can also find the necessary firewall rules, peerings and configurations to make the Private Worker Pool work. See [gitlab_vm.tf](../test/setup/gitlab_vm.tf) file and [nat_proxy_vm.tf](../test/setup/nat_proxy_vm.tf) file for more information. The same pool can be utilized in multiple steps. Reserving a wider IP range allows more concurrent builds. A /24 range allows 254 hosts.
+
 ### Deploying with Cloud Build
 
 #### Deploying on Enterprise Foundation blueprint
@@ -276,7 +301,7 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 | project\_id | Project ID for initial resources | `string` | n/a | yes |
 | tf\_apply\_branches | List of git branches configured to run terraform apply Cloud Build trigger. All other branches will run plan by default. | `list(string)` | <pre>[<br>  "development",<br>  "nonproduction",<br>  "production"<br>]</pre> | no |
 | trigger\_location | Location of for Cloud Build triggers created in the workspace. If using private pools should be the same location as the pool. | `string` | `"us-central1"` | no |
-| workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`<br><br>If this variable is left undefined, Worker Pool will not be used for the Cloud Build Triggers. | `string` | `""` | no |
+| workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | `string` | `""` | no |
 
 ## Outputs
 

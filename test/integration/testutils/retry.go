@@ -43,5 +43,7 @@ var (
 		".*Request is prohibited by organization's policy*.": "VPC-SC propagation.",
 
 		".*does not match the eTag of the current version of the Access Policy.*": "VPC-SC eTag consistency.",
+
+		".*Error: Error waiting to create Repository: Error waiting for Creating Repository: Error code 3, message: Request contains an invalid argument.*.": "Invalid Argument on Artifact Registry Creation",
 	}
 )

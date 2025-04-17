@@ -17,7 +17,7 @@ kind: Kustomization
 namespace: cb-frontend-development
 resources:
   - ../../base
-  - destinationrule.yaml
+  # - destinationrule.yaml uncomment if using istio/service mesh
   - ingress.yaml
 components:
   - ../../../../components/development
