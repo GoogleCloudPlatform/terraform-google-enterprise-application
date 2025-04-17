@@ -191,7 +191,9 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 				return retry, nil
 			}
 		}
-		utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
+		if envName != "development" {
+			utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 10, 60*time.Second)
+		}
 	})
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {

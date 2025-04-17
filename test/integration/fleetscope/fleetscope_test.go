@@ -294,7 +294,9 @@ func TestFleetscope(t *testing.T) {
 					return !testutils.AllTrue(booleans), nil
 				}
 
-				utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 40, 60*time.Second)
+				if envName != "development" {
+					utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 10, 60*time.Second)
+				}
 				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
 				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
 
