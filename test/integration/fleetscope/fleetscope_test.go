@@ -215,6 +215,23 @@ func TestFleetscope(t *testing.T) {
 
 							}
 						}
+
+						pollConfigSync := func() (bool, error) {
+							retry := false
+							// ensure config-sync resources are present in cluster
+							output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+							if err != nil {
+								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") {
+									return false, err
+								} else {
+									t.Log("Config-Sync not yet installed, will try polling again after sleeping.")
+									retry = true
+								}
+							}
+							return retry, nil
+						}
+
+						utils.Poll(t, pollConfigSync, 10, 30*time.Second)
 					}
 				}
 
@@ -240,39 +257,28 @@ func TestFleetscope(t *testing.T) {
 					assert.Equal(gkeScopes, opGKEScopes.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeScopes))
 					assert.True(opGKEScopes.Exists(), "Namespace %s should exist", gkeScopes)
 				}
-
 				gkeMeshCommand := fmt.Sprintf("beta container fleet mesh describe --project %s --format='json(membershipStates)'", clusterProjectID)
-				pollMeshProvisioning := func(cmd string) (bool, error) {
-					retry := false
-					result := gcloud.Runf(t, cmd)
-					if len(result.Array()) < 1 {
-						return true, nil
-					}
-					for _, memberShipName := range membershipNamesProjectNumber {
-						dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
-						controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
-						retryStatus := []string{"PROVISIONING", "STALLED"}
-						if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
-							retry = true
-						} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
-							generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
-							generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
-							return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
+				pollMeshProvisioning := func(cmd string) func() (bool, error) {
+					return func() (bool, error) {
+						retry := false
+						result := gcloud.Runf(t, cmd)
+						if len(result.Array()) < 1 {
+							return true, nil
 						}
+						for _, memberShipName := range membershipNamesProjectNumber {
+							dataPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.dataPlaneManagement.state").String()
+							controlPlaneManagement := result.Get("membershipStates").Get(memberShipName).Get("servicemesh.controlPlaneManagement.state").String()
+							retryStatus := []string{"PROVISIONING", "STALLED"}
+							if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
+								retry = true
+							} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
+								generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
+								generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
+								return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
+							}
+						}
+						return retry, nil
 					}
-					return retry, nil
-				}
-
-				// verify mesh state, if mesh installation is not healthy won't break the test, just give a warning
-				for count := 0; count < 10; count++ {
-					retry, err := pollMeshProvisioning(gkeMeshCommand)
-					if err != nil {
-						t.Logf("WARNING: error on mesh installation: %s", err)
-					}
-					if retry == false {
-						break
-					}
-					time.Sleep(30 * time.Second)
 				}
 
 				pollPolicyControllerState := func() (bool, error) {
@@ -305,11 +311,15 @@ func TestFleetscope(t *testing.T) {
 					return !testutils.AllTrue(booleans), nil
 				}
 
-				utils.Poll(t, pollPolicyControllerState, 6, 20*time.Second)
-				utils.Poll(t, pollPoliciesInstallationState, 6, 20*time.Second)
+				if envName != "development" {
+					utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 10, 60*time.Second)
+				}
+				utils.Poll(t, pollPolicyControllerState, 10, 30*time.Second)
+				utils.Poll(t, pollPoliciesInstallationState, 10, 30*time.Second)
 
 				noError := false
 				for count := 0; count < 10; count++ {
+
 					// validate no errors in config sync
 					output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 					if err != nil {
@@ -333,7 +343,7 @@ func TestFleetscope(t *testing.T) {
 					if noError {
 						break
 					} else {
-						time.Sleep(30 * time.Second)
+						time.Sleep(60 * time.Second)
 					}
 				}
 				if !noError {
