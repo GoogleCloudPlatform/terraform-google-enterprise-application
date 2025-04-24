@@ -20,7 +20,7 @@ locals {
     "roles/cloudbuild.workerPoolOwner",
     "roles/dns.admin",
     "roles/compute.networkAdmin",
-    "roles/privilegedaccessmanager.projectServiceAgent",
+    "roles/resourcemanager.projectIamAdmin",
     ] : [
     "roles/artifactregistry.admin",
     "roles/certificatemanager.owner",
@@ -39,7 +39,7 @@ locals {
     "roles/iam.serviceAccountAdmin",
     "roles/iam.serviceAccountUser",
     "roles/logging.logWriter",
-    "roles/privilegedaccessmanager.projectServiceAgent",
+    "roles/resourcemanager.projectIamAdmin",
     "roles/serviceusage.serviceUsageAdmin",
     "roles/source.admin",
     "roles/storage.admin",
@@ -89,13 +89,13 @@ resource "google_project_iam_member" "int_test_iam" {
   for_each = module.vpc_project
 
   project = each.value.project_id
-  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+  role    = "roles/resourcemanager.projectIamAdmin"
   member  = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 
 resource "google_organization_iam_member" "organizationServiceAgent_role" {
   org_id = var.org_id
-  role   = "roles/privilegedaccessmanager.organizationServiceAgent"
+  role   = "roles/resourcemanager.organizationAdmin"
   member = "serviceAccount:${google_service_account.int_test[local.index].email}"
 }
 

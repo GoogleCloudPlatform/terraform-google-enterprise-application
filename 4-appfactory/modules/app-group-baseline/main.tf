@@ -26,14 +26,14 @@ locals {
         "roles/browser", "roles/serviceusage.serviceUsageAdmin",
         "roles/storage.admin", "roles/iam.serviceAccountAdmin",
         "roles/artifactregistry.admin", "roles/clouddeploy.admin",
-        "roles/cloudbuild.builds.editor", "roles/privilegedaccessmanager.projectServiceAgent",
+        "roles/cloudbuild.builds.editor", "roles/resourcemanager.projectIamAdmin",
         "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin"
       ]
     } },
     {
       for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
         project_id = cluster_project_id
-        roles      = ["roles/privilegedaccessmanager.projectServiceAgent"]
+        roles      = ["roles/resourcemanager.projectIamAdmin"]
       }
     }
   )
@@ -201,10 +201,10 @@ resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
   role    = "roles/logging.logWriter"
 }
 
-resource "google_project_iam_member" "worker_pool_roles_privilegedaccessmanager_projectServiceAgent" {
+resource "google_project_iam_member" "worker_pool_roles_project_iam_admin" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = local.worker_pool_project
-  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+  role    = "roles/resourcemanager.projectIamAdmin"
 }
 
 resource "google_project_iam_member" "cloud_build_builder" {
