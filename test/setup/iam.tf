@@ -63,7 +63,7 @@ resource "google_project_iam_member" "int_test_connection_admin" {
 }
 
 resource "google_folder_iam_member" "int_test_connection_admin" {
-  for_each = toset(["roles/resourcemanager.projectCreator", "roles/owner"])
+  for_each = toset(["roles/resourcemanager.projectCreator", "roles/owner", "roles/iam.serviceAccountTokenCreator", "roles/iam.serviceAccountUser", ])
   folder   = module.folder_seed.id
   role     = each.value
   member   = "serviceAccount:${google_service_account.int_test[local.index].email}"

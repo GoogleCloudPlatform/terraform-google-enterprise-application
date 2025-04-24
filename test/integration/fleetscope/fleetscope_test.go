@@ -46,6 +46,8 @@ func TestFleetscope(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
+
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
