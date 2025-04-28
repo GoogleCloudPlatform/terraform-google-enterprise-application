@@ -63,6 +63,7 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
 }
 
 resource "google_service_account" "vertex_service_account" {
+  project      = var.infra_project
   account_id   = "vertex-instance"
   display_name = "Vertex Instance SA"
 }
