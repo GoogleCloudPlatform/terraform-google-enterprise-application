@@ -59,9 +59,9 @@ func setupClusterToolkitInTmpDirectory(t *testing.T) {
 	}
 }
 
-func deployClusterToolkitBlueprint(t *testing.T, projectID string, clusterName string, clusterProject string) {
+func deployClusterToolkitBlueprint(t *testing.T, projectID string, clusterName string, clusterProject string, vertexSA string) {
 	// Construct the --vars flag
-	vars := fmt.Sprintf("project_id=%s,cluster_name=%s,cluster_project=%s", projectID, clusterName, clusterProject)
+	vars := fmt.Sprintf("project_id=%s,cluster_name=%s,cluster_project=%s,service_account_email=%s", projectID, clusterName, clusterProject, vertexSA)
 	cmd := shell.Command{
 		WorkingDir: "/workspace/examples/hpc/6-appsource",
 		Command:    "/tmp/cluster-toolkit/gcluster",
@@ -198,7 +198,9 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
+	appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/hpc/5-appinfra/hpc-team-b/envs/development"))
 	infraProjectTeamB := appFactory.GetJsonOutput("app-group").Get("hpc\\.hpc-team-b.app_infra_project_ids.development").String()
+	vertexServiceAccount := appInfra.GetStringOutput("vertex_instance_sa")
 	// extract clusterName from fleet membership id
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
@@ -223,7 +225,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 
 		t.Log("Deploying Cluster Blueprint:")
 		setupClusterToolkitInTmpDirectory(t)
-		deployClusterToolkitBlueprint(t, infraProjectTeamB, clusterName, clusterProjectId)
+		deployClusterToolkitBlueprint(t, infraProjectTeamB, clusterName, clusterProjectId, vertexServiceAccount)
 
 		t.Log("Running Batch Jobs:")
 		runBatchJobs(t)

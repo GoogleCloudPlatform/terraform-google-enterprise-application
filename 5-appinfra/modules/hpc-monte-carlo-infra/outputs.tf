@@ -18,3 +18,8 @@ output "stocks_data_bucket_name" {
   description = "Stocks Historical Data Bucket Name"
   value       = google_storage_bucket.stocks_data.name
 }
+
+output "vertex_instance_sa" {
+  description = "Vertex Workench Instance Service Account"
+  value       = google_service_account.vertex_service_account
+}
