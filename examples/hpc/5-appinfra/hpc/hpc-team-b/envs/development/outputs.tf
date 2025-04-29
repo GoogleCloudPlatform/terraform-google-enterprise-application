@@ -21,5 +21,5 @@ output "stocks_data_bucket_name" {
 
 output "vertex_instance_sa" {
   description = "Vertex Workench Instance Service Account"
-  value       = module.provision-monte-carlo-infra.vertex_service_account
+  value       = module.provision-monte-carlo-infra.vertex_instance_sa
 }
