@@ -27,7 +27,8 @@ locals {
         "roles/storage.admin", "roles/iam.serviceAccountAdmin",
         "roles/artifactregistry.admin", "roles/clouddeploy.admin",
         "roles/cloudbuild.builds.editor", "roles/resourcemanager.projectIamAdmin",
-        "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin"
+        "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin",
+        "roles/compute.viewer"
       ]
     } },
     {
@@ -38,7 +39,6 @@ locals {
     }
   )
 
-  org_ids             = distinct([for env in var.envs : env.org_id])
   use_csr             = var.cloudbuildv2_repository_config.repo_type == "CSR"
   service_repo_name   = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
   worker_pool_project = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
@@ -251,13 +251,6 @@ resource "google_service_account_iam_member" "account_access" {
   service_account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
   role               = each.value
   member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
-}
-
-resource "google_organization_iam_member" "builder_organization_browser" {
-  for_each = toset(local.org_ids)
-  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
-  org_id   = each.value
-  role     = "roles/browser"
 }
 
 // Create infra project
