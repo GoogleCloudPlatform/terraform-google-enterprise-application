@@ -21,5 +21,5 @@ output "stocks_data_bucket_name" {
 
 output "vertex_instance_sa" {
   description = "Vertex Workench Instance Service Account"
-  value       = google_service_account.vertex_service_account
+  value       = google_service_account.vertex_service_account.email
 }
