@@ -149,12 +149,15 @@ func TestFleetscope(t *testing.T) {
 						}
 
 						if exists {
-							return true, nil
+							t.Logf("Namespace found: %s \n", namespace)
+							return false, nil
 						} else {
-							return false, fmt.Errorf("Namespace '%s' does not exist in the current cluster.\n", namespace)
+							t.Logf("Namespace NOT found: %s \n", namespace)
+							return true, fmt.Errorf("Namespace '%s' does not exist in the current cluster.\n", namespace)
 						}
 					}
-					return false, fmt.Errorf("Namespaces not found in %v.\n", k8sOpts)
+					t.Logf("There are no namespaces %v \n", k8sOpts)
+					return true, fmt.Errorf("Namespaces not found in %v.\n", k8sOpts)
 				}
 				utils.Poll(t, pollNamespaces, 20, 30*time.Second)
 
@@ -228,6 +231,7 @@ func TestFleetscope(t *testing.T) {
 							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 							if err != nil {
 								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") {
+									t.Logf("Config-Sync error '%s' \n.", err.Error())
 									return false, err
 								} else {
 									t.Log("Config-Sync not yet installed, will try polling again after sleeping.")
@@ -237,7 +241,7 @@ func TestFleetscope(t *testing.T) {
 							return retry, nil
 						}
 
-						utils.Poll(t, pollConfigSync, 20, 30*time.Second)
+						utils.Poll(t, pollConfigSync, 20, 40*time.Second)
 					}
 				}
 
