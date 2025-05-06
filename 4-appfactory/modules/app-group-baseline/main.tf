@@ -16,6 +16,7 @@
 
 locals {
   admin_project_id = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project_id
+  org_ids          = distinct([for env in var.envs : env.org_id])
   cloudbuild_sa_roles = merge(var.create_infra_project ? { for env in keys(var.envs) : env => {
     project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
@@ -280,4 +281,11 @@ resource "google_project_iam_member" "secretManager_admin" {
   project = var.cloudbuildv2_repository_config.secret_project_id
   role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/accesscontextmanager.policyAdmin"
 }
