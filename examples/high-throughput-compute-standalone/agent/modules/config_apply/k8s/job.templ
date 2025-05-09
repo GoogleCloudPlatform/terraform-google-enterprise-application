@@ -1,0 +1,63 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${job_name}
+spec:
+  parallelism: ${parallel}
+  ttlSecondsAfterFinished: 30
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: ${job_name}
+      annotations:
+        gke-gcsfuse/volumes: "true"
+        gke-gcsfuse/cpu-request: "50m"
+        gke-gcsfuse/memory-request: "64Mi"
+        gke-gcsfuse/cpu-limit: "1"
+        gke-gcsfuse/memory-limit: "1Gi"
+        gke-gcsfuse/cpu-limit: "1"
+        gke-gcsfuse/memory-limit: "1Gi"
+        gke-gcsfuse/ephemeral-storage-request: "1Gi"
+    spec:
+      priorityClassName: higher-priority
+      containers:
+      - name: ${container_name}
+        image: ${image}
+        workingDir: /data
+        args: ${jsonencode(args)}
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "900m"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+        volumeMounts:
+        - name: gcs-data
+          mountPath: /data
+        env:
+        - name: K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      restartPolicy: Never
+      volumes:
+      - name: gcs-data
+        persistentVolumeClaim:
+          claimName: data-pvc
+          readOnly: false
