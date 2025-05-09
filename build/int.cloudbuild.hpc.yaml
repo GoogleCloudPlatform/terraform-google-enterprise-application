@@ -144,7 +144,7 @@ steps:
         gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
         update-ca-certificates
         if (ls /etc/ssl/certs | grep gitlab.pem); then
-            cft test run TestFleetscope --stage verify --verbose
+            sleep 5m && cft test run TestFleetscope --stage verify --verbose
         else
             echo ERROR: Was not able to download certificate and update system bundle.
         fi

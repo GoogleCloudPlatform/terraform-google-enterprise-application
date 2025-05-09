@@ -16,6 +16,7 @@ package frontend
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -46,6 +47,8 @@ func TestAppInfra(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
+	remoteState := bootstrap.GetStringOutput("state_bucket")
 	type ServiceInfos struct {
 		ApplicationName string
 		ProjectID       string
@@ -63,7 +66,6 @@ func TestAppInfra(t *testing.T) {
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
 		appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
-		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 		for _, fullServiceName := range serviceNames {
 			fullServiceName := fullServiceName // capture range variable
 			splitServiceName = strings.Split(fullServiceName, "-")
@@ -77,6 +79,31 @@ func TestAppInfra(t *testing.T) {
 			}
 
 			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, suffixServiceName)).String()
+			serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, suffixServiceName)).String(), "/")
+			t.Logf("Setting Service Account %s to be impersonated.", serviceAccount[len(serviceAccount)-1])
+			servicePath := fmt.Sprintf("%s/%s/envs/shared", appSourcePath, fullServiceName)
+			f, err := os.Create(fmt.Sprintf("%s/providers.tf", servicePath))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			provider := `
+provider "google" {
+	impersonate_service_account = "%s"
+}
+
+provider "google-beta" {
+	impersonate_service_account = "%s"
+}
+			`
+			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
+			fmt.Println(l, "bytes written successfully")
+			if err != nil {
+				fmt.Println(err)
+				f.Close()
+				return
+			}
+
 			servicesInfoMap[fullServiceName] = ServiceInfos{
 				ApplicationName: appName,
 				ProjectID:       projectID,
@@ -84,14 +111,11 @@ func TestAppInfra(t *testing.T) {
 				TeamName:        prefixServiceName,
 			}
 
-			remoteState := bootstrap.GetStringOutput("state_bucket")
-
 			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, suffixServiceName)).String(), "/")
 			backendConfig := map[string]interface{}{
 				"bucket": backend_bucket[len(backend_bucket)-1],
 			}
 
-			servicePath := fmt.Sprintf("%s/%s/envs/shared", appSourcePath, fullServiceName)
 			t.Run(servicePath, func(t *testing.T) {
 				t.Parallel()
 

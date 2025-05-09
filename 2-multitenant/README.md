@@ -103,6 +103,16 @@ dedicated IP address to be provisioned. For the default hello world example, use
     }
     ```
 
+1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `backend.tf`.
+
+   ```bash
+   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
+
+   echo "remote_state_bucket = ${remote_state_bucket}"
+
+   sed -i'' -e "s/UPDATE_ME/${remote_state_bucket}/" ./*/*/backend.tf
+   ```
+
 1. Commit and push changes. Because the plan branch is not a named environment branch, pushing your plan branch triggers terraform plan but not terraform apply. Review the plan output in your Cloud Build project. https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
 
     ```bash
@@ -144,6 +154,16 @@ dedicated IP address to be provisioned. For the default hello world example, use
 
    ```bash
    mv terraform.example.tfvars terraform.tfvars
+   ```
+
+1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `backend.tf`.
+
+   ```bash
+   export remote_state_bucket=$(terraform -chdir="../1-bootstrap/" output -raw state_bucket)
+
+   echo "remote_state_bucket = ${remote_state_bucket}"
+
+   sed -i'' -e "s/UPDATE_ME/${remote_state_bucket}/" ./*/*/backend.tf
    ```
 
 1. Update the file with values for your environment. See any of the envs folder

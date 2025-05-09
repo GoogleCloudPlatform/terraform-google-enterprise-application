@@ -36,6 +36,7 @@
 | app\_admin\_project\_id | Project ID of the application admin project. |
 | app\_cloudbuild\_workspace\_apply\_trigger\_id | ID of the apply cloud build trigger. |
 | app\_cloudbuild\_workspace\_artifacts\_bucket\_name | Artifacts bucket name for the application workspace. |
+| app\_cloudbuild\_workspace\_cloudbuild\_sa\_email | Terraform CloudBuild SA email for the application workspace. |
 | app\_cloudbuild\_workspace\_logs\_bucket\_name | Logs bucket name for the application workspace. |
 | app\_cloudbuild\_workspace\_plan\_trigger\_id | ID of the plan cloud build trigger. |
 | app\_cloudbuild\_workspace\_state\_bucket\_name | Terraform state bucket name for the application workspace. |

@@ -53,6 +53,8 @@ func TestAppfactory(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
+
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,

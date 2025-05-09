@@ -16,6 +16,7 @@ package multitenant
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -36,6 +37,7 @@ func TestMultitenant(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
+	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("multitenant").String())
 
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup/vpcsc"),
