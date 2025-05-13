@@ -1,0 +1,107 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+ name: parallelstore-nodemount
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parallelstore-nodemount
+  namespace: parallelstore-nodemount
+data:
+  daos_agent.yml: |-
+    access_points: ['10.93.0.3', '10.93.0.4', '10.93.0.2'] # change to parallelstore server IP address
+
+    credential_config:
+      client_user_map:
+        default:
+          user: nobody
+          group: nobody
+
+    transport_config:
+      allow_insecure: true
+
+    log_file: /daos-tmp/daos_agent.log
+
+    fabric_ifaces:
+    - numa_node: 0
+      devices:
+      - iface: eth0
+        domain: eth0
+---
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: parallelstore-nodemount
+  namespace: parallelstore-nodemount
+spec:
+  selector:
+    matchLabels:
+      app: parallelstore-nodemount
+  template:
+    metadata:
+      labels:
+        app: parallelstore-nodemount
+    spec:
+      containers:
+      - name: parallelstore-nodemount
+        image: nodemount  # Replace with your image reference
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: daos-agent
+            mountPath: /etc/daos
+          - name: parallelstore-mount
+            mountPath: /mnt/daos
+            mountPropagation: Bidirectional
+          - name: daos-agent-socket
+            mountPath: /var/run/daos_agent
+          - name: daos-tmp
+            mountPath: /daos-tmp
+          - name: host-sysfs
+            mountPath: /sys
+        ports:
+          - containerPort: 10001
+        env:
+          - name: D_LOG_MASK
+            value: INFO
+          - name: DFUSE_ARGS
+            value: "-f -m=/mnt/daos --thread-count=32 --eq-count=16 --pool=default-pool --container=default-container --disable-wb-cache --multi-user"
+        resources:
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+      volumes:
+      - name: daos-agent
+        configMap:
+          name: parallelstore-nodemount
+      - name: daos-agent-socket
+        emptyDir: {}
+      - name: daos-tmp
+        emptyDir: {}
+      - name: parallelstore-mount
+        hostPath:
+          path: /tmp/parallelstore
+          type: DirectoryOrCreate
+      - name: host-sysfs
+        hostPath:
+          path: /sys
+          type: Directory
