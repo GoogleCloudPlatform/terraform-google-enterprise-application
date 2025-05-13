@@ -209,10 +209,10 @@ variable "storage_type" {
   type        = string
   default     = null
 
-  validation {
-    condition     = var.storage_type == null || contains(["PARALLELSTORE", "LUSTRE"], var.storage_type)
-    error_message = "The storage_type must be null, PARALLELSTORE, or LUSTRE."
-  }
+  # validation {
+  #   condition     = var.storage_type == null || contains(["PARALLELSTORE", "LUSTRE"], var.storage_type)
+  #   error_message = "The storage_type must be null, PARALLELSTORE, or LUSTRE."
+  # }
 }
 
 variable "storage_capacity_gib" {
@@ -220,10 +220,10 @@ variable "storage_capacity_gib" {
   type        = number
   default     = null
 
-  validation {
-    condition     = var.storage_capacity_gib == null || var.storage_capacity_gib > 0
-    error_message = "Storage capacity must be a positive number."
-  }
+  # validation {
+  #   condition     = var.storage_capacity_gib > 0
+  #   error_message = "Storage capacity must be a positive number or null."
+  # }
 }
 
 variable "storage_locations" {

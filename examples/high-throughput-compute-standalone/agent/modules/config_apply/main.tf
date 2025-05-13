@@ -42,6 +42,7 @@ locals {
 
   kubeconfig_script = join("\n", [
     "export KUBECONFIG=\"${path.root}/generated/kubeconfig_${var.cluster_name}.yaml\"",
+    "echo KUBECONFIG=$KUBECONFIG",
     "gcloud container clusters get-credentials ${var.cluster_name} --project=${var.project_id} --region=${var.region}",
     "mv -f \"${path.root}/generated/kubeconfig_${var.cluster_name}.yaml.${var.cluster_name}\" \"${path.root}/generated/kubeconfig_${var.cluster_name}.yaml\"",
   ])
@@ -149,7 +150,7 @@ resource "null_resource" "apply_custom_compute_class" {
   triggers = {
     cluster_change = local.cluster_config
     kustomize_change = sha512(join("", [
-      for f in fileset(".", "${path.module}/../../../../../kubernetes/compute-classes/**") :
+      for f in fileset(".", "${path.module}/../../../kubernetes/compute-classes/**") :
       filesha512(f)
     ]))
   }
@@ -158,7 +159,7 @@ resource "null_resource" "apply_custom_compute_class" {
     when    = create
     command = <<-EOT
     ${local.kubeconfig_script}
-    kubectl apply -k "${path.module}/../../../../../kubernetes/compute-classes/"
+    kubectl apply -k "${path.module}/../../../kubernetes/compute-classes/"
     EOT
   }
 }
@@ -167,7 +168,7 @@ resource "null_resource" "apply_custom_priority_class" {
   triggers = {
     cluster_change = local.cluster_config
     kustomize_change = sha512(join("", [
-      for f in fileset(".", "${path.module}/../../../../../kubernetes/priority-classes/**") :
+      for f in fileset(".", "${path.module}/../../../kubernetes/priority-classes/**") :
       filesha512(f)
     ]))
   }
@@ -176,7 +177,7 @@ resource "null_resource" "apply_custom_priority_class" {
     when    = create
     command = <<-EOT
     ${local.kubeconfig_script}
-    kubectl apply -k "${path.module}/../../../../../kubernetes/priority-classes/"
+    kubectl apply -k "${path.module}/../../../kubernetes/priority-classes/"
     EOT
   }
 }

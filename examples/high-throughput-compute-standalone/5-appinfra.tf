@@ -115,13 +115,13 @@ module "agent" {
 
   containers = {
     agent = {
-      source = "${path.module}/../agent/src"
+      source = "${path.module}/agent/src"
     },
     loadtest = {
       source = "${path.module}/src"
     },
     american_option = {
-      source = "${path.module}/../american-option"
+      source = "${path.module}/american-option"
     }
   }
 }
