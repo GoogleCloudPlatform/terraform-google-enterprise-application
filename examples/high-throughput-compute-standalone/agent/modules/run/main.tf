@@ -57,9 +57,9 @@ locals {
 
 # Enable Cloud Run service
 resource "google_project_service" "cloudrun" {
-  project = var.project_id
-  service = "run.googleapis.com"
-
+  project                    = var.project_id
+  service                    = "run.googleapis.com"
+  disable_dependent_services = true
 }
 
 # Cloud Run service account

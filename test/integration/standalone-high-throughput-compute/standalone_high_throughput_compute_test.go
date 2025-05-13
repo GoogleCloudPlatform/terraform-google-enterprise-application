@@ -30,8 +30,10 @@ func TestStandaloneHTCExample(t *testing.T) {
 
 	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
 	projectID := setupOutput.GetTFSetupStringOutput("project_id")
-	service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
-	service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
+	// service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
+	// service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
+	service_perimeter_name := "aa"
+	service_perimeter_mode := "ENFORCE"
 
 	vars := map[string]interface{}{
 		"project_id":             projectID,
