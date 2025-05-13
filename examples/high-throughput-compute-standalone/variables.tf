@@ -332,3 +332,24 @@ variable "enable_csi_gcs_fuse" {
   type        = bool
   default     = true
 }
+
+#-----------------------------------------------------
+# VPC-SC
+#-----------------------------------------------------
+
+variable "service_perimeter_name" {
+  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
+  type        = string
+  default     = "ENFORCE"
+
+  validation {
+    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+  }
+}
