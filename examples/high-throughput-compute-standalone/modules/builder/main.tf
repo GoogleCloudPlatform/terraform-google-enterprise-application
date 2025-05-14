@@ -52,16 +52,15 @@ resource "google_project_service" "project" {
   disable_dependent_services = true
 }
 
-resource "google_service_account" "cloudbuild_actor" {
+data "google_service_account" "cloudbuild_actor" {
   project      = var.project_id
   account_id   = "cloudbuild-actor"
-  display_name = "Cloudbuild custom service account"
 }
 
 resource "google_project_iam_member" "logging_member" {
   project = var.project_id
   role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${google_service_account.cloudbuild_actor.email}"
+  member  = "serviceAccount:${data.google_service_account.cloudbuild_actor.email}"
 }
 
 
@@ -74,7 +73,7 @@ resource "google_artifact_registry_repository_iam_member" "repository_member" {
   location   = var.repository_region
   repository = var.repository_id
   role       = "roles/artifactregistry.admin"
-  member     = "serviceAccount:${google_service_account.cloudbuild_actor.email}"
+  member     = "serviceAccount:${data.google_service_account.cloudbuild_actor.email}"
 }
 
 
@@ -100,7 +99,7 @@ resource "google_storage_bucket" "cloudbuild" {
 resource "google_storage_bucket_iam_member" "gcs_cloudbuild_member" {
   bucket = google_storage_bucket.cloudbuild.id
   role   = "roles/storage.admin"
-  member = "serviceAccount:${google_service_account.cloudbuild_actor.email}"
+  member = "serviceAccount:${data.google_service_account.cloudbuild_actor.email}"
 }
 
 
@@ -142,7 +141,7 @@ resource "null_resource" "run_cloud_build" {
       --region ${var.region} \
       --gcs-source-staging-dir gs://${google_storage_bucket.cloudbuild.id}/source/${each.key} \
       --gcs-log-dir gs://${google_storage_bucket.cloudbuild.id}/logs/${each.key} \
-      --service-account=${google_service_account.cloudbuild_actor.id} \
+      --service-account=${data.google_service_account.cloudbuild_actor.id} \
       --tag "${local.container_image[each.key]}" \
       "${each.value.source}"
 
