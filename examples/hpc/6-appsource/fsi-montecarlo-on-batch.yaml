@@ -21,7 +21,7 @@ vars:
   zone: us-central1-a
   cluster_name:  ## Set cluster name Here ##
   cluster_project:  ## Set the GCP GKE Cluster Project
-  # TODO: use custom service account after PR is merged:  https://github.com/GoogleCloudPlatform/cluster-toolkit/pull/3736
+  service_account_email: ## Set the GCP IAM Service Account that will run the Vertex Instance
 deployment_groups:
 - group: setup
   modules:
