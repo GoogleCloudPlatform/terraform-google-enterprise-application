@@ -99,3 +99,8 @@ variable "access_level_name" {
   type        = string
   default     = null
 }
+
+variable "logging_bucket" {
+  description = "Bucket to store logging."
+  type        = string
+}
