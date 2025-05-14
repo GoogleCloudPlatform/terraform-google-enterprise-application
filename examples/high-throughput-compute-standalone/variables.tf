@@ -353,3 +353,9 @@ variable "service_perimeter_mode" {
     error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
   }
 }
+
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
