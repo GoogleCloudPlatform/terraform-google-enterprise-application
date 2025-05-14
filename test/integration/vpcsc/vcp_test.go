@@ -37,6 +37,7 @@ func TestVPCSC(t *testing.T) {
 	protected_projects := []string{}
 	orgID := temp.GetTFSetupStringOutput("org_id")
 
+	HTC := strings.ToLower(os.Getenv("HTC_EXAMPLE")) == "true"
 	if testutils.GetOrgACMPolicyID(t, orgID) == "" {
 		_, err := testutils.CreateOrgACMPolicyID(t, orgID)
 		if err != nil {
@@ -51,7 +52,7 @@ func TestVPCSC(t *testing.T) {
 		fmt.Sprintf("serviceAccount:%s", serviceAccount),
 		"serviceAccount:cloud-build@system.gserviceaccount.com",
 	}
-	if singleProject {
+	if singleProject || HTC {
 		protected_projects = append(protected_projects, projectNumber)
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
