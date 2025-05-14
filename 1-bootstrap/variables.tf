@@ -179,3 +179,8 @@ variable "access_level_name" {
   type        = string
   default     = null
 }
+
+variable "org_id" {
+  description = "Organization ID"
+  type        = string
+}

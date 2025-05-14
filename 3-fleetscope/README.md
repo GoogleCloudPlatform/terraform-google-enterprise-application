@@ -157,6 +157,7 @@ Please note that some steps in this documentation are specific to the selected G
    echo "remote_state_bucket = ${remote_state_bucket}"
 
    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
+   sed -i'' -e "s/UPDATE_ME/${remote_state_bucket}/" ./*/*/backend.tf
    ```
 
 1. Update the `terraform.tfvars` file with values for your environment.
@@ -165,7 +166,7 @@ Please note that some steps in this documentation are specific to the selected G
 
     ```bash
     git add .
-    git commit -m 'Initialize multitenant repo'
+    git commit -m 'Initialize fleetscope repo'
     git push --set-upstream origin plan
     ```
 
@@ -214,6 +215,7 @@ Please note that some steps in this documentation are specific to the selected G
    echo "remote_state_bucket = ${remote_state_bucket}"
 
    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
+   sed -i'' -e "s/UPDATE_ME/${remote_state_bucket}/" ./*/*/backend.tf
    ```
 
 1. Update the file with values for your environment. See any of the envs folder [README.md](./envs/production/README.md#inputs) files for additional information on the values in the `terraform.tfvars` file.

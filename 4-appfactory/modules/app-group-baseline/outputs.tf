@@ -54,6 +54,11 @@ output "app_cloudbuild_workspace_state_bucket_name" {
   value       = module.tf_cloudbuild_workspace.state_bucket
 }
 
+output "app_cloudbuild_workspace_cloudbuild_sa_email" {
+  description = "Terraform CloudBuild SA email for the application workspace."
+  value       = module.tf_cloudbuild_workspace.cloudbuild_sa
+}
+
 output "app_infra_project_ids" {
   description = "Application environment projects IDs."
   value       = { for key, value in module.app_infra_project : key => value.project_id }
