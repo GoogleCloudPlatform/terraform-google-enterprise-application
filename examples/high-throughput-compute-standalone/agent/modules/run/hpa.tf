@@ -74,21 +74,21 @@ resource "google_pubsub_topic_iam_member" "hpa_cloudrun_publisher" {
   project = google_pubsub_topic.hpa_topic_resp[0].project
   topic   = google_pubsub_topic.hpa_topic_resp[0].name
   role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member  = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 resource "google_pubsub_topic_iam_member" "hpa_cloudrun_publisher_reqs" {
   count   = local.enable_jobs
   project = google_pubsub_topic.hpa_topic_req[0].project
   topic   = google_pubsub_topic.hpa_topic_req[0].name
   role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member  = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 resource "google_pubsub_subscription_iam_member" "hpa_cloudrun_subscriber_resps" {
   count        = local.enable_jobs
   project      = google_pubsub_subscription.hpa_sub_resp[0].project
   subscription = google_pubsub_subscription.hpa_sub_resp[0].name
   role         = "roles/pubsub.subscriber"
-  member       = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member       = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 
 # Pub/Sub publisher can call Cloud Run
@@ -118,7 +118,7 @@ resource "google_cloud_run_v2_service" "workload_pubsub_worker" {
       min_instance_count = 0
       max_instance_count = 100
     }
-    service_account                  = google_service_account.cloudrun_actor.email
+    service_account                  = data.google_service_account.cloudrun_actor.email
     execution_environment            = "EXECUTION_ENVIRONMENT_GEN2"
     max_instance_request_concurrency = 2
     timeout                          = "3600s"

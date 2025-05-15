@@ -52,11 +52,13 @@ func TestVPCSC(t *testing.T) {
 		fmt.Sprintf("serviceAccount:%s", serviceAccount),
 		"serviceAccount:cloud-build@system.gserviceaccount.com",
 	}
-	if singleProject || HTC {
+	if singleProject {
 		protected_projects = append(protected_projects, projectNumber)
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gcp-sa-artifactregistry.iam.gserviceaccount.com", projectNumber))
+	} else if HTC {
+		protected_projects = append(protected_projects, projectNumber)
 	} else {
 		protected_projects = append(protected_projects, networkProjectsNumber...)
 	}

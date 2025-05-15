@@ -39,7 +39,7 @@ resource "google_cloud_run_v2_service" "workload_worker" {
       min_instance_count = 0
       max_instance_count = 100
     }
-    service_account                  = google_service_account.cloudrun_actor.email
+    service_account                  = data.google_service_account.cloudrun_actor.email
     execution_environment            = "EXECUTION_ENVIRONMENT_GEN2"
     max_instance_request_concurrency = 2
     timeout                          = "3600s"

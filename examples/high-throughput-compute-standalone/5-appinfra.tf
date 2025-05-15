@@ -124,6 +124,8 @@ module "agent" {
       source = "${path.module}/american-option"
     }
   }
+
+  depends_on = [google_service_account.cloudbuild_actor]
 }
 
 
@@ -152,6 +154,8 @@ module "cloudrun" {
   workload_grpc_endpoint = local.workload_grpc_endpoint
   workload_init_args     = local.workload_init_args
   test_configs           = local.test_configs_dict
+
+  depends_on = [google_service_account.cloudrun_actor]
 }
 
 
@@ -483,4 +487,6 @@ module "ui_image" {
     }
   }
   service_account_name = "ui-cloudbuild"
+
+  depends_on = [google_service_account.cloudbuild_actor]
 }

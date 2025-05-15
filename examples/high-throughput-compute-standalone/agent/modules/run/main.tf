@@ -63,16 +63,15 @@ resource "google_project_service" "cloudrun" {
 }
 
 # Cloud Run service account
-resource "google_service_account" "cloudrun_actor" {
+data "google_service_account" "cloudrun_actor" {
   project      = var.project_id
   account_id   = "cloudrun-actor"
-  display_name = "Cloud Run custom service account"
 }
 
 resource "google_project_iam_member" "cloudrun_gcs_member" {
   project = var.project_id
   role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member  = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 
 
@@ -98,7 +97,7 @@ resource "google_storage_bucket" "gcs_storage_data" {
 resource "google_storage_bucket_iam_member" "cloudrun_gcs_member" {
   bucket = google_storage_bucket.gcs_storage_data.name
   role   = "roles/storage.admin"
-  member = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 
 
@@ -118,7 +117,7 @@ resource "google_cloud_run_v2_job" "agent" {
 
   template {
     template {
-      service_account       = google_service_account.cloudrun_actor.email
+      service_account       = data.google_service_account.cloudrun_actor.email
       execution_environment = "EXECUTION_ENVIRONMENT_GEN2"
       max_retries           = 0
       timeout               = "86400s"
@@ -166,7 +165,7 @@ resource "google_cloud_run_v2_job" "workload_workload" {
 
   template {
     template {
-      service_account       = google_service_account.cloudrun_actor.email
+      service_account       = data.google_service_account.cloudrun_actor.email
       execution_environment = "EXECUTION_ENVIRONMENT_GEN2"
       max_retries           = 0
       timeout               = "86400s"

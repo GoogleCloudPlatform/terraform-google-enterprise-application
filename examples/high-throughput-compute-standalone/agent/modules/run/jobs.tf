@@ -72,7 +72,7 @@ resource "google_pubsub_topic_iam_member" "cloudrun_publisher" {
   project = google_pubsub_topic.topic_resp[0].project
   topic   = google_pubsub_topic.topic_resp[0].name
   role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member  = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 
 resource "google_pubsub_topic_iam_member" "cloudrun_publisher_reqs" {
@@ -80,7 +80,7 @@ resource "google_pubsub_topic_iam_member" "cloudrun_publisher_reqs" {
   project = google_pubsub_topic.topic_req[0].project
   topic   = google_pubsub_topic.topic_req[0].name
   role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member  = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 
 resource "google_pubsub_subscription_iam_member" "cloudrun_subscriber" {
@@ -88,7 +88,7 @@ resource "google_pubsub_subscription_iam_member" "cloudrun_subscriber" {
   project      = google_pubsub_subscription.sub_req[0].project
   subscription = google_pubsub_subscription.sub_req[0].name
   role         = "roles/pubsub.subscriber"
-  member       = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member       = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 
 resource "google_pubsub_subscription_iam_member" "cloudrun_subscriber_resps" {
@@ -96,7 +96,7 @@ resource "google_pubsub_subscription_iam_member" "cloudrun_subscriber_resps" {
   project      = google_pubsub_subscription.sub_resp[0].project
   subscription = google_pubsub_subscription.sub_resp[0].name
   role         = "roles/pubsub.subscriber"
-  member       = "serviceAccount:${google_service_account.cloudrun_actor.email}"
+  member       = "serviceAccount:${data.google_service_account.cloudrun_actor.email}"
 }
 
 
@@ -118,7 +118,7 @@ resource "google_cloud_run_v2_job" "workload_worker" {
 
   template {
     template {
-      service_account       = google_service_account.cloudrun_actor.email
+      service_account       = data.google_service_account.cloudrun_actor.email
       execution_environment = "EXECUTION_ENVIRONMENT_GEN2"
       timeout               = "86400s"
       max_retries           = 0
