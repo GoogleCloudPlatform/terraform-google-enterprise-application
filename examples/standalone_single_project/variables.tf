@@ -75,4 +75,5 @@ variable "workerpool_id" {
 variable "logging_bucket" {
   description = "Bucket to store logging."
   type        = string
+  default     = null
 }
