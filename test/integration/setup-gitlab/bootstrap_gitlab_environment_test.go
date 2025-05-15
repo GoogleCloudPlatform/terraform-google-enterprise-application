@@ -15,6 +15,7 @@
 package bootstrap_gitlab
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -23,6 +24,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -46,21 +48,24 @@ func TestValidateStartupScript(t *testing.T) {
 	instanceName := setup.GetStringOutput("gitlab_instance_name")
 	instanceZone := setup.GetStringOutput("gitlab_instance_zone")
 	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")
-	// Periodically read logs from startup script running on the VM instance
-	for count := 0; count < 100; count++ {
+
+	pollGitLabConfiguration := func() (bool, error) {
+		// Periodically read logs from startup script running on the VM instance
 		logs, err := readLogsFromVm(t, instanceName, instanceZone, gitlabSecretProject)
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		if strings.Contains(logs, "Finished Google Compute Engine Startup Scripts") {
 			if strings.Contains(logs, "exit status 1") {
-				t.Fatal("ERROR: Startup Script finished with invalid exit status.")
+				t.Error("ERROR: Startup Script finished with invalid exit status.")
+				return false, errors.New("ERROR: Startup Script finished with invalid exit status.")
 			}
-			break
+			return false, nil
 		}
-		time.Sleep(12 * time.Second)
+		return true, nil
 	}
+
+	utils.Poll(t, pollGitLabConfiguration, 50, 30*time.Second)
 }
 func TestBootstrapGitlabVM(t *testing.T) {
 	caCert, err := os.ReadFile("/usr/local/share/ca-certificates/gitlab.crt")

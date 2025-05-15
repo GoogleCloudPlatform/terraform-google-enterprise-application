@@ -69,10 +69,10 @@ for (( i=1; i<=MAX_TRIES; i++)); do
       fi
       break
   else
-      echo "$i: GitLab is not ready for sign-in operations. Waiting 10 seconds and will try again."
+      echo "$i: GitLab is not ready for sign-in operations. Waiting 30 seconds and will try again."
       echo "Command Output:"
       echo "$RESPONSE_BODY"
-      sleep 10
+      sleep 30
   fi
 
   # Stop execution upon reaching MAX_TRIES iterations
