@@ -18,7 +18,7 @@
 apt-get update
 apt-get install -y curl openssh-server ca-certificates tzdata perl jq
 curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | bash
-apt-get install gitlab-ee
+apt-get install gitlab-ee=17.11.2-ee.0
 
 
 # Retrieve values from Metadata Server
