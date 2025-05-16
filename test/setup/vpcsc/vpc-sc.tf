@@ -213,39 +213,8 @@ locals {
     "workloadmanager.googleapis.com",
     "workstations.googleapis.com",
   ]
-}
 
-resource "random_string" "prefix" {
-  length  = 6
-  special = false
-  upper   = false
-}
-
-data "google_access_context_manager_access_policy" "policy_org" {
-  parent = "organizations/${var.org_id}"
-}
-
-module "access_level_members" {
-  source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version            = "~> 6.2"
-  policy             = data.google_access_context_manager_access_policy.policy_org.name
-  name               = "ac_gke_enterprise_${random_string.prefix.result}"
-  members            = var.access_level_members
-  combining_function = "OR"
-}
-
-module "regular_service_perimeter" {
-  source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version        = "~> 6.2"
-  policy         = data.google_access_context_manager_access_policy.policy_org.name
-  perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
-  description    = "Perimeter shielding projects"
-
-  access_levels_dry_run           = [module.access_level_members.name]
-  vpc_accessible_services_dry_run = ["*"]
-  restricted_services_dry_run     = local.supported_restricted_service
-  resources_dry_run               = var.protected_projects
-  egress_policies_dry_run = [
+  egress_rules = [
     {
       from = {
         identity_type = "ANY_IDENTITY"
@@ -295,63 +264,58 @@ module "regular_service_perimeter" {
           "storage.googleapis.com" = { methods = ["*"] }
         }
       }
+    },
+    {
+      from = {
+        identity_type = "ANY_IDENTITY"
+      }
+      to = {
+        resources = [
+          "projects/${var.logging_bucket_project_number}" //logging bucket
+        ]
+        operations = {
+          "storage.googleapis.com" = { methods = ["*"] }
+        }
+      }
     }
   ]
+}
+
+resource "random_string" "prefix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
+data "google_access_context_manager_access_policy" "policy_org" {
+  parent = "organizations/${var.org_id}"
+}
+
+module "access_level_members" {
+  source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
+  version            = "~> 6.2"
+  policy             = data.google_access_context_manager_access_policy.policy_org.name
+  name               = "ac_gke_enterprise_${random_string.prefix.result}"
+  members            = var.access_level_members
+  combining_function = "OR"
+}
+
+module "regular_service_perimeter" {
+  source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
+  version        = "~> 6.2"
+  policy         = data.google_access_context_manager_access_policy.policy_org.name
+  perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
+  description    = "Perimeter shielding projects"
+
+  access_levels_dry_run           = [module.access_level_members.name]
+  vpc_accessible_services_dry_run = ["*"]
+  restricted_services_dry_run     = local.supported_restricted_service
+  resources_dry_run               = var.protected_projects
+  egress_policies_dry_run         = local.egress_rules
 
   access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
   vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
   restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
   resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : []
-  egress_policies = var.service_perimeter_mode == "ENFORCE" ? [
-    {
-      from = {
-        identity_type = "ANY_IDENTITY"
-      },
-      to = {
-        resources = ["projects/213331819513"], //service networking projects
-        operations = {
-          "compute.googleapis.com" = { methods = ["*"] }
-        }
-      }
-    },
-    {
-      from = {
-        identity_type = "ANY_IDENTITY"
-      }
-      to = {
-        resources = [
-          "projects/682719828243" // projects/bank-of-anthos-ci/locations/us-central1/repositories/bank-of-anthos
-        ]
-        operations = {
-          "artifactregistry.googleapis.com" = { methods = ["*"] }
-        }
-      }
-    },
-    {
-      from = {
-        identity_type = "ANY_IDENTITY"
-      }
-      to = {
-        resources = [
-          "projects/912338787515", //proxy-golang-org-prod
-        ]
-        operations = {
-          "storage.googleapis.com" = { methods = ["*"] }
-        }
-      }
-    },
-    {
-      from = {
-        identity_type = "ANY_IDENTITY"
-      }
-      to = {
-        resources = [
-          "projects/213358688945",
-        ]
-        operations = {
-          "storage.googleapis.com" = { methods = ["*"] }
-        }
-      }
-    }
-  ] : []
+  egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : []
 }

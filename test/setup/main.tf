@@ -64,3 +64,11 @@ module "group" {
   description  = "Group module test group for ${each.key}"
   domain       = data.google_organization.org.domain
 }
+
+resource "google_storage_bucket" "logging_bucket" {
+  project                     = local.project_id
+  name                        = "bkt-logging-${random_string.prefix.result}"
+  uniform_bucket_level_access = true
+  location                    = "us"
+  force_destroy               = true
+}

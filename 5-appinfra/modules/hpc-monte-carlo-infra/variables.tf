@@ -76,3 +76,9 @@ variable "team" {
   description = "Environment Team, must be the same as the fleet scope team"
   type        = string
 }
+
+variable "logging_bucket" {
+  description = "Bucket to store logging."
+  type        = string
+  default     = null
+}
