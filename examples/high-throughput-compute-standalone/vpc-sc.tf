@@ -17,11 +17,11 @@ data "google_project" "project" {
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
   count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
-  members      = concat(
+  members = concat(
     [google_service_account.cloudbuild_actor.member,
-    google_service_account.cloudrun_actor.member
-    ], 
-    ["serviceAccount:service-${data.google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com"])
+      google_service_account.cloudrun_actor.member
+    ],
+  ["serviceAccount:service-${data.google_project.project.number}@serverless-robot-prod.iam.gserviceaccount.com"])
 }
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
@@ -42,7 +42,12 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
         method = "*"
       }
     }
-
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
