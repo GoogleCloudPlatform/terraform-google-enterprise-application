@@ -41,6 +41,9 @@ resource "google_storage_bucket" "build_logs" {
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
   location                    = var.location
+  versioning {
+    enabled = true
+  }
 }
 
 # IAM Roles required to build the terraform image on Google Cloud Build
