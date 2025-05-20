@@ -79,7 +79,7 @@ The entity used to deploy this examples must have the following roles at Project
 - Service Account Admin: `roles/iam.serviceAccountAdmin`
 - Service Account User: `roles/iam.serviceAccountUser`
 - Logging LogWriter: `roles/logging.logWriter`
-- Privileged Access Manager Project Service Agent: `roles/privilegedaccessmanager.projectServiceAgent`
+- Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
 - Source Repository Admin: `roles/source.admin` (if using CSR)
 - Storage Admin: `roles/storage.admin`
@@ -88,7 +88,7 @@ The entity used to deploy this examples must have the following roles at Project
 
 The entity used to deploy this examples must have the following roles at Organization level:
 
-- Privileged Access Manager Organization Service Agent: `roles/privilegedaccessmanager.organizationServiceAgent`
+- Organization Administrator: `roles/resourcemanager.organizationAdmin`
 - Access Context Manager Policy Admin: `roles/accesscontextmanager.policyAdmin`
 
 This example requires a Single network configured:
