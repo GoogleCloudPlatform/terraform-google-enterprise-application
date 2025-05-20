@@ -197,6 +197,7 @@ Please note that some steps in this documentation are specific to the selected G
    echo "remote_state_bucket = ${remote_state_bucket}"
 
    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
+   sed -i'' -e "s/UPDATE_ME/${remote_state_bucket}/" ./*/*/backend.tf
    ```
 
 1. Update the `terraform.tfvars` file with values for your environment.
@@ -231,9 +232,17 @@ Please note that some steps in this documentation are specific to the selected G
    mv terraform.example.tfvars terraform.tfvars
    ```
 
-1. Update the file with values for your environment.
 
-   > TIP: To retrieve the remote state bucket variable, you can run `terraform -chdir=../1-bootstrap/ output -raw state_bucket` command.
+
+1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `backend.tf`.
+
+   ```bash
+   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
+
+   echo "remote_state_bucket = ${remote_state_bucket}"
+
+   sed -i'' -e "s/UPDATE_ME/${remote_state_bucket}/" ./*/*/backend.tf
+   ```
 
 You can now deploy the into your common folder.
 

@@ -145,7 +145,7 @@ steps:
         update-ca-certificates
         sleep 5m
         if (ls /etc/ssl/certs | grep gitlab.pem); then
-            cft test run TestFleetscope --stage verify --verbose
+            sleep 5m && cft test run TestFleetscope --stage verify --verbose
         else
             echo ERROR: Was not able to download certificate and update system bundle.
         fi

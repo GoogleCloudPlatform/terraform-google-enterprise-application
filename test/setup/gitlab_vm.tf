@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 locals {
-  cloudbuild_consumer_project_number = module.gitlab_project.project_number
   bootstrap_project_number           = [for k, v in merge(module.project, module.project_standalone) : v.project_number][0]
   gitlab_network_name                = module.vpc.network_name
   gitlab_network_id                  = "projects/${module.gitlab_project.project_number}/locations/global/networks/${local.gitlab_network_name}"
@@ -37,7 +36,6 @@ resource "google_project_iam_member" "allow_gitlab_iam_policy_edit" {
 module "gitlab_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 18.0"
-
 
   name                     = "eab-gitlab-self-hosted"
   random_project_id        = "true"

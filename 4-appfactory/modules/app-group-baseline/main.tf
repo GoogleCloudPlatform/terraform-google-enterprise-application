@@ -16,6 +16,7 @@
 
 locals {
   admin_project_id = var.create_admin_project ? module.app_admin_project[0].project_id : var.admin_project_id
+  org_ids          = distinct([for env in var.envs : env.org_id])
   cloudbuild_sa_roles = merge(var.create_infra_project ? { for env in keys(var.envs) : env => {
     project_id = module.app_infra_project[env].project_id
     roles      = var.cloudbuild_sa_roles[env].roles
@@ -26,19 +27,19 @@ locals {
         "roles/browser", "roles/serviceusage.serviceUsageAdmin",
         "roles/storage.admin", "roles/iam.serviceAccountAdmin",
         "roles/artifactregistry.admin", "roles/clouddeploy.admin",
-        "roles/cloudbuild.builds.editor", "roles/privilegedaccessmanager.projectServiceAgent",
-        "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin"
+        "roles/cloudbuild.builds.editor", "roles/resourcemanager.projectIamAdmin",
+        "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin",
+        "roles/compute.viewer"
       ]
     } },
     {
       for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
         project_id = cluster_project_id
-        roles      = ["roles/privilegedaccessmanager.projectServiceAgent"]
+        roles      = ["roles/resourcemanager.projectIamAdmin"]
       }
     }
   )
 
-  org_ids             = distinct([for env in var.envs : env.org_id])
   use_csr             = var.cloudbuildv2_repository_config.repo_type == "CSR"
   service_repo_name   = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
   worker_pool_project = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
@@ -201,10 +202,10 @@ resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
   role    = "roles/logging.logWriter"
 }
 
-resource "google_project_iam_member" "worker_pool_roles_privilegedaccessmanager_projectServiceAgent" {
+resource "google_project_iam_member" "worker_pool_roles_project_iam_admin" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = local.worker_pool_project
-  role    = "roles/privilegedaccessmanager.projectServiceAgent"
+  role    = "roles/resourcemanager.projectIamAdmin"
 }
 
 resource "google_project_iam_member" "cloud_build_builder" {
@@ -253,13 +254,6 @@ resource "google_service_account_iam_member" "account_access" {
   member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 
-resource "google_organization_iam_member" "builder_organization_browser" {
-  for_each = toset(local.org_ids)
-  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
-  org_id   = each.value
-  role     = "roles/browser"
-}
-
 // Create infra project
 module "app_infra_project" {
   source   = "terraform-google-modules/project-factory/google"
@@ -287,4 +281,11 @@ resource "google_project_iam_member" "secretManager_admin" {
   project = var.cloudbuildv2_repository_config.secret_project_id
   role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  for_each = toset(local.org_ids)
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  org_id   = each.value
+  role     = "roles/accesscontextmanager.policyAdmin"
 }
