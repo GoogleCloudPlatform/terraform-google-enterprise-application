@@ -125,7 +125,10 @@ module "agent" {
     }
   }
 
-  depends_on = [google_service_account.cloudbuild_actor]
+  depends_on = [
+    google_service_account.cloudbuild_actor,
+    null_resource.depends_on_vpc_sc_rules
+  ]
 }
 
 
@@ -488,5 +491,8 @@ module "ui_image" {
   }
   service_account_name = "ui-cloudbuild"
 
-  depends_on = [google_service_account.cloudbuild_actor]
+  depends_on = [
+    google_service_account.cloudbuild_actor,
+    null_resource.depends_on_vpc_sc_rules
+  ]
 }

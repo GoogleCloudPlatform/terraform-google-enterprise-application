@@ -37,4 +37,6 @@ module "infrastructure" {
   # CSI Drivers
   enable_csi_parallelstore = var.enable_csi_parallelstore
   enable_csi_gcs_fuse      = var.enable_csi_gcs_fuse
+
+  depends_on = [null_resource.depends_on_vpc_sc_rules]
 }
