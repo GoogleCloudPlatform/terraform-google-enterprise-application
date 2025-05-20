@@ -36,7 +36,10 @@ func renameKueueFile(t *testing.T) {
 	tf_file_new := "../../../3-fleetscope/modules/env_baseline/kueue.tf"
 	err := os.Rename(tf_file_old, tf_file_new)
 	if err != nil {
-		t.Fatal(err)
+		// Test if the erro is because the file was already move in other environment test
+		if !strings.Contains(err.Error(), "no such file or directory") {
+			t.Fatal(err)
+		}
 	}
 }
 
