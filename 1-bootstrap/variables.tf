@@ -185,3 +185,8 @@ variable "logging_bucket" {
   type        = string
   default     = null
 }
+
+variable "org_id" {
+  description = "Organization ID"
+  type        = string
+}
