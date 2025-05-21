@@ -60,3 +60,24 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| cleanup\_keep\_count | Number of most recent container image versions to keep in Artifact Registry cleanup policy | `number` | `10` | no |
+| name | Name of the Artifact Registry | `string` | `"research-images"` | no |
+| project\_id | The GCP project where the resources will be created | `string` | n/a | yes |
+| regions | List of regions where GKE clusters will be deployed - used to determine the multi-region location | `list(string)` | <pre>[<br>  "us-central1"<br>]</pre> | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| artifact\_registry | Complete Artifact Registry repository resource including all attributes and properties |
+| artifact\_registry\_id | Fully qualified ID of the Artifact Registry repository in format projects/{project}/locations/{location}/repositories/{repository} |
+| artifact\_registry\_region | Region where the Artifact Registry repository was deployed based on dominant region analysis |
+| artifact\_registry\_url | Full URL of the Artifact Registry repository for use in Docker image references (format: {region}-docker.pkg.dev/{project}/{repository}) |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

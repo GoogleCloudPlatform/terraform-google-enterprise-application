@@ -122,3 +122,61 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| artifact\_registry | n/a | <pre>object({<br>    project  = string<br>    location = string<br>    name     = string<br>  })</pre> | n/a | yes |
+| cluster\_index | Index of this cluster within its region (0-3) | `number` | n/a | yes |
+| cluster\_max\_cpus | Max CPU in cluster autoscaling resource limits | `number` | `10000` | no |
+| cluster\_max\_memory | Max memory in cluster autoscaling resource limits | `number` | `80000` | no |
+| cluster\_name | Name of GKE cluster | `string` | `"gke-risk-research"` | no |
+| cluster\_service\_account | The service account for the GKE cluster | <pre>object({<br>    email = string<br>    id    = string<br>  })</pre> | n/a | yes |
+| create\_ondemand\_nodepool | Whether to create the on-demand node pool | `bool` | `true` | no |
+| create\_spot\_nodepool | Whether to create the spot node pool | `bool` | `true` | no |
+| datapath\_provider | The datapath provider for the GKE cluster (DATAPATH\_PROVIDER\_UNSPECIFIED, LEGACY\_DATAPATH, or ADVANCED\_DATAPATH) | `string` | `"LEGACY_DATAPATH"` | no |
+| enable\_advanced\_datapath\_observability\_metrics | Enable advanced datapath observability metrics when datapath\_provider is ADVANCED\_DATAPATH | `bool` | `true` | no |
+| enable\_advanced\_datapath\_observability\_relay | Enable advanced datapath observability relay when datapath\_provider is ADVANCED\_DATAPATH | `bool` | `false` | no |
+| enable\_cilium\_clusterwide\_network\_policy | Enable Cilium clusterwide network policy for the GKE cluster | `bool` | `false` | no |
+| enable\_csi\_filestore | Enable the Filestore CSI Driver | `bool` | `false` | no |
+| enable\_csi\_gcs\_fuse | Enable the GCS Fuse CSI Driver | `bool` | `true` | no |
+| enable\_csi\_parallelstore | Enable the Parallelstore CSI Driver | `bool` | `true` | no |
+| enable\_intranode\_visibility | Enable intranode visibility for the GKE cluster | `bool` | `false` | no |
+| enable\_mesh\_certificates | Enable mesh certificates for the GKE cluster | `bool` | `false` | no |
+| enable\_private\_endpoint | Enable private endpoint for GKE control plane (restricts access to private networks) | `bool` | `false` | no |
+| enable\_secure\_boot | Enable Secure Boot for GKE nodes | `bool` | `true` | no |
+| enable\_shielded\_nodes | Enable Shielded GKE Nodes for enhanced security | `bool` | `true` | no |
+| enable\_workload\_identity | Enable Workload Identity for GKE clusters | `bool` | `true` | no |
+| ip\_range\_pods | The _name_ of the secondary subnet ip range to use for pods | `string` | n/a | yes |
+| ip\_range\_services | The _name_ of the secondary subnet range to use for services | `string` | n/a | yes |
+| maintenance\_end\_time | The end time for the maintenance window in RFC3339 format (e.g., '2024-09-18T04:00:00Z') | `string` | `"2024-09-18T04:00:00Z"` | no |
+| maintenance\_recurrence | The recurrence of the maintenance window in RRULE format (e.g., 'FREQ=WEEKLY;BYDAY=SA,SU') | `string` | `"FREQ=WEEKLY;BYDAY=SA,SU"` | no |
+| maintenance\_start\_time | The start time for the maintenance window in RFC3339 format (e.g., '2024-09-17T04:00:00Z') | `string` | `"2024-09-17T04:00:00Z"` | no |
+| max\_nodes\_ondemand | Maximum number of on-demand nodes in the node pool | `number` | `32` | no |
+| max\_nodes\_spot | Maximum number of spot nodes in the node pool | `number` | `3000` | no |
+| min\_master\_version | The minimum version of the master. GKE will auto-update the master to new versions, so this does not guarantee the current master version. | `string` | `"1.32.3"` | no |
+| min\_nodes\_ondemand | Minimum number of on-demand nodes in the node pool | `number` | `0` | no |
+| min\_nodes\_spot | Minimum number of spot nodes in the node pool | `number` | `1` | no |
+| network | The vpc the cluster should be deployed to | `string` | `"default"` | no |
+| node\_machine\_type\_ondemand | Machine type for on-demand node pools in GKE clusters | `string` | `"n2-standard-16"` | no |
+| node\_machine\_type\_spot | Machine type for spot node pools in GKE clusters | `string` | `"n2-standard-64"` | no |
+| project\_id | The GCP project where the resources will be created | `string` | n/a | yes |
+| region | The region to host the cluster in | `string` | `"us-central1"` | no |
+| release\_channel | GKE release channel for clusters (RAPID, REGULAR, STABLE) | `string` | `"RAPID"` | no |
+| scaled\_control\_plane | Deploy a larger initial nodepool to ensure larger control plane nodes are provisied | `bool` | `false` | no |
+| subnet | The subnet the cluster should be deployed to | `string` | `"default"` | no |
+| zones | The zones for cluster nodes | `list(string)` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| cluster\_config | Configuration details for the GKE cluster |
+| cluster\_name | Name of the deployed GKE Standard cluster for use in kubectl commands and referencing in other resources |
+| endpoint | Control plane endpoint configuration for the GKE Standard cluster including DNS endpoints and external access configuration |
+| node\_pools | Node pools created for the cluster |
+| region | GCP region where the GKE Standard cluster is deployed, useful for region-scoped commands and resources |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

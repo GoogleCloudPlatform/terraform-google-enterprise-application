@@ -66,3 +66,21 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| bigquery\_dataset | The Dataset for capturing BigQuery data | `string` | n/a | yes |
+| bigquery\_table | The Datsaset for capturing BigQuery data | `string` | n/a | yes |
+| project\_id | The GCP project ID where resources will be created. | `string` | n/a | yes |
+| region | The Region of the Pub/Sub topic and subscriptions | `string` | n/a | yes |
+| subscriber\_service\_account | Service account that will be granted subscriber role on topics | `string` | `""` | no |
+| topics | List of topics to persist to BigQuery | `list(string)` | n/a | yes |
+
+## Outputs
+
+No outputs.
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

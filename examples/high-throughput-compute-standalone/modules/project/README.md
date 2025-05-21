@@ -80,3 +80,19 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| enable\_log\_analytics | Enable log analytics in the project? | `bool` | `true` | no |
+| project\_id | The GCP project where the resources will be created | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| analytics\_bigquery\_dataset\_id | ID of the BigQuery dataset linked to Cloud Logging for log analytics, returned only when log analytics is enabled, used for querying logs and creating dashboards |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

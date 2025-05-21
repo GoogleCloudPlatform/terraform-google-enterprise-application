@@ -85,3 +85,23 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| containers | Map of image name to configuration (source) | <pre>map(object({<br>    source      = string<br>    config_yaml = optional(string, "")<br>  }))</pre> | n/a | yes |
+| project\_id | The GCP project ID where resources will be created. | `string` | n/a | yes |
+| region | The region of the build | `string` | n/a | yes |
+| repository\_id | Artifact repository ID | `string` | n/a | yes |
+| repository\_region | Artifacte Repository region | `string` | n/a | yes |
+| service\_account\_name | Service account name | `string` | `"cloudbuild-actor"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| status | Container build status information including image URLs, tags, and build metadata for all containers built by Cloud Build |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

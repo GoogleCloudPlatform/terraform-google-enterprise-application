@@ -70,3 +70,31 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| capacity\_gib | Capacity in GiB for Lustre instance. Must be a multiple of 9000. | `number` | `18000` | no |
+| filesystem | The name of the Lustre filesystem | `string` | `"lustre-fs"` | no |
+| gke\_support\_enabled | Enable GKE support for Lustre instance | `bool` | `true` | no |
+| instance\_id | The ID of the Lustre instance. If null, will be set to 'lustre-{location}'. | `string` | `null` | no |
+| location | The location (zone) where the Lustre instance will be created, in the format 'region-zone' e.g., 'us-central1-a' | `string` | `"null"` | no |
+| network | The VPC network to which the Lustre instance should be connected | `string` | `"default"` | no |
+| project\_id | The GCP project where the resources will be created | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| capacity\_gib | Provisioned storage capacity of the Lustre instance in GiB |
+| filesystem | Name of the Lustre filesystem |
+| id | Fully qualified identifier for the Lustre resource |
+| instance\_id | ID of the Lustre instance |
+| location | Zone location where the Lustre instance is deployed |
+| mount\_point | List of IPv4 addresses or DNS names for the Lustre mount points |
+| name | Fully qualified name of the Lustre instance |
+| region | Region extracted from the location |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

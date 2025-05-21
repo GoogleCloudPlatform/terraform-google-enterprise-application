@@ -78,3 +78,22 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| regions | List of regions to determine multi region choice | `list(string)` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| default\_region | The first alphabetically sorted individual region from within the dominant multi-region, used as a default region for resources requiring a specific region |
+| dominant\_region | The multi-region with the most regions in the input set (preferring US in case of ties), used for optimal placement of multi-region resources |
+| region\_counts | Count of specific regions within each multi-region group, used to determine the dominant multi-region and for resource distribution planning |
+| region\_mapping | Mapping of individual GCP regions to their corresponding multi-region parent (e.g., us-central1 → us), used for determining resource placement strategy |
+| regions\_in\_dominant | List of all individual regions that belong to the identified dominant multi-region, useful for distributing resources across zones within the preferred multi-region |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

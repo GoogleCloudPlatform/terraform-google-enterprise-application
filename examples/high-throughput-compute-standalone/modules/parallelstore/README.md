@@ -67,3 +67,32 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| capacity\_gib | Custom capacity in GiB for Parallelstore instance. If null, defaults to 12000 for SCRATCH and 27000 for PERSISTENT. | `number` | `null` | no |
+| deployment\_type | Parallelstore Instance deployment type (SCRATCH or PERSISTENT) | `string` | `"SCRATCH"` | no |
+| instance\_id | The ID of the Parallelstore instance. If null, will be set to 'parallelstore-{location}'. | `string` | `null` | no |
+| location | The location (zone) where the Parallelstore instance will be created, in the format 'region-zone' e.g., 'us-central1-a' | `string` | `"null"` | no |
+| network | The VPC network to which the Parallelstore instance should be connected | `string` | `"default"` | no |
+| project\_id | The GCP project where the resources will be created | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| access\_points | List of IPv4 addresses for the Parallelstore access points, required for client-side configuration including Kubernetes PersistentVolumes and Daemonsets |
+| capacity\_gib | Provisioned storage capacity of the Parallelstore instance in Gibibytes (GiB), useful for capacity planning and cost estimation |
+| daos\_version | Version of the Distributed Application Object Storage (DAOS) software running in the Parallelstore instance, useful for compatibility checks and documentation |
+| id | Fully qualified identifier for the Parallelstore resource in format projects/{{project}}/locations/{{location}}/instances/{{instance\_id}}, used in API calls and scripts |
+| instance\_id | ID of the Parallelstore instance |
+| location | Zone location where the Parallelstore instance is deployed (format: {region}-{zone}), important for co-locating with compute resources |
+| name | Fully qualified name of the Parallelstore instance in format projects/{{project}}/locations/{{location}}/instances/{{name}}, used in Google Cloud API calls |
+| name\_short | Resource name in the format {{name}} |
+| region | Region extracted from the location |
+| reserved\_ip\_range | Identifier of the allocated IP address range associated with the Parallelstore private service access connection, used for network planning and troubleshooting |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

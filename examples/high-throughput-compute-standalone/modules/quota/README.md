@@ -96,3 +96,22 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| project\_id | The GCP project where the resources will be created | `string` | n/a | yes |
+| quota\_contact\_email | Contact email for quota requests | `string` | `""` | no |
+| quota\_preferences | Map of quota preferences to request. Each item should include service, quota\_id, preferred\_value, and optional dimensions | <pre>list(object({<br>    service         = string<br>    quota_id        = string<br>    preferred_value = number<br>    dimensions      = optional(map(string), {})<br>    region          = optional(string, null)<br>    # Use custom_name if you want to override the default name format<br>    custom_name = optional(string, null)<br>  }))</pre> | `[]` | no |
+| region | The region to host the cluster in | `string` | `"us-central1"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| quota\_preferences | Map of created quota preferences |
+| requested\_quota\_count | Number of quota preferences requested |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
