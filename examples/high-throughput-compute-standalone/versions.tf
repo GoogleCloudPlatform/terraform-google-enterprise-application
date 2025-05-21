@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/google-beta"
       version = ">= 6.29.0"
     }
+    local = {
+      source = "hashicorp/local"
+      version = ">= 2.5.3"
+    }
   }
   provider_meta "google" {
     module_name = "cloud-solutions/fsi-rdp-loadtest-v1.0.0"
