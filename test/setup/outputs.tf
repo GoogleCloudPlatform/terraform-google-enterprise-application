@@ -97,3 +97,7 @@ output "teams" {
 output "single_project" {
   value = var.single_project
 }
+
+output "logging_bucket" {
+  value = google_storage_bucket.logging_bucket.name
+}

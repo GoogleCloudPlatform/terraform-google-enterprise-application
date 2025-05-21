@@ -65,8 +65,9 @@ func TestVPCSC(t *testing.T) {
 	accessLevelMembers = append(accessLevelMembers, addAccessLevelMembers...)
 	t.Logf("accessLevelMembers: %v", accessLevelMembers)
 	vars := map[string]interface{}{
-		"access_level_members": accessLevelMembers,
-		"protected_projects":   protected_projects,
+		"access_level_members":          accessLevelMembers,
+		"protected_projects":            protected_projects,
+		"logging_bucket_project_number": projectNumber,
 	}
 
 	vpcsc := tft.NewTFBlueprintTest(t,

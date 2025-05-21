@@ -180,6 +180,12 @@ variable "access_level_name" {
   default     = null
 }
 
+variable "logging_bucket" {
+  description = "Bucket to store logging."
+  type        = string
+  default     = null
+}
+
 variable "org_id" {
   description = "Organization ID"
   type        = string
