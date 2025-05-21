@@ -25,6 +25,10 @@ resource "google_storage_bucket" "build_logs" {
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
   location                    = var.region
+  logging {
+    log_bucket        = var.logging_bucket
+    log_object_prefix = "cb-ai-${var.infra_project}"
+  }
   versioning {
     enabled = true
   }

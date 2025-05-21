@@ -50,4 +50,5 @@ module "app" {
 
   workerpool_id     = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
   access_level_name = var.access_level_name
+  logging_bucket    = var.logging_bucket
 }
