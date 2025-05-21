@@ -16,12 +16,12 @@
 
 
 # Ensure python3 is installed
-if ! $(which python3 > /dev/null); then
+if ! command -v python3 > /dev/null; then
   echo "python3 needs to be installed"
   exit 1
 fi
 
-ROOT="$(dirname $0)"
+ROOT="$(dirname "$0")"
 VENV="${ROOT}/.venv"
 
 # Create virtual environment
