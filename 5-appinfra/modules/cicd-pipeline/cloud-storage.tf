@@ -19,6 +19,9 @@ resource "google_storage_bucket" "build_cache" {
   uniform_bucket_level_access = true
   location                    = var.region
   force_destroy               = var.buckets_force_destroy
+  versioning {
+    enabled = true
+  }
 }
 
 resource "google_storage_bucket" "release_source_development" {
@@ -27,6 +30,9 @@ resource "google_storage_bucket" "release_source_development" {
   uniform_bucket_level_access = true
   location                    = var.region
   force_destroy               = var.buckets_force_destroy
+  versioning {
+    enabled = true
+  }
 }
 
 # Initialize cache with empty file

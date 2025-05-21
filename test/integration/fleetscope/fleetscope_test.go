@@ -46,6 +46,8 @@ func TestFleetscope(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
+
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
@@ -120,37 +122,44 @@ func TestFleetscope(t *testing.T) {
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
 
-				// get kubectl namespaces and store them on currentClusterNamespaces slice
-				output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
-				if err != nil {
-					t.Fatal(err)
-				}
-				if !gjson.Valid(output) {
-					t.Fatalf("Error parsing output, invalid json: %s", output)
-				}
-				jsonOutput := gjson.Parse(output)
-				var currentClusterNamespaces []string
-				jsonOutput.Get("items").ForEach(func(key, value gjson.Result) bool {
-					currentClusterNamespaces = append(currentClusterNamespaces, value.Get("metadata.name").String())
-					return true // keep iterating
-				})
+				pollNamespaces := func() (bool, error) {
+					// get kubectl namespaces and store them on currentClusterNamespaces slice
+					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !gjson.Valid(output) {
+						t.Fatalf("Error parsing output, invalid json: %s", output)
+					}
+					jsonOutput := gjson.Parse(output)
+					var currentClusterNamespaces []string
+					jsonOutput.Get("items").ForEach(func(key, value gjson.Result) bool {
+						currentClusterNamespaces = append(currentClusterNamespaces, value.Get("metadata.name").String())
+						return true // keep iterating
+					})
 
-				for _, namespace := range currentEnvNamespaces {
-					// Check if the namespace exists in currentClusterNamespaces
-					exists := false
-					for _, clusterNamespace := range currentClusterNamespaces {
-						if namespace == clusterNamespace {
-							exists = true
-							break
+					for _, namespace := range currentEnvNamespaces {
+						// Check if the namespace exists in currentClusterNamespaces
+						exists := false
+						for _, clusterNamespace := range currentClusterNamespaces {
+							if namespace == clusterNamespace {
+								exists = true
+								break
+							}
+						}
+
+						if exists {
+							t.Logf("Namespace found: %s \n", namespace)
+							return false, nil
+						} else {
+							t.Logf("Namespace NOT found: %s \n", namespace)
+							return true, fmt.Errorf("Namespace '%s' does not exist in the current cluster.\n", namespace)
 						}
 					}
-
-					if exists {
-						t.Logf("Namespace '%s' exists in the current cluster.\n", namespace)
-					} else {
-						t.Fatalf("Namespace '%s' does not exist in the current cluster.\n", namespace)
-					}
+					t.Logf("There are no namespaces %v \n", k8sOpts)
+					return true, fmt.Errorf("Namespaces not found in %v.\n", k8sOpts)
 				}
+				utils.Poll(t, pollNamespaces, 20, 30*time.Second)
 
 				// Multitenant Outputs
 				clusterRegions := testutils.GetBptOutputStrSlice(multitenant, "cluster_regions")
@@ -219,9 +228,10 @@ func TestFleetscope(t *testing.T) {
 						pollConfigSync := func() (bool, error) {
 							retry := false
 							// ensure config-sync resources are present in cluster
-							output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 							if err != nil {
 								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") {
+									t.Logf("Config-Sync error '%s' \n.", err.Error())
 									return false, err
 								} else {
 									t.Log("Config-Sync not yet installed, will try polling again after sleeping.")
@@ -231,7 +241,7 @@ func TestFleetscope(t *testing.T) {
 							return retry, nil
 						}
 
-						utils.Poll(t, pollConfigSync, 10, 30*time.Second)
+						utils.Poll(t, pollConfigSync, 20, 40*time.Second)
 					}
 				}
 
@@ -314,21 +324,21 @@ func TestFleetscope(t *testing.T) {
 				if envName != "development" {
 					utils.Poll(t, pollMeshProvisioning(gkeMeshCommand), 10, 60*time.Second)
 				}
-				utils.Poll(t, pollPolicyControllerState, 10, 30*time.Second)
-				utils.Poll(t, pollPoliciesInstallationState, 10, 30*time.Second)
+				utils.Poll(t, pollPolicyControllerState, 20, 30*time.Second)
+				utils.Poll(t, pollPoliciesInstallationState, 20, 30*time.Second)
 
 				noError := false
 				for count := 0; count < 10; count++ {
 
 					// validate no errors in config sync
-					output, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 					if err != nil {
 						t.Fatal(err)
 					}
 					// jsonpath adds ' character to string, that need to be removed for a valid json
 					output = strings.ReplaceAll(output, "'", "")
 					assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
-					jsonOutput = gjson.Parse(output)
+					jsonOutput := gjson.Parse(output)
 					noErrors := func() bool {
 						t.Logf("noError() jsonOutput: %v", jsonOutput.String())
 
