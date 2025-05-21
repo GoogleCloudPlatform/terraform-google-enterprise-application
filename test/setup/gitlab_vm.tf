@@ -225,6 +225,9 @@ resource "google_storage_bucket" "ssl_cert" {
 
   public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
+  versioning {
+    enabled = true
+  }
 }
 
 resource "google_storage_bucket_iam_member" "storage_admin" {

@@ -29,6 +29,9 @@ resource "google_storage_bucket" "build_logs" {
     log_bucket        = var.logging_bucket
     log_object_prefix = "cbmc-${var.infra_project}"
   }
+  versioning {
+    enabled = true
+  }
 }
 
 # IAM Roles required to build the terraform image on Google Cloud Build

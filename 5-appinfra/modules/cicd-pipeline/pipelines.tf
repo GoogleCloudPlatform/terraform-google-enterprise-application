@@ -65,6 +65,9 @@ resource "google_storage_bucket" "delivery_artifacts" {
     log_bucket        = var.logging_bucket
     log_object_prefix = "ar-${each.key}-${var.service_name}"
   }
+  versioning {
+    enabled = true
+  }
 }
 
 # give CloudDeploy SA access to administrate to delivery artifact bucket

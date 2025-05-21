@@ -46,6 +46,9 @@ resource "google_storage_bucket" "build_logs" {
     log_object_prefix = "cb-ai-${var.project_id}"
   }
 
+  versioning {
+    enabled = true
+  }
 }
 
 # IAM Roles required to build the terraform image on Google Cloud Build

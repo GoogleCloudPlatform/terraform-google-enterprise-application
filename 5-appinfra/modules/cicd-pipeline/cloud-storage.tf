@@ -24,6 +24,9 @@ resource "google_storage_bucket" "build_cache" {
     log_bucket        = var.logging_bucket
     log_object_prefix = "build-${var.service_name}"
   }
+  versioning {
+    enabled = true
+  }
 }
 
 resource "google_storage_bucket" "release_source_development" {
@@ -35,6 +38,9 @@ resource "google_storage_bucket" "release_source_development" {
   logging {
     log_bucket        = var.logging_bucket
     log_object_prefix = "release-${var.service_name}"
+  }
+  versioning {
+    enabled = true
   }
 }
 
