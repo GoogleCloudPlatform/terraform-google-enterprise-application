@@ -22,6 +22,11 @@ resource "google_storage_bucket" "stocks_data" {
 
   public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
+
+  logging {
+    log_bucket        = var.logging_bucket
+    log_object_prefix = "stocks-${var.infra_project}"
+  }
   versioning {
     enabled = true
   }
