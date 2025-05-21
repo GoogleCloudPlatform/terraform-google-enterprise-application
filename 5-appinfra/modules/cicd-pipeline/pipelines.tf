@@ -61,6 +61,9 @@ resource "google_storage_bucket" "delivery_artifacts" {
   uniform_bucket_level_access = true
   location                    = regex(local.membership_re, each.value.cluster_membership_ids[0])[1]
   force_destroy               = var.buckets_force_destroy
+  versioning {
+    enabled = true
+  }
 }
 
 # give CloudDeploy SA access to administrate to delivery artifact bucket

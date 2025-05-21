@@ -27,6 +27,7 @@ output "app-group" {
       app_cloudbuild_workspace_artifacts_bucket_name : value.app_cloudbuild_workspace_artifacts_bucket_name,
       app_cloudbuild_workspace_logs_bucket_name : value.app_cloudbuild_workspace_logs_bucket_name,
       app_cloudbuild_workspace_state_bucket_name : value.app_cloudbuild_workspace_state_bucket_name,
+      app_cloudbuild_workspace_cloudbuild_sa_email : value.app_cloudbuild_workspace_cloudbuild_sa_email,
     }
   }
 }

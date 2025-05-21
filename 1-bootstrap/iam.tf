@@ -123,12 +123,28 @@ resource "google_folder_iam_member" "app_factory_project_creator" {
   folder = var.common_folder_id
 }
 
-resource "google_folder_iam_member" "app_factory_folder_viewer" {
+// needed by terraform-vet to get parent folder
+resource "google_organization_iam_member" "app_factory_folder_viewer" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+  role     = "roles/resourcemanager.folderViewer"
+  org_id   = var.org_id
+  member   = "serviceAccount:${each.value.email}"
+}
+
+resource "google_project_iam_member" "project_iam_member" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
 
-  role   = "roles/resourcemanager.folderViewer"
-  member = "serviceAccount:${each.value.email}"
-  folder = var.common_folder_id
+  role    = "roles/resourcemanager.projectIamAdmin"
+  member  = "serviceAccount:${each.value.email}"
+  project = local.worker_pool_project
+}
+
+resource "google_project_iam_member" "secret_iam_member" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${each.value.email}"
+  project = local.worker_pool_project
 }
 
 resource "google_project_iam_member" "cloud_build_worker_pool_user" {
@@ -137,4 +153,19 @@ resource "google_project_iam_member" "cloud_build_worker_pool_user" {
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:${each.value}"
   project = local.worker_pool_project
+}
+
+resource "google_organization_iam_member" "policyAdmin_role" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  role     = "roles/accesscontextmanager.policyAdmin"
+  org_id   = var.org_id
+  member   = "serviceAccount:${each.value.email}"
+}
+
+resource "google_organization_iam_member" "org_iam_member" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+
+  role   = "roles/resourcemanager.organizationAdmin"
+  member = "serviceAccount:${each.value.email}"
+  org_id = var.org_id
 }

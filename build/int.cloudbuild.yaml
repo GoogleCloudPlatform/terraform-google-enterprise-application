@@ -141,6 +141,7 @@ steps:
       - |-
         gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
         update-ca-certificates
+        sleep 5m
         if (ls /etc/ssl/certs | grep gitlab.pem); then
             cft test run TestFleetscope --stage verify --verbose
         else
@@ -245,43 +246,23 @@ steps:
   - id: cymbal-bank-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "sleep 60s &&  cft test run TestCymbalBankE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 60s && cft test run TestCymbalBankE2E --stage verify --verbose"]
     waitFor:
       - cymbal-bank-app-deployment
 
   - id: cymbal-shop-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestCymbalShopE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 60s && cft test run TestCymbalShopE2E --stage verify --verbose"]
     waitFor:
       - cymbal-shop-app-deployment
 
   - id: hello-world-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestHelloWorldE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 60s && cft test run TestHelloWorldE2E --stage verify --verbose"]
     waitFor:
       - hello-world-app-deployment
-
-  - id: restore-vpc-sc-perimeter
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestVPCSC --stage apply --verbose",
-      ]
-    env:
-      - "TF_VAR_org_id=$_ORG_ID"
-    waitFor:
-      - cymbal-bank-e2e
-      - cymbal-shop-e2e
-      - hello-world-e2e
-      - appinfra-verify
-      - appfactory-verify
-      - fleetscope-verify
-      - multitenant-verify
-      - bootstrap-verify
 
   - id: appinfra-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -292,7 +273,14 @@ steps:
         "cft test run TestAppInfra --stage teardown --verbose",
       ]
     waitFor:
-      - restore-vpc-sc-perimeter
+      - cymbal-bank-e2e
+      - cymbal-shop-e2e
+      - hello-world-e2e
+      - appinfra-verify
+      - appfactory-verify
+      - fleetscope-verify
+      - multitenant-verify
+      - bootstrap-verify
 
   - id: appfactory-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
