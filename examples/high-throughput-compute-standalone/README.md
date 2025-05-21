@@ -95,7 +95,7 @@ Key variable outputs:
 Create a virtual environment:
 ```sh
 python3 -m venv ui/.venv
-ui/.venv/bin/python3 -m pip install --require-hashes -r ui/requirements.txt
+ui/.venv/bin/python3 -m pip install -r ui/requirements.txt
 ```
 
 Run the Gradio dashboard:
