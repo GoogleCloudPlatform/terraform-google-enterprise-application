@@ -86,29 +86,29 @@ variable "pubsub_exactly_once" {
   default     = true
 }
 
-variable "request_topic" {
-  description = "Request topic for tasks"
-  type        = string
-  default     = "request"
-}
+# variable "request_topic" {
+#   description = "Request topic for tasks"
+#   type        = string
+#   default     = "request"
+# }
 
-variable "request_subscription" {
-  description = "Request subscription for tasks"
-  type        = string
-  default     = "request_sub"
-}
+# variable "request_subscription" {
+#   description = "Request subscription for tasks"
+#   type        = string
+#   default     = "request_sub"
+# }
 
-variable "response_topic" {
-  description = "Response topic for tasks"
-  type        = string
-  default     = "response"
-}
+# variable "response_topic" {
+#   description = "Response topic for tasks"
+#   type        = string
+#   default     = "response"
+# }
 
-variable "response_subscription" {
-  description = "Response subscription for tasks"
-  type        = string
-  default     = "response_sub"
-}
+# variable "response_subscription" {
+#   description = "Response subscription for tasks"
+#   type        = string
+#   default     = "response_sub"
+# }
 
 #-----------------------------------------------------
 # BigQuery Configuration
