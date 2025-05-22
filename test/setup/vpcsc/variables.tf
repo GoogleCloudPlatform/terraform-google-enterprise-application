@@ -35,6 +35,11 @@ variable "service_perimeter_mode" {
   }
 }
 
+variable "logging_bucket_project_number" {
+  description = "Project number where logging bucket is stored."
+  type        = string
+}
+
 variable "access_level_members" {
   description = "Extra access level members. serviceAccount:EMAIL@DOMAIN or user:EMAIL@DOMAIN"
   type        = list(string)
