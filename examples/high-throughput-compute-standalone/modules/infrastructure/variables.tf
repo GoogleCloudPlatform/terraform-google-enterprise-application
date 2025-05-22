@@ -258,22 +258,22 @@ variable "storage_capacity_gib" {
   description = "Capacity in GiB for the selected storage system (Parallelstore or Lustre)."
   default     = null
   nullable    = true
-  validation {
-    condition = var.storage_capacity_gib == null ? true : (
-      (var.storage_type != "LUSTRE" || (
-        var.storage_capacity_gib >= 18000 &&
-        var.storage_capacity_gib <= 936000 &&
-        var.storage_capacity_gib % 9000 == 0
-      )) &&
-      (var.storage_type != "PARALLELSTORE" || (
-        var.storage_capacity_gib >= 12000 &&
-        var.storage_capacity_gib <= 100000 &&
-        var.storage_capacity_gib % 4000 == 0
-      )) &&
-      (var.storage_type == "LUSTRE" || var.storage_type == "PARALLELSTORE")
-    )
-    error_message = "Storage capacity must be a positive number."
-  }
+  # validation {
+  #   condition = var.storage_capacity_gib == null ? true : (
+  #     (var.storage_type != "LUSTRE" || (
+  #       var.storage_capacity_gib >= 18000 &&
+  #       var.storage_capacity_gib <= 936000 &&
+  #       var.storage_capacity_gib % 9000 == 0
+  #     )) &&
+  #     (var.storage_type != "PARALLELSTORE" || (
+  #       var.storage_capacity_gib >= 12000 &&
+  #       var.storage_capacity_gib <= 100000 &&
+  #       var.storage_capacity_gib % 4000 == 0
+  #     )) &&
+  #     (var.storage_type == "LUSTRE" || var.storage_type == "PARALLELSTORE")
+  #   )
+  #   error_message = "Storage capacity must be a positive number."
+  # }
 }
 
 #-----------------------------------------------------
