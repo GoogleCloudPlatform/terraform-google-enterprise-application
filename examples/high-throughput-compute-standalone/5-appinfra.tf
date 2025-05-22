@@ -316,7 +316,7 @@ resource "google_bigquery_table" "agent_summary_by_instance" {
 module "bigquery_capture" {
   source                     = "./modules/pubsub-subscriptions"
   project_id                 = var.project_id
-  region                     = module.default_region.default_region
+  # region                     = module.default_region.default_region
   bigquery_dataset           = google_bigquery_dataset.main.dataset_id
   bigquery_table             = "pubsub_messages"
   subscriber_service_account = google_service_account.bq_write_service_account.email
