@@ -42,8 +42,10 @@ var (
 		// generic::permission_denied: Request is prohibited by organization's policy.
 		".*Request is prohibited by organization's policy*.": "VPC-SC propagation.",
 
-		".*does not match the eTag of the current version of the Access Policy.*": "VPC-SC eTag consistency.",
+		".*does not match the eTag of the current version*": "VPC-SC eTag consistency.",
 
 		".*Error: Error waiting to create Repository: Error waiting for Creating Repository: Error code 3, message: Request contains an invalid argument.*.": "Invalid Argument on Artifact Registry Creation",
+
+		".*another operation is in progress on this scope*.": "another operation is in progress on this scope",
 	}
 )
