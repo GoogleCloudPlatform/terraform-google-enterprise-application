@@ -128,7 +128,6 @@ limitations under the License.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| artifact\_registry | n/a | <pre>object({<br>    project  = string<br>    location = string<br>    name     = string<br>  })</pre> | n/a | yes |
 | cluster\_index | Index of this cluster within its region (0-3) | `number` | n/a | yes |
 | cluster\_max\_cpus | Max CPU in cluster autoscaling resource limits | `number` | `10000` | no |
 | cluster\_max\_memory | Max memory in cluster autoscaling resource limits | `number` | `80000` | no |
@@ -167,7 +166,6 @@ limitations under the License.
 | release\_channel | GKE release channel for clusters (RAPID, REGULAR, STABLE) | `string` | `"RAPID"` | no |
 | scaled\_control\_plane | Deploy a larger initial nodepool to ensure larger control plane nodes are provisied | `bool` | `false` | no |
 | subnet | The subnet the cluster should be deployed to | `string` | `"default"` | no |
-| zones | The zones for cluster nodes | `list(string)` | n/a | yes |
 
 ## Outputs
 

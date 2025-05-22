@@ -105,7 +105,6 @@ limitations under the License.
 | project\_id | The GCP project where the resources will be created | `string` | n/a | yes |
 | quota\_contact\_email | Contact email for quota requests | `string` | `""` | no |
 | quota\_preferences | Map of quota preferences to request. Each item should include service, quota\_id, preferred\_value, and optional dimensions | <pre>list(object({<br>    service         = string<br>    quota_id        = string<br>    preferred_value = number<br>    dimensions      = optional(map(string), {})<br>    region          = optional(string, null)<br>    # Use custom_name if you want to override the default name format<br>    custom_name = optional(string, null)<br>  }))</pre> | `[]` | no |
-| region | The region to host the cluster in | `string` | `"us-central1"` | no |
 
 ## Outputs
 

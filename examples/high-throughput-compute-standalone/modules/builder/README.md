@@ -96,7 +96,6 @@ limitations under the License.
 | region | The region of the build | `string` | n/a | yes |
 | repository\_id | Artifact repository ID | `string` | n/a | yes |
 | repository\_region | Artifacte Repository region | `string` | n/a | yes |
-| service\_account\_name | Service account name | `string` | `"cloudbuild-actor"` | no |
 
 ## Outputs
 

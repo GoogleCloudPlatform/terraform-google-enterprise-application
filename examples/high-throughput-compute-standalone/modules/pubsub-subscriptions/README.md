@@ -75,7 +75,6 @@ limitations under the License.
 | bigquery\_dataset | The Dataset for capturing BigQuery data | `string` | n/a | yes |
 | bigquery\_table | The Datsaset for capturing BigQuery data | `string` | n/a | yes |
 | project\_id | The GCP project ID where resources will be created. | `string` | n/a | yes |
-| region | The Region of the Pub/Sub topic and subscriptions | `string` | n/a | yes |
 | subscriber\_service\_account | Service account that will be granted subscriber role on topics | `string` | `""` | no |
 | topics | List of topics to persist to BigQuery | `list(string)` | n/a | yes |
 

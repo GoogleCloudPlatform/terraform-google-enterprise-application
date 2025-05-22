@@ -79,7 +79,6 @@ limitations under the License.
 | region | The region to host the cluster in | `string` | `"us-central1"` | no |
 | regions | List of regions where GKE clusters should be created | `list(string)` | <pre>[<br>  "us-central1"<br>]</pre> | no |
 | vpc\_id | ID of the shared VPC network | `string` | n/a | yes |
-| vpc\_name | Name of the shared VPC network | `string` | n/a | yes |
 
 ## Outputs
 
