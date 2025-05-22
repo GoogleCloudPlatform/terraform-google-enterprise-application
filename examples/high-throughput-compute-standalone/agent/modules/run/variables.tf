@@ -89,26 +89,37 @@ variable "pubsub_exactly_once" {
 
 # BigQuery and Pub/Sub naming
 variable "bq_dataset" {
-  type    = string
-  default = "workload"
+  type        = string
+  default     = "workload"
+  description = "Name of the BigQuery dataset. Default is 'workload'."
 }
+
 variable "bq_routine" {
-  type    = string
-  default = "workload"
+  type        = string
+  default     = "workload"
+  description = "Name of the BigQuery routine. Default is 'workload'."
 }
+
 variable "run_job_request" {
-  type    = string
-  default = "run_job_request"
+  type        = string
+  default     = "run_job_request"
+  description = "Identifier for the run job request. Default is 'run_job_request'."
 }
+
 variable "run_job_response" {
-  type    = string
-  default = "run_job_response"
+  type        = string
+  default     = "run_job_response"
+  description = "Identifier for the run job response. Default is 'run_job_response'."
 }
+
 variable "run_hpa_request" {
-  type    = string
-  default = "run_hpa_request"
+  type        = string
+  default     = "run_hpa_request"
+  description = "Identifier for the run HPA request. Default is 'run_hpa_request'."
 }
+
 variable "run_hpa_response" {
-  type    = string
-  default = "run_hpa_response"
+  type        = string
+  default     = "run_hpa_response"
+  description = "Identifier for the run HPA response. Default is 'run_hpa_response'."
 }
