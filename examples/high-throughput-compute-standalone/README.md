@@ -116,13 +116,9 @@ links into the Console.
 | additional\_quota\_enabled | Enable quota requests for additional resources | `bool` | `false` | no |
 | artifact\_registry\_name | Name of the Artifact Registry repository | `string` | `"research-images"` | no |
 | cloudrun\_enabled | Enable Cloud Run deployment alongside GKE | `bool` | `true` | no |
-| cluster\_max\_cpus | Maximum CPU cores in cluster autoscaling resource limits | `number` | `10000` | no |
-| cluster\_max\_memory | Maximum memory (in GB) in cluster autoscaling resource limits | `number` | `80000` | no |
 | cluster\_service\_account | Service Account ID for GKE clusters | `string` | `"gke-risk-research-cluster-sa"` | no |
 | clusters\_per\_region | Map of regions to number of clusters to create in each (maximum 4 per region) | `map(number)` | <pre>{<br>  "us-central1": 1<br>}</pre> | no |
-| dataset\_id | BigQuery dataset in the project to create the tables | `string` | `"pubsub_msgs"` | no |
 | deployment\_type | Parallelstore Instance deployment type (SCRATCH or PERSISTENT) | `string` | `"SCRATCH"` | no |
-| enable\_csi\_filestore | Enable the Filestore CSI Driver | `bool` | `false` | no |
 | enable\_csi\_gcs\_fuse | Enable the GCS Fuse CSI Driver | `bool` | `true` | no |
 | enable\_csi\_parallelstore | Enable the Parallelstore CSI Driver | `bool` | `true` | no |
 | enable\_workload\_identity | Enable Workload Identity for GKE clusters | `bool` | `true` | no |
@@ -140,11 +136,6 @@ links into the Console.
 | pubsub\_exactly\_once | Enable Pub/Sub exactly once subscriptions | `bool` | `true` | no |
 | quota\_contact\_email | Contact email for quota requests | `string` | `""` | no |
 | regions | List of regions where GKE clusters should be created. Used for multi-region deployments. | `list(string)` | <pre>[<br>  "us-central1"<br>]</pre> | no |
-| request\_subscription | Request subscription for tasks | `string` | `"request_sub"` | no |
-| request\_topic | Request topic for tasks | `string` | `"request"` | no |
-| response\_subscription | Response subscription for tasks | `string` | `"response_sub"` | no |
-| response\_topic | Response topic for tasks | `string` | `"response"` | no |
-| scaled\_control\_plane | Deploy a larger initial nodepool to ensure larger control plane nodes are provisioned | `bool` | `false` | no |
 | scripts\_output | Output directory for testing scripts | `string` | `"./generated"` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |

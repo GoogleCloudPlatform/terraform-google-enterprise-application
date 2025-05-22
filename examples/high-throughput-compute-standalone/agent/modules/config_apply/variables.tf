@@ -30,7 +30,7 @@ variable "region" {
 }
 
 variable "cluster_name" {
-  type = string
+  type        = string
   description = "Cluster Name"
 }
 

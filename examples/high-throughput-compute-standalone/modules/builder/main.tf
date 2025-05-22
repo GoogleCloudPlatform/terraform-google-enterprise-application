@@ -47,14 +47,14 @@ locals {
 #
 
 resource "google_project_service" "project" {
-  project = var.project_id
-  service = "cloudbuild.googleapis.com"
+  project                    = var.project_id
+  service                    = "cloudbuild.googleapis.com"
   disable_dependent_services = true
 }
 
 data "google_service_account" "cloudbuild_actor" {
-  project      = var.project_id
-  account_id   = "cloudbuild-actor"
+  project    = var.project_id
+  account_id = "cloudbuild-actor"
 }
 
 resource "google_project_iam_member" "logging_member" {

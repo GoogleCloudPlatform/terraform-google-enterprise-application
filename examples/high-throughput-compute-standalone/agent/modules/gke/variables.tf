@@ -147,8 +147,8 @@ variable "parallelstore_instances" {
     id            = string
     capacity_gib  = number
   }))
-  default = null
-   description = "Map of parallel store instances configurations. Each instance must have non-null access_points."
+  default     = null
+  description = "Map of parallel store instances configurations. Each instance must have non-null access_points."
   validation {
     condition = var.parallelstore_instances == null || alltrue([
       for instance in values(var.parallelstore_instances) :

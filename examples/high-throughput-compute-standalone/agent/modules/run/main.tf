@@ -64,8 +64,8 @@ resource "google_project_service" "cloudrun" {
 
 # Cloud Run service account
 data "google_service_account" "cloudrun_actor" {
-  project      = var.project_id
-  account_id   = "cloudrun-actor"
+  project    = var.project_id
+  account_id = "cloudrun-actor"
 }
 
 resource "google_project_iam_member" "cloudrun_gcs_member" {
