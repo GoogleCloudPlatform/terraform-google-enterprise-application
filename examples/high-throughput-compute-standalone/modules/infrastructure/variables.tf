@@ -39,11 +39,11 @@ variable "regions" {
   }
 }
 
-variable "zones" {
-  type        = list(string)
-  description = "The GCP zone letters to deploy resources to within specified regions (e.g., 'a' for us-central1-a)."
-  default     = ["a", "b", "c"]
-}
+# variable "zones" {
+#   type        = list(string)
+#   description = "The GCP zone letters to deploy resources to within specified regions (e.g., 'a' for us-central1-a)."
+#   default     = ["a", "b", "c"]
+# }
 
 #-----------------------------------------------------
 # Network Configuration

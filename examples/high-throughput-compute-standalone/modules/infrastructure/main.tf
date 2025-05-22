@@ -52,7 +52,7 @@ module "networking" {
   project_id = data.google_project.environment.project_id
   depends_on = [module.project]
   vpc_id     = google_compute_network.research-vpc.id
-  vpc_name   = google_compute_network.research-vpc.name
+  # vpc_name   = google_compute_network.research-vpc.name
 
 }
 

@@ -128,7 +128,6 @@ See the `variables.tf` file for all available configuration options.
 | storage\_type | The type of storage system to deploy. Set to PARALLELSTORE or LUSTRE to enable storage creation. If null (default), no storage system will be deployed by these module blocks. | `string` | `null` | no |
 | vpc\_mtu | Maximum Transmission Unit (MTU) for the VPC network. 8896 recommended for Parallelstore and Lustre for 10% performance gain. | `number` | `8896` | no |
 | vpc\_name | Name of the VPC network to create | `string` | `"research-vpc"` | no |
-| zones | The GCP zone letters to deploy resources to within specified regions (e.g., 'a' for us-central1-a). | `list(string)` | <pre>[<br>  "a",<br>  "b",<br>  "c"<br>]</pre> | no |
 
 ## Outputs
 
