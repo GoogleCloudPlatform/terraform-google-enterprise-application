@@ -74,14 +74,14 @@ module "gke_standard" {
   cluster_name               = "${var.gke_standard_cluster_name}-${each.value.region}-${each.value.cluster_index}"
   project_id                 = data.google_project.environment.project_id
   region                     = each.value.region
-  zones                      = var.zones
+  # zones                      = var.zones
   network                    = google_compute_network.research-vpc.id
   subnet                     = module.networking[each.value.region].subnet_id
   ip_range_services          = module.networking[each.value.region].service_range_name
   ip_range_pods              = module.networking[each.value.region].pod_range_name
   depends_on                 = [google_service_account.cluster_service_account, module.project, module.networking]
   scaled_control_plane       = var.scaled_control_plane
-  artifact_registry          = module.artifact_registry.artifact_registry
+  # artifact_registry          = module.artifact_registry.artifact_registry
   cluster_max_cpus           = var.cluster_max_cpus
   cluster_max_memory         = var.cluster_max_memory
   cluster_service_account    = google_service_account.cluster_service_account
