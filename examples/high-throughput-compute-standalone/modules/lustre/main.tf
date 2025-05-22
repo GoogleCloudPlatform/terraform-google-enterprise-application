@@ -13,14 +13,13 @@
 # limitations under the License.
 
 locals {
-  is_zone  = can(regex("-[a-z]$", var.location))
-  region   = local.is_zone ? regex("^(.*)-[a-z]$", var.location)[0] : var.location
-  location = local.is_zone ? var.location : random_shuffle.zone.result[0]
+  is_zone = can(regex("-[a-z]$", var.location))
+  region  = local.is_zone ? regex("^(.*)-[a-z]$", var.location)[0] : var.location
 }
 
-data "google_project" "environment" {
-  project_id = var.project_id
-}
+# data "google_project" "environment" {
+#   project_id = var.project_id
+# }
 
 # Get available zones for the region
 data "google_compute_zones" "available" {

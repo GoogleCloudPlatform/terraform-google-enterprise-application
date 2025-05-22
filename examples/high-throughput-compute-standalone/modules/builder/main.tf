@@ -33,9 +33,9 @@ locals {
   container_status = {
     for container, config in var.containers :
     container => merge(config, {
-      "tag"              = "${local.container_tag[container]}",
-      "image"            = "${local.container_image[container]}",
-      "hash"             = "${local.container_hash[container]}",
+      "tag"              = local.container_tag[container],
+      "image"            = local.container_image[container],
+      "hash"             = local.container_hash[container],
       "config_yaml_file" = config.config_yaml == "" ? "" : "config.yaml",
     })
   }

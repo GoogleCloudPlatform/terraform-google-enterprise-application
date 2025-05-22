@@ -46,8 +46,8 @@ variable "containers" {
 }
 
 # Service account name to create
-variable "service_account_name" {
-  type        = string
-  description = "Service account name"
-  default     = "cloudbuild-actor"
-}
+# variable "service_account_name" {
+#   type        = string
+#   description = "Service account name"
+#   default     = "cloudbuild-actor"
+# }

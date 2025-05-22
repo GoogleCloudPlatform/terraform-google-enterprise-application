@@ -28,10 +28,10 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "zones" {
-  description = "The zones for cluster nodes"
-  type        = list(string)
-}
+# variable "zones" {
+#   description = "The zones for cluster nodes"
+#   type        = list(string)
+# }
 
 variable "network" {
   description = "The vpc the cluster should be deployed to"
@@ -75,13 +75,14 @@ variable "cluster_service_account" {
   })
 }
 
-variable "artifact_registry" {
-  type = object({
-    project  = string
-    location = string
-    name     = string
-  })
-}
+# variable "artifact_registry" {
+#   type = object({
+#     project  = string
+#     location = string
+#     name     = string
+#   })
+#   description = "Artifact Registry Opject"
+# }
 
 variable "cluster_max_cpus" {
   type        = number

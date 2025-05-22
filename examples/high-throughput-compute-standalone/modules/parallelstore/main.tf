@@ -18,9 +18,9 @@ locals {
   location = local.is_zone ? var.location : random_shuffle.zone.result[0]
 }
 
-data "google_project" "environment" {
-  project_id = var.project_id
-}
+# data "google_project" "environment" {
+#   project_id = var.project_id
+# }
 
 # Get available zones for the region
 data "google_compute_zones" "available" {
