@@ -489,7 +489,7 @@ module "ui_image" {
       config_yaml = local.ui_config_file
     }
   }
-  service_account_name = "ui-cloudbuild"
+  # service_account_name = "ui-cloudbuild"
 
   depends_on = [
     google_service_account.cloudbuild_actor,
