@@ -25,13 +25,31 @@ resource "google_storage_bucket" "build_logs" {
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
   location                    = var.region
+
   logging {
     log_bucket        = var.logging_bucket
     log_object_prefix = "cb-ai-${var.infra_project}"
   }
+
   versioning {
     enabled = true
   }
+
+  encryption {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+  project = var.infra_project
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = var.bucket_kms_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypterViaDelegation"
+  member        = data.google_storage_project_service_account.gcs_account.member
 }
 
 # IAM Roles required to build the terraform image on Google Cloud Build

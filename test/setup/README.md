@@ -22,6 +22,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | Name | Description |
 |------|-------------|
 | billing\_account | n/a |
+| bucket\_kms\_key | n/a |
 | common\_folder\_id | n/a |
 | envs | n/a |
 | folder\_id | n/a |
@@ -34,6 +35,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | gitlab\_service\_directory | n/a |
 | gitlab\_url | n/a |
 | gitlab\_webhook\_secret\_id | =========================== OUTPUTS =========================== |
+| kms\_bucket\_keyring | n/a |
 | logging\_bucket | n/a |
 | network\_project\_id | n/a |
 | network\_project\_number | n/a |

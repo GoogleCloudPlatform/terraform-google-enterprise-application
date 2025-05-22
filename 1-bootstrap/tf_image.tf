@@ -49,6 +49,10 @@ resource "google_storage_bucket" "build_logs" {
   versioning {
     enabled = true
   }
+
+  encryption {
+    default_kms_key_name = var.bucket_kms_key
+  }
 }
 
 # IAM Roles required to build the terraform image on Google Cloud Build

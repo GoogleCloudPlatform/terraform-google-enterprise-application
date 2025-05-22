@@ -24,8 +24,13 @@ resource "google_storage_bucket" "build_cache" {
     log_bucket        = var.logging_bucket
     log_object_prefix = "build-${var.service_name}"
   }
+
   versioning {
     enabled = true
+  }
+
+  encryption {
+    default_kms_key_name = var.bucket_kms_key
   }
 }
 
@@ -39,9 +44,16 @@ resource "google_storage_bucket" "release_source_development" {
     log_bucket        = var.logging_bucket
     log_object_prefix = "release-${var.service_name}"
   }
+
   versioning {
     enabled = true
   }
+
+  encryption {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 # Initialize cache with empty file

@@ -225,8 +225,13 @@ resource "google_storage_bucket" "ssl_cert" {
 
   public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
+
   versioning {
     enabled = true
+  }
+
+  encryption {
+    default_kms_key_name = module.kms.keys["key"]
   }
 }
 

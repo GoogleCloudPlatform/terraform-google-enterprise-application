@@ -65,9 +65,15 @@ resource "google_storage_bucket" "delivery_artifacts" {
     log_bucket        = var.logging_bucket
     log_object_prefix = "ar-${each.key}-${var.service_name}"
   }
+
   versioning {
     enabled = true
   }
+
+  encryption {
+    default_kms_key_name = var.bucket_kms_key
+  }
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 # give CloudDeploy SA access to administrate to delivery artifact bucket

@@ -18,7 +18,6 @@ locals {
   docker_tag_version_terraform = "v1"
   namespace                    = "${var.team}-${var.env}"
 }
-
 resource "google_project_iam_member" "team_roles" {
   for_each = toset([
     "roles/storage.objectUser",
