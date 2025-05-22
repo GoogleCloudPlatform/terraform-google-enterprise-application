@@ -27,9 +27,9 @@ locals {
   ]
 }
 
-data "google_project" "environment" {
-  project_id = var.project_id
-}
+# data "google_project" "environment" {
+#   project_id = var.project_id
+# }
 
 resource "google_cloud_quotas_quota_preference" "quota_preferences" {
   for_each = { for idx, pref in local.quota_preferences : idx => pref if var.quota_contact_email != "" }

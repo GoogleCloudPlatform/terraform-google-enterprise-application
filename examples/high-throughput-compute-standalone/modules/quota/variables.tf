@@ -22,11 +22,11 @@ variable "project_id" {
   }
 }
 
-variable "region" {
-  description = "The region to host the cluster in"
-  type        = string
-  default     = "us-central1"
-}
+# variable "region" {
+#   description = "The region to host the cluster in"
+#   type        = string
+#   default     = "us-central1"
+# }
 
 variable "quota_contact_email" {
   description = "Contact email for quota requests"

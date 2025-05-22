@@ -19,10 +19,10 @@ variable "project_id" {
 }
 
 # Region where the build and artifact repository is
-variable "region" {
-  type        = string
-  description = "The Region of the Pub/Sub topic and subscriptions"
-}
+# variable "region" {
+#   type        = string
+#   description = "The Region of the Pub/Sub topic and subscriptions"
+# }
 
 # Region where the build and artifact repository is
 variable "bigquery_dataset" {
