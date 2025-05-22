@@ -59,16 +59,18 @@ variable "workload_image" {
 # Sidecar configuration
 variable "workload_grpc_endpoint" {
   type        = string
-  description = ""
+  description = "Endpoint for Workload that the agent will use"
 }
 
 variable "workload_args" {
-  type = list(string)
+  type        = list(string)
+  description = "Workload image for Cloud Run templates"
 }
 
 variable "dashboard" {
-  type    = string
-  default = "dashboards/risk-platform-overview.json"
+  type        = string
+  default     = "dashboards/risk-platform-overview.json"
+  description = "dashboard JSON configuration. Default is 'dashboards/risk-platform-overview.json'."
 }
 
 #
@@ -105,20 +107,27 @@ variable "pubsub_exactly_once" {
 #
 
 variable "gke_job_request" {
-  type    = string
-  default = "gke_job_request"
+  type        = string
+  default     = "gke_job_request"
+  description = "The identifier for the GKE job request. Default is 'gke_job_request'."
 }
+
 variable "gke_job_response" {
-  type    = string
-  default = "gke_job_response"
+  type        = string
+  default     = "gke_job_response"
+  description = "The identifier for the GKE job response. Default is 'gke_job_response'."
 }
+
 variable "gke_hpa_request" {
-  type    = string
-  default = "gke_hpa_request"
+  type        = string
+  default     = "gke_hpa_request"
+  description = "The identifier for the GKE HPA request. Default is 'gke_hpa_request'."
 }
+
 variable "gke_hpa_response" {
-  type    = string
-  default = "gke_hpa_response"
+  type        = string
+  default     = "gke_hpa_response"
+  description = "The identifier for the GKE HPA response. Default is 'gke_hpa_response'."
 }
 
 # Parallelstore
@@ -139,6 +148,7 @@ variable "parallelstore_instances" {
     capacity_gib  = number
   }))
   default = null
+   description = "Map of parallel store instances configurations. Each instance must have non-null access_points."
   validation {
     condition = var.parallelstore_instances == null || alltrue([
       for instance in values(var.parallelstore_instances) :

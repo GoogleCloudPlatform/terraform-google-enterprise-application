@@ -53,8 +53,8 @@ variable "workload_grpc_endpoint" {
 }
 
 variable "workload_args" {
-  type = list(string)
-  description = "Workload Args"
+  type        = list(string)
+  description = "Workload image for Cloud Run templates"
 }
 
 variable "gcs_bucket" {
