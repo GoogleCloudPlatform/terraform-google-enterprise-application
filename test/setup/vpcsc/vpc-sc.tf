@@ -293,7 +293,7 @@ data "google_access_context_manager_access_policy" "policy_org" {
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version            = "~> 6.2"
+  version            = "~> 7.0"
   policy             = data.google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = var.access_level_members
@@ -302,7 +302,7 @@ module "access_level_members" {
 
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version        = "~> 6.2"
+  version        = "~> 7.0"
   policy         = data.google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
