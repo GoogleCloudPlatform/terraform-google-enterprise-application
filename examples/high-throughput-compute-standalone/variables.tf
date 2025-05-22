@@ -114,11 +114,11 @@ variable "pubsub_exactly_once" {
 # BigQuery Configuration
 #-----------------------------------------------------
 
-variable "dataset_id" {
-  description = "BigQuery dataset in the project to create the tables"
-  type        = string
-  default     = "pubsub_msgs"
-}
+# variable "dataset_id" {
+#   description = "BigQuery dataset in the project to create the tables"
+#   type        = string
+#   default     = "pubsub_msgs"
+# }
 
 #-----------------------------------------------------
 # Quota Configuration
@@ -182,23 +182,23 @@ variable "max_nodes_spot" {
   default     = 3000
 }
 
-variable "scaled_control_plane" {
-  description = "Deploy a larger initial nodepool to ensure larger control plane nodes are provisioned"
-  type        = bool
-  default     = false
-}
+# variable "scaled_control_plane" {
+#   description = "Deploy a larger initial nodepool to ensure larger control plane nodes are provisioned"
+#   type        = bool
+#   default     = false
+# }
 
-variable "cluster_max_cpus" {
-  description = "Maximum CPU cores in cluster autoscaling resource limits"
-  type        = number
-  default     = 10000
-}
+# variable "cluster_max_cpus" {
+#   description = "Maximum CPU cores in cluster autoscaling resource limits"
+#   type        = number
+#   default     = 10000
+# }
 
-variable "cluster_max_memory" {
-  description = "Maximum memory (in GB) in cluster autoscaling resource limits"
-  type        = number
-  default     = 80000
-}
+# variable "cluster_max_memory" {
+#   description = "Maximum memory (in GB) in cluster autoscaling resource limits"
+#   type        = number
+#   default     = 80000
+# }
 
 #-----------------------------------------------------
 # Storage Configuration
@@ -321,11 +321,11 @@ variable "enable_csi_parallelstore" {
   default     = true
 }
 
-variable "enable_csi_filestore" {
-  description = "Enable the Filestore CSI Driver"
-  type        = bool
-  default     = false
-}
+# variable "enable_csi_filestore" {
+#   description = "Enable the Filestore CSI Driver"
+#   type        = bool
+#   default     = false
+# }
 
 variable "enable_csi_gcs_fuse" {
   description = "Enable the GCS Fuse CSI Driver"

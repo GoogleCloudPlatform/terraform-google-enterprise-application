@@ -34,10 +34,6 @@ locals {
     template_path = "${path.module}/k8s/parallelstore/${fname}"
   } }
 
-  # Whether to enable different patterns
-  enable_jobs = (var.gke_job_request != "" && var.gke_job_response != "") ? 1 : 0
-  enable_hpa  = (var.gke_hpa_request != "" && var.gke_job_response != "") ? 1 : 0
-
   cluster_config = "${var.cluster_name}-${var.region}-${var.project_id}"
 
   kubeconfig_script = join("\n", [
