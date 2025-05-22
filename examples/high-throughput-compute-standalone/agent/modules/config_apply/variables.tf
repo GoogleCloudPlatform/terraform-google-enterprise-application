@@ -31,6 +31,7 @@ variable "region" {
 
 variable "cluster_name" {
   type = string
+  description = "Cluster Name"
 }
 
 # Containers to build
@@ -48,24 +49,29 @@ variable "workload_image" {
 # Sidecar configuration
 variable "workload_grpc_endpoint" {
   type        = string
-  description = ""
+  description = "Workload GRPC Endpoint for Sidecar Configuration."
 }
 
 variable "workload_args" {
   type = list(string)
+  description = "Workload Args"
 }
 
 variable "gcs_bucket" {
-  type = string
+  type        = string
+  description = "The name of the Google Cloud Storage (GCS) bucket used"
 }
 
 variable "pubsub_hpa_request" {
-  type = string
+  type        = string
+  description = "The name of the Pub/Sub subscription"
 }
 
 variable "pubsub_job_request" {
-  type = string
+  type        = string
+  description = "The name of the Pub/Sub subscription"
 }
+
 
 #
 # Optional functionality
@@ -119,46 +125,52 @@ variable "parallelstore_enabled" {
 }
 
 variable "parallelstore_access_points" {
-  type    = string
-  default = null
+  type        = string
+  default     = null
+  description = "Access points for the parallel store. Must be provided if parallelstore_enabled is true."
   validation {
     condition     = var.parallelstore_enabled ? var.parallelstore_access_points != null : true
-    error_message = "parallelstore_access_points must be set when parallelstore_enabled is true"
+    error_message = "parallelstore_access_points must be set when parallelstore_enabled is true."
   }
 }
 
 variable "parallelstore_vpc_name" {
-  type    = string
-  default = null
+  type        = string
+  default     = null
+  description = "Name of the VPC associated with the parallel store. Required when parallelstore_enabled is true."
   validation {
     condition     = var.parallelstore_enabled ? var.parallelstore_vpc_name != null : true
-    error_message = "parallelstore_vpc_name must be set when parallelstore_enabled is true"
+    error_message = "parallelstore_vpc_name must be set when parallelstore_enabled is true."
   }
 }
 
 variable "parallelstore_location" {
-  type    = string
-  default = null
+  type        = string
+  default     = null
+  description = "Location of the parallel store. Mandatory if parallelstore_enabled is true."
   validation {
     condition     = var.parallelstore_enabled ? var.parallelstore_location != null : true
-    error_message = "parallelstore_location must be set when parallelstore_enabled is true"
+    error_message = "parallelstore_location must be set when parallelstore_enabled is true."
   }
 }
 
 variable "parallelstore_instance_name" {
-  type    = string
-  default = null
+  type        = string
+  default     = null
+  description = "Name of the parallel store instance. Must be specified when parallelstore_enabled is true."
   validation {
     condition     = var.parallelstore_enabled ? var.parallelstore_instance_name != null : true
-    error_message = "parallelstore_instance_name must be set when parallelstore_enabled is true"
+    error_message = "parallelstore_instance_name must be set when parallelstore_enabled is true."
   }
 }
 
 variable "parallelstore_capacity_gib" {
-  type    = number
-  default = null
+  type        = number
+  default     = null
+  description = "Capacity of the parallel store in GiB. Required if parallelstore_enabled is true."
   validation {
     condition     = var.parallelstore_enabled ? var.parallelstore_capacity_gib != null : true
-    error_message = "parallelstore_capacity_gib must be set when parallelstore_enabled is true"
+    error_message = "parallelstore_capacity_gib must be set when parallelstore_enabled is true."
   }
 }
+
