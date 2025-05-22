@@ -100,20 +100,27 @@ variable "workload_init_args" {
 #
 
 variable "gke_job_request" {
-  type    = string
-  default = "gke_job_request"
+  type        = string
+  default     = "gke_job_request"
+  description = "The identifier for the GKE job request. Default is 'gke_job_request'."
 }
+
 variable "gke_job_response" {
-  type    = string
-  default = "gke_job_response"
+  type        = string
+  default     = "gke_job_response"
+  description = "The identifier for the GKE job response. Default is 'gke_job_response'."
 }
+
 variable "gke_hpa_request" {
-  type    = string
-  default = "gke_hpa_request"
+  type        = string
+  default     = "gke_hpa_request"
+  description = "The identifier for the GKE HPA request. Default is 'gke_hpa_request'."
 }
+
 variable "gke_hpa_response" {
-  type    = string
-  default = "gke_hpa_response"
+  type        = string
+  default     = "gke_hpa_response"
+  description = "The identifier for the GKE HPA response. Default is 'gke_hpa_response'."
 }
 
 # Parallelstore
