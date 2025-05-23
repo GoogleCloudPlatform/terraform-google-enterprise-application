@@ -1,0 +1,51 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package main;
+
+option go_package = "github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/protoio";
+
+service TestService {
+
+  // Runs the simulated library
+  rpc RunTest(TestInput) returns (TestOutput) {}
+}
+
+message TestInput {
+
+  // Unique identifier (possibly a timestamp!)
+  int64 id = 1;
+
+  // Likelihood of failure (for a simulator)
+  double  perc_crash  = 2;
+  double  perc_fail   = 3;
+
+  // How long it takes to run (for a simulator)
+  int64 max_micros  = 4;
+  int64 min_micros  = 5;
+
+  // Size of payload results (all risk metrics, sensitivities, etc)
+  int64 result_size = 6;
+
+  // Payload includes all marketdata, trade information,
+  // risk metric parameters, etc..
+  bytes  payload    = 7;
+}
+
+message TestOutput {
+  int64 id = 1;
+  bytes payload = 2;
+}
