@@ -165,3 +165,13 @@ module "deploy-gke-project-iam-bindings" {
   prefix                  = "serviceAccount"
   service_account_address = google_service_account.cloud_deploy.email
 }
+
+data "google_storage_project_service_account" "gcs_account" {
+  project = var.project_id
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = var.bucket_kms_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypterViaDelegation"
+  member        = data.google_storage_project_service_account.gcs_account.member
+}

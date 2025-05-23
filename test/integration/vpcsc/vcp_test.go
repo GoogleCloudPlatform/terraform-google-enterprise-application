@@ -40,7 +40,7 @@ func TestVPCSC(t *testing.T) {
 	if testutils.GetOrgACMPolicyID(t, orgID) == "" {
 		_, err := testutils.CreateOrgACMPolicyID(t, orgID)
 		if err != nil {
-			t.Errorf("Error creatin ACM Policy, %s", err)
+			t.Errorf("Error creating ACM Policy, %s", err)
 		}
 	}
 
@@ -56,6 +56,7 @@ func TestVPCSC(t *testing.T) {
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gcp-sa-artifactregistry.iam.gserviceaccount.com", projectNumber))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gs-project-accounts.iam.gserviceaccount.com", projectNumber))
 	} else {
 		protected_projects = append(protected_projects, networkProjectsNumber...)
 	}

@@ -269,6 +269,7 @@ module "cicd" {
   workerpool_id = var.workerpool_id == null ? google_cloudbuild_worker_pool.pool[0].id : var.workerpool_id
 
   logging_bucket = var.logging_bucket
+  bucket_kms_key = var.bucket_kms_key
 
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,

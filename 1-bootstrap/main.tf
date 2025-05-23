@@ -80,6 +80,16 @@ module "tfstate_bucket" {
   project_id    = var.project_id
   location      = var.location
   force_destroy = var.bucket_force_destroy
+
+  encryption = {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "tf-state-${var.project_id}"
+
+  versioning = true
+
 }
 
 module "tf_cloudbuild_workspace" {

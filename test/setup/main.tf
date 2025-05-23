@@ -69,6 +69,36 @@ resource "google_storage_bucket" "logging_bucket" {
   project                     = local.project_id
   name                        = "bkt-logging-${random_string.prefix.result}"
   uniform_bucket_level_access = true
-  location                    = "us"
+  location                    = "us-central1"
   force_destroy               = true
+  encryption {
+    default_kms_key_name = module.kms.keys["key"]
+  }
+}
+
+data "google_storage_project_service_account" "ci_gcs_account" {
+  project = local.project_id
+}
+
+data "google_storage_project_service_account" "gitlab_gcs_account" {
+  project = module.gitlab_project.project_id
+}
+
+module "kms" {
+  source  = "terraform-google-modules/kms/google"
+  version = "~> 4.0"
+
+  project_id     = local.project_id
+  location       = "us-central1"
+  keyring        = "kms-storage-buckets"
+  keys           = ["key"]
+  set_owners_for = ["key"]
+  owners = [
+    google_service_account.int_test[local.index].member
+  ]
+  set_encrypters_for = ["key"]
+  encrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member}"]
+  set_decrypters_for = ["key"]
+  decrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member}"]
+  prevent_destroy    = false
 }
