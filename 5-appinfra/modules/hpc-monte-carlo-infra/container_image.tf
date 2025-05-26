@@ -56,7 +56,7 @@ data "google_storage_project_service_account" "gcs_account" {
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = var.bucket_kms_key
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypterViaDelegation"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = data.google_storage_project_service_account.gcs_account.member
 }
 
