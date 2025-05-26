@@ -19,25 +19,27 @@ resource "google_service_account" "builder" {
   account_id = "mc-builder"
 }
 
-resource "google_storage_bucket" "build_logs" {
-  name                        = "cb-mc-builder-logs-${var.infra_project}"
-  project                     = var.infra_project
-  uniform_bucket_level_access = true
-  force_destroy               = var.bucket_force_destroy
-  location                    = var.region
+module "build_logs" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "10.0.2"
 
-  logging {
-    log_bucket        = var.logging_bucket
-    log_object_prefix = "cbmc-${var.infra_project}"
-  }
+  name              = "cb-mc-builder-logs-${var.infra_project}"
+  project_id        = var.infra_project
+  location          = var.region
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "cbmc-${var.infra_project}"
 
-  versioning {
-    enabled = true
-  }
+  force_destroy = var.bucket_force_destroy
 
-  encryption {
-    default_kms_key_name = var.bucket_kms_key
-  }
+  versioning = true
+  encryption = { default_kms_key_name = var.bucket_kms_key }
+
+
+  iam_members = [{
+    role   = "roles/storage.admin"
+    member = google_service_account.builder.member
+  }]
+
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
@@ -49,13 +51,6 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = var.bucket_kms_key
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypterViaDelegation"
   member        = data.google_storage_project_service_account.gcs_account.member
-}
-
-# IAM Roles required to build the terraform image on Google Cloud Build
-resource "google_storage_bucket_iam_member" "builder_admin" {
-  member = google_service_account.builder.member
-  bucket = google_storage_bucket.build_logs.name
-  role   = "roles/storage.admin"
 }
 
 resource "google_project_iam_member" "builder_object_user" {
@@ -86,7 +81,6 @@ resource "time_sleep" "wait_iam_propagation" {
 
   depends_on = [
     google_artifact_registry_repository_iam_member.builder,
-    google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,
     google_access_context_manager_access_level_condition.access-level-conditions,
   ]
@@ -118,13 +112,13 @@ gcloud builds submit ${path.module} \
   --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} \
   --project=${var.infra_project} \
   --service-account=${google_service_account.builder.id} \
-  --gcs-log-dir=${google_storage_bucket.build_logs.url} \
+  --gcs-log-dir=${module.build_logs.url} \
   --worker-pool=${var.workerpool_id} || (
     sleep 45 && gcloud builds submit ${path.module} \
       --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.research_images.name}/mc_run:${local.docker_tag_version_terraform} \
       --project=${var.infra_project} \
       --service-account=${google_service_account.builder.id} \
-      --gcs-log-dir=${google_storage_bucket.build_logs.url} \
+      --gcs-log-dir=${module.build_logs.url} \
       --worker-pool=${var.workerpool_id}
   )
 EOF

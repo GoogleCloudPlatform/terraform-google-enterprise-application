@@ -65,16 +65,29 @@ module "group" {
   domain       = data.google_organization.org.domain
 }
 
-resource "google_storage_bucket" "logging_bucket" {
-  project                     = local.project_id
-  name                        = "bkt-logging-${random_string.prefix.result}"
-  uniform_bucket_level_access = true
-  location                    = "us-central1"
-  force_destroy               = true
-  encryption {
-    default_kms_key_name = module.kms.keys["key"]
-  }
+module "logging_bucket" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "10.0.2"
+
+  name          = "bkt-logging-${random_string.prefix.result}"
+  project_id    = local.project_id
+  location      = "us-central1"
+  force_destroy = true
+
+  versioning = true
+  encryption = { default_kms_key_name = module.kms.keys["key"] }
+
+
+  iam_members = [{
+    role   = "roles/storage.admin"
+    member = "${google_service_account.gitlab_vm.member}"
+    },
+    {
+      role   = "roles/storage.admin"
+      member = "${google_service_account.int_test[local.index].member}"
+  }]
 }
+
 
 data "google_storage_project_service_account" "ci_gcs_account" {
   project = local.project_id

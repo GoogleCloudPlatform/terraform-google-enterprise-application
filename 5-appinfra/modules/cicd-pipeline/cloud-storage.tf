@@ -13,52 +13,60 @@
 # limitations under the License.
 
 # GCS bucket used as skaffold build cache
-resource "google_storage_bucket" "build_cache" {
-  project                     = var.project_id
-  name                        = "build-cache-${var.service_name}-${data.google_project.project.number}"
-  uniform_bucket_level_access = true
-  location                    = var.region
-  force_destroy               = var.buckets_force_destroy
+module "build_cache" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "10.0.2"
 
-  logging {
-    log_bucket        = var.logging_bucket
-    log_object_prefix = "build-${var.service_name}"
-  }
+  name              = "build-cache-${var.service_name}-${data.google_project.project.number}"
+  project_id        = var.project_id
+  location          = var.region
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "build-${var.project_id}"
 
-  versioning {
-    enabled = true
-  }
+  force_destroy = var.buckets_force_destroy
 
-  encryption {
-    default_kms_key_name = var.bucket_kms_key
-  }
+  versioning = true
+  encryption = { default_kms_key_name = var.bucket_kms_key }
+
+
+  iam_members = [{
+    role   = "roles/storage.admin"
+    member = google_service_account.cloud_build.member
+  }]
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
-resource "google_storage_bucket" "release_source_development" {
-  project                     = var.project_id
-  name                        = "release-source-development-${var.service_name}-${data.google_project.project.number}"
-  uniform_bucket_level_access = true
-  location                    = var.region
-  force_destroy               = var.buckets_force_destroy
-  logging {
-    log_bucket        = var.logging_bucket
-    log_object_prefix = "release-${var.service_name}"
-  }
+module "release_source_development" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "10.0.2"
 
-  versioning {
-    enabled = true
-  }
+  name              = "release-${var.service_name}"
+  project_id        = var.project_id
+  location          = var.region
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "release-${var.project_id}"
+  force_destroy     = var.buckets_force_destroy
 
-  encryption {
-    default_kms_key_name = var.bucket_kms_key
-  }
+  versioning = true
+  encryption = { default_kms_key_name = var.bucket_kms_key }
+
+
+  iam_members = [{
+    role   = "roles/storage.admin"
+    member = google_service_account.cloud_build.member
+    },
+    {
+      member = google_service_account.cloud_deploy.member
+      role   = "roles/storage.objectViewer"
+  }]
 
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 # Initialize cache with empty file
 resource "google_storage_bucket_object" "cache" {
-  bucket = google_storage_bucket.build_cache.name
+  bucket = module.build_cache.name
 
   name    = local.cache_filename
   content = " "
@@ -70,28 +78,4 @@ resource "google_storage_bucket_object" "cache" {
       detect_md5hash
     ]
   }
-}
-
-# give CloudBuild SA access to skaffold cache
-resource "google_storage_bucket_iam_member" "build_cache" {
-  bucket = google_storage_bucket.build_cache.name
-
-  member = "serviceAccount:${google_service_account.cloud_build.email}"
-  role   = "roles/storage.admin"
-}
-
-# give CloudBuild SA access to write to source development bucket
-resource "google_storage_bucket_iam_member" "release_source_development_admin" {
-  bucket = google_storage_bucket.release_source_development.name
-
-  member = "serviceAccount:${google_service_account.cloud_build.email}"
-  role   = "roles/storage.admin"
-}
-
-# give CloudDeploy SA access to read from source development bucket
-resource "google_storage_bucket_iam_member" "release_source_development_objectViewer" {
-  bucket = google_storage_bucket.release_source_development.name
-
-  member = "serviceAccount:${google_service_account.cloud_deploy.email}"
-  role   = "roles/storage.objectViewer"
 }

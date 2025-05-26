@@ -216,29 +216,26 @@ resource "google_compute_firewall" "allow_https" {
 // =======================================================
 //          GITLAB WORKER POOL AND PRIVATE DNS CONFIG
 // =======================================================
+module "ssl_cert" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "10.0.2"
 
-resource "google_storage_bucket" "ssl_cert" {
-  name          = "${module.gitlab_project.project_id}-ssl-cert"
-  project       = module.gitlab_project.project_id
-  location      = "us-central1"
-  force_destroy = true
+  name              = "${module.gitlab_project.project_id}-ssl-cert"
+  project_id        = module.gitlab_project.project_id
+  location          = "us-central1"
+  log_bucket        = module.logging_bucket.name
+  log_object_prefix = "ssl-cert"
+  force_destroy     = true
 
-  public_access_prevention    = "enforced"
-  uniform_bucket_level_access = true
+  versioning = true
+  encryption = { default_kms_key_name = module.kms.keys["key"] }
 
-  versioning {
-    enabled = true
-  }
 
-  encryption {
-    default_kms_key_name = module.kms.keys["key"]
-  }
-}
+  iam_members = [{
+    role   = "roles/storage.admin"
+    member = "${google_service_account.gitlab_vm.member}"
+  }]
 
-resource "google_storage_bucket_iam_member" "storage_admin" {
-  bucket = google_storage_bucket.ssl_cert.name
-  role   = "roles/storage.admin"
-  member = google_service_account.gitlab_vm.member
 }
 
 resource "google_service_directory_namespace" "gitlab" {
