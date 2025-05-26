@@ -77,15 +77,25 @@ module "logging_bucket" {
   versioning = true
   encryption = { default_kms_key_name = module.kms.keys["key"] }
 
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [
+  #   {
+  #     role   = "roles/storage.admin"
+  #     member = "serviceAccount:${google_service_account.gitlab_vm.email}"
+  #   },
+  #   {
+  #     role   = "roles/storage.admin"
+  #     member = "serviceAccount:${google_service_account.int_test[local.index].email}"
+  #   }
+  # ]
+}
 
-  iam_members = [{
-    role   = "roles/storage.admin"
-    member = "${google_service_account.gitlab_vm.member}"
-    },
-    {
-      role   = "roles/storage.admin"
-      member = "${google_service_account.int_test[local.index].member}"
-  }]
+resource "google_storage_bucket_iam_member" "logging_storage_admin" {
+  for_each = { "admin_gl" : google_service_account.gitlab_vm.member, "admin_ci" : google_service_account.int_test[local.index].email }
+  bucket   = module.logging_bucket.name
+  role     = "roles/storage.admin"
+  member   = each.value
 }
 
 

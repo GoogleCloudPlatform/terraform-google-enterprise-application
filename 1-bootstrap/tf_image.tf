@@ -49,16 +49,24 @@ module "build_logs" {
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 
-  iam_members = [
-    {
-      role   = "roles/storage.admin"
-      member = google_service_account.builder.member
-    },
-    {
-      member = google_service_account.builder.member
-      role   = "roles/storage.objectUser"
-    }
-  ]
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [
+  #   {
+  #     role   = "roles/storage.admin"
+  #     member = google_service_account.builder.member
+  #   },
+  #   {
+  #     member = google_service_account.builder.member
+  #     role   = "roles/storage.objectUser"
+  #   }
+  # ]
+}
+
+resource "google_storage_bucket_iam_member" "logging_storage_admin" {
+  bucket = module.build_logs.name
+  role   = "roles/storage.admin"
+  member = google_service_account.builder.member
 }
 
 resource "google_project_iam_member" "builder_object_user" {
@@ -91,6 +99,7 @@ resource "time_sleep" "wait_iam_propagation" {
 
   depends_on = [
     google_project_iam_member.tf_workerpool_user,
+    google_storage_bucket_iam_member.logging_storage_admin,
     google_artifact_registry_repository_iam_member.builder,
     google_project_iam_member.builder_object_user,
   ]

@@ -28,13 +28,20 @@ module "build_cache" {
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 
-
-  iam_members = [{
-    role   = "roles/storage.admin"
-    member = google_service_account.cloud_build.member
-  }]
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [{
+  #   role   = "roles/storage.admin"
+  #   member = google_service_account.cloud_build.member
+  # }]
 
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+
+resource "google_storage_bucket_iam_member" "build_cache_storage_admin" {
+  bucket = module.build_cache.name
+  role   = "roles/storage.admin"
+  member = google_service_account.cloud_build.member
 }
 
 module "release_source_development" {
@@ -51,17 +58,30 @@ module "release_source_development" {
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 
-
-  iam_members = [{
-    role   = "roles/storage.admin"
-    member = google_service_account.cloud_build.member
-    },
-    {
-      member = google_service_account.cloud_deploy.member
-      role   = "roles/storage.objectViewer"
-  }]
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [{
+  #   role   = "roles/storage.admin"
+  #   member = google_service_account.cloud_build.member
+  #   },
+  #   {
+  #     member = google_service_account.cloud_deploy.member
+  #     role   = "roles/storage.objectViewer"
+  # }]
 
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+
+resource "google_storage_bucket_iam_member" "release_source_development_storage_admin" {
+  bucket = module.release_source_development.name
+  role   = "roles/storage.admin"
+  member = google_service_account.cloud_build.member
+}
+
+resource "google_storage_bucket_iam_member" "release_source_development_storage_object_viewer" {
+  bucket = module.release_source_development.name
+  role   = "roles/storage.objectViewer"
+  member = google_service_account.cloud_deploy.member
 }
 
 # Initialize cache with empty file

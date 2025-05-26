@@ -70,10 +70,19 @@ module "delivery_artifacts" {
   encryption = { default_kms_key_name = var.bucket_kms_key }
 
 
-  iam_members = [{
-    role   = "roles/storage.admin"
-    member = google_service_account.cloud_deploy.member
-  }]
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [{
+  #   role   = "roles/storage.admin"
+  #   member = google_service_account.cloud_deploy.member
+  # }]
 
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+
+resource "google_storage_bucket_iam_member" "delivery_artifacts_storage_admin" {
+  for_each = var.env_cluster_membership_ids
+  bucket   = module.delivery_artifacts[each.key].name
+  role     = "roles/storage.admin"
+  member   = google_service_account.cloud_deploy.member
 }

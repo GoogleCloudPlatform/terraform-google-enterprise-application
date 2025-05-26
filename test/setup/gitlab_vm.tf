@@ -230,12 +230,19 @@ module "ssl_cert" {
   versioning = true
   encryption = { default_kms_key_name = module.kms.keys["key"] }
 
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [{
+  #   role   = "roles/storage.admin"
+  #   member = "${google_service_account.gitlab_vm.member}"
+  # }]
 
-  iam_members = [{
-    role   = "roles/storage.admin"
-    member = "${google_service_account.gitlab_vm.member}"
-  }]
+}
 
+resource "google_storage_bucket_iam_member" "ssl_storage_admin" {
+  bucket = module.ssl_cert.name
+  role   = "roles/storage.admin"
+  member = google_service_account.gitlab_vm.member
 }
 
 resource "google_service_directory_namespace" "gitlab" {
