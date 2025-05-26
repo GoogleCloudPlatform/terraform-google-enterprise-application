@@ -92,7 +92,7 @@ module "logging_bucket" {
 }
 
 resource "google_storage_bucket_iam_member" "logging_storage_admin" {
-  for_each = { "admin_gl" : google_service_account.gitlab_vm.member, "admin_ci" : google_service_account.int_test[local.index].email }
+  for_each = { "admin_gl" : google_service_account.gitlab_vm.member, "admin_ci" : google_service_account.int_test[local.index].member }
   bucket   = module.logging_bucket.name
   role     = "roles/storage.admin"
   member   = each.value
