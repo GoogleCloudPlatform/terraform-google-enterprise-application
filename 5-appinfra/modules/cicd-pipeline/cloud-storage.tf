@@ -48,7 +48,7 @@ module "release_source_development" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
   version = "10.0.2"
 
-  name              = "release-${var.service_name}"
+  name              = "release-source-development-${var.service_name}-${data.google_project.project.number}"
   project_id        = var.project_id
   location          = var.region
   log_bucket        = var.logging_bucket
