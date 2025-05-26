@@ -117,6 +117,7 @@ module "app_admin_project" {
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "secretmanager.googleapis.com",
     "servicenetworking.googleapis.com",
