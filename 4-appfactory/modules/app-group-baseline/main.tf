@@ -29,7 +29,7 @@ locals {
         "roles/artifactregistry.admin", "roles/clouddeploy.admin",
         "roles/cloudbuild.builds.editor", "roles/resourcemanager.projectIamAdmin",
         "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin",
-        "roles/compute.viewer"
+        "roles/compute.viewer", "roles/cloudkms.admin"
       ]
     } },
     {
