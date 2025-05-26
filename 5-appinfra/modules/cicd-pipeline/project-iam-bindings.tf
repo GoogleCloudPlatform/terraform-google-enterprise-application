@@ -175,3 +175,9 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = data.google_storage_project_service_account.gcs_account.member
 }
+
+resource "time_sleep" "wait_cmek_iam_propagation" {
+  create_duration = "60s"
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}

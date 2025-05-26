@@ -120,8 +120,8 @@ module "kms" {
     google_service_account.int_test[local.index].member
   ]
   set_encrypters_for = ["key"]
-  encrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member}"]
+  encrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}"]
   set_decrypters_for = ["key"]
-  decrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member}"]
+  decrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}"]
   prevent_destroy    = false
 }

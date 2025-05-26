@@ -12,6 +12,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 |------|-------------|------|---------|:--------:|
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | branch\_name | The branch starting the build. | `string` | n/a | yes |
+| cloud\_build\_sa | Cloud Build Service Account email to be granted Encrypt/Decrypt role. | `string` | n/a | yes |
 | create\_cloud\_nat | Create NAT router on cluster network. | `bool` | `false` | no |
 | folder\_id | The folder to deploy in | `string` | n/a | yes |
 | org\_id | The numeric organization id | `string` | n/a | yes |

@@ -29,6 +29,6 @@ module "stocks_data" {
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 
-  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+  depends_on = [time_sleep.wait_cmek_iam_propagation]
 }
 
