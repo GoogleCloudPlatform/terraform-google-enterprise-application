@@ -88,13 +88,36 @@ func TestHPCAppInfra(t *testing.T) {
 			}
 
 			remoteState := bootstrap.GetStringOutput("state_bucket")
+			infraPath := fmt.Sprintf("%s/%s/envs/development", appSourcePath, fullServiceName)
+			serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, suffixServiceName)).String(), "/")
+			t.Logf("Setting Service Account %s to be impersonated.", serviceAccount[len(serviceAccount)-1])
+			f, err := os.Create(fmt.Sprintf("%s/providers.tf", infraPath))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			provider := `
+provider "google" {
+	impersonate_service_account = "%s"
+}
+
+provider "google-beta" {
+	impersonate_service_account = "%s"
+}
+			`
+			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
+			fmt.Println(l, "bytes written successfully")
+			if err != nil {
+				fmt.Println(err)
+				f.Close()
+				return
+			}
 
 			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, fullServiceName)).String(), "/")
 			backendConfig := map[string]interface{}{
 				"bucket": backend_bucket[len(backend_bucket)-1],
 			}
 
-			infraPath := fmt.Sprintf("%s/%s/envs/development", appSourcePath, fullServiceName)
 			t.Run(infraPath, func(t *testing.T) {
 				t.Parallel()
 
