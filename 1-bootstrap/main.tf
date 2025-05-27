@@ -40,6 +40,7 @@ locals {
 
   projects_re         = "projects/([^/]+)/"
   worker_pool_project = regex(local.projects_re, var.workerpool_id)[0]
+  kms_project         = regex(local.projects_re, var.bucket_kms_key)[0]
 }
 
 resource "google_sourcerepo_repository" "gcp_repo" {

@@ -284,6 +284,13 @@ resource "google_project_iam_member" "secretManager_admin" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 
+resource "google_project_iam_member" "kms_admin" {
+  count   = var.kms_project_id != null ? 1 : 0
+  project = var.kms_project_id
+  role    = "roles/cloudkms.admin"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
 resource "google_organization_iam_member" "policyAdmin_role" {
   for_each = toset(local.org_ids)
   member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
