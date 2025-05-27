@@ -147,7 +147,7 @@ resource "google_project_iam_member" "secret_iam_member" {
   project = local.worker_pool_project
 }
 
-resource "google_project_iam_member" "secret_iam_member" {
+resource "google_project_iam_member" "kms_iam_member" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
 
   role    = "roles/cloudkms.admin"

@@ -89,7 +89,7 @@ func TestHPCAppInfra(t *testing.T) {
 
 			remoteState := bootstrap.GetStringOutput("state_bucket")
 			infraPath := fmt.Sprintf("%s/%s/envs/development", appSourcePath, fullServiceName)
-			serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, suffixServiceName)).String(), "/")
+			serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, fullServiceName)).String(), "/")
 			t.Logf("Setting Service Account %s to be impersonated.", serviceAccount[len(serviceAccount)-1])
 			f, err := os.Create(fmt.Sprintf("%s/providers.tf", infraPath))
 			if err != nil {
