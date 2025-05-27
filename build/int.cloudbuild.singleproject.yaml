@@ -41,7 +41,7 @@ steps:
     args:
       - "-c"
       - |-
-        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates --impersonate-service-account=$(terraform -chdir=/workspace/test/setup output -raw sa_email)
         update-ca-certificates
         if (ls /etc/ssl/certs | grep gitlab.pem); then
             cft test run TestBootstrapGitlabVM --stage verify --verbose || exit 1
