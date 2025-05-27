@@ -47,5 +47,7 @@ var (
 		".*Error: Error waiting to create Repository: Error waiting for Creating Repository: Error code 3, message: Request contains an invalid argument.*.": "Invalid Argument on Artifact Registry Creation",
 
 		".*another operation is in progress on this scope*.": "another operation is in progress on this scope",
+
+		".*Error when reading or editing ServicePerimeterResource*": "Propagation issues.",
 	}
 )
