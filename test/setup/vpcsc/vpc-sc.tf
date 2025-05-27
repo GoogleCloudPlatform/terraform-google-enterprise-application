@@ -285,9 +285,9 @@ locals {
     }
   ]
 
-  ingress_rules = [
+  ingress_rules = contains(var.protected_projects, var.logging_bucket_project_number) ? [
     {
-      title = "Ingress from Gitlab to KMS project"
+      title = "Ingress from Gitlab to Single Project project"
       from = {
         sources    = { resources = ["projects/${var.gitlab_project_number}"] }
         identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"] //gitlab storage identity
@@ -299,7 +299,7 @@ locals {
         }
       }
     }
-  ]
+  ] : []
 }
 
 resource "random_string" "prefix" {
