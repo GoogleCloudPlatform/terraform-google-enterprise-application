@@ -191,7 +191,7 @@ provider "google-beta" {
 						assert.Equal(strings.ToUpper(region), bucketOp.Get("location").String(), fmt.Sprintf("Bucket should be at location %s", region))
 
 						assert.Equal(bucketKMSKey, bucketOp.Get("default_kms_key").String(), fmt.Sprintf("Bucket should be have encryption key %s", bucketKMSKey))
-						assert.Equal(loggingBucket, bucketOp.Get("logging").String(), fmt.Sprintf("Bucket should be have logging bucket %s", loggingBucket))
+						assert.Equal(loggingBucket, bucketOp.Get("logging_config.logBucket").String(), fmt.Sprintf("Bucket should be have logging bucket %s", loggingBucket))
 
 						// storage buckets get-iam-policy does not support --filter
 						bucketIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--format", "json"})
@@ -208,7 +208,7 @@ provider "google-beta" {
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
 						assert.Equal(strings.ToUpper(region), bucketOp.Get("location").String(), fmt.Sprintf("Bucket should be at location %s", region))
 						assert.Equal(bucketKMSKey, bucketOp.Get("default_kms_key").String(), fmt.Sprintf("Bucket should be have encryption key %s", bucketKMSKey))
-						assert.Equal(loggingBucket, bucketOp.Get("logging").String(), fmt.Sprintf("Bucket should be have logging bucket %s", loggingBucket))
+						assert.Equal(loggingBucket, bucketOp.Get("logging_config.logBucket").String(), fmt.Sprintf("Bucket should be have logging bucket %s", loggingBucket))
 
 						// storage buckets get-iam-policy does not support --filter
 						bucketIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--format", "json"})
