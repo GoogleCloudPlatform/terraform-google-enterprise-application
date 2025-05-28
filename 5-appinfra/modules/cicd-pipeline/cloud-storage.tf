@@ -15,7 +15,7 @@
 # GCS bucket used as skaffold build cache
 module "build_cache" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "10.0.2"
+  version = "~> 10.0"
 
   name              = "build-cache-${var.service_name}-${data.google_project.project.number}"
   project_id        = var.project_id
@@ -46,7 +46,7 @@ resource "google_storage_bucket_iam_member" "build_cache_storage_admin" {
 
 module "release_source_development" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "10.0.2"
+  version = "~> 10.0"
 
   name              = "release-source-development-${var.service_name}-${data.google_project.project.number}"
   project_id        = var.project_id

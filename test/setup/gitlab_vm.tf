@@ -218,7 +218,7 @@ resource "google_compute_firewall" "allow_https" {
 // =======================================================
 module "ssl_cert" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "10.0.2"
+  version = "~> 10.0"
 
   name              = "${module.gitlab_project.project_id}-ssl-cert"
   project_id        = module.gitlab_project.project_id

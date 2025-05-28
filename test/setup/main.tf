@@ -67,7 +67,7 @@ module "group" {
 
 module "logging_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "10.0.2"
+  version = "~> 10.0"
 
   name          = "bkt-logging-${random_string.prefix.result}"
   project_id    = local.project_id

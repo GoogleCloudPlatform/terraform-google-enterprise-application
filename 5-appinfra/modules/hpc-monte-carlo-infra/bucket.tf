@@ -16,7 +16,7 @@
 
 module "stocks_data" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "10.0.2"
+  version = "~> 10.0"
 
   name              = "${var.infra_project}-stocks-historical-data"
   project_id        = var.infra_project
