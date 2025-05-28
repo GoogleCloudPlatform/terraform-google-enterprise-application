@@ -56,6 +56,11 @@ data "google_project" "workerpool_project" {
   project_id = local.worker_pool_project
 }
 
+data "google_project" "kms_project" {
+  count      = var.kms_project_id != null ? 1 : 0
+  project_id = var.kms_project_id
+}
+
 data "google_project" "clusters_projects" {
   for_each   = toset(var.cluster_projects_ids)
   project_id = each.value

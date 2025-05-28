@@ -148,7 +148,7 @@ resource "google_project_iam_member" "secret_iam_member" {
 }
 
 resource "google_project_iam_member" "kms_iam_member" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" && var.bucket_kms_key != null })
 
   role    = "roles/cloudkms.admin"
   member  = "serviceAccount:${each.value.email}"

@@ -61,12 +61,14 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  for_each = {
+    "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
+    "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
+  }
   crypto_key_id = var.bucket_kms_key
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  role          = each.value
   member        = data.google_storage_project_service_account.gcs_account.member
 }
-
-
 
 resource "time_sleep" "wait_cmek_iam_propagation" {
   create_duration = "60s"
