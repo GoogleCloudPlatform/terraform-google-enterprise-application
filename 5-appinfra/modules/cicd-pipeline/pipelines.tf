@@ -66,6 +66,8 @@ module "delivery_artifacts" {
   log_object_prefix = "ar-${each.key}-${var.service_name}"
   force_destroy     = var.buckets_force_destroy
 
+  public_access_prevention = "enforced"
+
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 

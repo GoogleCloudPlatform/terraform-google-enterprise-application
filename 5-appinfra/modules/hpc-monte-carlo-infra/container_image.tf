@@ -31,6 +31,8 @@ module "build_logs" {
 
   force_destroy = var.bucket_force_destroy
 
+  public_access_prevention = "enforced"
+
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 

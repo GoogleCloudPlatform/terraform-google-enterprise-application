@@ -25,6 +25,8 @@ module "build_cache" {
 
   force_destroy = var.buckets_force_destroy
 
+  public_access_prevention = "enforced"
+
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 
@@ -54,6 +56,8 @@ module "release_source_development" {
   log_bucket        = var.logging_bucket
   log_object_prefix = "release-${var.project_id}"
   force_destroy     = var.buckets_force_destroy
+
+  public_access_prevention = "enforced"
 
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }

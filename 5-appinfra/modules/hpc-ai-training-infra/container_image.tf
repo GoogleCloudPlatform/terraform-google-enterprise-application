@@ -30,6 +30,8 @@ module "build_logs" {
   log_object_prefix = "cb-ai-${var.infra_project}"
   force_destroy     = var.bucket_force_destroy
 
+  public_access_prevention = "enforced"
+
   versioning = true
   encryption = { default_kms_key_name = var.bucket_kms_key }
 
