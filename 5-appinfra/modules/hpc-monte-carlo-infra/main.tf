@@ -41,7 +41,8 @@ resource "google_project_service" "enable_apis" {
     "batch.googleapis.com",
     "pubsub.googleapis.com",
     "cloudbuild.googleapis.com",
-    "compute.googleapis.com"
+    "compute.googleapis.com",
+    "cloudkms.googleapis.com"
   ])
   project            = var.infra_project
   service            = each.key
