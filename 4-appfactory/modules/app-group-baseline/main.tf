@@ -283,6 +283,12 @@ module "app_infra_project" {
   svpc_host_project_id = each.value.network_project_id
 }
 
+
+data "google_storage_project_service_account" "gcs_account" {
+  for_each = var.create_infra_project && var.kms_project_id != null && contains(var.infra_project_apis, "storage.googleapis.com") ? module.app_infra_project : {}
+  project  = each.value.project_id
+}
+
 resource "google_project_iam_member" "secretManager_admin" {
   project = var.cloudbuildv2_repository_config.secret_project_id
   role    = "roles/secretmanager.admin"

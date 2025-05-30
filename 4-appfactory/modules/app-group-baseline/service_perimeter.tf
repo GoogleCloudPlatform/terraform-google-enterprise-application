@@ -108,11 +108,11 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "admin_
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "env_to_kms_egress_policy" {
-  for_each  = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null && var.create_infra_project && var.kms_project_id != null && contains(var.infra_project_apis, "storage.googleapis.com") ? module.app_infra_project : {}
+  for_each  = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
   perimeter = var.service_perimeter_name
-  title     = "KMS Egress from ${each.value.project_id} to ${data.google_project.kms_project[0].project_id}"
+  title     = "KMS Egress from ${each.value.project} to ${data.google_project.kms_project[0].project_id}"
   egress_from {
-    identities = ["serviceAccount:service-${each.value.project_number}@gs-project-accounts.iam.gserviceaccount.com"]
+    identities = [each.value.member]
   }
   egress_to {
     resources = ["projects/${data.google_project.kms_project[0].number}"]
@@ -129,11 +129,11 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "env_to_kms_egress_policy" {
-  for_each  = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_infra_project && var.kms_project_id != null && contains(var.infra_project_apis, "storage.googleapis.com") ? module.app_infra_project : {}
+  for_each  = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
   perimeter = var.service_perimeter_name
-  title     = "KMS Egress from ${each.value.project_id} to ${data.google_project.kms_project[0].project_id}"
+  title     = "KMS Egress from ${each.value.project} to ${data.google_project.kms_project[0].project_id}"
   egress_from {
-    identities = ["serviceAccount:service-${each.value.project_number}@gs-project-accounts.iam.gserviceaccount.com"]
+    identities = [each.value.member]
   }
   egress_to {
     resources = ["projects/${data.google_project.kms_project[0].number}"]
