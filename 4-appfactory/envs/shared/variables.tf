@@ -202,3 +202,14 @@ variable "service_perimeter_mode" {
     error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
   }
 }
+
+variable "infra_project_apis" {
+  type        = list(string)
+  description = "List of APIs to enable for environment-specific application infra projects"
+  default = [
+    "iam.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "serviceusage.googleapis.com",
+    "cloudbilling.googleapis.com",
+  ]
+}
