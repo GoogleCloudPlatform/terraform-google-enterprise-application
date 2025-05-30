@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -x
+
+export KUBECONFIG="/tmp/kubeconfig_${cluster_name}_${project_id}"
+if [ ! -r "$KUBECONFIG" ]; then
+    TEMP_KUBECONFIG=$(mktemp "/tmp/kubeconfig_XXXXXX")
+    KUBECONFIG="$TEMP_KUBECONFIG" gcloud container clusters get-credentials ${cluster_name} --project=${project_id} --region=${region}
+    mv -f "$TEMP_KUBECONFIG" "$KUBECONFIG"
+fi
+
+if [ "${parallel}" -ne "0" ]; then
+kubectl apply -f - <<EOF
+${job_config}
+EOF
+fi
+
+kubectl apply -f -<<EOF
+${controller_config}
+EOF

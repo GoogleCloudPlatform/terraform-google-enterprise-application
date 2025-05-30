@@ -1,0 +1,137 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gcsfuse-config
+  namespace: gcs-node-mount
+data:
+  gcs_config.yaml: |-
+
+    app-name: "fuse-node-mount"
+    write:
+      create-empty-file: true
+    logging:
+      format: json
+      severity: INFO
+    file-cache:
+      max-size-mb: -1 # grow until it occupies all the available capacity in your cache directory.
+      cache-file-for-range-read: true  # Helpful for small files, avoids full downloads
+      enable-parallel-downloads: true  # Helps if SOME files are larger
+      parallel-downloads-per-file: 8  # Tune based on network/GCS limits
+      max-parallel-downloads: 64  # Node-wide limit, balance concurrency
+      download-chunk-size-mb: 8  # Align with GCS optimal chunk size
+    metadata-cache:
+      enable-nonexistent-type-cache: true  # Reduces 'stat' calls for missing files
+      stat-cache-max-size-mb: 32
+      ttl-secs: 600 # 10 mins balance freshess vs cache hits (Tune depending on how often files change)
+      type-cache-max-size-mb: 4
+    cache-dir: "/tmp/cache"
+    # only-dir: "# Only needed if restricting access to a subpath
+    gcs-connection:
+      max-conns-per-host: 128 # High, to handle many pods concurrently
+      max-idle-conns-per-host: 64 # Keep some alive to reduce connection overhead
+      sequential-read-size-mb: 32 # Good for sequential reads if they occur
+    implicit-dirs: true  # Helps with 'mkdir -p', but has consistency caveats
+    file-system:
+      kernel-list-cache-ttl-secs: 60  # Cache dir listings moderately
+      ignore-interrupts: true  # For better stability under load
+      dir-mode: "755"  # Permissions, adjust as needed
+      file-mode: "644"  # Same as above
+      fuse-options: "allow_other,nonempty,auto_unmount" # Add specific FUSE options if required
+      # gid: # If needed for ownership mapping
+      # uid: # If needed for ownership mapping
+      # rename-dir-limit: # Tune based on rename behaviour
+      temp-dir: "/tmp/gcsfuse" # Mapped to tmpfs
+    foreground: true
+    gcs-retries:
+      max-retry-sleep: 30 # Defaults
+      multiplier: "2" # Defaults
+    metrics:
+      stackdriver-export-interval: 60 # Export metrics every 60 seconds for performance monitoring
+    debug:
+      log-mutex: false  # Only enable if debugging locking issues
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gcsfuse-node-sa
+  namespace: gcs-node-mount
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: gcs-fuse-daemonset
+  namespace: gcs-node-mount
+spec:
+  selector:
+    matchLabels:
+      app: gcs-fuse
+  template:
+    metadata:
+      labels:
+        app: gcs-fuse
+    spec:
+      terminationGracePeriodSeconds: 60 # Time to tidy up mounts
+      containers:
+      - name: gcs-fuse
+        lifecycle:
+          preStop:
+            exec:
+              command: ["fusermount", "-u", "/data"]
+        image: us-central1-docker.pkg.dev/fsi-research-5/research-images/gcsfuse
+        command: ["gcsfuse"]
+        args:
+        - "-o"
+        - "allow_other"
+        - "--config-file"
+        - "/config/gcs_config.yaml"
+        - "fuse-mount-testing"
+        - "/data"
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+        volumeMounts:
+        - name: gcsfuse-config
+          mountPath: /config
+        - name: gcsfuse-storage
+          mountPath: /data
+          mountPropagation: Bidirectional
+        - name: gcsfuse-cache
+          mountPath: /tmp/cache
+        - name: tmp-dir
+          mountPath: /tmp/gcsfuse
+        - name: fuse-device
+          mountPath: /dev/fuse
+        securityContext:
+          privileged: true
+      volumes:
+      - name: gcsfuse-config
+        configMap:
+          name: gcsfuse-config
+      - name: gcsfuse-cache
+        emptyDir: {}
+      - name: tmp-dir
+        emptyDir: {}
+      - name: fuse-device
+        hostPath:
+          path: /dev/fuse
+      - name: gcsfuse-storage
+        hostPath:
+          path: /mnt/disks/gcsfuse-storage
+          type: DirectoryOrCreate
+      serviceAccountName: gcsfuse-node-sa

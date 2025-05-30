@@ -1,0 +1,118 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${name}
+spec:
+  minReplicas: 1
+  maxReplicas: 50000
+  metrics:
+  - external:
+      metric:
+       name: pubsub.googleapis.com|subscription|num_undelivered_messages
+       selector:
+         matchLabels:
+           resource.labels.subscription_id: ${gke_hpa_request_sub}
+      target:
+        type: AverageValue
+        averageValue: 1
+    type: External
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${name}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${name}
+  labels:
+    app: ${name}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${name}
+  template:
+    metadata:
+      labels:
+        app: ${name}
+      annotations:
+        gke-gcsfuse/volumes: "true"
+        gke-gcsfuse/cpu-request: "50m"
+        gke-gcsfuse/memory-request: "64Mi"
+        gke-gcsfuse/cpu-limit: "1"
+        gke-gcsfuse/memory-limit: "1Gi"
+        gke-gcsfuse/ephemeral-storage-request: "1Gi"
+    spec:
+      nodeSelector:
+        cloud.google.com/compute-class: spot-capacity
+      containers:
+      - name: workload
+        # Workload. It starts and waits on port 2002 with gRPC service.
+        image: ${workload_image}
+        args: ${jsonencode(workload_args)}
+        # Tasks may require reading/writing to a POSIX file. /data is mapped
+        # for this purpose.
+        workingDir: /data
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "200m"
+          limits:
+            cpu: "200m"
+            memory: "1Gi"
+        volumeMounts:
+        - name: parallelstore-volume
+          mountPath: /data
+      - name: agent
+        resources:
+          requests:
+            memory: "3Gi"
+            cpu: "800m"
+          limits:
+            cpu: "800m"
+            memory: "3Gi"
+        image: ${agent_image}
+        args: ["serve", "pubsub-pull",
+               # subscription to pull requests (tasks) from, topic to publish responses
+               "${gke_hpa_request_sub}", "${gke_hpa_response}",
+               # Log to JSON
+               "--logJSON",
+               # Log Every operation
+               "--logAll",
+               # Text encode protobuf on PubSub
+               "--jsonPubSub=true",
+               # Endpoint to dispatch the work
+               "--endpoint", "${workload_endpoint}",
+               # Timeout waiting for the gRPC service to be available
+               "--timeout", "120s",
+               # NOTE: These are important so that only a small number of messages (tasks)
+               # are pulled from Pub/Sub, as if they are chunky in size they need to be
+               # evenly distributed.
+               # Maximum number of goroutines executing
+               "--goroutines", "1",
+               # Maximum number of outstanding messages
+               "--maxoutstandingmessages", "1"]
+        env:
+        - name: K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      volumes:
+      - name: parallelstore-volume
+        persistentVolumeClaim:
+          claimName: parallelstore-pvc-${location}

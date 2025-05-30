@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "${parallel}" -ne "0" ]; then
+  gcloud run jobs execute workload-worker --project ${project} --region ${region} --tasks=${parallel}
+  gcloud run jobs execute controller --project ${project} --region ${region} --tasks=1 --args=test,pubsub,--logJSON,--jsonPubSub=true,${run_job_request},${run_job_response_sub},--source,${testfile}
+else
+  gcloud run jobs execute controller --project ${project} --region ${region} --tasks=1 --args=test,pubsub,--logJSON,--jsonPubSub=true,${run_hpa_request},${run_hpa_response_sub},--source,${testfile}
+fi
