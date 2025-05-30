@@ -29,13 +29,13 @@ locals {
         "roles/artifactregistry.admin", "roles/clouddeploy.admin",
         "roles/cloudbuild.builds.editor", "roles/resourcemanager.projectIamAdmin",
         "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin",
-        "roles/compute.viewer"
+        "roles/compute.viewer", "roles/cloudkms.admin"
       ]
     } },
     {
       for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
         project_id = cluster_project_id
-        roles      = ["roles/resourcemanager.projectIamAdmin"]
+        roles      = ["roles/resourcemanager.projectIamAdmin", "roles/gkehub.admin"]
       }
     }
   )
@@ -54,6 +54,11 @@ data "google_project" "admin_project" {
 
 data "google_project" "workerpool_project" {
   project_id = local.worker_pool_project
+}
+
+data "google_project" "kms_project" {
+  count      = var.kms_project_id != null ? 1 : 0
+  project_id = var.kms_project_id
 }
 
 data "google_project" "clusters_projects" {
@@ -117,6 +122,7 @@ module "app_admin_project" {
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "secretmanager.googleapis.com",
     "servicenetworking.googleapis.com",
@@ -277,9 +283,22 @@ module "app_infra_project" {
   svpc_host_project_id = each.value.network_project_id
 }
 
+
+data "google_storage_project_service_account" "gcs_account" {
+  for_each = var.create_infra_project && var.kms_project_id != null && contains(var.infra_project_apis, "storage.googleapis.com") ? module.app_infra_project : {}
+  project  = each.value.project_id
+}
+
 resource "google_project_iam_member" "secretManager_admin" {
   project = var.cloudbuildv2_repository_config.secret_project_id
   role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "kms_admin" {
+  count   = var.kms_project_id != null ? 1 : 0
+  project = var.kms_project_id
+  role    = "roles/cloudkms.admin"
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 

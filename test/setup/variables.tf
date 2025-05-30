@@ -44,3 +44,8 @@ variable "create_cloud_nat" {
   type        = bool
   default     = false
 }
+
+variable "cloud_build_sa" {
+  description = "Cloud Build Service Account email to be granted Encrypt/Decrypt role."
+  type        = string
+}

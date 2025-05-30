@@ -35,27 +35,40 @@ resource "google_service_account" "builder" {
   account_id = "tf-builder"
 }
 
-resource "google_storage_bucket" "build_logs" {
-  name                        = "cb-tf-builder-logs-${var.project_id}"
-  project                     = var.project_id
-  uniform_bucket_level_access = true
-  force_destroy               = var.bucket_force_destroy
-  location                    = var.location
-  logging {
-    log_bucket        = var.logging_bucket
-    log_object_prefix = "cb-ai-${var.project_id}"
-  }
+module "build_logs" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 10.0"
 
-  versioning {
-    enabled = true
-  }
+  name              = "cb-tf-builder-logs-${var.project_id}"
+  project_id        = var.project_id
+  location          = var.location
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "cb-tf-${var.project_id}"
+  force_destroy     = var.bucket_force_destroy
+
+  public_access_prevention = "enforced"
+
+  versioning = true
+  encryption = { default_kms_key_name = var.bucket_kms_key }
+
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [
+  #   {
+  #     role   = "roles/storage.admin"
+  #     member = google_service_account.builder.member
+  #   },
+  #   {
+  #     member = google_service_account.builder.member
+  #     role   = "roles/storage.objectUser"
+  #   }
+  # ]
 }
 
-# IAM Roles required to build the terraform image on Google Cloud Build
-resource "google_storage_bucket_iam_member" "builder_admin" {
-  member = google_service_account.builder.member
-  bucket = google_storage_bucket.build_logs.name
+resource "google_storage_bucket_iam_member" "logging_storage_admin" {
+  bucket = module.build_logs.name
   role   = "roles/storage.admin"
+  member = google_service_account.builder.member
 }
 
 resource "google_project_iam_member" "builder_object_user" {
@@ -88,8 +101,8 @@ resource "time_sleep" "wait_iam_propagation" {
 
   depends_on = [
     google_project_iam_member.tf_workerpool_user,
+    google_storage_bucket_iam_member.logging_storage_admin,
     google_artifact_registry_repository_iam_member.builder,
-    google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,
   ]
 }
@@ -105,7 +118,7 @@ module "build_terraform_image" {
   }
 
   create_cmd_entrypoint = "bash"
-  create_cmd_body       = "gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url} --worker-pool=${var.workerpool_id} || ( sleep 45 && gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${google_storage_bucket.build_logs.url}  --worker-pool=${var.workerpool_id}  )"
+  create_cmd_body       = "gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${module.build_logs.url} --worker-pool=${var.workerpool_id} || ( sleep 45 && gcloud builds submit --tag ${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.tf_image.name}/terraform:${local.docker_tag_version_terraform} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${module.build_logs.url}  --worker-pool=${var.workerpool_id}  )"
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }

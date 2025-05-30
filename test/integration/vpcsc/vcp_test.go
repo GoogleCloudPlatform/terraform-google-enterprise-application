@@ -34,6 +34,7 @@ func TestVPCSC(t *testing.T) {
 	serviceAccount := temp.GetTFSetupStringOutput("sa_email")
 	singleProject, _ := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
 	addAccessLevelMembers := strings.Split(os.Getenv("TF_VAR_access_level_members"), ",")
+	gitlabProjectNumber := temp.GetTFSetupStringOutput("gitlab_project_number")
 	protected_projects := []string{}
 	orgID := temp.GetTFSetupStringOutput("org_id")
 
@@ -41,7 +42,7 @@ func TestVPCSC(t *testing.T) {
 	if testutils.GetOrgACMPolicyID(t, orgID) == "" {
 		_, err := testutils.CreateOrgACMPolicyID(t, orgID)
 		if err != nil {
-			t.Errorf("Error creatin ACM Policy, %s", err)
+			t.Errorf("Error creating ACM Policy, %s", err)
 		}
 	}
 
@@ -57,6 +58,7 @@ func TestVPCSC(t *testing.T) {
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gcp-sa-artifactregistry.iam.gserviceaccount.com", projectNumber))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gs-project-accounts.iam.gserviceaccount.com", projectNumber))
 	} else if HTC {
 		protected_projects = append(protected_projects, projectNumber)
 	} else {
@@ -68,6 +70,7 @@ func TestVPCSC(t *testing.T) {
 		"access_level_members":          accessLevelMembers,
 		"protected_projects":            protected_projects,
 		"logging_bucket_project_number": projectNumber,
+		"gitlab_project_number":         gitlabProjectNumber,
 	}
 
 	vpcsc := tft.NewTFBlueprintTest(t,

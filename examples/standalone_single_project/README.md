@@ -311,6 +311,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |

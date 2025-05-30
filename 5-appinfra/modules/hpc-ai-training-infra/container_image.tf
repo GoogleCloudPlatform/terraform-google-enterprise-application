@@ -19,31 +19,68 @@ resource "google_service_account" "builder" {
   account_id = "ai-builder"
 }
 
-resource "google_storage_bucket" "build_logs" {
-  name                        = "cb-ai-builder-logs-${var.infra_project}"
-  project                     = var.infra_project
-  uniform_bucket_level_access = true
-  force_destroy               = var.bucket_force_destroy
-  location                    = var.region
-  logging {
-    log_bucket        = var.logging_bucket
-    log_object_prefix = "cb-ai-${var.infra_project}"
-  }
-  versioning {
-    enabled = true
-  }
+module "build_logs" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 10.0"
+
+  name              = "cb-ai-builder-logs-${var.infra_project}"
+  project_id        = var.infra_project
+  location          = var.region
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "cb-ai-${var.infra_project}"
+  force_destroy     = var.bucket_force_destroy
+
+  public_access_prevention = "enforced"
+
+  versioning = true
+  encryption = { default_kms_key_name = var.bucket_kms_key }
+
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [
+  #   {
+  #     role   = "roles/storage.admin"
+  #     member = google_service_account.builder.member
+  #   },
+  #   {
+  #     member = google_service_account.builder.member
+  #     role   = "roles/storage.objectUser"
+  #   }
+  # ]
+
+  depends_on = [time_sleep.wait_cmek_iam_propagation]
 }
 
-# IAM Roles required to build the terraform image on Google Cloud Build
-resource "google_storage_bucket_iam_member" "builder_admin" {
-  member = google_service_account.builder.member
-  bucket = google_storage_bucket.build_logs.name
-  role   = "roles/storage.admin"
+resource "google_storage_bucket_iam_member" "build_logs_storage_roles" {
+  for_each = toset(["roles/storage.admin", "roles/storage.objectUser"])
+  bucket   = module.build_logs.name
+  role     = each.value
+  member   = google_service_account.builder.member
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+  project = var.infra_project
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  for_each = {
+    "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
+    "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
+  }
+  crypto_key_id = var.bucket_kms_key
+  role          = each.value
+  member        = data.google_storage_project_service_account.gcs_account.member
+}
+
+resource "time_sleep" "wait_cmek_iam_propagation" {
+  create_duration = "60s"
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_project_iam_member" "builder_object_user" {
-  member  = google_service_account.builder.member
   project = var.infra_project
+  member  = google_service_account.builder.member
   role    = "roles/storage.objectUser"
 }
 
@@ -75,8 +112,8 @@ resource "time_sleep" "wait_iam_propagation" {
 
   depends_on = [
     google_artifact_registry_repository_iam_member.builder,
-    google_storage_bucket_iam_member.builder_admin,
     google_project_iam_member.builder_object_user,
+    google_storage_bucket_iam_member.build_logs_storage_roles,
     google_access_context_manager_access_level_condition.access-level-conditions,
   ]
 }
@@ -117,13 +154,13 @@ gcloud builds submit ${path.module} \
   --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
   --project=${var.infra_project} \
   --service-account=${google_service_account.builder.id} \
-  --gcs-log-dir=${google_storage_bucket.build_logs.url} \
+  --gcs-log-dir=${module.build_logs.url} \
   --worker-pool=${var.workerpool_id} || (
     sleep 45 && gcloud builds submit ${path.module} \
       --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
       --project=${var.infra_project} \
       --service-account=${google_service_account.builder.id} \
-      --gcs-log-dir=${google_storage_bucket.build_logs.url}\
+      --gcs-log-dir=${module.build_logs.url}\
       --worker-pool=${var.workerpool_id}
   )
 EOF

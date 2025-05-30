@@ -65,10 +65,63 @@ module "group" {
   domain       = data.google_organization.org.domain
 }
 
-resource "google_storage_bucket" "logging_bucket" {
-  project                     = local.project_id
-  name                        = "bkt-logging-${random_string.prefix.result}"
-  uniform_bucket_level_access = true
-  location                    = "us"
-  force_destroy               = true
+module "logging_bucket" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 10.0"
+
+  name          = "bkt-logging-${random_string.prefix.result}"
+  project_id    = local.project_id
+  location      = "us-central1"
+  force_destroy = true
+
+  versioning = true
+  encryption = { default_kms_key_name = module.kms.keys["key"] }
+
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [
+  #   {
+  #     role   = "roles/storage.admin"
+  #     member = "serviceAccount:${google_service_account.gitlab_vm.email}"
+  #   },
+  #   {
+  #     role   = "roles/storage.admin"
+  #     member = "serviceAccount:${google_service_account.int_test[local.index].email}"
+  #   }
+  # ]
+}
+
+resource "google_storage_bucket_iam_member" "logging_storage_admin" {
+  for_each = { "admin_gl" : google_service_account.gitlab_vm.member, "admin_ci" : google_service_account.int_test[local.index].member }
+  bucket   = module.logging_bucket.name
+  role     = "roles/storage.admin"
+  member   = each.value
+}
+
+
+data "google_storage_project_service_account" "ci_gcs_account" {
+  project = local.project_id
+}
+
+data "google_storage_project_service_account" "gitlab_gcs_account" {
+  project = module.gitlab_project.project_id
+}
+
+module "kms" {
+  source  = "terraform-google-modules/kms/google"
+  version = "~> 4.0"
+
+  project_id     = local.project_id
+  location       = "us-central1"
+  keyring        = "kms-storage-buckets"
+  keys           = ["key"]
+  set_owners_for = ["key"]
+  owners = [
+    google_service_account.int_test[local.index].member
+  ]
+  set_encrypters_for = ["key"]
+  encrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}"]
+  set_decrypters_for = ["key"]
+  decrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}"]
+  prevent_destroy    = false
 }

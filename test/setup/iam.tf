@@ -121,6 +121,18 @@ resource "google_service_account_key" "int_test" {
   service_account_id = google_service_account.int_test[local.index].id
 }
 
+resource "google_service_account_iam_member" "service_account_token_creator" {
+  service_account_id = google_service_account.int_test[local.index].name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${var.cloud_build_sa}"
+}
+
+resource "google_service_account_iam_member" "service_account_user" {
+  service_account_id = google_service_account.int_test[local.index].name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${var.cloud_build_sa}"
+}
+
 resource "google_billing_account_iam_member" "tf_billing_user" {
   billing_account_id = var.billing_account
   role               = "roles/billing.admin"

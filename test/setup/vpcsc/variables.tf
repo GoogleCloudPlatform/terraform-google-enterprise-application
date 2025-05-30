@@ -40,6 +40,11 @@ variable "logging_bucket_project_number" {
   type        = string
 }
 
+variable "gitlab_project_number" {
+  description = "Project number where GitLab is running."
+  type        = string
+}
+
 variable "access_level_members" {
   description = "Extra access level members. serviceAccount:EMAIL@DOMAIN or user:EMAIL@DOMAIN"
   type        = list(string)
