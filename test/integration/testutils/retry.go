@@ -48,6 +48,8 @@ var (
 
 		".*another operation is in progress on this scope*.": "another operation is in progress on this scope",
 
-		".*Error when reading or editing ServicePerimeterResource*": "Propagation issues.",
+		".*Error when reading or editing ServicePerimeterResource*": "Propagation issues on Service Perimeter.",
+
+		".*Error when reading or editing AccessLevelCondition*": "Propagation issues on Access Level.",
 	}
 )
