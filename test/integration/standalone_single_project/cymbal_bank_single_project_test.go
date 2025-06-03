@@ -42,6 +42,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 	gitlabPersonalTokenSecretName := setupOutput.GetTFSetupStringOutput("gitlab_pat_secret_name")
 	gitlabSecretProject := setupOutput.GetTFSetupStringOutput("gitlab_secret_project")
 
+	singleProjectType := os.Getenv("single_project_example_type")
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
@@ -51,6 +52,11 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
 	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
+
+	if singleProjectType == "CONFIDENTIAL_NODES" {
+		standaloneSingleProj = tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project_confidential_nodes"))
+	}
+
 	envName := standaloneSingleProj.GetStringOutput("env")
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
+	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
@@ -29,7 +30,11 @@ func TestAppE2ECymbalBankSingleProject(t *testing.T) {
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t)
 	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	singleProjectType := os.Getenv("single_project_example_type")
 	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
+	if singleProjectType == "CONFIDENTIAL_NODES" {
+		standaloneSingleProj = tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project_confidential_nodes"))
+	}
 	t.Run("End to end tests Single project", func(t *testing.T) {
 		jar, err := cookiejar.New(nil)
 		if err != nil {
