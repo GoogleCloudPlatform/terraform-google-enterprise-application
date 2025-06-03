@@ -51,5 +51,7 @@ var (
 		".*Error when reading or editing ServicePerimeterResource*": "Propagation issues on Service Perimeter.",
 
 		".*Error when reading or editing AccessLevelCondition*": "Propagation issues on Access Level.",
+
+		".*Error 400: The email address 'service-*@*.iam.gserviceaccount.com' is invalid or non-existent*": "Service Agent propagation.",
 	}
 )
