@@ -40,7 +40,7 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
   }
 
   execution_configs {
-    artifact_storage = "gs://${google_storage_bucket.delivery_artifacts[split("-", each.value)[length(split("-", each.value)) - 1]].name}"
+    artifact_storage = "gs://${module.delivery_artifacts[split("-", each.value)[length(split("-", each.value)) - 1]].name}"
     service_account  = google_service_account.cloud_deploy.email
     worker_pool      = var.workerpool_id
     usages = [
@@ -49,33 +49,42 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
     ]
   }
 
-  depends_on = [google_storage_bucket.delivery_artifacts]
+  depends_on = [module.delivery_artifacts]
 }
 
 # GCS bucket used by Cloud Deploy for delivery artifact storage
-resource "google_storage_bucket" "delivery_artifacts" {
+module "delivery_artifacts" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 10.0"
+
   for_each = var.env_cluster_membership_ids
 
-  project                     = var.project_id
-  name                        = "artifacts-${each.key}-${data.google_project.project.number}-${var.service_name}"
-  uniform_bucket_level_access = true
-  location                    = regex(local.membership_re, each.value.cluster_membership_ids[0])[1]
-  force_destroy               = var.buckets_force_destroy
-  logging {
-    log_bucket        = var.logging_bucket
-    log_object_prefix = "ar-${each.key}-${var.service_name}"
-  }
-  versioning {
-    enabled = true
-  }
+  name              = "artifacts-${each.key}-${data.google_project.project.number}-${var.service_name}"
+  project_id        = var.project_id
+  location          = regex(local.membership_re, each.value.cluster_membership_ids[0])[1]
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "ar-${each.key}-${var.service_name}"
+  force_destroy     = var.buckets_force_destroy
+
+  public_access_prevention = "enforced"
+
+  versioning = true
+  encryption = { default_kms_key_name = var.bucket_kms_key }
+
+
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [{
+  #   role   = "roles/storage.admin"
+  #   member = google_service_account.cloud_deploy.member
+  # }]
+
+  depends_on = [time_sleep.wait_cmek_iam_propagation]
 }
 
-# give CloudDeploy SA access to administrate to delivery artifact bucket
-resource "google_storage_bucket_iam_member" "delivery_artifacts" {
+resource "google_storage_bucket_iam_member" "delivery_artifacts_storage_admin" {
   for_each = var.env_cluster_membership_ids
-
-  bucket = google_storage_bucket.delivery_artifacts[each.key].name
-
-  member = "serviceAccount:${google_service_account.cloud_deploy.email}"
-  role   = "roles/storage.admin"
+  bucket   = module.delivery_artifacts[each.key].name
+  role     = "roles/storage.admin"
+  member   = google_service_account.cloud_deploy.member
 }

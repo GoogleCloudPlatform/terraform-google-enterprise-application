@@ -55,6 +55,7 @@ module "project" {
     "accesscontextmanager.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "iam.googleapis.com",

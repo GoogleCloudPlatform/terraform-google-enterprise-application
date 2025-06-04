@@ -70,6 +70,7 @@ module "project_standalone" {
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudtrace.googleapis.com",
     "compute.googleapis.com",

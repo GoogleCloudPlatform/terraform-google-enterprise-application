@@ -50,4 +50,11 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
     google_project_service_identity.cloudbuild_service_identity.member,
     google_project_service_identity.cloud_deploy_sa.member,
   ]
+
+  depends_on = [
+    google_service_account.cloud_deploy,
+    google_service_account.cloud_build,
+    google_project_service_identity.cloudbuild_service_identity,
+    google_project_service_identity.cloud_deploy_sa
+  ]
 }

@@ -65,6 +65,90 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   }
 }
 
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "admin_to_kms_egress_policy" {
+  count     = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null && var.create_admin_project && var.kms_project_id != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "KMS Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.kms_project[0].project_id}"
+  egress_from {
+    identities = ["serviceAccount:service-${module.app_admin_project[0].project_number}@gs-project-accounts.iam.gserviceaccount.com"]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.kms_project[0].number}"]
+    operations {
+      service_name = "cloudkms.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "admin_to_kms_egress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_admin_project && var.kms_project_id != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "KMS Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.kms_project[0].project_id}"
+  egress_from {
+    identities = ["serviceAccount:service-${module.app_admin_project[0].project_number}@gs-project-accounts.iam.gserviceaccount.com"]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.kms_project[0].number}"]
+    operations {
+      service_name = "cloudkms.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "env_to_kms_egress_policy" {
+  for_each  = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
+  perimeter = var.service_perimeter_name
+  title     = "KMS Egress from ${each.value.project} to ${data.google_project.kms_project[0].project_id}"
+  egress_from {
+    identities = [each.value.member]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.kms_project[0].number}"]
+    operations {
+      service_name = "cloudkms.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "env_to_kms_egress_policy" {
+  for_each  = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
+  perimeter = var.service_perimeter_name
+  title     = "KMS Egress from ${each.value.project} to ${data.google_project.kms_project[0].project_id}"
+  egress_from {
+    identities = [each.value.member]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.kms_project[0].number}"]
+    operations {
+      service_name = "cloudkms.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "google_access_context_manager_service_perimeter_egress_policy" "cloudbuild_egress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name

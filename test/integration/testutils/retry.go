@@ -47,5 +47,11 @@ var (
 		".*Error: Error waiting to create Repository: Error waiting for Creating Repository: Error code 3, message: Request contains an invalid argument.*.": "Invalid Argument on Artifact Registry Creation",
 
 		".*another operation is in progress on this scope*.": "another operation is in progress on this scope",
+
+		".*Error when reading or editing ServicePerimeterResource*": "Propagation issues on Service Perimeter.",
+
+		".*Error when reading or editing AccessLevelCondition*": "Propagation issues on Access Level.",
+
+		".*Error 400: The email address 'service-*@*.iam.gserviceaccount.com' is invalid or non-existent*": "Service Agent propagation.",
 	}
 )

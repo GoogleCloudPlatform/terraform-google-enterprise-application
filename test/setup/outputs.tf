@@ -99,5 +99,13 @@ output "single_project" {
 }
 
 output "logging_bucket" {
-  value = google_storage_bucket.logging_bucket.name
+  value = module.logging_bucket.name
+}
+
+output "bucket_kms_key" {
+  value = module.kms.keys["key"]
+}
+
+output "kms_bucket_keyring" {
+  value = module.kms.keyring
 }
