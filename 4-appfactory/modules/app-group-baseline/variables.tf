@@ -232,6 +232,12 @@ variable "access_level_name" {
   default     = null
 }
 
+variable "kms_project_id" {
+  description = "Custom KMS Key project to be granted KMS Admin to the Cloud Build service account."
+  type        = string
+  default     = null
+}
+
 variable "service_perimeter_mode" {
   description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string

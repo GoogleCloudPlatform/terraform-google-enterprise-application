@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-resource "google_storage_bucket" "stocks_data" {
-  name          = "${var.infra_project}-stocks-historical-data"
-  project       = var.infra_project
-  location      = var.region
+module "stocks_data" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 10.0"
+
+  name              = "${var.infra_project}-stocks-historical-data"
+  project_id        = var.infra_project
+  location          = var.region
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "stocks-${var.infra_project}"
+
   force_destroy = var.bucket_force_destroy
 
-  public_access_prevention    = "enforced"
-  uniform_bucket_level_access = true
+  public_access_prevention = "enforced"
 
-  logging {
-    log_bucket        = var.logging_bucket
-    log_object_prefix = "stocks-${var.infra_project}"
-  }
-  versioning {
-    enabled = true
-  }
+  versioning = true
+  encryption = { default_kms_key_name = var.bucket_kms_key }
+
+  depends_on = [time_sleep.wait_cmek_iam_propagation]
 }
+

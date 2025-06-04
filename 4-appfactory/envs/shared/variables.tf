@@ -174,6 +174,12 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
+variable "kms_project_id" {
+  description = "Custom KMS Key project to be granted KMS Admin to the Cloud Build service account."
+  type        = string
+  default     = null
+}
+
 variable "access_level_name" {
   description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
   type        = string
@@ -195,4 +201,15 @@ variable "service_perimeter_mode" {
     condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
     error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
   }
+}
+
+variable "infra_project_apis" {
+  type        = list(string)
+  description = "List of APIs to enable for environment-specific application infra projects"
+  default = [
+    "iam.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "serviceusage.googleapis.com",
+    "cloudbilling.googleapis.com",
+  ]
 }
