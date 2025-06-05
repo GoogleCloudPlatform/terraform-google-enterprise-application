@@ -41,14 +41,11 @@ module "multitenant_infra" {
   cluster_type           = "AUTOPILOT"
   create_cluster_project = false
   # ignore below vars because we are reusing an existing project
-  org_id                 = null
-  folder_id              = null
-  billing_account        = null
-  service_perimeter_name = var.service_perimeter_name
-  service_perimeter_mode = var.service_perimeter_mode
-  deletion_protection    = false
-
-  depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy
-  ]
+  org_id                    = null
+  folder_id                 = null
+  billing_account           = null
+  service_perimeter_name    = var.service_perimeter_name
+  service_perimeter_mode    = var.service_perimeter_mode
+  deletion_protection       = false
+  enable_confidential_nodes = true
 }

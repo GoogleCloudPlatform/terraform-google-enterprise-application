@@ -62,3 +62,9 @@ variable "service_perimeter_mode" {
     error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
   }
 }
+
+variable "deletion_protection" {
+  type        = bool
+  description = "Whether or not to allow Terraform to destroy the cluster."
+  default     = true
+}

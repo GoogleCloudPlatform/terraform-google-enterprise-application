@@ -32,8 +32,6 @@ steps:
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestValidateStartupScript --stage verify --verbose"]
-    waitFor:
-      - prepare
 
   - id: bootstrap-gitlab-vm
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -41,15 +39,13 @@ steps:
     args:
       - "-c"
       - |-
-        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates --impersonate-service-account=$(terraform -chdir=/workspace/test/setup output -raw sa_email)
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
         update-ca-certificates
         if (ls /etc/ssl/certs | grep gitlab.pem); then
             cft test run TestBootstrapGitlabVM --stage verify --verbose || exit 1
         else
             echo ERROR: Was not able to download certificate and update system bundle. && exit 1
         fi
-    waitFor:
-      - wait-startup-script
 
   - id: vpc-sc
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -63,59 +59,40 @@ steps:
       - "TF_VAR_org_id=$_ORG_ID"
       - "access_level_members=serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
 
-  - id: single-project-init
+  - id: single-project-confidential-nodes-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage init --verbose",
+        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage init --verbose",
       ]
 
-  - id: single-project-apply
+  - id: single-project-confidential-nodes-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage apply --verbose",
+        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage apply --verbose",
       ]
 
-  - id: single-project-verify
+  - id: single-project-confidential-nodes-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage verify --verbose || (cft test run TestStandaloneSingleProjectExample --stage apply --verbose && cft test run TestStandaloneSingleProjectExample --stage verify --verbose)",
+        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose || (cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage apply --verbose && cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose)",
       ]
 
-  - id: single-project-app-deployment
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |-
-        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
-        update-ca-certificates
-        if (ls /etc/ssl/certs | grep gitlab.pem); then
-            cft test run TestSingleProjectSourceCymbalBank --stage verify --verbose || exit 1
-        else
-            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
-        fi
-
-  - id: app-single-project-e2e
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestAppE2ECymbalBankSingleProject --stage verify --verbose"]
-
-  - id: single-project-teardown
+  - id: single-project-confidential-nodes-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage teardown --verbose",
+        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage teardown --verbose",
       ]
 
   - id: vpcsc-teardown
@@ -126,8 +103,6 @@ steps:
         "-c",
         "cft test run TestVPCSC  --stage teardown --verbose",
       ]
-    waitFor:
-      - single-project-teardown
 
 tags:
   - "ci"
@@ -143,3 +118,4 @@ options:
     - "TF_VAR_service_perimeter_mode=ENFORCE"
     - "TF_VAR_deletion_protection=false"
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
+    - "single_project_example_type=CONFIDENTIAL_NODES"
