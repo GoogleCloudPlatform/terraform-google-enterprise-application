@@ -52,6 +52,8 @@ resource "google_cloudbuild_trigger" "ci" {
       _CACHE                     = local.cache_filename
       _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
       _WORKER_POOL               = var.workerpool_id
+      _ATTESTOR_NAME             = var.attestor_name
+      _KMS_KEY_VERSION           = data.google_kms_crypto_key_version.version.id
     },
     var.additional_substitutions, local.optional_worker_pool
   )
@@ -63,4 +65,8 @@ resource "google_project_iam_member" "pool_user" {
   project = local.worker_pool_project
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+data "google_kms_crypto_key_version" "version" {
+  crypto_key = var.attestation_kms_key
 }

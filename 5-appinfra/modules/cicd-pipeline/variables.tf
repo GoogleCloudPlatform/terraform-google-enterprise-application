@@ -169,3 +169,13 @@ variable "bucket_kms_key" {
   type        = string
   default     = null
 }
+
+variable "attestation_kms_key" {
+  type        = string
+  description = "The KMS Key ID to be used by attestor in format projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/KMS_KEYRING_NAME/cryptoKeys/KMS_KEY_NAME/cryptoKeyVersions/KMS_KEY_VERSION."
+}
+
+variable "attestor_name" {
+  type        = string
+  description = "The attestor name in format projects/PROJECT_ID/attestors/ATTESTOR_NAME."
+}

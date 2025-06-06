@@ -103,9 +103,13 @@ output "logging_bucket" {
 }
 
 output "bucket_kms_key" {
-  value = module.kms.keys["key"]
+  value = module.kms.keys["bucket"]
 }
 
-output "kms_bucket_keyring" {
+output "attestation_kms_key" {
+  value = module.kms.keys["attestation"]
+}
+
+output "kms_keyring" {
   value = module.kms.keyring
 }

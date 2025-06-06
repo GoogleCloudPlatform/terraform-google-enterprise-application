@@ -85,23 +85,26 @@ module "eab_cluster_project" {
   disable_services_on_destroy = false
 
   activate_apis = [
+    "anthos.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "cloudtrace.googleapis.com",
     "compute.googleapis.com",
-    "iam.googleapis.com",
-    "serviceusage.googleapis.com",
     "container.googleapis.com",
-    "mesh.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "containerscanning.googleapis.com",
     "gkehub.googleapis.com",
-    "anthos.googleapis.com",
+    "iam.googleapis.com",
+    "mesh.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
-    "trafficdirector.googleapis.com",
-    "anthosconfigmanagement.googleapis.com",
     "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudtrace.googleapis.com"
+    "trafficdirector.googleapis.com",
   ]
 }
 
@@ -289,6 +292,7 @@ module "gke-autopilot" {
   ip_range_services   = each.value.secondary_ip_range[1].range_name
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
+
 
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   enable_cost_allocation              = true

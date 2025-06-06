@@ -60,13 +60,13 @@ module "project" {
     "compute.googleapis.com",
     "iam.googleapis.com",
     "orgpolicy.googleapis.com",
+    "servicedirectory.googleapis.com",
     "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "storage-api.googleapis.com",
-    "servicedirectory.googleapis.com",
   ]
 
   activate_api_identities = [
@@ -153,8 +153,8 @@ module "vpc_project" {
     "compute.googleapis.com",
     "container.googleapis.com",
     "iam.googleapis.com",
-    "serviceusage.googleapis.com",
     "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
   ]
 }
 

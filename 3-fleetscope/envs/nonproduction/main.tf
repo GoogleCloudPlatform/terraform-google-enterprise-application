@@ -39,5 +39,7 @@ module "env" {
   config_sync_branch         = var.config_sync_branch
   config_sync_policy_dir     = var.config_sync_policy_dir
 
+  attestation_kms_key = var.attestation_kms_key
+
   disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

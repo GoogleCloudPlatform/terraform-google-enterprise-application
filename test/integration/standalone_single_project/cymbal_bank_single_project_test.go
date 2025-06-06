@@ -125,7 +125,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+				gitAppRun("clone", "--branch", "v0.6.7", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")

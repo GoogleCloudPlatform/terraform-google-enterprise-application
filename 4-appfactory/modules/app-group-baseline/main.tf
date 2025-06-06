@@ -116,14 +116,14 @@ module "app_admin_project" {
   default_service_account  = "KEEP"
   activate_apis = [
     "apikeys.googleapis.com",
-    "iam.googleapis.com",
-    "compute.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "iam.googleapis.com",
     "secretmanager.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",

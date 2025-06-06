@@ -75,7 +75,7 @@ module "logging_bucket" {
   force_destroy = true
 
   versioning = true
-  encryption = { default_kms_key_name = module.kms.keys["key"] }
+  encryption = { default_kms_key_name = module.kms.keys["bucket"] }
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
   # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
@@ -113,15 +113,22 @@ module "kms" {
 
   project_id     = local.project_id
   location       = "us-central1"
-  keyring        = "kms-storage-buckets"
-  keys           = ["key"]
-  set_owners_for = ["key"]
+  keyring        = "kms-general"
+  keys           = ["bucket", "attestation"]
+  set_owners_for = ["bucket", "attestation"]
   owners = [
-    google_service_account.int_test[local.index].member
+    google_service_account.int_test[local.index].member,
+    google_service_account.int_test[local.index].member,
   ]
-  set_encrypters_for = ["key"]
-  encrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}"]
-  set_decrypters_for = ["key"]
-  decrypters         = ["${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}"]
-  prevent_destroy    = false
+  set_encrypters_for = ["bucket", "attestation"]
+  encrypters = [
+    "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
+  ]
+  set_decrypters_for = ["bucket", "attestation"]
+  decrypters = [
+    "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
+  ]
+  prevent_destroy = false
 }
