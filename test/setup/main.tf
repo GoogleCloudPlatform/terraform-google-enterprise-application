@@ -113,21 +113,44 @@ module "kms" {
 
   project_id     = local.project_id
   location       = "us-central1"
-  keyring        = "kms-general"
-  keys           = ["bucket", "attestation"]
-  set_owners_for = ["bucket", "attestation"]
+  keyring        = "kms-bucket-encryption"
+  keys           = ["bucket"]
+  set_owners_for = ["bucket"]
   owners = [
     google_service_account.int_test[local.index].member,
-    google_service_account.int_test[local.index].member,
   ]
-  set_encrypters_for = ["bucket", "attestation"]
+  set_encrypters_for = ["bucket"]
   encrypters = [
     "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
-    "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
   ]
-  set_decrypters_for = ["bucket", "attestation"]
+  set_decrypters_for = ["bucket"]
   decrypters = [
     "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
+  ]
+  prevent_destroy = false
+}
+
+module "kms_attestor" {
+  source  = "terraform-google-modules/kms/google"
+  version = "~> 4.0"
+
+  project_id          = local.project_id
+  location            = "us-central1"
+  keyring             = "kms-attestation-sign"
+  keys                = ["attestation"]
+  set_owners_for      = ["attestation"]
+  purpose             = "ASYMMETRIC_SIGN"
+  key_algorithm       = "RSA_SIGN_PKCS1_4096_SHA512"
+  key_rotation_period = null
+  owners = [
+    google_service_account.int_test[local.index].member,
+  ]
+  set_encrypters_for = ["attestation"]
+  encrypters = [
+    "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
+  ]
+  set_decrypters_for = ["attestation"]
+  decrypters = [
     "${data.google_storage_project_service_account.ci_gcs_account.member},${data.google_storage_project_service_account.gitlab_gcs_account.member},${google_service_account.int_test[local.index].member},serviceAccount:${var.cloud_build_sa}",
   ]
   prevent_destroy = false

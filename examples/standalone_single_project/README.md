@@ -311,6 +311,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | n/a | yes |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |

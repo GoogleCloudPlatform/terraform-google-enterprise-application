@@ -107,9 +107,13 @@ output "bucket_kms_key" {
 }
 
 output "attestation_kms_key" {
-  value = module.kms.keys["attestation"]
+  value = module.kms_attestor.keys["attestation"]
 }
 
 output "kms_keyring" {
   value = module.kms.keyring
+}
+
+output "binary_authorization_image" {
+  value = "gcr.io/${local.project_id}/binauthz-attestation:latest"
 }
