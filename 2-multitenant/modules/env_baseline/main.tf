@@ -266,6 +266,8 @@ module "gke-standard" {
   enable_private_nodes    = true
   enable_private_endpoint = true
 
+  enable_confidential_nodes = var.enable_confidential_nodes
+
   fleet_project_grant_service_agent = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
