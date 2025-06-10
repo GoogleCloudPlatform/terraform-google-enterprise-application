@@ -46,6 +46,6 @@ module "app" {
   bucket_kms_key    = var.bucket_kms_key
 
   attestation_kms_key        = contains(var.environment_names, "production") ? var.attestation_kms_key : ""
-  attestor_id                = contains(var.environment_names, "production") ? module.fleetscope_infra["production"].attestor_id : ""
+  attestor_id                = contains(var.environment_names, "production") ? data.terraform_remote_state.fleetscope["production"].outputs.attestor_id : ""
   binary_authorization_image = contains(var.environment_names, "production") ? var.binary_authorization_image : ""
 }
