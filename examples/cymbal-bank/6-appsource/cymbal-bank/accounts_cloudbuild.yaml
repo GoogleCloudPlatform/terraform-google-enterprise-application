@@ -11,20 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 steps:
   - name: gcr.io/cloud-builders/gsutil
+    id: download-skaffold-cache
     args: ['cp', $_CACHE_URI, '/workspace/cache'] # always write skaffold cache to filename cache in workspace
   - name: gcr.io/k8s-skaffold/skaffold:v2.10.1
+    id: build-and-push-images
     args:
       - "skaffold"
       - "build"
       - "--file-output=/workspace/artifacts.json"
       - "--default-repo=$_CONTAINER_REGISTRY"
       - "--cache-file=/workspace/$_CACHE" # set _CACHE to anything other than "cache" e.g. "no-cache" to reset skaffold cache
-      - "--module=$_TEAM"
+      - "--module=$_SERVICE"
   - name: gcr.io/cloud-builders/gsutil
+    id: upload-skaffold-cache
     args: ['cp', '/workspace/$_CACHE',  $_CACHE_URI]
   - name: gcr.io/k8s-skaffold/skaffold:v2.10.1 # python set up should be baked into a custom builder image to speed up build times
+    id: run-tests
     script: |
       #!/bin/bash
       apt-get update
@@ -33,16 +38,17 @@ steps:
       . $HOME/venv-python-tests/bin/activate
       pip install --upgrade pip
       pip install pylint
-      cd /workspace/src/$TEAM
-      skaffold test --build-artifacts=/workspace/artifacts.json --assume-yes
+      skaffold test --build-artifacts=/workspace/artifacts.json --module=$SERVICE --assume-yes
     env:
       - 'TEAM=$_TEAM'
+      - 'SERVICE=$_SERVICE'
   - name: gcr.io/cloud-builders/gcloud
+    id: trigger-release
     args:
       - "deploy"
       - "releases"
       - "create"
-      - "$_TEAM-$SHORT_SHA-$$DATE-$$TIME"
+      - "$_SERVICE-$SHORT_SHA"
       - "--delivery-pipeline=$_SERVICE"
       - "--build-artifacts=/workspace/artifacts.json"
       - "--skaffold-file=src/$_TEAM/$_SERVICE/skaffold.yaml"
@@ -51,4 +57,4 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
   pool:
-    name: $_WORKER_POOL
+    name: '${_PRIVATE_POOL}'
