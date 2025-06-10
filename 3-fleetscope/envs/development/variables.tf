@@ -57,4 +57,5 @@ variable "config_sync_branch" {
 variable "attestation_kms_key" {
   type        = string
   description = "The KMS Key ID to be used by attestor."
+  default     = ""
 }

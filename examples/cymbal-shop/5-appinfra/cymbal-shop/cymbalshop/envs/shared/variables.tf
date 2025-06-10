@@ -111,3 +111,13 @@ variable "bucket_kms_key" {
   type        = string
   default     = null
 }
+
+variable "attestation_kms_key" {
+  type        = string
+  description = "The KMS Key ID to be used by attestor."
+}
+
+variable "binary_authorization_image" {
+  type        = string
+  description = "The Binary Authorization image to be used to create attestation."
+}

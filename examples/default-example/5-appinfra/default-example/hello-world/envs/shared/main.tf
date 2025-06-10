@@ -44,4 +44,8 @@ module "app" {
   access_level_name = var.access_level_name
   logging_bucket    = var.logging_bucket
   bucket_kms_key    = var.bucket_kms_key
+
+  attestation_kms_key        = contains(var.environment_names, "production") ? var.attestation_kms_key : ""
+  attestor_id                = contains(var.environment_names, "production") ? module.fleetscope_infra["production"].attestor_id : ""
+  binary_authorization_image = contains(var.environment_names, "production") ? var.binary_authorization_image : ""
 }

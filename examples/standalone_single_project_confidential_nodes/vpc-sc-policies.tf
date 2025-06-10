@@ -100,6 +100,12 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "servic
         method = "SubnetworksService.Get"
       }
     }
+    operations {
+      service_name = "binaryauthorization.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
 }
 
