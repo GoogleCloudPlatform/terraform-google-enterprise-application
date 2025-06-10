@@ -22,7 +22,7 @@ fi
 
 # Technique from https://stackoverflow.com/a/11682266
 # Use a Python script to parse the arguments to this bash script, then returns them to be parsed as an array
-OUTPUT=$(python3 /work/parse_arguments.py $@)
+OUTPUT=$(python3 /work/parse_arguments.py "$@")
 declare -A args="($OUTPUT)"
 
 docker pull "${args[artifact_url]}"
@@ -45,8 +45,8 @@ if [ -n "${args[pgp_key_fingerprint]}" ]; then
         COMMON_FLAGS="--no-tty --pinentry-mode loopback --passphrase ${PGP_SECRET_KEY_PASSPHRASE}"
     fi
 
-    echo -n "$PGP_SECRET_KEY" | gpg2 $COMMON_FLAGS --import
-    gpg2 $COMMON_FLAGS --output generated_signature.pgp --local-user "${args[pgp_key_fingerprint]}" --armor --sign binauthz_signature_payload.json
+    echo -n "$PGP_SECRET_KEY" | gpg2 "$COMMON_FLAGS" --import
+    gpg2 "$COMMON_FLAGS" --output generated_signature.pgp --local-user "${args[pgp_key_fingerprint]}" --armor --sign binauthz_signature_payload.json
     gcloud container binauthz attestations create \
         --artifact-url="$IMAGE_AND_DIGEST" \
         --attestor="${args[attestor]}" \

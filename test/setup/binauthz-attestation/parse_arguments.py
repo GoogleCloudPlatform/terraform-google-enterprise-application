@@ -12,10 +12,10 @@ import sys
 # Source: https://stackoverflow.com/a/4042861/862857
 class CustomParser(argparse.ArgumentParser):
 
-  def error(self, message):
-    print('{}: error: {}'.format(self.prog, message), file=sys.stderr)
-    self.print_help()
-    sys.exit(1)
+    def error(self, message):
+        print('{}: error: {}'.format(self.prog, message), file=sys.stderr)
+        self.print_help()
+        sys.exit(1)
 
 
 parser = CustomParser(prog='create_binauthz_attestation')
@@ -67,18 +67,18 @@ args = parser.parse_args()
 
 # Validate and parse attestor resource flags.
 if '/' not in args.attestor:
-  if not args.attestor_project:
-    parser.error('The --attestor-project option is required if '
-                 '--attestor is not a fully qualified '
-                 'Attestor resource identifier')
-  else:
-    args.attestor = 'projects/{project}/attestors/{attestor}'.format(
-        project=args.attestor_project, attestor=args.attestor)
+    if not args.attestor_project:
+        parser.error('The --attestor-project option is required if '
+                    '--attestor is not a fully qualified '
+                    'Attestor resource identifier')
+    else:
+        args.attestor = 'projects/{project}/attestors/{attestor}'.format(
+            project=args.attestor_project, attestor=args.attestor)
 
 attestor_regex = re.compile(r'^projects/[a-z0-9-]*/attestors/[a-zA-Z0-9-_]*$')
 if not attestor_regex.search(args.attestor):
-  parser.error('Attestor "{attestor}" is not '
-               'a valid attestor name'.format(attestor=args.attestor))
+    parser.error('Attestor "{attestor}" is not '
+                    'a valid attestor name'.format(attestor=args.attestor))
 
 # Enforce mutual exclusion of key flag types.
 keyversion_args = [
@@ -87,40 +87,40 @@ keyversion_args = [
 ]
 
 if args.pgp_key_fingerprint and any(keyversion_args):
-  parser.error('You cannot set --pgp-key-fingerprint and --keyversion related'
-               ' options at the same time.')
+    parser.error('You cannot set --pgp-key-fingerprint and --keyversion related'
+                ' options at the same time.')
 if not args.pgp_key_fingerprint and not any(keyversion_args):
-  parser.error('Either --pgp-key-fingerprint or --keyversion related'
-               ' options must be set.')
+    parser.error('Either --pgp-key-fingerprint or --keyversion related'
+                ' options must be set.')
 
 # Validate and parse keyversion resource flags.
 if args.keyversion is not None and '/' not in args.keyversion:
-  if not all(keyversion_args):
-    parser.error(
-        'The --keyversion-key, --keyversion-keyring, --keyversion-location, '
-        'and --keyversion-project options are required if --keyversion '
-        'is not a fully qualified KMS key resource identifier.')
-  else:
-    args.keyversion = (
-        'projects/{project}/locations/{location}/keyRings/{keyRing}/'
-        'cryptoKeys/{cryptoKey}/cryptoKeyVersions/{keyversion}').format(
-            project=args.keyversion_project,
-            location=args.keyversion_location,
-            keyRing=args.keyversion_keyring,
-            cryptoKey=args.keyversion_key,
-            keyversion=args.keyversion)
+    if not all(keyversion_args):
+        parser.error(
+            'The --keyversion-key, --keyversion-keyring, --keyversion-location, '
+            'and --keyversion-project options are required if --keyversion '
+            'is not a fully qualified KMS key resource identifier.')
+    else:
+        args.keyversion = (
+            'projects/{project}/locations/{location}/keyRings/{keyRing}/'
+            'cryptoKeys/{cryptoKey}/cryptoKeyVersions/{keyversion}').format(
+                project=args.keyversion_project,
+                location=args.keyversion_location,
+                keyRing=args.keyversion_keyring,
+                cryptoKey=args.keyversion_key,
+                keyversion=args.keyversion)
 
 keyversion_regex = re.compile(r'^projects/[a-z0-9-]*/locations/[a-z0-9-]*'
                               r'/keyRings/[a-zA-Z0-9-_]*/cryptoKeys/'
                               r'[a-zA-Z0-9-_]*/cryptoKeyVersions/[1-9][0-9]*$')
 
 if args.keyversion is not None and not keyversion_regex.search(args.keyversion):
-  parser.error('"{}" is not a valid fully qualified KMS key identifier.'.format(
-      args.keyversion))
+    parser.error('"{}" is not a valid fully qualified KMS key identifier.'.format(
+        args.keyversion))
 
 arguments_list = []
 for arg_name, value in args.__dict__.items():
-  arguments_list.append('[{name}]="{value}"'.format(
-      name=arg_name, value=value or ''))
+    arguments_list.append('[{name}]="{value}"'.format(
+        name=arg_name, value=value or ''))
 
 print('\n'.join(arguments_list))
