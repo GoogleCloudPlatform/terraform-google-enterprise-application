@@ -14,26 +14,11 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5, < 7"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
-
-    null = {
-      source  = "hashicorp/null"
-      version = ">= 3.2.0"
-    }
-  }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-example/v0.3.0"
-  }
+project_id = "<YOUR-PROJECT-ID>"
+network_id = "<YOUR-NETWORK-ID>"
+subnetwork_self_link = "<YOUR-CLUSTER-SUBNETWORK-SELF-LINK>"
+teams = {
+  "namespace" = "your-group@yourdomain.com",
 }
+service_perimeter_name = "<YOUR-SERVICE-PERIMETER-NAME>"
+service_perimeter_mode = "DRY_RUN"

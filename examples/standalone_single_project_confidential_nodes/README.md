@@ -1,5 +1,5 @@
-# Standalone Single-Project Example
-The Standalone Single Project Example deploys the core Enterprise Application Blueprint into a single project for the purposes of simplified demonstration.
+# Standalone Single-Project Confidential Nodes Example
+The Standalone Single Project Confidential Nodes Example deploys the core Enterprise Application Blueprint into a single project for the purposes of simplified demonstration. This examples uses the same infrastructure from Standalone Single Project Example, the main difference is the Confidential Nodes being enabled in the cluster.
 
 **Do not use this example for production deployments, as it lacks robust separation of duties and least-privileged permissions present in the standard multi-stage deployment.**
 
@@ -98,7 +98,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 1. Enter at Single Project example folder:
 
     ```bash
-    cd terraform-google-enterprise-application/examples/standalone_single_project
+    cd terraform-google-enterprise-application/examples/standalone_single_project_confidential_nodes
     ```
 
 1. Update `terraform.tfvars`.
