@@ -16,6 +16,6 @@
 
 | Name | Description |
 |------|-------------|
-| attestor\_name | Attestor name. |
+| attestor\_id | Attestor ID. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -35,7 +35,7 @@ The following resources are created:
 
 | Name | Description |
 |------|-------------|
-| attestor\_name | Attestor name. |
+| attestor\_id | Attestor ID. |
 | cluster\_service\_accounts | Cluster Service Accounts |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -25,7 +25,7 @@ module "build_terraform_image" {
 
   create_cmd_triggers = {
     "tag_version" = "v1"
-    "cmd_prompt" = local.cmd_prompt
+    "cmd_prompt"  = local.cmd_prompt
   }
 
   create_cmd_entrypoint = "bash"

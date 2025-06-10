@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-output "attestor_name" {
-  description = "Attestor name."
-  value       = module.env.attestor_name
+output "attestor_id" {
+  description = "Attestor ID."
+  value       = module.env.attestor_id
 }

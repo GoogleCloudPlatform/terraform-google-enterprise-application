@@ -52,8 +52,9 @@ resource "google_cloudbuild_trigger" "ci" {
       _CACHE                     = local.cache_filename
       _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
       _WORKER_POOL               = var.workerpool_id
-      _ATTESTOR_NAME             = var.attestor_name
-      _KMS_KEY_VERSION           = data.google_kms_crypto_key_version.version.id
+      _ATTESTOR_ID               = var.attestor_id
+      _KMS_KEY_VERSION           = data.google_kms_crypto_key_version.version.name
+      _BINARY_AUTH_IMAGE         = var.binary_authorization_image
     },
     var.additional_substitutions, local.optional_worker_pool
   )

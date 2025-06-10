@@ -19,7 +19,7 @@ output "cluster_service_accounts" {
   value       = var.cluster_service_accounts
 }
 
-output "attestor_name" {
-  description = "Attestor name."
-  value       = google_binary_authorization_attestor.attestor.name
+output "attestor_id" {
+  description = "Attestor ID."
+  value       = google_binary_authorization_attestor.attestor.id
 }
