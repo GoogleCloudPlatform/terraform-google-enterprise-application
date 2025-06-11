@@ -192,6 +192,12 @@ variable "bucket_kms_key" {
   default     = null
 }
 
+variable "attestation_kms_project" {
+  description = "KMS Key project where the key for attestation is stored."
+  type        = string
+  default     = null
+}
+
 variable "org_id" {
   description = "Organization ID"
   type        = string

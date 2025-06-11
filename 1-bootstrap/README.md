@@ -292,6 +292,7 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
+| attestation\_kms\_project | KMS Key project where the key for attestation is stored. | `string` | `null` | no |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
 | bucket\_prefix | Name prefix to use for buckets created. | `string` | `"bkt"` | no |
