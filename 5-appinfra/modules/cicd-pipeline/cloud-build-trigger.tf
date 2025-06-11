@@ -71,3 +71,11 @@ resource "google_project_iam_member" "pool_user" {
 data "google_kms_crypto_key_version" "version" {
   crypto_key = var.attestation_kms_key
 }
+
+resource "google_binary_authorization_attestor_iam_member" "member" {
+  count    = var.attestor_id != "" ? 1 : 0
+  project  = regex("projects/([^/]*)/", var.attestor_id)[0]
+  attestor = regex("attestors/([^/]*)", var.attestor_id)[0]
+  role     = "roles/binaryauthorization.attestorsVerifier"
+  member   = google_service_account.cloud_build.member
+}
