@@ -272,6 +272,12 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "cymba
         method = "*"
       }
     }
+    operations {
+      service_name = "containeranalysis.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
@@ -336,6 +342,12 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
     }
     operations {
       service_name = "cloudkms.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "containeranalysis.googleapis.com"
       method_selectors {
         method = "*"
       }

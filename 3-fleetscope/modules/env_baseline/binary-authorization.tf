@@ -45,9 +45,9 @@ resource "google_container_analysis_note" "note" {
 resource "google_binary_authorization_policy" "policy" {
   project = var.cluster_project_id
   default_admission_rule {
-    evaluation_mode         = "REQUIRE_ATTESTATION"
+    evaluation_mode         = var.attestation_evaluation_mode
     enforcement_mode        = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-    require_attestations_by = [google_binary_authorization_attestor.attestor.name]
+    require_attestations_by = var.attestation_evaluation_mode == "REQUIRE_ATTESTATION" ? [google_binary_authorization_attestor.attestor.name] : null
   }
 
   global_policy_evaluation_mode = "ENABLE"

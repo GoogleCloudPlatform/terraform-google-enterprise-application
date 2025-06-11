@@ -156,7 +156,7 @@ module "cb-gke-project-iam-bindings" {
   for_each   = local.gke_projects
   project_id = each.value
 
-  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor", "roles/cloudbuild.workerPoolUser"]
+  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor", "roles/cloudbuild.workerPoolUser", "roles/containeranalysis.notes.attacher"]
   prefix                  = "serviceAccount"
   service_account_address = google_service_account.cloud_build.email
 }
@@ -177,7 +177,7 @@ data "google_storage_project_service_account" "gcs_account" {
   project = var.project_id
 }
 
-resource "google_kms_crypto_key_iam_member" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
   for_each = {
     "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
     "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
@@ -187,8 +187,21 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   member        = data.google_storage_project_service_account.gcs_account.member
 }
 
+resource "google_binary_authorization_attestor_iam_member" "member" {
+  project  = regex("projects/([^/]*)/", var.attestor_id)[0]
+  attestor = regex("attestors/([^/]*)", var.attestor_id)[0]
+  role     = "roles/binaryauthorization.attestorsVerifier"
+  member   = google_service_account.cloud_build.member
+}
+
+resource "google_kms_crypto_key_iam_member" "attestor_crypto_key" {
+  crypto_key_id = var.attestation_kms_key
+  role          = "roles/cloudkms.signerVerifier"
+  member        = google_service_account.cloud_build.member
+}
+
 resource "time_sleep" "wait_cmek_iam_propagation" {
   create_duration = "60s"
 
-  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.bucket_crypto_key]
 }

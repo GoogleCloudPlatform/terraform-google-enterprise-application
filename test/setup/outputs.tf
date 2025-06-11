@@ -110,6 +110,10 @@ output "attestation_kms_key" {
   value = module.kms_attestor.keys["attestation"]
 }
 
+output "attestation_kms_project" {
+  value = local.project_id
+}
+
 output "kms_keyring" {
   value = module.kms.keyring
 }
