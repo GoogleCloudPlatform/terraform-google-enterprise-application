@@ -16,6 +16,8 @@ kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: ledger-db
+  labels:
+    image-policy.k8s.io/break-glass: "true"
 spec:
   serviceName: "ledger-db"
   replicas: 1
