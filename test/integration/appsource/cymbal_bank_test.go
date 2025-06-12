@@ -180,12 +180,6 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				t.Logf("copy %s/%s_cloudbuild.yaml to %s/src/%s/cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, tmpDirApp, servicesInfoMap[serviceName].TeamName)
-				err = cp.Copy(fmt.Sprintf("%s/%s_cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName), fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
-				if err != nil {
-					t.Fatal(err)
-				}
-
 				err = cp.Copy(fmt.Sprintf("%s/%s", appSourcePath, "other-overlays/e2e.Dockerfile"), fmt.Sprintf("%s/.github/workflows/ui-tests/Dockerfile", tmpDirApp))
 				if err != nil {
 					t.Fatal(err)

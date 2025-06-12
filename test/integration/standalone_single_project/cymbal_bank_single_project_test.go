@@ -179,12 +179,6 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				t.Logf("copy %s/%s_cloudbuild.yaml to %s/src/%s/cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, tmpDirApp, servicesInfoMap[serviceName].TeamName)
-				err = cp.Copy(fmt.Sprintf("%s/%s_cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName), fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
-				if err != nil {
-					t.Fatal(err)
-				}
-
 				// Copy test-specific k8s manifests to the frontend development overlay
 				if mapPath == "frontend" {
 					err = cp.Copy("../appsource/assets/", fmt.Sprintf("%s/src/%s/k8s/overlays/development/", tmpDirApp, mapPath))
