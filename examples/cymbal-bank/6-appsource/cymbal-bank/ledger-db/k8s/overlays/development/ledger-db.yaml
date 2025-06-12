@@ -31,7 +31,7 @@ spec:
       containers:
         - name: postgres
         # TODO: pull out the version as a variable
-          image: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/ledger-db:v0.6.5@sha256:cc4fd25f301ab6d46b1312244d6931babc4c6cb66c5cb6d31d4a1adfa318a321
+          image: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/ledger-db:v0.6.7@sha256:5e7c7cada87746ceafb6db5b409ce18b849f682ae64b88b0a77b4a9c189b38c0
           ports:
             - containerPort: 5432
           envFrom:
