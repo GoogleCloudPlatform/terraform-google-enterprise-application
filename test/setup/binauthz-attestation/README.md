@@ -74,9 +74,9 @@ gcloud projects add-iam-policy-binding $PROJECT \
 
 1.  Create a key ring and a key for asymmetric signing using
     [these instructions](https://cloud.google.com/kms/docs/creating-asymmetric-keys)
-2.  Use `gcloud alpha container binauthz attestors public-keys add` to add the
+2.  Use `gcloud container binauthz attestors public-keys add` to add the
     asymmetric signing key to the Attestor
-    ([docs](https://cloud.google.com/sdk/gcloud/reference/alpha/container/binauthz/attestors/public-keys/add)).
+    ([docs](https://cloud.google.com/sdk/gcloud/reference/container/binauthz/attestors/public-keys/add)).
 3.  Add this step to your `cloudbuild.yaml` file after the step where your
     container is uploaded to GCR, replacing ATTESTOR_NAME, KEY_LOCATION,
     KEYRING_NAME, KEY_NAME, and KEY_VERSION with your own values:
