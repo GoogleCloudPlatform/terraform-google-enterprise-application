@@ -303,6 +303,20 @@ resource "google_project_iam_member" "kms_admin" {
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 
+resource "google_project_iam_member" "kms_signer_verifier" {
+  count   = var.kms_project_id != null ? 1 : 0
+  project = var.kms_project_id
+  role    = "roles/cloudkms.signerVerifier"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "attestorsAdmin" {
+  for_each = toset(var.cluster_projects_ids)
+  project  = each.value
+  role     = "roles/binaryauthorization.attestorsAdmin"
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
 resource "google_organization_iam_member" "policyAdmin_role" {
   for_each = toset(local.org_ids)
   member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
