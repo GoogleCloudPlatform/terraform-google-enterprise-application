@@ -287,7 +287,7 @@ locals {
 
   ingress_rules = contains(var.protected_projects, var.logging_bucket_project_number) ? [
     {
-      title = "Ingress from Gitlab to Single Project project"
+      title = "Ingress from Gitlab to Single Project project - kms service"
       from = {
         sources    = { resources = ["projects/${var.gitlab_project_number}"] }
         identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"] //gitlab storage identity
@@ -314,7 +314,7 @@ data "google_access_context_manager_access_policy" "policy_org" {
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version            = "~> 7.0"
+  version            = "~> 7.1"
   policy             = data.google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = var.access_level_members
@@ -323,7 +323,7 @@ module "access_level_members" {
 
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version        = "~> 7.0"
+  version        = "~> 7.1"
   policy         = data.google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"

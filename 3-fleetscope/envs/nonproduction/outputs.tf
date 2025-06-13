@@ -14,22 +14,7 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 6.6, < 7"
-    }
-
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 6.6, < 7"
-    }
-
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
-  }
+output "attestor_id" {
+  description = "Attestor ID."
+  value       = module.env.attestor_id
 }

@@ -233,7 +233,7 @@ variable "access_level_name" {
 }
 
 variable "kms_project_id" {
-  description = "Custom KMS Key project to be granted KMS Admin to the Cloud Build service account."
+  description = "Custom KMS Key project to be granted KMS Admin and KMS Signer Verifier to the Cloud Build service account."
   type        = string
   default     = null
 }

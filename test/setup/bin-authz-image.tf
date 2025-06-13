@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 6.6, < 7"
-    }
+locals {
+  cmd_prompt = "gcloud builds submit binauthz-attestation/. --config binauthz-attestation/cloudbuild.yaml  --service-account=${google_service_account.int_test[local.index].id} --gcs-log-dir=${module.logging_bucket.url} --project=${local.project_id}"
+}
 
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 6.6, < 7"
-    }
+module "build_terraform_image" {
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 3.5"
+  upgrade = false
 
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
+  create_cmd_triggers = {
+    "tag_version" = "v1"
+    "cmd_prompt"  = local.cmd_prompt
   }
+
+  create_cmd_entrypoint = "bash"
+  create_cmd_body       = "${local.cmd_prompt} || ( sleep 45 && ${local.cmd_prompt})"
 }

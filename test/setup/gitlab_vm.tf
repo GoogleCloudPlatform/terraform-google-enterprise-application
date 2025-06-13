@@ -107,7 +107,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
     }
   }
 
@@ -228,7 +228,7 @@ module "ssl_cert" {
   force_destroy     = true
 
   versioning = true
-  encryption = { default_kms_key_name = module.kms.keys["key"] }
+  encryption = { default_kms_key_name = module.kms.keys["bucket"] }
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
   # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122

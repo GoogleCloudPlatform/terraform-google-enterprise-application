@@ -116,14 +116,15 @@ module "app_admin_project" {
   default_service_account  = "KEEP"
   activate_apis = [
     "apikeys.googleapis.com",
-    "iam.googleapis.com",
-    "compute.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "iam.googleapis.com",
     "secretmanager.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
@@ -300,6 +301,20 @@ resource "google_project_iam_member" "kms_admin" {
   project = var.kms_project_id
   role    = "roles/cloudkms.admin"
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "kms_signer_verifier" {
+  count   = var.kms_project_id != null ? 1 : 0
+  project = var.kms_project_id
+  role    = "roles/cloudkms.signerVerifier"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "attestorsAdmin" {
+  for_each = toset(var.cluster_projects_ids)
+  project  = each.value
+  role     = "roles/binaryauthorization.attestorsAdmin"
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 
 resource "google_organization_iam_member" "policyAdmin_role" {

@@ -55,3 +55,14 @@ data "terraform_remote_state" "appfactory" {
     prefix = "terraform/appfactory/shared"
   }
 }
+
+data "terraform_remote_state" "fleetscope" {
+  for_each = toset(var.environment_names)
+
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/fleet_scope/${each.value}"
+  }
+}

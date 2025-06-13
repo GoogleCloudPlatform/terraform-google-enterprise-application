@@ -16,6 +16,8 @@ kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: accounts-db
+  labels:
+    image-policy.k8s.io/break-glass: "true"
 spec:
   serviceName: "accounts-db"
   replicas: 1

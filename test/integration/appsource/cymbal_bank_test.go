@@ -123,7 +123,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+				gitAppRun("clone", "--branch", "v0.6.7", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
@@ -178,12 +178,6 @@ func TestSourceCymbalBank(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-				}
-
-				t.Logf("copy %s/%s_cloudbuild.yaml to %s/src/%s/cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, tmpDirApp, servicesInfoMap[serviceName].TeamName)
-				err = cp.Copy(fmt.Sprintf("%s/%s_cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName), fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
-				if err != nil {
-					t.Fatal(err)
 				}
 
 				err = cp.Copy(fmt.Sprintf("%s/%s", appSourcePath, "other-overlays/e2e.Dockerfile"), fmt.Sprintf("%s/.github/workflows/ui-tests/Dockerfile", tmpDirApp))
