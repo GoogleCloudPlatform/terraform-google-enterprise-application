@@ -409,6 +409,93 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
         method = "*"
       }
     }
+    operations {
+      service_name = "cloudkms.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "containeranalysis.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [google_access_context_manager_service_perimeter_egress_policy.service_directory_policy]
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
+  perimeter = var.service_perimeter_name
+  title     = "Ingress from [${data.google_project.admin_project.project_id}, ${data.google_project.workerpool_project.project_id}] to Deployment API's"
+  ingress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    sources {
+      resource = "projects/${data.google_project.workerpool_project.number}"
+    }
+  }
+  ingress_to {
+    resources = ["*"]
+    operations {
+      service_name = "logging.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "gkehub.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+
+    operations {
+      service_name = "connectgateway.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudkms.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "containeranalysis.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
