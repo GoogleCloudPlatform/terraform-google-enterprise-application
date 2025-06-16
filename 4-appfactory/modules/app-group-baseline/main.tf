@@ -56,6 +56,10 @@ data "google_project" "workerpool_project" {
   project_id = local.worker_pool_project
 }
 
+data "google_project" "remote_state_project" {
+  project_id = var.remote_state_project_id
+}
+
 data "google_project" "kms_project" {
   count      = var.kms_project_id != null ? 1 : 0
   project_id = var.kms_project_id

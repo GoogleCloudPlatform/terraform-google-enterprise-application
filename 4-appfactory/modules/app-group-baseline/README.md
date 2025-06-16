@@ -23,6 +23,7 @@
 | kms\_project\_id | Custom KMS Key project to be granted KMS Admin and KMS Signer Verifier to the Cloud Build service account. | `string` | `null` | no |
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Google Cloud Organization ID. | `string` | n/a | yes |
+| remote\_state\_project\_id | The project id where remote state are stored. It will be used to allow egress from VPC-SC if is being used. | `string` | n/a | yes |
 | service\_name | The name of a single service application. | `string` | `"demo-app"` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | n/a | yes |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |

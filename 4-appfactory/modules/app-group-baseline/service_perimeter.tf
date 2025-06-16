@@ -23,6 +23,48 @@ locals {
 #              EGRESS POLICIES                #
 ###############################################
 
+resource "google_access_context_manager_service_perimeter_egress_policy" "backend_egress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Storage Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.remote_state_project.project_id}"
+  egress_from {
+    identities = ["serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.remote_state_project.number}"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "backend_egress_policy" {
+  count     = var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Storage Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.remote_state_project.project_id}"
+  egress_from {
+    identities = ["serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"]
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.remote_state_project.number}"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "google_access_context_manager_service_perimeter_egress_policy" "secret_manager_egress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
@@ -45,7 +87,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "secret
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "secret_manager_egress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
+  count     = var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "Secret Manager Egress from ${data.google_project.admin_project.project_id} to ${local.secret_project_number}"
   egress_from {
@@ -66,7 +108,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "admin_to_kms_egress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null && var.create_admin_project && var.kms_project_id != null ? 1 : 0
+  count     = var.service_perimeter_name != null && var.create_admin_project && var.kms_project_id != null ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "KMS Egress from ${data.google_project.admin_project.project_id} to ${data.google_project.kms_project[0].project_id}"
   egress_from {
@@ -108,7 +150,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "admin_
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "env_to_kms_egress_policy" {
-  for_each  = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
+  for_each  = var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
   perimeter = var.service_perimeter_name
   title     = "KMS Egress from ${each.value.project} to ${data.google_project.kms_project[0].project_id}"
   egress_from {
@@ -251,8 +293,57 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
   }
 }
 
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_policy" {
+  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Cloud Deploy Egress from ${join(", ", var.cluster_projects_ids)} to ${data.google_project.workerpool_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.clusters_projects
+      content {
+        resource = "projects/${sources.value.number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_policy_to_gke_cluster" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.create_admin_project ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Cloud Deploy from ${data.google_project.admin_project.project_id} to GKE Cluster Projects"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+  }
+  egress_to {
+    resources = [for project in data.google_project.clusters_projects : "projects/${project.number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_policy_to_gke_cluster" {
+  count     = var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "Cloud Deploy from ${data.google_project.admin_project.project_id} to GKE Cluster Projects"
   egress_from {
@@ -294,16 +385,39 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "servic
   }
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_policy" {
-  count     = var.service_perimeter_mode == "DRY_RUN" && var.create_admin_project ? 1 : 0
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "service_directory_policy" {
+  count     = var.create_admin_project ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Cloud Deploy Egress from ${join(", ", var.cluster_projects_ids)} to ${data.google_project.workerpool_project.project_id}"
+  title     = "Allow Service Directory from ${data.google_project.admin_project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "servicedirectory.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "hpc_allow_infra_projects_to_use_workerpool" {
+  // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
+  count     = var.service_perimeter_mode == "ENFORCE" && contains(local.hpc_specific_applications, var.service_name) ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "HPC - Allow from [${join(", ", local.infra_projects)}] to ${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     dynamic "sources" {
-      for_each = data.google_project.clusters_projects
+      for_each = module.app_infra_project
       content {
-        resource = "projects/${sources.value.number}"
+        resource = "projects/${sources.value.project_number}"
       }
     }
     source_restriction = "SOURCE_RESTRICTION_ENABLED"
@@ -311,20 +425,17 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   egress_to {
     resources = ["projects/${data.google_project.workerpool_project.number}"]
     operations {
-      service_name = "clouddeploy.googleapis.com"
+      service_name = "cloudbuild.googleapis.com"
       method_selectors {
         method = "*"
       }
     }
   }
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
-resource "google_access_context_manager_service_perimeter_egress_policy" "hpc_allow_infra_projects_to_use_workerpool" {
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "hpc_allow_infra_projects_to_use_workerpool" {
   // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
-  count     = var.service_perimeter_mode == "ENFORCE" && contains(local.hpc_specific_applications, var.service_name) ? 1 : 0
+  count     = contains(local.hpc_specific_applications, var.service_name) ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "HPC - Allow from [${join(", ", local.infra_projects)}] to ${data.google_project.workerpool_project.project_id}"
   egress_from {

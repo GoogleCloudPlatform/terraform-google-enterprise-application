@@ -131,6 +131,11 @@ variable "admin_project_id" {
   type        = string
 }
 
+variable "remote_state_project_id" {
+  description = "The project id where remote state are stored. It will be used to allow egress from VPC-SC if is being used."
+  type        = string
+}
+
 variable "create_infra_project" {
   description = "Boolean value that indicates whether an infrastructure project should be created for the microservice."
   type        = bool
