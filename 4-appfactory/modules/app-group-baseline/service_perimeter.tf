@@ -615,6 +615,63 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   depends_on = [google_access_context_manager_service_perimeter_egress_policy.service_directory_policy]
 }
 
+resource "google_access_context_manager_service_perimeter_ingress_policy" "gke_ingress_policy" {
+  for_each  = var.service_perimeter_mode == "ENFORCE" ? data.google_project.clusters_projects : {}
+  perimeter = var.service_perimeter_name
+  title     = "Ingress from Cluster Service Account to ${data.google_project.admin_project.project_id}"
+  ingress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${each.value.number}"
+    }
+  }
+
+  ingress_to {
+    resources = ["projects/${data.google_project.admin_project.number}"]
+
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [google_access_context_manager_service_perimeter_egress_policy.service_directory_policy]
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "gke_ingress_policy" {
+  for_each  = data.google_project.clusters_projects
+  perimeter = var.service_perimeter_name
+  title     = "Ingress from Cluster Service Account to ${data.google_project.admin_project.project_id}"
+  ingress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${each.value.number}"
+    }
+  }
+
+  ingress_to {
+    resources = ["projects/${data.google_project.admin_project.number}"]
+
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [google_access_context_manager_service_perimeter_egress_policy.service_directory_policy]
+}
+
+
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
   count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
