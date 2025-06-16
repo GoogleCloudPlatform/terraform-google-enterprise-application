@@ -104,6 +104,12 @@ variable "service_perimeter_mode" {
   default     = null
 }
 
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
 variable "enable_confidential_nodes" {
   type        = bool
   description = "An optional flag to enable confidential node config."

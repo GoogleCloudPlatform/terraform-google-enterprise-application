@@ -62,6 +62,12 @@ variable "service_perimeter_mode" {
   }
 }
 
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
 variable "deletion_protection" {
   type        = bool
   description = "Whether or not to allow Terraform to destroy the cluster."

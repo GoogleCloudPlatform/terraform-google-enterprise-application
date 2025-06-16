@@ -120,6 +120,7 @@ module "app_admin_project" {
   default_service_account  = "KEEP"
   activate_apis = [
     "apikeys.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
@@ -168,6 +169,13 @@ module "app_admin_project" {
     },
   ]
 
+}
+
+resource "google_project_service_identity" "cloudbuild_service_identity" {
+  provider = google-beta
+
+  project = data.google_project.admin_project.project_id
+  service = "cloudbuild.googleapis.com"
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
@@ -253,6 +261,14 @@ resource "google_project_iam_member" "cloud_build_sa_roles" {
   for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader"])
 
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = var.gar_project_id
+  role    = each.value
+}
+
+resource "google_project_iam_member" "cloud_build_identity_roles" {
+  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader"])
+
+  member  = google_project_service_identity.cloudbuild_service_identity.member
   project = var.gar_project_id
   role    = each.value
 }

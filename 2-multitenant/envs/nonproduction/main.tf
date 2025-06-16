@@ -30,5 +30,6 @@ module "env" {
   cluster_subnetworks    = var.envs[local.env].subnets_self_links
   service_perimeter_name = var.service_perimeter_name
   service_perimeter_mode = var.service_perimeter_mode
+  access_level_name      = var.access_level_name
   deletion_protection    = var.deletion_protection
 }

@@ -51,6 +51,7 @@ func TestMultitenant(t *testing.T) {
 	vars := map[string]interface{}{
 		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
+		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
 	}
 
 	for _, envName := range testutils.EnvNames(t) {

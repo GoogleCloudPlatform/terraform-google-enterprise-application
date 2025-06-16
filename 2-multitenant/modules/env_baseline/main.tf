@@ -150,6 +150,15 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  for_each = var.access_level_name != null ? merge(
+    { for i, value in merge(module.gke-standard, module.gke-autopilot) : "cluster_${var.env}_${i}" => value.service_account },
+    { for i, value in module.eab_cluster_project : "project_${var.env}_${i}" => "${value.project_number}-compute@developer.gserviceaccount.com" }
+  ) : {}
+  access_level = var.access_level_name
+  members      = ["serviceAccount:${each.value}"]
+}
+
 resource "google_project_service_identity" "gke_identity_cluster_project" {
   provider   = google-beta
   project    = local.cluster_project_id
