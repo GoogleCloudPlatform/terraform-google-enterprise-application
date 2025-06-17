@@ -65,5 +65,6 @@ output "cb_private_workerpool_id" {
 }
 
 output "binary_authorization_image" {
+  description = "Image build to create attestations."
   value = local.binary_auth_image_tag
 }
