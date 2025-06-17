@@ -56,6 +56,6 @@ var (
 
 		".*dial tcp: lookup *.nip.io on *: server misbehaving*": "VM Gitlab issues.",
 
-		".Error 400: Invalid Directional Policies set in Perimeter*": "VPC-SC propagation issues",
+		".Error 400: Invalid Directional Policies set in Perimeter*": "VPC-SC propagation issues.",
 	}
 )
