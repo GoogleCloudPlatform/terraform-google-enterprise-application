@@ -119,5 +119,5 @@ output "kms_keyring" {
 }
 
 output "binary_authorization_image" {
-  value = "gcr.io/${local.project_id}/binauthz-attestation:latest"
+  value = var.single_project ? local.binary_auth_image_tag : null
 }

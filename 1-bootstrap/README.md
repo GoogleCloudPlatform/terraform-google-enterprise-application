@@ -312,6 +312,7 @@ Within the repository, you'll find `backend.tf` files that define the GCS bucket
 | Name | Description |
 |------|-------------|
 | artifacts\_bucket | Bucket for storing TF plans |
+| binary\_authorization\_image | n/a |
 | cb\_private\_workerpool\_id | Private Worker Pool ID used for Cloud Build Triggers. |
 | cb\_service\_accounts\_emails | Service Accounts for the Multitenant Administration Cloud Build Triggers |
 | logs\_bucket | Bucket for storing TF logs |
