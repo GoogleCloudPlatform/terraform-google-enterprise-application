@@ -55,5 +55,7 @@ var (
 		".*Error 400: The email address 'service-*@*.iam.gserviceaccount.com' is invalid or non-existent*": "Service Agent propagation.",
 
 		".*dial tcp: lookup *.nip.io on *: server misbehaving*": "VM Gitlab issues.",
+
+		".Error 400: Invalid Directional Policies set in Perimeter*": "VPC-SC propagation issues",
 	}
 )
