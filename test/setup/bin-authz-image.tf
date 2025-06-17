@@ -15,7 +15,7 @@
  */
 
 locals {
-  cmd_prompt = "gcloud builds submit ./1-bootstrap/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${local.project_id} --service-account=${google_service_account.int_test[local.index].id} --gcs-log-dir=${module.logging_bucket.url} --worker-pool=${google_cloudbuild_worker_pool.pool.id} || ( sleep 45 && gcloud builds submit --tag ${local.binary_auth_image_tag} --project=${local.project_id} --service-account=${google_service_account.int_test[local.index].id} --gcs-log-dir=${module.logging_bucket.url}  --worker-pool=${google_cloudbuild_worker_pool.pool.id}  )"
+  cmd_prompt = "gcloud builds submit ${path.root()}/1-bootstrap/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${local.project_id} --service-account=${google_service_account.int_test[local.index].id} --gcs-log-dir=${module.logging_bucket.url} --worker-pool=${google_cloudbuild_worker_pool.pool.id} || ( sleep 45 && gcloud builds submit --tag ${local.binary_auth_image_tag} --project=${local.project_id} --service-account=${google_service_account.int_test[local.index].id} --gcs-log-dir=${module.logging_bucket.url}  --worker-pool=${google_cloudbuild_worker_pool.pool.id}  )"
 
   binary_auth_image_version = "v1"
   binary_auth_image_tag     = var.single_project ? "us-central1-docker.pkg.dev/${local.project_id}/${google_artifact_registry_repository.attestation_image[local.index].name}/binauthz-attestation:${local.binary_auth_image_version}" : ""
