@@ -176,6 +176,12 @@ variable "binary_authorization_image" {
   default     = ""
 }
 
+variable "binary_authorization_repository_id" {
+  type        = string
+  description = "The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`."
+  default     = ""
+}
+
 variable "attestation_kms_key" {
   type        = string
   description = "The KMS Key ID to be used by attestor in format projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/KMS_KEYRING_NAME/cryptoKeys/KMS_KEY_NAME/cryptoKeyVersions/KMS_KEY_VERSION."

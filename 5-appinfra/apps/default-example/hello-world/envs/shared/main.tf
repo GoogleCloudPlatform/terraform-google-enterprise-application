@@ -44,7 +44,8 @@ module "app" {
   logging_bucket                 = var.logging_bucket
   bucket_kms_key                 = var.bucket_kms_key
 
-  attestation_kms_key        = var.attestation_kms_key
-  attestor_id                = contains(var.environment_names, "production") ? data.terraform_remote_state.fleetscope["production"].outputs.attestor_id : data.terraform_remote_state.fleetscope[var.environment_names[0]].outputs.attestor_id
-  binary_authorization_image = data.terraform_remote_state.bootstrap.outputs.binary_authorization_image
+  attestation_kms_key                = var.attestation_kms_key
+  attestor_id                        = contains(var.environment_names, "production") ? data.terraform_remote_state.fleetscope["production"].outputs.attestor_id : data.terraform_remote_state.fleetscope[var.environment_names[0]].outputs.attestor_id
+  binary_authorization_image         = data.terraform_remote_state.bootstrap.outputs.binary_authorization_image
+  binary_authorization_repository_id = data.terraform_remote_state.bootstrap.outputs.binary_authorization_repository_id
 }
