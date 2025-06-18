@@ -63,6 +63,12 @@ variable "service_perimeter_mode" {
   }
 }
 
+variable "cb_private_workerpool_project_id" {
+  description = "Private Worker Pool Project ID used for Cloud Build Triggers."
+  type        = string
+  default     = ""
+}
+
 variable "access_level_name" {
   description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
   type        = string

@@ -342,3 +342,58 @@ resource "time_sleep" "wait_service_cleanup" {
 
   destroy_duration = "300s"
 }
+
+data "google_project" "workerpool_project" {
+  count      = var.cb_private_workerpool_project_id != "" ? 1 : 0
+  project_id = var.cb_private_workerpool_project_id
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.cb_private_workerpool_project_id != "" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Cloud Deploy Egress from ${local.cluster_project_id} to ${data.google_project.workerpool_project[0].project_id}."
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.eab_cluster_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project[0].number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
+  count     = var.service_perimeter_name != null && var.cb_private_workerpool_project_id != "" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "Cloud Deploy Egress from ${local.cluster_project_id} to ${data.google_project.workerpool_project[0].project_id}."
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.eab_cluster_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project[0].number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}

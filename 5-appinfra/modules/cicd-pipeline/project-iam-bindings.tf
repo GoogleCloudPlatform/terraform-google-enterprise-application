@@ -204,7 +204,7 @@ resource "google_artifact_registry_repository_iam_member" "builder_on_attestatio
   count      = var.binary_authorization_repository_id != "" ? 1 : 0
   project    = regex("projects/([^/]*)/", var.binary_authorization_repository_id)[0]
   location   = regex("locations/([^/]*)/", var.binary_authorization_repository_id)[0]
-  repository = regex("repositories/([^/]*)/", var.binary_authorization_repository_id)[0]
+  repository = regex("repositories/([^/]*)", var.binary_authorization_repository_id)[0]
   role       = "roles/artifactregistry.reader"
   member     = google_service_account.cloud_build.member
 }
@@ -213,7 +213,7 @@ resource "google_artifact_registry_repository_iam_member" "service_agent_on_atte
   count      = var.binary_authorization_repository_id != "" ? 1 : 0
   project    = regex("projects/([^/]*)/", var.binary_authorization_repository_id)[0]
   location   = regex("locations/([^/]*)/", var.binary_authorization_repository_id)[0]
-  repository = regex("repositories/([^/]*)/", var.binary_authorization_repository_id)[0]
+  repository = regex("repositories/([^/]*)", var.binary_authorization_repository_id)[0]
   role       = "roles/artifactregistry.reader"
   member     = google_project_service_identity.cloudbuild_service_identity.member
 }

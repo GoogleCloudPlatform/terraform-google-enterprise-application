@@ -98,9 +98,27 @@ resource "time_sleep" "wait_propagation" {
   create_duration = "120s"
 
   depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.cloudbuild_egress_policy,
-    google_access_context_manager_service_perimeter_dry_run_egress_policy.cloudbuild_egress_policy,
-    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy
+    google_access_context_manager_service_perimeter_egress_policy.clouddeploy_egress_policy_admin_to_gke_cluster,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.clouddeploy_egress_policy_admin_to_gke_cluster,
+    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.service_directory_policy,
+
+    # google_access_context_manager_service_perimeter_egress_policy.admin_to_kms_egress_policy,
+    # google_access_context_manager_service_perimeter_egress_policy.backend_egress_policy,
+    # google_access_context_manager_service_perimeter_egress_policy.cloudbuild_egress_admin_to_workerpool_policy,
+    # google_access_context_manager_service_perimeter_egress_policy.clouddeploy_egress_cluster_to_workerpool_policy,
+    # google_access_context_manager_service_perimeter_egress_policy.env_to_kms_egress_policy,
+    # google_access_context_manager_service_perimeter_egress_policy.hpc_allow_infra_projects_to_use_workerpool,
+    # google_access_context_manager_service_perimeter_egress_policy.secret_manager_egress_policy,
+    # google_access_context_manager_service_perimeter_dry_run_egress_policy.backend_egress_policy,
+    # google_access_context_manager_service_perimeter_dry_run_egress_policy.admin_to_kms_egress_policy,
+    # google_access_context_manager_service_perimeter_dry_run_egress_policy.cloudbuild_egress_admin_to_workerpool_policy,
+    # google_access_context_manager_service_perimeter_dry_run_egress_policy.clouddeploy_egress_cluster_to_workerpool_policy,
+    # google_access_context_manager_service_perimeter_dry_run_egress_policy.env_to_kms_egress_policy,
+    # google_access_context_manager_service_perimeter_dry_run_egress_policy.hpc_allow_infra_projects_to_use_workerpool,
+    # google_access_context_manager_service_perimeter_dry_run_egress_policy.secret_manager_egress_policy,
+    # google_access_context_manager_service_perimeter_ingress_policy.ingress_policy,
+    # google_access_context_manager_service_perimeter_dry_run_ingress_policy.ingress_policy,
   ]
 }
 

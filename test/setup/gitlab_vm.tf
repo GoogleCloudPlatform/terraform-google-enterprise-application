@@ -415,3 +415,7 @@ output "gitlab_service_directory" {
 output "workerpool_id" {
   value = google_cloudbuild_worker_pool.pool.id
 }
+
+output "workerpool_project_id" {
+  value = google_cloudbuild_worker_pool.pool.project
+}

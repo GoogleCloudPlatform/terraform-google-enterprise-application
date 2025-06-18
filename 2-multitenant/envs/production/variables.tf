@@ -68,6 +68,12 @@ variable "access_level_name" {
   default     = null
 }
 
+variable "cb_private_workerpool_project_id" {
+  description = "Private Worker Pool Project ID used for Cloud Build Triggers."
+  type        = string
+  default     = ""
+}
+
 variable "deletion_protection" {
   type        = bool
   description = "Whether or not to allow Terraform to destroy the cluster."

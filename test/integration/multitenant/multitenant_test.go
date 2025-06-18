@@ -49,9 +49,10 @@ func TestMultitenant(t *testing.T) {
 	}
 
 	vars := map[string]interface{}{
-		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
-		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
-		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
+		"service_perimeter_name":           vpcsc.GetStringOutput("service_perimeter_name"),
+		"service_perimeter_mode":           vpcsc.GetStringOutput("service_perimeter_mode"),
+		"access_level_name":                vpcsc.GetStringOutput("access_level_name"),
+		"cb_private_workerpool_project_id": vpcsc.GetTFSetupStringOutput("workerpool_project_id"),
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
