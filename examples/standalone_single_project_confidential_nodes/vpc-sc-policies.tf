@@ -67,7 +67,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "service_directory_policy" {
   count     = var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Allow Services from ${data.google_project.project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  # title     = "Allow Services from ${data.google_project.project.project_id} to ${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     sources {
@@ -113,7 +113,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 resource "google_access_context_manager_service_perimeter_egress_policy" "service_directory_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "Allow Services from ${data.google_project.project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  # title     = "Allow Services from ${data.google_project.project.project_id} to ${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     sources {
@@ -213,8 +213,8 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
 }
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "cymbal_bank_private_deployment" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
-  title     = "Allow from ${data.google_project.workerpool_project.project_id} API's for private gkehub deployment"
+  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
+  # title     = "Allow from ${data.google_project.workerpool_project.project_id} API's for private gkehub deployment"
   perimeter = var.service_perimeter_name
   ingress_from {
     identity_type = "ANY_IDENTITY"
@@ -288,8 +288,8 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "cymba
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "cymbal_bank_private_deployment" {
-  count     = var.service_perimeter_name != "" ? 1 : 0
-  title     = "Allow from ${data.google_project.workerpool_project.project_id} API's for private gkehub deployment"
+  count = var.service_perimeter_name != "" ? 1 : 0
+  # title     = "Allow from ${data.google_project.workerpool_project.project_id} API's for private gkehub deployment"
   perimeter = var.service_perimeter_name
   ingress_from {
     identity_type = "ANY_IDENTITY"

@@ -36,7 +36,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/hello-world:latest'
+      - '$_CONTAINER_REGISTRY/skaffold-example:latest'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'

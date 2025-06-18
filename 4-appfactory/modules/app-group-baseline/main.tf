@@ -276,7 +276,7 @@ resource "google_project_iam_member" "service_agent_cb_si" {
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
-  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader"])
+  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader", "roles/artifactregistry.admin"])
 
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
   project = var.gar_project_id

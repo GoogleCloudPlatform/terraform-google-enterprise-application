@@ -228,7 +228,7 @@ locals {
       }
     },
     {
-      title = "Egress to bank of anthos Artifact Registry project"
+      title = "Egress to bank of anthos by AR, CA and BAuthz."
       from = {
         identity_type = "ANY_IDENTITY"
       }
@@ -239,12 +239,12 @@ locals {
         operations = {
           "artifactregistry.googleapis.com" = { methods = ["*"] }
         }
-        # operations = {
-        #   "containeranalisys.googleapis.com" = { methods = ["*"] }
-        # }
-        # operations = {
-        #   "binaryauthorization.googleapis.com" = { methods = ["*"] }
-        # }
+        operations = {
+          "containeranalisys.googleapis.com" = { methods = ["*"] }
+        }
+        operations = {
+          "binaryauthorization.googleapis.com" = { methods = ["*"] }
+        }
       }
     },
     {
