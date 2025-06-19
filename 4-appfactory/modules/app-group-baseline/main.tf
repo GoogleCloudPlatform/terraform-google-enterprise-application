@@ -70,6 +70,11 @@ data "google_project" "clusters_projects" {
   project_id = each.value
 }
 
+data "google_project" "vpc_projects" {
+  for_each   = var.envs
+  project_id = each.value.network_project_id
+}
+
 module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 

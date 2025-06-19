@@ -476,6 +476,12 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
         method = "*"
       }
     }
+    operations {
+      service_name = "sts.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true

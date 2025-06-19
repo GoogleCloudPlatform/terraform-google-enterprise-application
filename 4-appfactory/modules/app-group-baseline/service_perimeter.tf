@@ -403,6 +403,57 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   }
 }
 
+resource "google_access_context_manager_service_perimeter_egress_policy" "egress_from_vpc_project_to_admin" {
+  // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "vpc-to-${data.google_project.admin_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.vpc_projects
+      content {
+        resource = "projects/${sources.value.number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.admin_project.number}"]
+    operations {
+      service_name = "containerfilesystem.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_from_vpc_project_to_admin" {
+  count     = var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "vpc-to-${data.google_project.admin_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.vpc_projects
+      content {
+        resource = "projects/${sources.value.number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.admin_project.number}"]
+    operations {
+      service_name = "containerfilesystem.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+}
+
 ###############################################
 #              INGRESS POLICIES               #
 ###############################################

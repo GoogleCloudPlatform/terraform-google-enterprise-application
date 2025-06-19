@@ -23,7 +23,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/emailservice:latest'
+      - '$_CONTAINER_REGISTRY/emailservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -32,7 +32,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/productcatalogservice:latest'
+      - '$_CONTAINER_REGISTRY/productcatalogservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -41,7 +41,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/recommendationservice:latest'
+      - '$_CONTAINER_REGISTRY/recommendationservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -50,7 +50,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/shoppingassistantservice:latest'
+      - '$_CONTAINER_REGISTRY/shoppingassistantservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -59,7 +59,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/shippingservice:latest'
+      - '$_CONTAINER_REGISTRY/shippingservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -68,7 +68,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/checkoutservice:latest'
+      - '$_CONTAINER_REGISTRY/checkoutservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -77,7 +77,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/paymentservice:latest'
+      - '$_CONTAINER_REGISTRY/paymentservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -86,7 +86,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/currencyservice:latest'
+      - '$_CONTAINER_REGISTRY/currencyservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -95,7 +95,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/cartservice:latest'
+      - '$_CONTAINER_REGISTRY/cartservice:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -104,7 +104,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/frontend:latest'
+      - '$_CONTAINER_REGISTRY/frontend:$SHORT_SHA'
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'

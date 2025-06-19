@@ -27,6 +27,7 @@ spec:
     metadata:
       labels:
         app: loadgenerator
+        image-policy.k8s.io/break-glass: "true"
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
