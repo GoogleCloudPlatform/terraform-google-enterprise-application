@@ -285,6 +285,21 @@ locals {
           "storage.googleapis.com" = { methods = ["*"] }
         }
       }
+    },
+    {
+      title = "Egress to artifact-registry-docker-cache"
+      from = {
+        identity_type = "ANY_IDENTITY"
+      },
+      to = {
+        resources = ["projects/342927644502"], //artifact-registry-docker-cache
+        operations = {
+          "artifactregistry.googleapis.com"    = { methods = ["*"] }
+          "binaryauthorization.googleapis.com" = { methods = ["*"] }
+          "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "cloudkms.googleapis.com"            = { methods = ["*"] }
+        }
+      }
     }
   ]
 
