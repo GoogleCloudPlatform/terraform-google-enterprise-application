@@ -17,7 +17,7 @@
 locals {
   cmd_prompt = "gcloud builds submit binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${module.build_logs.url} --worker-pool=${var.workerpool_id} || ( sleep 45 && gcloud builds submit --tag ${local.binary_auth_image_tag} --project=${var.project_id} --service-account=${google_service_account.builder.id} --gcs-log-dir=${module.build_logs.url}  --worker-pool=${var.workerpool_id}  )"
 
-  binary_auth_image_version = "v1"
+  binary_auth_image_version = "v1.1"
   binary_auth_image_tag     = "${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.attestation_image.name}/binauthz-attestation:${local.binary_auth_image_version}"
 }
 
@@ -38,9 +38,10 @@ resource "google_artifact_registry_repository_iam_member" "builder_on_attestatio
 }
 
 module "build_binary_authz_image" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.5"
-  upgrade = false
+  source            = "terraform-google-modules/gcloud/google"
+  version           = "~> 3.5"
+  upgrade           = false
+  module_depends_on = [time_sleep.wait_iam_propagation]
 
   create_cmd_triggers = {
     "tag_version" = local.binary_auth_image_version
