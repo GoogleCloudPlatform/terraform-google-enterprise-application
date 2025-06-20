@@ -28,6 +28,8 @@ locals {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
   }
 
+  cluster_sa = [for i in merge(module.gke-standard, module.gke-autopilot) : i.service_account][0]
+
   arm_node_pool = { for k, v in local.subnets : k => (regex(local.regions_re, v)[0]) == "us-central1" ?
     [
       {
@@ -151,12 +153,13 @@ data "google_compute_subnetwork" "default" {
 }
 
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
-  for_each = var.access_level_name != null ? merge(
-    { for i, value in merge(module.gke-standard, module.gke-autopilot) : "cluster_${var.env}_${i}" => value.service_account },
-    { for i, value in module.eab_cluster_project : "project_${var.env}_${i}" => "${value.project_number}-compute@developer.gserviceaccount.com" }
-  ) : {}
+  count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
-  members      = ["serviceAccount:${each.value}"]
+  members = [
+    "serviceAccount:${local.cluster_sa}",
+    "serviceAccount:${data.google_project.eab_cluster_project.number}-compute@developer.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com"
+  ]
 }
 
 resource "google_project_service_identity" "gke_identity_cluster_project" {
@@ -407,7 +410,8 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
   perimeter = var.service_perimeter_name
   title     = "${var.network_project_id}-${local.cluster_project_id}"
   egress_from {
-    identities = ["serviceAccount:service-${data.google_project.eab_cluster_project.number}@compute-system.iam.gserviceaccount.com"]
+    # identities = ["serviceAccount:service-${data.google_project.eab_cluster_project.number}@compute-system.iam.gserviceaccount.com", "serviceAccount:${local.cluster_sa}"]
+    identity_type = "ANY_IDENTITY"
     sources {
       resource = "projects/${data.google_project.network_project.number}"
     }
@@ -450,7 +454,8 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   perimeter = var.service_perimeter_name
   title     = "${var.network_project_id}-${local.cluster_project_id}"
   egress_from {
-    identities = ["serviceAccount:service-${data.google_project.eab_cluster_project.number}@compute-system.iam.gserviceaccount.com"]
+    # identities = ["serviceAccount:service-${data.google_project.eab_cluster_project.number}@compute-system.iam.gserviceaccount.com", "serviceAccount:${local.cluster_sa}"]
+    identity_type = "ANY_IDENTITY"
     sources {
       resource = "projects/${data.google_project.network_project.number}"
     }
