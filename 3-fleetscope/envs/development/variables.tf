@@ -59,3 +59,9 @@ variable "attestation_kms_key" {
   description = "The KMS Key ID to be used by attestor."
   default     = ""
 }
+
+variable "attestation_evaluation_mode" {
+  type        = string
+  description = "How this admission rule will be evaluated. Possible values are: ALWAYS_ALLOW, REQUIRE_ATTESTATION, ALWAYS_DENY"
+  default     = "ALWAYS_ALLOW"
+}

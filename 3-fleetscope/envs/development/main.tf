@@ -18,11 +18,6 @@ locals {
   env = "development"
 }
 
-# import {
-#   id = "projects/${local.cluster_project_id}/locations/global/features/fleetobservability"
-#   to = module.env.google_gke_hub_feature.fleet-o11y
-# }
-
 module "env" {
   source = "../../modules/env_baseline"
 
@@ -40,5 +35,6 @@ module "env" {
   config_sync_policy_dir     = var.config_sync_policy_dir
   attestation_kms_key        = var.attestation_kms_key
 
+  attestation_evaluation_mode = var.attestation_evaluation_mode
   disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

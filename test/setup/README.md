@@ -22,6 +22,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description |
 |------|-------------|
+| attestation\_evaluation\_mode | n/a |
 | attestation\_kms\_key | n/a |
 | attestation\_kms\_project | n/a |
 | billing\_account | n/a |

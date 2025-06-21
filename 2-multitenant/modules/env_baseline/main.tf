@@ -438,6 +438,12 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
       }
     }
     operations {
+      service_name = "sts.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
       service_name = "trafficdirector.googleapis.com"
       method_selectors {
         method = "*"

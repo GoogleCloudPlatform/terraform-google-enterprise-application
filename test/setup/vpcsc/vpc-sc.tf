@@ -239,8 +239,10 @@ locals {
         operations = {
           "artifactregistry.googleapis.com"    = { methods = ["*"] }
           "binaryauthorization.googleapis.com" = { methods = ["*"] }
-          "containeranalysis.googleapis.com"   = { methods = ["*"] }
           "cloudkms.googleapis.com"            = { methods = ["*"] }
+          "container.googleapis.com"           = { methods = ["*"] }
+          "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "storage.googleapis.com"             = { methods = ["*"] }
         }
       }
     },

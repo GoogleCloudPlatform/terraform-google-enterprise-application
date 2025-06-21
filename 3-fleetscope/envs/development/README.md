@@ -3,6 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| attestation\_evaluation\_mode | How this admission rule will be evaluated. Possible values are: ALWAYS\_ALLOW, REQUIRE\_ATTESTATION, ALWAYS\_DENY | `string` | `"ALWAYS_ALLOW"` | no |
 | attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | `""` | no |
 | config\_sync\_branch | The branch of the repository to sync from. Default: master | `string` | `"master"` | no |
 | config\_sync\_policy\_dir | The path within the Git repository that represents the top level of the repo to sync | `string` | `null` | no |

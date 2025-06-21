@@ -49,17 +49,18 @@ module "gitlab_project" {
   auto_create_network = true
 
   activate_apis = [
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudkms.googleapis.com",
     "compute.googleapis.com",
+    "dns.googleapis.com",
     "iam.googleapis.com",
     "secretmanager.googleapis.com",
-    "servicemanagement.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "storage.googleapis.com",
     "servicedirectory.googleapis.com",
+    "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
-    "dns.googleapis.com",
-    "cloudbuild.googleapis.com"
+    "serviceusage.googleapis.com",
+    "storage.googleapis.com",
   ]
 }
 

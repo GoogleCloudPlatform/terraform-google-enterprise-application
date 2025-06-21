@@ -121,3 +121,7 @@ output "kms_keyring" {
 output "binary_authorization_image" {
   value = var.single_project ? local.binary_auth_image_tag : null
 }
+
+output "attestation_evaluation_mode" {
+  value = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : null
+}
