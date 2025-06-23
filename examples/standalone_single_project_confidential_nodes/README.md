@@ -113,6 +113,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | n/a | yes |
 | binary\_authorization\_image | The Binary Authorization image to be used to create attestation. | `string` | n/a | yes |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |

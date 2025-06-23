@@ -57,6 +57,12 @@ variable "service_perimeter_mode" {
   }
 }
 
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
 variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.

@@ -27,6 +27,7 @@ data "google_project" "workerpool_project" {
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
+  title     = "e-${join(",", [for project_number in local.secret_project_numbers : "projects/${project_number}"])}"
   egress_from {
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
@@ -47,6 +48,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_policy" {
   count     = var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
+  title     = "e-${join(",", [for project_number in local.secret_project_numbers : "projects/${project_number}"])}"
   egress_from {
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
@@ -64,10 +66,10 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   }
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "service_directory_policy" {
-  count     = var.service_perimeter_name != "" ? 1 : 0
+resource "google_access_context_manager_service_perimeter_egress_policy" "service_directory_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
-  # title     = "Allow Services from ${data.google_project.project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  title     = "srvdir-${data.google_project.project.project_id}-${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     sources {
@@ -99,21 +101,15 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
       service_name = "compute.googleapis.com"
       method_selectors {
         method = "SubnetworksService.Get"
-      }
-    }
-    operations {
-      service_name = "binaryauthorization.googleapis.com"
-      method_selectors {
-        method = "*"
       }
     }
   }
 }
 
-resource "google_access_context_manager_service_perimeter_egress_policy" "service_directory_policy" {
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "service_directory_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
-  # title     = "Allow Services from ${data.google_project.project.project_id} to ${data.google_project.workerpool_project.project_id}"
+  title     = "srvdir-${data.google_project.project.project_id}-${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     sources {
@@ -145,12 +141,6 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "servic
       service_name = "compute.googleapis.com"
       method_selectors {
         method = "SubnetworksService.Get"
-      }
-    }
-    operations {
-      service_name = "binaryauthorization.googleapis.com"
-      method_selectors {
-        method = "*"
       }
     }
   }
@@ -163,6 +153,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "servic
 resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
+  title     = "cb-access_level-to-${data.google_project.project.project_id}"
   ingress_from {
     identities = local.sa_cb
     sources {
@@ -189,6 +180,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
 resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
   count     = var.service_perimeter_name != "" ? 1 : 0
   perimeter = var.service_perimeter_name
+  title     = "cb-access_level-to-${data.google_project.project.project_id}"
   ingress_from {
     identities = local.sa_cb
     sources {
@@ -212,9 +204,9 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   }
 }
 
-resource "google_access_context_manager_service_perimeter_ingress_policy" "cymbal_bank_private_deployment" {
-  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
-  # title     = "Allow from ${data.google_project.workerpool_project.project_id} API's for private gkehub deployment"
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "cymbal_bank_private_deployment" {
+  count     = var.service_perimeter_name != "" ? 1 : 0
+  title     = "cicd-${data.google_project.workerpool_project.project_id}-private-gkehub-deployment"
   perimeter = var.service_perimeter_name
   ingress_from {
     identity_type = "ANY_IDENTITY"
@@ -277,6 +269,12 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "cymba
     }
     operations {
       service_name = "containeranalysis.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iamcredentials.googleapis.com"
       method_selectors {
         method = "*"
       }
@@ -287,9 +285,9 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "cymba
   }
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "cymbal_bank_private_deployment" {
-  count = var.service_perimeter_name != "" ? 1 : 0
-  # title     = "Allow from ${data.google_project.workerpool_project.project_id} API's for private gkehub deployment"
+resource "google_access_context_manager_service_perimeter_ingress_policy" "cymbal_bank_private_deployment" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != "" ? 1 : 0
+  title     = "cicd-${data.google_project.workerpool_project.project_id}-private-gkehub-deployment"
   perimeter = var.service_perimeter_name
   ingress_from {
     identity_type = "ANY_IDENTITY"
@@ -352,6 +350,12 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
     }
     operations {
       service_name = "containeranalysis.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iamcredentials.googleapis.com"
       method_selectors {
         method = "*"
       }

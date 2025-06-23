@@ -46,6 +46,7 @@ module "multitenant_infra" {
   billing_account        = null
   service_perimeter_name = var.service_perimeter_name
   service_perimeter_mode = var.service_perimeter_mode
+  access_level_name      = var.access_level_name
   deletion_protection    = false
 
   cb_private_workerpool_project_id = var.workerpool_id == "" ? google_cloudbuild_worker_pool.pool[0].project : regex("projects/([^/]*)", var.workerpool_id)[0]

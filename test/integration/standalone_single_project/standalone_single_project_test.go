@@ -43,11 +43,13 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 	projectID := setupOutput.GetTFSetupStringOutput("project_id")
 	service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
 	service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
+	access_level_name := setupOutput.GetStringOutput("access_level_name")
 
 	vars := map[string]interface{}{
 		"project_id":             projectID,
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
+		"access_level_name":      access_level_name,
 		"subnetwork_self_link":   setupOutput.GetTFSetupStringOutput("single_project_cluster_subnetwork_self_link"),
 	}
 
