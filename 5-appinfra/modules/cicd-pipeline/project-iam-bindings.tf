@@ -188,6 +188,7 @@ resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
 }
 
 resource "google_binary_authorization_attestor_iam_member" "member" {
+  count    = var.attestor_id != "" ? 1 : 0
   project  = regex("projects/([^/]*)/", var.attestor_id)[0]
   attestor = regex("attestors/([^/]*)", var.attestor_id)[0]
   role     = "roles/binaryauthorization.attestorsVerifier"
@@ -195,6 +196,7 @@ resource "google_binary_authorization_attestor_iam_member" "member" {
 }
 
 resource "google_kms_crypto_key_iam_member" "attestor_crypto_key" {
+  count         = var.attestation_kms_key != "" ? 1 : 0
   crypto_key_id = var.attestation_kms_key
   role          = "roles/cloudkms.signerVerifier"
   member        = google_service_account.cloud_build.member

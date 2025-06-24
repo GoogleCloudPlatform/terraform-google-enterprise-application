@@ -155,11 +155,11 @@ data "google_compute_subnetwork" "default" {
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
   count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
-  members = [
+  members = distinct([
     "serviceAccount:${local.cluster_sa}",
-    "serviceAccount:${data.google_project.eab_cluster_project.number}-compute@developer.gserviceaccount.com",
+    data.google_compute_default_service_account.compute_sa.member,
     "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com"
-  ]
+  ])
 }
 
 resource "google_project_service_identity" "gke_identity_cluster_project" {
@@ -200,6 +200,16 @@ resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
   project = local.cluster_project_id
   role    = "roles/multiclusterservicediscovery.serviceAgent"
   member  = google_project_service_identity.mcsd_cluster_project.member
+}
+
+resource "google_project_iam_member" "artifactregistry_reader" {
+  for_each = {
+    "compute_sa" : data.google_compute_default_service_account.compute_sa.member,
+    "cluster_sa" : "serviceAccount:${local.cluster_sa}",
+  }
+  project = local.cluster_project_id
+  role    = "roles/artifactregistry.reader"
+  member  = each.value
 }
 
 module "gke-standard" {

@@ -228,7 +228,7 @@ locals {
       }
     },
     {
-      title = "Egress to bank of anthos by AR, CA and BAuthz."
+      title = "Egress to bank of anthos by AR, CA and BAuthz"
       from = {
         identity_type = "ANY_IDENTITY"
       }
@@ -241,8 +241,12 @@ locals {
           "binaryauthorization.googleapis.com" = { methods = ["*"] }
           "cloudkms.googleapis.com"            = { methods = ["*"] }
           "container.googleapis.com"           = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
           "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "containerregistry.googleapis.com"   = { methods = ["*"] }
           "storage.googleapis.com"             = { methods = ["*"] }
+          "iamcredentials.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"             = { methods = ["*"] }
         }
       }
     },
@@ -289,17 +293,23 @@ locals {
       }
     },
     {
-      title = "Egress to artifact-registry-docker-cache"
+      title = "Egress from ANY_IDENTITY to artifact-registry-docker-cache"
       from = {
-        identity_type = "ANY_IDENTITY"
+        identity_type = "ANY_IDENTITY" //https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
       },
       to = {
         resources = ["projects/342927644502"], //artifact-registry-docker-cache
         operations = {
           "artifactregistry.googleapis.com"    = { methods = ["*"] }
           "binaryauthorization.googleapis.com" = { methods = ["*"] }
-          "containeranalysis.googleapis.com"   = { methods = ["*"] }
           "cloudkms.googleapis.com"            = { methods = ["*"] }
+          "container.googleapis.com"           = { methods = ["*"] }
+          "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
+          "containerregistry.googleapis.com"   = { methods = ["*"] }
+          "storage.googleapis.com"             = { methods = ["*"] }
+          "iamcredentials.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"             = { methods = ["*"] }
         }
       }
     }

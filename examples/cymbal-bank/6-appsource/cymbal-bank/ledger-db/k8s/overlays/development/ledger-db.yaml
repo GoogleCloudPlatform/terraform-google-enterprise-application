@@ -29,7 +29,13 @@ spec:
       labels:
         app: ledger-db
     spec:
+      serviceAccount: bank-of-anthos
       serviceAccountName: default
+      tolerations:
+        - effect: NoSchedule
+          key: kubernetes.io/arch
+          operator: Equal
+          value: arm64
       containers:
         - name: postgres
         # TODO: pull out the version as a variable
