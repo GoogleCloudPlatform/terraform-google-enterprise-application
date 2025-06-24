@@ -237,7 +237,8 @@ locals {
           "projects/682719828243" // projects/bank-of-anthos-ci/locations/us-central1/repositories/bank-of-anthos
         ]
         operations = {
-          "artifactregistry.googleapis.com" = { methods = ["*"] }
+          "artifactregistry.googleapis.com"    = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
         }
       }
     },
