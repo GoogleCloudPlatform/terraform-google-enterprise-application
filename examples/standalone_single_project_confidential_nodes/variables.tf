@@ -100,3 +100,8 @@ variable "binary_authorization_image" {
   type        = string
   description = "The Binary Authorization image to be used to create attestation."
 }
+
+variable "binary_authorization_repository_id" {
+  type        = string
+  description = "The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`."
+}

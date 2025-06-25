@@ -27,6 +27,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | attestation\_kms\_project | n/a |
 | billing\_account | n/a |
 | binary\_authorization\_image | n/a |
+| binary\_authorization\_repository\_id | The ID of the Repository where binary attestation image is stored. |
 | bucket\_kms\_key | n/a |
 | common\_folder\_id | n/a |
 | envs | n/a |

@@ -125,3 +125,8 @@ output "binary_authorization_image" {
 output "attestation_evaluation_mode" {
   value = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : null
 }
+
+output "binary_authorization_repository_id" {
+  description = "The ID of the Repository where binary attestation image is stored."
+  value       = var.single_project ? google_artifact_registry_repository.attestation_image[local.index].id : null
+}
