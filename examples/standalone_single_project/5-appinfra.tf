@@ -274,6 +274,8 @@ module "cicd" {
   attestor_id                = module.fleetscope_infra.attestor_id
   binary_authorization_image = var.binary_authorization_image
 
+  binary_authorization_repository_id = var.binary_authorization_repository_id
+
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
