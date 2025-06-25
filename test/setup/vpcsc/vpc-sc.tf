@@ -239,6 +239,7 @@ locals {
         operations = {
           "artifactregistry.googleapis.com"    = { methods = ["*"] }
           "containerfilesystem.googleapis.com" = { methods = ["*"] }
+          "iamcredentials.googleapis.com"      = { methods = ["*"] }
         }
       }
     },
