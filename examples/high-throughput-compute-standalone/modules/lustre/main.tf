@@ -44,6 +44,8 @@ resource "google_lustre_instance" "lustre" {
   network             = var.network
   gke_support_enabled = var.gke_support_enabled
 
+  per_unit_storage_throughput = 1000
+
   timeouts {
     create = "120m"
     update = "120m"
