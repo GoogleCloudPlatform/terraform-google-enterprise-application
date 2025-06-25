@@ -219,6 +219,9 @@ locals {
       title = "Egress to service networking project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       },
       to = {
         resources = ["projects/213331819513"], //service networking project
@@ -231,6 +234,9 @@ locals {
       title = "Egress to bank of anthos Artifact Registry project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -247,6 +253,9 @@ locals {
       title = "Egress to Proxy Golang Storage project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -261,6 +270,9 @@ locals {
       title = "Egress to Storage project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -275,6 +287,9 @@ locals {
       title = "Egress to Logging bucket project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
