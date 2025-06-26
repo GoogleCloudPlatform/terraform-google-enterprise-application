@@ -299,6 +299,26 @@ locals {
           "storage.googleapis.com" = { methods = ["*"] }
         }
       }
+    },
+    {
+      title = "Allow Services from ${join(",", var.protected_projects)} to ${var.gitlab_project_number}"
+      from = {
+        identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
+      }
+      to = {
+        resources = [
+          "projects/${var.gitlab_project_number}" //worker pool project
+        ]
+        operations = {
+          "servicedirectory.googleapis.com" = { methods = ["*"] }
+          "cloudbuild.googleapis.com"       = { methods = ["*"] }
+          "clouddeploy.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"          = { methods = ["SubnetworksService.Get"] }
+        }
+      }
     }
   ]
 
