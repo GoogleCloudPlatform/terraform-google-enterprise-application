@@ -19,3 +19,53 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
   access_level = var.access_level_name
   members      = concat([for sa in local.cb_service_accounts_emails : "serviceAccount:${sa}"], [google_service_account.builder.member])
 }
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "access_to_remote_state_project" {
+  count     = var.service_perimeter_name != null && var.access_level_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "storage-access_level-${var.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      access_level = var.access_level_name
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.project.number}"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "access_to_remote_state_project" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.access_level_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "storage-access_level-${var.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      access_level = var.access_level_name
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.project.number}"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}

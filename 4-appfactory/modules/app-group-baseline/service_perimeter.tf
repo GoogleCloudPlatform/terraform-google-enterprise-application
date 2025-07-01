@@ -71,6 +71,10 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "secret
   title     = "scr-${data.google_project.admin_project.project_id}-${local.secret_project_number}"
   egress_from {
     identities = ["serviceAccount:service-${data.google_project.admin_project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = ["projects/${local.secret_project_number}"]
@@ -92,6 +96,10 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   title     = "scr-${data.google_project.admin_project.project_id}-${local.secret_project_number}"
   egress_from {
     identities = ["serviceAccount:service-${module.app_admin_project[0].project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = ["projects/${local.secret_project_number}"]
@@ -113,6 +121,10 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   title     = "kms-${data.google_project.admin_project.project_id}-${data.google_project.kms_project[0].project_id}"
   egress_from {
     identities = ["serviceAccount:service-${module.app_admin_project[0].project_number}@gs-project-accounts.iam.gserviceaccount.com"]
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = ["projects/${data.google_project.kms_project[0].number}"]
@@ -134,6 +146,10 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "admin_
   title     = "kms-${data.google_project.admin_project.project_id}-${data.google_project.kms_project[0].project_id}"
   egress_from {
     identities = ["serviceAccount:service-${module.app_admin_project[0].project_number}@gs-project-accounts.iam.gserviceaccount.com"]
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = ["projects/${data.google_project.kms_project[0].number}"]
@@ -150,11 +166,15 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "admin_
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "env_to_kms_egress_policy" {
-  for_each  = var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
+  for_each  = var.service_perimeter_mode == "DRY_RUN" && var.service_perimeter_name != null && var.kms_project_id != null && var.create_infra_project ? data.google_storage_project_service_account.gcs_account : {}
   perimeter = var.service_perimeter_name
   title     = "kms-${each.value.project}-${data.google_project.kms_project[0].project_id}"
   egress_from {
     identities = [each.value.member]
+    sources {
+      resource = "projects/${module.app_infra_project[each.key].project_number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = ["projects/${data.google_project.kms_project[0].number}"]
@@ -171,11 +191,15 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "env_to_kms_egress_policy" {
-  for_each  = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? data.google_storage_project_service_account.gcs_account : {}
+  for_each  = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.kms_project_id != null && var.create_infra_project ? data.google_storage_project_service_account.gcs_account : {}
   perimeter = var.service_perimeter_name
   title     = "kms-${each.value.project}-${data.google_project.kms_project[0].project_id}"
   egress_from {
     identities = [each.value.member]
+    sources {
+      resource = "projects/${module.app_infra_project[each.key].project_number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = ["projects/${data.google_project.kms_project[0].number}"]
@@ -292,6 +316,10 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   title     = "depl-${data.google_project.admin_project.project_id}-gke"
   egress_from {
     identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = [for project in data.google_project.clusters_projects : "projects/${project.number}"]

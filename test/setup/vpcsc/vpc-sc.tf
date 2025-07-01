@@ -219,6 +219,9 @@ locals {
       title = "Egress to service networking project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       },
       to = {
         resources = ["projects/213331819513"], //service networking project
@@ -231,6 +234,9 @@ locals {
       title = "Egress to bank of anthos by AR, CA and BAuthz"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -247,6 +253,7 @@ locals {
           "storage.googleapis.com"             = { methods = ["*"] }
           "iamcredentials.googleapis.com"      = { methods = ["*"] }
           "compute.googleapis.com"             = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
         }
       }
     },
@@ -254,6 +261,9 @@ locals {
       title = "Egress to Proxy Golang Storage project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -268,6 +278,9 @@ locals {
       title = "Egress to Storage project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -282,6 +295,9 @@ locals {
       title = "Egress to Logging bucket project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -312,6 +328,26 @@ locals {
           "compute.googleapis.com"             = { methods = ["*"] }
         }
       }
+    },
+    {
+      title = "Allow Services from ${join(",", var.protected_projects)} to ${var.gitlab_project_number}"
+      from = {
+        identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
+      }
+      to = {
+        resources = [
+          "projects/${var.gitlab_project_number}" //worker pool project
+        ]
+        operations = {
+          "servicedirectory.googleapis.com" = { methods = ["*"] }
+          "cloudbuild.googleapis.com"       = { methods = ["*"] }
+          "clouddeploy.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"          = { methods = ["SubnetworksService.Get"] }
+        }
+      }
     }
   ]
 
@@ -329,7 +365,7 @@ locals {
         }
       }
     }
-  ] : []
+  ] : tolist([])
 }
 
 resource "random_string" "prefix" {
@@ -365,10 +401,10 @@ module "regular_service_perimeter" {
   egress_policies_dry_run         = local.egress_rules
   ingress_policies_dry_run        = local.ingress_rules
 
-  access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
-  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
-  restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
-  resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : []
-  egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : []
-  ingress_policies        = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : []
+  access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : tolist([])
+  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : tolist([])
+  restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : tolist([])
+  resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : tolist([])
+  egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : tolist([])
+  ingress_policies        = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : tolist([])
 }
