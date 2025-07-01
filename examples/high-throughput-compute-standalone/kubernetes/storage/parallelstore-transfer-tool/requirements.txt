@@ -47,5 +47,5 @@ requests==2.32.3
     # via google-api-core
 rsa==4.9
     # via google-auth
-urllib3==2.3.0
+urllib3==2.5.0
     # via requests
