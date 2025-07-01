@@ -40,8 +40,10 @@ func TestBootstrap(t *testing.T) {
 	)
 
 	vars := map[string]interface{}{
-		"bucket_force_destroy": true,
-		"access_level_name":    vpcsc.GetStringOutput("access_level_name"),
+		"bucket_force_destroy":   true,
+		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
+		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
+		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
 	}
 
 	bootstrap := tft.NewTFBlueprintTest(t,
