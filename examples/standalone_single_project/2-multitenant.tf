@@ -50,8 +50,4 @@ module "multitenant_infra" {
   deletion_protection    = false
 
   cb_private_workerpool_project_id = var.workerpool_id == "" ? google_cloudbuild_worker_pool.pool[0].project : regex("projects/([^/]*)", var.workerpool_id)[0]
-
-  depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy
-  ]
 }

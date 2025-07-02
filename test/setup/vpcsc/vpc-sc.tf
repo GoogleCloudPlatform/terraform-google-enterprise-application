@@ -404,10 +404,10 @@ module "regular_service_perimeter" {
   egress_policies_dry_run         = local.egress_rules
   ingress_policies_dry_run        = local.ingress_rules
 
-  access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : tolist([])
-  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : tolist([])
-  restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : tolist([])
-  resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : tolist([])
-  egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : tolist([])
-  ingress_policies        = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : tolist([])
+  access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
+  vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
+  restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
+  resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : []
+  egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : []
+  ingress_policies        = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : []
 }
