@@ -312,6 +312,9 @@ locals {
       title = "Egress from ANY_IDENTITY to artifact-registry-docker-cache"
       from = {
         identity_type = "ANY_IDENTITY" //https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       },
       to = {
         resources = ["projects/342927644502"], //artifact-registry-docker-cache
