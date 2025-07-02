@@ -101,6 +101,7 @@ spec:
     metadata:
       labels:
         app: redis-cart
+        image-policy.k8s.io/break-glass: "true"
     spec:
       securityContext:
         fsGroup: 1000
