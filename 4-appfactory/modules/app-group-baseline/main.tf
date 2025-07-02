@@ -107,23 +107,6 @@ resource "time_sleep" "wait_propagation" {
     google_access_context_manager_service_perimeter_dry_run_egress_policy.clouddeploy_egress_policy_admin_to_gke_cluster,
     google_access_context_manager_service_perimeter_egress_policy.service_directory_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.service_directory_policy,
-
-    # google_access_context_manager_service_perimeter_egress_policy.admin_to_kms_egress_policy,
-    # google_access_context_manager_service_perimeter_egress_policy.backend_egress_policy,
-    # google_access_context_manager_service_perimeter_egress_policy.cloudbuild_egress_admin_to_workerpool_policy,
-    # google_access_context_manager_service_perimeter_egress_policy.clouddeploy_egress_cluster_to_workerpool_policy,
-    # google_access_context_manager_service_perimeter_egress_policy.env_to_kms_egress_policy,
-    # google_access_context_manager_service_perimeter_egress_policy.hpc_allow_infra_projects_to_use_workerpool,
-    # google_access_context_manager_service_perimeter_egress_policy.secret_manager_egress_policy,
-    # google_access_context_manager_service_perimeter_dry_run_egress_policy.backend_egress_policy,
-    # google_access_context_manager_service_perimeter_dry_run_egress_policy.admin_to_kms_egress_policy,
-    # google_access_context_manager_service_perimeter_dry_run_egress_policy.cloudbuild_egress_admin_to_workerpool_policy,
-    # google_access_context_manager_service_perimeter_dry_run_egress_policy.clouddeploy_egress_cluster_to_workerpool_policy,
-    # google_access_context_manager_service_perimeter_dry_run_egress_policy.env_to_kms_egress_policy,
-    # google_access_context_manager_service_perimeter_dry_run_egress_policy.hpc_allow_infra_projects_to_use_workerpool,
-    # google_access_context_manager_service_perimeter_dry_run_egress_policy.secret_manager_egress_policy,
-    # google_access_context_manager_service_perimeter_ingress_policy.ingress_policy,
-    # google_access_context_manager_service_perimeter_dry_run_ingress_policy.ingress_policy,
   ]
 }
 
@@ -162,7 +145,7 @@ module "app_admin_project" {
   disable_services_on_destroy = false
   disable_dependent_services  = false
 
-  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
@@ -320,7 +303,7 @@ module "app_infra_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
