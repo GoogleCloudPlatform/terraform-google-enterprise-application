@@ -66,6 +66,7 @@ func TestAppfactory(t *testing.T) {
 		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
 		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
+		"kms_project_id":         vpcsc.GetTFSetupStringOutput("project_id"),
 	}
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"

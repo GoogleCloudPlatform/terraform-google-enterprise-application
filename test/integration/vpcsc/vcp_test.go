@@ -41,7 +41,7 @@ func TestVPCSC(t *testing.T) {
 	if testutils.GetOrgACMPolicyID(t, orgID) == "" {
 		_, err := testutils.CreateOrgACMPolicyID(t, orgID)
 		if err != nil {
-			t.Errorf("Error creatin ACM Policy, %s", err)
+			t.Errorf("Error creating ACM Policy, %s", err)
 		}
 	}
 

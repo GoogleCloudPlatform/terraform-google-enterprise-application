@@ -266,6 +266,8 @@ module "gke-standard" {
   enable_private_nodes    = true
   enable_private_endpoint = true
 
+  enable_confidential_nodes = var.enable_confidential_nodes
+
   fleet_project_grant_service_agent = true
 
   deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
@@ -303,6 +305,16 @@ module "gke-autopilot" {
     "mesh_id" : "proj-${data.google_project.eab_cluster_project.number}"
   }
 
+  // Private Cluster Configuration
+  enable_private_nodes    = true
+  enable_private_endpoint = true
+
+  enable_confidential_nodes = var.enable_confidential_nodes
+
+  fleet_project_grant_service_agent = true
+
+  deletion_protection = var.deletion_protection
+
   depends_on = [
     module.eab_cluster_project,
     google_project_iam_member.gke_service_agent,
@@ -310,14 +322,6 @@ module "gke-autopilot" {
     google_project_iam_member.multiclusterdiscovery_service_agent,
     data.google_compute_default_service_account.compute_sa
   ]
-
-  // Private Cluster Configuration
-  enable_private_nodes    = true
-  enable_private_endpoint = true
-
-  fleet_project_grant_service_agent = true
-
-  deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
 }
 
 resource "time_sleep" "wait_service_cleanup" {

@@ -107,7 +107,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
     }
   }
 
@@ -216,22 +216,31 @@ resource "google_compute_firewall" "allow_https" {
 // =======================================================
 //          GITLAB WORKER POOL AND PRIVATE DNS CONFIG
 // =======================================================
+module "ssl_cert" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 10.0"
 
-resource "google_storage_bucket" "ssl_cert" {
-  name          = "${module.gitlab_project.project_id}-ssl-cert"
-  project       = module.gitlab_project.project_id
-  location      = "us-central1"
-  force_destroy = true
+  name              = "${module.gitlab_project.project_id}-ssl-cert"
+  project_id        = module.gitlab_project.project_id
+  location          = "us-central1"
+  log_bucket        = module.logging_bucket.name
+  log_object_prefix = "ssl-cert"
+  force_destroy     = true
 
-  public_access_prevention    = "enforced"
-  uniform_bucket_level_access = true
-  versioning {
-    enabled = true
-  }
+  versioning = true
+  encryption = { default_kms_key_name = module.kms.keys["key"] }
+
+  # Module does not support values not know before apply (member and role are used to create the index in for_each)
+  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
+  # iam_members = [{
+  #   role   = "roles/storage.admin"
+  #   member = "${google_service_account.gitlab_vm.member}"
+  # }]
+
 }
 
-resource "google_storage_bucket_iam_member" "storage_admin" {
-  bucket = google_storage_bucket.ssl_cert.name
+resource "google_storage_bucket_iam_member" "ssl_storage_admin" {
+  bucket = module.ssl_cert.name
   role   = "roles/storage.admin"
   member = google_service_account.gitlab_vm.member
 }
