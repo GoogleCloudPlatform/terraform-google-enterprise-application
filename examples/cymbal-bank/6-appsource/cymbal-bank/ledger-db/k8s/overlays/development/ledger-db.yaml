@@ -28,6 +28,7 @@ spec:
     metadata:
       labels:
         app: ledger-db
+        image-policy.k8s.io/break-glass: "true"
     spec:
       serviceAccountName: default
       containers:
