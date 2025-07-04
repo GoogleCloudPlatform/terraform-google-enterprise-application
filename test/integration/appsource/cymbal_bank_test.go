@@ -245,6 +245,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
 
 				releaseName := ""
+				releaseFullName := ""
 				releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
 				pollRelease := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
@@ -252,14 +253,16 @@ func TestSourceCymbalBank(t *testing.T) {
 						if len(releases) == 0 {
 							return true, nil
 						}
-						releaseName = releases[0].Get("name").String()
+						releaseFullName = releases[0].Get("name").String()
+						releaseNameSplited := strings.Split(releaseFullName, "/")
+						releaseName = releaseNameSplited[len(releaseNameSplited)-1]
 						return false, nil
 					}
 				}
 				utils.Poll(t, pollRelease(releaseListCmd), 10, 60*time.Second)
 
 				targetId := deployTargets.Array()[0]
-				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
+				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseFullName, targetId)
 				// Poll CD rollouts until rollout is successful
 				pollCloudDeploy := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
@@ -276,6 +279,11 @@ func TestSourceCymbalBank(t *testing.T) {
 							logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
 							logs := gcloud.Runf(t, logsCmd).String()
 							t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
+							if strings.Contains(logs, "Insufficient memory") || strings.Contains(logs, "Insufficient CPU") {
+								t.Logf("Re-trying rollout due to Cluster scalling.")
+								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase=stable", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName))
+								return true, nil
+							}
 							return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 						}
 					}
