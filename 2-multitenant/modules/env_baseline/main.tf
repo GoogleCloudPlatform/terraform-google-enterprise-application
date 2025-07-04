@@ -28,6 +28,8 @@ locals {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]
   }
 
+  cluster_sa = [for i in merge(module.gke-standard, module.gke-autopilot) : i.service_account][0]
+
   arm_node_pool = { for k, v in local.subnets : k => (regex(local.regions_re, v)[0]) == "us-central1" ?
     [
       {
@@ -75,7 +77,7 @@ module "eab_cluster_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
   vpc_service_control_sleep_duration = "2m"
@@ -85,23 +87,26 @@ module "eab_cluster_project" {
   disable_services_on_destroy = false
 
   activate_apis = [
+    "anthos.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "cloudtrace.googleapis.com",
     "compute.googleapis.com",
-    "iam.googleapis.com",
-    "serviceusage.googleapis.com",
     "container.googleapis.com",
-    "mesh.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "containerscanning.googleapis.com",
     "gkehub.googleapis.com",
-    "anthos.googleapis.com",
+    "iam.googleapis.com",
+    "mesh.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
-    "trafficdirector.googleapis.com",
-    "anthosconfigmanagement.googleapis.com",
     "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudtrace.googleapis.com"
+    "trafficdirector.googleapis.com",
   ]
 }
 
@@ -147,6 +152,16 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
+resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
+  count        = var.access_level_name != null ? 1 : 0
+  access_level = var.access_level_name
+  members = distinct([
+    "serviceAccount:${local.cluster_sa}",
+    data.google_compute_default_service_account.compute_sa.member,
+    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com"
+  ])
+}
+
 resource "google_project_service_identity" "gke_identity_cluster_project" {
   provider   = google-beta
   project    = local.cluster_project_id
@@ -185,6 +200,16 @@ resource "google_project_iam_member" "multiclusterdiscovery_service_agent" {
   project = local.cluster_project_id
   role    = "roles/multiclusterservicediscovery.serviceAgent"
   member  = google_project_service_identity.mcsd_cluster_project.member
+}
+
+resource "google_project_iam_member" "artifactregistry_reader" {
+  for_each = {
+    "compute_sa" : data.google_compute_default_service_account.compute_sa.member,
+    "cluster_sa" : "serviceAccount:${local.cluster_sa}",
+  }
+  project = local.cluster_project_id
+  role    = "roles/artifactregistry.reader"
+  member  = each.value
 }
 
 module "gke-standard" {
@@ -292,6 +317,7 @@ module "gke-autopilot" {
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
 
+
   security_posture_vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   enable_cost_allocation              = true
 
@@ -328,4 +354,163 @@ resource "time_sleep" "wait_service_cleanup" {
   depends_on = [module.gke-autopilot.name, module.gke-standard.name]
 
   destroy_duration = "300s"
+}
+
+data "google_project" "workerpool_project" {
+  count      = var.cb_private_workerpool_project_id != "" ? 1 : 0
+  project_id = var.cb_private_workerpool_project_id
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.cb_private_workerpool_project_id != "" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "deploy-${local.cluster_project_id}-${data.google_project.workerpool_project[0].project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.eab_cluster_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project[0].number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
+  count     = var.service_perimeter_name != null && var.cb_private_workerpool_project_id != "" ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "deploy-${local.cluster_project_id}-${data.google_project.workerpool_project[0].project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.eab_cluster_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project[0].number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+data "google_project" "network_project" {
+  project_id = var.network_project_id
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_cluster_to_network_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "${var.network_project_id}-${local.cluster_project_id}"
+  egress_from {
+    # identities = ["serviceAccount:service-${data.google_project.eab_cluster_project.number}@compute-system.iam.gserviceaccount.com", "serviceAccount:${local.cluster_sa}"]
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.network_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.eab_cluster_project.number}"]
+    operations {
+      service_name = "monitoring.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "logging.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudtrace.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "sts.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "trafficdirector.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_cluster_to_network_policy" {
+  count     = var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "${var.network_project_id}-${local.cluster_project_id}"
+  egress_from {
+    # identities = ["serviceAccount:service-${data.google_project.eab_cluster_project.number}@compute-system.iam.gserviceaccount.com", "serviceAccount:${local.cluster_sa}"]
+    identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.network_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.eab_cluster_project.number}"]
+    operations {
+      service_name = "monitoring.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "logging.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudtrace.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "sts.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "trafficdirector.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
 }

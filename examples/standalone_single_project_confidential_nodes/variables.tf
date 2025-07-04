@@ -57,6 +57,13 @@ variable "service_perimeter_mode" {
   }
 }
 
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
+
 variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
@@ -82,4 +89,19 @@ variable "bucket_kms_key" {
   description = "KMS Key id to be used to encrypt bucket."
   type        = string
   default     = null
+}
+
+variable "attestation_kms_key" {
+  type        = string
+  description = "The KMS Key ID to be used by attestor."
+}
+
+variable "binary_authorization_image" {
+  type        = string
+  description = "The Binary Authorization image to be used to create attestation."
+}
+
+variable "binary_authorization_repository_id" {
+  type        = string
+  description = "The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`."
 }

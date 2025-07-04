@@ -133,10 +133,12 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		}
 		project, _, err := git.Projects.CreateProject(p)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
+		} else {
+			t.Log(project.WebURL)
+			t.Log(project.Name)
 		}
-		t.Log(project.WebURL)
-		t.Log(project.Name)
+
 	}
 
 	root := "../../.."

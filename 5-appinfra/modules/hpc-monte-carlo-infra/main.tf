@@ -32,17 +32,20 @@ resource "google_project_iam_member" "team_roles" {
 
 resource "google_project_service" "enable_apis" {
   for_each = toset([
+    "batch.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "bigquery.googleapis.com",
-    "storage.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
     "container.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "containerscanning.googleapis.com",
     "logging.googleapis.com",
     "notebooks.googleapis.com",
-    "batch.googleapis.com",
     "pubsub.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "compute.googleapis.com",
-    "cloudkms.googleapis.com"
+    "storage.googleapis.com"
   ])
   project            = var.infra_project
   service            = each.key

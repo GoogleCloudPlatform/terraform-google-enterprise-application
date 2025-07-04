@@ -131,6 +131,11 @@ variable "admin_project_id" {
   type        = string
 }
 
+variable "remote_state_project_id" {
+  description = "The project id where remote state are stored. It will be used to allow egress from VPC-SC if is being used."
+  type        = string
+}
+
 variable "create_infra_project" {
   description = "Boolean value that indicates whether an infrastructure project should be created for the microservice."
   type        = bool
@@ -233,7 +238,7 @@ variable "access_level_name" {
 }
 
 variable "kms_project_id" {
-  description = "Custom KMS Key project to be granted KMS Admin to the Cloud Build service account."
+  description = "Custom KMS Key project to be granted KMS Admin and KMS Signer Verifier to the Cloud Build service account."
   type        = string
   default     = null
 }

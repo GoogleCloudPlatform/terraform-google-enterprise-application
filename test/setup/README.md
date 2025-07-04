@@ -22,7 +22,12 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description |
 |------|-------------|
+| attestation\_evaluation\_mode | n/a |
+| attestation\_kms\_key | n/a |
+| attestation\_kms\_project | n/a |
 | billing\_account | n/a |
+| binary\_authorization\_image | n/a |
+| binary\_authorization\_repository\_id | The ID of the Repository where binary attestation image is stored. |
 | bucket\_kms\_key | n/a |
 | common\_folder\_id | n/a |
 | envs | n/a |
@@ -36,7 +41,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | gitlab\_service\_directory | n/a |
 | gitlab\_url | n/a |
 | gitlab\_webhook\_secret\_id | =========================== OUTPUTS =========================== |
-| kms\_bucket\_keyring | n/a |
+| kms\_keyring | n/a |
 | logging\_bucket | n/a |
 | network\_project\_id | n/a |
 | network\_project\_number | n/a |
@@ -54,5 +59,6 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | workerpool\_network\_name | n/a |
 | workerpool\_network\_project\_id | n/a |
 | workerpool\_network\_self\_link | n/a |
+| workerpool\_project\_id | n/a |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

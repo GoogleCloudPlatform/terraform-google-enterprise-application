@@ -268,8 +268,13 @@ module "cicd" {
 
   workerpool_id = var.workerpool_id == null ? google_cloudbuild_worker_pool.pool[0].id : var.workerpool_id
 
-  logging_bucket = var.logging_bucket
-  bucket_kms_key = var.bucket_kms_key
+  logging_bucket             = var.logging_bucket
+  bucket_kms_key             = var.bucket_kms_key
+  attestation_kms_key        = var.attestation_kms_key
+  attestor_id                = module.fleetscope_infra.attestor_id
+  binary_authorization_image = var.binary_authorization_image
+
+  binary_authorization_repository_id = var.binary_authorization_repository_id
 
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
