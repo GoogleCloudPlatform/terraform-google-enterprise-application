@@ -58,3 +58,9 @@ variable "attestation_kms_key" {
   type        = string
   description = "The KMS Key ID to be used by attestor."
 }
+
+variable "enable_kueue" {
+  type        = bool
+  description = "Enables Kueue private installation."
+  default     = false
+}

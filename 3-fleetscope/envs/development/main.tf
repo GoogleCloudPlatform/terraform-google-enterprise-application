@@ -35,6 +35,8 @@ module "env" {
   config_sync_policy_dir     = var.config_sync_policy_dir
   attestation_kms_key        = var.attestation_kms_key
 
+  enable_kueue = var.enable_kueue
+
   attestation_evaluation_mode = var.attestation_evaluation_mode
   disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

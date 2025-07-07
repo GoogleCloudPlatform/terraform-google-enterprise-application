@@ -50,5 +50,12 @@ resource "google_binary_authorization_policy" "policy" {
     require_attestations_by = var.attestation_evaluation_mode == "REQUIRE_ATTESTATION" ? [google_binary_authorization_attestor.attestor.name] : null
   }
 
+  dynamic "admission_whitelist_patterns" {
+    for_each = concat(var.binary_authz_admission_whitelist_patterns, var.enable_kueue ? [for i in module.kueue : "${i.remote_repository_url}/**"] : [])
+    content {
+      name_pattern = admission_whitelist_patterns.value
+    }
+  }
+
   global_policy_evaluation_mode = "ENABLE"
 }

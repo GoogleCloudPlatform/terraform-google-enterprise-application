@@ -65,3 +65,9 @@ variable "attestation_evaluation_mode" {
   description = "How this admission rule will be evaluated. Possible values are: ALWAYS_ALLOW, REQUIRE_ATTESTATION, ALWAYS_DENY"
   default     = "ALWAYS_ALLOW"
 }
+
+variable "enable_kueue" {
+  type        = bool
+  description = "Enables Kueue private installation."
+  default     = false
+}
