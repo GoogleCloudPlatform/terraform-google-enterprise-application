@@ -49,17 +49,18 @@ module "gitlab_project" {
   auto_create_network = true
 
   activate_apis = [
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudkms.googleapis.com",
     "compute.googleapis.com",
+    "dns.googleapis.com",
     "iam.googleapis.com",
     "secretmanager.googleapis.com",
-    "servicemanagement.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "storage.googleapis.com",
     "servicedirectory.googleapis.com",
+    "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
-    "dns.googleapis.com",
-    "cloudbuild.googleapis.com"
+    "serviceusage.googleapis.com",
+    "storage.googleapis.com",
   ]
 }
 
@@ -228,7 +229,7 @@ module "ssl_cert" {
   force_destroy     = true
 
   versioning = true
-  encryption = { default_kms_key_name = module.kms.keys["key"] }
+  encryption = { default_kms_key_name = module.kms.keys["bucket"] }
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
   # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
@@ -414,4 +415,8 @@ output "gitlab_service_directory" {
 
 output "workerpool_id" {
   value = google_cloudbuild_worker_pool.pool.id
+}
+
+output "workerpool_project_id" {
+  value = google_cloudbuild_worker_pool.pool.project
 }

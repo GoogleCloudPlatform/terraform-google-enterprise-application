@@ -20,7 +20,7 @@ locals {
 }
 
 module "kueue" {
-  for_each = toset(var.cluster_membership_ids)
+  for_each = var.enable_kueue ? toset(var.cluster_membership_ids) : toset([])
 
   source                   = "../private_install_manifest"
   url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/${local.kueue_version}/manifests.yaml"

@@ -293,4 +293,5 @@ options:
     - "TF_VAR_service_perimeter_mode=ENFORCE"
     - "TF_VAR_deletion_protection=false"
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
+    - "TF_VAR_enable_kueue=true"
     - 'INSTALL_KUEUE=true'

@@ -65,6 +65,7 @@ module "project_standalone" {
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
@@ -75,6 +76,8 @@ module "project_standalone" {
     "cloudtrace.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "containerscanning.googleapis.com",
     "gkehub.googleapis.com",
     "iam.googleapis.com",
     "iap.googleapis.com",
@@ -85,6 +88,7 @@ module "project_standalone" {
     "networkmanagement.googleapis.com",
     "orgpolicy.googleapis.com",
     "secretmanager.googleapis.com",
+    "servicedirectory.googleapis.com",
     "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
@@ -92,7 +96,6 @@ module "project_standalone" {
     "sqladmin.googleapis.com",
     "storage-api.googleapis.com",
     "trafficdirector.googleapis.com",
-    "servicedirectory.googleapis.com",
   ]
 }
 

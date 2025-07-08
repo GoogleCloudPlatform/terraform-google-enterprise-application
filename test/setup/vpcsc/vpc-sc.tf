@@ -231,7 +231,7 @@ locals {
       }
     },
     {
-      title = "Egress to bank of anthos Artifact Registry project"
+      title = "Egress to bank of anthos by AR, CA and BAuthz"
       from = {
         identity_type = "ANY_IDENTITY"
         sources = {
@@ -244,8 +244,16 @@ locals {
         ]
         operations = {
           "artifactregistry.googleapis.com"    = { methods = ["*"] }
+          "binaryauthorization.googleapis.com" = { methods = ["*"] }
+          "cloudkms.googleapis.com"            = { methods = ["*"] }
+          "container.googleapis.com"           = { methods = ["*"] }
           "containerfilesystem.googleapis.com" = { methods = ["*"] }
+          "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "containerregistry.googleapis.com"   = { methods = ["*"] }
+          "storage.googleapis.com"             = { methods = ["*"] }
           "iamcredentials.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"             = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
         }
       }
     },
@@ -301,6 +309,30 @@ locals {
       }
     },
     {
+      title = "Egress from ANY_IDENTITY to artifact-registry-docker-cache"
+      from = {
+        identity_type = "ANY_IDENTITY" //https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
+      },
+      to = {
+        resources = ["projects/342927644502"], //artifact-registry-docker-cache
+        operations = {
+          "artifactregistry.googleapis.com"    = { methods = ["*"] }
+          "binaryauthorization.googleapis.com" = { methods = ["*"] }
+          "cloudkms.googleapis.com"            = { methods = ["*"] }
+          "container.googleapis.com"           = { methods = ["*"] }
+          "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
+          "containerregistry.googleapis.com"   = { methods = ["*"] }
+          "storage.googleapis.com"             = { methods = ["*"] }
+          "iamcredentials.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"             = { methods = ["*"] }
+        }
+      }
+    },
+    {
       title = "Allow Services from ${join(",", var.protected_projects)} to ${var.gitlab_project_number}"
       from = {
         identity_type = "ANY_IDENTITY"
@@ -324,7 +356,7 @@ locals {
 
   ingress_rules = contains(var.protected_projects, var.logging_bucket_project_number) ? [
     {
-      title = "Ingress from Gitlab to Single Project project"
+      title = "Ingress from Gitlab to Single Project project - kms service"
       from = {
         sources    = { resources = ["projects/${var.gitlab_project_number}"] }
         identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"] //gitlab storage identity
@@ -336,7 +368,7 @@ locals {
         }
       }
     }
-  ] : []
+  ] : tolist([])
 }
 
 resource "random_string" "prefix" {
@@ -351,7 +383,7 @@ data "google_access_context_manager_access_policy" "policy_org" {
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version            = "~> 7.0"
+  version            = "~> 7.1"
   policy             = data.google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = var.access_level_members
@@ -360,7 +392,7 @@ module "access_level_members" {
 
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version        = "~> 7.0"
+  version        = "~> 7.1"
   policy         = data.google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
