@@ -43,6 +43,11 @@ func TestMultitenant(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
+	privateWorkerPool := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(privateWorkerPoolPath),
+	)
+
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
@@ -52,7 +57,7 @@ func TestMultitenant(t *testing.T) {
 		"service_perimeter_name":           vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode":           vpcsc.GetStringOutput("service_perimeter_mode"),
 		"access_level_name":                vpcsc.GetStringOutput("access_level_name"),
-		"cb_private_workerpool_project_id": vpcsc.GetTFSetupStringOutput("workerpool_project_id"),
+		"cb_private_workerpool_project_id": privateWorkerPool.GetStringOutput("workerpool_id"),
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
@@ -64,6 +69,7 @@ func TestMultitenant(t *testing.T) {
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
 				tft.WithVars(vars),
+				tft.WithParallelism(100),
 			)
 
 			multitenant.DefineVerify(func(assert *assert.Assertions) {

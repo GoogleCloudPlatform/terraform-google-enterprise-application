@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+locals {
+  teams = var.hpc ? ["hpc-team-a", "hpc-team-b"] : setunion([
+    "cb-frontend",
+    "cb-accounts",
+    "cb-ledger"],
+    !var.single_project ? ["cymbalshops"] : []
+  )
+}
+
 resource "random_string" "prefix" {
   length  = 6
   special = false
@@ -45,23 +54,39 @@ module "seed_project" {
 
   activate_apis = [
     "accesscontextmanager.googleapis.com",
+    "anthos.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
+    "apikeys.googleapis.com",
+    "binaryauthorization.googleapis.com",
+    "certificatemanager.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
+    "clouddeploy.googleapis.com",
+    "cloudfunctions.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
     "container.googleapis.com",
     "containeranalysis.googleapis.com",
     "containerscanning.googleapis.com",
-    "compute.googleapis.com",
+    "gkehub.googleapis.com",
     "iam.googleapis.com",
+    "iap.googleapis.com",
+    "mesh.googleapis.com",
+    "monitoring.googleapis.com",
+    "multiclusteringress.googleapis.com",
+    "multiclusterservicediscovery.googleapis.com",
+    "networkmanagement.googleapis.com",
     "orgpolicy.googleapis.com",
+    "secretmanager.googleapis.com",
     "servicedirectory.googleapis.com",
     "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
-    "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
-    "storage-api.googleapis.com",
+    "storage.googleapis.com",
+    "trafficdirector.googleapis.com",
   ]
 
   activate_api_identities = [
@@ -85,4 +110,19 @@ module "seed_project" {
       roles = ["roles/cloudconfig.serviceAgent"]
     }
   ]
+}
+
+data "google_organization" "org" {
+  organization = var.org_id
+}
+
+module "group" {
+  for_each = toset(local.teams)
+  source   = "terraform-google-modules/group/google"
+  version  = "~> 0.7"
+
+  id           = "${each.key}-${random_string.prefix.result}@${data.google_organization.org.domain}"
+  display_name = "${each.key}-${random_string.prefix.result}"
+  description  = "Group module test group for ${each.key}"
+  domain       = data.google_organization.org.domain
 }

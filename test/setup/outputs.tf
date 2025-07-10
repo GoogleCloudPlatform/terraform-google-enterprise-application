@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-output "project_id" {
+output "seed_project_id" {
   value = module.seed_project.project_id
 }
 
-output "project_number" {
+output "seed_project_number" {
   value = module.seed_project.project_number
 }
 
-output "folder_id" {
+output "seed_folder_id" {
   value = module.folder_seed.id
 }
 
@@ -30,7 +30,35 @@ output "sa_email" {
   value = google_service_account.int_test.email
 }
 
+output "sa_id" {
+  value = google_service_account.int_test.id
+}
+
 output "sa_key" {
   value     = google_service_account_key.int_test.private_key
   sensitive = true
+}
+
+output "cloud_build_sa" {
+  value = var.cloud_build_sa
+}
+
+output "billing_account" {
+  value = var.billing_account
+}
+
+output "org_id" {
+  value = var.org_id
+}
+
+output "teams" {
+  value = { for team, group in module.group : team => module.group[team].id }
+}
+
+output "single_project" {
+  value = var.single_project
+}
+
+output "hpc" {
+  value = var.hpc
 }

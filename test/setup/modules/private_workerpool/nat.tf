@@ -14,55 +14,10 @@
  * limitations under the License.
  */
 
-locals {
-  nat_proxy_vm_ip_range = "10.1.1.0/24"
-  gitlab_vm_ip_range    = "10.2.2.0/24"
-}
 
-module "vpc" {
-  source  = "terraform-google-modules/network/google"
-  version = "~> 10.0"
-
-  project_id                             = module.gitlab_project.project_id
-  network_name                           = "eab-vpc-workerpool"
-  shared_vpc_host                        = false
-  delete_default_internet_gateway_routes = true
-
-  ingress_rules = [
-    {
-      name     = "allow-ssh"
-      priority = 500
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      source_ranges = ["0.0.0.0/0"]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["22"]
-        }
-      ]
-    },
-  ]
-
-  subnets = [
-    {
-      subnet_name           = "nat-subnet"
-      subnet_ip             = local.nat_proxy_vm_ip_range
-      subnet_region         = "us-central1"
-      subnet_private_access = true
-    },
-    {
-      subnet_name           = "gitlab-vm-subnet"
-      subnet_ip             = local.gitlab_vm_ip_range
-      subnet_region         = "us-central1"
-      subnet_private_access = true
-    }
-  ]
-}
 
 resource "google_compute_network_peering_routes_config" "peering_routes" {
-  project              = module.vpc.project_id
+  project              = module.private_workerpool_project.project_id
   peering              = google_service_networking_connection.gitlab_worker_pool_conn.peering
   network              = module.vpc.network_name
   import_custom_routes = true
@@ -75,7 +30,7 @@ resource "google_compute_network_peering_routes_config" "peering_routes" {
 module "firewall_rules" {
   source       = "terraform-google-modules/network/google//modules/firewall-rules"
   version      = "~> 9.0"
-  project_id   = module.vpc.project_id
+  project_id   = module.private_workerpool_project.project_id
   network_name = module.vpc.network_name
 
   rules = [{
@@ -115,7 +70,7 @@ module "firewall_rules" {
 }
 
 resource "google_compute_address" "cloud_build_nat" {
-  project      = module.vpc.project_id
+  project      = module.private_workerpool_project.project_id
   address_type = "EXTERNAL"
   name         = "cloud-build-nat"
   network_tier = "PREMIUM"
@@ -123,7 +78,7 @@ resource "google_compute_address" "cloud_build_nat" {
 }
 
 resource "google_compute_instance" "vm-proxy" {
-  project      = module.vpc.project_id
+  project      = module.private_workerpool_project.project_id
   name         = "cloud-build-nat-vm"
   machine_type = "e2-medium"
   zone         = "us-central1-a"
@@ -139,7 +94,7 @@ resource "google_compute_instance" "vm-proxy" {
   network_interface {
     network            = module.vpc.network_name
     subnetwork         = "nat-subnet"
-    subnetwork_project = module.vpc.project_id
+    subnetwork_project = module.private_workerpool_project.project_id
 
     access_config {
       nat_ip = google_compute_address.cloud_build_nat.address
@@ -160,7 +115,7 @@ resource "google_compute_instance" "vm-proxy" {
 
 resource "google_compute_route" "through-nat" {
   name              = "through-nat-range1"
-  project           = module.vpc.project_id
+  project           = module.private_workerpool_project.project_id
   dest_range        = "0.0.0.0/1"
   network           = module.vpc.network_name
   next_hop_instance = google_compute_instance.vm-proxy.id
@@ -169,7 +124,7 @@ resource "google_compute_route" "through-nat" {
 
 resource "google_compute_route" "through-nat2" {
   name              = "through-nat-range2"
-  project           = module.vpc.project_id
+  project           = module.private_workerpool_project.project_id
   dest_range        = "128.0.0.0/1"
   network           = module.vpc.network_name
   next_hop_instance = google_compute_instance.vm-proxy.id
@@ -180,7 +135,7 @@ resource "google_compute_route" "through-nat2" {
 
 resource "google_compute_route" "direct-to-gateway" {
   name             = "direct-to-gateway-range1"
-  project          = module.vpc.project_id
+  project          = module.private_workerpool_project.project_id
   dest_range       = "0.0.0.0/1"
   network          = module.vpc.network_name
   next_hop_gateway = "default-internet-gateway"
@@ -190,7 +145,7 @@ resource "google_compute_route" "direct-to-gateway" {
 
 resource "google_compute_route" "direct-to-gateway2" {
   name             = "direct-to-gateway-range2"
-  project          = module.vpc.project_id
+  project          = module.private_workerpool_project.project_id
   dest_range       = "128.0.0.0/1"
   network          = module.vpc.network_name
   next_hop_gateway = "default-internet-gateway"

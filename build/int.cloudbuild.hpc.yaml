@@ -29,28 +29,71 @@ steps:
       - "TF_VAR_single_project=false"
       - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
 
+  - id: private-workerpool-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage init --verbose"]
+    waitFor:
+      - prepare
+
+  - id: private-workerpool-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage apply --verbose"]
+    waitFor:
+      - private-workerpool-init
+
+  - id: logging-bucket-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
+    waitFor:
+      - private-workerpool-apply
+
+  - id: logging-bucket-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage apply --verbose"]
+    waitFor:
+      - logging-bucket-init
+
+  - id: gitlab-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage init --verbose"]
+    waitFor:
+      - private-workerpool-apply
+      - logging-bucket-apply
+
+  - id: gitlab-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage apply --verbose"]
+    waitFor:
+      - gitlab-init
+
   - id: wait-startup-script
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestValidateStartupScript --stage verify --verbose"]
     waitFor:
-      - prepare
+      - private-workerpool-apply
+      - gitlab-apply
 
-  - id: bootstrap-gitlab-vm
+  - id: harness-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    entrypoint: "bash"
     args:
-      - "-c"
-      - |-
-        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
-        update-ca-certificates
-        if (ls /etc/ssl/certs | grep gitlab.pem); then
-            cft test run TestBootstrapGitlabVM --stage verify --verbose || exit 1
-        else
-            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
-        fi
+      ["/bin/bash", "-c", "cft test run TestMultitenantHarness --stage init --verbose"]
     waitFor:
-      - wait-startup-script
+      - private-workerpool-apply
+      - gitlab-apply
+
+  - id: harness-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestMultitenantHarness --stage apply --verbose"]
+    waitFor:
+      - harness-init
 
   - id: vpc-sc
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -62,9 +105,25 @@ steps:
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
-      - "access_level_members=serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
+    waitFor:
+      - harness-apply
+
+  - id: bootstrap-gitlab-vm
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |-
+       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestBootstrapGitlabVM --stage verify --verbose || exit 1
+        else
+            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
+        fi
     waitFor:
       - wait-startup-script
+      - vpc-sc
 
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
@@ -141,7 +200,7 @@ steps:
     args:
       - "-c"
       - |-
-        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
         update-ca-certificates
         sleep 5m
         if (ls /etc/ssl/certs | grep gitlab.pem); then
@@ -278,7 +337,36 @@ steps:
         "cft test run TestVPCSC  --stage teardown --verbose",
       ]
     waitFor:
-      - multitenant-teardown
+      - bootstrap-teardown
+
+  - id: harness-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestMultitenantHarness --stage teardown --verbose"]
+    waitFor:
+      - vpcsc-teardown
+
+  - id: gitlab-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage teardown --verbose"]
+    waitFor:
+      - harness-teardown
+
+  - id: private-workerpool-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage teardown --verbose"]
+    waitFor:
+      - gitlab-teardown
+
+  - id: logging-bucket-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage teardown --verbose"]
+    waitFor:
+      - gitlab-teardown
+      - private-workerpool-teardown
 
 tags:
   - "ci"
@@ -295,3 +383,5 @@ options:
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
     - "TF_VAR_enable_kueue=true"
     - 'INSTALL_KUEUE=true'
+    - "TF_VAR_single_project=false"
+    - "TF_VAR_hpc=true"

@@ -39,17 +39,24 @@ func TestBootstrap(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
+	privateWorkerPool := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(privateWorkerPoolPath),
+	)
+
 	vars := map[string]interface{}{
 		"bucket_force_destroy":   true,
 		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
 		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
+		"workerpool_id":          privateWorkerPool.GetStringOutput("workerpool_id"),
 	}
 
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithParallelism(100),
 	)
 
 	bootstrap.DefineApply(

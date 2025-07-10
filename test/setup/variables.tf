@@ -33,3 +33,13 @@ variable "cloud_build_sa" {
   description = "Cloud Build Service Account email to be granted Encrypt/Decrypt role."
   type        = string
 }
+
+variable "single_project" {
+  description = "Single Project example being deployed."
+  type        = bool
+}
+
+variable "hpc" {
+  description = "HPC Example being deployed."
+  type        = bool
+}

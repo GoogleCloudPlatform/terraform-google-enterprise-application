@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package vpcsc
+package harness_vpcsc
 
 import (
 	"fmt"
@@ -29,10 +29,26 @@ import (
 func TestVPCSC(t *testing.T) {
 	vpcPath := "../../setup/vpcsc"
 	temp := tft.NewTFBlueprintTest(t, tft.WithTFDir(vpcPath))
-	projectNumber := temp.GetTFSetupStringOutput("project_number")
-	networkProjectsNumber := temp.GetTFSetupOutputListVal("network_project_number")
+
+	gitLabPath := "../../setup/harness/gitlab"
+	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+
+	gitLabProjectNumber := gitLab.GetStringOutput("gitlab_project_number")
+
+	isSingleProject, err := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
+	if err != nil {
+		isSingleProject = false
+	}
+	networkProjectsNumber := []string{}
+
+	if !isSingleProject {
+		multitenantPath := "../../setup/harness/multitenant"
+		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(multitenantPath))
+		networkProjectsNumber = multitenant.GetTFSetupOutputListVal("network_project_number")
+	}
+
+	projectNumber := temp.GetTFSetupStringOutput("seed_project_number")
 	serviceAccount := temp.GetTFSetupStringOutput("sa_email")
-	singleProject, _ := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
 	addAccessLevelMembers := strings.Split(os.Getenv("TF_VAR_access_level_members"), ",")
 	protected_projects := []string{}
 	orgID := temp.GetTFSetupStringOutput("org_id")
@@ -52,7 +68,7 @@ func TestVPCSC(t *testing.T) {
 		fmt.Sprintf("serviceAccount:%s", serviceAccount),
 		"serviceAccount:cloud-build@system.gserviceaccount.com",
 	}
-	if singleProject {
+	if isSingleProject {
 		protected_projects = append(protected_projects, projectNumber)
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
@@ -68,12 +84,14 @@ func TestVPCSC(t *testing.T) {
 		"access_level_members":          accessLevelMembers,
 		"protected_projects":            protected_projects,
 		"logging_bucket_project_number": projectNumber,
+		"gitlab_project_number":         gitLabProjectNumber,
 	}
 
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(vpcPath),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithParallelism(100),
 	)
 	vpcsc.Test()
 

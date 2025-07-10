@@ -86,6 +86,7 @@ func TestHPCAppfactory(t *testing.T) {
 			tft.WithVars(vars),
 			tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			tft.WithBackendConfig(backendConfig),
+			tft.WithParallelism(100),
 		)
 
 		appFactory.DefineVerify(func(assert *assert.Assertions) {

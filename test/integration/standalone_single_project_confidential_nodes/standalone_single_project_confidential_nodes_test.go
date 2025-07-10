@@ -40,17 +40,34 @@ func TestStandaloneSingleProjectConfidentialNodesExample(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	projectID := setupOutput.GetTFSetupStringOutput("seed_project_id")
+
+	singleProjecPath := "../../setup/harness/single_project"
+	singleProject := tft.NewTFBlueprintTest(t, tft.WithTFDir(singleProjecPath))
+
+	loggingBucketPath := "../../setup/harness/logging_bucket"
+	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
+
+	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
+	privateWorkerPool := tft.NewTFBlueprintTest(t, tft.WithTFDir(privateWorkerPoolPath))
+
 	service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
 	service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
 	access_level_name := setupOutput.GetStringOutput("access_level_name")
 
 	vars := map[string]interface{}{
-		"project_id":             projectID,
-		"service_perimeter_mode": service_perimeter_mode,
-		"service_perimeter_name": service_perimeter_name,
-		"access_level_name":      access_level_name,
-		"subnetwork_self_link":   setupOutput.GetTFSetupStringOutput("single_project_cluster_subnetwork_self_link"),
+		"project_id":                         projectID,
+		"service_perimeter_mode":             service_perimeter_mode,
+		"service_perimeter_name":             service_perimeter_name,
+		"access_level_name":                  access_level_name,
+		"subnetwork_self_link":               singleProject.GetStringOutput("single_project_cluster_subnetwork_self_link"),
+		"binary_authorization_repository_id": singleProject.GetStringOutput("binary_authorization_repository_id"),
+		"binary_authorization_image":         singleProject.GetStringOutput("binary_authorization_image"),
+		"workerpool_network_id":              privateWorkerPool.GetStringOutput("workerpool_network_id"),
+		"workerpool_id":                      privateWorkerPool.GetStringOutput("workerpool_id"),
+		"logging_bucket":                     loggingBucket.GetStringOutput("logging_bucket"),
+		"bucket_kms_key":                     loggingBucket.GetStringOutput("bucket_kms_key"),
+		"attestation_kms_key":                loggingBucket.GetStringOutput("attestation_kms_key"),
 	}
 
 	// wire setup output project_id to example var.project_id
@@ -58,6 +75,7 @@ func TestStandaloneSingleProjectConfidentialNodesExample(t *testing.T) {
 		tft.WithVars(vars),
 		tft.WithTFDir("../../../examples/standalone_single_project_confidential_nodes"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithParallelism(100),
 	)
 
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes

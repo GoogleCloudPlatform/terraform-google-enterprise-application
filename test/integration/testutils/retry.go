@@ -36,9 +36,6 @@ var (
 		// Request had invalid authentication credentials.*
 		".*Request had invalid authentication credentials.*": "Request had invalid authentication credentials.",
 
-		// Error waiting for Creating Repository: Error code 13, message: Internal error encountered.
-		".Internal error encountered*": "Internal error encountered",
-
 		// generic::permission_denied: Request is prohibited by organization's policy.
 		".*Request is prohibited by organization's policy*.": "VPC-SC propagation.",
 
@@ -53,6 +50,8 @@ var (
 		".*Error when reading or editing AccessLevelCondition*": "Propagation issues on Access Level.",
 
 		".*Error 400: The email address 'service-*@*.iam.gserviceaccount.com' is invalid or non-existent*": "Service Agent propagation.",
+
+		".*Error 400: Service account 'service-*@*.iam.gserviceaccount.com' does not exist.*": "Service Agent propagation.",
 
 		".*dial tcp: lookup *.nip.io on *: server misbehaving*": "VM Gitlab issues.",
 

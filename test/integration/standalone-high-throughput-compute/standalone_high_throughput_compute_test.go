@@ -46,6 +46,7 @@ func TestStandaloneHTCExample(t *testing.T) {
 		tft.WithVars(vars),
 		tft.WithTFDir("../../../examples/high-throughput-compute-standalone"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithParallelism(100),
 	)
 
 	standaloneHTC.Test()

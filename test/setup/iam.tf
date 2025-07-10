@@ -110,7 +110,7 @@ resource "google_service_account_iam_member" "service_account_user" {
   member             = "serviceAccount:${var.cloud_build_sa}"
 }
 
-resource "google_billing_account_iam_member" "tf_billing_user" {
+resource "google_billing_account_iam_member" "tf_billing_admin" {
   billing_account_id = var.billing_account
   role               = "roles/billing.admin"
   member             = "serviceAccount:${google_service_account.int_test.email}"

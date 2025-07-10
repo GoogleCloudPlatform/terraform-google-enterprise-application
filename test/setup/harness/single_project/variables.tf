@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,33 +19,27 @@ variable "org_id" {
   type        = string
 }
 
-variable "branch_name" {
-  type        = string
-  description = "The branch starting the build."
-}
-
-variable "folder_id" {
-  description = "The folder to deploy in"
+variable "seed_project_id" {
+  description = "The project where the example will be deployed."
   type        = string
 }
 
-variable "billing_account" {
-  description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
+variable "sa_email" {
+  description = "The ci service account email created by setup to run the tests."
   type        = string
 }
 
-variable "single_project" {
-  description = "The example which will be tested, if is true, single project infra will be created; if is false multitentant infra will be created"
-  type        = bool
+variable "sa_id" {
+  description = "The ci service account id created by setup to run the tests."
+  type        = string
 }
 
-variable "create_cloud_nat" {
-  description = "Create NAT router on cluster network."
-  type        = bool
-  default     = false
+variable "logging_bucket_name" {
+  description = "The logging bucket name."
+  type        = string
 }
 
-variable "cloud_build_sa" {
-  description = "Cloud Build Service Account email to be granted Encrypt/Decrypt role."
+variable "workerpool_id" {
+  description = "The workerpool id where builds are going to run."
   type        = string
 }
