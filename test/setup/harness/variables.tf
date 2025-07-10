@@ -19,6 +19,11 @@ variable "org_id" {
   type        = string
 }
 
+variable "branch_name" {
+  type        = string
+  description = "The branch starting the build."
+}
+
 variable "folder_id" {
   description = "The folder to deploy in"
   type        = string
@@ -27,6 +32,17 @@ variable "folder_id" {
 variable "billing_account" {
   description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
   type        = string
+}
+
+variable "single_project" {
+  description = "The example which will be tested, if is true, single project infra will be created; if is false multitentant infra will be created"
+  type        = bool
+}
+
+variable "create_cloud_nat" {
+  description = "Create NAT router on cluster network."
+  type        = bool
+  default     = false
 }
 
 variable "cloud_build_sa" {
