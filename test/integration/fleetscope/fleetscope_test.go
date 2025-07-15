@@ -78,6 +78,16 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 			)
 
+			multitenantHarnessPath := "../../setup/harness/multitenant"
+			multitenantHarness := tft.NewTFBlueprintTest(t,
+				tft.WithTFDir(multitenantHarnessPath),
+			)
+
+			loggingHarnessPath := "../../setup/harness/logging_bucket"
+			loggingHarness := tft.NewTFBlueprintTest(t,
+				tft.WithTFDir(loggingHarnessPath),
+			)
+
 			// retrieve cluster location and fleet membership from 2-multitenant
 			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
 			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
@@ -97,6 +107,11 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_policy_dir":      fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName),
 				"config_sync_branch":          "cymbal-bank-isolation",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
+				"network_project_id":          multitenantHarness.GetStringOutput("network_project_id"),
+				"logging_bucket":              loggingHarness.GetStringOutput("logging_bucket"),
+				"bucket_kms_key":              loggingHarness.GetStringOutput("bucket_kms_key"),
+				"attestation_kms_project":     loggingHarness.GetStringOutput("attestation_kms_key"),
+				"attestation_evaluation_mode": multitenant.GetStringOutput("attestation_evaluation_mode"),
 			}
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")

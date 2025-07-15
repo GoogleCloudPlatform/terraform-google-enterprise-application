@@ -58,6 +58,7 @@ module "seed_project" {
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",
     "binaryauthorization.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
@@ -84,6 +85,7 @@ module "seed_project" {
     "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "storage.googleapis.com",
     "trafficdirector.googleapis.com",
@@ -92,7 +94,7 @@ module "seed_project" {
   activate_api_identities = [
     {
       api   = "compute.googleapis.com",
-      roles = []
+      roles = ["roles/compute.networkAdmin"]
     },
     {
       api = "cloudbuild.googleapis.com",
@@ -108,6 +110,14 @@ module "seed_project" {
     {
       api   = "config.googleapis.com",
       roles = ["roles/cloudconfig.serviceAgent"]
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkAdmin"]
+    },
+    {
+      api   = "gkehub.googleapis.com",
+      roles = ["roles/compute.networkAdmin"]
     }
   ]
 }

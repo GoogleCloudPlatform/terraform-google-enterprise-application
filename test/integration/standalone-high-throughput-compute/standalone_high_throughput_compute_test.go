@@ -29,7 +29,7 @@ import (
 func TestStandaloneHTCExample(t *testing.T) {
 
 	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	projectID := setupOutput.GetTFSetupStringOutput("seed_project_id")
 	service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
 	service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
 	access_level_name := setupOutput.GetStringOutput("access_level_name")

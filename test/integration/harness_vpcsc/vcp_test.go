@@ -47,7 +47,6 @@ func TestVPCSC(t *testing.T) {
 		for _, number := range multitenant.GetJsonOutput("network_project_number").Array() {
 			networkProjectsNumber = append(networkProjectsNumber, number.String())
 		}
-
 	}
 
 	projectNumber := temp.GetTFSetupStringOutput("seed_project_number")

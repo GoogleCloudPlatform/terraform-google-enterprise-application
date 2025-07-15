@@ -48,6 +48,11 @@ func TestMultitenant(t *testing.T) {
 		tft.WithTFDir(privateWorkerPoolPath),
 	)
 
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
@@ -58,6 +63,7 @@ func TestMultitenant(t *testing.T) {
 		"service_perimeter_mode":           vpcsc.GetStringOutput("service_perimeter_mode"),
 		"access_level_name":                vpcsc.GetStringOutput("access_level_name"),
 		"cb_private_workerpool_project_id": privateWorkerPool.GetStringOutput("workerpool_id"),
+		"envs":                             multitenantHarness.GetStringOutput("envs"),
 	}
 
 	for _, envName := range testutils.EnvNames(t) {

@@ -43,12 +43,17 @@ func TestAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
-	bucketKMSKey := bootstrap.GetTFSetupStringOutput("bucket_kms_key")
-	loggingBucket := bootstrap.GetTFSetupStringOutput("logging_bucket")
+	bucketKMSKey := loggingHarness.GetStringOutput("bucket_kms_key")
+	loggingBucket := loggingHarness.GetStringOutput("logging_bucket")
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 	remoteState := bootstrap.GetStringOutput("state_bucket")

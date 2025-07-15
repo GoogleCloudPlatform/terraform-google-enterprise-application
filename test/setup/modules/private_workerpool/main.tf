@@ -29,6 +29,8 @@ module "private_workerpool_project" {
 
   auto_create_network = true
 
+
+
   activate_apis = [
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
@@ -45,6 +47,13 @@ module "private_workerpool_project" {
   ]
 }
 
+resource "time_sleep" "wait_api_propagation" {
+  depends_on = [module.private_workerpool_project]
+
+  create_duration = "60s"
+}
+
+
 resource "google_compute_global_address" "worker_range" {
   project       = module.private_workerpool_project.project_id
   name          = "worker-pool-range"
@@ -53,13 +62,15 @@ resource "google_compute_global_address" "worker_range" {
   address       = "10.3.3.0"
   prefix_length = 24
   network       = module.vpc.network_name
+
+  depends_on = [time_sleep.wait_api_propagation]
 }
 
 resource "google_service_networking_connection" "gitlab_worker_pool_conn" {
   network                 = module.vpc.network_id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.worker_range.name]
-  depends_on              = [google_project_service.servicenetworking]
+  depends_on              = [google_project_service.servicenetworking, module.private_workerpool_project]
 }
 
 resource "google_project_service" "servicenetworking" {
@@ -82,7 +93,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
     peered_network_ip_range = "/24"
   }
 
-  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
+  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn, module.private_workerpool_project]
 }
 
 resource "time_sleep" "wait_service_network_peering" {
