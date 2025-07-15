@@ -44,7 +44,10 @@ func TestVPCSC(t *testing.T) {
 	if !isSingleProject {
 		multitenantPath := "../../setup/harness/multitenant"
 		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(multitenantPath))
-		networkProjectsNumber = multitenant.GetTFSetupOutputListVal("network_project_number")
+		for _, number := range multitenant.GetJsonOutput("network_project_number").Array() {
+			networkProjectsNumber = append(networkProjectsNumber, number.String())
+		}
+
 	}
 
 	projectNumber := temp.GetTFSetupStringOutput("seed_project_number")

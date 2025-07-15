@@ -28,16 +28,13 @@ var (
 		// Error 403: Kubernetes Engine API has not been used in project {} before or it is disabled.
 		".*Error 403: Kubernetes Engine API is not enabled for this project*": "Kubernetes Engine API not enabled",
 
-		// Error 400: Service account service-{}@gcp-sa-mcsd.iam.gserviceaccount.com does not exist.*"
-		".*Error 400: Service account service-.*@gcp-sa-mcsd.iam.gserviceaccount.com does not exist.*": "Multi-cluster Service Discovery Service Account does not exist.",
-
 		".*Error waiting for Creating Connection: Error code 9, message: Failed to verify authorizer_credential.*.": "servicedirectory.networks.access propagation time",
 
 		// Request had invalid authentication credentials.*
 		".*Request had invalid authentication credentials.*": "Request had invalid authentication credentials.",
 
 		// generic::permission_denied: Request is prohibited by organization's policy.
-		".*Request is prohibited by organization's policy*.": "VPC-SC propagation.",
+		".*Request is prohibited by organization's policy*": "VPC-SC propagation.",
 
 		".*does not match the eTag of the current version*": "VPC-SC eTag consistency.",
 
@@ -49,9 +46,9 @@ var (
 
 		".*Error when reading or editing AccessLevelCondition*": "Propagation issues on Access Level.",
 
-		".*Error 400: The email address 'service-*@*.iam.gserviceaccount.com' is invalid or non-existent*": "Service Agent propagation.",
+		".*Error 400: The email address '*@*.iam.gserviceaccount.com' is invalid or non-existent*": "Service Agent propagation.",
 
-		".*Error 400: Service account 'service-*@*.iam.gserviceaccount.com' does not exist.*": "Service Agent propagation.",
+		".*Error 400: Service account '*@*.iam.gserviceaccount.com' does not exist*": "Service Agent propagation.",
 
 		".*dial tcp: lookup *.nip.io on *: server misbehaving*": "VM Gitlab issues.",
 
