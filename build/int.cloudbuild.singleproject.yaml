@@ -26,7 +26,6 @@ steps:
       - "TF_VAR_org_id=$_ORG_ID"
       - "TF_VAR_folder_id=$_FOLDER_ID"
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
-      - "TF_VAR_single_project=false"
       - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
 
   - id: private-workerpool-init
