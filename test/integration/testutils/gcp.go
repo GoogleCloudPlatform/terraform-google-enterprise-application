@@ -41,3 +41,9 @@ func CreateOrgACMPolicyID(t testing.TB, orgID string) (string, error) {
 	t.Log("Creating Access Policy id.")
 	return gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title '%s' --quiet", orgID, "Organization access level policy"))
 }
+
+// DeleteOrgACMPolicyID deletes the Organization Access Context Manager Policy ID
+func DeleteOrgACMPolicyID(t testing.TB, acmD string) (string, error) {
+	t.Log("Deleting Access Policy id.")
+	return gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies delete %s --quiet", acmD))
+}
