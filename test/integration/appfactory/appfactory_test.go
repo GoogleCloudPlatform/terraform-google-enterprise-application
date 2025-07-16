@@ -78,7 +78,7 @@ func TestAppfactory(t *testing.T) {
 		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
 		"kms_project_id":         loggingHarness.GetStringOutput("project_id"),
 		"common_folder_id":       multitenantHarness.GetStringOutput("common_folder_id"),
-		"envs":                   multitenantHarness.GetStringOutput("envs"),
+		"envs":                   multitenantHarness.GetJsonOutput("envs").Map(),
 	}
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"
@@ -100,7 +100,7 @@ func TestAppfactory(t *testing.T) {
 			tft.WithVars(vars),
 			tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 			tft.WithBackendConfig(backendConfig),
-			tft.WithParallelism(100),
+			tft.WithParallelism(15),
 		)
 
 		appFactory.DefineVerify(func(assert *assert.Assertions) {

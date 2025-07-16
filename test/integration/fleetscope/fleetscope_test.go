@@ -107,11 +107,8 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_policy_dir":      fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName),
 				"config_sync_branch":          "cymbal-bank-isolation",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
-				"network_project_id":          multitenantHarness.GetStringOutput("network_project_id"),
-				"logging_bucket":              loggingHarness.GetStringOutput("logging_bucket"),
-				"bucket_kms_key":              loggingHarness.GetStringOutput("bucket_kms_key"),
-				"attestation_kms_project":     loggingHarness.GetStringOutput("attestation_kms_key"),
-				"attestation_evaluation_mode": multitenant.GetStringOutput("attestation_evaluation_mode"),
+				"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode"),
+				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")

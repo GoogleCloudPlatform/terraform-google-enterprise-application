@@ -132,6 +132,9 @@ provider "google-beta" {
 					"buckets_force_destroy": "true",
 					"environment_names":     testutils.EnvNames(t),
 					"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
+					"bucket_kms_key":        bucketKMSKey,
+					"logging_bucket":        loggingBucket,
+					"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,

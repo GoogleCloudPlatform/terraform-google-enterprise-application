@@ -77,7 +77,7 @@ func TestHPCAppfactory(t *testing.T) {
 		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
 		"kms_project_id":         loggingHarness.GetStringOutput("project_id"),
 		"common_folder_id":       multitenantHarness.GetStringOutput("common_folder_id"),
-		"envs":                   multitenantHarness.GetStringOutput("envs"),
+		"envs":                   multitenantHarness.GetJsonOutput("envs").Map(),
 	}
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"

@@ -56,6 +56,11 @@ func TestHPCAppInfra(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	type ServiceInfos struct {
 		ApplicationName string
 		ProjectID       string
@@ -122,9 +127,13 @@ provider "google-beta" {
 				t.Parallel()
 
 				vars := map[string]interface{}{
-					"remote_state_bucket":  remoteState,
-					"bucket_force_destroy": "true",
-					"access_level_name":    vpcsc.GetStringOutput("access_level_name"),
+					"remote_state_bucket":   remoteState,
+					"buckets_force_destroy": "true",
+					"environment_names":     testutils.EnvNames(t),
+					"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
+					"bucket_kms_key":        loggingHarness.GetStringOutput("bucket_kms_key"),
+					"logging_bucket":        loggingHarness.GetStringOutput("logging_bucket"),
+					"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,

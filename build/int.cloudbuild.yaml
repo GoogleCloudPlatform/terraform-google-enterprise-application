@@ -93,19 +93,6 @@ steps:
     waitFor:
       - gitlab-apply
 
-  - id: vpc-sc
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
-      ]
-    env:
-      - "TF_VAR_org_id=$_ORG_ID"
-    waitFor:
-      - harness-apply
-
   - id: bootstrap-gitlab-vm
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: "bash"
@@ -121,7 +108,20 @@ steps:
         fi
     waitFor:
       - wait-startup-script
-      - vpc-sc
+
+  - id: vpc-sc
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
+      ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+    waitFor:
+      - harness-apply
+      - bootstrap-gitlab-vm
 
   # Distinct init stages for tf output state passing
   - id: bootstrap-init
@@ -393,7 +393,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestVPCSC --stage teardown --verbose",
+        "sleep 3m && cft test run TestVPCSC  --stage teardown --verbose",
       ]
     waitFor:
       - bootstrap-teardown

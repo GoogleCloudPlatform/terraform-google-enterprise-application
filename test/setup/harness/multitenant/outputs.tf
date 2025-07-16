@@ -34,7 +34,7 @@ output "network_project_id" {
 }
 
 output "common_folder_id" {
-  value = try([for value in module.folder_common : value.ids["common"]][0], "")
+  value = module.folder_common.ids["common"]
 }
 
 output "org_id" {

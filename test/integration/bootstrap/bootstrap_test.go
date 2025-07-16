@@ -56,17 +56,16 @@ func TestBootstrap(t *testing.T) {
 
 	vars := map[string]interface{}{
 		"bucket_force_destroy":    true,
+		"project_id":              vpcsc.GetTFSetupStringOutput("seed_project_id"),
 		"access_level_name":       vpcsc.GetStringOutput("access_level_name"),
 		"service_perimeter_name":  vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode":  vpcsc.GetStringOutput("service_perimeter_mode"),
 		"workerpool_id":           privateWorkerPool.GetStringOutput("workerpool_id"),
 		"common_folder_id":        multitenantHarness.GetStringOutput("common_folder_id"),
-		"envs":                    multitenantHarness.GetStringOutput("envs"),
-		"network_project_number":  multitenantHarness.GetStringOutput("network_project_number"),
-		"network_project_id":      multitenantHarness.GetStringOutput("network_project_id"),
+		"envs":                    multitenantHarness.GetJsonOutput("envs").Map(),
 		"logging_bucket":          loggingHarness.GetStringOutput("logging_bucket"),
 		"bucket_kms_key":          loggingHarness.GetStringOutput("bucket_kms_key"),
-		"attestation_kms_project": loggingHarness.GetStringOutput("attestation_kms_key"),
+		"attestation_kms_project": loggingHarness.GetStringOutput("project_id"),
 	}
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -106,9 +105,9 @@ func TestBootstrap(t *testing.T) {
 		bootstrap.DefaultVerify(assert)
 
 		// Outputs
-		projectID := bootstrap.GetStringOutput("project_id")
-		loggingBucket := bootstrap.GetTFSetupStringOutput("logging_bucket")
-		kmsKey := bootstrap.GetTFSetupStringOutput("bucket_kms_key")
+		projectID := vpcsc.GetTFSetupStringOutput("seed_project_id")
+		loggingBucket := loggingHarness.GetStringOutput("logging_bucket")
+		kmsKey := loggingHarness.GetStringOutput("bucket_kms_key")
 
 		// Buckets
 		gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", projectID, "--format=json"})

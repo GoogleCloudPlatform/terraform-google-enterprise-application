@@ -62,8 +62,8 @@ func TestMultitenant(t *testing.T) {
 		"service_perimeter_name":           vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode":           vpcsc.GetStringOutput("service_perimeter_mode"),
 		"access_level_name":                vpcsc.GetStringOutput("access_level_name"),
-		"cb_private_workerpool_project_id": privateWorkerPool.GetStringOutput("workerpool_id"),
-		"envs":                             multitenantHarness.GetStringOutput("envs"),
+		"cb_private_workerpool_project_id": privateWorkerPool.GetStringOutput("workerpool_project_id"),
+		"envs":                             multitenantHarness.GetJsonOutput("envs").Map(),
 	}
 
 	for _, envName := range testutils.EnvNames(t) {

@@ -20,8 +20,9 @@ locals {
     "roles/certificatemanager.owner",
     "roles/cloudbuild.builds.builder",
     "roles/cloudbuild.workerPoolOwner",
-    "roles/clouddeploy.serviceAgent",
     "roles/clouddeploy.admin",
+    "roles/clouddeploy.serviceAgent",
+    "roles/cloudkms.admin",
     "roles/compute.admin",
     "roles/compute.networkAdmin",
     "roles/compute.securityAdmin",
@@ -37,7 +38,6 @@ locals {
     "roles/serviceusage.serviceUsageAdmin",
     "roles/source.admin",
     "roles/storage.admin",
-    "roles/resourcemanager.projectIamAdmin",
     "roles/viewer",
   ]
 }

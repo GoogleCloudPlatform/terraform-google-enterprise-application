@@ -68,17 +68,6 @@ steps:
     args:
       ["/bin/bash", "-c", "cft test run TestSingleProjectHarness --stage apply --verbose"]
 
-  - id: vpc-sc
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
-      ]
-    env:
-      - "TF_VAR_org_id=$_ORG_ID"
-
   - id: wait-startup-script
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -97,6 +86,17 @@ steps:
         else
             echo ERROR: Was not able to download certificate and update system bundle. && exit 1
         fi
+
+  - id: vpc-sc
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
+      ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
 
   - id: single-project-confidential-nodes-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -140,7 +140,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestVPCSC  --stage teardown --verbose",
+        "sleep 3m && cft test run TestVPCSC  --stage teardown --verbose",
       ]
 
   - id: harness-teardown

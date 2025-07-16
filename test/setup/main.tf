@@ -54,6 +54,7 @@ module "seed_project" {
 
   activate_apis = [
     "accesscontextmanager.googleapis.com",
+    "artifactregistry.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",
@@ -93,14 +94,18 @@ module "seed_project" {
 
   activate_api_identities = [
     {
-      api   = "compute.googleapis.com",
-      roles = ["roles/compute.networkAdmin"]
+      api = "compute.googleapis.com",
+      roles = [
+        "roles/compute.networkAdmin",
+        "roles/compute.admin"
+      ]
     },
     {
       api = "cloudbuild.googleapis.com",
       roles = [
         "roles/cloudbuild.builds.builder",
         "roles/cloudbuild.connectionAdmin",
+        "roles/cloudbuild.serviceAgent",
       ]
     },
     {
@@ -113,11 +118,15 @@ module "seed_project" {
     },
     {
       api   = "container.googleapis.com",
-      roles = ["roles/compute.networkAdmin"]
+      roles = ["roles/compute.networkAdmin", "roles/container.serviceAgent"]
     },
     {
       api   = "gkehub.googleapis.com",
-      roles = ["roles/compute.networkAdmin"]
+      roles = ["roles/compute.networkAdmin", "roles/gkehub.serviceAgent"]
+    },
+    {
+      api   = "artifactregistry.googleapis.com",
+      roles = ["roles/artifactregistry.serviceAgent"]
     }
   ]
 }

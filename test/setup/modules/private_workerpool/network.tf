@@ -52,4 +52,6 @@ module "vpc" {
       subnet_private_access = true
     },
   ]
+
+  depends_on = [time_sleep.wait_api_propagation]
 }

@@ -52,9 +52,16 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
   ]
 
   depends_on = [
+    time_sleep.wait_access_level_propagation
+  ]
+}
+
+resource "time_sleep" "wait_access_level_propagation" {
+  depends_on = [
     google_service_account.cloud_deploy,
     google_service_account.cloud_build,
     google_project_service_identity.cloudbuild_service_identity,
     google_project_service_identity.cloud_deploy_sa
   ]
+  destroy_duration = "2m"
 }

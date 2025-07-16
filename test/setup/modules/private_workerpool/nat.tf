@@ -25,6 +25,8 @@ resource "google_compute_network_peering_routes_config" "peering_routes" {
   // explicitly allow the peering for public ip address
   import_subnet_routes_with_public_ip = true
   export_subnet_routes_with_public_ip = true
+
+  depends_on = [time_sleep.wait_api_propagation]
 }
 
 module "firewall_rules" {
@@ -93,7 +95,7 @@ resource "google_compute_instance" "vm-proxy" {
 
   network_interface {
     network            = module.vpc.network_name
-    subnetwork         = "nat-subnet"
+    subnetwork         = module.vpc.subnets_names[0]
     subnetwork_project = module.private_workerpool_project.project_id
 
     access_config {
