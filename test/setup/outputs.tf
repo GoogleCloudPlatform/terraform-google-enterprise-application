@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-output "project_id" {
-  value = local.project_id
+output "seed_project_id" {
+  value = module.seed_project.project_id
 }
 
-output "project_number" {
-  value = local.project_number
+output "seed_project_number" {
+  value = module.seed_project.project_number
 }
 
-output "folder_id" {
+output "seed_folder_id" {
   value = module.folder_seed.id
 }
 
 output "sa_email" {
-  value = google_service_account.int_test[local.index].email
+  value = google_service_account.int_test.email
+}
+
+output "sa_id" {
+  value = google_service_account.int_test.id
 }
 
 output "sa_key" {
@@ -35,59 +39,16 @@ output "sa_key" {
   sensitive = true
 }
 
-output "envs" {
-  value = var.single_project ? {} : { for env, vpc in module.cluster_vpc : env => {
-    org_id             = var.org_id
-    folder_id          = module.folders[local.index].ids[env]
-    billing_account    = var.billing_account
-    network_project_id = vpc.project_id
-    network_self_link  = vpc.network_self_link,
-    subnets_self_links = vpc.subnets_self_links,
-  } }
-}
-
-output "workerpool_network_name" {
-  value = module.vpc.network_name
-}
-
-output "workerpool_network_id" {
-  value = module.vpc.network_id
-}
-
-output "workerpool_network_project_id" {
-  value = module.vpc.project_id
-}
-
-output "workerpool_network_self_link" {
-  value = module.vpc.network_self_link
-}
-
-output "single_project_cluster_subnetwork_name" {
-  value = var.single_project ? module.single_project_vpc[0].subnets_names[0] : null
-}
-
-output "single_project_cluster_subnetwork_self_link" {
-  value = var.single_project ? module.single_project_vpc[0].subnets_self_links[0] : null
-}
-
-output "network_project_number" {
-  value = [for value in module.vpc_project : value.project_number]
-}
-
-output "network_project_id" {
-  value = [for value in module.vpc_project : value.project_id]
-}
-
-output "common_folder_id" {
-  value = try([for value in module.folder_common : value.ids["common"]][0], "")
-}
-
-output "org_id" {
-  value = var.org_id
+output "cloud_build_sa" {
+  value = var.cloud_build_sa
 }
 
 output "billing_account" {
   value = var.billing_account
+}
+
+output "org_id" {
+  value = var.org_id
 }
 
 output "teams" {
@@ -98,35 +59,6 @@ output "single_project" {
   value = var.single_project
 }
 
-output "logging_bucket" {
-  value = module.logging_bucket.name
-}
-
-output "bucket_kms_key" {
-  value = module.kms.keys["bucket"]
-}
-
-output "attestation_kms_key" {
-  value = module.kms_attestor.keys["attestation"]
-}
-
-output "attestation_kms_project" {
-  value = local.project_id
-}
-
-output "kms_keyring" {
-  value = module.kms.keyring
-}
-
-output "binary_authorization_image" {
-  value = var.single_project ? local.binary_auth_image_tag : null
-}
-
-output "attestation_evaluation_mode" {
-  value = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : null
-}
-
-output "binary_authorization_repository_id" {
-  description = "The ID of the Repository where binary attestation image is stored."
-  value       = var.single_project ? google_artifact_registry_repository.attestation_image[local.index].id : null
+output "hpc" {
+  value = var.hpc
 }

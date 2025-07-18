@@ -41,7 +41,7 @@ func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, inst
 func TestValidateStartupScript(t *testing.T) {
 	// Retrieve output values from test setup
 	setup := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../setup"),
+		tft.WithTFDir("../../setup/harness/gitlab"),
 	)
 	instanceName := setup.GetStringOutput("gitlab_instance_name")
 	instanceZone := setup.GetStringOutput("gitlab_instance_zone")
@@ -71,7 +71,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 
 	// Retrieve output values from test setup
 	setup := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../setup"),
+		tft.WithTFDir("../../setup/harness/gitlab"),
 	)
 
 	gitlabSecretProject := setup.GetStringOutput("gitlab_secret_project")

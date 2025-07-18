@@ -43,12 +43,17 @@ func TestAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
-	bucketKMSKey := bootstrap.GetTFSetupStringOutput("bucket_kms_key")
-	loggingBucket := bootstrap.GetTFSetupStringOutput("logging_bucket")
+	bucketKMSKey := loggingHarness.GetStringOutput("bucket_kms_key")
+	loggingBucket := loggingHarness.GetStringOutput("logging_bucket")
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 	remoteState := bootstrap.GetStringOutput("state_bucket")
@@ -127,6 +132,9 @@ provider "google-beta" {
 					"buckets_force_destroy": "true",
 					"environment_names":     testutils.EnvNames(t),
 					"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
+					"bucket_kms_key":        bucketKMSKey,
+					"logging_bucket":        loggingBucket,
+					"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -134,6 +142,7 @@ provider "google-beta" {
 					tft.WithVars(vars),
 					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 					tft.WithBackendConfig(backendConfig),
+					tft.WithParallelism(100),
 				)
 				appService.DefineVerify(func(assert *assert.Assertions) {
 					appService.DefaultVerify(assert)

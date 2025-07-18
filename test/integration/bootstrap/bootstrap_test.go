@@ -39,17 +39,40 @@ func TestBootstrap(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
+	privateWorkerPool := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(privateWorkerPoolPath),
+	)
+
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	vars := map[string]interface{}{
-		"bucket_force_destroy":   true,
-		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
-		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
-		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
+		"bucket_force_destroy":    true,
+		"project_id":              vpcsc.GetTFSetupStringOutput("seed_project_id"),
+		"access_level_name":       vpcsc.GetStringOutput("access_level_name"),
+		"service_perimeter_name":  vpcsc.GetStringOutput("service_perimeter_name"),
+		"service_perimeter_mode":  vpcsc.GetStringOutput("service_perimeter_mode"),
+		"workerpool_id":           privateWorkerPool.GetStringOutput("workerpool_id"),
+		"common_folder_id":        multitenantHarness.GetStringOutput("common_folder_id"),
+		"envs":                    multitenantHarness.GetJsonOutput("envs").Map(),
+		"logging_bucket":          loggingHarness.GetStringOutput("logging_bucket"),
+		"bucket_kms_key":          loggingHarness.GetStringOutput("bucket_kms_key"),
+		"attestation_kms_project": loggingHarness.GetStringOutput("project_id"),
 	}
 
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithParallelism(100),
 	)
 
 	bootstrap.DefineApply(
@@ -82,9 +105,9 @@ func TestBootstrap(t *testing.T) {
 		bootstrap.DefaultVerify(assert)
 
 		// Outputs
-		projectID := bootstrap.GetStringOutput("project_id")
-		loggingBucket := bootstrap.GetTFSetupStringOutput("logging_bucket")
-		kmsKey := bootstrap.GetTFSetupStringOutput("bucket_kms_key")
+		projectID := vpcsc.GetTFSetupStringOutput("seed_project_id")
+		loggingBucket := loggingHarness.GetStringOutput("logging_bucket")
+		kmsKey := loggingHarness.GetStringOutput("bucket_kms_key")
 
 		// Buckets
 		gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", projectID, "--format=json"})
