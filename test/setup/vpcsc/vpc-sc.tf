@@ -377,14 +377,16 @@ resource "random_string" "prefix" {
   upper   = false
 }
 
-data "google_access_context_manager_access_policy" "policy_org" {
+resource "google_access_context_manager_access_policy" "policy_org" {
   parent = "organizations/${var.org_id}"
+  title  = "GKE folder ${var.seed_folder_id} Scoped Access Policy"
+  scopes = [var.seed_folder_id]
 }
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
   version            = "~> 7.1"
-  policy             = data.google_access_context_manager_access_policy.policy_org.name
+  policy             = google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = var.access_level_members
   combining_function = "OR"
@@ -393,7 +395,7 @@ module "access_level_members" {
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
   version        = "~> 7.1"
-  policy         = data.google_access_context_manager_access_policy.policy_org.name
+  policy         = google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
 

@@ -20,7 +20,7 @@ output "protected_projects" {
 
 output "service_perimeter_name" {
   description = "Service Perimeter name."
-  value       = "accessPolicies/${data.google_access_context_manager_access_policy.policy_org.name}/servicePerimeters/${module.regular_service_perimeter.perimeter_name}"
+  value       = "accessPolicies/${google_access_context_manager_access_policy.policy_org.name}/servicePerimeters/${module.regular_service_perimeter.perimeter_name}"
 }
 
 output "access_level_name" {
@@ -35,5 +35,5 @@ output "service_perimeter_mode" {
 
 output "access_context_manager_name" {
   description = "Access context manager name."
-  value       = data.google_access_context_manager_access_policy.policy_org.name
+  value       = google_access_context_manager_access_policy.policy_org.name
 }
