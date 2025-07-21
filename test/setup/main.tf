@@ -127,6 +127,10 @@ module "seed_project" {
     {
       api   = "artifactregistry.googleapis.com",
       roles = ["roles/artifactregistry.serviceAgent"]
+    },
+    {
+      api   = "storage.googleapis.com",
+      roles = []
     }
   ]
 }

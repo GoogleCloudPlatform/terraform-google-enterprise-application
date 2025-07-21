@@ -26,7 +26,7 @@ var (
 		".*Error 403.*Compute Engine API has not been used in project.*": "Compute Engine API not enabled",
 
 		// Error 403: Kubernetes Engine API has not been used in project {} before or it is disabled.
-		".*Error 403:*Kubernetes Engine API is not enabled for this project*": "Kubernetes Engine API not enabled",
+		".*Error 403.*Kubernetes Engine API is not enabled for this project*": "Kubernetes Engine API not enabled",
 
 		".*Error waiting for Creating Connection: Error code 9, message: Failed to verify authorizer_credential.*.": "servicedirectory.networks.access propagation time",
 
@@ -34,30 +34,28 @@ var (
 		".*Request had invalid authentication credentials.*": "Request had invalid authentication credentials.",
 
 		// generic::permission_denied: Request is prohibited by organization's policy.
-		".*Request is prohibited by organization's policy*": "VPC-SC propagation.",
+		".*Request is prohibited by organization's policy.*": "VPC-SC propagation.",
 
 		".*does not match the eTag of the current version*": "VPC-SC eTag consistency.",
 
-		".*Error: Error waiting to create Repository: Error waiting for Creating Repository: Error code 3, message: Request contains an invalid argument.*.": "Invalid Argument on Artifact Registry Creation",
+		".*Error code 3, message: Request contains an invalid argument.*.": "Invalid Argument on Artifact Registry Creation",
 
 		".*another operation is in progress on this scope*.": "another operation is in progress on this scope",
 
-		".*Error when reading or editing ServicePerimeterResource*": "Propagation issues on Service Perimeter.",
+		".*Error when reading or editing ServicePerimeterResource.*": "Propagation issues on Service Perimeter.",
 
-		".*Error when reading or editing AccessLevelCondition*": "Propagation issues on Access Level.",
+		".*Error when reading or editing AccessLevelCondition.*": "Propagation issues on Access Level.",
 
-		".*Error 400:*Invalid Directional Policies set in Perimeter*": "Propagation issues on Service Perimeter.",
+		".*Error 400.*Invalid Directional Policies set in Perimeter.*": "Propagation issues on Service Perimeter.",
 
-		".*Error 400:*@*.iam.gserviceaccount.com*is invalid or non-existent*": "Service Agent propagation.",
+		".*Error 400.*@*.iam.gserviceaccount.com*is invalid or non-existent.*": "Service Agent propagation.",
 
-		".*Error 400:*@*.iam.gserviceaccount.com*does not exist.*": "Service Agent propagation.",
+		".*Error 400.*@*.iam.gserviceaccount.com*does not exist.*": "Service Agent propagation.",
 
 		".*dial tcp: lookup *.nip.io on *: server misbehaving*": "VM Gitlab issues.",
 
-		".Error 400:*Invalid Directional Policies set in Perimeter*": "VPC-SC propagation issues.",
+		".Error 400.*The subnetwork resource*projects/8/regions/*/subnetworks/*is already being used by*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
 
-		".Error 400:*The subnetwork resource*projects/8/regions/*/subnetworks/*is already being used by*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
-
-		".Error 400:*Invalid value for field*resource.networkInterfaces[0].subnetwork*:*projects/*/regions/*/subnetworks/*. The referenced subnetwork resource cannot be found.*": "Network propagation",
+		".Error 400.*Invalid value for field*resource.networkInterfaces[0].subnetwork*:*projects/*/regions/*/subnetworks/*. The referenced subnetwork resource cannot be found.*": "Network propagation",
 	}
 )
