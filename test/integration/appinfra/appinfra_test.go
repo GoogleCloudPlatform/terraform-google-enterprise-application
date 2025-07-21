@@ -153,7 +153,6 @@ provider "google-beta" {
 					apis :=
 						[]string{
 							"artifactregistry.googleapis.com",
-							"sourcerepo.googleapis.com",
 							"certificatemanager.googleapis.com",
 							"cloudbuild.googleapis.com",
 							"clouddeploy.googleapis.com",

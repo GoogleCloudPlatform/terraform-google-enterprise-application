@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -48,6 +49,8 @@ func TestFleetscope(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
+
+	hpc, _ := strconv.ParseBool(setup.GetTFSetupStringOutput("hpc"))
 
 	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
 
@@ -268,10 +271,11 @@ func TestFleetscope(t *testing.T) {
 
 				// GKE Scopes and Namespaces
 				for _, namespaces := range func() []string {
-					if envName == "development" {
-						return []string{"cb-frontend", "cb-accounts", "cb-ledger"}
+					if hpc {
+						return []string{"hpc-team-a", "hpc-team-b"}
+					} else {
+						return []string{"cb-frontend", "cb-accounts", "cb-ledger", "cymbalshops"}
 					}
-					return []string{"cb-frontend"}
 				}() {
 					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", clusterProjectID, namespaces, envName)
 					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)

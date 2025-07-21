@@ -152,15 +152,20 @@ func TestAppfactory(t *testing.T) {
 
 					adminProjectID := appData.Get("app_admin_project_id").String()
 					adminProjectApis := []string{
-						"iam.googleapis.com",
-						"cloudresourcemanager.googleapis.com",
-						"cloudbuild.googleapis.com",
-						"secretmanager.googleapis.com",
-						"serviceusage.googleapis.com",
-						"cloudbilling.googleapis.com",
-						"cloudfunctions.googleapis.com",
 						"apikeys.googleapis.com",
-						"sourcerepo.googleapis.com",
+						"binaryauthorization.googleapis.com",
+						"cloudbilling.googleapis.com",
+						"cloudbuild.googleapis.com",
+						"clouddeploy.googleapis.com",
+						"cloudfunctions.googleapis.com",
+						"cloudkms.googleapis.com",
+						"cloudresourcemanager.googleapis.com",
+						"compute.googleapis.com",
+						"containeranalysis.googleapis.com",
+						"iam.googleapis.com",
+						"secretmanager.googleapis.com",
+						"servicenetworking.googleapis.com",
+						"serviceusage.googleapis.com",
 					}
 
 					prj := gcloud.Runf(t, "projects describe %s", adminProjectID)
