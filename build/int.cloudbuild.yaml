@@ -47,7 +47,7 @@ steps:
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
     waitFor:
-      - private-workerpool-apply
+      - prepare
 
   - id: logging-bucket-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
