@@ -53,3 +53,14 @@ variable "config_sync_branch" {
   description = "The branch of the repository to sync from. Default: master"
   default     = "master"
 }
+
+variable "attestation_kms_key" {
+  type        = string
+  description = "The KMS Key ID to be used by attestor."
+}
+
+variable "enable_kueue" {
+  type        = bool
+  description = "Enables Kueue private installation."
+  default     = false
+}

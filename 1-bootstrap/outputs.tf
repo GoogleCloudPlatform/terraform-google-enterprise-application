@@ -63,3 +63,13 @@ output "cb_private_workerpool_id" {
   description = "Private Worker Pool ID used for Cloud Build Triggers."
   value       = var.workerpool_id
 }
+
+output "binary_authorization_image" {
+  description = "Image build to create attestations."
+  value       = local.binary_auth_image_tag
+}
+
+output "binary_authorization_repository_id" {
+  description = "The ID of the Repository where binary attestation image is stored."
+  value       = google_artifact_registry_repository.attestation_image.id
+}

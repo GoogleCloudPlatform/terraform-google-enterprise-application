@@ -123,7 +123,7 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+				gitAppRun("clone", "--branch", "v0.6.7", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
@@ -178,12 +178,6 @@ func TestSourceCymbalBank(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-				}
-
-				t.Logf("copy %s/%s_cloudbuild.yaml to %s/src/%s/cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, tmpDirApp, servicesInfoMap[serviceName].TeamName)
-				err = cp.Copy(fmt.Sprintf("%s/%s_cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName), fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
-				if err != nil {
-					t.Fatal(err)
 				}
 
 				err = cp.Copy(fmt.Sprintf("%s/%s", appSourcePath, "other-overlays/e2e.Dockerfile"), fmt.Sprintf("%s/.github/workflows/ui-tests/Dockerfile", tmpDirApp))
@@ -251,6 +245,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
 
 				releaseName := ""
+				releaseFullName := ""
 				releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
 				pollRelease := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
@@ -258,14 +253,16 @@ func TestSourceCymbalBank(t *testing.T) {
 						if len(releases) == 0 {
 							return true, nil
 						}
-						releaseName = releases[0].Get("name").String()
+						releaseFullName = releases[0].Get("name").String()
+						releaseNameSplited := strings.Split(releaseFullName, "/")
+						releaseName = releaseNameSplited[len(releaseNameSplited)-1]
 						return false, nil
 					}
 				}
 				utils.Poll(t, pollRelease(releaseListCmd), 10, 60*time.Second)
 
 				targetId := deployTargets.Array()[0]
-				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
+				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseFullName, targetId)
 				// Poll CD rollouts until rollout is successful
 				pollCloudDeploy := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
@@ -282,6 +279,11 @@ func TestSourceCymbalBank(t *testing.T) {
 							logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
 							logs := gcloud.Runf(t, logsCmd).String()
 							t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
+							if strings.Contains(logs, "Insufficient memory") || strings.Contains(logs, "Insufficient CPU") {
+								t.Logf("Re-trying rollout due to Cluster scalling.")
+								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase=stable", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName))
+								return true, nil
+							}
 							return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 						}
 					}

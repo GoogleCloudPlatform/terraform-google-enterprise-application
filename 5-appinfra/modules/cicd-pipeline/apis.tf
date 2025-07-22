@@ -20,22 +20,24 @@ module "enabled_google_apis" {
   disable_services_on_destroy = false
 
   activate_apis = [
+    "anthos.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
     "artifactregistry.googleapis.com",
-    "sourcerepo.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
-    "anthos.googleapis.com",
     "container.googleapis.com",
-    "gkehub.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "containerscanning.googleapis.com",
     "gkeconnect.googleapis.com",
-    "anthosconfigmanagement.googleapis.com",
+    "gkehub.googleapis.com",
+    "iam.googleapis.com",
     "mesh.googleapis.com",
     "meshconfig.googleapis.com",
     "meshtelemetry.googleapis.com",
-    "iam.googleapis.com",
-    "servicenetworking.googleapis.com"
+    "servicenetworking.googleapis.com",
   ]
 }

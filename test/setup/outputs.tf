@@ -103,9 +103,30 @@ output "logging_bucket" {
 }
 
 output "bucket_kms_key" {
-  value = module.kms.keys["key"]
+  value = module.kms.keys["bucket"]
 }
 
-output "kms_bucket_keyring" {
+output "attestation_kms_key" {
+  value = module.kms_attestor.keys["attestation"]
+}
+
+output "attestation_kms_project" {
+  value = local.project_id
+}
+
+output "kms_keyring" {
   value = module.kms.keyring
+}
+
+output "binary_authorization_image" {
+  value = var.single_project ? local.binary_auth_image_tag : null
+}
+
+output "attestation_evaluation_mode" {
+  value = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : null
+}
+
+output "binary_authorization_repository_id" {
+  description = "The ID of the Repository where binary attestation image is stored."
+  value       = var.single_project ? google_artifact_registry_repository.attestation_image[local.index].id : null
 }

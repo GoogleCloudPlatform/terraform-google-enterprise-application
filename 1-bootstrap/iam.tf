@@ -99,6 +99,15 @@ resource "google_folder_iam_member" "owner" {
   folder = each.value.folder_id
 }
 
+
+resource "google_project_iam_member" "kms_sign" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" && var.attestation_kms_project != null })
+
+  role    = "roles/cloudkms.signerVerifier"
+  member  = "serviceAccount:${each.value.email}"
+  project = var.attestation_kms_project
+}
+
 resource "google_folder_iam_member" "app_factory_foldereditor" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
 

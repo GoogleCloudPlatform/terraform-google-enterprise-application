@@ -128,7 +128,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 1. Clone Bank of Anthos repository:
 
     ```bash
-    git clone --branch v0.6.4 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
+    git clone --branch v0.6.7 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
     ```
 
 1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.
@@ -311,6 +311,10 @@ the steps below assume that you are checked out on the same level as `terraform-
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
+| attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | n/a | yes |
+| binary\_authorization\_image | The Binary Authorization image to be used to create attestation. | `string` | n/a | yes |
+| binary\_authorization\_repository\_id | The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`. | `string` | n/a | yes |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |
