@@ -28,6 +28,9 @@ var (
 		// Error 403: Kubernetes Engine API has not been used in project {} before or it is disabled.
 		".*Error 403.*Kubernetes Engine API is not enabled for this project*": "Kubernetes Engine API not enabled",
 
+		// google_gke_hub_feature - Error: Error waiting to create Feature: Error waiting for Creating Feature: Error code 13, message: an internal error has occurred
+		".*Error waiting for Creating Feature: Error code 13, message: an internal error has occurred*.": "Error creating feature",
+
 		".*Error waiting for Creating Connection: Error code 9, message: Failed to verify authorizer_credential.*.": "servicedirectory.networks.access propagation time",
 
 		// Request had invalid authentication credentials.*
