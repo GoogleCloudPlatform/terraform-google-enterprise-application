@@ -50,7 +50,10 @@ func TestFleetscope(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
-	hpc, _ := strconv.ParseBool(setup.GetTFSetupStringOutput("hpc"))
+	hpc, err := strconv.ParseBool(setup.GetTFSetupStringOutput("hpc"))
+	if err != nil {
+		hpc = false
+	}
 
 	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
 

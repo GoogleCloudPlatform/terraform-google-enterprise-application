@@ -127,13 +127,11 @@ provider "google-beta" {
 				t.Parallel()
 
 				vars := map[string]interface{}{
-					"remote_state_bucket":   remoteState,
-					"buckets_force_destroy": "true",
-					"environment_names":     testutils.EnvNames(t),
-					"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
-					"bucket_kms_key":        loggingHarness.GetStringOutput("bucket_kms_key"),
-					"logging_bucket":        loggingHarness.GetStringOutput("logging_bucket"),
-					"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
+					"remote_state_bucket": remoteState,
+					"environment_names":   testutils.EnvNames(t),
+					"access_level_name":   vpcsc.GetStringOutput("access_level_name"),
+					"bucket_kms_key":      loggingHarness.GetStringOutput("bucket_kms_key"),
+					"logging_bucket":      loggingHarness.GetStringOutput("logging_bucket"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
