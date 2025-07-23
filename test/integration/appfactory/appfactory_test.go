@@ -173,7 +173,7 @@ func TestAppfactory(t *testing.T) {
 
 					enabledAPIS := gcloud.Runf(t, "services list --project %s", adminProjectID).Array()
 					listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
-					assert.Subset(listApis, adminProjectApis, "APIs should have been enabled")
+					assert.Subset(listApis, adminProjectApis, fmt.Sprintf("APIs should have been enabled at admin project %s", adminProjectID))
 
 					// check app infra repo
 					repositoryName := appData.Get("app_infra_repository_name").String()
@@ -252,7 +252,7 @@ func TestAppfactory(t *testing.T) {
 
 							enabledAPIS := gcloud.Runf(t, "services list --project %s", infraProjectID).Array()
 							listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
-							assert.Subset(listApis, envProjectApis, "APIs should have been enabled")
+							assert.Subset(listApis, envProjectApis, fmt.Sprintf("APIs should have been enabled at infra project %s", infraProjectID))
 
 							for _, role := range cloudBuildSARoles {
 								iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", fmt.Sprintf("bindings.role:%s", role), "--format", "json"})
