@@ -63,5 +63,6 @@ resource "time_sleep" "wait_access_level_propagation" {
     google_project_service_identity.cloudbuild_service_identity,
     google_project_service_identity.cloud_deploy_sa
   ]
-  destroy_duration = "2m"
+  destroy_duration = "5m"
+  create_duration  = "2m"
 }

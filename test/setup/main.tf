@@ -86,7 +86,6 @@ module "seed_project" {
     "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
-    "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "storage.googleapis.com",
     "trafficdirector.googleapis.com",

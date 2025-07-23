@@ -107,7 +107,6 @@ func TestMultitenant(t *testing.T) {
 							"multiclusterservicediscovery.googleapis.com",
 							"trafficdirector.googleapis.com",
 							"anthosconfigmanagement.googleapis.com",
-							"sourcerepo.googleapis.com",
 							"cloudtrace.googleapis.com",
 						},
 					},
