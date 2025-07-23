@@ -103,6 +103,7 @@ provider "google" {
 provider "google-beta" {
 	impersonate_service_account = "%s"
 }
+
 			`
 			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
 			fmt.Println(l, "bytes written successfully")
