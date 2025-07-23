@@ -166,7 +166,7 @@ module "vpc_project" {
 module "cluster_vpc" {
   for_each = !var.single_project ? module.vpc_project : {}
   source   = "terraform-google-modules/network/google"
-  version  = "~> 10.0"
+  version  = "~> 11.0"
 
   project_id      = each.value.project_id
   network_name    = "eab-vpc-${each.key}"
@@ -228,7 +228,7 @@ module "cluster_vpc" {
 module "cluster_private_service_connect" {
   for_each                   = module.cluster_vpc
   source                     = "terraform-google-modules/network/google//modules/private-service-connect"
-  version                    = "~> 10.0"
+  version                    = "~> 11.0"
   project_id                 = each.value.project_id
   network_self_link          = each.value.network_self_link
   private_service_connect_ip = "10.3.0.5"

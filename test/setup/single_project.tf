@@ -109,7 +109,7 @@ module "single_project_vpc" {
   count = var.single_project ? 1 : 0
 
   source  = "terraform-google-modules/network/google"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   project_id      = local.project_id
   network_name    = "cluster-vpc"
