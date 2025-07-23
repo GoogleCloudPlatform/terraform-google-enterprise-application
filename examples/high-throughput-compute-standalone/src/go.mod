@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/ri
 go 1.24
 
 require (
-	cloud.google.com/go/compute/metadata v0.6.0
-	cloud.google.com/go/storage v1.50.0
-	github.com/schollz/progressbar/v3 v3.16.1
-	github.com/spf13/cobra v1.8.1
-	google.golang.org/api v0.215.0
-	google.golang.org/grpc v1.68.1
-	google.golang.org/protobuf v1.36.4
+	cloud.google.com/go/compute/metadata v0.7.0
+	cloud.google.com/go/storage v1.55.0
+	github.com/schollz/progressbar/v3 v3.18.0
+	github.com/spf13/cobra v1.9.1
+	google.golang.org/api v0.241.0
+	google.golang.org/grpc v1.73.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
