@@ -55,7 +55,7 @@ func TestVPCSC(t *testing.T) {
 	protected_projects := []string{}
 	orgID := temp.GetTFSetupStringOutput("org_id")
 
-	HTC, err := strconv.ParseBool(temp.GetTFSetupStringOutput("HTC_EXAMPLE"))
+	HTC, err := strconv.ParseBool(strings.ToLower(os.Getenv("HTC_EXAMPLE")))
 	if err != nil {
 		HTC = false
 	}
