@@ -96,15 +96,14 @@ func TestAppInfra(t *testing.T) {
 				return
 			}
 			provider := `
-provider "google" {
-	impersonate_service_account = "%s"
-}
+	provider "google" {
+		impersonate_service_account = "%s"
+	}
 
-provider "google-beta" {
-	impersonate_service_account = "%s"
-}
-
-			`
+	provider "google-beta" {
+		impersonate_service_account = "%s"
+	}
+`
 			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
 			fmt.Println(l, "bytes written successfully")
 			if err != nil {

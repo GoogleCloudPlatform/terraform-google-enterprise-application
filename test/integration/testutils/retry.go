@@ -57,9 +57,9 @@ var (
 
 		".*dial tcp: lookup *.nip.io on *: server misbehaving*": "VM Gitlab issues.",
 
-		".*Error 400.*The subnetwork resource*projects/8/regions/*/subnetworks/*is already being used by*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
+		".*Error 400.*The subnetwork resource*projects/*/regions/*/subnetworks/*is already being used by*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
 
-		".*Error waiting for Deleting Network: The network resource*projects/*/global/networks/*is already being used by*.": "Destroy resources usage propagation issues",
+		".*The network resource*projects/*/global/networks/*is already being used by*.": "Destroy resources usage propagation issues",
 
 		".*Error 400.*Invalid value for field*resource.networkInterfaces[0].subnetwork*:*projects/*/regions/*/subnetworks/*. The referenced subnetwork resource cannot be found.*": "Network propagation",
 	}
