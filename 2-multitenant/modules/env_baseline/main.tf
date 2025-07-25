@@ -104,7 +104,6 @@ module "eab_cluster_project" {
     "multiclusterservicediscovery.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
-    "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "trafficdirector.googleapis.com",
   ]
@@ -156,7 +155,6 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
   count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
   members = distinct([
-    "serviceAccount:${local.cluster_sa}",
     data.google_compute_default_service_account.compute_sa.member,
     "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com"
   ])

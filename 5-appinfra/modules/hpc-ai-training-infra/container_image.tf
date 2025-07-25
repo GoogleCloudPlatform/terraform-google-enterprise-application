@@ -101,12 +101,6 @@ resource "google_artifact_registry_repository_iam_member" "allow_cluster_sa_down
   member     = "serviceAccount:${each.value}"
 }
 
-resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
-  count        = var.access_level_name != null ? 1 : 0
-  access_level = var.access_level_name
-  members      = [google_service_account.builder.member]
-}
-
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "60s"
 
@@ -114,7 +108,6 @@ resource "time_sleep" "wait_iam_propagation" {
     google_artifact_registry_repository_iam_member.builder,
     google_project_iam_member.builder_object_user,
     google_storage_bucket_iam_member.build_logs_storage_roles,
-    google_access_context_manager_access_level_condition.access-level-conditions,
   ]
 }
 

@@ -19,6 +19,11 @@ variable "org_id" {
   type        = string
 }
 
+variable "seed_folder_id" {
+  description = "Seed folder id."
+  type        = string
+}
+
 variable "protected_projects" {
   description = "The projects number to be protected."
   type        = list(string)
