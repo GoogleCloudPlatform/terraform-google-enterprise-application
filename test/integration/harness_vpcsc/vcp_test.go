@@ -53,17 +53,14 @@ func TestVPCSC(t *testing.T) {
 	serviceAccount := temp.GetTFSetupStringOutput("sa_email")
 	addAccessLevelMembers := strings.Split(os.Getenv("TF_VAR_access_level_members"), ",")
 	protected_projects := []string{}
-	orgID := temp.GetTFSetupStringOutput("org_id")
+
+	// orgID := temp.GetTFSetupStringOutput("org_id")
+	// testutils.CleanOrgACMPolicyID(t, orgID)
+	// testutils.CreateOrgACMPolicyID(t, orgID)
 
 	HTC, err := strconv.ParseBool(strings.ToLower(os.Getenv("HTC_EXAMPLE")))
 	if err != nil {
 		HTC = false
-	}
-	if testutils.GetOrgACMPolicyID(t, orgID) == "" {
-		_, err := testutils.CreateOrgACMPolicyID(t, orgID)
-		if err != nil {
-			t.Errorf("Error creating ACM Policy, %s", err)
-		}
 	}
 
 	accessLevelMembers := []string{
