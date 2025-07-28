@@ -18,7 +18,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/stretchr/testify/assert"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
@@ -47,5 +49,16 @@ func TestSingleProjectHarness(t *testing.T) {
 		tft.WithParallelism(100),
 		tft.WithVars(vars),
 	)
+
+	singleProject.DefineTeardown(func(assert *assert.Assertions) {
+		clusterProjectID := singleProject.GetStringOutput("seed_project_id")
+		// removes firewall rules created by the service but not being deleted.
+		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
+		for i := range firewallRules {
+			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
+		}
+		singleProject.DefaultTeardown(assert)
+
+	})
 	singleProject.Test()
 }

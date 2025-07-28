@@ -465,7 +465,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
     }
   }
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 }
 
@@ -521,7 +521,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     }
   }
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 }
 
