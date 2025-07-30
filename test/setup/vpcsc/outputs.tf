@@ -15,25 +15,30 @@
  */
 
 output "protected_projects" {
-  value = var.protected_projects
+  value      = var.protected_projects
+  depends_on = [time_sleep.apply_wait_propagation]
 }
 
 output "service_perimeter_name" {
   description = "Service Perimeter name."
   value       = "accessPolicies/${google_access_context_manager_access_policy.policy_org.name}/servicePerimeters/${module.regular_service_perimeter.perimeter_name}"
+  depends_on  = [time_sleep.apply_wait_propagation]
 }
 
 output "access_level_name" {
   description = "Access level name."
   value       = module.access_level_members.name_id
+  depends_on  = [time_sleep.apply_wait_propagation]
 }
 
 output "service_perimeter_mode" {
   description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   value       = var.service_perimeter_mode
+  depends_on  = [time_sleep.apply_wait_propagation]
 }
 
 output "access_context_manager_name" {
   description = "Access context manager name."
   value       = google_access_context_manager_access_policy.policy_org.name
+  depends_on  = [time_sleep.apply_wait_propagation]
 }

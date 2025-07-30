@@ -33,11 +33,13 @@ func TestMultitenantHarness(t *testing.T) {
 		tft.WithParallelism(100),
 	)
 	multiTenant.DefineTeardown(func(assert *assert.Assertions) {
-		clusterProjectID := multiTenant.GetTFSetupStringOutput("seed_project_id")
-		// removes firewall rules created by the service but not being deleted.
-		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
-		for i := range firewallRules {
-			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
+		clusterProjectIDs := multiTenant.GetJsonOutput("network_project_id").Array()
+		for _, clusterProjectID := range clusterProjectIDs {
+			// removes firewall rules created by the service but not being deleted.
+			firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID.String()).Array()
+			for i := range firewallRules {
+				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID.String())
+			}
 		}
 		multiTenant.DefaultTeardown(assert)
 

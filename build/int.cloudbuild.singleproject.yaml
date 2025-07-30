@@ -93,7 +93,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
+        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose",
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
@@ -159,7 +159,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "sleep 3m && cft test run TestVPCSC  --stage teardown --verbose",
+        "cft test run TestVPCSC  --stage teardown --verbose",
       ]
 
   - id: harness-teardown
