@@ -55,7 +55,6 @@ This examples requires one project already created with the following APIs enabl
 - servicemanagement.googleapis.com
 - servicenetworking.googleapis.com
 - serviceusage.googleapis.com
-- sourcerepo.googleapis.com
 - sqladmin.googleapis.com
 - storage-api.googleapis.com
 - trafficdirector.googleapis.com

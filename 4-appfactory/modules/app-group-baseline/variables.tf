@@ -231,12 +231,6 @@ variable "service_perimeter_name" {
   default     = null
 }
 
-variable "access_level_name" {
-  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
-  type        = string
-  default     = null
-}
-
 variable "kms_project_id" {
   description = "Custom KMS Key project to be granted KMS Admin and KMS Signer Verifier to the Cloud Build service account."
   type        = string

@@ -555,6 +555,12 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
         method = "*"
       }
     }
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
@@ -630,14 +636,171 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
         method = "*"
       }
     }
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
   }
 }
 
-resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
-  count        = var.access_level_name != null ? 1 : 0
-  access_level = var.access_level_name
-  members      = ["serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"]
+# This ingress policy configures the necessary permissions for Cloud Deploy and Worker Pool to deploy the workload on the GKE cluster project
+resource "google_access_context_manager_service_perimeter_ingress_policy" "identities_search_ingress_policy" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "identities-[${data.google_project.admin_project.project_id}, ${data.google_project.workerpool_project.project_id}]-cicd"
+  ingress_from {
+    identities = ["serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"]
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = ["*"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iam.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "binaryauthorization.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudresourcemanager.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "serviceusage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "gkehub.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "identities_search_ingress_policy" {
+  count     = var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "identities-[${data.google_project.admin_project.project_id}, ${data.google_project.workerpool_project.project_id}]-cicd"
+  ingress_from {
+    identities = ["serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"]
+    sources {
+      access_level = "*"
+    }
+  }
+  ingress_to {
+    resources = ["*"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iam.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "binaryauthorization.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudresourcemanager.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "serviceusage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "artifactregistry.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "cloudbuild.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "gkehub.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
 }

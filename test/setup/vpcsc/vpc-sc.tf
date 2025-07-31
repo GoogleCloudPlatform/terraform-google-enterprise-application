@@ -377,23 +377,27 @@ resource "random_string" "prefix" {
   upper   = false
 }
 
-data "google_access_context_manager_access_policy" "policy_org" {
-  parent = "organizations/${var.org_id}"
+resource "google_access_context_manager_access_policy" "policy_org" {
+  parent     = "organizations/${var.org_id}"
+  title      = "GKE folder ${var.seed_folder_id} Scoped Access Policy"
+  scopes     = [var.seed_folder_id]
+  depends_on = [time_sleep.destroy_wait_propagation]
 }
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
   version            = "~> 7.1"
-  policy             = data.google_access_context_manager_access_policy.policy_org.name
+  policy             = google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = var.access_level_members
   combining_function = "OR"
+  depends_on         = [time_sleep.destroy_wait_propagation]
 }
 
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
   version        = "~> 7.1"
-  policy         = data.google_access_context_manager_access_policy.policy_org.name
+  policy         = google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
 
@@ -410,4 +414,19 @@ module "regular_service_perimeter" {
   resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : []
   egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : []
   ingress_policies        = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : []
+  depends_on              = [time_sleep.destroy_wait_propagation]
+}
+
+resource "time_sleep" "apply_wait_propagation" {
+  create_duration = "5m"
+
+  depends_on = [
+    google_access_context_manager_access_policy.policy_org,
+    module.access_level_members,
+    module.regular_service_perimeter
+  ]
+}
+
+resource "time_sleep" "destroy_wait_propagation" {
+  destroy_duration = "5m"
 }
