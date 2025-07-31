@@ -1,10 +1,11 @@
 # 1. Bootstrap phase
 
-The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
+The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application Blueprint.
+These pipelines are:
 
 - the Multitenant Infrastructure pipeline
-- the Application Factory
-- the Fleet-Scope pipeline
+- the Application Factory pipeline
+- the FleetScope pipeline
 
 An overview of the deployment methodology for the Enterprise Application blueprint is shown below.
 ![Enterprise Application blueprint deployment diagram](../assets/eab-deployment.svg)
@@ -20,13 +21,216 @@ Each pipeline has the following associated resources:
   - Build Logs bucket, to store the logs from the build process
 - 1 service account for executing the Cloud Build build process
 
+It is also create an image to attestate builded images.
+
 ## Usage
 
 ### Pre-requisites
 
+#### Seed project
+
+This is the project where the infrastructure will be created.
+
+You will need a project with billing account already linked.
+The project need the following APIs already enabled.
+
+- "accesscontextmanager.googleapis.com",
+- "artifactregistry.googleapis.com",
+- "anthos.googleapis.com",
+- "anthosconfigmanagement.googleapis.com",
+- "apikeys.googleapis.com",
+- "binaryauthorization.googleapis.com",
+- "binaryauthorization.googleapis.com",
+- "certificatemanager.googleapis.com",
+- "cloudbilling.googleapis.com",
+- "cloudbuild.googleapis.com",
+- "clouddeploy.googleapis.com",
+- "cloudfunctions.googleapis.com",
+- "cloudkms.googleapis.com",
+- "cloudresourcemanager.googleapis.com",
+- "cloudtrace.googleapis.com",
+- "compute.googleapis.com",
+- "container.googleapis.com",
+- "containeranalysis.googleapis.com",
+- "containerscanning.googleapis.com",
+- "gkehub.googleapis.com",
+- "iam.googleapis.com",
+- "iap.googleapis.com",
+- "mesh.googleapis.com",
+- "monitoring.googleapis.com",
+- "multiclusteringress.googleapis.com",
+- "multiclusterservicediscovery.googleapis.com",
+- "networkmanagement.googleapis.com",
+- "orgpolicy.googleapis.com",
+- "secretmanager.googleapis.com",
+- "servicedirectory.googleapis.com",
+- "servicemanagement.googleapis.com",
+- "servicenetworking.googleapis.com",
+- "serviceusage.googleapis.com",
+- "sqladmin.googleapis.com",
+- "storage.googleapis.com",
+- "trafficdirector.googleapis.com",
+
+You can run the command to enable them in you project:
+
+```bash
+gcloud services enable \
+  accesscontextmanager.googleapis.com \
+  artifactregistry.googleapis.com \
+  anthos.googleapis.com \
+  anthosconfigmanagement.googleapis.com \
+  apikeys.googleapis.com \
+  binaryauthorization.googleapis.com \
+  certificatemanager.googleapis.com \
+  cloudbilling.googleapis.com \
+  cloudbuild.googleapis.com \
+  clouddeploy.googleapis.com \
+  cloudfunctions.googleapis.com \
+  cloudkms.googleapis.com \
+  cloudresourcemanager.googleapis.com \
+  cloudtrace.googleapis.com \
+  compute.googleapis.com \
+  container.googleapis.com \
+  containeranalysis.googleapis.com \
+  containerscanning.googleapis.com \
+  gkehub.googleapis.com \
+  iam.googleapis.com \
+  iap.googleapis.com \
+  mesh.googleapis.com \
+  monitoring.googleapis.com \
+  multiclusteringress.googleapis.com \
+  multiclusterservicediscovery.googleapis.com \
+  networkmanagement.googleapis.com \
+  orgpolicy.googleapis.com \
+  secretmanager.googleapis.com \
+  servicedirectory.googleapis.com \
+  servicemanagement.googleapis.com \
+  servicenetworking.googleapis.com \
+  serviceusage.googleapis.com \
+  sqladmin.googleapis.com \
+  storage.googleapis.com \
+  trafficdirector.googleapis.com \
+  --project=YOUR_PROJECT_ID
+```
+
+The identity deploying will need the following roles at the project:
+
+- Cloud Build Connection Admin: `roles/cloudbuild.connectionAdmin`
+- Compute Network Admin: `roles/compute.networkAdmin`
+- Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+
 #### Secrets Project
 
 You will need a Google Cloud project with [Secret Manager](https://cloud.google.com/security/products/secret-manager) to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
+
+The identity deploying will need the following roles at the project:
+
+- Secret Manager Admin: `roles/secretmanager.admin`
+
+This project needs the following services enabled:
+
+- "secretmanager.googleapis.com"
+
+You can run the command to enable them in you project:
+
+```bash
+gcloud services enable \
+  secretmanager.googleapis.com \
+  --project=YOUR_PROJECT_ID
+```
+
+#### KMS Project
+
+You will need a Google Cloud project where your [KMS](https://cloud.google.com/kms/docs/key-management-service) key for attestation is stored.
+
+The identity deploying will need the following roles at the project:
+
+- Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+
+This project needs the following services enabled:
+
+- "cloudkms.googleapis.com"
+
+You can run the command to enable them in you project:
+
+```bash
+gcloud services enable \
+  cloudkms.googleapis.com \
+  --project=YOUR_PROJECT_ID
+```
+
+#### KMS Key for bucket encryption
+
+This  [KMS key](https://cloud.google.com/kms/docs/key-management-service) will be used to encrypt key bucket content.
+
+The project [Storage service agent](https://cloud.google.com/storage/docs/getting-service-agent#command-line) needs the following roles:
+
+- Cloud KMS CryptoKey Encrypter: `roles/cloudkms.cryptoKeyEncrypter`
+- Cloud KMS CryptoKey Decrypter: `roles/cloudkms.cryptoKeyDecrypter`
+
+#### Logging bucket
+
+You can use a already created bucket to store logging. It will be used to store logs from:
+
+- Build logs
+- Terraform state bucket.
+
+#### VPC-SC
+
+This solution can be deployed inside of a VPC-Perimeter. However, the Cloud Build project, aka. seed project, __cannot__ be inside of the perimeter, since it will create new projects, errors will happen when accessing services (enabling APIs for example) before the new project is appended to the perimeter.
+
+__The creation of the Service Perimeter, Access Level are not resposability of this module. But it will make changes, adding projects at the Service Perimeter, creating Directional Rules and adding identities to the Access Level.__
+
+You need to provide a already create Access Level Name, Service Perimeter Name and the mode os deploymente (DRY_RUN or ENFORCED).
+
+The identity deploying must be part of the Access Level.
+
+The identity deploying will need the following roles at the organization level:
+
+- Access Context Manager Admin: `roles/accesscontextmanager.policyAdmin`
+
+#### Private Worker Pool Requirements
+
+A private worker pool must be defined to run within a VPC-SC Perimeter.
+You can find an example Worker Pool without external IP, peered network and NAT configured `test/setup/modules/private_workerpool/` folder.
+
+The module creates one project, a Private Worker Pool in his own project, a peered VPC with a NAT VM who allows internet egrees to get external dependencies.
+You can also find the necessary firewall rules, peerings and configurations to make the Private Worker Pool work.
+The same pool can be utilized in multiple steps. Reserving a wider IP range allows more concurrent builds. A /24 range allows 254 hosts.
+
+The identity deploying must have the following roles at the Private WorkerPool project:
+
+- Cloud Build WorkerPool User: `roles/cloudbuild.workerPoolUser`
+- Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+
+#### Environments infrastructure
+
+##### Folders
+
+You will need pre created folders:
+
+- A common folder
+- A folder per environment (ex.: development, nonproduction, production)
+
+The identity deploiyng must have the following roles at the folders:
+
+- Folder Admin: `roles/resourcemanager.folderAdmin`
+- Project Creator: `roles/resourcemanager.projectCreator`
+- Compute Network Admin: `roles/compute.networkAdmin`
+- Compute Shared VPC Admin: `roles/compute.xpnAdmin`
+
+
+###### Shared Network
+
+You will need a Shared VPC per environment already created.
+
+You network will need to meet the following requirements:
+
+- Two subnets in different regions
+- Each subnet must have two secondary ranges
+- Ingress firewall rule allowing SSH
+
+You can find an example of network configuration in `test/setup/harness/multitenant` module.
 
 #### Cloud Build with Github Pre-requisites
 
@@ -41,7 +245,9 @@ To proceed with GitHub as your git provider you will need:
    > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later.
-- [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
+- [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+   - Grant `repo` and `read:user` (or if app is installed in org use `read:org`)
+   - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
 - Create a secret for the Github Cloud Build App ID:
 
    ```bash
@@ -93,6 +299,7 @@ To proceed with GitHub as your git provider you will need:
 
       github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat" # Personal Access Token Secret
       github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id" # App ID value secret
+      secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
    }
    ```
 
@@ -179,33 +386,21 @@ To proceed with Gitlab as your git provider you will need:
       gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-api-token"
       gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-read-api-token"
       gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-webhook"
+
+      secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+
+      # If you are using a self-hosted instance, you may change the URL below accordingly
+      gitlab_enterprise_host_uri = "https://gitlab.com"
+
+      gitlab_enterprise_service_directory = "projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE"
+
+      # .pem string
+      gitlab_enterprise_ca_certificate = <<EOF
+      REPLACE_WITH_SSL_CERT
+      EOF
    }
    ```
 
-### Worker Pool Requirements
-
-A worker pool must be defined to run within a VPC-SC Perimeter. You can find an example Worker Pool without external IP that peers a Gitlab Instance Internal IP on `test/setup` directory.
-
-```terraform
-resource "google_cloudbuild_worker_pool" "pool" {
-  name     = "cb-pool"
-  project  = module.gitlab_project.project_id
-  location = "us-central1"
-  worker_config {
-    disk_size_gb   = 100
-    machine_type   = "e2-standard-4"
-    no_external_ip = true
-  }
-  network_config {
-    peered_network          = local.gitlab_network_id_without_location
-    peered_network_ip_range = "/24"
-  }
-
-  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
-}
-```
-
-The code above creates the Worker Pool. The peered VPC is a VPC that contains a Git Instance and a NAT VM. You can also find the necessary firewall rules, peerings and configurations to make the Private Worker Pool work. See [gitlab_vm.tf](../test/setup/gitlab_vm.tf) file and [nat_proxy_vm.tf](../test/setup/nat_proxy_vm.tf) file for more information. The same pool can be utilized in multiple steps. Reserving a wider IP range allows more concurrent builds. A /24 range allows 254 hosts.
 
 ### Deploying with Cloud Build
 
