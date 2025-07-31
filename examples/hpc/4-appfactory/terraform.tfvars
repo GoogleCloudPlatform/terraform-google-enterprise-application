@@ -40,10 +40,11 @@ EOF
 }
 
 infra_project_apis = [
-  "iam.googleapis.com",
-  "cloudresourcemanager.googleapis.com",
-  "serviceusage.googleapis.com",
+  "artifactregistry.googleapis.com",
   "cloudbilling.googleapis.com",
-  "storage.googleapis.com",
   "cloudkms.googleapis.com",
+  "cloudresourcemanager.googleapis.com",
+  "iam.googleapis.com",
+  "serviceusage.googleapis.com",
+  "storage.googleapis.com",
 ]
