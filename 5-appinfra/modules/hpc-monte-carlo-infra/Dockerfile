@@ -28,7 +28,7 @@ COPY mc_run_reqs.txt /requirements.txt
 RUN /venv/bin/pip install --disable-pip-version-check -r /requirements.txt
 
 # Copy the virtualenv into a distroless image
-FROM gcr.io/distroless/python3-debian12@sha256:d9fd857eb4a7639c5de33a65582aebe0339bd4e15e2551de27a1d95f73aa0a82
+FROM gcr.io/distroless/python3-debian12@sha256:2ee12c9ec854c64622f469f4c5974c419767334f5965706cedbe2e2353a3a425
 COPY --from=build-venv /venv /venv
 COPY . /app
 WORKDIR /app
