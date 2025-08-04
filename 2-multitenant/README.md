@@ -19,6 +19,117 @@ The following resources are created:
 1. Provision of the per-environment folder, network project, network, and subnetwork(s).
 1. 1-bootstrap phase executed successfully.
 
+### Environments
+
+You will need to provide information about your environment. It includes:
+
+- A biling account to be linked to the cluster projects,
+- The environement folder id where the cluster project will be created,
+- The network project id where the cluster network is hosted,
+- The cluster network self link,
+- The cluster subnetworks self-links,
+- The organization id
+
+You can see the variable example bellow. Remember to include your own values.
+
+```hcl
+envs = {
+  developemnt = {
+    billing_account    = "000000-000000-000000"
+    folder_id          = "1234567890123"
+    network_project_id = "shared-vpc-project"
+    network_self_link  = "https://www.googleapis.com/compute/v1/projects/shared-vpc-project/global/networks/the-network"
+    org_id             = "9876543210987"
+    subnets_self_links = [
+      "https://www.googleapis.com/compute/v1/projects/shared-vpc-project/regions/us-central1/subnetworks/subnet-us-central1",
+      "https://www.googleapis.com/compute/v1/projects/shared-vpc-project/regions/us-east1/subnetworks/subnet-us-east1"
+    ]
+  },
+  nonproduction = {
+    billing_account    = "111111-111111-111111"
+    folder_id          = "4567890123456"
+    network_project_id = "shared-vpc-project-nonprod"
+    network_self_link  = "https://www.googleapis.com/compute/v1/projects/shared-vpc-project-nonprod/global/networks/the-network"
+    org_id             = "2345678901234"
+    subnets_self_links = [
+      "https://www.googleapis.com/compute/v1/projects/shared-vpc-project-nonprod/regions/us-central1/subnetworks/subnet-us-central1",
+      "https://www.googleapis.com/compute/v1/projects/shared-vpc-project-nonprod/regions/us-east1/subnetworks/subnet-us-east1"
+    ]
+  },
+  production = {
+    billing_account    = "111111-111111-111111"
+    folder_id          = "4567890123456"
+    network_project_id = "shared-vpc-project-prod"
+    network_self_link  = "https://www.googleapis.com/compute/v1/projects/shared-vpc-project-prod/global/networks/the-network"
+    org_id             = "2345678901234"
+    subnets_self_links = [
+      "https://www.googleapis.com/compute/v1/projects/shared-vpc-project-prod/regions/us-central1/subnetworks/subnet-us-central1",
+      "https://www.googleapis.com/compute/v1/projects/shared-vpc-project-prod/regions/us-east1/subnetworks/subnet-us-east1"
+    ]
+  }
+}
+```
+
+### Application
+
+For each application to be deployed in this solution, please provide:
+
+- A distinct application name as key;
+  - A distinct acronym for each application, it will be used as a shorten identificator;
+  - IP addresses for each application, wheen needed;
+  - Certificates for each application, when needed;
+
+```hcl
+apps = {
+  "myapp1" = {
+    acronym          = "MA1"
+    ip_address_names = ["ip-myapp1-01", "ip-myapp1-02"]
+    certificates = {
+      "cert-web" = [
+        "-----BEGIN CERTIFICATE-----",
+        "MII...muito codigo aqui...",
+        "-----END CERTIFICATE-----"
+      ],
+      "cert-db" = [
+        "-----BEGIN CERTIFICATE-----",
+        "MII...outro codigo aqui...",
+        "-----END CERTIFICATE-----"
+      ]
+    }
+  }
+
+  "anotherapp" = {
+    acronym = "AAP"
+    # ip_address_names e certificates são opcionais e podem ser omitidos
+  }
+
+  "yet-another-app" = {
+    acronym          = "YAA"
+    ip_address_names = [] # Exemplo de lista vazia
+    certificates     = {} # Exemplo de mapa vazio
+  }
+}
+```
+
+### VPC-SC
+
+This solution can be deployed inside of a VPC-Perimeter. However, the Cloud Build project, aka. seed project, __cannot__ be inside of the perimeter, since it will create new projects, errors will happen when accessing services (enabling APIs for example) before the new project is appended to the perimeter.
+
+__The creation of the Service Perimeter, Access Level are not resposability of this module. But it will make changes, adding projects at the Service Perimeter, creating Directional Rules and adding identities to the Access Level.__
+
+You need to provide a already create Access Level Name, Service Perimeter Name and the mode os deploymente (DRY_RUN or ENFORCED).
+
+This module will modify you perimeter and access level:
+
+- Append Cluster projects at the service perimeter
+- Add Egress rule to allow egress from Network project to Cluster project
+- Add cluster service account, default compute engine and container engine service agent at the access level.
+
+#### Private Workerpool project
+
+If you are deploying this solution inside of the VPC-SC, you need to provide the project where you Private Workerpool is deployed. This module will create Directional rules to allow Egress from Cloud Deploy to the Private Workerpool project.
+
+
 ## Usage
 
 ### Deploying with Google Cloud Build
