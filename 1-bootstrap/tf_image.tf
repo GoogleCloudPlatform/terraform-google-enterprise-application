@@ -37,7 +37,7 @@ resource "google_service_account" "builder" {
 
 module "build_logs" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   name              = "cb-tf-builder-logs-${var.project_id}"
   project_id        = var.project_id
