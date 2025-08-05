@@ -102,7 +102,6 @@ resource "time_sleep" "wait_iam_propagation" {
     google_artifact_registry_repository_iam_member.builder,
     google_project_iam_member.builder_object_user,
     google_storage_bucket_iam_member.build_logs_storage_admin,
-    google_access_context_manager_access_level_condition.access-level-conditions,
   ]
 }
 

@@ -36,11 +36,13 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t)
-	projectID := setupOutput.GetTFSetupStringOutput("project_id")
-	gitUrl := setupOutput.GetTFSetupStringOutput("gitlab_url")
-	gitlabPersonalTokenSecretName := setupOutput.GetTFSetupStringOutput("gitlab_pat_secret_name")
-	gitlabSecretProject := setupOutput.GetTFSetupStringOutput("gitlab_secret_project")
+	gitLabPath := "../../setup/harness/gitlab"
+	gitLab := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(gitLabPath))
+	projectID := gitLab.GetTFSetupStringOutput("seed_project_id")
+	gitUrl := gitLab.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
 
 	singleProjectType := os.Getenv("single_project_example_type")
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
@@ -101,6 +103,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				tft.WithTFDir(servicePath),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+				tft.WithParallelism(100),
 			)
 			mapPath := ""
 			if servicesInfoMap[serviceName].TeamName == servicesInfoMap[serviceName].ServiceName {

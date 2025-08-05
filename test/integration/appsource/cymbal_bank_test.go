@@ -35,10 +35,13 @@ import (
 
 func TestSourceCymbalBank(t *testing.T) {
 
-	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-	gitUrl := setupOutput.GetStringOutput("gitlab_url")
-	gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
-	gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
+	// initialize Terraform test from the Blueprints test framework
+	gitLabPath := "../../setup/harness/gitlab"
+	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+	gitUrl := gitLab.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
+
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)

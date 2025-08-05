@@ -19,11 +19,6 @@ variable "org_id" {
   type        = string
 }
 
-variable "branch_name" {
-  type        = string
-  description = "The branch starting the build."
-}
-
 variable "folder_id" {
   description = "The folder to deploy in"
   type        = string
@@ -34,18 +29,17 @@ variable "billing_account" {
   type        = string
 }
 
-variable "single_project" {
-  description = "The example which will be tested, if is true, single project infra will be created; if is false multitentant infra will be created"
-  type        = bool
-}
-
-variable "create_cloud_nat" {
-  description = "Create NAT router on cluster network."
-  type        = bool
-  default     = false
-}
-
 variable "cloud_build_sa" {
   description = "Cloud Build Service Account email to be granted Encrypt/Decrypt role."
   type        = string
+}
+
+variable "single_project" {
+  description = "Single Project example being deployed."
+  type        = bool
+}
+
+variable "hpc" {
+  description = "HPC Example being deployed."
+  type        = bool
 }

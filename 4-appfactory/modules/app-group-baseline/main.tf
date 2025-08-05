@@ -139,7 +139,6 @@ module "app_admin_project" {
     "secretmanager.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
-    "sourcerepo.googleapis.com",
   ]
 
   disable_services_on_destroy = false

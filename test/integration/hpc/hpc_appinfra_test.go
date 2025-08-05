@@ -52,8 +52,9 @@ func TestHPCAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
-	vpcsc := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../setup/vpcsc"),
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
 	)
 
 	type ServiceInfos struct {
@@ -123,8 +124,9 @@ provider "google-beta" {
 
 				vars := map[string]interface{}{
 					"remote_state_bucket":  remoteState,
-					"bucket_force_destroy": "true",
-					"access_level_name":    vpcsc.GetStringOutput("access_level_name"),
+					"bucket_force_destroy": true,
+					"logging_bucket":       loggingHarness.GetStringOutput("logging_bucket"),
+					"bucket_kms_key":       loggingHarness.GetStringOutput("bucket_kms_key"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -132,6 +134,7 @@ provider "google-beta" {
 					tft.WithVars(vars),
 					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 					tft.WithBackendConfig(backendConfig),
+					tft.WithParallelism(100),
 				)
 
 				appService.DefineVerify(func(assert *assert.Assertions) {

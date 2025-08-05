@@ -104,7 +104,6 @@ module "eab_cluster_project" {
     "multiclusterservicediscovery.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
-    "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "trafficdirector.googleapis.com",
   ]
@@ -156,7 +155,6 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
   count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
   members = distinct([
-    "serviceAccount:${local.cluster_sa}",
     data.google_compute_default_service_account.compute_sa.member,
     "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com"
   ])
@@ -459,6 +457,12 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
         method = "*"
       }
     }
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
@@ -505,6 +509,60 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     }
     operations {
       service_name = "trafficdirector.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "service_mesh_gke_to_network" {
+  count     = var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "servmesh-${local.cluster_project_id}-${var.network_project_id}"
+  ingress_from {
+    identities = [google_project_iam_member.servicemesh_service_agent.member]
+    sources {
+      resource = "projects/${data.google_project.eab_cluster_project.number}"
+    }
+  }
+  ingress_to {
+    resources = ["projects/${data.google_project.network_project.number}"]
+    operations {
+      service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_ingress_policy" "service_mesh_gke_to_network" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "servmesh-${local.cluster_project_id}-${var.network_project_id}"
+  ingress_from {
+    identities = [google_project_iam_member.servicemesh_service_agent.member]
+    sources {
+      resource = "projects/${data.google_project.eab_cluster_project.number}"
+    }
+  }
+  ingress_to {
+    resources = ["projects/${data.google_project.network_project.number}"]
+    operations {
+      service_name = "compute.googleapis.com"
       method_selectors {
         method = "*"
       }

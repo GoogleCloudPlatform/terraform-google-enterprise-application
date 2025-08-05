@@ -45,16 +45,24 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
   count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
   members = [
-    google_service_account.cloud_deploy.member,
-    google_service_account.cloud_build.member,
     google_project_service_identity.cloudbuild_service_identity.member,
     google_project_service_identity.cloud_deploy_sa.member,
+    google_service_account.cloud_build.member,
+    google_service_account.cloud_deploy.member
   ]
 
   depends_on = [
-    google_service_account.cloud_deploy,
-    google_service_account.cloud_build,
-    google_project_service_identity.cloudbuild_service_identity,
-    google_project_service_identity.cloud_deploy_sa
+    time_sleep.wait_access_level_propagation
   ]
+}
+
+resource "time_sleep" "wait_access_level_propagation" {
+  depends_on = [
+    google_project_service_identity.cloudbuild_service_identity,
+    google_project_service_identity.cloud_deploy_sa,
+    google_service_account.cloud_build,
+    google_service_account.cloud_deploy,
+  ]
+  destroy_duration = "5m"
+  create_duration  = "2m"
 }
