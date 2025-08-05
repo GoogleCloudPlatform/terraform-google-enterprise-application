@@ -19,12 +19,18 @@ The following resources are created:
 - Multicluster Ingress
 - Multicluster Service
 - Policy Controller
+- Binary authorization admission rule
 
 ## Prerequisites
 
 1. Provision of the per-environment folder, network project, network, and subnetwork(s).
 1. 1-bootstrap phase executed successfully.
 1. 2-multitenant phase executed successfully.
+
+### KMS key for attestation
+
+You will need to provide a [PKIK KMS Key](https://cloud.google.com/binary-authorization/docs/creating-attestors-console#create_a_pkix_key_pair) to be used to ce used by the attestor.
+
 
 ### Configuring Git Access for Config Sync Repository
 

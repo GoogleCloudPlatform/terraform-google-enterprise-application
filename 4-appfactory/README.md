@@ -18,15 +18,35 @@ It will also create an Application Folder to group your admin projects under it,
 
 ```txt
 .
-└── fldr-common/
-    ├── default-example/
-    │   ├── hello-world-admin
-    │   └── ...
-    ├── cymbal-bank/
-    │   ├── accounts-userservice-admin
-    │   ├── accounts-contacts-admin
-    │   ├── ledger-ledger-writer-admin
-    │   └── ...
+└── fldr-seed/
+  ├── fldr-common/
+  │   |── default-example/
+  │       ├── hello-world-admin
+  │       └── ...
+  │   |── cymbal-bank/
+  │       ├── accounts-userservice-admin
+  │       ├── accounts-contacts-admin
+  │       ├── ledger-ledger-writer-admin
+  │       └── ...
+  ├── fldr-development/
+  │   ├── prj-vpc-dev
+  │   ├── prj-gke-dev
+  │   ├── prj-accounts-userservice
+  │   ├── prj-ledger-ledgerwriter
+  │   └── ...
+  ├── fldr-nonproduction/
+  │   ├── prj-vpc-nonprod
+  │   ├── prj-gke-dev
+  │   ├── prj-accounts-userservice
+  │   ├── prj-ledger-ledgerwriter
+  │   └── ...
+  ├── fldr-prod/
+  │   ├── prj-vpc-prod
+  │   ├── prj-gke-dev
+  │   ├── prj-accounts-userservice
+  │   ├── prj-ledger-ledgerwriter
+  │   └── ...
+  ├── prj-seed
 ```
 
 ## Usage
