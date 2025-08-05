@@ -26,7 +26,47 @@ steps:
       - "TF_VAR_org_id=$_ORG_ID"
       - "TF_VAR_folder_id=$_FOLDER_ID"
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
-      - "TF_VAR_single_project=true"
+      - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
+
+  - id: private-workerpool-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage init --verbose"]
+
+  - id: private-workerpool-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage apply --verbose"]
+
+  - id: logging-bucket-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
+
+  - id: logging-bucket-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage apply --verbose"]
+
+  - id: gitlab-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage init --verbose"]
+
+  - id: gitlab-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage apply --verbose"]
+
+  - id: harness-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestSingleProjectHarness --stage init --verbose"]
+
+  - id: harness-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestSingleProjectHarness --stage apply --verbose"]
 
   - id: wait-startup-script
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -39,7 +79,7 @@ steps:
     args:
       - "-c"
       - |-
-        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup output -raw gitlab_secret_project)-ssl-cert/gitlab.crt /usr/local/share/ca-certificates
+       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
         update-ca-certificates
         if (ls /etc/ssl/certs | grep gitlab.pem); then
             cft test run TestBootstrapGitlabVM --stage verify --verbose || exit 1
@@ -53,11 +93,10 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose && sleep 5m",
+        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose",
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
-      - "access_level_members=serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
 
   - id: single-project-confidential-nodes-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -104,6 +143,30 @@ steps:
         "cft test run TestVPCSC  --stage teardown --verbose",
       ]
 
+  - id: harness-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestSingleProjectHarness  --stage teardown --verbose",
+      ]
+
+  - id: gitlab-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage teardown --verbose"]
+
+  - id: private-workerpool-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage teardown --verbose"]
+
+  - id: logging-bucket-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage teardown --verbose"]
+
 tags:
   - "ci"
   - "integration"
@@ -119,3 +182,5 @@ options:
     - "TF_VAR_deletion_protection=false"
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
     - "single_project_example_type=CONFIDENTIAL_NODES"
+    - "TF_VAR_single_project=true"
+    - "TF_VAR_hpc=false"

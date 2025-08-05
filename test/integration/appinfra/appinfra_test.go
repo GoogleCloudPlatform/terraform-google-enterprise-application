@@ -43,12 +43,17 @@ func TestAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
-	bucketKMSKey := bootstrap.GetTFSetupStringOutput("bucket_kms_key")
-	loggingBucket := bootstrap.GetTFSetupStringOutput("logging_bucket")
+	bucketKMSKey := loggingHarness.GetStringOutput("bucket_kms_key")
+	loggingBucket := loggingHarness.GetStringOutput("logging_bucket")
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 	remoteState := bootstrap.GetStringOutput("state_bucket")
@@ -91,14 +96,14 @@ func TestAppInfra(t *testing.T) {
 				return
 			}
 			provider := `
-provider "google" {
-	impersonate_service_account = "%s"
-}
+	provider "google" {
+		impersonate_service_account = "%s"
+	}
 
-provider "google-beta" {
-	impersonate_service_account = "%s"
-}
-			`
+	provider "google-beta" {
+		impersonate_service_account = "%s"
+	}
+`
 			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
 			fmt.Println(l, "bytes written successfully")
 			if err != nil {
@@ -127,6 +132,9 @@ provider "google-beta" {
 					"buckets_force_destroy": "true",
 					"environment_names":     testutils.EnvNames(t),
 					"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
+					"bucket_kms_key":        bucketKMSKey,
+					"logging_bucket":        loggingBucket,
+					"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -144,7 +152,6 @@ provider "google-beta" {
 					apis :=
 						[]string{
 							"artifactregistry.googleapis.com",
-							"sourcerepo.googleapis.com",
 							"certificatemanager.googleapis.com",
 							"cloudbuild.googleapis.com",
 							"clouddeploy.googleapis.com",
