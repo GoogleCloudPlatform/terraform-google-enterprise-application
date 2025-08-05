@@ -1,236 +1,271 @@
 # 1. Bootstrap phase
 
-The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application Blueprint.
-These pipelines are:
+## Purpose
 
-- the Multitenant Infrastructure pipeline
-- the Application Factory pipeline
-- the FleetScope pipeline
+The bootstrap phase streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP). It automates the creation of essential infrastructure components, including:
+
+- Cloud Build repositories and triggers
+- Service accounts with necessary IAM bindings
+- Artifact Registry for storing Terraform images
+- Cloud Storage buckets for storing Terraform state, plans and logs.
 
 An overview of the deployment methodology for the Enterprise Application blueprint is shown below.
 ![Enterprise Application blueprint deployment diagram](../assets/eab-deployment.svg)
 
-Each pipeline has the following associated resources:
+The folloging organization is expected by this phase:
 
-- 2 Cloud Build triggers
-  - 1 trigger to run Terraform Plan commands upon changes to a non-main git branch
-  - 1 trigger to run Terraform Apply commands upon changes to the main git branch
-- 3 Cloud Storage buckets
-  - Terraform State bucket, to store the current state
-  - Build Artifacts bucket, to store any artifacts generated during the build process, such as `.tfplan` files
-  - Build Logs bucket, to store the logs from the build process
-- 1 service account for executing the Cloud Build build process
+```txt
+.
+└── fldr-seed/
+    ├── fldr-common/
+    │   ├── ...
+    ├── fldr-development/
+    │   ├── prj-vpc-dev
+    │   └── ...
+    ├── fldr-nonproduction/
+    │   ├── prj-vpc-nonprod
+    │   └── ...
+    ├── fldr-prod/
+    │   ├── prj-vpc-prod
+    │   └── ...
+    ├── prj-seed
+```
 
-It is also create an image to attestate builded images.
+### Features
+
+__Automated Infrastructure Provisioning:__ Easily deploy a standardized and secure foundation for your enterprise applications.
+
+__Cloud Build Integration:__ Automates Terraform plan and apply operations via Cloud Build triggers, enabling CI/CD workflows.
+
+__Service Account Management:__ Creates and configures service accounts with the appropriate IAM roles for secure access to GCP resources.
+
+__Artifact Registry:__ Provides a private Docker registry for storing custom Terraform images, ensuring consistent execution environments.
+
+__Cloud Storage Buckets:__ Sets up dedicated Cloud Storage buckets for storing Terraform state files, execution plans, and logs, enhancing security and traceability.
+
+__VPC Service Controls (VPC-SC) Support:__ Integrates with VPC-SC by allowing you to specify an access level and service perimeter for enhanced security (optional).
+
+__Customizable Environments:__ Supports multiple environments (e.g., development, non-production, production) with configurable settings for billing accounts, folders, and networks.
+
+__Cloud Build v2 Repository Integration:__ Integrates with Cloud Build v2 for repository management, supporting GitHub, GitLab, and Cloud Source Repositories (CSR).
+
 
 ## Usage
 
-### Pre-requisites
+This section outlines the prerequisites and steps required to successfully deploy the module.
 
-#### Seed project
+### Prerequisites
 
-This is the project where the infrastructure will be created.
+Before deploying the module, ensure the following prerequisites are met:
 
-You will need a project with billing account already linked.
-The project need the following APIs already enabled.
+#### Seed Project
 
-- "accesscontextmanager.googleapis.com",
-- "artifactregistry.googleapis.com",
-- "anthos.googleapis.com",
-- "anthosconfigmanagement.googleapis.com",
-- "apikeys.googleapis.com",
-- "binaryauthorization.googleapis.com",
-- "binaryauthorization.googleapis.com",
-- "certificatemanager.googleapis.com",
-- "cloudbilling.googleapis.com",
-- "cloudbuild.googleapis.com",
-- "clouddeploy.googleapis.com",
-- "cloudfunctions.googleapis.com",
-- "cloudkms.googleapis.com",
-- "cloudresourcemanager.googleapis.com",
-- "cloudtrace.googleapis.com",
-- "compute.googleapis.com",
-- "container.googleapis.com",
-- "containeranalysis.googleapis.com",
-- "containerscanning.googleapis.com",
-- "gkehub.googleapis.com",
-- "iam.googleapis.com",
-- "iap.googleapis.com",
-- "mesh.googleapis.com",
-- "monitoring.googleapis.com",
-- "multiclusteringress.googleapis.com",
-- "multiclusterservicediscovery.googleapis.com",
-- "networkmanagement.googleapis.com",
-- "orgpolicy.googleapis.com",
-- "secretmanager.googleapis.com",
-- "servicedirectory.googleapis.com",
-- "servicemanagement.googleapis.com",
-- "servicenetworking.googleapis.com",
-- "serviceusage.googleapis.com",
-- "sqladmin.googleapis.com",
-- "storage.googleapis.com",
-- "trafficdirector.googleapis.com",
+The seed project is the GCP project where the initial infrastructure resources will be created.
 
-You can run the command to enable them in you project:
+- __Billing Account:__ The seed project must have a billing account linked.
 
-```bash
-gcloud services enable \
-  accesscontextmanager.googleapis.com \
-  artifactregistry.googleapis.com \
-  anthos.googleapis.com \
-  anthosconfigmanagement.googleapis.com \
-  apikeys.googleapis.com \
-  binaryauthorization.googleapis.com \
-  certificatemanager.googleapis.com \
-  cloudbilling.googleapis.com \
-  cloudbuild.googleapis.com \
-  clouddeploy.googleapis.com \
-  cloudfunctions.googleapis.com \
-  cloudkms.googleapis.com \
-  cloudresourcemanager.googleapis.com \
-  cloudtrace.googleapis.com \
-  compute.googleapis.com \
-  container.googleapis.com \
-  containeranalysis.googleapis.com \
-  containerscanning.googleapis.com \
-  gkehub.googleapis.com \
-  iam.googleapis.com \
-  iap.googleapis.com \
-  mesh.googleapis.com \
-  monitoring.googleapis.com \
-  multiclusteringress.googleapis.com \
-  multiclusterservicediscovery.googleapis.com \
-  networkmanagement.googleapis.com \
-  orgpolicy.googleapis.com \
-  secretmanager.googleapis.com \
-  servicedirectory.googleapis.com \
-  servicemanagement.googleapis.com \
-  servicenetworking.googleapis.com \
-  serviceusage.googleapis.com \
-  sqladmin.googleapis.com \
-  storage.googleapis.com \
-  trafficdirector.googleapis.com \
-  --project=YOUR_PROJECT_ID
-```
+- __APIs Enabled:__ The following Google Cloud APIs must be enabled in the seed project. You can enable them using the gcloud command provided below.
 
-The identity deploying will need the following roles at the project:
+   - `accesscontextmanager.googleapis.com`
+   - `artifactregistry.googleapis.com`
+   - `anthos.googleapis.com`
+   - `anthosconfigmanagement.googleapis.com`
+   - `apikeys.googleapis.com`
+   - `binaryauthorization.googleapis.com`
+   - `certificatemanager.googleapis.com`
+   - `cloudbilling.googleapis.com`
+   - `cloudbuild.googleapis.com`
+   - `clouddeploy.googleapis.com`
+   - `cloudfunctions.googleapis.com`
+   - `cloudkms.googleapis.com`
+   - `cloudresourcemanager.googleapis.com`
+   - `cloudtrace.googleapis.com`
+   - `compute.googleapis.com`
+   - `container.googleapis.com`
+   - `containeranalysis.googleapis.com`
+   - `containerscanning.googleapis.com`
+   - `gkehub.googleapis.com`
+   - `iam.googleapis.com`
+   - `iap.googleapis.com`
+   - `mesh.googleapis.com`
+   - `monitoring.googleapis.com`
+   - `multiclusteringress.googleapis.com`
+   - `multiclusterservicediscovery.googleapis.com`
+   - `networkmanagement.googleapis.com`
+   - `orgpolicy.googleapis.com`
+   - `secretmanager.googleapis.com`
+   - `servicedirectory.googleapis.com`
+   - `servicemanagement.googleapis.com`
+   - `servicenetworking.googleapis.com`
+   - `serviceusage.googleapis.com`
+   - `sqladmin.googleapis.com`
+   - `storage.googleapis.com`
+   - `trafficdirector.googleapis.com`
 
-- Cloud Build Connection Admin: `roles/cloudbuild.connectionAdmin`
-- Compute Network Admin: `roles/compute.networkAdmin`
-- Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+   To enable these APIs, execute the following command, replacing `YOUR_PROJECT_ID` with your actual project ID:
 
-#### Secrets Project
+   ```bash
+   gcloud services enable \
+   accesscontextmanager.googleapis.com \
+   artifactregistry.googleapis.com \
+   anthos.googleapis.com \
+   anthosconfigmanagement.googleapis.com \
+   apikeys.googleapis.com \
+   binaryauthorization.googleapis.com \
+   certificatemanager.googleapis.com \
+   cloudbilling.googleapis.com \
+   cloudbuild.googleapis.com \
+   clouddeploy.googleapis.com \
+   cloudfunctions.googleapis.com \
+   cloudkms.googleapis.com \
+   cloudresourcemanager.googleapis.com \
+   cloudtrace.googleapis.com \
+   compute.googleapis.com \
+   container.googleapis.com \
+   containeranalysis.googleapis.com \
+   containerscanning.googleapis.com \
+   gkehub.googleapis.com \
+   iam.googleapis.com \
+   iap.googleapis.com \
+   mesh.googleapis.com \
+   monitoring.googleapis.com \
+   multiclusteringress.googleapis.com \
+   multiclusterservicediscovery.googleapis.com \
+   networkmanagement.googleapis.com \
+   orgpolicy.googleapis.com \
+   secretmanager.googleapis.com \
+   servicedirectory.googleapis.com \
+   servicemanagement.googleapis.com \
+   servicenetworking.googleapis.com \
+   serviceusage.googleapis.com \
+   sqladmin.googleapis.com \
+   storage.googleapis.com \
+   trafficdirector.googleapis.com \
+   --project=YOUR_PROJECT_ID
+   ```
 
-You will need a Google Cloud project with [Secret Manager](https://cloud.google.com/security/products/secret-manager) to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
+- __IAM Roles:__ The identity deploying the module requires the following IAM roles on the seed project:
 
-The identity deploying will need the following roles at the project:
+   - Cloud Build Connection Admin: `roles/cloudbuild.connectionAdmin`
+   - Compute Network Admin: `roles/compute.networkAdmin`
+   - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 
-- Secret Manager Admin: `roles/secretmanager.admin`
+### Secrets Project
 
-This project needs the following services enabled:
+A separate Google Cloud project is required to store Git credentials securely using Secret Manager. This project will be referenced as $GIT_SECRET_PROJECT throughout the documentation.
 
-- "secretmanager.googleapis.com"
+- __IAM Roles:__ The identity deploying the module requires the following IAM role on the secrets project:
 
-You can run the command to enable them in you project:
+   - Secret Manager Admin: `roles/secretmanager.admin`
 
-```bash
-gcloud services enable \
-  secretmanager.googleapis.com \
-  --project=YOUR_PROJECT_ID
-```
+- __API Enabled:__ The following API must be enabled in the secrets project:
 
-#### KMS Project
+   - `secretmanager.googleapis.com`
 
-You will need a Google Cloud project where your [KMS](https://cloud.google.com/kms/docs/key-management-service) key for attestation is stored.
+   To enable the API, execute the following command, replacing YOUR_PROJECT_ID with your actual project ID:
 
-The identity deploying will need the following roles at the project:
+   ```bash
+   gcloud services enable \
+   secretmanager.googleapis.com \
+   --project=YOUR_PROJECT_ID
+   ```
 
-- Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+### KMS Project
 
-This project needs the following services enabled:
+A separate Google Cloud project is required to store the KMS key used for attestation.
 
-- "cloudkms.googleapis.com"
+- __IAM Roles:__ The identity deploying the module requires the following IAM role on the KMS project:
 
-You can run the command to enable them in you project:
+   - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 
-```bash
-gcloud services enable \
-  cloudkms.googleapis.com \
-  --project=YOUR_PROJECT_ID
-```
+- __API Enabled:__ The following API must be enabled in the KMS project:
 
-#### KMS Key for bucket encryption
+   - `cloudkms.googleapis.com`
 
-This  [KMS key](https://cloud.google.com/kms/docs/key-management-service) will be used to encrypt key bucket content.
+   To enable the API, execute the following command, replacing `YOUR_PROJECT_ID` with your actual project ID:
 
-The project [Storage service agent](https://cloud.google.com/storage/docs/getting-service-agent#command-line) needs the following roles:
+   ```bash
+   gcloud services enable \
+   cloudkms.googleapis.com \
+   --project=YOUR_PROJECT_ID
+   ```
 
-- Cloud KMS CryptoKey Encrypter: `roles/cloudkms.cryptoKeyEncrypter`
-- Cloud KMS CryptoKey Decrypter: `roles/cloudkms.cryptoKeyDecrypter`
+### KMS Key for Bucket Encryption
 
-#### Logging bucket
+A KMS key will be used to encrypt the contents of the created Cloud Storage buckets. This key should reside in the KMS Project.
 
-You can use a already created bucket to store logging. It will be used to store logs from:
+- __IAM Roles:__ The Storage service agent for the KMS Project requires the following IAM roles:
+
+   - Cloud KMS CryptoKey Encrypter: `roles/cloudkms.cryptoKeyEncrypter`
+   - Cloud KMS CryptoKey Decrypter: `roles/cloudkms.cryptoKeyDecrypter`
+
+### Logging Bucket
+
+You can optionally specify an existing Cloud Storage bucket to store logs from:
 
 - Build logs
-- Terraform state bucket.
+- Terraform state bucket
 
-#### VPC-SC
+### VPC Service Controls (VPC-SC)
 
-This solution can be deployed inside of a VPC-Perimeter. However, the Cloud Build project, aka. seed project, __cannot__ be inside of the perimeter, since it will create new projects, errors will happen when accessing services (enabling APIs for example) before the new project is appended to the perimeter.
+This module supports deployment within a VPC-SC perimeter.
 
-__The creation of the Service Perimeter, Access Level are not resposability of this module. But it will make changes, adding projects at the Service Perimeter, creating Directional Rules and adding identities to the Access Level.__
+__Important:__ The Cloud Build project (seed project) __cannot__ be within the perimeter. This is because the module creates new projects, and errors will occur when accessing services (e.g., enabling APIs) before the new project is added to the perimeter.
 
-You need to provide a already create Access Level Name, Service Perimeter Name and the mode os deploymente (DRY_RUN or ENFORCED).
+This module does not create the Service Perimeter or Access Level. However, it can add projects to the Service Perimeter, create directional rules, and add identities to the Access Level.
 
-The identity deploying must be part of the Access Level.
+To enable VPC-SC integration, you must provide the following:
 
-The identity deploying will need the following roles at the organization level:
+- An existing Access Level name.
+- An existing Service Perimeter name.
+- The deployment mode (`DRY_RUN` or `ENFORCED`).
 
-- Access Context Manager Admin: `roles/accesscontextmanager.policyAdmin`
+The identity deploying the module must be a member of the specified Access Level.
 
-#### Private Worker Pool Requirements
+- __IAM Roles:__ The identity deploying the module requires the following IAM role at the organization level:
 
-A private worker pool must be defined to run within a VPC-SC Perimeter.
-You can find an example Worker Pool without external IP, peered network and NAT configured `test/setup/modules/private_workerpool/` folder.
+- __Access Context Manager Admin:__ `roles/accesscontextmanager.policyAdmin`
 
-The module creates one project, a Private Worker Pool in his own project, a peered VPC with a NAT VM who allows internet egrees to get external dependencies.
-You can also find the necessary firewall rules, peerings and configurations to make the Private Worker Pool work.
-The same pool can be utilized in multiple steps. Reserving a wider IP range allows more concurrent builds. A /24 range allows 254 hosts.
+### Private Worker Pool Requirements
 
-The identity deploying must have the following roles at the Private WorkerPool project:
+A private worker pool is required to run within a VPC-SC perimeter.
 
-- Cloud Build WorkerPool User: `roles/cloudbuild.workerPoolUser`
-- Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+A sample Worker Pool configuration without external IP, peered network, and NAT is provided in the `test/setup/modules/private_workerpool/` folder. This sample includes a project, a Private Worker Pool in its own project, a peered VPC with a NAT VM that allows internet egress for external dependencies, and the necessary firewall rules and configurations.
 
-#### Environments infrastructure
+The same pool can be used across multiple steps. Reserving a wider IP range allows for more concurrent builds. A /24 range supports 254 hosts.
 
-##### Folders
+- __IAM Roles:__ The identity deploying the module must have the following IAM roles on the Private Worker Pool project:
 
-You will need pre created folders:
+- __Cloud Build WorkerPool User:__ `roles/cloudbuild.workerPoolUser`
+- __Project IAM Admin:__ `roles/resourcemanager.projectIamAdmin`
 
-- A common folder
-- A folder per environment (ex.: development, nonproduction, production)
+### Environments Infrastructure
 
-The identity deploiyng must have the following roles at the folders:
+The following infrastructure is required for the different environments:
 
-- Folder Admin: `roles/resourcemanager.folderAdmin`
-- Project Creator: `roles/resourcemanager.projectCreator`
-- Compute Network Admin: `roles/compute.networkAdmin`
-- Compute Shared VPC Admin: `roles/compute.xpnAdmin`
+#### Folders
 
+You need to pre-create the following folders:
 
-###### Shared Network
+- A common folder.
+- A folder per environment (e.g., development, nonproduction, production).
+- __IAM Roles:__ The identity deploying the module requires the following IAM roles on the folders:
+   - Folder Admin: `roles/resourcemanager.folderAdmin`
+   - Project Creator: `roles/resourcemanager.projectCreator`
+   - Compute Network Admin: `roles/compute.networkAdmin`
+   - Compute Shared VPC Admin: `roles/compute.xpnAdmin`
 
-You will need a Shared VPC per environment already created.
+### Shared Network
 
-You network will need to meet the following requirements:
+You need a Shared VPC per environment already created.
 
-- Two subnets in different regions
-- Each subnet must have two secondary ranges
-- Ingress firewall rule allowing SSH
+The networks must meet the following requirements:
 
-You can find an example of network configuration in `test/setup/harness/multitenant` module.
+- Two subnets in different regions.
+- Each subnet must have two secondary ranges.
+- Ingress firewall rule allowing SSH.
+
+A sample network configuration can be found in the `test/setup/harness/multitenant` module.
 
 #### Cloud Build with Github Pre-requisites
 
@@ -411,16 +446,6 @@ If you have previously deployed the Enterprise Foundation blueprint, create the 
 Start at "5. Clone the `bu1-example-app` repo". Replace the contents of that repo with the contents of this folder.
 
 ### Running Terraform locally
-
-#### Requirements
-
-You will need a project to host your resources, you can manually create it:
-
-```txt
-example-organization
-└── fldr-common
-    └── prj-c-eab-bootstrap
-```
 
 #### Step-by-Step
 

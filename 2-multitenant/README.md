@@ -14,6 +14,26 @@ The following resources are created:
 - Cloud Armor
 - App IP addresses (see below for details)
 
+```txt
+.
+└── fldr-seed/
+  ├── fldr-common/
+  │   ├── ...
+  ├── fldr-development/
+  │   ├── prj-vpc-dev
+  │   ├── prj-gke-dev
+  │   └── ...
+  ├── fldr-nonproduction/
+  │   ├── prj-vpc-nonprod
+  │   ├── prj-gke-dev
+  │   └── ...
+  ├── fldr-prod/
+  │   ├── prj-vpc-prod
+  │   ├── prj-gke-dev
+  │   └── ...
+  ├── prj-seed
+```
+
 ## Prerequisites
 
 1. Provision of the per-environment folder, network project, network, and subnetwork(s).
