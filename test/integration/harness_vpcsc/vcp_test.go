@@ -98,3 +98,15 @@ func TestVPCSC(t *testing.T) {
 	vpcsc.Test()
 
 }
+
+func TestCleanVPCSC(t *testing.T) {
+	vpcPath := "../../setup/vpcsc"
+	temp := tft.NewTFBlueprintTest(t, tft.WithTFDir(vpcPath))
+
+	orgID := temp.GetTFSetupStringOutput("org_id")
+	testutils.CleanOrgACMPolicyID(t, orgID)
+	_, err := testutils.CreateOrgACMPolicyID(t, orgID)
+	if err != nil {
+		t.Fatalf("Error re-creating the ACM policy: %s", err)
+	}
+}
