@@ -16,6 +16,7 @@ package fleetscope
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"slices"
 	"strconv"
@@ -62,6 +63,22 @@ func TestFleetscope(t *testing.T) {
 		"bucket": backend_bucket,
 	}
 
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
+	attestation := map[string]interface{}{}
+
+	if len(testutils.EnvNames(t)) == 1 {
+		attestation = map[string]interface{}{"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode")}
+	}
+
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		// retrieve namespaces from test/setup, they will be used to create the specific namespaces with the environment suffix
@@ -84,16 +101,6 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 			)
 
-			multitenantHarnessPath := "../../setup/harness/multitenant"
-			multitenantHarness := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(multitenantHarnessPath),
-			)
-
-			loggingHarnessPath := "../../setup/harness/logging_bucket"
-			loggingHarness := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(loggingHarnessPath),
-			)
-
 			// retrieve cluster location and fleet membership from 2-multitenant
 			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
 			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
@@ -113,9 +120,10 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_policy_dir":      fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName),
 				"config_sync_branch":          "cymbal-bank-isolation",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
-				"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode"),
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
+
+			maps.Copy(vars, attestation)
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
