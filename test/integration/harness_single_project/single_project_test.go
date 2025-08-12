@@ -57,6 +57,11 @@ func TestSingleProjectHarness(t *testing.T) {
 		for i := range firewallRules {
 			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
 		}
+
+		endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID).Array()
+		for i := range endpoints {
+			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID)
+		}
 		singleProject.DefaultTeardown(assert)
 
 	})
