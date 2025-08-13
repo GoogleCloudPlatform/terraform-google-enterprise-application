@@ -293,7 +293,7 @@ module "gke-standard" {
 
   fleet_project_grant_service_agent = true
 
-  deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
+  deletion_protection = var.deletion_protection
 
 }
 
@@ -546,7 +546,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
     }
   }
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 }
 
@@ -571,6 +571,6 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "servi
     }
   }
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 }
