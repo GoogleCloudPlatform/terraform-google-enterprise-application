@@ -16,8 +16,10 @@ package helloworld_e2e
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/shell"
@@ -55,10 +57,16 @@ func TestHelloWorldE2E(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !strings.Contains(logs, "Hello world!") {
-				t.Errorf("expected logs to contain 'Hello world!', but it did not")
+			i := 0
+			for i = 0; i < 40; i++ {
+				if strings.Contains(logs, "Hello world!") {
+					break
+				} else if strings.Contains(logs, "container creating") {
+					time.Sleep(2 * time.Second)
+					t.Log("Container initializing, sleeping for 2 minutes.")
+				}
 			}
-
+			t.Errorf("Unable to get hello world container after %s retries.", strconv.Itoa(i))
 		})
 	}
 
