@@ -172,13 +172,13 @@ A separate Google Cloud project is required to store Git credentials securely us
 
 ### KMS Project
 
-A separate Google Cloud project is required to store the KMS key used for attestation.
+A separate Google Cloud project is required to store the KMS key by this solution.
 
 - __IAM Roles:__ The identity deploying the module requires the following IAM role on the KMS project:
 
    - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 
-- __API Enabled:__ The following API must be enabled in the KMS project:
+- __API Enabled:__ The following API must be enabled in the Seed and KMS projects:
 
    - `cloudkms.googleapis.com`
 
@@ -190,14 +190,13 @@ A separate Google Cloud project is required to store the KMS key used for attest
    --project=YOUR_PROJECT_ID
    ```
 
-### KMS Key for Bucket Encryption
+####  KMS Key for Bucket Encryption
 
 A KMS key will be used to encrypt the contents of the created Cloud Storage buckets. This key should reside in the KMS Project.
 
-- __IAM Roles:__ The Storage service agent for the KMS Project requires the following IAM roles:
+####  KMS Key for Binary Authorization Attestation
 
-   - Cloud KMS CryptoKey Encrypter: `roles/cloudkms.cryptoKeyEncrypter`
-   - Cloud KMS CryptoKey Decrypter: `roles/cloudkms.cryptoKeyDecrypter`
+A KMS key will be sign images during building time.
 
 ### Logging Bucket
 
@@ -205,6 +204,13 @@ You can optionally specify an existing Cloud Storage bucket to store logs from:
 
 - Build logs
 - Terraform state bucket
+
+The bucket will use the KMS Key provided to encrypt the content. In this case, the code will grant the Storage Service Agent:
+
+   - Cloud KMS CryptoKey Encrypter: `roles/cloudkms.cryptoKeyEncrypter`
+   - Cloud KMS CryptoKey Decrypter: `roles/cloudkms.cryptoKeyDecrypter`
+
+If a Key is not provided, a new one will be created at the same project to encrypt the content.
 
 ### VPC Service Controls (VPC-SC)
 
@@ -262,10 +268,13 @@ You need a Shared VPC per environment already created.
 The networks must meet the following requirements:
 
 - Two subnets in different regions.
-- Each subnet must have two secondary ranges.
+- Each subnet must have two secondary ranges with at least /28 range.
 - Ingress firewall rule allowing SSH.
+- A Cloud Nat configured to reach extenal repositories.
 
-A sample network configuration can be found in the `test/setup/harness/multitenant` module.
+Access [Best practices for GKE networking](https://cloud.google.com/kubernetes-engine/docs/best-practices/networking) for more information.
+
+For a network configuration example, check the [Foundation Shared VPC](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/3-networks-svpc) step.
 
 #### Cloud Build with Github Pre-requisites
 
