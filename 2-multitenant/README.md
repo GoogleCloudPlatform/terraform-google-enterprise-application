@@ -44,13 +44,13 @@ The following resources are created:
 You will need to provide information about your environment. It includes:
 
 - A biling account to be linked to the cluster projects,
-- The environement folder id where the cluster project will be created,
+- The environment folder id where the cluster project will be created,
 - The network project id where the cluster network is hosted,
 - The cluster network self link,
 - The cluster subnetworks self-links,
 - The organization id
 
-You can see the variable example bellow. Remember to include your own values.
+You can see the variable example below. Remember to include your own values.
 
 ```hcl
 envs = {
@@ -96,7 +96,7 @@ For each application to be deployed in this solution, please provide:
 
 - A distinct application name as key;
   - A distinct acronym for each application, it will be used as a shorten identificator;
-  - IP addresses for each application, wheen needed;
+  - IP addresses for each application, when needed;
   - Certificates for each application, when needed;
 
 ```hcl
