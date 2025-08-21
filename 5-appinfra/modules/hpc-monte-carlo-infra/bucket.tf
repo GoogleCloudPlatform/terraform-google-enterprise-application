@@ -16,7 +16,7 @@
 
 module "stocks_data" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   name              = "${var.infra_project}-stocks-historical-data"
   project_id        = var.infra_project
@@ -29,8 +29,14 @@ module "stocks_data" {
   public_access_prevention = "enforced"
 
   versioning = true
-  encryption = { default_kms_key_name = var.bucket_kms_key }
+  encryption = var.bucket_kms_key == null ? {} : {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  internal_encryption_config = var.bucket_kms_key == null ? {
+    create_encryption_key = true
+    prevent_destroy       = !var.bucket_force_destroy
+  } : {}
 
   depends_on = [time_sleep.wait_cmek_iam_propagation]
 }
-
