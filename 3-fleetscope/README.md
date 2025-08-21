@@ -26,10 +26,22 @@ The following resources are created:
 1. 1-bootstrap phase executed successfully.
 1. 2-multitenant phase executed successfully.
 
+### Workspace groups
+
+For each namespace being created, you will need a Workspace group email previusly created.
+The code will grant ADMIN permission for each group email to the namespace created.
+
+```hcl
+namespace_ids = {
+  "cb-frontend" = "your-frontend-group@yourdomain.com",
+  "cb-accounts" = "your-accounts-group@yourdomain.com",
+  "cb-ledger"   = "your-ledger-group@yourdomain.com"
+}
+```
+
 ### KMS key for attestation
 
 You will need to provide a [PKIK KMS Key](https://cloud.google.com/binary-authorization/docs/creating-attestors-console#create_a_pkix_key_pair) to be used to ce used by the attestor.
-
 
 ### Configuring Git Access for Config Sync Repository
 
@@ -52,18 +64,29 @@ The example below shows configuration steps for the `token` mechanism, using Git
 
 After you create and obtain the personal access token in Gitlab, add it to a new `Secret` in each cluster.
 
-- Get Cluster names on 2-multitenant output:
+- Get Cluster names on 2-multitenant output for each environment:
 
     ```bash
-    export cluster_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_project)
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" init
+    export cluster_dev_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_project)
     terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_names
     terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_regions
+
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" init
+    export cluster_nonprod_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -raw cluster_project)
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -raw cluster_names
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -raw cluster_regions
+
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" init
+    export cluster_prod_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -raw cluster_project)
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -raw cluster_names
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -raw cluster_regions
     ```
 
 - Get your cluster credentials:
 
     ```bash
-     gcloud container clusters get-credentials <CLUSTER_NAME> --region <CLUSTER_REGION> --project <CLUSTER_PROJECT>
+     gcloud container hub memberships get-credentials MEMBERSHIP_NAME <CLUSTER_REGION> --project <CLUSTER_PROJECT>
      ```
 
 - (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
