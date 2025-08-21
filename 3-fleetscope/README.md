@@ -13,7 +13,6 @@ The following resources are created:
 
 - Fleet scope
 - Fleet namespace
-- Cloud Source Repo
 - Config Management
 - Service Mesh
 - Multicluster Ingress
@@ -51,7 +50,21 @@ The example below shows configuration steps for the `token` mechanism, using Git
 
 #### Git access: Gitlab using Token
 
-After you create and obtain the personal access token in Gitlab, add it to a new `Secret` in the cluster.
+After you create and obtain the personal access token in Gitlab, add it to a new `Secret` in each cluster.
+
+- Get Cluster names on 2-multitenant output:
+
+    ```bash
+    export cluster_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_project)
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_names
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_regions
+    ```
+
+- Get your cluster credentials:
+
+    ```bash
+     gcloud container clusters get-credentials <CLUSTER_NAME> --region <CLUSTER_REGION> --project <CLUSTER_PROJECT>
+     ```
 
 - (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
 

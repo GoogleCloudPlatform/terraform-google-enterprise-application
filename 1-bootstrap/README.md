@@ -196,7 +196,7 @@ A KMS key will be used to encrypt the contents of the created Cloud Storage buck
 
 ####  KMS Key for Binary Authorization Attestation
 
-A KMS key will be sign images during building time.
+A KMS key will be used to sign images during building time. This key should reside in the KMS Project.
 
 ### Logging Bucket
 

@@ -107,12 +107,12 @@ apps = {
     certificates = {
       "cert-web" = [
         "-----BEGIN CERTIFICATE-----",
-        "MII...muito codigo aqui...",
+        "...",
         "-----END CERTIFICATE-----"
       ],
       "cert-db" = [
         "-----BEGIN CERTIFICATE-----",
-        "MII...outro codigo aqui...",
+        "...",
         "-----END CERTIFICATE-----"
       ]
     }
@@ -120,13 +120,13 @@ apps = {
 
   "anotherapp" = {
     acronym = "AAP"
-    # ip_address_names e certificates são opcionais e podem ser omitidos
+    # ip_address_names e certificates are optionals
   }
 
   "yet-another-app" = {
     acronym          = "YAA"
-    ip_address_names = [] # Exemplo de lista vazia
-    certificates     = {} # Exemplo de mapa vazio
+    ip_address_names = [] # Empty list example
+    certificates     = {} # Empty map example
   }
 }
 ```
