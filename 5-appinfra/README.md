@@ -17,13 +17,13 @@ The application infrastructure pipeline creates the following resources to estab
 - Cloud Storage buckets for build cache and other build artifacts
 - Custom service accounts and IAM bindings
 
-### Other applicaiton infrastructure
+### Other application infrastructure
 
 The application infrastructure pipeline can create additional resources on a per-environment basis.
 
 In this example, some services are using the [`alloydb-psc-setup`](.modules/alloydb-psc-setup) submodule for creating an AlloyDB Cluster with Private Service Connect.
 
-You may add additional infrastructure like application-specifc databases or other managed services by creating and invoking new submodules.
+You may add additional infrastructure like application-specific databases or other managed services by creating and invoking new submodules.
 
 ## Usage
 
