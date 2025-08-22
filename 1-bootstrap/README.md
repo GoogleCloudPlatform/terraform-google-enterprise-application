@@ -268,7 +268,7 @@ You need a Shared VPC per environment already created.
 The networks must meet the following requirements:
 
 - Two subnets in different regions.
-- Each subnet must have two secondary ranges with at least /28 range.
+- Each subnet must have two secondary ranges with at least /18 range.
 - Ingress firewall rule allowing SSH.
 - A Cloud Nat configured to reach extenal repositories.
 
