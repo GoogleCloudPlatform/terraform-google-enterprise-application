@@ -107,3 +107,14 @@ variable "logging_bucket" {
   type        = string
   default     = null
 }
+
+variable "bucket_kms_key" {
+  description = "KMS Key id to be used to encrypt bucket."
+  type        = string
+  default     = null
+}
+
+variable "attestation_kms_key" {
+  type        = string
+  description = "The KMS Key ID to be used by attestor."
+}

@@ -50,7 +50,7 @@ python-dateutil==2.9.0.post0
 # python-multipart==0.0.17
 pytz==2024.2
 pyyaml==6.0.2
-requests==2.32.3
+requests==2.32.4
 rich==13.9.4
 rsa==4.9
 ruff==0.7.4
@@ -64,7 +64,7 @@ tqdm==4.67.0
 typer==0.13.0
 typing-extensions==4.12.2
 tzdata==2024.2
-urllib3==2.2.3
+urllib3==2.5.0
 uvicorn==0.32.0
 websockets==12.0
 

@@ -18,7 +18,6 @@ locals {
   docker_tag_version_terraform = "v1"
   namespace                    = "${var.team}-${var.env}"
 }
-
 resource "google_project_iam_member" "team_roles" {
   for_each = toset([
     "roles/storage.objectUser",
@@ -33,16 +32,20 @@ resource "google_project_iam_member" "team_roles" {
 
 resource "google_project_service" "enable_apis" {
   for_each = toset([
+    "batch.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "bigquery.googleapis.com",
-    "storage.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
     "container.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "containerscanning.googleapis.com",
     "logging.googleapis.com",
     "notebooks.googleapis.com",
-    "batch.googleapis.com",
     "pubsub.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "compute.googleapis.com"
+    "storage.googleapis.com"
   ])
   project            = var.infra_project
   service            = each.key
@@ -54,12 +57,6 @@ resource "google_compute_network" "default" {
   name                    = "default"
   project                 = var.infra_project
   auto_create_subnetworks = true
-}
-
-resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
-  count        = var.access_level_name != null ? 1 : 0
-  access_level = var.access_level_name
-  members      = [google_service_account.builder.member]
 }
 
 resource "google_service_account" "vertex_service_account" {

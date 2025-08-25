@@ -99,3 +99,26 @@ variable "config_sync_branch" {
   description = "The branch of the repository to sync from. Default: master"
   default     = "master"
 }
+
+variable "attestation_kms_key" {
+  type        = string
+  description = "The KMS Key ID to be used by attestor."
+}
+
+variable "attestation_evaluation_mode" {
+  type        = string
+  description = "How this admission rule will be evaluated. Possible values are: ALWAYS_ALLOW, REQUIRE_ATTESTATION, ALWAYS_DENY"
+  default     = "ALWAYS_ALLOW"
+}
+
+variable "binary_authz_admission_whitelist_patterns" {
+  type        = list(string)
+  description = "An image name pattern to whitelist, in the form registry/path/to/image. This supports a trailing * as a wildcard, but this is allowed only in text after the registry/ part."
+  default     = []
+}
+
+variable "enable_kueue" {
+  type        = bool
+  description = "Enables Kueue private installation."
+  default     = false
+}

@@ -42,6 +42,15 @@ steps:
     env:
       - 'TEAM=$_TEAM'
       - 'SERVICE=$_SERVICE'
+  - id: 'create-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    args:
+      - '--artifact-url'
+      - '$_CONTAINER_REGISTRY/$_SERVICE:latest'
+      - '--attestor'
+      - '$_ATTESTOR_ID'
+      - '--keyversion'
+      - '$_KMS_KEY_VERSION'
   - name: gcr.io/cloud-builders/gcloud
     id: trigger-release
     args:

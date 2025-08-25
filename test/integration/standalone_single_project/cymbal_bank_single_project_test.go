@@ -36,12 +36,15 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t)
-	projectID := setupOutput.GetTFSetupStringOutput("project_id")
-	gitUrl := setupOutput.GetTFSetupStringOutput("gitlab_url")
-	gitlabPersonalTokenSecretName := setupOutput.GetTFSetupStringOutput("gitlab_pat_secret_name")
-	gitlabSecretProject := setupOutput.GetTFSetupStringOutput("gitlab_secret_project")
+	gitLabPath := "../../setup/harness/gitlab"
+	gitLab := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(gitLabPath))
+	projectID := gitLab.GetTFSetupStringOutput("seed_project_id")
+	gitUrl := gitLab.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
 
+	singleProjectType := os.Getenv("single_project_example_type")
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
@@ -51,6 +54,11 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
 	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
+
+	if singleProjectType == "CONFIDENTIAL_NODES" {
+		standaloneSingleProj = tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project_confidential_nodes"))
+	}
+
 	envName := standaloneSingleProj.GetStringOutput("env")
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
@@ -95,6 +103,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				tft.WithTFDir(servicePath),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+				tft.WithParallelism(100),
 			)
 			mapPath := ""
 			if servicesInfoMap[serviceName].TeamName == servicesInfoMap[serviceName].ServiceName {
@@ -119,7 +128,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				gitAppRun("clone", "--branch", "v0.6.4", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+				gitAppRun("clone", "--branch", "v0.6.7", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
@@ -169,12 +178,6 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				}
 
 				err = cp.Copy(fmt.Sprintf("%s/k8s", servicePath), fmt.Sprintf("%s/src/%s/k8s", tmpDirApp, mapPath))
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				t.Logf("copy %s/%s_cloudbuild.yaml to %s/src/%s/cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName, tmpDirApp, servicesInfoMap[serviceName].TeamName)
-				err = cp.Copy(fmt.Sprintf("%s/%s_cloudbuild.yaml", appSourcePath, servicesInfoMap[serviceName].TeamName), fmt.Sprintf("%s/src/%s/cloudbuild.yaml", tmpDirApp, servicesInfoMap[serviceName].TeamName))
 				if err != nil {
 					t.Fatal(err)
 				}

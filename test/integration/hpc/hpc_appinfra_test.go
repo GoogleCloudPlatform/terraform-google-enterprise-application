@@ -52,8 +52,9 @@ func TestHPCAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
-	vpcsc := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../setup/vpcsc"),
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
 	)
 
 	type ServiceInfos struct {
@@ -88,20 +89,44 @@ func TestHPCAppInfra(t *testing.T) {
 			}
 
 			remoteState := bootstrap.GetStringOutput("state_bucket")
+			infraPath := fmt.Sprintf("%s/%s/envs/development", appSourcePath, fullServiceName)
+			serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, fullServiceName)).String(), "/")
+			t.Logf("Setting Service Account %s to be impersonated.", serviceAccount[len(serviceAccount)-1])
+			f, err := os.Create(fmt.Sprintf("%s/providers.tf", infraPath))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			provider := `
+provider "google" {
+	impersonate_service_account = "%s"
+}
+
+provider "google-beta" {
+	impersonate_service_account = "%s"
+}
+			`
+			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
+			fmt.Println(l, "bytes written successfully")
+			if err != nil {
+				fmt.Println(err)
+				f.Close()
+				return
+			}
 
 			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, fullServiceName)).String(), "/")
 			backendConfig := map[string]interface{}{
 				"bucket": backend_bucket[len(backend_bucket)-1],
 			}
 
-			infraPath := fmt.Sprintf("%s/%s/envs/development", appSourcePath, fullServiceName)
 			t.Run(infraPath, func(t *testing.T) {
 				t.Parallel()
 
 				vars := map[string]interface{}{
 					"remote_state_bucket":  remoteState,
-					"bucket_force_destroy": "true",
-					"access_level_name":    vpcsc.GetStringOutput("access_level_name"),
+					"bucket_force_destroy": true,
+					"logging_bucket":       loggingHarness.GetStringOutput("logging_bucket"),
+					"bucket_kms_key":       loggingHarness.GetStringOutput("bucket_kms_key"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -109,6 +134,7 @@ func TestHPCAppInfra(t *testing.T) {
 					tft.WithVars(vars),
 					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 					tft.WithBackendConfig(backendConfig),
+					tft.WithParallelism(100),
 				)
 
 				appService.DefineVerify(func(assert *assert.Assertions) {

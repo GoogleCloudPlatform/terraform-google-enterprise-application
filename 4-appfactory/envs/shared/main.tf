@@ -61,6 +61,8 @@ module "components" {
   gar_repository_name          = local.gar_image_name
   docker_tag_version_terraform = local.gar_tag_version
   cluster_projects_ids         = local.cluster_projects_ids
+  kms_project_id               = var.kms_project_id
+  infra_project_apis           = var.infra_project_apis
 
   cloudbuild_sa_roles = {
     development = {
@@ -81,8 +83,8 @@ module "components" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  service_perimeter_mode = var.service_perimeter_mode
-  service_perimeter_name = var.service_perimeter_name
-  access_level_name      = var.access_level_name
-  workerpool_id          = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
+  service_perimeter_mode  = var.service_perimeter_mode
+  service_perimeter_name  = var.service_perimeter_name
+  workerpool_id           = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
+  remote_state_project_id = data.terraform_remote_state.bootstrap.outputs.project_id
 }
