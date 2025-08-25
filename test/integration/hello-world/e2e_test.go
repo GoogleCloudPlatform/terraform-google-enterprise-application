@@ -16,7 +16,6 @@ package helloworld_e2e
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -59,16 +58,13 @@ func TestHelloWorldE2E(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-
-					i := 0
-					for i = 0; i < 40; i++ {
-						if strings.Contains(logs, "Hello world!") {
-							return false, nil
-						} else if strings.Contains(logs, "container creating") {
-							return true, nil
-						}
+					if strings.Contains(logs, "Hello world!") {
+						return false, nil
+					} else if strings.Contains(logs, "container creating") {
+						return true, nil
+					} else {
+						return false, fmt.Errorf("Unable to get hello world container running.")
 					}
-					return false, fmt.Errorf("Unable to get hello world container after %s retries.", strconv.Itoa(i))
 				}
 			}
 			utils.Poll(t, pollApplication(), 40, 60*time.Second)
