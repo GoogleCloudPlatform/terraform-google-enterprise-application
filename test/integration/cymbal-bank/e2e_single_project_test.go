@@ -29,7 +29,7 @@ import (
 func TestAppE2ECymbalBankSingleProject(t *testing.T) {
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t)
-	projectID := setupOutput.GetTFSetupStringOutput("project_id")
+	projectID := setupOutput.GetTFSetupStringOutput("seed_project_id")
 	singleProjectType := os.Getenv("single_project_example_type")
 	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/standalone_single_project"))
 	if singleProjectType == "CONFIDENTIAL_NODES" {

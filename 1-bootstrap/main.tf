@@ -75,16 +75,22 @@ module "cloudbuild_repositories" {
 
 module "tfstate_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
-  name          = "${var.bucket_prefix}-${var.project_id}-tf-state"
-  project_id    = var.project_id
-  location      = var.location
-  force_destroy = var.bucket_force_destroy
+  name                     = "${var.bucket_prefix}-${var.project_id}-tf-state"
+  project_id               = var.project_id
+  location                 = var.location
+  force_destroy            = var.bucket_force_destroy
+  public_access_prevention = "enforced"
 
-  encryption = {
+  encryption = var.bucket_kms_key == null ? {} : {
     default_kms_key_name = var.bucket_kms_key
   }
+
+  internal_encryption_config = var.bucket_kms_key == null ? {
+    create_encryption_key = true
+    prevent_destroy       = !var.bucket_force_destroy
+  } : {}
 
   log_bucket        = var.logging_bucket
   log_object_prefix = "tf-state-${var.project_id}"

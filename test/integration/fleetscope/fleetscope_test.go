@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -49,6 +50,11 @@ func TestFleetscope(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	hpc, err := strconv.ParseBool(setup.GetTFSetupStringOutput("hpc"))
+	if err != nil {
+		hpc = false
+	}
+
 	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
@@ -78,6 +84,16 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 			)
 
+			multitenantHarnessPath := "../../setup/harness/multitenant"
+			multitenantHarness := tft.NewTFBlueprintTest(t,
+				tft.WithTFDir(multitenantHarnessPath),
+			)
+
+			loggingHarnessPath := "../../setup/harness/logging_bucket"
+			loggingHarness := tft.NewTFBlueprintTest(t,
+				tft.WithTFDir(loggingHarnessPath),
+			)
+
 			// retrieve cluster location and fleet membership from 2-multitenant
 			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
 			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
@@ -97,6 +113,8 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_policy_dir":      fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName),
 				"config_sync_branch":          "cymbal-bank-isolation",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
+				"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode"),
+				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
@@ -256,10 +274,11 @@ func TestFleetscope(t *testing.T) {
 
 				// GKE Scopes and Namespaces
 				for _, namespaces := range func() []string {
-					if envName == "development" {
-						return []string{"cb-frontend", "cb-accounts", "cb-ledger"}
+					if hpc {
+						return []string{"hpc-team-a", "hpc-team-b"}
+					} else {
+						return []string{"cb-frontend", "cb-accounts", "cb-ledger", "cymbalshops"}
 					}
-					return []string{"cb-frontend"}
 				}() {
 					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", clusterProjectID, namespaces, envName)
 					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)
