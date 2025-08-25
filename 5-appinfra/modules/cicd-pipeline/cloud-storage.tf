@@ -15,7 +15,7 @@
 # GCS bucket used as skaffold build cache
 module "build_cache" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   name              = "build-cache-${var.service_name}-${data.google_project.project.number}"
   project_id        = var.project_id
@@ -28,7 +28,14 @@ module "build_cache" {
   public_access_prevention = "enforced"
 
   versioning = true
-  encryption = { default_kms_key_name = var.bucket_kms_key }
+  encryption = var.bucket_kms_key == null ? {} : {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  internal_encryption_config = var.bucket_kms_key == null ? {
+    create_encryption_key = true
+    prevent_destroy       = !var.buckets_force_destroy
+  } : {}
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
   # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
@@ -48,7 +55,7 @@ resource "google_storage_bucket_iam_member" "build_cache_storage_admin" {
 
 module "release_source_development" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   name              = "release-source-development-${var.service_name}-${data.google_project.project.number}"
   project_id        = var.project_id
@@ -60,7 +67,14 @@ module "release_source_development" {
   public_access_prevention = "enforced"
 
   versioning = true
-  encryption = { default_kms_key_name = var.bucket_kms_key }
+  encryption = var.bucket_kms_key == null ? {} : {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  internal_encryption_config = var.bucket_kms_key == null ? {
+    create_encryption_key = true
+    prevent_destroy       = !var.buckets_force_destroy
+  } : {}
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
   # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
