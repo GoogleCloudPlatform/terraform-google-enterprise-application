@@ -53,6 +53,16 @@ func TestAppfactory(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
@@ -65,8 +75,9 @@ func TestAppfactory(t *testing.T) {
 		"bucket_force_destroy":   "true",
 		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
-		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
-		"kms_project_id":         vpcsc.GetTFSetupStringOutput("project_id"),
+		"kms_project_id":         loggingHarness.GetStringOutput("project_id"),
+		"common_folder_id":       multitenantHarness.GetStringOutput("common_folder_id"),
+		"envs":                   multitenantHarness.GetJsonOutput("envs").Map(),
 	}
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"
@@ -139,15 +150,20 @@ func TestAppfactory(t *testing.T) {
 
 					adminProjectID := appData.Get("app_admin_project_id").String()
 					adminProjectApis := []string{
-						"iam.googleapis.com",
-						"cloudresourcemanager.googleapis.com",
-						"cloudbuild.googleapis.com",
-						"secretmanager.googleapis.com",
-						"serviceusage.googleapis.com",
-						"cloudbilling.googleapis.com",
-						"cloudfunctions.googleapis.com",
 						"apikeys.googleapis.com",
-						"sourcerepo.googleapis.com",
+						"binaryauthorization.googleapis.com",
+						"cloudbilling.googleapis.com",
+						"cloudbuild.googleapis.com",
+						"clouddeploy.googleapis.com",
+						"cloudfunctions.googleapis.com",
+						"cloudkms.googleapis.com",
+						"cloudresourcemanager.googleapis.com",
+						"compute.googleapis.com",
+						"containeranalysis.googleapis.com",
+						"iam.googleapis.com",
+						"secretmanager.googleapis.com",
+						"servicenetworking.googleapis.com",
+						"serviceusage.googleapis.com",
 					}
 
 					prj := gcloud.Runf(t, "projects describe %s", adminProjectID)
@@ -155,7 +171,7 @@ func TestAppfactory(t *testing.T) {
 
 					enabledAPIS := gcloud.Runf(t, "services list --project %s", adminProjectID).Array()
 					listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
-					assert.Subset(listApis, adminProjectApis, "APIs should have been enabled")
+					assert.Subset(listApis, adminProjectApis, fmt.Sprintf("APIs should have been enabled at admin project %s", adminProjectID))
 
 					// check app infra repo
 					repositoryName := appData.Get("app_infra_repository_name").String()
@@ -234,7 +250,7 @@ func TestAppfactory(t *testing.T) {
 
 							enabledAPIS := gcloud.Runf(t, "services list --project %s", infraProjectID).Array()
 							listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
-							assert.Subset(listApis, envProjectApis, "APIs should have been enabled")
+							assert.Subset(listApis, envProjectApis, fmt.Sprintf("APIs should have been enabled at infra project %s", infraProjectID))
 
 							for _, role := range cloudBuildSARoles {
 								iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", fmt.Sprintf("bindings.role:%s", role), "--format", "json"})

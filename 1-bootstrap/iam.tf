@@ -186,3 +186,17 @@ resource "google_organization_iam_member" "org_iam_member" {
   member = "serviceAccount:${each.value.email}"
   org_id = var.org_id
 }
+
+data "google_storage_project_service_account" "gcs_account" {
+  project = var.project_id
+}
+
+resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
+  for_each = var.bucket_kms_key != "" ? {
+    "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
+    "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
+  } : {}
+  crypto_key_id = var.bucket_kms_key
+  role          = each.value
+  member        = data.google_storage_project_service_account.gcs_account.member
+}

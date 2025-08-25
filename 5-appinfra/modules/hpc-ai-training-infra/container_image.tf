@@ -21,7 +21,7 @@ resource "google_service_account" "builder" {
 
 module "build_logs" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   name              = "cb-ai-builder-logs-${var.infra_project}"
   project_id        = var.infra_project
@@ -33,7 +33,14 @@ module "build_logs" {
   public_access_prevention = "enforced"
 
   versioning = true
-  encryption = { default_kms_key_name = var.bucket_kms_key }
+  encryption = var.bucket_kms_key == null ? {} : {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  internal_encryption_config = var.bucket_kms_key == null ? {
+    create_encryption_key = true
+    prevent_destroy       = !var.bucket_force_destroy
+  } : {}
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
   # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
@@ -101,12 +108,6 @@ resource "google_artifact_registry_repository_iam_member" "allow_cluster_sa_down
   member     = "serviceAccount:${each.value}"
 }
 
-resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
-  count        = var.access_level_name != null ? 1 : 0
-  access_level = var.access_level_name
-  members      = [google_service_account.builder.member]
-}
-
 resource "time_sleep" "wait_iam_propagation" {
   create_duration = "60s"
 
@@ -114,7 +115,6 @@ resource "time_sleep" "wait_iam_propagation" {
     google_artifact_registry_repository_iam_member.builder,
     google_project_iam_member.builder_object_user,
     google_storage_bucket_iam_member.build_logs_storage_roles,
-    google_access_context_manager_access_level_condition.access-level-conditions,
   ]
 }
 

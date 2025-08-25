@@ -55,7 +55,7 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
 # GCS bucket used by Cloud Deploy for delivery artifact storage
 module "delivery_artifacts" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 11.0"
 
   for_each = var.env_cluster_membership_ids
 
@@ -69,7 +69,14 @@ module "delivery_artifacts" {
   public_access_prevention = "enforced"
 
   versioning = true
-  encryption = { default_kms_key_name = var.bucket_kms_key }
+  encryption = var.bucket_kms_key == null ? {} : {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  internal_encryption_config = var.bucket_kms_key == null ? {
+    create_encryption_key = true
+    prevent_destroy       = !var.buckets_force_destroy
+  } : {}
 
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
