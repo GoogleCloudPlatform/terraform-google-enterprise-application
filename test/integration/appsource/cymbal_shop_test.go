@@ -34,10 +34,11 @@ import (
 
 func TestSourceCymbalShop(t *testing.T) {
 
-	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-	gitUrl := setupOutput.GetStringOutput("gitlab_url")
-	gitlabPersonalTokenSecretName := setupOutput.GetStringOutput("gitlab_pat_secret_name")
-	gitlabSecretProject := setupOutput.GetStringOutput("gitlab_secret_project")
+	gitLabPath := "../../setup/harness/gitlab"
+	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+	gitUrl := gitLab.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
@@ -96,7 +97,7 @@ func TestSourceCymbalShop(t *testing.T) {
 				}
 			}
 
-			gitAppRun("clone", "--branch", "v0.10.1", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
+			gitAppRun("clone", "--branch", "v0.10.3", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
 			// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")

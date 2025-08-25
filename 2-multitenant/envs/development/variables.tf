@@ -62,3 +62,21 @@ variable "service_perimeter_mode" {
     error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
   }
 }
+
+variable "cb_private_workerpool_project_id" {
+  description = "Private Worker Pool Project ID used for Cloud Build Triggers."
+  type        = string
+  default     = ""
+}
+
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
+variable "deletion_protection" {
+  type        = bool
+  description = "Whether or not to allow Terraform to destroy the cluster."
+  default     = true
+}

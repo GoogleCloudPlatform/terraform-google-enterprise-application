@@ -18,11 +18,6 @@ locals {
   env = "production"
 }
 
-# import {
-#   id = "projects/${local.cluster_project_id}/locations/global/features/fleetobservability"
-#   to = module.env.google_gke_hub_feature.fleet-o11y
-# }
-
 module "env" {
   source = "../../modules/env_baseline"
 
@@ -34,10 +29,14 @@ module "env" {
   cluster_membership_ids   = local.cluster_membership_ids
   cluster_service_accounts = values(local.cluster_service_accounts)
 
-  config_sync_secret_type    = var.config_sync_secret_type
-  config_sync_repository_url = var.config_sync_repository_url
-  config_sync_branch         = var.config_sync_branch
-  config_sync_policy_dir     = var.config_sync_policy_dir
+  config_sync_secret_type     = var.config_sync_secret_type
+  config_sync_repository_url  = var.config_sync_repository_url
+  config_sync_branch          = var.config_sync_branch
+  config_sync_policy_dir      = var.config_sync_policy_dir
+  attestation_kms_key         = var.attestation_kms_key
+  attestation_evaluation_mode = "REQUIRE_ATTESTATION"
+
+  enable_kueue = var.enable_kueue
 
   disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

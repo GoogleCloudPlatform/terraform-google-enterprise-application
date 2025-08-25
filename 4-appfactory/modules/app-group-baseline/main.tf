@@ -29,13 +29,13 @@ locals {
         "roles/artifactregistry.admin", "roles/clouddeploy.admin",
         "roles/cloudbuild.builds.editor", "roles/resourcemanager.projectIamAdmin",
         "roles/iam.serviceAccountUser", "roles/source.admin", "roles/cloudbuild.connectionAdmin",
-        "roles/compute.viewer"
+        "roles/compute.viewer", "roles/cloudkms.admin"
       ]
     } },
     {
       for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
         project_id = cluster_project_id
-        roles      = ["roles/resourcemanager.projectIamAdmin"]
+        roles      = ["roles/resourcemanager.projectIamAdmin", "roles/gkehub.admin"]
       }
     }
   )
@@ -56,9 +56,23 @@ data "google_project" "workerpool_project" {
   project_id = local.worker_pool_project
 }
 
+data "google_project" "remote_state_project" {
+  project_id = var.remote_state_project_id
+}
+
+data "google_project" "kms_project" {
+  count      = var.kms_project_id != null ? 1 : 0
+  project_id = var.kms_project_id
+}
+
 data "google_project" "clusters_projects" {
   for_each   = toset(var.cluster_projects_ids)
   project_id = each.value
+}
+
+data "google_project" "vpc_projects" {
+  for_each   = var.envs
+  project_id = each.value.network_project_id
 }
 
 module "cloudbuild_repositories" {
@@ -89,9 +103,10 @@ resource "time_sleep" "wait_propagation" {
   create_duration = "120s"
 
   depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.cloudbuild_egress_policy,
-    google_access_context_manager_service_perimeter_dry_run_egress_policy.cloudbuild_egress_policy,
-    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy
+    google_access_context_manager_service_perimeter_egress_policy.clouddeploy_egress_policy_admin_to_gke_cluster,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.clouddeploy_egress_policy_admin_to_gke_cluster,
+    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.service_directory_policy,
   ]
 }
 
@@ -111,23 +126,25 @@ module "app_admin_project" {
   default_service_account  = "KEEP"
   activate_apis = [
     "apikeys.googleapis.com",
-    "iam.googleapis.com",
-    "compute.googleapis.com",
+    "binaryauthorization.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "iam.googleapis.com",
     "secretmanager.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
-    "sourcerepo.googleapis.com",
   ]
 
   disable_services_on_destroy = false
   disable_dependent_services  = false
 
-  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
@@ -157,6 +174,13 @@ module "app_admin_project" {
     },
   ]
 
+}
+
+resource "google_project_service_identity" "cloudbuild_service_identity" {
+  provider = google-beta
+
+  project = data.google_project.admin_project.project_id
+  service = "cloudbuild.googleapis.com"
 }
 
 resource "google_sourcerepo_repository" "app_infra_repo" {
@@ -239,9 +263,17 @@ resource "google_project_iam_member" "service_agent_cb_si" {
 }
 
 resource "google_project_iam_member" "cloud_build_sa_roles" {
-  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader"])
+  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader", "roles/artifactregistry.admin"])
 
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+  project = var.gar_project_id
+  role    = each.value
+}
+
+resource "google_project_iam_member" "cloud_build_identity_roles" {
+  for_each = toset(["roles/storage.objectUser", "roles/artifactregistry.reader"])
+
+  member  = google_project_service_identity.cloudbuild_service_identity.member
   project = var.gar_project_id
   role    = each.value
 }
@@ -270,17 +302,44 @@ module "app_infra_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  vpc_service_control_attach_dry_run = var.service_perimeter_name != null && var.service_perimeter_mode == "DRY_RUN"
+  vpc_service_control_attach_dry_run = var.service_perimeter_name != null
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
   svpc_host_project_id = each.value.network_project_id
 }
 
+
+data "google_storage_project_service_account" "gcs_account" {
+  for_each = var.create_infra_project && var.kms_project_id != null && contains(var.infra_project_apis, "storage.googleapis.com") ? module.app_infra_project : {}
+  project  = each.value.project_id
+}
+
 resource "google_project_iam_member" "secretManager_admin" {
   project = var.cloudbuildv2_repository_config.secret_project_id
   role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "kms_admin" {
+  count   = var.kms_project_id != null ? 1 : 0
+  project = var.kms_project_id
+  role    = "roles/cloudkms.admin"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "kms_signer_verifier" {
+  count   = var.kms_project_id != null ? 1 : 0
+  project = var.kms_project_id
+  role    = "roles/cloudkms.signerVerifier"
+  member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "attestorsAdmin" {
+  for_each = toset(var.cluster_projects_ids)
+  project  = each.value
+  role     = "roles/binaryauthorization.attestorsAdmin"
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 
 resource "google_organization_iam_member" "policyAdmin_role" {

@@ -268,12 +268,17 @@ module "cicd" {
 
   workerpool_id = var.workerpool_id == null ? google_cloudbuild_worker_pool.pool[0].id : var.workerpool_id
 
-  logging_bucket = var.logging_bucket
+  logging_bucket             = var.logging_bucket
+  bucket_kms_key             = var.bucket_kms_key
+  attestation_kms_key        = var.attestation_kms_key
+  attestor_id                = module.fleetscope_infra.attestor_id
+  binary_authorization_image = var.binary_authorization_image
+
+  binary_authorization_repository_id = var.binary_authorization_repository_id
 
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_egress_policy.service_directory_policy,
     google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment
   ]
 }

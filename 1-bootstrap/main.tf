@@ -40,6 +40,7 @@ locals {
 
   projects_re         = "projects/([^/]+)/"
   worker_pool_project = regex(local.projects_re, var.workerpool_id)[0]
+  kms_project         = regex(local.projects_re, var.bucket_kms_key)[0]
 }
 
 resource "google_sourcerepo_repository" "gcp_repo" {
@@ -74,12 +75,28 @@ module "cloudbuild_repositories" {
 
 module "tfstate_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 9.0"
+  version = "~> 11.0"
 
-  name          = "${var.bucket_prefix}-${var.project_id}-tf-state"
-  project_id    = var.project_id
-  location      = var.location
-  force_destroy = var.bucket_force_destroy
+  name                     = "${var.bucket_prefix}-${var.project_id}-tf-state"
+  project_id               = var.project_id
+  location                 = var.location
+  force_destroy            = var.bucket_force_destroy
+  public_access_prevention = "enforced"
+
+  encryption = var.bucket_kms_key == null ? {} : {
+    default_kms_key_name = var.bucket_kms_key
+  }
+
+  internal_encryption_config = var.bucket_kms_key == null ? {
+    create_encryption_key = true
+    prevent_destroy       = !var.bucket_force_destroy
+  } : {}
+
+  log_bucket        = var.logging_bucket
+  log_object_prefix = "tf-state-${var.project_id}"
+
+  versioning = true
+
 }
 
 module "tf_cloudbuild_workspace" {

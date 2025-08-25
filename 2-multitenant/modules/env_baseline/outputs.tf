@@ -15,49 +15,56 @@
  */
 
 output "cluster_regions" {
-  description = "Regions with clusters"
+  description = "Regions with clusters."
   value = [
     for value in data.google_compute_subnetwork.default : value.region
   ]
 }
 
 output "cluster_membership_ids" {
-  description = "GKE cluster membership IDs"
+  description = "GKE cluster membership IDs."
   value = [
     for value in merge(module.gke-standard, module.gke-autopilot) : value.fleet_membership
   ]
 }
 
+output "cluster_names" {
+  description = "GKE cluster names."
+  value = [
+    for value in merge(module.gke-standard, module.gke-autopilot) : value.name
+  ]
+}
+
 output "cluster_project_id" {
-  description = "Cluster Project ID"
+  description = "Cluster Project ID."
   value       = data.google_project.eab_cluster_project.project_id
 
   depends_on = [module.gke-standard, module.gke-autopilot]
 }
 
 output "cluster_project_number" {
-  description = "Cluster Project ID"
+  description = "Cluster Project ID."
   value       = data.google_project.eab_cluster_project.number
 }
 
 output "network_project_id" {
-  description = "Network Project ID"
+  description = "Network Project ID."
   value       = var.network_project_id
 }
 
 output "network_names" {
-  description = "Network name"
+  description = "Network name."
   value       = [for subnet in data.google_compute_subnetwork.default : regex(local.networks_re, subnet.network)[0]][0]
 }
 
 # Provide for future seperate Fleet Project
 output "fleet_project_id" {
-  description = "Fleet Project ID"
+  description = "Fleet Project ID."
   value       = data.google_project.eab_cluster_project.project_id
 }
 
 output "app_ip_addresses" {
-  description = "App IP Addresses"
+  description = "App IP Addresses."
   value = {
     for k, v in var.apps : k => {
       for i in range(length(module.apps_ip_address[k].names)) : module.apps_ip_address[k].names[i] => module.apps_ip_address[k].addresses[i]
@@ -66,14 +73,14 @@ output "app_ip_addresses" {
 }
 
 output "app_certificates" {
-  description = "App Certificates"
+  description = "App Certificates."
   value = [
     for value in google_compute_managed_ssl_certificate.app_ssl_certificates : value.name
   ]
 }
 
 output "cluster_type" {
-  description = "Cluster type"
+  description = "Cluster type."
   value       = var.cluster_type
 }
 

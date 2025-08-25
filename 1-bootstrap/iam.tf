@@ -99,6 +99,15 @@ resource "google_folder_iam_member" "owner" {
   folder = each.value.folder_id
 }
 
+
+resource "google_project_iam_member" "kms_sign" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" && var.attestation_kms_project != null })
+
+  role    = "roles/cloudkms.signerVerifier"
+  member  = "serviceAccount:${each.value.email}"
+  project = var.attestation_kms_project
+}
+
 resource "google_folder_iam_member" "app_factory_foldereditor" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
 
@@ -147,6 +156,14 @@ resource "google_project_iam_member" "secret_iam_member" {
   project = local.worker_pool_project
 }
 
+resource "google_project_iam_member" "kms_iam_member" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" && var.bucket_kms_key != null })
+
+  role    = "roles/cloudkms.admin"
+  member  = "serviceAccount:${each.value.email}"
+  project = local.kms_project
+}
+
 resource "google_project_iam_member" "cloud_build_worker_pool_user" {
   for_each = local.cb_service_accounts_emails
 
@@ -168,4 +185,18 @@ resource "google_organization_iam_member" "org_iam_member" {
   role   = "roles/resourcemanager.organizationAdmin"
   member = "serviceAccount:${each.value.email}"
   org_id = var.org_id
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+  project = var.project_id
+}
+
+resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
+  for_each = var.bucket_kms_key != "" ? {
+    "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
+    "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
+  } : {}
+  crypto_key_id = var.bucket_kms_key
+  role          = each.value
+  member        = data.google_storage_project_service_account.gcs_account.member
 }

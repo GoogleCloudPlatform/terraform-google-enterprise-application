@@ -19,6 +19,11 @@ variable "org_id" {
   type        = string
 }
 
+variable "seed_folder_id" {
+  description = "Seed folder id."
+  type        = string
+}
+
 variable "protected_projects" {
   description = "The projects number to be protected."
   type        = list(string)
@@ -37,6 +42,11 @@ variable "service_perimeter_mode" {
 
 variable "logging_bucket_project_number" {
   description = "Project number where logging bucket is stored."
+  type        = string
+}
+
+variable "gitlab_project_number" {
+  description = "Project number where GitLab is running."
   type        = string
 }
 

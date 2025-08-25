@@ -3,7 +3,6 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | acronym | The acronym of the application. | `string` | n/a | yes |
 | admin\_project\_id | The admin project id associated with the microservice. This project will host resources like microservice CI/CD pipelines. If set, `create_admin_project` must be set to `false`. | `string` | n/a | yes |
 | billing\_account | Billing Account ID for application admin project resources. | `string` | n/a | yes |
@@ -20,8 +19,10 @@
 | gar\_project\_id | Project ID where the Artifact Registry Repository that Hosts the infrastructure pipeline docker image is located. | `string` | n/a | yes |
 | gar\_repository\_name | Artifact Registry repository name where the Docker image for the infrastructure pipeline is stored. | `string` | n/a | yes |
 | infra\_project\_apis | List of APIs to enable for environment-specific application infra projects | `list(string)` | <pre>[<br>  "iam.googleapis.com",<br>  "cloudresourcemanager.googleapis.com",<br>  "serviceusage.googleapis.com",<br>  "cloudbilling.googleapis.com"<br>]</pre> | no |
+| kms\_project\_id | Custom KMS Key project to be granted KMS Admin and KMS Signer Verifier to the Cloud Build service account. | `string` | `null` | no |
 | location | Location for build buckets. | `string` | `"us-central1"` | no |
 | org\_id | Google Cloud Organization ID. | `string` | n/a | yes |
+| remote\_state\_project\_id | The project id where remote state are stored. It will be used to allow egress from VPC-SC if is being used. | `string` | n/a | yes |
 | service\_name | The name of a single service application. | `string` | `"demo-app"` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | n/a | yes |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |

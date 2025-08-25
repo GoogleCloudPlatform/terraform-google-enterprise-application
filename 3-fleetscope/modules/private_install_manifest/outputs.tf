@@ -18,3 +18,9 @@ output "applied_manifest" {
   description = "The manifest that was applied to the cluster."
   value       = local.applied_manifest
 }
+
+output "remote_repository_url" {
+  description = "The Artifact Registry remote repository name."
+  value       = local.repository_url
+}
+

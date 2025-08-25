@@ -38,3 +38,13 @@ REPLACE_WITH_SSL_CERT
 EOF
   secret_project_id                = "REPLACE_WITH_SECRET_PROJECT_ID"
 }
+
+infra_project_apis = [
+  "artifactregistry.googleapis.com",
+  "cloudbilling.googleapis.com",
+  "cloudkms.googleapis.com",
+  "cloudresourcemanager.googleapis.com",
+  "iam.googleapis.com",
+  "serviceusage.googleapis.com",
+  "storage.googleapis.com",
+]

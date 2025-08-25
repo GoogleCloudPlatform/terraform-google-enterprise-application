@@ -39,15 +39,40 @@ func TestBootstrap(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
+	privateWorkerPool := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(privateWorkerPoolPath),
+	)
+
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	vars := map[string]interface{}{
-		"bucket_force_destroy": true,
-		"access_level_name":    vpcsc.GetStringOutput("access_level_name"),
+		"bucket_force_destroy":    true,
+		"project_id":              vpcsc.GetTFSetupStringOutput("seed_project_id"),
+		"access_level_name":       vpcsc.GetStringOutput("access_level_name"),
+		"service_perimeter_name":  vpcsc.GetStringOutput("service_perimeter_name"),
+		"service_perimeter_mode":  vpcsc.GetStringOutput("service_perimeter_mode"),
+		"workerpool_id":           privateWorkerPool.GetStringOutput("workerpool_id"),
+		"common_folder_id":        multitenantHarness.GetStringOutput("common_folder_id"),
+		"envs":                    multitenantHarness.GetJsonOutput("envs").Map(),
+		"logging_bucket":          loggingHarness.GetStringOutput("logging_bucket"),
+		"bucket_kms_key":          loggingHarness.GetStringOutput("bucket_kms_key"),
+		"attestation_kms_project": loggingHarness.GetStringOutput("project_id"),
 	}
 
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithParallelism(100),
 	)
 
 	bootstrap.DefineApply(
@@ -80,10 +105,12 @@ func TestBootstrap(t *testing.T) {
 		bootstrap.DefaultVerify(assert)
 
 		// Outputs
-		projectID := bootstrap.GetStringOutput("project_id")
+		projectID := vpcsc.GetTFSetupStringOutput("seed_project_id")
+		loggingBucket := loggingHarness.GetStringOutput("logging_bucket")
+		kmsKey := loggingHarness.GetStringOutput("bucket_kms_key")
 
 		// Buckets
-		gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", projectID, "--json"})
+		gcloudArgsBucket := gcloud.WithCommonArgs([]string{"--project", projectID, "--format=json"})
 		bucketInfix := []string{
 			"mt",
 			"af",
@@ -91,20 +118,19 @@ func TestBootstrap(t *testing.T) {
 		}
 		for _, infix := range bucketInfix {
 			urlBuildBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s-build", projectID, infix)
-			opBuildBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-%s-build", projectID, infix), gcloudArgsBucket).Array()
+			opBuildBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://bkt-%s-%s-build", projectID, infix), gcloudArgsBucket).Array()
 			assert.True(opBuildBucket[0].Exists(), "Bucket %s should exist.", urlBuildBucket)
-			assert.Equal(urlBuildBucket, opBuildBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlBuildBucket))
 
 			urlLogsBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s-logs", projectID, infix)
-			opLogsBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-%s-logs", projectID, infix), gcloudArgsBucket).Array()
+			opLogsBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://bkt-%s-%s-logs", projectID, infix), gcloudArgsBucket).Array()
 			assert.True(opLogsBucket[0].Exists(), "Bucket %s should exist.", urlLogsBucket)
-			assert.Equal(urlLogsBucket, opLogsBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlLogsBucket))
 		}
 
 		urlStateBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-tf-state", projectID)
-		opStateBucket := gcloud.Run(t, fmt.Sprintf("storage ls --buckets gs://bkt-%s-tf-state", projectID), gcloudArgsBucket).Array()
+		opStateBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://bkt-%s-tf-state", projectID), gcloudArgsBucket).Array()
 		assert.True(opStateBucket[0].Exists(), "Bucket %s should exist.", urlStateBucket)
-		assert.Equal(urlStateBucket, opStateBucket[0].Get("metadata.selfLink").String(), fmt.Sprintf("The bucket name should be %s.", urlStateBucket))
+		assert.Equal(loggingBucket, opStateBucket[0].Get("logging_config.logBucket").String(), fmt.Sprintf("The bucket should have logging bucket %s.", loggingBucket))
+		assert.Equal(kmsKey, opStateBucket[0].Get("default_kms_key").String(), fmt.Sprintf("The bucket should have the default kms key %s.", kmsKey))
 
 		// Source Repo
 		repos := []string{

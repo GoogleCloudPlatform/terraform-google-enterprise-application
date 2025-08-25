@@ -216,8 +216,12 @@ locals {
 
   egress_rules = [
     {
+      title = "Egress to service networking project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       },
       to = {
         resources = ["projects/213331819513"], //service networking project
@@ -227,21 +231,39 @@ locals {
       }
     },
     {
+      title = "Egress to bank of anthos by AR, CA and BAuthz"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
           "projects/682719828243" // projects/bank-of-anthos-ci/locations/us-central1/repositories/bank-of-anthos
         ]
         operations = {
-          "artifactregistry.googleapis.com" = { methods = ["*"] }
+          "artifactregistry.googleapis.com"    = { methods = ["*"] }
+          "binaryauthorization.googleapis.com" = { methods = ["*"] }
+          "cloudkms.googleapis.com"            = { methods = ["*"] }
+          "container.googleapis.com"           = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
+          "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "containerregistry.googleapis.com"   = { methods = ["*"] }
+          "storage.googleapis.com"             = { methods = ["*"] }
+          "iamcredentials.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"             = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
         }
       }
     },
     {
+      title = "Egress to Proxy Golang Storage project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -253,8 +275,12 @@ locals {
       }
     },
     {
+      title = "Egress to Storage project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -266,8 +292,12 @@ locals {
       }
     },
     {
+      title = "Egress to Logging bucket project"
       from = {
         identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
       }
       to = {
         resources = [
@@ -277,8 +307,68 @@ locals {
           "storage.googleapis.com" = { methods = ["*"] }
         }
       }
+    },
+    {
+      title = "Egress from ANY_IDENTITY to artifact-registry-docker-cache"
+      from = {
+        identity_type = "ANY_IDENTITY" //https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
+      },
+      to = {
+        resources = ["projects/342927644502"], //artifact-registry-docker-cache
+        operations = {
+          "artifactregistry.googleapis.com"    = { methods = ["*"] }
+          "binaryauthorization.googleapis.com" = { methods = ["*"] }
+          "cloudkms.googleapis.com"            = { methods = ["*"] }
+          "container.googleapis.com"           = { methods = ["*"] }
+          "containeranalysis.googleapis.com"   = { methods = ["*"] }
+          "containerfilesystem.googleapis.com" = { methods = ["*"] }
+          "containerregistry.googleapis.com"   = { methods = ["*"] }
+          "storage.googleapis.com"             = { methods = ["*"] }
+          "iamcredentials.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"             = { methods = ["*"] }
+        }
+      }
+    },
+    {
+      title = "Allow Services from ${join(",", var.protected_projects)} to ${var.gitlab_project_number}"
+      from = {
+        identity_type = "ANY_IDENTITY"
+        sources = {
+          resources = [for i in var.protected_projects : "projects/${i}"]
+        }
+      }
+      to = {
+        resources = [
+          "projects/${var.gitlab_project_number}" //worker pool project
+        ]
+        operations = {
+          "servicedirectory.googleapis.com" = { methods = ["*"] }
+          "cloudbuild.googleapis.com"       = { methods = ["*"] }
+          "clouddeploy.googleapis.com"      = { methods = ["*"] }
+          "compute.googleapis.com"          = { methods = ["SubnetworksService.Get"] }
+        }
+      }
     }
   ]
+
+  ingress_rules = contains(var.protected_projects, var.logging_bucket_project_number) ? [
+    {
+      title = "Ingress from Gitlab to Single Project project - kms service"
+      from = {
+        sources    = { resources = ["projects/${var.gitlab_project_number}"] }
+        identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"] //gitlab storage identity
+      },
+      to = {
+        resources = ["projects/${var.logging_bucket_project_number}"], //logging-kms bucket
+        operations = {
+          "cloudkms.googleapis.com" = { methods = ["*"] }
+        }
+      }
+    }
+  ] : tolist([])
 }
 
 resource "random_string" "prefix" {
@@ -287,23 +377,27 @@ resource "random_string" "prefix" {
   upper   = false
 }
 
-data "google_access_context_manager_access_policy" "policy_org" {
-  parent = "organizations/${var.org_id}"
+resource "google_access_context_manager_access_policy" "policy_org" {
+  parent     = "organizations/${var.org_id}"
+  title      = "GKE folder ${var.seed_folder_id} Scoped Access Policy"
+  scopes     = [var.seed_folder_id]
+  depends_on = [time_sleep.destroy_wait_propagation]
 }
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version            = "~> 7.0"
-  policy             = data.google_access_context_manager_access_policy.policy_org.name
+  version            = "~> 7.1"
+  policy             = google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = var.access_level_members
   combining_function = "OR"
+  depends_on         = [time_sleep.destroy_wait_propagation]
 }
 
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version        = "~> 7.0"
-  policy         = data.google_access_context_manager_access_policy.policy_org.name
+  version        = "~> 7.1"
+  policy         = google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
 
@@ -312,10 +406,27 @@ module "regular_service_perimeter" {
   restricted_services_dry_run     = local.supported_restricted_service
   resources_dry_run               = var.protected_projects
   egress_policies_dry_run         = local.egress_rules
+  ingress_policies_dry_run        = local.ingress_rules
 
   access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
   vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
   restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
   resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : []
   egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : []
+  ingress_policies        = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : []
+  depends_on              = [time_sleep.destroy_wait_propagation]
+}
+
+resource "time_sleep" "apply_wait_propagation" {
+  create_duration = "5m"
+
+  depends_on = [
+    google_access_context_manager_access_policy.policy_org,
+    module.access_level_members,
+    module.regular_service_perimeter
+  ]
+}
+
+resource "time_sleep" "destroy_wait_propagation" {
+  destroy_duration = "5m"
 }

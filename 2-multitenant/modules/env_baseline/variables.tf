@@ -103,3 +103,27 @@ variable "service_perimeter_mode" {
   type        = string
   default     = null
 }
+
+variable "access_level_name" {
+  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
+variable "cb_private_workerpool_project_id" {
+  description = "Private Worker Pool Project ID used for Cloud Build Triggers. It is going to create an Egress rule from Cluster project to Workerpool project in case you are deploying the solution inside of a VPC-SC."
+  type        = string
+  default     = ""
+}
+
+variable "enable_confidential_nodes" {
+  type        = bool
+  description = "An optional flag to enable confidential node config."
+  default     = false
+}
+
+variable "deletion_protection" {
+  type        = bool
+  description = "Whether or not to allow Terraform to destroy the cluster."
+  default     = true
+}

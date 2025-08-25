@@ -43,14 +43,27 @@ func TestMultitenant(t *testing.T) {
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
 
+	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
+	privateWorkerPool := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(privateWorkerPoolPath),
+	)
+
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
 		"bucket": backend_bucket,
 	}
 
 	vars := map[string]interface{}{
-		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
-		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
+		"service_perimeter_name":           vpcsc.GetStringOutput("service_perimeter_name"),
+		"service_perimeter_mode":           vpcsc.GetStringOutput("service_perimeter_mode"),
+		"access_level_name":                vpcsc.GetStringOutput("access_level_name"),
+		"cb_private_workerpool_project_id": privateWorkerPool.GetStringOutput("workerpool_project_id"),
+		"envs":                             multitenantHarness.GetJsonOutput("envs").Map(),
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
@@ -62,6 +75,7 @@ func TestMultitenant(t *testing.T) {
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
 				tft.WithVars(vars),
+				tft.WithParallelism(100),
 			)
 
 			multitenant.DefineVerify(func(assert *assert.Assertions) {
@@ -93,7 +107,6 @@ func TestMultitenant(t *testing.T) {
 							"multiclusterservicediscovery.googleapis.com",
 							"trafficdirector.googleapis.com",
 							"anthosconfigmanagement.googleapis.com",
-							"sourcerepo.googleapis.com",
 							"cloudtrace.googleapis.com",
 						},
 					},
@@ -219,11 +232,6 @@ func TestMultitenant(t *testing.T) {
 			})
 
 			multitenant.DefineTeardown(func(assert *assert.Assertions) {
-				multitenant := tft.NewTFBlueprintTest(t,
-					tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
-					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-					tft.WithBackendConfig(backendConfig),
-				)
 				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 				// removes firewall rules created by the service but not being deleted.
 				firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()

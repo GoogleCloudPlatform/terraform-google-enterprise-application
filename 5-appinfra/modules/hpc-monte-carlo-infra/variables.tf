@@ -66,12 +66,6 @@ variable "workerpool_id" {
   default     = ""
 }
 
-variable "access_level_name" {
-  description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
-  type        = string
-  default     = null
-}
-
 variable "team" {
   description = "Environment Team, must be the same as the fleet scope team"
   type        = string
@@ -79,6 +73,12 @@ variable "team" {
 
 variable "logging_bucket" {
   description = "Bucket to store logging."
+  type        = string
+  default     = null
+}
+
+variable "bucket_kms_key" {
+  description = "KMS Key id to be used to encrypt bucket."
   type        = string
   default     = null
 }

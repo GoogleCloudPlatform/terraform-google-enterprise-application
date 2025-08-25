@@ -43,9 +43,17 @@ func TestAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup/vpcsc"),
 	)
+
+	bucketKMSKey := loggingHarness.GetStringOutput("bucket_kms_key")
+	loggingBucket := loggingHarness.GetStringOutput("logging_bucket")
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 	remoteState := bootstrap.GetStringOutput("state_bucket")
@@ -88,14 +96,14 @@ func TestAppInfra(t *testing.T) {
 				return
 			}
 			provider := `
-provider "google" {
-	impersonate_service_account = "%s"
-}
+	provider "google" {
+		impersonate_service_account = "%s"
+	}
 
-provider "google-beta" {
-	impersonate_service_account = "%s"
-}
-			`
+	provider "google-beta" {
+		impersonate_service_account = "%s"
+	}
+`
 			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
 			fmt.Println(l, "bytes written successfully")
 			if err != nil {
@@ -124,6 +132,9 @@ provider "google-beta" {
 					"buckets_force_destroy": "true",
 					"environment_names":     testutils.EnvNames(t),
 					"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
+					"bucket_kms_key":        bucketKMSKey,
+					"logging_bucket":        loggingBucket,
+					"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -141,7 +152,6 @@ provider "google-beta" {
 					apis :=
 						[]string{
 							"artifactregistry.googleapis.com",
-							"sourcerepo.googleapis.com",
 							"certificatemanager.googleapis.com",
 							"cloudbuild.googleapis.com",
 							"clouddeploy.googleapis.com",
@@ -187,6 +197,9 @@ provider "google-beta" {
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
 						assert.Equal(strings.ToUpper(region), bucketOp.Get("location").String(), fmt.Sprintf("Bucket should be at location %s", region))
 
+						assert.Equal(bucketKMSKey, bucketOp.Get("default_kms_key").String(), fmt.Sprintf("Bucket should be have encryption key %s", bucketKMSKey))
+						assert.Equal(loggingBucket, bucketOp.Get("logging_config.logBucket").String(), fmt.Sprintf("Bucket should be have logging bucket %s", loggingBucket))
+
 						// storage buckets get-iam-policy does not support --filter
 						bucketIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--format", "json"})
 						bucketSAPolicyOp := gcloud.Run(t, fmt.Sprintf("storage buckets get-iam-policy gs://%s", bucketName), bucketIamCommonArgs).Array()
@@ -201,6 +214,8 @@ provider "google-beta" {
 						bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, servicesInfoMap[fullServiceName].ProjectID)
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))
 						assert.Equal(strings.ToUpper(region), bucketOp.Get("location").String(), fmt.Sprintf("Bucket should be at location %s", region))
+						assert.Equal(bucketKMSKey, bucketOp.Get("default_kms_key").String(), fmt.Sprintf("Bucket should be have encryption key %s", bucketKMSKey))
+						assert.Equal(loggingBucket, bucketOp.Get("logging_config.logBucket").String(), fmt.Sprintf("Bucket should be have logging bucket %s", loggingBucket))
 
 						// storage buckets get-iam-policy does not support --filter
 						bucketIamCommonArgs := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--format", "json"})
