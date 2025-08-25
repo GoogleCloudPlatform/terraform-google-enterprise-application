@@ -15,17 +15,17 @@
  */
 
 output "cluster_project_id" {
-  description = "Cluster Project ID"
+  description = "Cluster Project ID."
   value       = module.env.cluster_project_id
 }
 
 output "cluster_project_number" {
-  description = "Cluster Project number"
+  description = "Cluster Project number."
   value       = module.env.cluster_project_number
 }
 
 output "network_project_id" {
-  description = "Network Project ID"
+  description = "Network Project ID."
   value       = module.env.network_project_id
 }
 
@@ -35,42 +35,47 @@ output "network_names" {
 }
 
 output "fleet_project_id" {
-  description = "Fleet Project ID"
+  description = "Fleet Project ID."
   value       = module.env.fleet_project_id
 }
 
 output "env" {
-  description = "Environment"
+  description = "Environments."
   value       = local.env
 }
 
 output "cluster_regions" {
-  description = "Regions with clusters"
+  description = "Regions with clusters."
   value       = module.env.cluster_regions
 }
 
 output "cluster_membership_ids" {
-  description = "GKE cluster membership IDs"
+  description = "GKE cluster membership IDs."
   value       = module.env.cluster_membership_ids
 }
 
+output "cluster_names" {
+  description = "GKE cluster names."
+  value       = module.env.cluster_names
+}
+
 output "app_ip_addresses" {
-  description = "App IP Addresses"
+  description = "App IP Addresses."
   value       = module.env.app_ip_addresses
 }
 
 output "app_certificates" {
-  description = "App Certificates"
+  description = "App Certificates."
   value       = module.env.app_certificates
 }
 
 output "acronyms" {
-  description = "App Acronyms"
+  description = "App Acronyms."
   value       = { for k, v in var.apps : (k) => v.acronym }
 }
 
 output "cluster_type" {
-  description = "Cluster type"
+  description = "Cluster type."
   value       = module.env.cluster_type
 }
 
