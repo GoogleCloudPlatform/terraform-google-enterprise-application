@@ -62,7 +62,7 @@ The example below shows configuration steps for the `token` mechanism, using Git
 
 #### Git access: Gitlab using Token
 
-After you create and obtain the personal access token in Gitlab, add it to a new `Secret` in each cluster.
+After you create and obtain the personal access token in Gitlab, add it to a new `Secret` in each cluster for each environment.
 
 - Get Cluster names on 2-multitenant output for each environment:
 
@@ -86,7 +86,7 @@ After you create and obtain the personal access token in Gitlab, add it to a new
 - Get your cluster credentials:
 
     ```bash
-     gcloud container hub memberships get-credentials MEMBERSHIP_NAME <CLUSTER_REGION> --project <CLUSTER_PROJECT>
+     gcloud container hub memberships get-credentials <MEMBERSHIP_NAME> --location <CLUSTER_REGION> --project <CLUSTER_PROJECT>
      ```
 
 - (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
