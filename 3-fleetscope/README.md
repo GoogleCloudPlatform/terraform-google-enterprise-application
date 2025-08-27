@@ -28,7 +28,7 @@ The following resources are created:
 
 ### Workspace groups
 
-For each namespace being created, you will need a Workspace group email previusly created.
+For each namespace being created, you will need a Workspace group email previously created.
 The code will grant ADMIN permission for each group email to the namespace created.
 
 ```hcl
@@ -60,9 +60,9 @@ Config Sync supports the following mechanisms for authentication:
 
 The example below shows configuration steps for the `token` mechanism, using Gitlab as the Git provider, for more information please check the [following documentation](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync).
 
-#### Git access: Gitlab using Token
+#### Git access: Gitlab/Github using Token
 
-After you create and obtain the personal access token in Gitlab, add it to a new `Secret` in each cluster for each environment.
+After you create and obtain the personal access token in Gitlab/Github, add it to a new `Secret` in each cluster for each environment.
 
 - Get Cluster names on 2-multitenant output for each environment:
 

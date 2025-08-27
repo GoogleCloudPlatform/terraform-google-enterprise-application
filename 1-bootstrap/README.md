@@ -341,8 +341,8 @@ To proceed with GitHub as your git provider you will need:
          }
       }
 
-      github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat" # Personal Access Token Secret
-      github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id" # App ID value secret
+      github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_PAT_SECRET_NAME" # Personal Access Token Secret
+      github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_APP_ID_SECRET_NAME" # App ID value secret
       secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
    }
    ```
@@ -427,9 +427,9 @@ To proceed with Gitlab as your git provider you will need:
          }
       }
 
-      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-api-token"
-      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-read-api-token"
-      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-webhook"
+      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
+      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
+      gitlab_webhook_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
 
       secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
 

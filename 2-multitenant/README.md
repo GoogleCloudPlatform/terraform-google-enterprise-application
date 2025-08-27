@@ -135,9 +135,9 @@ apps = {
 
 This solution can be deployed inside of a VPC-Perimeter. However, the Cloud Build project, aka. seed project, __cannot__ be inside of the perimeter, since it will create new projects, errors will happen when accessing services (enabling APIs for example) before the new project is appended to the perimeter.
 
-__The creation of the Service Perimeter, Access Level are not resposability of this module. But it will make changes, adding projects at the Service Perimeter, creating Directional Rules and adding identities to the Access Level.__
+__The creation of the Service Perimeter and Access Level are not responsability of this module. But it will make changes, adding projects at the Service Perimeter, creating Directional Rules and adding identities to the Access Level.__
 
-You need to provide a already create Access Level Name, Service Perimeter Name and the mode os deploymente (DRY_RUN or ENFORCED).
+You need to provide an already created Access Level Name, Service Perimeter Name and the mode os deploymente (DRY_RUN or ENFORCED).
 
 This module will modify you perimeter and access level:
 
