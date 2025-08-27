@@ -18,8 +18,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
@@ -50,15 +52,22 @@ func TestHelloWorldE2E(t *testing.T) {
 
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
-			logs, err := getLogs(t)
-			if err != nil {
-				t.Fatal(err)
+			pollApplication := func() func() (bool, error) {
+				return func() (bool, error) {
+					logs, err := getLogs(t)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if strings.Contains(logs, "Hello world!") {
+						return false, nil
+					} else if strings.Contains(logs, "container creating") {
+						return true, nil
+					} else {
+						return false, fmt.Errorf("Unable to get hello world container running.")
+					}
+				}
 			}
-
-			if !strings.Contains(logs, "Hello world!") {
-				t.Errorf("expected logs to contain 'Hello world!', but it did not")
-			}
-
+			utils.Poll(t, pollApplication(), 40, 60*time.Second)
 		})
 	}
 

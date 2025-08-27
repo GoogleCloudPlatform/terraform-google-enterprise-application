@@ -25,7 +25,7 @@ module "kueue" {
   source                   = "../private_install_manifest"
   url                      = "https://github.com/kubernetes-sigs/kueue/releases/download/${local.kueue_version}/manifests.yaml"
   project_id               = regex(local.fleet_membership_regex, each.value)[0]
-  region                   = "us-central1"
+  region                   = regex(local.fleet_membership_regex, each.value)[1]
   k8s_registry             = "registry.k8s.io"
   cluster_name             = regex(local.fleet_membership_regex, each.value)[2]
   cluster_region           = regex(local.fleet_membership_regex, each.value)[1]
