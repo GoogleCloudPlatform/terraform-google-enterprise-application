@@ -27,6 +27,21 @@ The steps below assume that you are checked out on the same level as `terraform-
 └── .
 ```
 
+#### Add Cymbal Bank App at Multitenant repository
+1. Navigate to Multitenant repository and add the Cymbal Bank app at `terraform.tfvars` if it was not created before:
+
+   ```hcl
+    "cymbal-bank" : {
+        "ip_address_names" : [
+        "{UPDATE_WITH_IP_ADDRESS_NAME}",
+        ]
+        "certificates" : {
+        "{UPDATE_WITH_CERTIFICATE}" : ["{UPDATE_WITH_APP_DOMAIN}"]
+        }
+        "acronym" = "cb",
+    }
+   ```
+
 #### Add Cymbal Bank namespaces at Fleetscope repository
 
 1. Navigate to Fleetscope repository and add the Cymbal Bank namespaces at `terraform.tfvars` if they were not created:
@@ -80,6 +95,70 @@ The steps below assume that you are checked out on the same level as `terraform-
     ```
 
 #### Add Cymbal Bank envs at App Factory
+
+1. Navigate to App Factory repository and add the Cymbal Bank application at `terraform.tfvars` if it was not created:
+
+    ```hcl
+    applications = {
+        "cymbal-bank" = {
+            "balancereader" = {
+                create_infra_project = false
+                create_admin_project = true
+            }
+            "contacts" = {
+                create_infra_project = false
+                create_admin_project = true
+            }
+            "frontend" = {
+                create_infra_project = false
+                create_admin_project = true
+            }
+            "ledgerwriter" = {
+                create_infra_project = true
+                create_admin_project = true
+            }
+            "transactionhistory" = {
+                create_infra_project = false
+                create_admin_project = true
+            }
+            "userservice" = {
+                create_infra_project = true
+                create_admin_project = true
+            }
+        }
+    }
+    ```
+
+1. Navigate to App Factory repository and update `cloudbuildv2_repository_config` at `terraform.tfvars` with cymbal-bank repositories if it was not updated:
+
+    ```hcl
+    repositories = {
+        balancereader = {
+            repository_name = "balancereader-i-r"
+            repository_url  = "{UPDATE_WITH_BALANCE_READER_REPOSITORY_URL}"
+        }
+        contacts = {
+            repository_name = "contacts-i-r"
+            repository_url  = "{UPDATE_WITH_CONTACTS_REPOSITORY_URL}"
+        }
+        frontend = {
+            repository_name = "frontend-i-r"
+            repository_url  = "{UPDATE_WITH_FRONT_END_REPOSITORY_URL}"
+        }
+        ledgerwriter = {
+            repository_name = "ledgerwriter-i-r"
+            repository_url  = "{UPDATE_WITH_LEDGERWRITER_URL}"
+        }
+        transactionhistory = {
+            repository_name = "transactionhistory-i-r"
+            repository_url  = "{UPDATE_WITH_TRANSACTION_HISTORY_REPOSITORY_URL}"
+        }
+        userservice = {
+            repository_name = "userservice-i-r"
+            repository_url  = "{UPDATE_WITH_USER_SERVICE_REPOSITORY_URL}"
+        }
+    }
+    ```
 
 1. Copy the `examples/cymbal-bank/4-appfactory` folder content to the repo:
 
@@ -240,17 +319,17 @@ The steps below assume that you are checked out on the same level as `terraform-
     rm -rf $ledgerwriter_repository/modules
     rm -rf $transactionhistory_repository/modules
 
-    cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-balancereader/* $balancereader_repository
-    rm -rf $balancereader_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $balancereader_repository
-    cp ../terraform-example-foundation/build/cloudbuild-tf-* $balancereader_repository/
-    cp ../terraform-example-foundation/build/tf-wrapper.sh $balancereader_repository/
-    chmod 755 $balancereader_repository/tf-wrapper.sh
-    cp -RT ../terraform-example-foundation/policy-library/ $balancereader_repository/policy-library
-    rm -rf $balancereader_repository/policy-library/policies/constraints/*
-    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $balancereader_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
-    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $balancereader_repository/*/*/terraform.tfvars
+    cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-contacts/* $contacts_repository
+    rm -rf $contacts_repository/modules
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $contacts_repository
+    cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
+    cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
+    chmod 755 $contacts_repository/tf-wrapper.sh
+    cp -RT ../terraform-example-foundation/policy-library/ $contacts_repository/policy-library
+    rm -rf $contacts_repository/policy-library/policies/constraints/*
+    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $contacts_repository/cloudbuild-tf-*
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$contacts_statebucket/" $contacts_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $contacts_repository/*/*/terraform.tfvars
 
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-userservice/* $userservice_repository
@@ -278,8 +357,8 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $frontend_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-contacts/* $contacts_repository
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $contacts_repository
     rm -rf $contacts_repository/modules
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $contacts_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
     chmod 755 $contacts_repository/tf-wrapper.sh
@@ -393,7 +472,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Commit files to userservice repository a plan branch:
 
     ```bash
-    cd $ledgerwriter_repository
+    cd $userservice_repository
 
     git checkout -b plan
     git add .
@@ -513,16 +592,18 @@ The steps below assume that you are checked out on the same level as `terraform-
 
         ```bash
         cp -r $APP_SOURCE_DIR_PATH/frontend/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/frontend
-        cp -r $APP_SOURCE_DIR_PATH/frontend_cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/frontend/cloudbuild.yaml
+        cp -r $APP_SOURCE_DIR_PATH/cloudbuild-files/frontend/cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/frontend/cloudbuild.yaml
+
 
         cp -r $APP_SOURCE_DIR_PATH/ledger-ledgerwriter/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/ledgerwriter
         cp -r $APP_SOURCE_DIR_PATH/ledger-transactionhistory/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/transactionhistory
         cp -r $APP_SOURCE_DIR_PATH/ledger-balancereader/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/balancereader
-        cp -r $APP_SOURCE_DIR_PATH/ledger_cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/ledger/cloudbuild.yaml
+        cp -r $APP_SOURCE_DIR_PATH/cloudbuild-files/ledger/cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/ledger/cloudbuild.yaml
+
 
         cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/userservice
         cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/contacts
-        cp -r $APP_SOURCE_DIR_PATH/accounts_cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/accounts/cloudbuild.yaml
+        cp -r $APP_SOURCE_DIR_PATH/cloudbuild-files/accounts/cloudbuild.yaml $BANK_OF_ANTHOS_PATH/src/accounts/cloudbuild.yaml
         ```
 
   - Update `k8s` overlays:
@@ -541,7 +622,7 @@ The steps below assume that you are checked out on the same level as `terraform-
   - Create specific assets for `frontend`:
 
         ```bash
-        cp $APP_SOURCE_DIR_PATH/../../../test/integration/appsource/assets/* $BANK_OF_ANTHOS_PATH/src/frontend/k8s/overlays/development
+        cp $APP_SOURCE_DIR_PATH/../../../../test/integration/appsource/assets/* $BANK_OF_ANTHOS_PATH/src/frontend/k8s/overlays/development
         ```
 
   - Add files and commit:
