@@ -2,6 +2,12 @@
 
 This Terraform phase sets up initial resources and IAM bindings required for deploying multi-tenant applications and managing Cloud Build workspaces. It configures service accounts, grants necessary permissions, and creates storage buckets for Terraform state and Cloud Build artifacts. It also sets up a custom Terraform image in Artifact Registry.
 
+The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
+
+- the Multitenant Infrastructure pipeline
+- the Application Factory
+- the Fleet-Scope pipeline
+
 <table>
 <tbody>
 <tr>
@@ -13,7 +19,7 @@ This Terraform phase sets up initial resources and IAM bindings required for dep
 <td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
 </tr>
 <tr>
-<td><a href="../3-fleetscope">3-fleetscope</a></td>
+<td><a href="../3-fleetscope">3-fleetscope</a></td>g
 <td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
 </tr>
 <tr>
@@ -185,6 +191,20 @@ The seed project is the GCP project where the initial infrastructure resources w
    - Compute Network Admin: `roles/compute.networkAdmin`
    - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 
+   ```bash
+   gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/cloudbuild.connectionAdmin"
+
+   gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/compute.networkAdmin"
+
+   gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/resourcemanager.projectIamAdmin"
+   ```
+
 ### Secrets Project
 
 A separate Google Cloud project is required to store Git credentials securely using Secret Manager. This project will be referenced as $GIT_SECRET_PROJECT throughout the documentation.
@@ -193,16 +213,22 @@ A separate Google Cloud project is required to store Git credentials securely us
 
    - Secret Manager Admin: `roles/secretmanager.admin`
 
+   ```bash
+   gcloud projects add-iam-policy-binding YOUR_SECRET_PROJECT_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/secretmanager.admin"
+   ```
+
 - __API Enabled:__ The following API must be enabled in the secrets project:
 
    - `secretmanager.googleapis.com`
 
-   To enable the API, execute the following command, replacing YOUR_PROJECT_ID with your actual project ID:
+   To enable the API, execute the following command, replacing `YOUR_SECRET_PROJECT_ID` with your actual project ID:
 
    ```bash
    gcloud services enable \
    secretmanager.googleapis.com \
-   --project=YOUR_PROJECT_ID
+   --project=YOUR_SECRET_PROJECT_ID
    ```
 
 ### KMS Project
@@ -213,16 +239,22 @@ A separate Google Cloud project is required to store the KMS key by this solutio
 
    - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 
+   ```bash
+   gcloud projects add-iam-policy-binding YOUR_KMS_PROJECT_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/resourcemanager.projectIamAdmin"
+   ```
+
 - __API Enabled:__ The following API must be enabled in the Seed and KMS projects:
 
    - `cloudkms.googleapis.com`
 
-   To enable the API, execute the following command, replacing `YOUR_PROJECT_ID` with your actual project ID:
+   To enable the API, execute the following command, replacing `YOUR_KMS_PROJECT_ID` with your actual project ID:
 
    ```bash
    gcloud services enable \
    cloudkms.googleapis.com \
-   --project=YOUR_PROJECT_ID
+   --project=YOUR_KMS_PROJECT_ID
    ```
 
 ####  KMS Key for Bucket Encryption
@@ -265,7 +297,13 @@ The identity deploying the module must be a member of the specified Access Level
 
 - __IAM Roles:__ The identity deploying the module requires the following IAM role at the organization level:
 
-- __Access Context Manager Admin:__ `roles/accesscontextmanager.policyAdmin`
+   - __Access Context Manager Admin:__ `roles/accesscontextmanager.policyAdmin`
+
+   ```bash
+   gcloud organizations add-iam-policy-binding YOUR_ORGANIZATION_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/accesscontextmanager.policyAdmin"
+   ```
 
 ### Private Worker Pool Requirements
 
@@ -277,8 +315,19 @@ The same pool can be used across multiple steps. Reserving a wider IP range allo
 
 - __IAM Roles:__ The identity deploying the module must have the following IAM roles on the Private Worker Pool project:
 
-- __Cloud Build WorkerPool User:__ `roles/cloudbuild.workerPoolUser`
-- __Project IAM Admin:__ `roles/resourcemanager.projectIamAdmin`
+   - __Cloud Build WorkerPool User:__ `roles/cloudbuild.workerPoolUser`
+   - __Project IAM Admin:__ `roles/resourcemanager.projectIamAdmin`
+
+   ```bash
+   gcloud projects add-iam-policy-binding YOUR_WORKER_POOL_PROJECT_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/cloudbuild.workerPoolUser"
+
+   gcloud projects add-iam-policy-binding YOUR_WORKER_POOL_PROJECT_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/resourcemanager.projectIamAdmin"
+   ```
+
 
 ### Environments Infrastructure
 
@@ -296,6 +345,24 @@ You need to pre-create the following folders:
    - Compute Network Admin: `roles/compute.networkAdmin`
    - Compute Shared VPC Admin: `roles/compute.xpnAdmin`
 
+   ```bash
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/resourcemanager.folderAdmin"
+
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/resourcemanager.projectCreator"
+
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/compute.networkAdmin"
+
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --role="roles/compute.xpnAdmin"
+   ```
+
 ### Shared Network
 
 You need a Shared VPC per environment already created.
@@ -304,7 +371,6 @@ The networks must meet the following requirements:
 
 - Two subnets in different regions.
 - Each subnet must have two secondary ranges with at least /18 range.
-- Ingress firewall rule allowing SSH.
 - A Cloud Nat configured to reach extenal repositories.
 
 Access [Best practices for GKE networking](https://cloud.google.com/kubernetes-engine/docs/best-practices/networking) for more information.
