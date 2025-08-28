@@ -2,6 +2,35 @@
 
 The Fleet Scope phase defines the resources used to create the GKE Fleet Scopes, Fleet namespaces, and some Fleet features.
 
+<table>
+<tbody>
+<tr>
+<td><a href="../1-bootstrap">1-bootstrap</a></td>
+<td>Bootstraps streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP)</td>
+</tr>
+<tr>
+<td><a href="../2-multitenant">2-multitenant</a></td>
+<td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
+</tr>
+<tr>
+<td>3-fleetscope (this file)</td>
+<td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
+</tr>
+<tr>
+<td><a href="../4-appfactory">4-appfactory</a></td>
+<td>Sets up infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud</td>
+</tr>
+<tr>
+<td><a href="../5-appinfra">5-appinfra</a></td>
+<td>Set up application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+</tr>
+<tr>
+<td><a href="../6-appsource">6-appsource</a></td>
+<td>Deploys a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold.</td>
+</tr>
+</tbody>
+</table>
+
 ## Purpose
 
 This phase deploys the per-environment the setup and configuration of a Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters. It automates the creation of scopes and namespaces, enables features across the fleet, and configures necessary IAM permissions for services running within the clusters. This simplifies multi-cluster management and promotes consistent policy enforcement.

@@ -2,6 +2,35 @@
 
 This phase deploys a multi-tenant Google Kubernetes Engine (GKE) cluster environment, optionally with VPC Service Controls (VPC-SC) and Cloud Armor integration. It supports both Standard and Autopilot cluster types and automates project creation, network configuration, and security policies.
 
+<table>
+<tbody>
+<tr>
+<td><a href="../1-bootstrap">1-bootstrap</a></td>
+<td>Bootstraps streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP)</td>
+</tr>
+<tr>
+<td>2-multitenant (this file)</td>
+<td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
+</tr>
+<tr>
+<td><a href="../3-fleetscope">3-fleetscope</a></td>
+<td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
+</tr>
+<tr>
+<td><a href="../4-appfactory">4-appfactory</a></td>
+<td>Sets up infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud</td>
+</tr>
+<tr>
+<td><a href="../5-appinfra">5-appinfra</a></td>
+<td>Set up application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+</tr>
+<tr>
+<td><a href="../6-appsource">6-appsource</a></td>
+<td>Deploys a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold.</td>
+</tr>
+</tbody>
+</table>
+
 ## Purpose
 
 The phase aims to provide a repeatable and configurable way to deploy a GKE cluster optimized for multi-tenancy within an enterprise environment. It handles project setup, networking, and security considerations, allowing application teams to focus on deploying their workloads.

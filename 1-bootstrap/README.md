@@ -1,15 +1,50 @@
 # 1. Bootstrap phase
 
+This Terraform phase sets up initial resources and IAM bindings required for deploying multi-tenant applications and managing Cloud Build workspaces. It configures service accounts, grants necessary permissions, and creates storage buckets for Terraform state and Cloud Build artifacts. It also sets up a custom Terraform image in Artifact Registry.
+
+<table>
+<tbody>
+<tr>
+<td>1-bootstrap (this file)</td>
+<td>Bootstraps streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP)</td>
+</tr>
+<tr>
+<td><a href="../2-multitenant">2-multitenant</a></td>
+<td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
+</tr>
+<tr>
+<td><a href="../3-fleetscope">3-fleetscope</a></td>
+<td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
+</tr>
+<tr>
+<td><a href="../4-appfactory">4-appfactory</a></td>
+<td>Sets up infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud</td>
+</tr>
+<tr>
+<td><a href="../5-appinfra">5-appinfra</a></td>
+<td>Set up application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+</tr>
+<tr>
+<td><a href="../6-appsource">6-appsource</a></td>
+<td>Deploys a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold.</td>
+</tr>
+</tbody>
+</table>
+
 ## Purpose
 
 The bootstrap phase streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP). It automates the creation of essential infrastructure components, including:
 
-- Cloud Build repositories and triggers
-- Service accounts with necessary IAM bindings
-- Artifact Registry for storing Terraform images
-- Cloud Storage buckets for storing Terraform state, plans and logs.
+- __Service Accounts:__ Creates service accounts for Cloud Build to execute Terraform deployments.
+- __IAM Bindings:__ Grants IAM roles to service accounts, enabling them to create projects, manage resources, and access Artifact Registry.
+Google Cloud Source Repositories (CSR): Creates source repositories for storing code and configurations.
+- __Cloud Build Triggers:__ Configures Cloud Build triggers to automatically start builds on code changes in the infrastructure repositories.
+- __Cloud Storage Buckets:__ Creates Cloud Storage buckets for storing Terraform state, build artifacts, and logs.
+- __Artifact Registry Repository:__ Creates an Artifact Registry repository to store the custom Terraform image.
+- __Custom Terraform Image:__ Builds a custom Terraform image using Cloud Build and stores it in the Artifact Registry repository.
 
 An overview of the deployment methodology for the Enterprise Application blueprint is shown below.
+
 ![Enterprise Application blueprint deployment diagram](../assets/eab-deployment.svg)
 
 The folloging organization is expected by this phase:
@@ -274,7 +309,7 @@ The networks must meet the following requirements:
 
 Access [Best practices for GKE networking](https://cloud.google.com/kubernetes-engine/docs/best-practices/networking) for more information.
 
-For a network configuration example, check the [Foundation Shared VPC](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/3-networks-svpc) step.
+For a network configuration example, check the [Foundation Shared VPC](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/4-appfactory) step.
 
 #### Cloud Build with Github Pre-requisites
 
@@ -450,7 +485,7 @@ To proceed with Gitlab as your git provider you will need:
 
 #### Deploying on Enterprise Foundation blueprint
 
-If you have previously deployed the Enterprise Foundation blueprint, create the pipelines in this phase by pushing the contents of this folder to a [workload repo created at stage 5](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/5-app-infra/README.md). Instead of deploying to multiple environments, create these pipelines in the common folder of the foundation.
+If you have previously deployed the Enterprise Foundation blueprint, create the pipelines in this phase by pushing the contents of this folder to a [workload repo created at stage 5](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/6-appsource/README.md). Instead of deploying to multiple environments, create these pipelines in the common folder of the foundation.
 
 Start at "5. Clone the `bu1-example-app` repo". Replace the contents of that repo with the contents of this folder.
 

@@ -2,6 +2,35 @@
 
 This phase automates the setup of infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud. It creates projects, configures repositories, and sets up Cloud Build triggers for automated builds, testing, and deployments. It supports Cloud Source Repositories (CSR) and 2nd generation Cloud Build repositories through repository connections.
 
+<table>
+<tbody>
+<tr>
+<td><a href="../1-bootstrap">1-bootstrap</a></td>
+<td>Bootstraps streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP)</td>
+</tr>
+<tr>
+<td><a href="../2-multitenant">2-multitenant</a></td>
+<td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
+</tr>
+<tr>
+<td><a href="../3-fleetscope"><span style="white-space: nowrap;">3-fleetscope</span></a></td>
+<td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
+</tr>
+<tr>
+<td>4-appfactory (this file)</td>
+<td>Sets up infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud</td>
+</tr>
+<tr>
+<td><a href="../5-appinfra">5-appinfra</a></td>
+<td>Set up application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+</tr>
+<tr>
+<td><a href="../6-appsource">6-appsource</a></td>
+<td>Deploys a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold.</td>
+</tr>
+</tbody>
+</table>
+
 ## Purpose
 
 This phase streamlines the process of onboarding applications to a Google Cloud environment by automating project creation, repository setup, and CI/CD pipeline configuration. This reduces manual effort, enforces consistent configurations, and accelerates application delivery.

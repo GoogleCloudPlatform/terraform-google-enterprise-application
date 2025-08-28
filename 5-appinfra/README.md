@@ -2,6 +2,35 @@
 
 This phase configures a CI/CD pipeline for an application, leveraging Google Cloud Build and Cloud Deploy. It automates building, testing, and deploying container images to GKE clusters, with support for various repository types and deployment targets.
 
+<table>
+<tbody>
+<tr>
+<td><a href="../1-bootstrap">1-bootstrap</a></td>
+<td>Bootstraps streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP)</td>
+</tr>
+<tr>
+<td><a href="../2-multitenant">2-multitenant</a></td>
+<td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
+</tr>
+<tr>
+<td><a href="../3-fleetscope"><span style="white-space: nowrap;">3-fleetscope</span></a></td>
+<td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
+</tr>
+<tr>
+<td><a href="../4-appfactory">4-appfactory</a></td>
+<td>Sets up infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud</td>
+</tr>
+<tr>
+<td>5-appinfra (this file)</td>
+<td>Set up application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+</tr>
+<tr>
+<td><a href="../6-appsource">6-appsource</a></td>
+<td>Deploys a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold.</td>
+</tr>
+</tbody>
+</table>
+
 ## Purpose
 
 The application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters). It sets up the necessary infrastructure, including repositories, build triggers, and Cloud Deploy pipelines, allowing developers to focus on code development rather than deployment logistics.
