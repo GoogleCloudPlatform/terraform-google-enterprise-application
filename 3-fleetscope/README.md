@@ -4,21 +4,24 @@ The Fleet Scope phase defines the resources used to create the GKE Fleet Scopes,
 
 ## Purpose
 
-This phase deploys the per-environment fleet resources deployed via the fleetscope infrastructure pipeline.
+This phase deploys the per-environment the setup and configuration of a Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters. It automates the creation of scopes and namespaces, enables features across the fleet, and configures necessary IAM permissions for services running within the clusters. This simplifies multi-cluster management and promotes consistent policy enforcement.
 
 An overview of the fleet-scope  pipeline is shown below.
+
 ![Enterprise Application fleet-scope  diagram](../assets/eab-multitenant.png)
 
 The following resources are created:
 
-- Fleet scope
-- Fleet namespace
-- Config Management
-- Service Mesh
-- Multicluster Ingress
-- Multicluster Service
-- Policy Controller
-- Binary authorization admission rule
+*   **GKE Hub Scope:** Creates GKE Hub scopes for each specified namespace.
+*   **GKE Hub Namespace:** Creates GKE Hub namespaces within the defined scopes.
+*   **GKE Hub Membership Binding:** Binds cluster memberships to the created scopes.
+*   **GKE Hub Feature:** Enables features like Config Management (ACM), Service Mesh, Policy Controller (PoCo), Multi-cluster Ingress (MCI), and Multi-cluster Services (MCS) on the fleet.
+*   **GKE Hub Feature Membership:** Associates the enabled features with specific cluster memberships.
+*   **IAM Bindings:** Grants IAM roles to service accounts, allowing them to create traces, send metrics, access logging views, and manage service mesh configurations.
+*   **Binary Authorization Attestor and Policy:** Configures Binary Authorization to ensure that only attested images are deployed to the cluster.
+*   **Google Cloud Source Repository (Optional):** Creates a Cloud Source Repository for Config Sync if `config_sync_secret_type` is set to `gcpserviceaccount`.
+*   **Kueue Private Installation (Optional):** Installs Kueue, a Kubernetes-native job management system, for private use within the fleet.
+*   **Fleet App Operator Permissions:** Grants operator permissions within the fleet.
 
 ## Prerequisites
 
@@ -124,6 +127,16 @@ After you create and obtain the personal access token in Gitlab/Github, add it t
 > NOTE: Config Sync must be able to fetch your Git server, this means you might need to adjust your firewall rules to allow GKE pods to reach that server or create a Cloud NAT Router to allow accessing the Github/Gitlab or Bitbucket SaaS servers.
 
 ## Usage
+
+### Important Considerations:
+
+- __namespace_ids:__ This map defines the namespaces to be created in the fleet, along with the Google Group email address associated with each team/namespace.
+- __cluster_membership_ids:__ Ensure that these IDs are correct and that the clusters are properly registered with the GKE Hub.
+- __Workload Identity:__ Make sure Workload Identity is enabled on your GKE clusters.
+- __Config Sync:__ If using `gcpserviceaccount` for `config_sync_secret_type`, the module will create a Cloud Source Repository. Otherwise, you must provide a valid `config_sync_repository_url`.
+- __Binary Authorization:__ The attestation_kms_key must be a valid KMS key with appropriate permissions.
+- __Kueue:__ If enable_kueue is set to true, ensure that the `private_install_manifest` module is available (as indicated by `source = "../private_install_manifest"`).
+
 
 ### Deploying with Google Cloud Build
 

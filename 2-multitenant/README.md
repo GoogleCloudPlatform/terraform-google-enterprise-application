@@ -1,18 +1,25 @@
 # 2. Multitenant Infrastructure phase
 
+This phase deploys a multi-tenant Google Kubernetes Engine (GKE) cluster environment, optionally with VPC Service Controls (VPC-SC) and Cloud Armor integration. It supports both Standard and Autopilot cluster types and automates project creation, network configuration, and security policies.
+
 ## Purpose
 
-This phase deploys the per-environment multitenant resources deployed via the multitenant infrastructure pipeline.
+The phase aims to provide a repeatable and configurable way to deploy a GKE cluster optimized for multi-tenancy within an enterprise environment. It handles project setup, networking, and security considerations, allowing application teams to focus on deploying their workloads.
 
 An overview of the multitenant infrastructure pipeline is shown below.
 ![Enterprise Application multitenant infrastructure diagram](../assets/eab-multitenant.png)
 
 The following resources are created:
 
-- GCP Project (cluster project)
-- GKE cluster(s)
-- Cloud Armor
-- App IP addresses (see below for details)
+- __Google Cloud Project (Optional):__ A new Google Cloud project dedicated to hosting the GKE cluster. This project is created if `create_cluster_project` is set to true.
+- __GKE Cluster (Standard or Autopilot):__ A GKE cluster, either Standard or Autopilot, configured according to the specified variables.
+- __VPC Network Configuration:__ Configures networking, including subnetworks and firewall rules.
+- __Cloud Armor Policy:__ A Cloud Armor policy to protect the GKE cluster from common web attacks.
+- __Service Accounts: Service__ accounts for the GKE cluster nodes and project, with appropriate IAM roles.
+- __VPC Service Controls (Optional):__ Configures VPC-SC perimeter and access levels, if `service_perimeter_name` is set.
+- __Managed SSL Certificates:__ Creates Google Compute Managed SSL Certificates for applications.
+- __Global IP Addresses:__ Creates global static IP addresses for applications.
+- __Egress/Ingress Policies:__ Creates Egress and Ingress policies for VPC-SC to allow communication between the cluster, network project, and Cloud Build worker pool (if applicable).
 
 ```txt
 .
@@ -149,8 +156,15 @@ This module will modify you perimeter and access level:
 
 If you are deploying this solution inside of the VPC-SC, you need to provide the project where you Private Workerpool is deployed. This module will create Directional rules to allow Egress from Cloud Deploy to the Private Workerpool project.
 
-
 ## Usage
+
+### Important Considerations:
+
+- __cluster_subnetworks__: Ensure that the subnetworks specified have sufficient IP address space for the GKE cluster nodes and services. Also, make sure the `master_ipv4_cidr_blocks` variable has an IP block defined for each subnetwork.
+- __VPC-SC:__ If using VPC Service Controls, ensure that the `service_perimeter_name` and access_level_name variables are correctly configured. The module will attempt to add the GKE service account to the specified access level. Properly configure ingress and egress rules.
+- __create_cluster_project:__ If setting this to `false`, you must ensure that the `network_project_id` already exists and has the necessary APIs enabled.
+apps variable: The acronyms must be unique and no longer than 3 characters.
+- __Deletion Protection:__ The `deletion_protection` variable defaults to true for the autopilot cluster, preventing accidental deletion of the cluster. Set it to false if you need to destroy the cluster using Terraform.
 
 ### Deploying with Google Cloud Build
 

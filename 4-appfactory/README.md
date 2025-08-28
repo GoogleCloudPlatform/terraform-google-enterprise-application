@@ -1,18 +1,24 @@
 # 4. Application Factory phase
 
+This phase automates the setup of infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud. It creates projects, configures repositories, and sets up Cloud Build triggers for automated builds, testing, and deployments. It supports Cloud Source Repositories (CSR) and 2nd generation Cloud Build repositories through repository connections.
+
 ## Purpose
 
-The application factory creates application project groups, which contain resources responsible for deployment of a single application within the developer platform.
+This phase streamlines the process of onboarding applications to a Google Cloud environment by automating project creation, repository setup, and CI/CD pipeline configuration. This reduces manual effort, enforces consistent configurations, and accelerates application delivery.
 
 An overview of the application factory pipeline is shown below.
+
 ![Enterprise Application application factory diagram](../assets/eab-app-factory.svg)
 
 The application factory creates the following resources as defined in the [`app-group-baseline`](./modules/app-group-baseline/) submodule:
 
-* **Application admin project:** A project dedicated for application administration and management.
-* **Application environment projects:** A project for the application for each environment (e.g., development, nonproduction, production).
-* **Infrastructure repository:** A Git repository containing the Terraform configuration for the application infrastructure.
-* **Application infrastucture pipeline:** A Cloud Build pipeline for deploying the application infrastructure specified as Terraform.
+- __Application Admin Project (Optional):__ A new Google Cloud project to host the application's CI/CD pipelines and related resources. This project is created if `create_admin_project` is set to `true`.
+- __Application Infrastructure Projects (Optional):__ Environment-specific Google Cloud projects to host the application's infrastructure resources (e.g., GKE clusters, databases). These projects are created if `create_infra_project` is set to `true`.
+- __Cloud Source Repository or 2nd Gen Cloud Build Repository:__ Creates a repository for the application's infrastructure code. It defaults to Cloud Source Repository if `cloudbuildv2_repository_config` is not provided, otherwise it uses the specified 2nd Gen Cloud Build repository connection.
+- __Cloud Build Triggers:__ Configures Cloud Build triggers to automatically run Terraform plan and apply jobs on code changes in the infrastructure repository.
+- __Cloud Build Service Account:__ Creates or uses a Cloud Build service account with the necessary IAM roles to manage infrastructure resources.
+- __Cloud Storage Buckets:__ Creates Cloud Storage buckets for storing Cloud Build artifacts, logs, and Terraform state.
+- __VPC Service Controls (Optional):__ Configures VPC-SC perimeter and access levels, if `service_perimeter_name` is set.
 
 It will also create an Application Folder to group your admin projects under it, for example:
 
@@ -50,6 +56,12 @@ It will also create an Application Folder to group your admin projects under it,
 ```
 
 ## Usage
+
+### Important Considerations:
+
+- __cloudbuildv2_repository_config:__ If using GitHub or GitLab integration, ensure that the appropriate secrets are configured in Secret Manager and that the service account has access to those secrets. Follow the validation rules specified in the variable description. If you omit this variable, ensure that Cloud Source Repositories API is enabled.
+- __Network Configuration:__ Ensure that the network project and subnets specified in the envs variable are correctly configured and that the Cloud Build service account has access to them.
+- __VPC-SC:__ If using VPC Service Controls, ensure that the `service_perimeter_name` and access_level_name variables are correctly configured. The module will attempt to add the GKE service account to the specified access level. Properly configure ingress and egress rules.
 
 ### Git Provider
 
