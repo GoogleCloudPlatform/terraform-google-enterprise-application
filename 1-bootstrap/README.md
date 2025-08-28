@@ -389,7 +389,7 @@ To proceed with GitHub as your git provider you will need:
 
    > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
-- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later.
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
 - [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
    - Grant `repo` and `read:user` (or if app is installed in org use `read:org`)
    - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
