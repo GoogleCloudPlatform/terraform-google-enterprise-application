@@ -22,7 +22,7 @@ The Fleet Scope phase defines the resources used to create the GKE Fleet Scopes,
 </tr>
 <tr>
 <td><a href="../5-appinfra">5-appinfra</a></td>
-<td>Set up application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+<td>Set up application infrastructure pipeline aims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
 </tr>
 <tr>
 <td><a href="../6-appsource">6-appsource</a></td>

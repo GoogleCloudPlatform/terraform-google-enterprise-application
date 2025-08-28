@@ -20,7 +20,7 @@
 </tr>
 <tr>
 <td><a href="../5-appinfra">5-appinfra</a></td>
-<td>Set up application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+<td>Set up application infrastructure pipeline aims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
 </tr>
 <tr>
 <td>6-appsource (this file)</td>
