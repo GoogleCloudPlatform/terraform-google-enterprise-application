@@ -19,6 +19,9 @@ locals {
     "development",
     "nonproduction",
     "production",
+    ] : var.branch_name == "" ? [
+    "development",
+    "nonproduction",
   ] : ["development"]
   folder_admin_roles = [
     "roles/owner",

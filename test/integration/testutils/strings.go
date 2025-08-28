@@ -64,6 +64,11 @@ func EnvNames(t *testing.T) []string {
 			"nonproduction",
 			"production",
 		}
+	} else if branchName == "" {
+		return []string{
+			"development",
+			"nonproduction",
+		}
 	}
 	return []string{
 		"development",
