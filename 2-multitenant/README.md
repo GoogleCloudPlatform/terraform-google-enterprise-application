@@ -156,7 +156,7 @@ apps = {
 
   "anotherapp" = {
     acronym = "AAP"
-    # ip_address_names e certificates are optionals
+    # ip_address_names and certificates are optional
   }
 
   "yet-another-app" = {
