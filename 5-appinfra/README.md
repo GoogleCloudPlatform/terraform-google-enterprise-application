@@ -33,7 +33,7 @@ This phase configures a CI/CD pipeline for an application, leveraging Google Clo
 
 ## Purpose
 
-The application infrastructure pipelineaims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters). It sets up the necessary infrastructure, including repositories, build triggers, and Cloud Deploy pipelines, allowing developers to focus on code development rather than deployment logistics.
+The application infrastructure pipeline aims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters). It sets up the necessary infrastructure, including repositories, build triggers, and Cloud Deploy pipelines, allowing developers to focus on code development rather than deployment logistics.
 
 An overview of application inrastruction pipeline is shown below, in the context of deploying a new applicaiton across the Enterprise Application blueprint.
 
