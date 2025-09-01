@@ -41,16 +41,16 @@ An overview of the fleet-scope  pipeline is shown below.
 
 The following resources are created:
 
-*   **GKE Hub Scope:** Creates GKE Hub scopes for each specified namespace.
-*   **GKE Hub Namespace:** Creates GKE Hub namespaces within the defined scopes.
-*   **GKE Hub Membership Binding:** Binds cluster memberships to the created scopes.
-*   **GKE Hub Feature:** Enables features like Config Management (ACM), Service Mesh, Policy Controller (PoCo), Multi-cluster Ingress (MCI), and Multi-cluster Services (MCS) on the fleet.
-*   **GKE Hub Feature Membership:** Associates the enabled features with specific cluster memberships.
-*   **IAM Bindings:** Grants IAM roles to service accounts, allowing them to create traces, send metrics, access logging views, and manage service mesh configurations.
-*   **Binary Authorization Attestor and Policy:** Configures Binary Authorization to ensure that only attested images are deployed to the cluster.
-*   **Google Cloud Source Repository (Optional):** Creates a Cloud Source Repository for Config Sync if `config_sync_secret_type` is set to `gcpserviceaccount`.
-*   **Kueue Private Installation (Optional):** Installs Kueue, a Kubernetes-native job management system, for private use within the fleet.
-*   **Fleet App Operator Permissions:** Grants operator permissions within the fleet.
+-   **GKE Hub Scope:** Creates GKE Hub scopes for each specified namespace.
+-   **GKE Hub Namespace:** Creates GKE Hub namespaces within the defined scopes.
+-   **GKE Hub Membership Binding:** Binds cluster memberships to the created scopes.
+-   **GKE Hub Feature:** Enables features like Config Management (ACM), Service Mesh, Policy Controller (PoCo), Multi-cluster Ingress (MCI), and Multi-cluster Services (MCS) on the fleet.
+-   **GKE Hub Feature Membership:** Associates the enabled features with specific cluster memberships.
+-   **IAM Bindings:** Grants IAM roles to service accounts, allowing them to create traces, send metrics, access logging views, and manage service mesh configurations.
+-   **Binary Authorization Attestor and Policy:** Configures Binary Authorization to ensure that only attested images are deployed to the cluster.
+-   **Google Cloud Source Repository (Optional):** Creates a Cloud Source Repository for Config Sync if `config_sync_secret_type` is set to `gcpserviceaccount`.
+-   **Kueue Private Installation (Optional):** Installs Kueue, a Kubernetes-native job management system, for private use within the fleet.
+-   **Fleet App Operator Permissions:** Grants operator permissions within the fleet.
 
 ## Prerequisites
 
@@ -73,7 +73,7 @@ namespace_ids = {
 
 ### KMS key for attestation
 
-You will need to provide a [PKIK KMS Key](https://cloud.google.com/binary-authorization/docs/creating-attestors-console#create_a_pkix_key_pair) to be used to ce used by the attestor.
+You will need to provide a [PKIK KMS Key](https://cloud.google.com/binary-authorization/docs/creating-attestors-console#create_a_pkix_key_pair) to be used by the attestor.
 
 ### Configuring Git Access for Config Sync Repository
 

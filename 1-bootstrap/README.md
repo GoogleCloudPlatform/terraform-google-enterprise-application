@@ -192,16 +192,17 @@ The seed project is the GCP project where the initial infrastructure resources w
    - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 
    ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
    gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/cloudbuild.connectionAdmin"
 
    gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/compute.networkAdmin"
 
    gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/resourcemanager.projectIamAdmin"
    ```
 
@@ -214,8 +215,9 @@ A separate Google Cloud project is required to store Git credentials securely us
    - Secret Manager Admin: `roles/secretmanager.admin`
 
    ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
    gcloud projects add-iam-policy-binding YOUR_SECRET_PROJECT_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/secretmanager.admin"
    ```
 
@@ -240,8 +242,9 @@ A separate Google Cloud project is required to store the KMS key by this solutio
    - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 
    ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
    gcloud projects add-iam-policy-binding YOUR_KMS_PROJECT_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/resourcemanager.projectIamAdmin"
    ```
 
@@ -289,7 +292,7 @@ This module does not create the Service Perimeter or Access Level. However, it c
 
 To enable VPC-SC integration, you must provide the following:
 
-- An existing Access Level name.
+- An existing Access Level name. Since the module will be addind access level conditions, your access level need to be configured with 'OR' as the combining function.
 - An existing Service Perimeter name.
 - The deployment mode (`DRY_RUN` or `ENFORCED`).
 
@@ -300,8 +303,9 @@ The identity deploying the module must be a member of the specified Access Level
    - __Access Context Manager Admin:__ `roles/accesscontextmanager.policyAdmin`
 
    ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
    gcloud organizations add-iam-policy-binding YOUR_ORGANIZATION_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/accesscontextmanager.policyAdmin"
    ```
 
@@ -319,12 +323,13 @@ The same pool can be used across multiple steps. Reserving a wider IP range allo
    - __Project IAM Admin:__ `roles/resourcemanager.projectIamAdmin`
 
    ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
    gcloud projects add-iam-policy-binding YOUR_WORKER_POOL_PROJECT_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/cloudbuild.workerPoolUser"
 
    gcloud projects add-iam-policy-binding YOUR_WORKER_POOL_PROJECT_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/resourcemanager.projectIamAdmin"
    ```
 
@@ -346,20 +351,21 @@ You need to pre-create the following folders:
    - Compute Shared VPC Admin: `roles/compute.xpnAdmin`
 
    ```bash
+   export SERVICE_ACCOUNT_EMAIL="YOUR_SERVICE_ACCOUNT_EMAIL"
    gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${"serviceAccount:${SERVICE_ACCOUNT_EMAIL}"}" \
    --role="roles/resourcemanager.folderAdmin"
 
    gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/resourcemanager.projectCreator"
 
    gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/compute.networkAdmin"
 
    gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
-   --member="serviceAccount:YOUR_SERVICE_ACCOUNT_EMAIL" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/compute.xpnAdmin"
    ```
 
@@ -372,10 +378,11 @@ The networks must meet the following requirements:
 - Two subnets in different regions.
 - Each subnet must have two secondary ranges with at least /18 range.
 - A Cloud Nat configured to reach extenal repositories.
+- Google Private access enabled.
 
 Access [Best practices for GKE networking](https://cloud.google.com/kubernetes-engine/docs/best-practices/networking) for more information.
 
-For a network configuration example, check the [Foundation Shared VPC](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/4-appfactory) step.
+For a network configuration example, check the [Foundation Shared VPC](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/3-networks-svpc/modules/shared_vpc) step.
 
 #### Cloud Build with Github Pre-requisites
 
@@ -442,8 +449,8 @@ To proceed with GitHub as your git provider you will need:
          }
       }
 
-      github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_PAT_SECRET_NAME" # Personal Access Token Secret
-      github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_APP_ID_SECRET_NAME" # App ID value secret
+      github_secret_id                            = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_PAT_SECRET_NAME" # Personal Access Token Secret
+      github_app_id_secret_id                     = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_APP_ID_SECRET_NAME" # App ID value secret
       secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
    }
    ```
@@ -528,9 +535,9 @@ To proceed with Gitlab as your git provider you will need:
          }
       }
 
-      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
-      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
-      gitlab_webhook_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
+      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
+      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
+      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
 
       secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
 
@@ -551,7 +558,7 @@ To proceed with Gitlab as your git provider you will need:
 
 #### Deploying on Enterprise Foundation blueprint
 
-If you have previously deployed the Enterprise Foundation blueprint, create the pipelines in this phase by pushing the contents of this folder to a [workload repo created at stage 5](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/6-appsource/README.md). Instead of deploying to multiple environments, create these pipelines in the common folder of the foundation.
+If you have previously deployed the Enterprise Foundation blueprint, create the pipelines in this phase by pushing the contents of this folder to a [workload repo created at stage 5](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/5-app-infra). Instead of deploying to multiple environments, create these pipelines in the common folder of the foundation.
 
 Start at "5. Clone the `bu1-example-app` repo". Replace the contents of that repo with the contents of this folder.
 

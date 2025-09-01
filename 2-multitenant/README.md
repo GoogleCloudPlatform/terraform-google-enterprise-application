@@ -81,10 +81,12 @@ You will need to provide information about your environment. It includes:
 
 - A biling account to be linked to the cluster projects,
 - The environment folder id where the cluster project will be created,
-- The network project id where the cluster network is hosted,
-- The cluster network self link,
-- The cluster subnetworks self-links,
+- The network project id where the cluster network is going to be hosted,
+- The network self link who will be used by the cluster,
+- The subnetworks self-links who will be used by the cluster,
 - The organization id
+
+__Note:__ You can use one or more regions to deploy your cluster. This will be determined by the subnetworks provided. For each subnetwork provided, a cluster will be created in the same region of the subnetwork.
 
 You can see the variable example below. Remember to include your own values.
 
@@ -95,7 +97,7 @@ envs = {
     folder_id          = "1234567890123"
     network_project_id = "shared-vpc-project"
     network_self_link  = "https://www.googleapis.com/compute/v1/projects/shared-vpc-project/global/networks/the-network"
-    org_id             = "9876543210987"
+    org_id             = "2345678901234"
     subnets_self_links = [
       "https://www.googleapis.com/compute/v1/projects/shared-vpc-project/regions/us-central1/subnetworks/subnet-us-central1",
       "https://www.googleapis.com/compute/v1/projects/shared-vpc-project/regions/us-east1/subnetworks/subnet-us-east1"
@@ -131,7 +133,7 @@ envs = {
 For each application to be deployed in this solution, please provide:
 
 - A distinct application name as key;
-  - A distinct acronym for each application, it will be used as a shorten identificator;
+  - A distinct acronym for each application, maximun size of 3 characters,  it will be used as a shorten identificator;
   - IP addresses for each application, when needed;
   - Certificates for each application, when needed;
 
@@ -183,7 +185,7 @@ This module will modify you perimeter and access level:
 
 #### Private Workerpool project
 
-If you are deploying this solution inside of the VPC-SC, you need to provide the project where you Private Workerpool is deployed. This module will create Directional rules to allow Egress from Cloud Deploy to the Private Workerpool project.
+If you are deploying this solution inside of the VPC-SC, you need to provide the project where you Private Workerpool is deployed. This module will create Directional rules to allow Egress from Cloud Deploy to the Private Workerpool project. The current solution **does not** support Cloud Build inside of the service perimeter.
 
 ## Usage
 

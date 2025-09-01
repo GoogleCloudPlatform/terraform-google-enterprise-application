@@ -120,8 +120,8 @@ A previously created **private** [GitHub repository](https://docs.github.com/en/
    +         repository_url  = "https://github.com/<owner or organization>/hello-world-i-r.git"
         }
       }
-   +  github_secret_id = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat"
-   +  github_app_id_secret_id = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id"
+   +  github_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/github-pat"
+   +  github_app_id_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/github-app-id"
    }
    ```
 
@@ -156,9 +156,9 @@ A previously created **private** GitLab repository for each one of the repositor
    +         repository_url  = "https://gitlab.com/<account or group>/hello-world-i-r.git"
         }
       }
-   +  gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-api-token"
-   +  gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-read-api-token"
-   +  gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-webhook"
+   +  gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/gitlab-api-token"
+   +  gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/gitlab-read-api-token"
+   +  gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/gitlab-webhook"
    }
    ```
 
