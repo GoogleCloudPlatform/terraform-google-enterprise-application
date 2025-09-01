@@ -53,6 +53,7 @@ The following resources are created:
 ```txt
 .
 └── fldr-seed/
+  ├── prj-seed
   ├── fldr-common/
   │   ├── ...
   ├── fldr-development/
@@ -63,11 +64,10 @@ The following resources are created:
   │   ├── prj-vpc-nonprod
   │   ├── prj-gke-dev
   │   └── ...
-  ├── fldr-prod/
-  │   ├── prj-vpc-prod
-  │   ├── prj-gke-dev
-  │   └── ...
-  ├── prj-seed
+  └──  fldr-prod/
+      ├── prj-vpc-prod
+      ├── prj-gke-dev
+      └── ...
 ```
 
 ## Prerequisites
