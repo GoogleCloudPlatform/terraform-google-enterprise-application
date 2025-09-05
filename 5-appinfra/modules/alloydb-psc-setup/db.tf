@@ -32,11 +32,11 @@ resource "google_project_service" "alloydb_api" {
 
 module "alloydb" {
   source  = "GoogleCloudPlatform/alloy-db/google"
-  version = "~> 3.0"
+  version = "~> 7.0"
 
-  cluster_id       = "cluster-${var.db_region}-psc-${var.env}"
-  cluster_location = var.db_region
-  project_id       = var.app_project_id
+  cluster_id = "cluster-${var.db_region}-psc-${var.env}"
+  location   = var.db_region
+  project_id = var.app_project_id
   cluster_initial_user = {
     user     = "admin"
     password = random_password.password.result
