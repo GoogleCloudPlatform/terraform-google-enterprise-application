@@ -1,0 +1,161 @@
+/**
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// General inputs
+
+// The directory where the helper will git clone the Google Source Repositories that will
+// host the code for each one of the stages
+code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITORIES"
+
+// The directory where the user has created a fresh git clone of the Enterprise Application Blueprint repository
+eab_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EXAMPLE_FOUNDATION_CODE_WAS_CHECKED_OUT"
+
+bucket_force_destroy  = false
+buckets_force_destroy = false
+deletion_protection   = false
+
+cloudbuildv2_repository_config = {
+  repo_type = "GITLABv2"
+  repositories = {
+    applicationfactory = {
+      repository_name = "eab-applicationfactory"
+      repository_url  = "https://gitlab.com/user/eab-applicationfactory.git"
+    }
+    fleetscope = {
+      repository_name = "eab-fleetscope"
+      repository_url  = "https://gitlab.com/user/eab-fleetscope.git"
+    }
+    multitenant = {
+      repository_name = "eab-multitenant"
+      repository_url  = "https://gitlab.com/user/eab-multitenant.git"
+    }
+  }
+  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+  secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+
+  gitlab_enterprise_host_uri          = "https://gitlab.com"
+  gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+  gitlab_enterprise_ca_certificate    = <<EOF
+REPLACE_WITH_SSL_CERT
+EOF
+  github_secret_id                    = ""
+  github_app_id_secret_id             = ""
+}
+
+// An existing project configured as the default project in the local Cloud SDK configuration
+// See https://cloud.google.com/sdk/gcloud/reference/config/set#EXAMPLES
+
+
+// 1-bootstrap inputs
+// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md#inputs
+
+common_folder_id = "folders/FOLDER_ID"
+project_id       = "REPLACE_WITH_YOUR_PROJECT"
+workerpool_id    = "projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME"
+
+
+// 2-multitenant inputs
+apps = {
+  "default-example" : {
+    "acronym"        = "de",
+    ip_address_names = [],
+    certificates     = {}
+  }
+}
+
+envs = {
+  "development" = {
+    "billing_account"    = "{BILLING_ACCOUNT}"
+    "folder_id"          = "folders/{FOLDER}"
+    "network_project_id" = "{PROJECT}"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/{PROJECT}/global/networks/{NETWORK}}"
+    "org_id"             = "{ORGANIZATION}"
+    "subnets_self_links" = [
+      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
+    ]
+  }
+  "non-production" = {
+    "billing_account"    = "{BILLING_ACCOUNT}"
+    "folder_id"          = "folders/{FOLDER}"
+    "network_project_id" = "{PROJECT}"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/{PROJECT}/global/networks/{NETWORK}}"
+    "org_id"             = "{ORGANIZATION}"
+    "subnets_self_links" = [
+      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
+      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
+    ]
+  }
+  "production" = {
+    "billing_account"    = "{BILLING_ACCOUNT}"
+    "folder_id"          = "folders/{FOLDER}"
+    "network_project_id" = "{PROJECT}"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/{PROJECT}/global/networks/{NETWORK}}"
+    "org_id"             = "{ORGANIZATION}"
+    "subnets_self_links" = [
+      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
+      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
+    ]
+  }
+}
+
+// 3-fleetscope inputs
+
+namespace_ids = {
+  "cb-frontend" = "your-frontend-group@yourdomain.com",
+  "cb-accounts" = "your-accounts-group@yourdomain.com",
+  "cb-ledger"   = "your-ledger-group@yourdomain.com"
+}
+
+remote_state_bucket         = "REMOTE_STATE_BUCKET"
+attestation_evaluation_mode = "ENFORCE"
+attestation_kms_key         = ""
+enable_kueue                = false
+config_sync_branch          = ""
+config_sync_repository_url  = ""
+config_sync_secret_type     = ""
+disable_istio_on_namespaces = []
+
+
+
+// 4-appfactory
+
+billing_account = "REPLACE_WITH_BILLING_ACCOUNT"
+org_id          = "REPLACE_WITH_YOUR_ORGANIZATION_ID"
+
+infra_project_apis     = []
+service_perimeter_name = "accessPolicies/000000000000000/servicePerimeters/sp_gke_enterprise_XXXXX"
+service_perimeter_mode = "ENFORCE"
+access_level_name      = "accessPolicies/000000000000000/accessLevels/ac_gke_enterprise_XXXXX"
+applications = {
+  "default-example" = {
+    "hello-world" = {
+      create_infra_project = false
+      create_admin_project = true
+      admin_project_id     = "" # Adicione esta linha
+    }
+  }
+}
+cb_private_workerpool_project_id = ""
+location                         = ""
+// 5-appinfra
+
+region            = "us-central1"
+environment_names = ["development", "nonproduction", "production"]
+tf_apply_branches = []
+trigger_location  = ""
+bucket_prefix     = ""
