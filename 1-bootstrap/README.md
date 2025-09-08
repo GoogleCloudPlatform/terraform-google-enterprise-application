@@ -557,10 +557,10 @@ To proceed with Gitlab as your git provider you will need:
 ### Deploying with Cloud Build
 
 #### Deploying on Enterprise Foundation blueprint
+TODO: add step by step instructions
 
-If you have previously deployed the Enterprise Foundation blueprint, create the pipelines in this phase by pushing the contents of this folder to a [workload repo created at stage 5](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/5-app-infra). Instead of deploying to multiple environments, create these pipelines in the common folder of the foundation.
+If you have previously deployed the Enterprise Foundation blueprint, copy this folder to the [4-appinfra/modules](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0/4-projects/modules) folder. Then add a new file on in [4-projects/business_unit_1/shared](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0/4-projects/business_unit_1/shared) calling this module. Make sure to retrieve all the needed variables from remote when necessary.
 
-Start at "5. Clone the `bu1-example-app` repo". Replace the contents of that repo with the contents of this folder.
 
 ### Running Terraform locally
 

@@ -60,7 +60,8 @@ The following resources are created:
 
 ### Workspace groups
 
-For each namespace being created, you will need a Workspace group email previously created.
+For each namespace being created, you will need a Workspace group email previously created. You can find more information [here](https://developers.google.com/workspace/admin/directory/v1/guides/manage-groups#create_group).
+
 The code will grant ADMIN permission for each group email to the namespace created.
 
 ```hcl
@@ -101,24 +102,17 @@ After you create and obtain the personal access token in Gitlab/Github, add it t
     ```bash
     terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" init
     export cluster_dev_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_project)
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_names
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -raw cluster_regions
+    export membership_dev_1=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -json cluster_names | jq -r '.[0]')
+    export region_dev_1=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -json cluster_regions | jq -r '.[0]')
 
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" init
-    export cluster_nonprod_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -raw cluster_project)
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -raw cluster_names
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -raw cluster_regions
-
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" init
-    export cluster_prod_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -raw cluster_project)
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -raw cluster_names
-    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -raw cluster_regions
+    export membership_dev_2=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -json cluster_names | jq -r '.[1]')
+    export region_dev_2=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/development" output -json cluster_regions | jq -r '.[1]')
     ```
 
-- Get your cluster credentials:
+- Get your cluster credentials for the first region:
 
     ```bash
-     gcloud container hub memberships get-credentials <MEMBERSHIP_NAME> --location <CLUSTER_REGION> --project <CLUSTER_PROJECT>
+     gcloud container hub memberships get-credentials ${membership_dev_1} --location ${region_dev_1} --project ${cluster_dev_project}
      ```
 
 - (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
@@ -152,6 +146,219 @@ After you create and obtain the personal access token in Gitlab/Github, add it t
   - `USERNAME`: the username that you want to use.
   - `TOKEN`: the token that you created in the previous step.
   - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+
+- Get your cluster credentials for the second region:
+
+    ```bash
+     gcloud container hub memberships get-credentials ${membership_dev_2} --location ${region_dev_2} --project ${cluster_dev_project}
+     ```
+
+- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace="config-management-system" \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+
+- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace=config-management-system \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN \
+    --from-literal=https_proxy=HTTPS_PROXY_URL
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+  - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+
+
+    ```bash
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" init
+    export cluster_nonprod_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -raw cluster_project)
+    export membership_nonprod_1=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -json cluster_names | jq -r '.[0]')
+    export region_nonprod_1=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -json cluster_regions | jq -r '.[0]')
+
+    export membership_nonprod_2=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -json cluster_names | jq -r '.[1]')
+    export region_nonprod_2=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/nonproduction" output -json cluster_regions | jq -r '.[1]')
+    ```
+
+- Get your cluster credentials for the first region:
+
+    ```bash
+     gcloud container hub memberships get-credentials ${membership_nonprod_1} --location ${region_nonprod_1} --project ${cluster_nonprod_project}
+     ```
+
+- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace="config-management-system" \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+
+- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace=config-management-system \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN \
+    --from-literal=https_proxy=HTTPS_PROXY_URL
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+  - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+
+- Get your cluster credentials for the second region:
+
+    ```bash
+     gcloud container hub memberships get-credentials ${membership_nonprod_2} --location ${region_nonprod_2} --project ${cluster_nonprod_project}
+     ```
+
+- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace="config-management-system" \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+
+- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace=config-management-system \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN \
+    --from-literal=https_proxy=HTTPS_PROXY_URL
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+  - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+
+
+    ```bash
+    terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" init
+    export cluster_prod_project=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -raw cluster_project)
+    export membership_prod_1=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -json cluster_names | jq -r '.[0]')
+    export region_prod_1=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -json cluster_regions | jq -r '.[0]')
+
+    export membership_prod_2=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -json cluster_names | jq -r '.[1]')
+    export region_prod_2=$(terraform -chdir="../terraform-google-enterprise-application/2-multitenant/envs/production" output -json cluster_regions | jq -r '.[1]')
+    ```
+
+- Get your cluster credentials for the first region:
+
+    ```bash
+     gcloud container hub memberships get-credentials ${membership_prod_1} --location ${region_prod_1} --project ${cluster_prod_project}
+     ```
+
+- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace="config-management-system" \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+
+- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace=config-management-system \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN \
+    --from-literal=https_proxy=HTTPS_PROXY_URL
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+  - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+
+- Get your cluster credentials for the second region:
+
+    ```bash
+     gcloud container hub memberships get-credentials ${membership_prod_2} --location ${region_prod_2} --project ${cluster_prod_project}
+     ```
+
+- (No HTTPS-Proxy) If you don't use an HTTPS proxy, create the `Secret` with the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace="config-management-system" \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+
+- (HTTPS-Proxy) If you need to use an HTTPS proxy, add it to the `Secret` together with username and token by running the following command:
+
+    ```bash
+    kubectl create ns config-management-system && \
+    kubectl create secret generic git-creds \
+    --namespace=config-management-system \
+    --from-literal=username=USERNAME \
+    --from-literal=token=TOKEN \
+    --from-literal=https_proxy=HTTPS_PROXY_URL
+    ```
+
+    Replace the following:
+
+  - `USERNAME`: the username that you want to use.
+  - `TOKEN`: the token that you created in the previous step.
+  - `HTTPS_PROXY_URL`: the URL for the HTTPS proxy that you use when communicating with the Git repository.
+
 
 > NOTE: Config Sync must be able to fetch your Git server, this means you might need to adjust your firewall rules to allow GKE pods to reach that server or create a Cloud NAT Router to allow accessing the Github/Gitlab or Bitbucket SaaS servers.
 
