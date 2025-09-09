@@ -106,7 +106,7 @@ To proceed with GitHub as your git provider you will need:
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 A previously created **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories connection repositories that will be created, in this example only a `hello-world` connection repo will be created:
   - Hello World Infrastructure Repository (`hello-world-i-r`)
-- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your installation id can be found in [https://github.com/settings/installations](https://github.com/settings/installations).
 - [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
 
 - Populate your `terraform.tfvars` file in `4-appfactory` with the Cloud Build 2nd Gen configuration variable, here is an example:
