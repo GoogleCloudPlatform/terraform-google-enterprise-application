@@ -140,7 +140,7 @@ func main() {
 		msg.PrintStageMsg("Destroying 5-appinfra stage")
 		err = s.RunDestroyStep("apps/default-example/hello-world", func() error {
 			io := stages.GetAppFactoryStepOutputs(t, conf.CheckoutPath)
-			return stages.DestroyAppInfraStage(t, s, io, conf)
+			return stages.DestroyAppInfraStage(t, s, globalTFVars, io, conf)
 		})
 		if err != nil {
 			fmt.Printf("# Example app step destroy failed. Error: %s\n", err.Error())
@@ -151,7 +151,7 @@ func main() {
 		msg.PrintStageMsg("Destroying 4-appfactory stage")
 		err = s.RunDestroyStep("gcp-appfactory", func() error {
 			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyAppFactoryStage(t, s, bo, conf)
+			return stages.DestroyAppFactoryStage(t, s, globalTFVars, bo, conf)
 		})
 		if err != nil {
 			fmt.Printf("# AppFactory step destroy failed. Error: %s\n", err.Error())
@@ -162,7 +162,7 @@ func main() {
 		msg.PrintStageMsg("Destroying 3-fleetscope stage")
 		err = s.RunDestroyStep("gcp-networks", func() error {
 			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyFleetscopeStage(t, s, bo, conf)
+			return stages.DestroyFleetscopeStage(t, s, globalTFVars, bo, conf)
 		})
 		if err != nil {
 			fmt.Printf("# Fleetscope step destroy failed. Error: %s\n", err.Error())
@@ -173,7 +173,7 @@ func main() {
 		msg.PrintStageMsg("Destroying 3-fleetscope stage")
 		err = s.RunDestroyStep("gcp-fleetscope", func() error {
 			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyFleetscopeStage(t, s, bo, conf)
+			return stages.DestroyFleetscopeStage(t, s, globalTFVars, bo, conf)
 		})
 		if err != nil {
 			fmt.Printf("# Fleetscope step destroy failed. Error: %s\n", err.Error())
@@ -182,19 +182,19 @@ func main() {
 
 		// 2-Multitenant
 		msg.PrintStageMsg("Destroying 2-Multitenant stage")
-		err = s.RunDestroyStep("gcp-Multitenant", func() error {
+		err = s.RunDestroyStep("gcp-multitenant", func() error {
 			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyMultitenantStage(t, s, bo, conf)
+			return stages.DestroyMultitenantStage(t, s, globalTFVars, bo, conf)
 		})
 		if err != nil {
 			fmt.Printf("# Multitenant step destroy failed. Error: %s\n", err.Error())
 			os.Exit(3)
 		}
 
-		// 0-bootstrap
-		msg.PrintStageMsg("Destroying 0-bootstrap stage")
+		// 1-bootstrap
+		msg.PrintStageMsg("Destroying 1-bootstrap stage")
 		err = s.RunDestroyStep("gcp-bootstrap", func() error {
-			return stages.DestroyBootstrapStage(t, s, conf)
+			return stages.DestroyBootstrapStage(t, s, globalTFVars, conf)
 		})
 		if err != nil {
 			fmt.Printf("# Bootstrap step destroy failed. Error: %s\n", err.Error())
@@ -212,9 +212,8 @@ func main() {
 
 	// deploy stages
 
-	// 0-bootstrap
-	msg.PrintStageMsg("Deploying 0-bootstrap stage")
-	skipInnerBuildMsg := s.IsStepComplete("gcp-bootstrap")
+	// 1-bootstrap
+	msg.PrintStageMsg("Deploying 1-bootstrap stage")
 	err = s.RunStep("gcp-bootstrap", func() error {
 		return stages.DeployBootstrapStage(t, s, globalTFVars, conf)
 	})
@@ -225,14 +224,9 @@ func main() {
 
 	bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
 
-	if skipInnerBuildMsg {
-		msg.PrintBuildMsg(bo.ProjectID, "us-central1", conf.DisablePrompt)
-	}
-	msg.PrintQuotaMsg(bo.CBServiceAccountsEmails["appfactory"], conf.DisablePrompt)
-
 	// 2-Multitenant
 	msg.PrintStageMsg("Deploying 2-Multitenant stage")
-	err = s.RunStep("gcp-Multitenant", func() error {
+	err = s.RunStep("gcp-multitenant", func() error {
 		return stages.DeployMultitenantStage(t, s, globalTFVars, bo, conf)
 	})
 	if err != nil {

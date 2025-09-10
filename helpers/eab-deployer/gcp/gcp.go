@@ -61,7 +61,9 @@ func (g GCP) GetBuilds(t testing.TB, projectID, region, filter string) map[strin
 
 // GetLastBuildStatus gets the status of the last build form a project and region that satisfy the given filter.
 func (g GCP) GetLastBuildStatus(t testing.TB, projectID, region, filter string) string {
-	return g.Runf(t, "builds list --project %s --region %s --limit 1 --sort-by ~createTime --filter %s", projectID, region, filter).Array()[0].Get("status").String()
+	cmd := fmt.Sprintf("builds list --project %s --region %s --limit 1 --sort-by ~createTime --filter %s", projectID, region, filter)
+	fmt.Printf("Running command %s", cmd)
+	return g.Runf(t, cmd).Array()[0].Get("status").String()
 }
 
 // GetBuildStatus gets the status of the given build
@@ -105,9 +107,9 @@ func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string,
 func (g GCP) WaitBuildSuccess(t testing.TB, project, region, repo, commitSha, failureMsg string, maxRetry int) error {
 	var filter string
 	if commitSha == "" {
-		filter = fmt.Sprintf("source.repoSource.repoName:%s", repo)
+		filter = fmt.Sprintf("substitutions.REPO_FULL_NAME:%s", repo)
 	} else {
-		filter = fmt.Sprintf("source.repoSource.commitSha:%s", commitSha)
+		filter = fmt.Sprintf("substitutions.COMMIT_SHA:%s", commitSha)
 	}
 	build := g.GetRunningBuildID(t, project, region, filter)
 	if build != "" {

@@ -32,7 +32,7 @@ const (
 	MaxBuildRetries = 40
 )
 
-func DestroyBootstrapStage(t testing.TB, s steps.Steps, c CommonConf) error {
+func DestroyBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 
 	if err := forceBackendMigration(t, BootstrapRepo, "envs", "shared", c); err != nil {
 		return err
@@ -45,7 +45,7 @@ func DestroyBootstrapStage(t testing.TB, s steps.Steps, c CommonConf) error {
 		GroupingUnits: []string{"envs"},
 		Envs:          []string{"shared"},
 	}
-	return destroyStage(t, stageConf, s, c)
+	return destroyStage(t, stageConf, s, tfvars, c)
 }
 
 // forceBackendMigration removes backend.tf file to force migration of the
@@ -86,60 +86,60 @@ func forceBackendMigration(t testing.TB, repo, groupUnit, env string, c CommonCo
 	return nil
 }
 
-func DestroyMultitenantStage(t testing.TB, s steps.Steps, outputs BootstrapOutputs, c CommonConf) error {
+func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:       MultitenantRepo,
+		Stage:       tfvars.CloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
 		CICDProject: outputs.ProjectID,
 		Step:        MultitenantStep,
-		Repo:        MultitenantRepo,
+		Repo:        tfvars.CloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryURL,
 		StageSA:     outputs.CBServiceAccountsEmails["multitenant"],
 		Envs:        []string{"production", "nonproduction", "development"},
 	}
 
-	return destroyStage(t, stageConf, s, c)
+	return destroyStage(t, stageConf, s, tfvars, c)
 }
 
-func DestroyFleetscopeStage(t testing.TB, s steps.Steps, outputs BootstrapOutputs, c CommonConf) error {
+func DestroyFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:       FleetscopeRepo,
+		Stage:       tfvars.CloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
 		CICDProject: outputs.ProjectID,
 		Step:        FleetscopeStep,
-		Repo:        FleetscopeRepo,
+		Repo:        tfvars.CloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryURL,
 		StageSA:     outputs.CBServiceAccountsEmails["fleetscope"],
 		Envs:        []string{"production", "nonproduction", "development"},
 	}
-	return destroyStage(t, stageConf, s, c)
+	return destroyStage(t, stageConf, s, tfvars, c)
 }
 
-func DestroyAppFactoryStage(t testing.TB, s steps.Steps, outputs BootstrapOutputs, c CommonConf) error {
+func DestroyAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:         AppFactoryRepo,
+		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName,
 		StageSA:       outputs.CBServiceAccountsEmails["appfactory"],
 		CICDProject:   outputs.ProjectID,
 		Step:          AppFactoryStep,
-		Repo:          AppFactoryRepo,
+		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryURL,
 		HasLocalStep:  true,
 		LocalSteps:    []string{"shared"},
 		GroupingUnits: []string{"envs"},
 	}
-	return destroyStage(t, stageConf, s, c)
+	return destroyStage(t, stageConf, s, tfvars, c)
 }
 
-func DestroyAppInfraStage(t testing.TB, s steps.Steps, outputs AppFactoryOutputs, c CommonConf) error {
+func DestroyAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs AppFactoryOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:         AppInfraRepo,
+		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryName,
 		StageSA:       outputs.AppGroup["default-example"].AppCloudbuildWorkspaceCloudbuildSAEmail,
 		CICDProject:   outputs.AppGroup["default-example"].AppAdminProjectID,
 		Step:          AppInfraStep,
-		Repo:          AppInfraRepo,
+		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL,
 		HasLocalStep:  false,
 		GroupingUnits: []string{"apps"},
 		Envs:          []string{"default-example"},
 	}
-	return destroyStage(t, stageConf, s, c)
+	return destroyStage(t, stageConf, s, tfvars, c)
 }
 
-func destroyStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error {
+func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 	gcpPath := filepath.Join(c.CheckoutPath, sc.Repo)
 	for _, e := range sc.Envs {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s", sc.Repo, e), func() error {
@@ -186,7 +186,7 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error
 				MaxRetries:               2,
 				TimeBetweenRetries:       2 * time.Minute,
 			}
-			conf := utils.CloneCSR(t, AppFactoryRepo, gcpPath, sc.CICDProject, c.Logger)
+			conf := utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryURL, gcpPath, sc.CICDProject, c.Logger)
 			err := conf.CheckoutBranch("production")
 			if err != nil {
 				return err

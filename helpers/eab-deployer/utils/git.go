@@ -16,7 +16,9 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
@@ -35,6 +37,28 @@ func CloneCSR(t testing.TB, name, path, project string, logger *logger.Logger) G
 	if os.IsNotExist(err) {
 		gcloud.Runf(t, "source repos clone %s %s --project %s", name, path, project)
 	}
+	return GitRepo{
+		conf: git.NewCmdConfig(t, git.WithDir(path), git.WithLogger(logger)),
+	}
+}
+
+// CloneGit clones a Github or Gitlab repository and returns a CmdConfig pointing to the repository.
+func CloneGit(t testing.TB, repositoryUrl, path string, logger *logger.Logger) GitRepo {
+	_, err := os.Stat(path)
+
+	if os.IsNotExist(err) {
+		cmd := exec.Command("git", "clone", repositoryUrl, path)
+		fmt.Printf("Executing command %s", cmd)
+		// Run the command and capture its standard output
+		output, err := cmd.Output()
+		if err != nil {
+			log.Fatalf("Error executing git command: %v", err)
+		}
+		// Convert the output to a string and trim whitespace
+		branchName := strings.TrimSpace(string(output))
+		fmt.Printf("Current Git branch: %s\n", branchName)
+	}
+
 	return GitRepo{
 		conf: git.NewCmdConfig(t, git.WithDir(path), git.WithLogger(logger)),
 	}

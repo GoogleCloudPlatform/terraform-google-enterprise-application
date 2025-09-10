@@ -30,10 +30,6 @@ import (
 const (
 	PoliciesRepo    = "gcp-policies"
 	BootstrapRepo   = "gcp-bootstrap"
-	MultitenantRepo = "gcp-multitenant"
-	FleetscopeRepo  = "gcp-fleetscope"
-	AppFactoryRepo  = "gcp-appfactory"
-	AppInfraRepo    = "gcp-appinfra"
 	AppSourceRepo   = "6-appsource"
 	BootstrapStep   = "1-bootstrap"
 	MultitenantStep = "2-multitenant"
@@ -283,7 +279,7 @@ type AppInfraTfvars struct {
 
 func GetBootstrapStepOutputs(t testing.TB, eabPath string) BootstrapOutputs {
 	options := &terraform.Options{
-		TerraformDir: filepath.Join(eabPath, "0-bootstrap"),
+		TerraformDir: filepath.Join(eabPath, "1-bootstrap"),
 		Logger:       logger.Discard,
 		NoColor:      true,
 	}

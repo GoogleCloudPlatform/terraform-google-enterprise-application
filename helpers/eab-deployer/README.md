@@ -10,7 +10,7 @@ Helper tool to deploy the Enterprise Application Blueprint using Cloud Build and
 - [Google Cloud SDK](https://cloud.google.com/sdk/install) version 393.0.0 or later
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) version 2.28.0 or later
 - [Terraform](https://www.terraform.io/downloads.html) version 1.5.7 or later
-- See `0-bootstrap` README for additional IAM [requirements](../../0-bootstrap/README.md#prerequisites) on the user deploying the Foundation.
+- See `1-bootstrap` README for additional IAM [requirements](../../1-bootstrap/README.md#prerequisites) on the user deploying the Foundation.
 - To enable Security Command Center, choose a Security Command Center tier and create and grant permissions for the Security Command Center service account as described in [Setting up Security Command Center](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
 
 Your environment need to use the same [Terraform](https://www.terraform.io/downloads.html) version used on the build pipeline.
@@ -18,12 +18,12 @@ Otherwise, you might experience Terraform state snapshot lock errors.
 
 Version 1.5.7 is the last version before the license model change. To use a later version of Terraform, ensure that the Terraform version used in the Operational System to manually execute part of the steps in `3-networks` and `4-projects` is the same version configured in the following code
 
-- 0-bootstrap/modules/jenkins-agent/variables.tf
+- 1-bootstrap/modules/jenkins-agent/variables.tf
    ```
    default     = "1.5.7"
    ```
 
-- 0-bootstrap/cb.tf
+- 1-bootstrap/cb.tf
    ```
    terraform_version = "1.5.7"
    ```
@@ -44,7 +44,7 @@ Version 1.5.7 is the last version before the license model change. To use a late
    terraform_version: "1.5.7"
    ```
 
-- 0-bootstrap/Dockerfile
+- 1-bootstrap/Dockerfile
    ```
    ARG TERRAFORM_VERSION=1.5.7
    ```
@@ -90,11 +90,11 @@ Version 1.5.7 is the last version before the license model change. To use a late
     ```
 
 - Update `global.tfvars` with values from your environment.
-- The `0-bootstrap` README [prerequisites](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
+- The `1-bootstrap` README [prerequisites](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
 - Variable `code_checkout_path` is the full path to `deploy-directory` directory.
 - Variable `foundation_code_path` is the full path to `terraform-example-foundation` directory.
 - See the READMEs for the stages for additional information:
-  - [0-bootstrap](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md)
+  - [1-bootstrap](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-bootstrap/README.md)
   - [1-org](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-org/README.md)
   - [2-environments](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/2-environments/README.md)
   - [3-networks-svpc](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-svpc)
