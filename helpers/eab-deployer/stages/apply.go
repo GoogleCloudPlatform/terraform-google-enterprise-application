@@ -228,17 +228,17 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 
 	conf := utils.GitRepo{}
 	if tfvars.CloudbuildV2RepositoryConfig.RepoType != "CSR" {
-		conf = utils.CloneGit(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName), c.Logger)
+		conf = utils.CloneGit(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName), c.Logger)
 	} else {
-		conf = utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName), outputs.ProjectID, c.Logger)
+		conf = utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName), outputs.ProjectID, c.Logger)
 	}
 
 	stageConf := StageConf{
-		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName,
-		StageSA:       outputs.CBServiceAccountsEmails["appfactory"],
+		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName,
+		StageSA:       outputs.CBServiceAccountsEmails["applicationfactory"],
 		CICDProject:   outputs.ProjectID,
 		Step:          AppFactoryStep,
-		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName,
+		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName,
 		GitConf:       conf,
 		HasLocalStep:  true,
 		LocalSteps:    []string{"shared"},
@@ -269,9 +269,9 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 
 	conf := utils.GitRepo{}
 	if tfvars.CloudbuildV2RepositoryConfig.RepoType != "CSR" {
-		conf = utils.CloneGit(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName), c.Logger)
+		conf = utils.CloneGit(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName), c.Logger)
 	} else {
-		conf = utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName), outputs.AppGroup["default-example"].AppAdminProjectID, c.Logger)
+		conf = utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName), outputs.AppGroup["default-example"].AppAdminProjectID, c.Logger)
 	}
 	stageConf := StageConf{
 		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryName,
@@ -496,6 +496,7 @@ func applyLocal(t testing.TB, options *terraform.Options, serviceAccount, policy
 	var err error
 
 	if serviceAccount != "" {
+		t.Logf("Setting GOOGLE_IMPERSONATE_SERVICE_ACCOUNT as %s", serviceAccount)
 		err = os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
 		if err != nil {
 			return err

@@ -113,11 +113,11 @@ func DestroyFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 
 func DestroyAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryName,
+		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName,
 		StageSA:       outputs.CBServiceAccountsEmails["appfactory"],
 		CICDProject:   outputs.ProjectID,
 		Step:          AppFactoryStep,
-		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryURL,
+		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL,
 		HasLocalStep:  true,
 		LocalSteps:    []string{"shared"},
 		GroupingUnits: []string{"envs"},
@@ -186,7 +186,7 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 				MaxRetries:               2,
 				TimeBetweenRetries:       2 * time.Minute,
 			}
-			conf := utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["appfactory"].RepositoryURL, gcpPath, sc.CICDProject, c.Logger)
+			conf := utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, gcpPath, sc.CICDProject, c.Logger)
 			err := conf.CheckoutBranch("production")
 			if err != nil {
 				return err

@@ -236,7 +236,7 @@ func main() {
 
 	// 3-fleetscope
 	msg.PrintStageMsg("Deploying 3-fleetscope stage")
-	err = s.RunStep("gcp-environments", func() error {
+	err = s.RunStep("gcp-fleetscope", func() error {
 		return stages.DeployFleetscopeStage(t, s, globalTFVars, bo, conf)
 	})
 	if err != nil {
@@ -246,9 +246,9 @@ func main() {
 
 	// 4-appfactory
 	msg.PrintStageMsg("Deploying 4-appfactory stage")
-	msg.ConfirmQuota(bo.CBServiceAccountsEmails["appfactory"], conf.DisablePrompt)
+	msg.ConfirmQuota(bo.CBServiceAccountsEmails["applicationfactory"], conf.DisablePrompt)
 
-	err = s.RunStep("gcp-projects", func() error {
+	err = s.RunStep("gcp-appfactory", func() error {
 		return stages.DeployAppFactoryStage(t, s, globalTFVars, bo, conf)
 	})
 	if err != nil {
