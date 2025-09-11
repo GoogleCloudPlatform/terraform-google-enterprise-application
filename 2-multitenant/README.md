@@ -346,7 +346,8 @@ dedicated IP address to be provisioned. For the default hello world example, use
 [README.md](./envs/production/README.md#inputs) files for additional information
 on the values in the `terraform.tfvars` file. In addition to `envs` from
 prerequisites, each App must have it's own entry under `apps` with a list of any
-dedicated IP address to be provisioned.
+dedicated IP address to be provisioned. The ip_address_names need to be the same
+as the examples on  `terraform.tfvars` file.
 
   ```terraform
   apps = {
