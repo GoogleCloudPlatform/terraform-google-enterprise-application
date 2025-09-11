@@ -1,35 +1,96 @@
 # 4. Application Factory phase
 
+This phase automates the setup of infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud. It creates projects, configures repositories, and sets up Cloud Build triggers for automated builds, testing, and deployments. It supports Cloud Source Repositories (CSR) and 2nd generation Cloud Build repositories through repository connections.
+
+<table>
+<tbody>
+<tr>
+<td><a href="../1-bootstrap">1-bootstrap</a></td>
+<td>Bootstraps streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP)</td>
+</tr>
+<tr>
+<td><a href="../2-multitenant">2-multitenant</a></td>
+<td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
+</tr>
+<tr>
+<td><a href="../3-fleetscope"><span style="white-space: nowrap;">3-fleetscope</span></a></td>
+<td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
+</tr>
+<tr>
+<td>4-appfactory (this file)</td>
+<td>Sets up infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud</td>
+</tr>
+<tr>
+<td><a href="../5-appinfra">5-appinfra</a></td>
+<td>Set up application infrastructure pipeline aims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+</tr>
+<tr>
+<td><a href="../6-appsource">6-appsource</a></td>
+<td>Deploys a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold.</td>
+</tr>
+</tbody>
+</table>
+
 ## Purpose
 
-The application factory creates application project groups, which contain resources responsible for deployment of a single application within the developer platform.
+This phase streamlines the process of onboarding applications to a Google Cloud environment by automating project creation, repository setup, and CI/CD pipeline configuration. This reduces manual effort, enforces consistent configurations, and accelerates application delivery.
 
 An overview of the application factory pipeline is shown below.
+
 ![Enterprise Application application factory diagram](../assets/eab-app-factory.svg)
 
 The application factory creates the following resources as defined in the [`app-group-baseline`](./modules/app-group-baseline/) submodule:
 
-* **Application admin project:** A project dedicated for application administration and management.
-* **Application environment projects:** A project for the application for each environment (e.g., development, nonproduction, production).
-* **Infrastructure repository:** A Git repository containing the Terraform configuration for the application infrastructure.
-* **Application infrastucture pipeline:** A Cloud Build pipeline for deploying the application infrastructure specified as Terraform.
+- __Application Admin Project (Optional):__ A new Google Cloud project to host the application's CI/CD pipelines and related resources. This project is created if `create_admin_project` is set to `true`.
+- __Application Infrastructure Projects (Optional):__ Environment-specific Google Cloud projects to host the application's infrastructure resources (e.g., GKE clusters, databases). These projects are created if `create_infra_project` is set to `true`.
+- __Cloud Source Repository or 2nd Gen Cloud Build Repository:__ Creates a repository for the application's infrastructure code. It defaults to Cloud Source Repository if `cloudbuildv2_repository_config` is not provided, otherwise it uses the specified 2nd Gen Cloud Build repository connection.
+- __Cloud Build Triggers:__ Configures Cloud Build triggers to automatically run Terraform plan and apply jobs on code changes in the infrastructure repository.
+- __Cloud Build Service Account:__ Creates or uses a Cloud Build service account with the necessary IAM roles to manage infrastructure resources.
+- __Cloud Storage Buckets:__ Creates Cloud Storage buckets for storing Cloud Build artifacts, logs, and Terraform state.
+- __VPC Service Controls (Optional):__ Configures VPC-SC perimeter and access levels, if `service_perimeter_name` is set.
 
 It will also create an Application Folder to group your admin projects under it, for example:
 
 ```txt
 .
-└── fldr-common/
-    ├── default-example/
-    │   ├── hello-world-admin
-    │   └── ...
-    ├── cymbal-bank/
-    │   ├── accounts-userservice-admin
-    │   ├── accounts-contacts-admin
-    │   ├── ledger-ledger-writer-admin
-    │   └── ...
+└── fldr-seed/
+  ├── fldr-common/
+  │   |── default-example/
+  │       ├── hello-world-admin
+  │       └── ...
+  │   |── cymbal-bank/
+  │       ├── accounts-userservice-admin
+  │       ├── accounts-contacts-admin
+  │       ├── ledger-ledger-writer-admin
+  │       └── ...
+  ├── fldr-development/
+  │   ├── prj-vpc-dev
+  │   ├── prj-gke-dev
+  │   ├── prj-accounts-userservice
+  │   ├── prj-ledger-ledgerwriter
+  │   └── ...
+  ├── fldr-nonproduction/
+  │   ├── prj-vpc-nonprod
+  │   ├── prj-gke-dev
+  │   ├── prj-accounts-userservice
+  │   ├── prj-ledger-ledgerwriter
+  │   └── ...
+  ├── fldr-prod/
+  │   ├── prj-vpc-prod
+  │   ├── prj-gke-dev
+  │   ├── prj-accounts-userservice
+  │   ├── prj-ledger-ledgerwriter
+  │   └── ...
+  ├── prj-seed
 ```
 
 ## Usage
+
+### Important Considerations:
+
+- __cloudbuildv2_repository_config:__ If using GitHub or GitLab integration, ensure that the appropriate secrets are configured in Secret Manager and that the service account has access to those secrets. Follow the validation rules specified in the variable description. If you omit this variable, ensure that Cloud Source Repositories API is enabled.
+- __Network Configuration:__ Ensure that the network project and subnets specified in the envs variable are correctly configured and that the Cloud Build service account has access to them.
+- __VPC-SC:__ If using VPC Service Controls, ensure that the `service_perimeter_name` and access_level_name variables are correctly configured. The module will attempt to add the GKE service account to the specified access level. Properly configure ingress and egress rules.
 
 ### Git Provider
 
@@ -43,9 +104,9 @@ You have 3 Git provider options for this step: Cloud Source Repositories (CSR), 
 To proceed with GitHub as your git provider you will need:
 
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
-- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories infrastucture repositories that will be created, in this example only a `hello-world` infrastucture repo will be created:
+A previously created **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories connection repositories that will be created, in this example only a `hello-world` connection repo will be created:
   - Hello World Infrastructure Repository (`hello-world-i-r`)
-- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later.
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your installation id can be found in [https://github.com/settings/installations](https://github.com/settings/installations).
 - [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
 
 - Populate your `terraform.tfvars` file in `4-appfactory` with the Cloud Build 2nd Gen configuration variable, here is an example:
@@ -59,8 +120,8 @@ To proceed with GitHub as your git provider you will need:
    +         repository_url  = "https://github.com/<owner or organization>/hello-world-i-r.git"
         }
       }
-   +  github_secret_id = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat"
-   +  github_app_id_secret_id = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id"
+   +  github_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/github-pat"
+   +  github_app_id_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/github-app-id"
    }
    ```
 
@@ -77,7 +138,7 @@ To proceed with GitHub as your git provider you will need:
 To proceed with Gitlab as your git provider you will need:
 
 - An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
-- A **private** GitLab repository for each one of the repositories infrastucture repositories that will be created, in this example only a `hello-world` infrastucture repo will be created:
+A previously created **private** GitLab repository for each one of the repositories connection repositories that will be created, in this example only a `hello-world` repository connection will be created:
   - Hello World Infrastructure Repository (`hello-world-i-r`)
 
 - An access token with the `api` scope to use for connecting and disconnecting repositories.
@@ -95,9 +156,9 @@ To proceed with Gitlab as your git provider you will need:
    +         repository_url  = "https://gitlab.com/<account or group>/hello-world-i-r.git"
         }
       }
-   +  gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-api-token"
-   +  gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-read-api-token"
-   +  gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-webhook"
+   +  gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/gitlab-api-token"
+   +  gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/gitlab-read-api-token"
+   +  gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/gitlab-webhook"
    }
    ```
 

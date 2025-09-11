@@ -1,32 +1,388 @@
 # 1. Bootstrap phase
 
+This Terraform phase sets up initial resources and IAM bindings required for deploying multi-tenant applications and managing Cloud Build workspaces. It configures service accounts, grants necessary permissions, and creates storage buckets for Terraform state and Cloud Build artifacts. It also sets up a custom Terraform image in Artifact Registry.
+
 The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
 
 - the Multitenant Infrastructure pipeline
 - the Application Factory
 - the Fleet-Scope pipeline
 
+<table>
+<tbody>
+<tr>
+<td>1-bootstrap (this file)</td>
+<td>Bootstraps streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP)</td>
+</tr>
+<tr>
+<td><a href="../2-multitenant">2-multitenant</a></td>
+<td>Deploys GKE clusters optimized for multi-tenancy within an enterprise environment.</td>
+</tr>
+<tr>
+<td><a href="../3-fleetscope">3-fleetscope</a></td>g
+<td>Set-ups Google Cloud Fleet, enabling centralized management of multiple Kubernetes clusters.</td>
+</tr>
+<tr>
+<td><a href="../4-appfactory">4-appfactory</a></td>
+<td>Sets up infrastructure and CI/CD pipelines for a single application or microservice on Google Cloud</td>
+</tr>
+<tr>
+<td><a href="../5-appinfra">5-appinfra</a></td>
+<td>Set up application infrastructure pipeline aims to establish a streamlined CI/CD workflow for applications, enabling automated deployments to multiple environments (GKE clusters).</td>
+</tr>
+<tr>
+<td><a href="../6-appsource">6-appsource</a></td>
+<td>Deploys a modified version of a [simple example](https://github.com/GoogleContainerTools/skaffold/tree/main/examples/getting-started) for skaffold.</td>
+</tr>
+</tbody>
+</table>
+
+## Purpose
+
+The bootstrap phase streamlines the bootstrapping process for Enterprise Applications on Google Cloud Platform (GCP). It automates the creation of essential infrastructure components, including:
+
+- __Service Accounts:__ Creates service accounts for Cloud Build to execute Terraform deployments.
+- __IAM Bindings:__ Grants IAM roles to service accounts, enabling them to create projects, manage resources, and access Artifact Registry.
+Google Cloud Source Repositories (CSR): Creates source repositories for storing code and configurations.
+- __Cloud Build Triggers:__ Configures Cloud Build triggers to automatically start builds on code changes in the infrastructure repositories.
+- __Cloud Storage Buckets:__ Creates Cloud Storage buckets for storing Terraform state, build artifacts, and logs.
+- __Artifact Registry Repository:__ Creates an Artifact Registry repository to store the custom Terraform image.
+- __Custom Terraform Image:__ Builds a custom Terraform image using Cloud Build and stores it in the Artifact Registry repository.
+
 An overview of the deployment methodology for the Enterprise Application blueprint is shown below.
+
 ![Enterprise Application blueprint deployment diagram](../assets/eab-deployment.svg)
 
-Each pipeline has the following associated resources:
+The folloging organization is expected by this phase:
 
-- 2 Cloud Build triggers
-  - 1 trigger to run Terraform Plan commands upon changes to a non-main git branch
-  - 1 trigger to run Terraform Apply commands upon changes to the main git branch
-- 3 Cloud Storage buckets
-  - Terraform State bucket, to store the current state
-  - Build Artifacts bucket, to store any artifacts generated during the build process, such as `.tfplan` files
-  - Build Logs bucket, to store the logs from the build process
-- 1 service account for executing the Cloud Build build process
+```txt
+.
+└── fldr-seed/
+    ├── fldr-common/
+    │   ├── ...
+    ├── fldr-development/
+    │   ├── prj-vpc-dev
+    │   └── ...
+    ├── fldr-nonproduction/
+    │   ├── prj-vpc-nonprod
+    │   └── ...
+    ├── fldr-prod/
+    │   ├── prj-vpc-prod
+    │   └── ...
+    ├── prj-seed
+```
+
+### Features
+
+__Automated Infrastructure Provisioning:__ Easily deploy a standardized and secure foundation for your enterprise applications.
+
+__Cloud Build Integration:__ Automates Terraform plan and apply operations via Cloud Build triggers, enabling CI/CD workflows.
+
+__Service Account Management:__ Creates and configures service accounts with the appropriate IAM roles for secure access to GCP resources.
+
+__Artifact Registry:__ Provides a private Docker registry for storing custom Terraform images, ensuring consistent execution environments.
+
+__Cloud Storage Buckets:__ Sets up dedicated Cloud Storage buckets for storing Terraform state files, execution plans, and logs, enhancing security and traceability.
+
+__VPC Service Controls (VPC-SC) Support:__ Integrates with VPC-SC by allowing you to specify an access level and service perimeter for enhanced security (optional).
+
+__Customizable Environments:__ Supports multiple environments (e.g., development, non-production, production) with configurable settings for billing accounts, folders, and networks.
+
+__Cloud Build v2 Repository Integration:__ Integrates with Cloud Build v2 for repository management, supporting GitHub, GitLab, and Cloud Source Repositories (CSR).
+
 
 ## Usage
 
-### Pre-requisites
+This section outlines the prerequisites and steps required to successfully deploy the module.
 
-#### Secrets Project
+### Prerequisites
 
-You will need a Google Cloud project with [Secret Manager](https://cloud.google.com/security/products/secret-manager) to store your git credentials, throughout the documentation this will be referenced as `$GIT_SECRET_PROJECT`.
+Before deploying the module, ensure the following prerequisites are met:
+
+#### Seed Project
+
+The seed project is the GCP project where the initial infrastructure resources will be created.
+
+- __Billing Account:__ The seed project must have a billing account linked.
+
+- __APIs Enabled:__ The following Google Cloud APIs must be enabled in the seed project. You can enable them using the gcloud command provided below.
+
+   - `accesscontextmanager.googleapis.com`
+   - `artifactregistry.googleapis.com`
+   - `anthos.googleapis.com`
+   - `anthosconfigmanagement.googleapis.com`
+   - `apikeys.googleapis.com`
+   - `binaryauthorization.googleapis.com`
+   - `certificatemanager.googleapis.com`
+   - `cloudbilling.googleapis.com`
+   - `cloudbuild.googleapis.com`
+   - `clouddeploy.googleapis.com`
+   - `cloudfunctions.googleapis.com`
+   - `cloudkms.googleapis.com`
+   - `cloudresourcemanager.googleapis.com`
+   - `cloudtrace.googleapis.com`
+   - `compute.googleapis.com`
+   - `container.googleapis.com`
+   - `containeranalysis.googleapis.com`
+   - `containerscanning.googleapis.com`
+   - `gkehub.googleapis.com`
+   - `iam.googleapis.com`
+   - `iap.googleapis.com`
+   - `mesh.googleapis.com`
+   - `monitoring.googleapis.com`
+   - `multiclusteringress.googleapis.com`
+   - `multiclusterservicediscovery.googleapis.com`
+   - `networkmanagement.googleapis.com`
+   - `orgpolicy.googleapis.com`
+   - `secretmanager.googleapis.com`
+   - `servicedirectory.googleapis.com`
+   - `servicemanagement.googleapis.com`
+   - `servicenetworking.googleapis.com`
+   - `serviceusage.googleapis.com`
+   - `sqladmin.googleapis.com`
+   - `storage.googleapis.com`
+   - `trafficdirector.googleapis.com`
+
+   To enable these APIs, execute the following command, replacing `YOUR_PROJECT_ID` with your actual project ID:
+
+   ```bash
+   gcloud services enable \
+   accesscontextmanager.googleapis.com \
+   artifactregistry.googleapis.com \
+   anthos.googleapis.com \
+   anthosconfigmanagement.googleapis.com \
+   apikeys.googleapis.com \
+   binaryauthorization.googleapis.com \
+   certificatemanager.googleapis.com \
+   cloudbilling.googleapis.com \
+   cloudbuild.googleapis.com \
+   clouddeploy.googleapis.com \
+   cloudfunctions.googleapis.com \
+   cloudkms.googleapis.com \
+   cloudresourcemanager.googleapis.com \
+   cloudtrace.googleapis.com \
+   compute.googleapis.com \
+   container.googleapis.com \
+   containeranalysis.googleapis.com \
+   containerscanning.googleapis.com \
+   gkehub.googleapis.com \
+   iam.googleapis.com \
+   iap.googleapis.com \
+   mesh.googleapis.com \
+   monitoring.googleapis.com \
+   multiclusteringress.googleapis.com \
+   multiclusterservicediscovery.googleapis.com \
+   networkmanagement.googleapis.com \
+   orgpolicy.googleapis.com \
+   secretmanager.googleapis.com \
+   servicedirectory.googleapis.com \
+   servicemanagement.googleapis.com \
+   servicenetworking.googleapis.com \
+   serviceusage.googleapis.com \
+   sqladmin.googleapis.com \
+   storage.googleapis.com \
+   trafficdirector.googleapis.com \
+   --project=YOUR_PROJECT_ID
+   ```
+
+- __IAM Roles:__ The identity deploying the module requires the following IAM roles on the seed project:
+
+   - Cloud Build Connection Admin: `roles/cloudbuild.connectionAdmin`
+   - Compute Network Admin: `roles/compute.networkAdmin`
+   - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+
+   ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
+   gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/cloudbuild.connectionAdmin"
+
+   gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/compute.networkAdmin"
+
+   gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/resourcemanager.projectIamAdmin"
+   ```
+
+### Secrets Project
+
+A separate Google Cloud project is required to store Git credentials securely using Secret Manager. This project will be referenced as $GIT_SECRET_PROJECT throughout the documentation.
+
+- __IAM Roles:__ The identity deploying the module requires the following IAM role on the secrets project:
+
+   - Secret Manager Admin: `roles/secretmanager.admin`
+
+   ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
+   gcloud projects add-iam-policy-binding YOUR_SECRET_PROJECT_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/secretmanager.admin"
+   ```
+
+- __API Enabled:__ The following API must be enabled in the secrets project:
+
+   - `secretmanager.googleapis.com`
+
+   To enable the API, execute the following command, replacing `YOUR_SECRET_PROJECT_ID` with your actual project ID:
+
+   ```bash
+   gcloud services enable \
+   secretmanager.googleapis.com \
+   --project=YOUR_SECRET_PROJECT_ID
+   ```
+
+### KMS Project
+
+A separate Google Cloud project is required to store the KMS key by this solution.
+
+- __IAM Roles:__ The identity deploying the module requires the following IAM role on the KMS project:
+
+   - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+
+   ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
+   gcloud projects add-iam-policy-binding YOUR_KMS_PROJECT_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/resourcemanager.projectIamAdmin"
+   ```
+
+- __API Enabled:__ The following API must be enabled in the Seed and KMS projects:
+
+   - `cloudkms.googleapis.com`
+
+   To enable the API, execute the following command, replacing `YOUR_KMS_PROJECT_ID` with your actual project ID:
+
+   ```bash
+   gcloud services enable \
+   cloudkms.googleapis.com \
+   --project=YOUR_KMS_PROJECT_ID
+   ```
+
+####  KMS Key for Bucket Encryption
+
+A KMS key will be used to encrypt the contents of the created Cloud Storage buckets. This key should reside in the KMS Project.
+
+####  KMS Key for Binary Authorization Attestation
+
+A KMS key will be used to sign images during building time. This key should reside in the KMS Project.
+
+### Logging Bucket
+
+You can optionally specify an existing Cloud Storage bucket to store logs from:
+
+- Build logs
+- Terraform state bucket
+
+The bucket will use the KMS Key provided to encrypt the content. In this case, the code will grant the Storage Service Agent:
+
+   - Cloud KMS CryptoKey Encrypter: `roles/cloudkms.cryptoKeyEncrypter`
+   - Cloud KMS CryptoKey Decrypter: `roles/cloudkms.cryptoKeyDecrypter`
+
+If a Key is not provided, a new one will be created at the same project to encrypt the content.
+
+### VPC Service Controls (VPC-SC)
+
+This module supports deployment within a VPC-SC perimeter.
+
+__Important:__ The Cloud Build project (seed project) __cannot__ be within the perimeter. This is because the module creates new projects, and errors will occur when accessing services (e.g., enabling APIs) before the new project is added to the perimeter.
+
+This module does not create the Service Perimeter or Access Level. However, it can add projects to the Service Perimeter, create directional rules, and add identities to the Access Level.
+
+To enable VPC-SC integration, you must provide the following:
+
+- An existing Access Level name. Since the module will be addind access level conditions, your access level need to be configured with 'OR' as the combining function.
+- An existing Service Perimeter name.
+- The deployment mode (`DRY_RUN` or `ENFORCED`).
+
+The identity deploying the module must be a member of the specified Access Level.
+
+- __IAM Roles:__ The identity deploying the module requires the following IAM role at the organization level:
+
+   - __Access Context Manager Admin:__ `roles/accesscontextmanager.policyAdmin`
+
+   ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
+   gcloud organizations add-iam-policy-binding YOUR_ORGANIZATION_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/accesscontextmanager.policyAdmin"
+   ```
+
+### Private Worker Pool Requirements
+
+A private worker pool is required to run within a VPC-SC perimeter.
+
+A sample Worker Pool configuration without external IP, peered network, and NAT is provided in the `test/setup/modules/private_workerpool/` folder. This sample includes a project, a Private Worker Pool in its own project, a peered VPC with a NAT VM that allows internet egress for external dependencies, and the necessary firewall rules and configurations.
+
+The same pool can be used across multiple steps. Reserving a wider IP range allows for more concurrent builds. A /24 range supports 254 hosts.
+
+- __IAM Roles:__ The identity deploying the module must have the following IAM roles on the Private Worker Pool project:
+
+   - __Cloud Build WorkerPool User:__ `roles/cloudbuild.workerPoolUser`
+   - __Project IAM Admin:__ `roles/resourcemanager.projectIamAdmin`
+
+   ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
+   gcloud projects add-iam-policy-binding YOUR_WORKER_POOL_PROJECT_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/cloudbuild.workerPoolUser"
+
+   gcloud projects add-iam-policy-binding YOUR_WORKER_POOL_PROJECT_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/resourcemanager.projectIamAdmin"
+   ```
+
+
+### Environments Infrastructure
+
+The following infrastructure is required for the different environments:
+
+#### Folders
+
+You need to pre-create the following folders:
+
+- A common folder.
+- A folder per environment (e.g., development, nonproduction, production).
+- __IAM Roles:__ The identity deploying the module requires the following IAM roles on the folders:
+   - Folder Admin: `roles/resourcemanager.folderAdmin`
+   - Project Creator: `roles/resourcemanager.projectCreator`
+   - Compute Network Admin: `roles/compute.networkAdmin`
+   - Compute Shared VPC Admin: `roles/compute.xpnAdmin`
+
+   ```bash
+   export SERVICE_ACCOUNT_EMAIL="YOUR_SERVICE_ACCOUNT_EMAIL"
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:${"serviceAccount:${SERVICE_ACCOUNT_EMAIL}"}" \
+   --role="roles/resourcemanager.folderAdmin"
+
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/resourcemanager.projectCreator"
+
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/compute.networkAdmin"
+
+   gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/compute.xpnAdmin"
+   ```
+
+### Shared Network
+
+You need a Shared VPC per environment already created.
+
+The networks must meet the following requirements:
+
+- Two subnets in different regions.
+- Each subnet must have two secondary ranges with at least /18 range.
+- A Cloud Nat configured to reach extenal repositories.
+- Google Private access enabled.
+
+Access [Best practices for GKE networking](https://cloud.google.com/kubernetes-engine/docs/best-practices/networking) for more information.
+
+For a network configuration example, check the [Foundation Shared VPC](https://github.com/terraform-google-modules/terraform-example-foundation/tree/main/3-networks-svpc/modules/shared_vpc) step.
 
 #### Cloud Build with Github Pre-requisites
 
@@ -40,8 +396,10 @@ To proceed with GitHub as your git provider you will need:
 
    > Note: Default names for the repositories are, in sequence: `eab-multitenant`, `eab-fleetscope` and `eab-applicationfactory`; If you choose other names for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
-- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later.
-- [Create Personal Access Token on Github with `repo` and `read:user` (or if app is installed in org use `read:org`)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
+- [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+   - Grant `repo` and `read:user` (or if app is installed in org use `read:org`)
+   - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
 - Create a secret for the Github Cloud Build App ID:
 
    ```bash
@@ -91,8 +449,9 @@ To proceed with GitHub as your git provider you will need:
          }
       }
 
-      github_secret_id                            = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-pat" # Personal Access Token Secret
-      github_app_id_secret_id                     = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/github-app-id" # App ID value secret
+      github_secret_id                            = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_PAT_SECRET_NAME" # Personal Access Token Secret
+      github_app_id_secret_id                     = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_APP_ID_SECRET_NAME" # App ID value secret
+      secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
    }
    ```
 
@@ -176,56 +535,34 @@ To proceed with Gitlab as your git provider you will need:
          }
       }
 
-      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-api-token"
-      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-read-api-token"
-      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_PRJ_NUMBER/secrets/gitlab-webhook"
+      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
+      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
+      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
+
+      secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+
+      # If you are using a self-hosted instance, you may change the URL below accordingly
+      gitlab_enterprise_host_uri = "https://gitlab.com"
+
+      gitlab_enterprise_service_directory = "projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE"
+
+      # .pem string
+      gitlab_enterprise_ca_certificate = <<EOF
+      REPLACE_WITH_SSL_CERT
+      EOF
    }
    ```
 
-### Worker Pool Requirements
-
-A worker pool must be defined to run within a VPC-SC Perimeter. You can find an example Worker Pool without external IP that peers a Gitlab Instance Internal IP on `test/setup` directory.
-
-```terraform
-resource "google_cloudbuild_worker_pool" "pool" {
-  name     = "cb-pool"
-  project  = module.gitlab_project.project_id
-  location = "us-central1"
-  worker_config {
-    disk_size_gb   = 100
-    machine_type   = "e2-standard-4"
-    no_external_ip = true
-  }
-  network_config {
-    peered_network          = local.gitlab_network_id_without_location
-    peered_network_ip_range = "/24"
-  }
-
-  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
-}
-```
-
-The code above creates the Worker Pool. The peered VPC is a VPC that contains a Git Instance and a NAT VM. You can also find the necessary firewall rules, peerings and configurations to make the Private Worker Pool work. See [gitlab_vm.tf](../test/setup/gitlab_vm.tf) file and [nat_proxy_vm.tf](../test/setup/nat_proxy_vm.tf) file for more information. The same pool can be utilized in multiple steps. Reserving a wider IP range allows more concurrent builds. A /24 range allows 254 hosts.
 
 ### Deploying with Cloud Build
 
 #### Deploying on Enterprise Foundation blueprint
+TODO: add step by step instructions
 
-If you have previously deployed the Enterprise Foundation blueprint, create the pipelines in this phase by pushing the contents of this folder to a [workload repo created at stage 5](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/5-app-infra/README.md). Instead of deploying to multiple environments, create these pipelines in the common folder of the foundation.
+If you have previously deployed the Enterprise Foundation blueprint, copy this folder to the [4-appinfra/modules](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0/4-projects/modules) folder. Then add a new file on in [4-projects/business_unit_1/shared](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0/4-projects/business_unit_1/shared) calling this module. Make sure to retrieve all the needed variables from remote when necessary.
 
-Start at "5. Clone the `bu1-example-app` repo". Replace the contents of that repo with the contents of this folder.
 
 ### Running Terraform locally
-
-#### Requirements
-
-You will need a project to host your resources, you can manually create it:
-
-```txt
-example-organization
-└── fldr-common
-    └── prj-c-eab-bootstrap
-```
 
 #### Step-by-Step
 
