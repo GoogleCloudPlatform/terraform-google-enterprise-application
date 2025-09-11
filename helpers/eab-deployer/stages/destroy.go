@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	MaxBuildRetries = 40
+	MaxBuildRetries = 60
 )
 
 func DestroyBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
@@ -93,7 +93,7 @@ func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, o
 		Step:        MultitenantStep,
 		Repo:        tfvars.CloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryURL,
 		StageSA:     outputs.CBServiceAccountsEmails["multitenant"],
-		Envs:        []string{"production", "nonproduction", "development"},
+		Envs:        tfvars.EnvsToBeDeployed,
 	}
 
 	return destroyStage(t, stageConf, s, tfvars, c)
@@ -106,7 +106,7 @@ func DestroyFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 		Step:        FleetscopeStep,
 		Repo:        tfvars.CloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryURL,
 		StageSA:     outputs.CBServiceAccountsEmails["fleetscope"],
-		Envs:        []string{"production", "nonproduction", "development"},
+		Envs:        tfvars.EnvsToBeDeployed,
 	}
 	return destroyStage(t, stageConf, s, tfvars, c)
 }

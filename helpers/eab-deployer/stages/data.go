@@ -30,7 +30,6 @@ import (
 const (
 	PoliciesRepo    = "gcp-policies"
 	BootstrapRepo   = "gcp-bootstrap"
-	AppSourceRepo   = "6-appsource"
 	BootstrapStep   = "1-bootstrap"
 	MultitenantStep = "2-multitenant"
 	FleetscopeStep  = "3-fleetscope"
@@ -113,6 +112,7 @@ type GcpGroups struct {
 // GlobalTFVars contains all the configuration for the deploy
 type GlobalTFVars struct {
 	ProjectID                    string                                   `hcl:"project_id"`
+	EnvsToBeDeployed             []string                                 `hcl:"envs_to_be_deployed"`
 	BucketPrefix                 string                                   `hcl:"bucket_prefix"`
 	BucketForceDestroy           bool                                     `hcl:"bucket_force_destroy"`
 	Location                     string                                   `hcl:"location"`

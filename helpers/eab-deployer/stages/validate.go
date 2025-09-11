@@ -31,7 +31,7 @@ const (
 func ValidateDirectories(g GlobalTFVars) error {
 	_, err := os.Stat(g.EABCodePath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("Stopping execution, FoundationCodePath directory '%s' does not exits\n", g.EABCodePath)
+		return fmt.Errorf("Stopping execution, EABCodePath directory '%s' does not exits\n", g.EABCodePath)
 	}
 	_, err = os.Stat(g.CodeCheckoutPath)
 	if os.IsNotExist(err) {

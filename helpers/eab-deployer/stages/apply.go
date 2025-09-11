@@ -154,7 +154,7 @@ func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
 		StageSA:       outputs.CBServiceAccountsEmails["multitenant"],
 		GitConf:       conf,
-		Envs:          []string{"production", "nonproduction", "development"},
+		Envs:          tfvars.EnvsToBeDeployed,
 		DefaultRegion: tfvars.TriggerLocation,
 	}
 
@@ -194,7 +194,7 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
 		StageSA:       outputs.CBServiceAccountsEmails["fleetscope"],
 		GitConf:       conf,
-		Envs:          []string{"production", "nonproduction", "development"},
+		Envs:          tfvars.EnvsToBeDeployed,
 		DefaultRegion: tfvars.TriggerLocation,
 	}
 

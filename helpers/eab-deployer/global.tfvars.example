@@ -23,6 +23,9 @@ code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITO
 // The directory where the user has created a fresh git clone of the Enterprise Application Blueprint repository
 eab_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EXAMPLE_FOUNDATION_CODE_WAS_CHECKED_OUT"
 
+// Which environments will be deployed. If you are going to deploy a single enviroment, you need to provide production.
+envs_to_be_deployed = ["production"]
+
 bucket_force_destroy  = false
 buckets_force_destroy = false
 deletion_protection   = false
