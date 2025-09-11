@@ -18,6 +18,7 @@ This repository contains several distinct deployment stages, each contained in a
 
 - Google Cloud SDK version greater than 487.0.0
 - Terraform version greater than 1.6
+- A project already created with a linked billing account
 
 ### [1. bootstrap](/1-bootstrap/)
 
