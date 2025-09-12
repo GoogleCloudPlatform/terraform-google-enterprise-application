@@ -112,12 +112,10 @@ type GcpGroups struct {
 // GlobalTFVars contains all the configuration for the deploy
 type GlobalTFVars struct {
 	ProjectID                    string                                   `hcl:"project_id"`
-	EnvsToBeDeployed             []string                                 `hcl:"envs_to_be_deployed"`
 	BucketPrefix                 string                                   `hcl:"bucket_prefix"`
 	BucketForceDestroy           bool                                     `hcl:"bucket_force_destroy"`
 	Location                     string                                   `hcl:"location"`
 	TriggerLocation              string                                   `hcl:"trigger_location"`
-	TFApplyBranches              []string                                 `hcl:"tf_apply_branches"`
 	Envs                         map[string]Env                           `hcl:"envs"`
 	CommonFolderID               string                                   `hcl:"common_folder_id"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"cloudbuildv2_repository_config"`
@@ -148,7 +146,6 @@ type GlobalTFVars struct {
 	InfraProjectAPIs             []string                                 `hcl:"infra_project_apis"`
 	Region                       string                                   `hcl:"region"`
 	BucketsForceDestroy          bool                                     `hcl:"buckets_force_destroy"`
-	EnvironmentNames             []string                                 `hcl:"environment_names"`
 	EABCodePath                  string                                   `hcl:"eab_code_path"`
 	CodeCheckoutPath             string                                   `hcl:"code_checkout_path"`
 }

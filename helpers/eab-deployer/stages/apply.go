@@ -16,8 +16,10 @@ package stages
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/mitchellh/go-testing-interface"
@@ -34,7 +36,7 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		BucketForceDestroy:           tfvars.BucketForceDestroy,
 		Location:                     tfvars.Location,
 		TriggerLocation:              tfvars.TriggerLocation,
-		TFApplyBranches:              tfvars.TFApplyBranches,
+		TFApplyBranches:              slices.Collect(maps.Keys(tfvars.Envs)),
 		Envs:                         tfvars.Envs,
 		CommonFolderID:               tfvars.CommonFolderID,
 		CloudbuildV2RepositoryConfig: tfvars.CloudbuildV2RepositoryConfig,
@@ -154,7 +156,7 @@ func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
 		StageSA:       outputs.CBServiceAccountsEmails["multitenant"],
 		GitConf:       conf,
-		Envs:          tfvars.EnvsToBeDeployed,
+		Envs:          slices.Collect(maps.Keys(tfvars.Envs)),
 		DefaultRegion: tfvars.TriggerLocation,
 	}
 
@@ -194,7 +196,7 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
 		StageSA:       outputs.CBServiceAccountsEmails["fleetscope"],
 		GitConf:       conf,
-		Envs:          tfvars.EnvsToBeDeployed,
+		Envs:          slices.Collect(maps.Keys(tfvars.Envs)),
 		DefaultRegion: tfvars.TriggerLocation,
 	}
 
@@ -213,7 +215,7 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		BucketForceDestroy:           tfvars.BucketForceDestroy,
 		Location:                     tfvars.Location,
 		TriggerLocation:              tfvars.TriggerLocation,
-		TFApplyBranches:              tfvars.TFApplyBranches,
+		TFApplyBranches:              slices.Collect(maps.Keys(tfvars.Envs)),
 		Applications:                 tfvars.Applications,
 		CloudbuildV2RepositoryConfig: tfvars.CloudbuildV2RepositoryConfig,
 		KMSProjectID:                 tfvars.KMSProjectID,
@@ -254,7 +256,7 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 		Region:                       tfvars.Region,
 		BucketsForceDestroy:          tfvars.BucketsForceDestroy,
 		RemoteStateBucket:            tfvars.RemoteStateBucket,
-		EnvironmentNames:             tfvars.EnvironmentNames,
+		EnvironmentNames:             slices.Collect(maps.Keys(tfvars.Envs)),
 		CloudbuildV2RepositoryConfig: tfvars.CloudbuildV2RepositoryConfig,
 		AccessLevelName:              tfvars.AccessLevelName,
 		LoggingBucket:                tfvars.LoggingBucket,
