@@ -98,7 +98,7 @@ steps:
     env:
       - "TF_VAR_org_id=$_ORG_ID"
 
-  - id: single-project-init
+  - id: single-project-htc-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -107,7 +107,7 @@ steps:
         "cft test run TestStandaloneHTCExample --stage init --verbose",
       ]
 
-  - id: single-project-apply
+  - id: single-project-htc-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -116,7 +116,7 @@ steps:
         "cft test run TestStandaloneHTCExample --stage apply --verbose",
       ]
 
-  - id: single-project-verify
+  - id: single-project-htc-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -125,7 +125,7 @@ steps:
         "cft test run TestStandaloneHTCExample --stage verify --verbose || (cft test run TestStandaloneHTCExample --stage apply --verbose && cft test run TestStandaloneHTCExample --stage verify --verbose)",
       ]
 
-  - id: single-project-app-deployment
+  - id: single-project-htc-app-deployment
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: "bash"
     args:
@@ -139,7 +139,7 @@ steps:
             echo ERROR: Was not able to download certificate and update system bundle. && exit 1
         fi
 
-  - id: single-project-teardown
+  - id: single-project-htc-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
