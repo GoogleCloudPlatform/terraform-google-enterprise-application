@@ -138,12 +138,12 @@ func main() {
 		// Note: destroy is only terraform destroy, local directories are not deleted.
 		// 5-appinfra
 		msg.PrintStageMsg("Destroying 5-appinfra stage")
-		err = s.RunDestroyStep("apps/default-example/hello-world", func() error {
-			io := stages.GetAppFactoryStepOutputs(t, conf.CheckoutPath)
+		err = s.RunDestroyStep("appinfra-hello-world", func() error {
+			io := stages.GetAppFactoryStepOutputs(t, filepath.Join(conf.CheckoutPath, globalTFVars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName))
 			return stages.DestroyAppInfraStage(t, s, globalTFVars, io, conf)
 		})
 		if err != nil {
-			fmt.Printf("# Example app step destroy failed. Error: %s\n", err.Error())
+			fmt.Printf("# App Infra hello world step destroy failed. Error: %s\n", err.Error())
 			os.Exit(3)
 		}
 
@@ -160,17 +160,6 @@ func main() {
 
 		// 3-fleetscope
 		msg.PrintStageMsg("Destroying 3-fleetscope stage")
-		err = s.RunDestroyStep("gcp-networks", func() error {
-			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyFleetscopeStage(t, s, globalTFVars, bo, conf)
-		})
-		if err != nil {
-			fmt.Printf("# Fleetscope step destroy failed. Error: %s\n", err.Error())
-			os.Exit(3)
-		}
-
-		// 3-fleetscope
-		msg.PrintStageMsg("Destroying 3-fleetscope stage")
 		err = s.RunDestroyStep("gcp-fleetscope", func() error {
 			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
 			return stages.DestroyFleetscopeStage(t, s, globalTFVars, bo, conf)
@@ -180,8 +169,8 @@ func main() {
 			os.Exit(3)
 		}
 
-		// 2-Multitenant
-		msg.PrintStageMsg("Destroying 2-Multitenant stage")
+		// 2-multitenant
+		msg.PrintStageMsg("Destroying 2-multitenant stage")
 		err = s.RunDestroyStep("gcp-multitenant", func() error {
 			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
 			return stages.DestroyMultitenantStage(t, s, globalTFVars, bo, conf)

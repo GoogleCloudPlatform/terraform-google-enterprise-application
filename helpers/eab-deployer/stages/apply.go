@@ -56,19 +56,6 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		return err
 	}
 
-	// delete README-Jenkins.md due to private key checker false positive
-	jenkinsReadme := filepath.Join(c.EABPath, BootstrapStep, "README-Jenkins.md")
-	exist, err := utils.FileExists(jenkinsReadme)
-	if err != nil {
-		return err
-	}
-	if exist {
-		err = os.Remove(jenkinsReadme)
-		if err != nil {
-			return err
-		}
-	}
-
 	terraformDir := filepath.Join(c.EABPath, BootstrapStep)
 	options := &terraform.Options{
 		TerraformDir: terraformDir,

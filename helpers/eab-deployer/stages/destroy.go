@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -36,16 +37,14 @@ const (
 
 func DestroyBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 
-	if err := forceBackendMigration(t, BootstrapRepo, "envs", "shared", c); err != nil {
+	if err := forceBackendMigration(t, BootstrapRepo, "", "", c); err != nil {
 		return err
 	}
 
 	stageConf := StageConf{
-		Stage:         BootstrapStep,
-		Step:          BootstrapStep,
-		Repo:          BootstrapRepo,
-		GroupingUnits: []string{"envs"},
-		Envs:          []string{"shared"},
+		Stage: BootstrapStep,
+		Step:  BootstrapStep,
+		Repo:  BootstrapRepo,
 	}
 	return destroyStage(t, stageConf, s, tfvars, c)
 }
@@ -90,12 +89,13 @@ func forceBackendMigration(t testing.TB, repo, groupUnit, env string, c CommonCo
 
 func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:       tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
-		CICDProject: outputs.ProjectID,
-		Step:        MultitenantStep,
-		Repo:        tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryURL,
-		StageSA:     outputs.CBServiceAccountsEmails["multitenant"],
-		Envs:        slices.Collect(maps.Keys(tfvars.Envs)),
+		Stage:         tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
+		CICDProject:   outputs.ProjectID,
+		Step:          MultitenantStep,
+		Repo:          tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
+		StageSA:       outputs.CBServiceAccountsEmails["multitenant"],
+		Envs:          slices.Collect(maps.Keys(tfvars.Envs)),
+		GroupingUnits: []string{"envs"},
 	}
 
 	return destroyStage(t, stageConf, s, tfvars, c)
@@ -103,12 +103,13 @@ func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, o
 
 func DestroyFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:       tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
-		CICDProject: outputs.ProjectID,
-		Step:        FleetscopeStep,
-		Repo:        tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryURL,
-		StageSA:     outputs.CBServiceAccountsEmails["fleetscope"],
-		Envs:        slices.Collect(maps.Keys(tfvars.Envs)),
+		Stage:         tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
+		CICDProject:   outputs.ProjectID,
+		Step:          FleetscopeStep,
+		Repo:          tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
+		StageSA:       outputs.CBServiceAccountsEmails["fleetscope"],
+		Envs:          slices.Collect(maps.Keys(tfvars.Envs)),
+		GroupingUnits: []string{"envs"},
 	}
 	return destroyStage(t, stageConf, s, tfvars, c)
 }
@@ -116,33 +117,45 @@ func DestroyFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 func DestroyAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
 		Stage:         tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName,
-		StageSA:       outputs.CBServiceAccountsEmails["appfactory"],
+		StageSA:       outputs.CBServiceAccountsEmails["applicationfactory"],
 		CICDProject:   outputs.ProjectID,
 		Step:          AppFactoryStep,
-		Repo:          tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL,
-		HasLocalStep:  true,
-		LocalSteps:    []string{"shared"},
+		Repo:          tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName,
+		Envs:          []string{"shared"},
 		GroupingUnits: []string{"envs"},
 	}
 	return destroyStage(t, stageConf, s, tfvars, c)
 }
 
 func DestroyAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs AppFactoryOutputs, c CommonConf) error {
-	stageConf := StageConf{
-		Stage:         tfvars.AppServicesCloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryName,
-		StageSA:       outputs.AppGroup["default-example"].AppCloudbuildWorkspaceCloudbuildSAEmail,
-		CICDProject:   outputs.AppGroup["default-example"].AppAdminProjectID,
-		Step:          AppInfraStep,
-		Repo:          tfvars.AppServicesCloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL,
-		HasLocalStep:  false,
-		GroupingUnits: []string{"apps"},
-		Envs:          []string{"default-example"},
+	var err error
+	for exampleName, services := range tfvars.Applications {
+		for serviceName := range services {
+			appGroupIndex := fmt.Sprintf("%s.%s", exampleName, serviceName)
+			envs := []string{"shared"}
+			cbPathEmail := strings.Split(outputs.AppGroup[appGroupIndex].AppCloudbuildWorkspaceCloudbuildSAEmail, "/")
+			email := cbPathEmail[len(cbPathEmail)-1]
+			stageConf := StageConf{
+				Stage:         tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName,
+				StageSA:       email,
+				CICDProject:   outputs.AppGroup[appGroupIndex].AppAdminProjectID,
+				Step:          AppInfraStep,
+				Repo:          tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName,
+				Envs:          envs,
+				LocalSteps:    envs,
+				GroupingUnits: []string{"apps/default-example/hello-world/envs"},
+				DefaultRegion: tfvars.TriggerLocation,
+			}
+			err = destroyStage(t, stageConf, s, tfvars, c)
+		}
 	}
-	return destroyStage(t, stageConf, s, tfvars, c)
+	return err
 }
 
 func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 	gcpPath := filepath.Join(c.CheckoutPath, sc.Repo)
+	stageName := strings.Split(sc.Stage, "-")[1]
+	conf := utils.GitRepo{}
 	for _, e := range sc.Envs {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s", sc.Repo, e), func() error {
 			for _, g := range sc.GroupingUnits {
@@ -154,7 +167,13 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 					MaxRetries:               2,
 					TimeBetweenRetries:       2 * time.Minute,
 				}
-				conf := utils.CloneCSR(t, sc.Repo, gcpPath, sc.CICDProject, c.Logger)
+				conf := utils.GitRepo{}
+
+				if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
+					conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), c.Logger)
+				} else {
+					conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), sc.CICDProject, c.Logger)
+				}
 				branch := e
 				if branch == "shared" {
 					branch = "production"
@@ -188,12 +207,39 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 				MaxRetries:               2,
 				TimeBetweenRetries:       2 * time.Minute,
 			}
-			conf := utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, gcpPath, sc.CICDProject, c.Logger)
+			t.Log("Clonning repo")
+			if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
+				conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), c.Logger)
+			} else {
+				conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), sc.CICDProject, c.Logger)
+			}
 			err := conf.CheckoutBranch("production")
 			if err != nil {
 				return err
 			}
 			return destroyEnv(t, options, sc.StageSA)
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(groupingUnits) == 0 && len(sc.Envs) == 0 {
+		err := s.RunDestroyStep(fmt.Sprintf("%s", sc.Repo), func() error {
+			options := &terraform.Options{
+				TerraformDir:             filepath.Join(c.EABPath, sc.Stage),
+				Logger:                   c.Logger,
+				NoColor:                  true,
+				RetryableTerraformErrors: testutils.RetryableTransientErrors,
+				MaxRetries:               2,
+				TimeBetweenRetries:       2 * time.Minute,
+			}
+			err := destroyEnv(t, options, sc.StageSA)
+			if err != nil {
+				return err
+			}
+
+			return nil
 		})
 		if err != nil {
 			return err
@@ -208,6 +254,7 @@ func destroyEnv(t testing.TB, options *terraform.Options, serviceAccount string)
 	var err error
 
 	if serviceAccount != "" {
+		t.Log(fmt.Sprintf("Setting GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=%s", serviceAccount))
 		err = os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
 		if err != nil {
 			return err
