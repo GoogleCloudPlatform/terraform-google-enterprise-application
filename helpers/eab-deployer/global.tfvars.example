@@ -18,59 +18,88 @@
 
 // The directory where the helper will git clone the Google Source Repositories that will
 // host the code for each one of the stages
-code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITORIES"
+code_checkout_path = "/home/amandak/repos/eab-helper-test/"
 
 // The directory where the user has created a fresh git clone of the Enterprise Application Blueprint repository
-eab_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EXAMPLE_FOUNDATION_CODE_WAS_CHECKED_OUT"
+eab_code_path = "/home/amandak/repos/terraform-google-enterprise-application/"
 
-// Which environments will be deployed. If you are going to deploy a single enviroment, you need to provide production.
-envs_to_be_deployed = ["production"]
-
-bucket_force_destroy  = false
-buckets_force_destroy = false
+bucket_force_destroy  = true
+buckets_force_destroy = true
 deletion_protection   = false
 
-cloudbuildv2_repository_config = {
-  repo_type = "GITLABv2"
+infra_cloudbuildv2_repository_config = {
+  repo_type = "GITHUBv2"
   repositories = {
-    applicationfactory = {
-      repository_name = "eab-applicationfactory"
-      repository_url  = "https://gitlab.com/user/eab-applicationfactory.git"
-    }
-    fleetscope = {
-      repository_name = "eab-fleetscope"
-      repository_url  = "https://gitlab.com/user/eab-fleetscope.git"
-    }
     multitenant = {
       repository_name = "eab-multitenant"
-      repository_url  = "https://gitlab.com/user/eab-multitenant.git"
+      repository_url  = "https://github.com/amandakarina/eab-multitenant.git"
+    },
+    applicationfactory = {
+      repository_name = "eab-appfactory"
+      repository_url  = "https://github.com/amandakarina/eab-appfactory.git"
+    },
+    fleetscope = {
+      repository_name = "eab-fleetscope"
+      repository_url  = "https://github.com/amandakarina/eab-fleetscope.git"
+    },
+    hello-world = {
+      repository_name = "hello-world-admin"
+      repository_url  = "https://github.com/amandakarina/hello-world-admin.git"
     }
   }
-  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-  secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
+  gitlab_authorizer_credential_secret_id      = null
+  gitlab_read_authorizer_credential_secret_id = null
+  gitlab_webhook_secret_id                    = null
+  # If you are using a self-hosted instance, you may change the URL below accordingly
+  gitlab_enterprise_host_uri = null
+  # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+  gitlab_enterprise_service_directory = null
+  # .pem string
+  gitlab_enterprise_ca_certificate = null
+  secret_project_id                = "eab-private-workerpool-vjsn"
 
-  gitlab_enterprise_host_uri          = "https://gitlab.com"
-  gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
-  gitlab_enterprise_ca_certificate    = <<EOF
-REPLACE_WITH_SSL_CERT
-EOF
-  github_secret_id                    = ""
-  github_app_id_secret_id             = ""
+  github_app_id_secret_id = "projects/646528126348/secrets/github-app-id"
+  github_secret_id        = "projects/646528126348/secrets/github-pat"
 }
+
+app_services_cloudbuildv2_repository_config = {
+  repo_type = "GITHUBv2"
+  repositories = {
+    eab-default-example-hello-world = {
+      repository_name = "hello-world-i-r"
+      repository_url  = "https://github.com/amandakarina/hello-world-i-r.git"
+    }
+  }
+  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
+  gitlab_authorizer_credential_secret_id      = null
+  gitlab_read_authorizer_credential_secret_id = null
+  gitlab_webhook_secret_id                    = null
+  # If you are using a self-hosted instance, you may change the URL below accordingly
+  gitlab_enterprise_host_uri = null
+  # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
+  gitlab_enterprise_service_directory = null
+  # .pem string
+  gitlab_enterprise_ca_certificate = null
+  secret_project_id                = "eab-private-workerpool-vjsn"
+
+  github_app_id_secret_id = "projects/646528126348/secrets/github-app-id"
+  github_secret_id        = "projects/646528126348/secrets/github-pat"
+}
+
 
 // An existing project configured as the default project in the local Cloud SDK configuration
 // See https://cloud.google.com/sdk/gcloud/reference/config/set#EXAMPLES
 
 
 // 1-bootstrap inputs
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md#inputs
+// github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-bootstrap/README.md#inputs
 
-common_folder_id = "folders/FOLDER_ID"
-project_id       = "REPLACE_WITH_YOUR_PROJECT"
-workerpool_id    = "projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME"
-
+common_folder_id = "folders/421751741598"
+project_id       = "ci-eab-seed-l2aw"
+workerpool_id    = "projects/eab-private-workerpool-vjsn/locations/us-central1/workerPools/cb-pool"
+bucket_kms_key   = "projects/ci-eab-seed-l2aw/locations/us-central1/keyRings/kms-bucket-encryption/cryptoKeys/bucket"
+logging_bucket   = "bkt-logging-9b1gd6"
 
 // 2-multitenant inputs
 apps = {
@@ -82,36 +111,37 @@ apps = {
 }
 
 envs = {
-  "development" = {
-    "billing_account"    = "{BILLING_ACCOUNT}"
-    "folder_id"          = "folders/{FOLDER}"
-    "network_project_id" = "{PROJECT}"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/{PROJECT}/global/networks/{NETWORK}}"
-    "org_id"             = "{ORGANIZATION}"
-    "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
-    ]
-  }
-  "non-production" = {
-    "billing_account"    = "{BILLING_ACCOUNT}"
-    "folder_id"          = "folders/{FOLDER}"
-    "network_project_id" = "{PROJECT}"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/{PROJECT}/global/networks/{NETWORK}}"
-    "org_id"             = "{ORGANIZATION}"
-    "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
-      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
-    ]
-  }
+  # "development" = {
+  #   "billing_account"    = "01AAD1-616217-97513A"
+  #   "folder_id"          = "folders/983169473629"
+  #   "network_project_id" = "eab-vpc-development-m6ov"
+  #   "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/eab-vpc-development-m6ov/global/networks/vpc-eab-vpc-development"
+  #   "org_id"             = "119612413569"
+  #   "subnets_self_links" = [
+  #     "https://www.googleapis.com/compute/v1/projects/eab-vpc-development-m6ov/regions/us-central1/subnetworks/eab-development-us-central1",
+  #     "https://www.googleapis.com/compute/v1/projects/eab-vpc-development-m6ov/regions/us-east4/subnetworks/eab-development-us-east4",
+  #   ]
+  # }
+  # "nonproduction" = {
+  #   "billing_account"    = "01AAD1-616217-97513A"
+  #   "folder_id"          = "folders/486240043191"
+  #   "network_project_id" = "eab-vpc-nonproduction-l4xv"
+  #   "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/eab-vpc-nonproduction-l4xv/global/networks/vpc-eab-vpc-nonproduction"
+  #   "org_id"             = "119612413569"
+  #   "subnets_self_links" = [
+  #     "https://www.googleapis.com/compute/v1/projects/eab-vpc-nonproduction-l4xv/regions/us-central1/subnetworks/eab-nonproduction-us-central1",
+  #     "https://www.googleapis.com/compute/v1/projects/eab-vpc-nonproduction-l4xv/regions/us-east4/subnetworks/eab-nonproduction-us-east4",
+  #   ]
+  # }
   "production" = {
-    "billing_account"    = "{BILLING_ACCOUNT}"
-    "folder_id"          = "folders/{FOLDER}"
-    "network_project_id" = "{PROJECT}"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/{PROJECT}/global/networks/{NETWORK}}"
-    "org_id"             = "{ORGANIZATION}"
+    "billing_account"    = "01AAD1-616217-97513A"
+    "folder_id"          = "folders/362159320179"
+    "network_project_id" = "eab-vpc-production-htjz"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/eab-vpc-production-htjz/global/networks/vpc-eab-vpc-production"
+    "org_id"             = "119612413569"
     "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
-      "https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}/subnetworks/{SUBNETWORK}",
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-production-htjz/regions/us-central1/subnetworks/eab-production-us-central1",
+      "https://www.googleapis.com/compute/v1/projects/eab-vpc-production-htjz/regions/us-east4/subnetworks/eab-production-us-east4",
     ]
   }
 }
@@ -119,14 +149,16 @@ envs = {
 // 3-fleetscope inputs
 
 namespace_ids = {
-  "cb-frontend" = "your-frontend-group@yourdomain.com",
-  "cb-accounts" = "your-accounts-group@yourdomain.com",
-  "cb-ledger"   = "your-ledger-group@yourdomain.com"
+  "cb-accounts" = "cb-accounts-kqbwxl@clseclab.com"
+  "cb-frontend" = "cb-frontend-kqbwxl@clseclab.com"
+  "cb-ledger"   = "cb-ledger-kqbwxl@clseclab.com"
+  "cymbalshops" = "cymbalshops-kqbwxl@clseclab.com"
 }
 
 remote_state_bucket         = "REMOTE_STATE_BUCKET"
-attestation_evaluation_mode = "ENFORCE"
-attestation_kms_key         = ""
+attestation_evaluation_mode = "ALWAYS_ALLOW"
+attestation_kms_key         = "projects/ci-eab-seed-l2aw/locations/us-central1/keyRings/kms-attestation-sign/cryptoKeys/attestation"
+attestation_kms_project     = "ci-eab-seed-l2aw"
 enable_kueue                = false
 config_sync_branch          = ""
 config_sync_repository_url  = ""
@@ -137,28 +169,32 @@ disable_istio_on_namespaces = []
 
 // 4-appfactory
 
-billing_account = "REPLACE_WITH_BILLING_ACCOUNT"
-org_id          = "REPLACE_WITH_YOUR_ORGANIZATION_ID"
+billing_account = "01AAD1-616217-97513A"
+org_id          = "119612413569"
 
-infra_project_apis     = []
-service_perimeter_name = "accessPolicies/000000000000000/servicePerimeters/sp_gke_enterprise_XXXXX"
-service_perimeter_mode = "ENFORCE"
-access_level_name      = "accessPolicies/000000000000000/accessLevels/ac_gke_enterprise_XXXXX"
+infra_project_apis = [
+  "iam.googleapis.com",
+  "cloudresourcemanager.googleapis.com",
+  "serviceusage.googleapis.com",
+  "cloudbilling.googleapis.com"
+]
+service_perimeter_name = "accessPolicies/680708110069/servicePerimeters/sp_gke_enterprise_ndbcd2"
+service_perimeter_mode = "DRY_RUN"
+access_level_name      = "accessPolicies/680708110069/accessLevels/ac_gke_enterprise_ndbcd2"
 applications = {
   "default-example" = {
     "hello-world" = {
       create_infra_project = false
       create_admin_project = true
-      admin_project_id     = "" # Adicione esta linha
+      admin_project_id     = null
     }
   }
 }
-cb_private_workerpool_project_id = ""
-location                         = ""
+cb_private_workerpool_project_id = "eab-private-workerpool-vjsn"
+location                         = "us-central1"
 // 5-appinfra
 
 region            = "us-central1"
-environment_names = ["development", "nonproduction", "production"]
-tf_apply_branches = []
-trigger_location  = ""
-bucket_prefix     = ""
+trigger_location  = "us-central1"
+bucket_prefix     = "bkt"
+kms_project_id ="ci-eab-seed-l2aw"

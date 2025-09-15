@@ -83,7 +83,7 @@ func (g GitRepo) HasUpstream(branch, remote string) (bool, error) {
 
 // PushBranch pushes a branch to 'remote' repository .
 func (g GitRepo) PushBranch(branch, remote string) error {
-	_, err := g.conf.RunCmdE("push", "--set-upstream", remote, branch)
+	_, err := g.conf.RunCmdE("push", "--set-upstream", remote, branch, "--force")
 	return err
 }
 

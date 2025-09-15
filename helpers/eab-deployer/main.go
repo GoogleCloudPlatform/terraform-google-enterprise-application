@@ -224,6 +224,8 @@ func main() {
 
 	bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
 
+	globalTFVars.RemoteStateBucket = bo.StateBucket
+
 	// 2-Multitenant
 	msg.PrintStageMsg("Deploying 2-Multitenant stage")
 	err = s.RunStep("gcp-multitenant", func() error {
@@ -244,11 +246,10 @@ func main() {
 		os.Exit(3)
 	}
 
-	// 4-appfactory
-	msg.PrintStageMsg("Deploying 4-appfactory stage")
-	msg.ConfirmQuota(bo.CBServiceAccountsEmails["applicationfactory"], conf.DisablePrompt)
-
 	err = s.RunStep("gcp-appfactory", func() error {
+		// 4-appfactory
+		msg.PrintStageMsg("Deploying 4-appfactory stage")
+		msg.ConfirmQuota(bo.CBServiceAccountsEmails["applicationfactory"], conf.DisablePrompt)
 		return stages.DeployAppFactoryStage(t, s, globalTFVars, bo, conf)
 	})
 	if err != nil {
@@ -258,24 +259,25 @@ func main() {
 
 	// 5-appinfra
 	msg.PrintStageMsg("Deploying 5-appinfra stage")
-	io := stages.GetAppFactoryStepOutputs(t, conf.CheckoutPath)
+	io := stages.GetAppFactoryStepOutputs(t, filepath.Join(conf.CheckoutPath, globalTFVars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName))
 
-	err = s.RunStep("hello-world", func() error {
+	err = s.RunStep("appinfra-hello-world", func() error {
 		return stages.DeployAppInfraStage(t, s, globalTFVars, io, conf)
 	})
 	if err != nil {
-		fmt.Printf("# Example app step failed. Error: %s\n", err.Error())
+		fmt.Printf("# Example app infra step failed. Error: %s\n", err.Error())
 		os.Exit(3)
 	}
 
 	// // 6-appsource
-	// msg.PrintStageMsg("Deploying 6-appsource stage")
-	// err = s.RunStep("gcp-networks", func() error {
-	// 	return stages.DeployFleetscopeStage(t, s, globalTFVars, bo, conf)
-	// })
-	// if err != nil {
-	// 	fmt.Printf("# Networks step failed. Error: %s\n", err.Error())
-	// 	os.Exit(3)
-	// }
+	msg.PrintStageMsg("Deploying 6-appsource stage")
+	appInfraOutputs := stages.GetAppInfraStepOutputs(t, filepath.Join(conf.CheckoutPath, globalTFVars.InfraCloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryName))
+	err = s.RunStep("gcp-appsource-hello-world", func() error {
+		return stages.DeployAppSourceStage(t, s, globalTFVars, appInfraOutputs, conf)
+	})
+	if err != nil {
+		fmt.Printf("# Appsource step failed. Error: %s\n", err.Error())
+		os.Exit(3)
+	}
 
 }

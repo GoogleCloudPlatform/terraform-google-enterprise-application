@@ -196,7 +196,7 @@ tf_plan() {
 #============================================================================#
 tf_plan_validate_all() {
   local leaf
-  find "$base_dir" -mindepth 1 -maxdepth 1 -type d \
+  find "$base_dir" -mindepth 1 -maxdepth 5 -type d \
   -not -path "$base_dir/modules" \
   -not -path "$base_dir/.git" \
   -not -path "$base_dir/.terraform" | while read -r component_path ; do
@@ -289,7 +289,7 @@ tf_validate() {
 single_action_runner() {
   local leaf
   # filter folders that does not contain Terraform configurations
-  find "$base_dir" -mindepth 1 -maxdepth 1 -type d \
+  find "$base_dir" -mindepth 1 -maxdepth 5 -type d \
   -not -path "$base_dir/modules" \
   -not -path "$base_dir/.git" \
   -not -path "$base_dir/.terraform" | while read -r component_path ; do

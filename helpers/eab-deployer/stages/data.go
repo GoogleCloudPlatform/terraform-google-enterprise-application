@@ -60,6 +60,7 @@ type StageConf struct {
 	GroupingUnits       []string
 	Envs                []string
 	LocalSteps          []string
+	SkipPlan            bool
 }
 
 type BootstrapOutputs struct {
@@ -78,8 +79,8 @@ type BootstrapOutputs struct {
 }
 
 type AppFactoryOutputs struct {
-	AppGroup        map[string]AppGroupOutput `hcl:"app_group"`
-	AppFoldersIDs   map[string]string         `hcl:"app_folders_ids"`
+	AppGroup        map[string]AppGroupOutput `hcl:"app-group"`
+	AppFoldersIDs   map[string]string         `hcl:"app-folders-ids"`
 	TriggerLocation string                    `hcl:"trigger_location"`
 }
 
@@ -111,43 +112,44 @@ type GcpGroups struct {
 
 // GlobalTFVars contains all the configuration for the deploy
 type GlobalTFVars struct {
-	ProjectID                    string                                   `hcl:"project_id"`
-	BucketPrefix                 string                                   `hcl:"bucket_prefix"`
-	BucketForceDestroy           bool                                     `hcl:"bucket_force_destroy"`
-	Location                     string                                   `hcl:"location"`
-	TriggerLocation              string                                   `hcl:"trigger_location"`
-	Envs                         map[string]Env                           `hcl:"envs"`
-	CommonFolderID               string                                   `hcl:"common_folder_id"`
-	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"cloudbuildv2_repository_config"`
-	WorkerPoolID                 string                                   `hcl:"workerpool_id"`
-	AccessLevelName              *string                                  `hcl:"access_level_name"`
-	ServicePerimeterName         *string                                  `hcl:"service_perimeter_name"`
-	ServicePerimeterMode         *string                                  `hcl:"service_perimeter_mode"`
-	LoggingBucket                *string                                  `hcl:"logging_bucket"`
-	BucketKMSKey                 *string                                  `hcl:"bucket_kms_key"`
-	AttestationKMSProject        *string                                  `hcl:"attestation_kms_project"`
-	OrgID                        string                                   `hcl:"org_id"`
-	Apps                         map[string]App                           `hcl:"apps"`
-	CBPrivateWorkerpoolProjectID string                                   `hcl:"cb_private_workerpool_project_id"`
-	DeletionProtection           bool                                     `hcl:"deletion_protection"`
-	NamespaceIDs                 map[string]string                        `hcl:"namespace_ids"`
-	RemoteStateBucket            string                                   `hcl:"remote_state_bucket"`
-	ConfigSyncSecretType         string                                   `hcl:"config_sync_secret_type"`
-	ConfigSyncRepositoryURL      string                                   `hcl:"config_sync_repository_url"`
-	DisableIstioOnNamespaces     []string                                 `hcl:"disable_istio_on_namespaces"`
-	ConfigSyncPolicyDir          *string                                  `hcl:"config_sync_policy_dir"`
-	ConfigSyncBranch             string                                   `hcl:"config_sync_branch"`
-	AttestationKMSKey            string                                   `hcl:"attestation_kms_key"`
-	AttestationEvaluationMode    string                                   `hcl:"attestation_evaluation_mode"`
-	EnableKueue                  bool                                     `hcl:"enable_kueue"`
-	BillingAccount               string                                   `hcl:"billing_account"`
-	Applications                 map[string]map[string]ApplicationService `hcl:"applications"`
-	KMSProjectID                 *string                                  `hcl:"kms_project_id"`
-	InfraProjectAPIs             []string                                 `hcl:"infra_project_apis"`
-	Region                       string                                   `hcl:"region"`
-	BucketsForceDestroy          bool                                     `hcl:"buckets_force_destroy"`
-	EABCodePath                  string                                   `hcl:"eab_code_path"`
-	CodeCheckoutPath             string                                   `hcl:"code_checkout_path"`
+	ProjectID                               string                                   `hcl:"project_id"`
+	BucketPrefix                            string                                   `hcl:"bucket_prefix"`
+	BucketForceDestroy                      bool                                     `hcl:"bucket_force_destroy"`
+	Location                                string                                   `hcl:"location"`
+	TriggerLocation                         string                                   `hcl:"trigger_location"`
+	Envs                                    map[string]Env                           `hcl:"envs"`
+	CommonFolderID                          string                                   `hcl:"common_folder_id"`
+	InfraCloudbuildV2RepositoryConfig       CloudbuildV2RepositoryConfig             `hcl:"infra_cloudbuildv2_repository_config"`
+	AppServicesCloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"app_services_cloudbuildv2_repository_config"`
+	WorkerPoolID                            string                                   `hcl:"workerpool_id"`
+	AccessLevelName                         *string                                  `hcl:"access_level_name"`
+	ServicePerimeterName                    *string                                  `hcl:"service_perimeter_name"`
+	ServicePerimeterMode                    *string                                  `hcl:"service_perimeter_mode"`
+	LoggingBucket                           *string                                  `hcl:"logging_bucket"`
+	BucketKMSKey                            *string                                  `hcl:"bucket_kms_key"`
+	AttestationKMSProject                   *string                                  `hcl:"attestation_kms_project"`
+	OrgID                                   string                                   `hcl:"org_id"`
+	Apps                                    map[string]App                           `hcl:"apps"`
+	CBPrivateWorkerpoolProjectID            string                                   `hcl:"cb_private_workerpool_project_id"`
+	DeletionProtection                      bool                                     `hcl:"deletion_protection"`
+	NamespaceIDs                            map[string]string                        `hcl:"namespace_ids"`
+	RemoteStateBucket                       string                                   `hcl:"remote_state_bucket"`
+	ConfigSyncSecretType                    string                                   `hcl:"config_sync_secret_type"`
+	ConfigSyncRepositoryURL                 string                                   `hcl:"config_sync_repository_url"`
+	DisableIstioOnNamespaces                []string                                 `hcl:"disable_istio_on_namespaces"`
+	ConfigSyncPolicyDir                     *string                                  `hcl:"config_sync_policy_dir"`
+	ConfigSyncBranch                        string                                   `hcl:"config_sync_branch"`
+	AttestationKMSKey                       string                                   `hcl:"attestation_kms_key"`
+	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
+	EnableKueue                             bool                                     `hcl:"enable_kueue"`
+	BillingAccount                          string                                   `hcl:"billing_account"`
+	Applications                            map[string]map[string]ApplicationService `hcl:"applications"`
+	KMSProjectID                            *string                                  `hcl:"kms_project_id"`
+	InfraProjectAPIs                        []string                                 `hcl:"infra_project_apis"`
+	Region                                  string                                   `hcl:"region"`
+	BucketsForceDestroy                     bool                                     `hcl:"buckets_force_destroy"`
+	EABCodePath                             string                                   `hcl:"eab_code_path"`
+	CodeCheckoutPath                        string                                   `hcl:"code_checkout_path"`
 }
 
 type Env struct {
@@ -298,7 +300,7 @@ func GetBootstrapStepOutputs(t testing.TB, eabPath string) BootstrapOutputs {
 
 func GetAppInfraStepOutputs(t testing.TB, eabPath string) AppInfraOutputs {
 	options := &terraform.Options{
-		TerraformDir: filepath.Join(eabPath, "5-appinfra/apps/default-example/hello-world"),
+		TerraformDir: filepath.Join(eabPath, "apps/default-example/hello-world/envs/shared"),
 		Logger:       logger.Discard,
 		NoColor:      true,
 	}
@@ -322,24 +324,24 @@ func convertToAppFactoryOutputs(input map[string]interface{}) (AppFactoryOutputs
 	}
 
 	// Handle AppFoldersIDs
-	if appFoldersIDs, ok := input["app_folders_ids"].(map[string]interface{}); ok {
+	if appFoldersIDs, ok := input["app-folders-ids"].(map[string]interface{}); ok {
 		for k, v := range appFoldersIDs {
 			if strVal, ok := v.(string); ok {
 				outputs.AppFoldersIDs[k] = strVal
 			} else {
-				return AppFactoryOutputs{}, fmt.Errorf("expected app_folders_ids[%s] to be string, got %T", k, v)
+				return AppFactoryOutputs{}, fmt.Errorf("expected app-folders-ids[%s] to be string, got %T", k, v)
 			}
 		}
 	} else {
-		return AppFactoryOutputs{}, fmt.Errorf("expected app_folders_ids to be map[string]interface{}, got %T", input["app_folders_ids"])
+		return AppFactoryOutputs{}, fmt.Errorf("expected app-folders-ids to be map[string]interface{}, got %T", input["app-folders-ids"])
 	}
 
 	// Handle AppGroup
-	if appGroup, ok := input["app_group"].(map[string]interface{}); ok {
+	if appGroup, ok := input["app-group"].(map[string]interface{}); ok {
 		for componentName, componentData := range appGroup {
 			componentDataMap, ok := componentData.(map[string]interface{})
 			if !ok {
-				return AppFactoryOutputs{}, fmt.Errorf("expected app_group[%s] to be map[string]interface{}, got %T", componentName, componentData)
+				return AppFactoryOutputs{}, fmt.Errorf("expected app-group[%s] to be map[string]interface{}, got %T", componentName, componentData)
 			}
 
 			// Create a new AppGroupOutput
@@ -426,14 +428,15 @@ func convertToAppFactoryOutputs(input map[string]interface{}) (AppFactoryOutputs
 			outputs.AppGroup[componentName] = appGroupOutput
 		}
 	} else {
-		return AppFactoryOutputs{}, fmt.Errorf("expected app_group to be map[string]interface{}, got %T", input["app_group"])
+		return AppFactoryOutputs{}, fmt.Errorf("expected app-group to be map[string]interface{}, got %T", input["app-group"])
 	}
+
 	return outputs, nil
 }
 
 func GetAppFactoryStepOutputs(t testing.TB, eabPath string) AppFactoryOutputs {
 	options := &terraform.Options{
-		TerraformDir: filepath.Join(eabPath, "4-appfactory/envs/shared"),
+		TerraformDir: filepath.Join(eabPath, "envs/shared"),
 		Logger:       logger.Discard,
 		NoColor:      true,
 	}

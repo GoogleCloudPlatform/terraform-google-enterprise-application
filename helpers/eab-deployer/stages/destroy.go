@@ -90,10 +90,10 @@ func forceBackendMigration(t testing.TB, repo, groupUnit, env string, c CommonCo
 
 func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:       tfvars.CloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
+		Stage:       tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
 		CICDProject: outputs.ProjectID,
 		Step:        MultitenantStep,
-		Repo:        tfvars.CloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryURL,
+		Repo:        tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryURL,
 		StageSA:     outputs.CBServiceAccountsEmails["multitenant"],
 		Envs:        slices.Collect(maps.Keys(tfvars.Envs)),
 	}
@@ -103,10 +103,10 @@ func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, o
 
 func DestroyFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:       tfvars.CloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
+		Stage:       tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName,
 		CICDProject: outputs.ProjectID,
 		Step:        FleetscopeStep,
-		Repo:        tfvars.CloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryURL,
+		Repo:        tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryURL,
 		StageSA:     outputs.CBServiceAccountsEmails["fleetscope"],
 		Envs:        slices.Collect(maps.Keys(tfvars.Envs)),
 	}
@@ -115,11 +115,11 @@ func DestroyFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 
 func DestroyAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName,
+		Stage:         tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName,
 		StageSA:       outputs.CBServiceAccountsEmails["appfactory"],
 		CICDProject:   outputs.ProjectID,
 		Step:          AppFactoryStep,
-		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL,
+		Repo:          tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL,
 		HasLocalStep:  true,
 		LocalSteps:    []string{"shared"},
 		GroupingUnits: []string{"envs"},
@@ -129,11 +129,11 @@ func DestroyAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 
 func DestroyAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs AppFactoryOutputs, c CommonConf) error {
 	stageConf := StageConf{
-		Stage:         tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryName,
+		Stage:         tfvars.AppServicesCloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryName,
 		StageSA:       outputs.AppGroup["default-example"].AppCloudbuildWorkspaceCloudbuildSAEmail,
 		CICDProject:   outputs.AppGroup["default-example"].AppAdminProjectID,
 		Step:          AppInfraStep,
-		Repo:          tfvars.CloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL,
+		Repo:          tfvars.AppServicesCloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryURL,
 		HasLocalStep:  false,
 		GroupingUnits: []string{"apps"},
 		Envs:          []string{"default-example"},
@@ -188,7 +188,7 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 				MaxRetries:               2,
 				TimeBetweenRetries:       2 * time.Minute,
 			}
-			conf := utils.CloneCSR(t, tfvars.CloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, gcpPath, sc.CICDProject, c.Logger)
+			conf := utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, gcpPath, sc.CICDProject, c.Logger)
 			err := conf.CheckoutBranch("production")
 			if err != nil {
 				return err
