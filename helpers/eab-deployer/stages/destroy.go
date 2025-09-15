@@ -37,7 +37,7 @@ const (
 
 func DestroyBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 
-	if err := forceBackendMigration(t, BootstrapRepo, "", "", c); err != nil {
+	if err := forceBackendMigration(t, filepath.Join(c.EABPath, BootstrapStep), c); err != nil {
 		return err
 	}
 
@@ -52,20 +52,17 @@ func DestroyBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c C
 // forceBackendMigration removes backend.tf file to force migration of the
 // terraform state from GCS to the local directory.
 // Before changing the backend we ensure it is has been initialized.
-func forceBackendMigration(t testing.TB, repo, groupUnit, env string, c CommonConf) error {
-	tfDir := filepath.Join(c.CheckoutPath, repo, groupUnit, env)
+func forceBackendMigration(t testing.TB, tfDir string, c CommonConf) error {
 	backendF := filepath.Join(tfDir, "backend.tf")
 
-	exist, err := utils.FileExists(backendF)
-	if err != nil {
-		return err
+	exist, _ := utils.FileExists(backendF)
+
+	options := &terraform.Options{
+		TerraformDir: tfDir,
+		Logger:       c.Logger,
+		NoColor:      true,
 	}
 	if exist {
-		options := &terraform.Options{
-			TerraformDir: tfDir,
-			Logger:       c.Logger,
-			NoColor:      true,
-		}
 		_, err := terraform.InitE(t, options)
 		if err != nil {
 			return err
@@ -78,13 +75,14 @@ func forceBackendMigration(t testing.TB, repo, groupUnit, env string, c CommonCo
 		if err != nil {
 			return err
 		}
+
 		options.MigrateState = true
 		_, err = terraform.InitE(t, options)
 		if err != nil {
 			return err
 		}
+		return nil
 	}
-	return nil
 }
 
 func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
