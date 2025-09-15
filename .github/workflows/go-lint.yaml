@@ -20,6 +20,7 @@ on:
     paths:
       - ".github/workflows/go-lint.yaml"
       - "test/integration/**"
+      - "helpers/eab-deployer/**"
 permissions:
   contents: read
 
