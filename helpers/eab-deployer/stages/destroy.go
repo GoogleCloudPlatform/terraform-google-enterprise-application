@@ -26,9 +26,9 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/steps"
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/utils"
-	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/steps"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
 
 const (
@@ -81,8 +81,8 @@ func forceBackendMigration(t testing.TB, tfDir string, c CommonConf) error {
 		if err != nil {
 			return err
 		}
-		return nil
 	}
+	return nil
 }
 
 func DestroyMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {

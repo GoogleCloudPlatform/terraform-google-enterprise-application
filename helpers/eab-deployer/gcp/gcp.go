@@ -23,7 +23,7 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 	"github.com/tidwall/gjson"
 
-	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
 
 const (
