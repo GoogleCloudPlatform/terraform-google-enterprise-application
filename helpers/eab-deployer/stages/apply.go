@@ -16,6 +16,7 @@ package stages
 
 import (
 	"fmt"
+	"io/ioutil"
 	"maps"
 	"os"
 	"path/filepath"
@@ -342,7 +343,7 @@ func deployStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error 
 	}
 
 	err = s.RunStep(fmt.Sprintf("%s.copy-code", sc.Stage), func() error {
-		return copyStepCode(t, sc.GitConf, c.EABPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath)
+		return copyStepCode(t, sc.GitConf, c.EABPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath, sc.Envs)
 	})
 	if err != nil {
 		return err
@@ -448,7 +449,7 @@ func copyAppSourceCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, 
 	return err
 }
 
-func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo, step, customPath string) error {
+func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo, step, customPath string, environmentNames []string) error {
 	gcpPath := filepath.Join(checkoutPath, repo)
 	targetDir := gcpPath
 	fmt.Println(targetDir)
@@ -493,7 +494,28 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 	if err != nil {
 		fmt.Printf("Error writing to file: %v\n", err)
 	}
-	return utils.CopyFile(filepath.Join(EABPath, "build/tf-wrapper.sh"), filepath.Join(gcpPath, "tf-wrapper.sh"))
+	err = utils.CopyFile(filepath.Join(EABPath, "build/tf-wrapper.sh"), filepath.Join(gcpPath, "tf-wrapper.sh"))
+	if err != nil {
+		fmt.Printf("Error writing to file: %v\n", err)
+	}
+
+	fileContent, err := ioutil.ReadFile(filepath.Join(gcpPath, "tf-wrapper.sh"))
+	if err != nil {
+		return fmt.Errorf("error reading file: %w", err)
+	}
+
+	oldValue := "^(development|nonproduction|production|shared)$"
+	newValue := fmt.Sprintf("^(%s)$", strings.Join(environmentNames, "|"))
+	// Convert content to string and perform replacement
+	modifiedContent := strings.ReplaceAll(string(fileContent), oldValue, newValue)
+
+	// Write the modified content back to the file
+	err = ioutil.WriteFile(filepath.Join(gcpPath, "tf-wrapper.sh"), []byte(modifiedContent), 0o644) // 0o644 for read/write by owner, read by others
+	if err != nil {
+		return fmt.Errorf("error writing file: %w", err)
+	}
+
+	return nil
 }
 
 func planStage(t testing.TB, conf utils.GitRepo, project, region, repo string) error {
@@ -523,7 +545,7 @@ func saveBootstrapCodeOnly(t testing.TB, sc StageConf, s steps.Steps, c CommonCo
 	}
 
 	err = s.RunStep(fmt.Sprintf("%s.copy-code", sc.Stage), func() error {
-		return copyStepCode(t, sc.GitConf, c.EABPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath)
+		return copyStepCode(t, sc.GitConf, c.EABPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath, sc.Envs)
 	})
 	if err != nil {
 		return err

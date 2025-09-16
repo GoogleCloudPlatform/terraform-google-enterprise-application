@@ -90,17 +90,16 @@ Version 1.5.7 is the last version before the license model change. To use a late
     ```
 
 - Update `global.tfvars` with values from your environment.
-- The `1-bootstrap` README [prerequisites](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
+- The `1-bootstrap` README [prerequisites](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/1-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
 - Variable `code_checkout_path` is the full path to `deploy-directory` directory.
 - Variable `foundation_code_path` is the full path to `terraform-example-foundation` directory.
 - See the READMEs for the stages for additional information:
-  - [1-bootstrap](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-bootstrap/README.md)
-  - [1-org](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-org/README.md)
-  - [2-environments](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/2-environments/README.md)
-  - [3-networks-svpc](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-svpc)
-  - [3-networks-hub-and-spoke](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-hub-and-spoke)
-  - [4-projects](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/4-projects)
-  - [5-app-infra](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/5-app-infra)
+  - [1-bootstrap](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/1-bootstrap/README.md)
+  - [2-multitenant](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/2-multitenant/README.md)
+  - [3-fleetscope](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/3-fleetscope/README.md)
+  - [4-appfactory](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/4-appfactory/README.md)
+  - [5-appinfra](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/5-appinfra/README.md)
+  - [6-appsource](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/6-appsource/hello-world/README.md)
 
 ### Location
 
@@ -142,8 +141,7 @@ Change the two locals **before** starting the deployment to deploy in other regi
     go install
     ```
 
-- Validate the tfvars file. If you configured a `validator_project_id` in the `global.tfvars` file the `validate` flag will do additional checks for the Secure Command Center notification name and for the Tag Key name.
-For these extra check you need at least the roles *Security Center Notification Configurations Viewer* (`roles/securitycenter.notificationConfigViewer`) and *Tag Viewer* (`roles/resourcemanager.tagViewer`):
+- Validate the tfvars file.
 
     ```bash
     $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -validate
@@ -171,16 +169,13 @@ For these extra check you need at least the roles *Security Center Notification 
 
     ```text
     deploy-directory/
-    └── bu1-example-app
-    └── gcp-bootstrap
-    └── gcp-environments
-    └── gcp-networks
-    └── gcp-org
-    └── gcp-policies
-    └── gcp-policies-app-infra
-    └── gcp-projects
+    └── gcp-multitenant
+    └── gcp-fleetscope
+    └── gcp-appfactory
+    └── hello-world-admin
+    └── hello-world-i-r
     └── global.tfvars
-    └── terraform-example-foundation
+    └── terraform-google-enterprise-application
     ```
 
 ### Supported flags

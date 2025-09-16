@@ -23,11 +23,11 @@ import (
 
 const (
 	size            = 70
-	readmeURL       = "https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/%s/README.md"
+	readmeURL       = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/%s/README.md"
 	cloudBuildURL   = "https://console.cloud.google.com/cloud-build/builds;region=%s?project=%s"
 	buildErrorURL   = "https://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s"
 	quotaURL        = "https://support.google.com/code/contact/billing_quota_increase"
-	troubleQuotaURL = "https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/TROUBLESHOOTING.md#billing-quota-exceeded"
+	troubleQuotaURL = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/blob/main/docs/TROUBLESHOOTING.md#billing-quota-exceeded"
 	groupAdminURL   = "https://cloud.google.com/identity/docs/how-to/setup#assigning_an_admin_role_to_the_service_account"
 )
 
@@ -81,7 +81,7 @@ func PrintBuildMsg(project, region string, disablePrompt bool) {
 
 func PrintQuotaMsg(sa string, disablePrompt bool) {
 	fmt.Println("")
-	fmt.Println("# Request a billing quota increase for the service account of stage 4-projects")
+	fmt.Println("# Request a billing quota increase for the service account of stage 4-appfactory")
 	fmt.Printf("# %s \n", sa)
 	fmt.Printf("# Link: %s\n", quotaURL)
 	fmt.Println("")
@@ -111,7 +111,7 @@ func PrintAdminGroupPermissionMsg(sa string, disablePrompt bool) {
 
 func ConfirmQuota(sa string, disablePrompt bool) {
 	fmt.Println("")
-	fmt.Println("# Proceed if you received confirmation of billing quota increase for the service account of stage 4-projects")
+	fmt.Println("# Proceed if you received confirmation of billing quota increase for the service account of stage 4-appfactory")
 	fmt.Printf("# %s \n", sa)
 	fmt.Printf("# Quota increase link is: %s\n", quotaURL)
 	fmt.Println("")
