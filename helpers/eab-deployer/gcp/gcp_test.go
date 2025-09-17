@@ -38,12 +38,12 @@ func TestGetLastBuildStatus(t *gotest.T) {
 		sleepTime: 1,
 	}
 	status := gcp.GetLastBuildStatus(t, "prj-b-cicd-0123", "us-central1", "filter")
-	assert.Equal(t, StatusSuccess, status)
+	assert.Equal(t, BuildStatusSuccess, status)
 
 	current, err = os.ReadFile(filepath.Join(".", "testdata", "failure_build.json"))
 	assert.NoError(t, err)
 	status = gcp.GetLastBuildStatus(t, "prj-b-cicd-0123", "us-central1", "filter")
-	assert.Equal(t, StatusFailure, status)
+	assert.Equal(t, BuildStatusFailure, status)
 }
 
 func TestGetFinalBuildState(t *gotest.T) {
@@ -70,7 +70,7 @@ func TestGetFinalBuildState(t *gotest.T) {
 
 	status2, err := gcp.GetFinalBuildState(t, "prj-b-cicd-0123", "us-central1", "buildID", 40)
 	assert.NoError(t, err)
-	assert.Equal(t, StatusFailure, status2)
+	assert.Equal(t, BuildStatusFailure, status2)
 	assert.Equal(t, callCount, 2, "Runf must be called twice")
 }
 
@@ -101,7 +101,7 @@ func TestWaitBuildSuccess(t *gotest.T) {
 		sleepTime: 1,
 	}
 
-	err = gcp.WaitBuildSuccess(t, "prj-b-cicd-0123", "us-central1", "repo","", "failed_test_for_WaitBuildSuccess", 40)
+	err = gcp.WaitBuildSuccess(t, "prj-b-cicd-0123", "us-central1", "repo", "", "failed_test_for_WaitBuildSuccess", 40)
 	assert.Error(t, err, "should have failed")
 	assert.Contains(t, err.Error(), "failed_test_for_WaitBuildSuccess", "should have failed with custom info")
 	assert.Equal(t, callCount, 3, "Runf must be called three times")
@@ -133,7 +133,7 @@ func TestWaitBuildTimeout(t *gotest.T) {
 		sleepTime: 1,
 	}
 
-	err = gcp.WaitBuildSuccess(t, "prj-b-cicd-0123", "us-central1", "repo","", "failed_test_for_WaitBuildSuccess", 1)
+	err = gcp.WaitBuildSuccess(t, "prj-b-cicd-0123", "us-central1", "repo", "", "failed_test_for_WaitBuildSuccess", 1)
 	assert.Error(t, err, "should have failed")
 	assert.Contains(t, err.Error(), "timeout waiting for build '736f4689-2497-4382-afd0-b5f0f50eea5b' execution", "should have failed with timeout error")
 	assert.Equal(t, callCount, 3, "Runf must be called three times")

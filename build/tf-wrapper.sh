@@ -29,7 +29,7 @@ tmp_plan="${base_dir}/tmp_plan" #if you change this, update build triggers
 # Configuration for the search depth of folders in the source code that
 # contains the terraform configurations.
 #==============================================================================#
-max_depth=5  # Must be configured based in your directory design
+max_depth=1  # Must be configured based in your directory design
 min_depth=1  # Must be configured based in your directory design
 
 

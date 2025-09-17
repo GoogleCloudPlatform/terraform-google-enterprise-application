@@ -16,6 +16,8 @@ package gcp
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 	"time"
 
@@ -27,11 +29,16 @@ import (
 )
 
 const (
-	StatusQueued    = "QUEUED"
-	StatusWorking   = "WORKING"
-	StatusSuccess   = "SUCCESS"
-	StatusFailure   = "FAILURE"
-	StatusCancelled = "CANCELLED"
+	BuildStatusQueued      = "QUEUED"
+	BuildStatusWorking     = "WORKING"
+	BuildStatusSuccess     = "SUCCESS"
+	BuildStatusFailure     = "FAILURE"
+	BuildStatusCancelled   = "CANCELLED"
+	ReleaseStatusWorking   = "IN_PROGRESS"
+	ReleaseStatusQueued    = "PENDING_RELEASE"
+	ReleaseStatusSuccess   = "SUCCEEDED"
+	ReleaseStatusFailure   = "FAILED"
+	ReleaseStatusCancelled = "CANCELLED"
 )
 
 type GCP struct {
@@ -76,7 +83,7 @@ func (g GCP) GetRunningBuildID(t testing.TB, projectID, region, filter string) s
 	time.Sleep(g.sleepTime * time.Second)
 	builds := g.GetBuilds(t, projectID, region, filter)
 	for id, status := range builds {
-		if status == StatusQueued || status == StatusWorking {
+		if status == BuildStatusQueued || status == BuildStatusWorking {
 			return id
 		}
 	}
@@ -90,7 +97,7 @@ func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string,
 	fmt.Printf("waiting for build %s execution.\n", buildID)
 	status = g.GetBuildStatus(t, projectID, region, buildID)
 	fmt.Printf("build status is %s\n", status)
-	for status != StatusSuccess && status != StatusFailure && status != StatusCancelled {
+	for status != BuildStatusSuccess && status != BuildStatusFailure && status != BuildStatusCancelled {
 		fmt.Printf("build status is %s\n", status)
 		if count >= maxRetry {
 			return "", fmt.Errorf("timeout waiting for build '%s' execution", buildID)
@@ -100,6 +107,35 @@ func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string,
 		status = g.GetBuildStatus(t, projectID, region, buildID)
 	}
 	fmt.Printf("final build status is %s\n", status)
+	return status, nil
+}
+
+// GetRollouts gets all Cloud Deploy Rollouts form a project and region that satisfy the given filter.
+func (g GCP) GetRolloutsStatus(t testing.TB, projectID, region, service, releaseFullName, targetID string) string {
+	rollout := g.Runf(t, "deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, service, region, releaseFullName, targetID).Array()
+	if len(rollout) > 0 {
+		return rollout[0].Get("state").String()
+	}
+	return ""
+}
+
+// GetFinalRolloutState gets the terminal status of the given rollout. It will wait if build is not finished.
+func (g GCP) GetFinalRolloutState(t testing.TB, projectID, region, serviceName, releaseFullName, targetID string, maxRetry int) (string, error) {
+	var status string
+	count := 0
+	fmt.Printf("waiting for rollout %s execution.\n", releaseFullName)
+	status = g.GetRolloutsStatus(t, projectID, region, serviceName, releaseFullName, targetID)
+	fmt.Printf("rollout status is %s\n", status)
+	for status != ReleaseStatusSuccess && status != ReleaseStatusFailure && status != ReleaseStatusCancelled {
+		fmt.Printf("release status is %s\n", status)
+		if count >= maxRetry {
+			return "", fmt.Errorf("timeout waiting for release '%s' execution", releaseFullName)
+		}
+		count = count + 1
+		time.Sleep(g.sleepTime * time.Second)
+		status = g.GetRolloutsStatus(t, projectID, region, serviceName, releaseFullName, targetID)
+	}
+	fmt.Printf("final rollout status is %s\n", status)
 	return status, nil
 }
 
@@ -117,16 +153,49 @@ func (g GCP) WaitBuildSuccess(t testing.TB, project, region, repo, commitSha, fa
 		if err != nil {
 			return err
 		}
-		if status != StatusSuccess {
+		if status != BuildStatusSuccess {
 			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details.\n", failureMsg, region, build, project)
 		}
 	} else {
 		status := g.GetLastBuildStatus(t, project, region, filter)
-		if status != StatusSuccess {
+		if status != BuildStatusSuccess {
 			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details.\n", failureMsg, region, build, project)
 		}
 	}
 	return nil
+}
+
+// WaitReleaseSuccess waits for the current release in a repo to finish.
+func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, commitSha, failureMsg string, maxRetry int) error {
+
+	releaseFullName := fmt.Sprintf("projects/%s/locations/%s/deliveryPipelines/%s/releases/%s-%s", project, region, serviceName, serviceName, commitSha)
+
+	releaseTargets := slices.Collect(maps.Keys(g.GetRelease(t, releaseFullName).Get("targetArtifacts").Map()))
+	if len(releaseTargets) > 0 {
+		for i, targetID := range releaseTargets {
+			status, err := g.GetFinalRolloutState(t, project, region, serviceName, releaseFullName, targetID, maxRetry)
+			if err != nil {
+				return err
+			}
+			if status != ReleaseStatusSuccess {
+				return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/deploy/delivery-pipelines?project=%s\nfor details.\n", failureMsg, project)
+			}
+			if status == ReleaseStatusSuccess && i+1 < len(releaseTargets) {
+				g.PromoteRelease(t, releaseFullName, serviceName, region, releaseTargets[i+1])
+			}
+		}
+	}
+	return nil
+}
+
+// GetRelease waits for the current release.
+func (g GCP) GetRelease(t testing.TB, releaseFullName string) gjson.Result {
+	return g.Runf(t, "deploy releases describe %s", releaseFullName).Array()[0]
+}
+
+// PromoteRelease promote for the current release.
+func (g GCP) PromoteRelease(t testing.TB, releaseFullName, serviceName, region, nextTargetId string) gjson.Result {
+	return g.Runf(t, "deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s", releaseFullName, serviceName, region, nextTargetId)
 }
 
 // HasSccNotification checks if a Security Command Center notification exists

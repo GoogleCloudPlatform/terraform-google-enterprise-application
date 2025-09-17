@@ -85,8 +85,9 @@ type AppFactoryOutputs struct {
 }
 
 type AppInfraOutputs struct {
-	ServiceRepositoryName      string `hcl:"service_repository_name"`
-	ServiceRepositoryProjectID string `hcl:"service_repository_project_id"`
+	ServiceRepositoryName      string   `hcl:"service_repository_name"`
+	ServiceRepositoryProjectID string   `hcl:"service_repository_project_id"`
+	CloudDeployTargetsNames    []string `hcl:"clouddeploy_targets_names"`
 }
 
 type AppGroupOutput struct {
@@ -304,9 +305,12 @@ func GetAppInfraStepOutputs(t testing.TB, eabPath string) AppInfraOutputs {
 		Logger:       logger.Discard,
 		NoColor:      true,
 	}
+	terraform.Init(t, options)
+	t.Logf("Getting outputs from %s", options.TerraformDir)
 	return AppInfraOutputs{
 		ServiceRepositoryName:      terraform.Output(t, options, "service_repository_name"),
 		ServiceRepositoryProjectID: terraform.Output(t, options, "service_repository_project_id"),
+		CloudDeployTargetsNames:    terraform.OutputList(t, options, "clouddeploy_targets_names"),
 	}
 }
 

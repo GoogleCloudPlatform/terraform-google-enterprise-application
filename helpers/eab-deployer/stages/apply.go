@@ -410,14 +410,11 @@ func deployApp(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error {
 		return err
 	}
 
-	for _, env := range sc.Envs {
-		err = s.RunStep(fmt.Sprintf("%s.%s", sc.Stage, env), func() error {
-			aEnv := env
-			return deployEnvApp(t, sc.GitConf, sc.CICDProject, sc.DefaultRegion, sc.Repo, aEnv)
-		})
-		if err != nil {
-			return err
-		}
+	err = s.RunStep(sc.Stage, func() error {
+		return deployEnvApp(t, sc.GitConf, sc.CICDProject, sc.DefaultRegion, sc.Repo, "hello-world", sc.Envs)
+	})
+	if err != nil {
+		return err
 	}
 
 	fmt.Println("end of", sc.Step, "deploy")
@@ -585,7 +582,7 @@ func saveBootstrapCodeOnly(t testing.TB, sc StageConf, s steps.Steps, c CommonCo
 	return nil
 }
 
-func deployEnvApp(t testing.TB, conf utils.GitRepo, project, region, repo, environment string) error {
+func deployEnvApp(t testing.TB, conf utils.GitRepo, project, region, repo, service string, envs []string) error {
 	var err error
 
 	err = conf.CommitFiles(fmt.Sprintf("Initialize %s repo", repo))
@@ -602,7 +599,14 @@ func deployEnvApp(t testing.TB, conf utils.GitRepo, project, region, repo, envir
 		return err
 	}
 
-	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Deploy %s env %s build Failed.", repo, environment), MaxBuildRetries)
+	err = gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Build %s env %s build Failed.", repo, service), MaxBuildRetries)
+	if err != nil {
+		return err
+	}
+
+	err = gcp.NewGCP().WaitReleaseSuccess(t, project, region, service, commitSha[0:7], fmt.Sprintf("Deploy %s env %s build Failed.", repo, service), MaxBuildRetries)
+
+	return err
 }
 
 func applyEnv(t testing.TB, conf utils.GitRepo, project, region, repo, environment string) error {
