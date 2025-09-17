@@ -233,6 +233,7 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		GitConf:       conf,
 		HasLocalStep:  true,
 		LocalSteps:    []string{"shared"},
+		Envs:          []string{"shared"},
 		GroupingUnits: []string{"envs"},
 		DefaultRegion: tfvars.TriggerLocation,
 	}
