@@ -18,6 +18,7 @@ billing_account     = "REPLACE_WITH_BILLING_ACCOUNT"
 common_folder_id    = "REPLACE_WITH_COMMON_FOLDER_ID"
 org_id              = "REPLACE_WITH_YOUR_ORGANIZATION_ID"
 remote_state_bucket = "REMOTE_STATE_BUCKET"
+kms_project_id      = "REPLACE_WITH_KMS_PROJECT_ID"
 
 service_perimeter_name = "accessPolicies/000000000000000/servicePerimeters/sp_gke_enterprise_XXXXX"
 service_perimeter_mode = "ENFORCE"
