@@ -271,7 +271,7 @@ You can get this information from step `0-bootstrap` by running the following co
 
 **Terraform State lock possible causes:**
 
-- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/build/cloudbuild-tf-apply.yaml#L15).
+- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/terraform-google-modules/terraform-example-foundation/blob/main/build/cloudbuild-tf-apply.yaml#L15).
 
 ### Terraform deploy fails due to GitLab repositories not found
 
@@ -335,7 +335,7 @@ Possible causes of the project creation failure in the first execution are:
 
 **Solution:**
 
-If the cause is the project creation quota issue. Follow instruction in the Terraform Example Foundation [troubleshooting](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/TROUBLESHOOTING.md#billing-quota-exceeded)
+If the cause is the project creation quota issue. Follow instruction in the Terraform Example Foundation [troubleshooting](https://github.com/terraform-google-modules/terraform-example-foundation/blob/main/docs/TROUBLESHOOTING.md#billing-quota-exceeded)
 
 After doing this fixes you need to force the recreation of the random suffix used in the project ID.
 To force the creation run
