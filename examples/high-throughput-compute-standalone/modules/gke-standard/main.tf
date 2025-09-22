@@ -346,6 +346,7 @@ resource "google_container_node_pool" "primary_spot_nodes" {
       enable_integrity_monitoring = var.enable_shielded_nodes
       enable_secure_boot          = var.enable_secure_boot
     }
+
     disk_type = "pd-standard"
     disk_size_gb = "100"
     preemptible  = true
