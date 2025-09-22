@@ -18,15 +18,57 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/gcp"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/mitchellh/go-testing-interface"
 )
 
 const (
 	replaceME     = "REPLACE_ME"
 	exampleDotCom = "example.com"
+)
+
+var (
+	requiredAPIs = []string{"accesscontextmanager.googleapis.com",
+		"artifactregistry.googleapis.com",
+		"anthos.googleapis.com",
+		"anthosconfigmanagement.googleapis.com",
+		"apikeys.googleapis.com",
+		"binaryauthorization.googleapis.com",
+		"certificatemanager.googleapis.com",
+		"cloudbilling.googleapis.com",
+		"cloudbuild.googleapis.com",
+		"clouddeploy.googleapis.com",
+		"cloudfunctions.googleapis.com",
+		"cloudkms.googleapis.com",
+		"cloudresourcemanager.googleapis.com",
+		"cloudtrace.googleapis.com",
+		"compute.googleapis.com",
+		"container.googleapis.com",
+		"containeranalysis.googleapis.com",
+		"containerscanning.googleapis.com",
+		"gkehub.googleapis.com",
+		"iam.googleapis.com",
+		"iap.googleapis.com",
+		"mesh.googleapis.com",
+		"monitoring.googleapis.com",
+		"multiclusteringress.googleapis.com",
+		"multiclusterservicediscovery.googleapis.com",
+		"networkmanagement.googleapis.com",
+		"orgpolicy.googleapis.com",
+		"secretmanager.googleapis.com",
+		"servicedirectory.googleapis.com",
+		"servicemanagement.googleapis.com",
+		"servicenetworking.googleapis.com",
+		"serviceusage.googleapis.com",
+		"sqladmin.googleapis.com",
+		"storage.googleapis.com",
+		"trafficdirector.googleapis.com",
+	}
 )
 
 // ValidateDirectories checks if the required directories exist
@@ -84,6 +126,21 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
 	if !test {
 		fmt.Println("# You `attestation_kms_project` must be the same in your `attestation_kms_key`")
 	}
+}
+
+func ValidateRequiredAPIs(t testing.TB, g GlobalTFVars) {
+	fmt.Println("")
+	fmt.Println("# Validating required APIs.")
+
+	enabledAPIS := gcloud.Runf(t, "services list --project %s", g.ProjectID).Array()
+	listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
+
+	for _, requiredAPI := range requiredAPIs {
+		if !slices.Contains(listApis, requiredAPI) {
+			fmt.Printf("# Project `%s` is missing required API: `%s` \n", g.ProjectID, requiredAPI)
+		}
+	}
+
 }
 
 // ValidateDestroyFlags checks if the flags to allow the destruction of the infrastructure are enabled

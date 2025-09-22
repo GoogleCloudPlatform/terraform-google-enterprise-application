@@ -104,6 +104,7 @@ func main() {
 		stages.ValidateComponents(t)
 		stages.ValidateBasicFields(t, globalTFVars)
 		stages.ValidateDestroyFlags(t, globalTFVars)
+		stages.ValidateRequiredAPIs(t, globalTFVars)
 		return
 	}
 
