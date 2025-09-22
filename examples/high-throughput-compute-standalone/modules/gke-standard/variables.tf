@@ -86,13 +86,13 @@ variable "cluster_service_account" {
 
 variable "cluster_max_cpus" {
   type        = number
-  default     = 8
+  default     = 100
   description = "Max CPU in cluster autoscaling resource limits"
 }
 
 variable "cluster_max_memory" {
   type        = number
-  default     = 16
+  default     = 1024
   description = "Max memory in cluster autoscaling resource limits"
 }
 

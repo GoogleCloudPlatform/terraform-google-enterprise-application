@@ -89,8 +89,8 @@ See the `variables.tf` file for all available configuration options.
 | additional\_service\_account\_roles | Additional IAM roles to assign to the cluster service account | `list(string)` | `[]` | no |
 | artifact\_registry\_cleanup\_policy\_keep\_count | Number of most recent container image versions to keep in Artifact Registry | `number` | `10` | no |
 | artifact\_registry\_name | Name of the Artifact Registry repository to create | `string` | `"research-images"` | no |
-| cluster\_max\_cpus | Maximum CPU cores in cluster autoscaling resource limits | `number` | `8` | no |
-| cluster\_max\_memory | Maximum memory (in GB) in cluster autoscaling resource limits | `number` | `16` | no |
+| cluster\_max\_cpus | Maximum CPU cores in cluster autoscaling resource limits | `number` | `100` | no |
+| cluster\_max\_memory | Maximum memory (in GB) in cluster autoscaling resource limits | `number` | `1024` | no |
 | cluster\_service\_account | Service Account ID to use for GKE clusters | `string` | `"gke-risk-research-cluster-sa"` | no |
 | clusters\_per\_region | Map of regions to number of clusters to create in each (maximum 4 per region) | `map(number)` | <pre>{<br>  "us-central1": 1<br>}</pre> | no |
 | create\_ondemand\_nodepool | Whether to create the on-demand node pool | `bool` | `true` | no |

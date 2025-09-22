@@ -193,12 +193,12 @@ resource "google_container_cluster" "risk-research" {
     resource_limits {
       resource_type = "cpu"
       minimum       = 0
-      maximum       = 100
+      maximum       = var.cluster_max_cpus
     }
     resource_limits {
       resource_type = "memory"
       minimum       = 0
-      maximum       = 1024
+      maximum       = var.cluster_max_memory
     }
 
     resource_limits {

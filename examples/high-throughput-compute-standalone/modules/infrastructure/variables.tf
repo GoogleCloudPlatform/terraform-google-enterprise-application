@@ -104,13 +104,13 @@ variable "scaled_control_plane" {
 
 variable "cluster_max_cpus" {
   type        = number
-  default     = 8
+  default     = 100
   description = "Maximum CPU cores in cluster autoscaling resource limits"
 }
 
 variable "cluster_max_memory" {
   type        = number
-  default     = 16
+  default     = 1024
   description = "Maximum memory (in GB) in cluster autoscaling resource limits"
 }
 

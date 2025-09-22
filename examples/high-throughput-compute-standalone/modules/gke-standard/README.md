@@ -129,8 +129,8 @@ limitations under the License.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | cluster\_index | Index of this cluster within its region (0-3) | `number` | n/a | yes |
-| cluster\_max\_cpus | Max CPU in cluster autoscaling resource limits | `number` | `8` | no |
-| cluster\_max\_memory | Max memory in cluster autoscaling resource limits | `number` | `16` | no |
+| cluster\_max\_cpus | Max CPU in cluster autoscaling resource limits | `number` | `100` | no |
+| cluster\_max\_memory | Max memory in cluster autoscaling resource limits | `number` | `1024` | no |
 | cluster\_name | Name of GKE cluster | `string` | `"gke-risk-research"` | no |
 | cluster\_service\_account | The service account for the GKE cluster | <pre>object({<br>    email = string<br>    id    = string<br>  })</pre> | n/a | yes |
 | create\_ondemand\_nodepool | Whether to create the on-demand node pool | `bool` | `true` | no |
