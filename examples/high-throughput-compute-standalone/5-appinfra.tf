@@ -197,14 +197,14 @@ resource "google_logging_project_bucket_config" "analytics-enabled-bucket" {
   project          = var.project_id
   location         = module.default_region.default_region
   enable_analytics = true
-  bucket_id        = "appLogsTest"
+  bucket_id        = "applogs"
   lifecycle {
     ignore_changes = [project]
   }
 }
 
 resource "google_logging_linked_dataset" "logging_linked_dataset" {
-  link_id     = "appLogsTest"
+  link_id     = "applogs"
   bucket      = google_logging_project_bucket_config.analytics-enabled-bucket.id
   description = "Linked dataset test"
   depends_on = [
