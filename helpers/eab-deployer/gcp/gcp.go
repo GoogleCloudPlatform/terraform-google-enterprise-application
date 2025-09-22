@@ -228,3 +228,13 @@ func (g GCP) IsApiEnabled(t testing.TB, project, api string) bool {
 	filter := fmt.Sprintf("config.name=%s", api)
 	return len(g.Runf(t, "services list --enabled --project %s --filter %s", project, filter).Array()) > 0
 }
+
+// IsComponentInstalled checks if a given gcloud component is installed
+func (g GCP) IsComponentInstalled(t testing.TB, componentID string) bool {
+	filter := fmt.Sprintf("\"id='%s'\"", componentID)
+	components := g.Runf(t, "components list --filter %s", filter).Array()
+	if len(components) == 0 {
+		return false
+	}
+	return components[0].Get("state.name").String() != "Not Installed"
+}

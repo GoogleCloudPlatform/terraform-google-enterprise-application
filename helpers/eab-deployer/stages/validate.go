@@ -17,8 +17,10 @@ package stages
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/gcp"
 	"github.com/mitchellh/go-testing-interface"
 )
 
@@ -40,6 +42,25 @@ func ValidateDirectories(g GlobalTFVars) error {
 	return nil
 }
 
+// ValidateComponents checks if gcloud Beta Components and Terraform Tools are installed
+func ValidateComponents(t testing.TB) error {
+	gcpConf := gcp.NewGCP()
+	components := []string{
+		"beta",
+		"terraform-tools",
+	}
+	missing := []string{}
+	for _, c := range components {
+		if !gcpConf.IsComponentInstalled(t, c) {
+			missing = append(missing, fmt.Sprintf("'%s' not installed", c))
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("missing Google Cloud SDK component:%v", missing)
+	}
+	return nil
+}
+
 // ValidateBasicFields validates if the values for the required field were provided
 func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
 	// gcpConf := gcp.NewGCP()
@@ -48,6 +69,21 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
 
 	g.CheckString(replaceME)
 
+	for namespaces := range g.NamespaceIDs {
+		if strings.Contains(namespaces, exampleDotCom) {
+			fmt.Println("# Replace value 'example.com' for input 'namespace_ids'")
+		}
+	}
+
+	test, _ := regexp.MatchString(g.KMSProjectID, g.BucketKMSKey)
+	if !test {
+		fmt.Println("# You `kms_project_id` must be the same in your `bucket_kms_key`")
+	}
+
+	test, _ = regexp.MatchString(g.AttestationKMSProject, g.AttestationKMSKey)
+	if !test {
+		fmt.Println("# You `attestation_kms_project` must be the same in your `attestation_kms_key`")
+	}
 }
 
 // ValidateDestroyFlags checks if the flags to allow the destruction of the infrastructure are enabled
