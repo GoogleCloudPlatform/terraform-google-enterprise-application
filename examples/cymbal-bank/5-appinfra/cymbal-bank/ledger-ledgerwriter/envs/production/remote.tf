@@ -20,8 +20,8 @@ locals {
   cluster_project_id = data.terraform_remote_state.multitenant.outputs.cluster_project_id
   cluster_regions    = data.terraform_remote_state.multitenant.outputs.cluster_regions
   network_project_id = data.terraform_remote_state.multitenant.outputs.network_project_id
-  network_name       = data.terraform_remote_state.multitenant.outputs.network_name
-  app_project_id     = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.ledgerwriter"].app_env_project_ids[local.env]
+  network_name       = data.terraform_remote_state.multitenant.outputs.network_names
+  app_project_id     = data.terraform_remote_state.appfactory.outputs.app-group["cymbal-bank.ledgerwriter"].app_infra_project_ids[local.env]
 }
 
 data "terraform_remote_state" "multitenant" {
