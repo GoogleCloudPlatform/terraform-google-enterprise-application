@@ -143,7 +143,14 @@ func ValidateRequiredAPIs(t testing.TB, g GlobalTFVars) {
 func ValidateRepositories(t testing.TB, g GlobalTFVars) {
 	fmt.Println("")
 	fmt.Println("# Validating if repositories are accessible.")
-	pat := gcp.NewGCP().GetSecretValue(t, g.InfraCloudbuildV2RepositoryConfig.GithubSecretID)
+	var pat string
+
+	switch g.InfraCloudbuildV2RepositoryConfig.RepoType {
+	case "GITHUBv2":
+		pat = gcp.NewGCP().GetSecretValue(t, g.InfraCloudbuildV2RepositoryConfig.GithubSecretID)
+	case "GITLABv2":
+		pat = gcp.NewGCP().GetSecretValue(t, g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID)
+	}
 
 	for _, repo := range g.InfraCloudbuildV2RepositoryConfig.Repositories {
 		repoParts := strings.Split(repo.RepositoryURL, "/")
@@ -157,7 +164,8 @@ func ValidateRepositories(t testing.TB, g GlobalTFVars) {
 
 		// Check for common success status codes (200-299).
 		if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
-			if g.InfraCloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" {
+			switch g.InfraCloudbuildV2RepositoryConfig.RepoType {
+			case "GITHUBv2":
 				repoURL := fmt.Sprintf("https://api.github.com/repos/%s/%s", repoParts[len(repoParts)-2], strings.ReplaceAll(repoParts[len(repoParts)-1], ".git", ""))
 				req, err := http.NewRequest("GET", repoURL, nil)
 				if err != nil {
@@ -170,6 +178,26 @@ func ValidateRepositories(t testing.TB, g GlobalTFVars) {
 				}
 				defer resp.Body.Close()
 
+				if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+					fmt.Printf("# Repository is accessible and PRIVATE! %s\n", repo.RepositoryURL)
+				} else {
+					fmt.Printf("# Repository %s is NOT ACCESSIBLE! %d\n", repo.RepositoryURL, resp.StatusCode)
+				}
+			case "GITLABv2":
+				repoURL := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/%s", repoParts[len(repoParts)-2], strings.ReplaceAll(repoParts[len(repoParts)-1], ".git", ""))
+				req, err := http.NewRequest("HEAD", repoURL, nil)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
+				}
+
+				// GitLab uses the "PRIVATE-TOKEN" header for authentication with a PAT
+				req.Header.Add("PRIVATE-TOKEN", pat)
+
+				resp, err := client.Do(req)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error making request: %v\n", err)
+				}
+				defer resp.Body.Close()
 				if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 					fmt.Printf("# Repository is accessible and PRIVATE! %s\n", repo.RepositoryURL)
 				} else {
