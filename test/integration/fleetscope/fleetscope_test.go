@@ -27,9 +27,9 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/stretchr/testify/assert"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	"github.com/tidwall/gjson"
 )
 
@@ -237,7 +237,7 @@ func TestFleetscope(t *testing.T) {
 								configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
 
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
-								assert.Equal("1.19.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
+								assert.Equal("1.22.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 							}
 						}
 					case "policycontroller":
