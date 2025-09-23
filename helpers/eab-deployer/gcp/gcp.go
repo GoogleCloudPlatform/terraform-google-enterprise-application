@@ -15,6 +15,7 @@
 package gcp
 
 import (
+	"encoding/base64"
 	"fmt"
 	"maps"
 	"slices"
@@ -227,6 +228,16 @@ func (g GCP) EnableApis(t testing.TB, project string, apis []string) {
 func (g GCP) IsApiEnabled(t testing.TB, project, api string) bool {
 	filter := fmt.Sprintf("config.name=%s", api)
 	return len(g.Runf(t, "services list --enabled --project %s --filter %s", project, filter).Array()) > 0
+}
+
+// IsApiEnabled checks if the api is enabled in the given project
+func (g GCP) GetSecretValue(t testing.TB, secretID string) string {
+	secret := g.Runf(t, "secrets versions access %s/versions/latest", secretID)
+	decoded, err := base64.StdEncoding.DecodeString(secret.Get("payload.data").String())
+	if err != nil {
+		fmt.Printf("Error decoding string: %s", err.Error())
+	}
+	return string(decoded)
 }
 
 // IsComponentInstalled checks if a given gcloud component is installed

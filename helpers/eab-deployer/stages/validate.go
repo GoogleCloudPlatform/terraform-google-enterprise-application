@@ -16,14 +16,12 @@ package stages
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
-	"slices"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/gcp"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/mitchellh/go-testing-interface"
 )
 
@@ -128,16 +126,58 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
 	}
 }
 
+// ValidateRequiredAPIs validates if the project has the required APIs enabled.
 func ValidateRequiredAPIs(t testing.TB, g GlobalTFVars) {
 	fmt.Println("")
 	fmt.Println("# Validating required APIs.")
 
-	enabledAPIS := gcloud.Runf(t, "services list --project %s", g.ProjectID).Array()
-	listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
-
 	for _, requiredAPI := range requiredAPIs {
-		if !slices.Contains(listApis, requiredAPI) {
+		if !gcp.NewGCP().IsApiEnabled(t, g.ProjectID, requiredAPI) {
 			fmt.Printf("# Project `%s` is missing required API: `%s` \n", g.ProjectID, requiredAPI)
+		}
+	}
+
+}
+
+// ValidateRepositories checks if provided repositories are accessible.
+func ValidateRepositories(t testing.TB, g GlobalTFVars) {
+	fmt.Println("")
+	fmt.Println("# Validating if repositories are accessible.")
+	pat := gcp.NewGCP().GetSecretValue(t, g.InfraCloudbuildV2RepositoryConfig.GithubSecretID)
+
+	for _, repo := range g.InfraCloudbuildV2RepositoryConfig.Repositories {
+		repoParts := strings.Split(repo.RepositoryURL, "/")
+
+		client := &http.Client{}
+		resp, err := client.Get(repo.RepositoryURL)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "# Error making request: %v\n", err)
+		}
+		defer resp.Body.Close()
+
+		// Check for common success status codes (200-299).
+		if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
+			if g.InfraCloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" {
+				repoURL := fmt.Sprintf("https://api.github.com/repos/%s/%s", repoParts[len(repoParts)-2], strings.ReplaceAll(repoParts[len(repoParts)-1], ".git", ""))
+				req, err := http.NewRequest("GET", repoURL, nil)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
+				}
+				req.Header.Add("Authorization", "Bearer "+pat)
+				resp, err := client.Do(req)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error making request: %v\n", err)
+				}
+				defer resp.Body.Close()
+
+				if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+					fmt.Printf("# Repository is accessible and PRIVATE! %s\n", repo.RepositoryURL)
+				} else {
+					fmt.Printf("# Repository %s is NOT ACCESSIBLE! %d\n", repo.RepositoryURL, resp.StatusCode)
+				}
+			}
+		} else {
+			fmt.Printf("# Repository is PUBLIC! %s\n", repo.RepositoryURL)
 		}
 	}
 
