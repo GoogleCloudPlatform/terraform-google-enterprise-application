@@ -249,3 +249,19 @@ func (g GCP) IsComponentInstalled(t testing.TB, componentID string) bool {
 	}
 	return components[0].Get("state.name").String() != "Not Installed"
 }
+
+func (g GCP) GetRolePermissions(t testing.TB, roleName string) ([]string, error) {
+	result := g.Runf(t, "iam roles describe %s", roleName)
+
+	permissions := []string{}
+	for _, permission := range result.Get("includedPermissions").Array() {
+		permissions = append(permissions, permission.String())
+	}
+	return permissions, nil
+}
+
+func (g GCP) GetAuthToken(t testing.TB) string {
+	result := g.Runf(t, "auth print-access-token")
+
+	return result.Get("token").String()
+}

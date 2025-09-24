@@ -15,7 +15,10 @@
 package stages
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
@@ -211,6 +214,172 @@ func ValidateRepositories(t testing.TB, g GlobalTFVars) {
 
 }
 
+// ValidateRepositories checks if provided repositories are accessible.
+func ValidatePermissions(t testing.TB, g GlobalTFVars) {
+	fmt.Println("")
+	fmt.Println("# Validating if identity has required roles.")
+
+	projectRoles := map[string][]string{
+
+		fmt.Sprintf("infraSecretProject:%s", g.InfraCloudbuildV2RepositoryConfig.SecretProjectID): {
+			"roles/secretmanager.admin",
+		},
+		fmt.Sprintf("AppSecretProject:%s", g.AppServicesCloudbuildV2RepositoryConfig.SecretProjectID): {
+			"roles/secretmanager.admin",
+		},
+		fmt.Sprintf("seedProject:%s", g.ProjectID): {
+			"roles/cloudbuild.connectionAdmin",
+			"roles/compute.networkAdmin",
+			"roles/resourcemanager.projectIamAdmin",
+		},
+		fmt.Sprintf("kmsProject:%s", g.KMSProjectID): {
+			"roles/resourcemanager.projectIamAdmin",
+		},
+		fmt.Sprintf("cbPrivateWorkerPoolProject:%s", g.CBPrivateWorkerpoolProjectID): {
+			"roles/cloudbuild.workerPoolUser",
+			"roles/resourcemanager.projectIamAdmin",
+		},
+	}
+
+	orgLevelRoles := []string{
+		"roles/accesscontextmanager.policyAdmin",
+	}
+
+	folderLevelRoles := []string{
+		"roles/resourcemanager.folderAdmin",
+		"roles/resourcemanager.projectCreator",
+		"roles/compute.networkAdmin",
+		"roles/compute.xpnAdmin",
+	}
+
+	for indexProject, roles := range projectRoles {
+		project := strings.Split(indexProject, ":")[1]
+		for _, role := range roles {
+			fmt.Printf("# Checking role %s at project %s. \n", role, project)
+
+			rolePermissions, err := gcp.NewGCP().GetRolePermissions(t, role)
+			if err != nil {
+				fmt.Printf("# Error getting roles: %v\n", err)
+				return
+			}
+
+			cleanPermission := []string{}
+			for _, permission := range rolePermissions {
+				if permission != "resourcemanager.projects.list" && permission != "networksecurity.firewallEndpoints.create" &&
+					permission != "networksecurity.firewallEndpoints.delete" && permission != "networksecurity.firewallEndpoints.get" &&
+					permission != "networksecurity.firewallEndpoints.list" && permission != "networksecurity.firewallEndpoints.update" &&
+					permission != "networksecurity.firewallEndpoints.use" {
+					cleanPermission = append(cleanPermission, permission)
+				}
+			}
+			identityPermissions, err := testIAMPermissions(t, cleanPermission, fmt.Sprintf("projects/%s", project))
+			if err != nil {
+				fmt.Printf("# Error testing roles: %v\n", err)
+				return
+			}
+
+			if len(intersection(cleanPermission, identityPermissions)) != len(cleanPermission) {
+				fmt.Printf("# Missing required role: %s \n", role)
+			}
+		}
+	}
+
+	for _, role := range orgLevelRoles {
+		fmt.Printf("# Checking role %s at organization %s. \n", role, g.OrgID)
+
+		rolePermissions, err := gcp.NewGCP().GetRolePermissions(t, role)
+		if err != nil {
+			fmt.Printf("# Error getting roles: %v\n", err)
+			return
+		}
+
+		identityPermissions, err := testIAMPermissions(t, rolePermissions, fmt.Sprintf("organizations/%s", g.OrgID))
+		if err != nil {
+			fmt.Printf("# Error testing roles: %v\n", err)
+			return
+		}
+
+		if len(intersection(rolePermissions, identityPermissions)) != len(rolePermissions) {
+			fmt.Printf("# Missing required role: %s \n", role)
+		}
+	}
+
+	for _, role := range folderLevelRoles {
+		fmt.Printf("# Checking role %s at folder %s. \n", role, g.CommonFolderID)
+
+		rolePermissions, err := gcp.NewGCP().GetRolePermissions(t, role)
+		if err != nil {
+			fmt.Printf("# Error getting roles: %v\n", err)
+			return
+		}
+		cleanPermission := []string{}
+		for _, permission := range rolePermissions {
+			if permission != "resourcemanager.organizations.get" && permission != "networksecurity.firewallEndpoints.create" &&
+				permission != "networksecurity.firewallEndpoints.delete" && permission != "networksecurity.firewallEndpoints.get" &&
+				permission != "networksecurity.firewallEndpoints.list" && permission != "networksecurity.firewallEndpoints.update" &&
+				permission != "networksecurity.firewallEndpoints.use" {
+				cleanPermission = append(cleanPermission, permission)
+			}
+		}
+
+		identityPermissions, err := testIAMPermissions(t, cleanPermission, g.CommonFolderID)
+		if err != nil {
+			fmt.Printf("# Error testing roles: %v\n", err)
+			return
+		}
+
+		if len(intersection(cleanPermission, identityPermissions)) != len(cleanPermission) {
+			fmt.Printf("# Missing required role: %s \n", role)
+		}
+	}
+}
+
+// testIAMPermissions checks a set of permissions against a parent (projects/PROJECT_ID or folders/FORLDER_ID of organizations/ORG_ID) using the cloudresourcemanager:testIamPermissions V3 API
+func testIAMPermissions(t testing.TB, permissions []string, parent string) ([]string, error) {
+	client := &http.Client{}
+	identityPermissions := []string{}
+	chunkSize := 100
+
+	// avoid "The number of permissions (xxx) is greater than the maximum allowed (100).
+	for i := 0; i < len(permissions); i += chunkSize {
+		// Calculate the end index for the current chunk
+		end := i + chunkSize
+		if end > len(permissions) {
+			end = len(permissions)
+		}
+
+		// Extract the current chunk
+		chunk := permissions[i:end]
+
+		requestBody := map[string][]string{"permissions": chunk}
+		jsonBody, _ := json.Marshal(requestBody)
+		req, err := http.NewRequest("POST", fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/%s:testIamPermissions", parent), bytes.NewBuffer([]byte(jsonBody)))
+		req.Header.Add("Authorization", "Bearer "+gcp.NewGCP().GetAuthToken(t))
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("# Error making request: %v\n", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			bodyBytes, _ := io.ReadAll(resp.Body) // Read error body (ignore error to avoid shadowing)
+			return nil, fmt.Errorf("# Error request failed with status code: %d, body: %s \n", resp.StatusCode, string(bodyBytes))
+		} else {
+			bodyBytes, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, fmt.Errorf("# Error failed to read response body: %w \n", err)
+			}
+			bodyJson := map[string][]string{}
+			err = json.Unmarshal(bodyBytes, &bodyJson)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal JSON: %w \n", err)
+			}
+			identityPermissions = append(identityPermissions, bodyJson["permissions"]...)
+		}
+	}
+	return identityPermissions, nil
+}
+
 // ValidateDestroyFlags checks if the flags to allow the destruction of the infrastructure are enabled
 func ValidateDestroyFlags(t testing.TB, g GlobalTFVars) {
 	trueFlags := []string{}
@@ -240,4 +409,20 @@ func ValidateDestroyFlags(t testing.TB, g GlobalTFVars) {
 			fmt.Println("# please set the project_deletion_policy input to 'DELETE' in the tfvars file")
 		}
 	}
+}
+
+func intersection(first, second []string) []string {
+	out := []string{}
+	bucket := map[string]bool{}
+
+	for _, i := range first {
+		for _, j := range second {
+			if i == j && !bucket[i] {
+				out = append(out, i)
+				bucket[i] = true
+			}
+		}
+	}
+
+	return out
 }

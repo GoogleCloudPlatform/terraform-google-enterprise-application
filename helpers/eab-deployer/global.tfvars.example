@@ -28,8 +28,8 @@ buckets_force_destroy = true
 deletion_protection   = false
 
 infra_cloudbuildv2_repository_config = {
- github_app_id_secret_id                     = "projects/646528126348/secrets/github-app-id"
-  github_secret_id                            = "projects/646528126348/secrets/github-pat"
+ github_app_id_secret_id                     = "projects/REPLACE_ME/secrets/github-app-id"
+  github_secret_id                            = "projects/REPLACE_ME/secrets/github-pat"
   gitlab_authorizer_credential_secret_id      = ""
   gitlab_enterprise_ca_certificate            = ""
   gitlab_enterprise_host_uri                  = ""
@@ -40,22 +40,22 @@ infra_cloudbuildv2_repository_config = {
   repositories = {
     applicationfactory = {
       repository_name = "eab-appfactory"
-      repository_url  = "https://github.com/amandakarina/eab-appfactory.git"
+      repository_url  = "https://github.com/REPLACE_ME/eab-appfactory.git"
     }
     fleetscope = {
       repository_name = "eab-fleetscope"
-      repository_url  = "https://github.com/amandakarina/eab-fleetscope.git"
+      repository_url  = "https://github.com/REPLACE_ME/eab-fleetscope.git"
     }
     hello-world = {
       repository_name = "hello-world-admin"
-      repository_url  = "https://github.com/amandakarina/hello-world-admin.git"
+      repository_url  = "https://github.com/REPLACE_ME/hello-world-admin.git"
     }
     multitenant = {
       repository_name = "eab-multitenant"
-      repository_url  = "https://github.com/amandakarina/eab-multitenant.git"
+      repository_url  = "https://github.com/REPLACE_ME/eab-multitenant.git"
     }
   }
-  secret_project_id = "eab-private-workerpool-vjsn"
+  secret_project_id = "REPLACE_ME"
 }
 
 app_services_cloudbuildv2_repository_config = {
@@ -161,8 +161,8 @@ disable_istio_on_namespaces = []
 
 // 4-appfactory
 
-billing_account = "REPLACE_ME" # "REPLACE_ME"
-org_id          = "REPLACE_ME" #"REPLACE_ME"
+billing_account = "REPLACE_ME"
+org_id          = "REPLACE_ME"
 
 infra_project_apis = [
   "iam.googleapis.com",
