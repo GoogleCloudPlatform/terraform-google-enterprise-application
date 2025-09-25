@@ -27,6 +27,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/gcp"
 	"github.com/mitchellh/go-testing-interface"
+	"github.com/tidwall/gjson"
 )
 
 const (
@@ -127,6 +128,24 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
 	test, _ = regexp.MatchString(g.AttestationKMSProject, g.AttestationKMSKey)
 	if !test {
 		fmt.Println("# You `attestation_kms_project` must be the same in your `attestation_kms_key`")
+	}
+
+	if g.InfraCloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" &&
+		(g.InfraCloudbuildV2RepositoryConfig.GithubAppIDSecretID == "" || g.InfraCloudbuildV2RepositoryConfig.GithubSecretID == "") {
+		fmt.Println("# You must provide `github_app_id_secret_id` and `github_secret_id` for infra_cloudbuildv2_repository_config")
+	}
+	if g.AppServicesCloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" &&
+		(g.AppServicesCloudbuildV2RepositoryConfig.GithubAppIDSecretID == "" || g.AppServicesCloudbuildV2RepositoryConfig.GithubSecretID == "") {
+		fmt.Println("# You must provide `github_app_id_secret_id` and `github_secret_id` for app_services_cloudbuildv2_repository_config")
+	}
+
+	if g.InfraCloudbuildV2RepositoryConfig.RepoType == "GITLABv2" &&
+		(g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == "" || g.InfraCloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == "" || g.InfraCloudbuildV2RepositoryConfig.GitlabWebhookSecretID == "") {
+		fmt.Println("# You must provide `gitlab_authorizer_credential_secret_id`, `gitlab_webhook_secret_id` and `gitlab_read_authorizer_credential_secret_id` for infra_cloudbuildv2_repository_config")
+	}
+	if g.AppServicesCloudbuildV2RepositoryConfig.RepoType == "GITLABv2" &&
+		(g.AppServicesCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == "" || g.AppServicesCloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == "" || g.AppServicesCloudbuildV2RepositoryConfig.GitlabWebhookSecretID == "") {
+		fmt.Println("# You must provide `gitlab_authorizer_credential_secret_id`, `gitlab_webhook_secret_id` and `gitlab_read_authorizer_credential_secret_id` for app_services_cloudbuildv2_repository_config")
 	}
 }
 
@@ -427,27 +446,9 @@ func intersection(first, second []string) []string {
 	return out
 }
 
-func extractInfoFromSubnetSelfLink(selfLink string) (map[string]string, error) {
-	re := regexp.MustCompile(`projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<subnet>[^/]+)`)
-	match := re.FindStringSubmatch(selfLink)
-
-	if len(match) == 0 {
-		return nil, fmt.Errorf("no match found.")
-	}
-
-	result := make(map[string]string)
-	for i, name := range re.SubexpNames() {
-		if i != 0 && name != "" {
-			result[name] = match[i]
-		}
-	}
-
-	return result, nil
-}
-
-func extractInfoFromPrivateWorkerPoolID(privateWorkerPoolID string) (map[string]string, error) {
-	re := regexp.MustCompile(`projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/workerPools/(?P<workerPool>[^/]+)`)
-	match := re.FindStringSubmatch(privateWorkerPoolID)
+func extractInfoWithRegex(input, pattern string) (map[string]string, error) {
+	re := regexp.MustCompile(pattern)
+	match := re.FindStringSubmatch(input)
 
 	if len(match) == 0 {
 		return nil, fmt.Errorf("no match found.")
@@ -483,7 +484,7 @@ func ValidateNetworkRequirementes(t testing.TB, g GlobalTFVars) {
 		for _, subnet := range envs.SubnetsSelfLinks {
 			fmt.Printf("# Checking subnet %s.", subnet)
 
-			subnetInfo, err := extractInfoFromSubnetSelfLink(subnet)
+			subnetInfo, err := extractInfoWithRegex(subnet, `projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<subnet>[^/]+)`)
 			if err != nil {
 				fmt.Printf("# error extracting info for subnet. %v \n", err)
 				return
@@ -513,7 +514,7 @@ func ValidateNetworkRequirementes(t testing.TB, g GlobalTFVars) {
 
 func ValidatePrivateWorkerPoolRequirementes(t testing.TB, g GlobalTFVars) {
 	fmt.Println("# Checking Private Worker Pool requirements.")
-	workerPoolInfo, err := extractInfoFromPrivateWorkerPoolID(g.WorkerPoolID)
+	workerPoolInfo, err := extractInfoWithRegex(g.WorkerPoolID, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/workerPools/(?P<workerPool>[^/]+)`)
 	if err != nil {
 		fmt.Println("Worker Pool ID is not in the correct format: `projects/PROJECT_ID/locations/LOCATION/workerPools/NAME`.")
 	}
@@ -532,4 +533,34 @@ func ValidatePrivateWorkerPoolRequirementes(t testing.TB, g GlobalTFVars) {
 		fmt.Println("Your Peered IP range should be at least /24.")
 	}
 
+}
+
+func ValidateVPCSCRequirements(t testing.TB, g GlobalTFVars) {
+	fmt.Println("#Checking VPC-SC requirementes.")
+	if g.ServicePerimeterName != "" {
+		if g.AccessLevelName == "" {
+			fmt.Println("You must provide the associated Access Level name to be used with Service Perimeter.")
+			return
+		}
+
+		fmt.Println("#Checking if perimeter exists.")
+		res := gcp.NewGCP().Runf(t, "access-context-manager perimeters describe %s ", g.ServicePerimeterName)
+		found := false
+		fieldToCheck := "status"
+		if g.ServicePerimeterMode == "DRY_RUN" {
+			fieldToCheck = "spec"
+		}
+		res.Get(fieldToCheck).Get("accessLevels").ForEach(func(k, v gjson.Result) bool {
+			if v.String() == g.AccessLevelName {
+				found = true
+				return false
+			}
+			return true
+		})
+		if !found {
+			fmt.Println("#The access level provided does not match if the access levels associated with service perimeter.")
+		}
+	} else {
+		fmt.Println("#No Service Perimeter provided.")
+	}
 }

@@ -109,6 +109,7 @@ func main() {
 		stages.ValidateRepositories(t, globalTFVars)
 		stages.ValidateNetworkRequirementes(t, globalTFVars)
 		stages.ValidatePrivateWorkerPoolRequirementes(t, globalTFVars)
+		stages.ValidateVPCSCRequirements(t, globalTFVars)
 		return
 	}
 
