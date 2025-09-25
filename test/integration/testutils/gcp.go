@@ -50,9 +50,10 @@ func DeleteOrgACMPolicyID(t testing.TB, acmD string) (string, error) {
 
 func CleanOrgACMPolicyID(t testing.TB, orgID string) {
 	t.Log("Cleaning Access Policy id.")
-	filter := fmt.Sprintf("parent:organizations/%s", orgID)
+	filter := fmt.Sprintf("parent:organizations/%s AND scopes:folders/*", orgID)
 	t.Log("Getting Access Policy id.")
-	acmDs := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter %s --quiet", orgID, filter).Array()
+	acmDs := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter \"%s\" --quiet", orgID, filter).Array()
+	t.Log(acmDs)
 	for _, acmD := range acmDs {
 		t.Log("Deleting Access Policy id %s", acmD.Get("name"))
 		_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies delete %s --quiet", acmD.Get("name")))

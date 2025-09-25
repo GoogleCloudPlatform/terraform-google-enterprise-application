@@ -15,7 +15,6 @@
  */
 
 locals {
-  infra_projects            = [for key, value in module.app_infra_project : value.project_id]
   hpc_specific_applications = ["hpc-team-a", "hpc-team-b"]
 }
 
@@ -383,7 +382,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "hpc_al
   // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && contains(local.hpc_specific_applications, var.service_name) ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "HPC-[${join(", ", local.infra_projects)}]-${data.google_project.workerpool_project.project_id}"
+  title     = "hpc-${var.service_name}-infra-${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     dynamic "sources" {
@@ -409,7 +408,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
   count     = contains(local.hpc_specific_applications, var.service_name) && var.service_perimeter_name != null ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "HPC-[${join(", ", local.infra_projects)}]-${data.google_project.workerpool_project.project_id}"
+  title     = "HPC-${var.service_name}-infra-${data.google_project.workerpool_project.project_id}"
   egress_from {
     identity_type = "ANY_IDENTITY"
     dynamic "sources" {

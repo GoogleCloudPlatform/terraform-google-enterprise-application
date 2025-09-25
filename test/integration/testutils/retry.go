@@ -17,7 +17,7 @@ package testutils
 var (
 	RetryableTransientErrors = map[string]string{
 		// Error 409: unable to queue the operation
-		".*Error 409.*unable to queue the operation": "Unable to queue operation.",
+		".*Error 409.*unable to queue the operation.*": "Unable to queue operation.",
 
 		// Error code 409 for concurrent policy changes.
 		".*Error 409.*There were concurrent policy changes.*": "Concurrent policy changes.",
@@ -31,7 +31,7 @@ var (
 		// google_gke_hub_feature - Error: Error waiting to create Feature: Error waiting for Creating Feature: Error code 13, message: an internal error has occurred
 		".*Error waiting for Creating Feature: Error code 13, message: an internal error has occurred*.": "Error creating feature",
 
-		".*Error waiting for Creating Connection: Error code 9, message: Failed to verify authorizer_credential.*.": "servicedirectory.networks.access propagation time",
+		".*Error waiting for Creating Connection: Error code 9, message: Failed to verify authorizer_credential.*": "servicedirectory.networks.access propagation time",
 
 		// Request had invalid authentication credentials.*
 		".*Request had invalid authentication credentials.*": "Request had invalid authentication credentials.",
@@ -39,11 +39,11 @@ var (
 		// generic::permission_denied: Request is prohibited by organization's policy.
 		".*Request is prohibited by organization's policy.*": "VPC-SC propagation.",
 
-		".*does not match the eTag of the current version*": "VPC-SC eTag consistency.",
+		".*does not match the eTag of the current version.*": "VPC-SC eTag consistency.",
 
-		".*Error code 3, message: Request contains an invalid argument.*.": "Invalid Argument on Artifact Registry Creation",
+		".*Error code 3, message: Request contains an invalid argument.*": "Invalid Argument on Artifact Registry Creation",
 
-		".*another operation is in progress on this scope*.": "another operation is in progress on this scope",
+		".*another operation is in progress on this scope.*": "another operation is in progress on this scope",
 
 		".*Error when reading or editing ServicePerimeterResource.*": "Propagation issues on Service Perimeter.",
 
@@ -55,12 +55,12 @@ var (
 
 		".*Error 400.*@*.iam.gserviceaccount.com*does not exist.*": "Service Agent propagation.",
 
-		".*dial tcp: lookup *.nip.io on *: server misbehaving*": "VM Gitlab issues.",
+		".*dial tcp: lookup.*.nip.io on.*: server misbehaving.*": "VM Gitlab issues.",
 
-		".*Error 400.*The subnetwork resource*projects/*/regions/*/subnetworks/*is already being used by*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
+		".*Error 400.*The subnetwork resource*projects/*/regions/*/subnetworks/*is already being used by.*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
 
-		".*The network resource*projects/*/global/networks/*is already being used by*.": "Destroy resources usage propagation issues",
+		".*The network resource*projects/*/global/networks/*is already being used by.*": "Destroy resources usage propagation issues",
 
-		".*Error 400.*Invalid value for field*resource.networkInterfaces[0].subnetwork*:*projects/*/regions/*/subnetworks/*. The referenced subnetwork resource cannot be found.*": "Network propagation",
+		".*Error 400.*Invalid value for field.*resource.networkInterfaces[0].subnetwork.*:.*projects/.*/regions/.*/subnetworks/.*. The referenced subnetwork resource cannot be found.*": "Network propagation",
 	}
 )

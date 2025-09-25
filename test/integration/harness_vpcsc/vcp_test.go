@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
 
 func TestVPCSC(t *testing.T) {
@@ -97,4 +97,16 @@ func TestVPCSC(t *testing.T) {
 	)
 	vpcsc.Test()
 
+}
+
+func TestCleanVPCSC(t *testing.T) {
+	vpcPath := "../../setup/vpcsc"
+	temp := tft.NewTFBlueprintTest(t, tft.WithTFDir(vpcPath))
+
+	orgID := temp.GetTFSetupStringOutput("org_id")
+	testutils.CleanOrgACMPolicyID(t, orgID)
+	_, err := testutils.CreateOrgACMPolicyID(t, orgID)
+	if err != nil {
+		t.Logf("Error creating the ACM policy: %s", err)
+	}
 }
