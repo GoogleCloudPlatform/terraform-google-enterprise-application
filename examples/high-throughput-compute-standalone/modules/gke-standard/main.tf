@@ -46,12 +46,12 @@ resource "google_container_cluster" "risk-research" {
   project             = var.project_id
   location            = var.region
   datapath_provider   = var.datapath_provider
-  node_locations      = [random_shuffle.zone.result[0], random_shuffle.zone.result[1], random_shuffle.zone.result[2]]
+  node_locations      = [random_shuffle.zone.result[0]]
   depends_on          = [google_kms_crypto_key_iam_member.gke_crypto_key]
   min_master_version  = data.google_container_engine_versions.central1b.latest_master_version
 
   # We do this to ensure we have large control plane nodes created initially
-  initial_node_count       = var.scaled_control_plane ? 700 : 1
+  initial_node_count       = var.scaled_control_plane ? 2 : 1
   remove_default_node_pool = true
 
   control_plane_endpoints_config {
@@ -188,57 +188,23 @@ resource "google_container_cluster" "risk-research" {
 
   cluster_autoscaling {
     enabled             = true
-    autoscaling_profile = "OPTIMIZE_UTILIZATION"
+    autoscaling_profile = "BALANCED"
 
     resource_limits {
       resource_type = "cpu"
-      minimum       = 4
+      minimum       = 0
       maximum       = var.cluster_max_cpus
     }
     resource_limits {
       resource_type = "memory"
-      minimum       = 16
+      minimum       = 0
       maximum       = var.cluster_max_memory
     }
 
     resource_limits {
-      resource_type = "nvidia-a100-80gb"
-      maximum       = 30
-    }
-
-    resource_limits {
-      resource_type = "nvidia-l4"
-      maximum       = 30
-    }
-
-    resource_limits {
       resource_type = "nvidia-tesla-t4"
-      maximum       = 300
-    }
-
-    resource_limits {
-      resource_type = "nvidia-tesla-a100"
-      maximum       = 50
-    }
-
-    resource_limits {
-      resource_type = "nvidia-tesla-k80"
-      maximum       = 30
-    }
-
-    resource_limits {
-      resource_type = "nvidia-tesla-p4"
-      maximum       = 30
-    }
-
-    resource_limits {
-      resource_type = "nvidia-tesla-p100"
-      maximum       = 30
-    }
-
-    resource_limits {
-      resource_type = "nvidia-tesla-v100"
-      maximum       = 30
+      minimum       = 0
+      maximum       = 4
     }
 
     auto_provisioning_defaults {
@@ -272,7 +238,7 @@ resource "google_container_cluster" "risk-research" {
   }
 
   pod_autoscaling {
-    hpa_profile = "PERFORMANCE"
+    hpa_profile = "NONE"
   }
 
   lifecycle {
@@ -354,7 +320,7 @@ resource "google_container_node_pool" "primary_spot_nodes" {
   location           = var.region
   cluster            = google_container_cluster.risk-research.name
   node_locations     = [random_shuffle.zone.result[0], random_shuffle.zone.result[1], random_shuffle.zone.result[2]]
-  initial_node_count = 5
+  initial_node_count = 0
 
 
   autoscaling {
@@ -381,6 +347,8 @@ resource "google_container_node_pool" "primary_spot_nodes" {
       enable_secure_boot          = var.enable_secure_boot
     }
 
+    disk_type    = "pd-standard"
+    disk_size_gb = "100"
     preemptible  = true
     machine_type = var.node_machine_type_spot
 

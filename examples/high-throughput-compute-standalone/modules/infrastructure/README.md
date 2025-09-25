@@ -89,8 +89,8 @@ See the `variables.tf` file for all available configuration options.
 | additional\_service\_account\_roles | Additional IAM roles to assign to the cluster service account | `list(string)` | `[]` | no |
 | artifact\_registry\_cleanup\_policy\_keep\_count | Number of most recent container image versions to keep in Artifact Registry | `number` | `10` | no |
 | artifact\_registry\_name | Name of the Artifact Registry repository to create | `string` | `"research-images"` | no |
-| cluster\_max\_cpus | Maximum CPU cores in cluster autoscaling resource limits | `number` | `10000` | no |
-| cluster\_max\_memory | Maximum memory (in GB) in cluster autoscaling resource limits | `number` | `80000` | no |
+| cluster\_max\_cpus | Maximum CPU cores in cluster autoscaling resource limits | `number` | `100` | no |
+| cluster\_max\_memory | Maximum memory (in GB) in cluster autoscaling resource limits | `number` | `1024` | no |
 | cluster\_service\_account | Service Account ID to use for GKE clusters | `string` | `"gke-risk-research-cluster-sa"` | no |
 | clusters\_per\_region | Map of regions to number of clusters to create in each (maximum 4 per region) | `map(number)` | <pre>{<br>  "us-central1": 1<br>}</pre> | no |
 | create\_ondemand\_nodepool | Whether to create the on-demand node pool | `bool` | `true` | no |
@@ -111,12 +111,12 @@ See the `variables.tf` file for all available configuration options.
 | maintenance\_end\_time | The end time for the maintenance window in RFC3339 format (e.g., '2024-09-18T04:00:00Z') | `string` | `"2024-09-18T04:00:00Z"` | no |
 | maintenance\_recurrence | The recurrence of the maintenance window in RRULE format (e.g., 'FREQ=WEEKLY;BYDAY=SA,SU') | `string` | `"FREQ=WEEKLY;BYDAY=SA,SU"` | no |
 | maintenance\_start\_time | The start time for the maintenance window in RFC3339 format (e.g., '2024-09-17T04:00:00Z') | `string` | `"2024-09-17T04:00:00Z"` | no |
-| max\_nodes\_ondemand | Maximum number of on-demand nodes in the node pool | `number` | `32` | no |
-| max\_nodes\_spot | Maximum number of spot nodes in the node pool | `number` | `3000` | no |
+| max\_nodes\_ondemand | Maximum number of on-demand nodes in the node pool | `number` | `1` | no |
+| max\_nodes\_spot | Maximum number of spot nodes in the node pool | `number` | `1` | no |
 | min\_nodes\_ondemand | Minimum number of on-demand nodes in the node pool | `number` | `0` | no |
-| min\_nodes\_spot | Minimum number of spot nodes in the node pool | `number` | `1` | no |
-| node\_machine\_type\_ondemand | Machine type for on-demand node pools in GKE clusters | `string` | `"n2-standard-16"` | no |
-| node\_machine\_type\_spot | Machine type for spot node pools in GKE clusters | `string` | `"n2-standard-64"` | no |
+| min\_nodes\_spot | Minimum number of spot nodes in the node pool | `number` | `0` | no |
+| node\_machine\_type\_ondemand | Machine type for on-demand node pools in GKE clusters | `string` | `"e2-standard-2"` | no |
+| node\_machine\_type\_spot | Machine type for spot node pools in GKE clusters | `string` | `"e2-standard-2"` | no |
 | parallelstore\_deployment\_type | Parallelstore Instance deployment type (SCRATCH or PERSISTENT) | `string` | `"SCRATCH"` | no |
 | project\_id | The GCP project ID where resources will be created. | `string` | `"YOUR_PROJECT_ID"` | no |
 | regions | List of regions where GKE clusters should be created. Used for multi-region deployments. | `list(string)` | <pre>[<br>  "us-central1"<br>]</pre> | no |
