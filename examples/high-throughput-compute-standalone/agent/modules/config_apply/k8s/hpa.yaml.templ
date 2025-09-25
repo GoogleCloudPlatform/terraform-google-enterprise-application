@@ -18,8 +18,8 @@ metadata:
   name: ${name}
 spec:
   minReplicas: 1
-  maxReplicas: 50000
-  maxReplicas: 50000
+  maxReplicas: 2
+  maxReplicas: 2
   metrics:
   - external:
       metric:
@@ -87,13 +87,13 @@ spec:
       - name: agent
         resources:
           requests:
-            memory: "3Gi"
+            memory: "1Gi"
             cpu: "900m"
           limits:
-            cpu: "3900m"
-            memory: "7Gi"
-            cpu: "3900m"
-            memory: "7Gi"
+            cpu: "1000m"
+            memory: "3Gi"
+            cpu: "1000m"
+            memory: "3Gi"
         image: ${agent_image}
         args: ["serve", "pubsub-pull",
                # subscription to pull requests (tasks) from, topic to publish responses

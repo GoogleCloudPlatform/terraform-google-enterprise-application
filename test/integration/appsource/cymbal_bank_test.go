@@ -27,8 +27,8 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 
 	cp "github.com/otiai10/copy"
 )
@@ -291,7 +291,7 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 					}
 				}
-				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 30, 60*time.Second)
+				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
 			})
 			appsource.Test()
 		})

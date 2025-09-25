@@ -126,18 +126,18 @@ links into the Console.
 | hsn\_bucket | Enable hierarchical namespace GCS buckets | `bool` | `false` | no |
 | lustre\_filesystem | The name of the Lustre filesystem | `string` | `"lustre-fs"` | no |
 | lustre\_gke\_support\_enabled | Enable GKE support for Lustre instance | `bool` | `true` | no |
-| max\_nodes\_ondemand | Maximum number of on-demand nodes | `number` | `32` | no |
-| max\_nodes\_spot | Maximum number of spot nodes | `number` | `3000` | no |
+| max\_nodes\_ondemand | Maximum number of on-demand nodes | `number` | `1` | no |
+| max\_nodes\_spot | Maximum number of spot nodes | `number` | `1` | no |
 | min\_nodes\_ondemand | Minimum number of on-demand nodes | `number` | `0` | no |
-| min\_nodes\_spot | Minimum number of spot nodes | `number` | `1` | no |
-| node\_machine\_type\_ondemand | Machine type for on-demand node pools | `string` | `"n2-standard-16"` | no |
-| node\_machine\_type\_spot | Machine type for spot node pools | `string` | `"n2-standard-64"` | no |
+| min\_nodes\_spot | Minimum number of spot nodes | `number` | `0` | no |
+| node\_machine\_type\_ondemand | Machine type for on-demand node pools | `string` | `"e2-standard-2"` | no |
+| node\_machine\_type\_spot | Machine type for spot node pools | `string` | `"e2-standard-2"` | no |
 | project\_id | The GCP project ID where resources will be created. | `string` | `"YOUR_PROJECT_ID"` | no |
 | pubsub\_exactly\_once | Enable Pub/Sub exactly once subscriptions | `bool` | `true` | no |
 | quota\_contact\_email | Contact email for quota requests | `string` | `""` | no |
 | regions | List of regions where GKE clusters should be created. Used for multi-region deployments. | `list(string)` | <pre>[<br>  "us-central1"<br>]</pre> | no |
 | scripts\_output | Output directory for testing scripts | `string` | `"./generated"` | no |
-| service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
+| service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"DRY_RUN"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 | storage\_capacity\_gib | Capacity in GiB for the selected storage system (Parallelstore or Lustre) | `number` | `null` | no |
 | storage\_ip\_range | IP range for Storage peering, in CIDR notation | `string` | `"172.16.0.0/16"` | no |
