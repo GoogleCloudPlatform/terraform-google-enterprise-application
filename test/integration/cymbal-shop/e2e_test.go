@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/gruntwork-io/terratest/modules/shell"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 
 	"github.com/gruntwork-io/terratest/modules/retry"
 )
