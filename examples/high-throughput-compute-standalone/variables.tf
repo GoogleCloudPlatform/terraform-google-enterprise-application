@@ -149,13 +149,13 @@ variable "gke_standard_cluster_name" {
 variable "node_machine_type_ondemand" {
   description = "Machine type for on-demand node pools"
   type        = string
-  default     = "n2-standard-16"
+  default     = "e2-standard-2"
 }
 
 variable "node_machine_type_spot" {
   description = "Machine type for spot node pools"
   type        = string
-  default     = "n2-standard-64"
+  default     = "e2-standard-2"
 }
 
 variable "min_nodes_ondemand" {
@@ -167,19 +167,19 @@ variable "min_nodes_ondemand" {
 variable "max_nodes_ondemand" {
   description = "Maximum number of on-demand nodes"
   type        = number
-  default     = 32
+  default     = 1
 }
 
 variable "min_nodes_spot" {
   description = "Minimum number of spot nodes"
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "max_nodes_spot" {
   description = "Maximum number of spot nodes"
   type        = number
-  default     = 3000
+  default     = 1
 }
 
 # variable "scaled_control_plane" {
@@ -346,7 +346,7 @@ variable "service_perimeter_name" {
 variable "service_perimeter_mode" {
   description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string
-  default     = "ENFORCE"
+  default     = "DRY_RUN"
 
   validation {
     condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
