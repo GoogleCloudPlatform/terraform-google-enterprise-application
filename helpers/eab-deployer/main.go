@@ -107,6 +107,8 @@ func main() {
 		stages.ValidatePermissions(t, globalTFVars)
 		stages.ValidateRequiredAPIs(t, globalTFVars)
 		stages.ValidateRepositories(t, globalTFVars)
+		stages.ValidateNetworkRequirementes(t, globalTFVars)
+		stages.ValidatePrivateWorkerPoolRequirementes(t, globalTFVars)
 		return
 	}
 

@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"regexp"
@@ -139,7 +140,6 @@ func ValidateRequiredAPIs(t testing.TB, g GlobalTFVars) {
 			fmt.Printf("# Project `%s` is missing required API: `%s` \n", g.ProjectID, requiredAPI)
 		}
 	}
-
 }
 
 // ValidateRepositories checks if provided repositories are accessible.
@@ -425,4 +425,111 @@ func intersection(first, second []string) []string {
 	}
 
 	return out
+}
+
+func extractInfoFromSubnetSelfLink(selfLink string) (map[string]string, error) {
+	re := regexp.MustCompile(`projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<subnet>[^/]+)`)
+	match := re.FindStringSubmatch(selfLink)
+
+	if len(match) == 0 {
+		return nil, fmt.Errorf("no match found.")
+	}
+
+	result := make(map[string]string)
+	for i, name := range re.SubexpNames() {
+		if i != 0 && name != "" {
+			result[name] = match[i]
+		}
+	}
+
+	return result, nil
+}
+
+func extractInfoFromPrivateWorkerPoolID(privateWorkerPoolID string) (map[string]string, error) {
+	re := regexp.MustCompile(`projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/workerPools/(?P<workerPool>[^/]+)`)
+	match := re.FindStringSubmatch(privateWorkerPoolID)
+
+	if len(match) == 0 {
+		return nil, fmt.Errorf("no match found.")
+	}
+
+	result := make(map[string]string)
+	for i, name := range re.SubexpNames() {
+		if i != 0 && name != "" {
+			result[name] = match[i]
+		}
+	}
+
+	return result, nil
+}
+
+func ipRangeSize(ipRange string, minimunSize int) bool {
+	_, ipNet, err := net.ParseCIDR(ipRange)
+	if err != nil {
+		fmt.Println("Error parsing CIDR:", err)
+		return false // Invalid CIDR format
+	}
+
+	ones, bits := ipNet.Mask.Size()
+	prefixLength := ones
+
+	return prefixLength <= (bits-minimunSize)+ones
+
+}
+
+func ValidateNetworkRequirementes(t testing.TB, g GlobalTFVars) {
+	fmt.Println("# Checking Network Requirements.")
+	for _, envs := range g.Envs {
+		for _, subnet := range envs.SubnetsSelfLinks {
+			fmt.Printf("# Checking subnet %s.", subnet)
+
+			subnetInfo, err := extractInfoFromSubnetSelfLink(subnet)
+			if err != nil {
+				fmt.Printf("# error extracting info for subnet. %v \n", err)
+				return
+			}
+
+			res := gcp.NewGCP().Runf(t, "compute networks subnets describe %s --region=%s --project=%s", subnetInfo["subnet"], subnetInfo["region"], subnetInfo["project"])
+			fmt.Println("# Checking Private Access.")
+			if !res.Get("privateIpGoogleAccess").Bool() {
+				fmt.Println("# Your subnet should have Private Access Enabled.")
+			}
+
+			fmt.Println("# Checking existance of secondary ranges.")
+			if len(res.Get("secondaryIpRanges").Array()) < 2 {
+				fmt.Println("# Your subnet should have at least 2 secondary ranges.")
+			}
+
+			fmt.Println("# Checking secondary ranges size.")
+			for _, ipRange := range res.Get("secondaryIpRanges").Array() {
+				if !ipRangeSize(ipRange.Get("ipCidrRange").String(), 18) {
+					fmt.Printf("# Your secondary range %s should have at least a /18. Current: %s \n", ipRange.Get("rangeName").String(), ipRange.Get("ipCidrRange").String())
+				}
+			}
+		}
+	}
+
+}
+
+func ValidatePrivateWorkerPoolRequirementes(t testing.TB, g GlobalTFVars) {
+	fmt.Println("# Checking Private Worker Pool requirements.")
+	workerPoolInfo, err := extractInfoFromPrivateWorkerPoolID(g.WorkerPoolID)
+	if err != nil {
+		fmt.Println("Worker Pool ID is not in the correct format: `projects/PROJECT_ID/locations/LOCATION/workerPools/NAME`.")
+	}
+
+	res := gcp.NewGCP().Runf(t, "builds worker-pools describe %s --region=%s --project=%s", workerPoolInfo["workerPool"], workerPoolInfo["location"], workerPoolInfo["project"])
+
+	if res.Get("privatePoolV1Config").Get("networkConfig").Get("egressOption").String() != "NO_PUBLIC_EGRESS" {
+		fmt.Println("Your worker pool ALLOWS PUBLIC EGRESS! It should NOT.")
+	}
+
+	if res.Get("privatePoolV1Config").Get("networkConfig").Get("peeredNetwork").String() == "" {
+		fmt.Println("Your worker pool is NOT private. Should have a peered Network.")
+		return
+	}
+	if !ipRangeSize(fmt.Sprintf("0.0.0.0%s", res.Get("privatePoolV1Config").Get("networkConfig").Get("peeredNetworkIpRange").String()), 24) {
+		fmt.Println("Your Peered IP range should be at least /24.")
+	}
+
 }
