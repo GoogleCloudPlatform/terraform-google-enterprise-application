@@ -16,26 +16,11 @@ locals {
   workload_args          = ["serve", "--logJSON"]
   workload_grpc_endpoint = "http://localhost:2002/main.LoadTestService/RunLibrary"
   workload_init_args = [
-    ["writedata", "--logJSON", "--showProgress=false", "--size", "104857600", "--parallel", "2", "--count", "10", "/data/read_dir/large"],
-    ["writedata", "--logJSON", "--showProgress=false", "--size", "10485760", "--parallel", "20", "--count", "100", "/data/read_dir/medium"],
-    ["writedata", "--logJSON", "--showProgress=false", "--size", "1048576", "--parallel", "20", "--count", "1000", "/data/read_dir/small"],
     ["writedata", "--logJSON", "--showProgress=false", "--size", "1048576", "--parallel", "20", "--count", "5", "/data/read_dir/small-low"],
-    ["gentasks", "--logJSON", "--count=10000", "--initMinMicros=1000000", "--minMicros=1000000", "--initReadDir=/data/read_dir/small", "/data/tasks/10k_1s_1s_read_small.jsonl.gz"],
     ["gentasks", "--logJSON", "--count=1000", "--initMinMicros=1000000", "--minMicros=1000000", "--initReadDir=/data/read_dir/small", "/data/tasks/1k_1s_1s_read_small.jsonl.gz"],
-    ["gentasks", "--logJSON", "--count=5000000", "--initMinMicros=30000000", "--minMicros=240000000", "--minMicros=360000000", "--initReadDir=/data/read_dir/small-low", "/data/tasks/5m_30s_360s_read_5_small.jsonl.gz"],
   ]
   test_configs = [
     { name = "hpa_1k_1s_s_read_small", testfile = "/data/tasks/1k_1s_1s_read_small.jsonl.gz", parallel = 0, description = "Autoscaling workers, 1 second compute and small folder read on initialization, 1,000 tasks for 1 second task compute." },
-    { name = "10_1k_1s_s_read_small", testfile = "/data/tasks/1k_1s_1s_read_small.jsonl.gz", parallel = 10, description = "10 workers, 1 second compute and small folder read on initialization, 1,000 tasks for 1 second compute." },
-    { name = "50_1k_1s_s_read_small", testfile = "/data/tasks/1k_1s_1s_read_small.jsonl.gz", parallel = 50, description = "50 workers, 1 second compute and small folder read on initialization, 1,000 tasks for 1 second compute." },
-    { name = "100_1k_1s_s_read_small", testfile = "/data/tasks/1k_1s_1s_read_small.jsonl.gz", parallel = 100, description = "100 workers, 1 second compute and small folder read on initialization, 1,000 tasks for 1 second compute." },
-    { name = "500_1k_1s_s_read_small", testfile = "/data/tasks/1k_1s_1s_read_small.jsonl.gz", parallel = 500, description = "500 workers, 1 second compute and small folder read on initialization, 1,000 tasks for 1 second compute." },
-    { name = "hpa_10k_1s_s_read_small", testfile = "/data/tasks/10k_1s_1s_read_small.jsonl.gz", parallel = 0, description = "Autoscaling workers, 1 second compute and small folder read on initialization, 10,000 tasks for 1 second compute." },
-    { name = "10_10k_1s_s_read_small", testfile = "/data/tasks/10k_1s_1s_read_small.jsonl.gz", parallel = 10, description = "10 workers, 1 second compute and small folder read on initialization, 10,000 tasks for 1 second compute." },
-    { name = "100_10k_1s_s_read_small", testfile = "/data/tasks/10k_1s_1s_read_small.jsonl.gz", parallel = 100, description = "100 workers, 1 second compute and small folder read on initialization, 10,000 tasks for 1 second compute." },
-    { name = "500_10k_1s_s_read_small", testfile = "/data/tasks/10k_1s_1s_read_small.jsonl.gz", parallel = 500, description = "500 workers, 1 second compute and small folder read on initialization, 10,000 tasks for 1 second compute." },
-    { name = "30000_5m_10s_s_read_small", testfile = "/data/tasks/5m_1s_3s_read_5_small.jsonl.gz", parallel = 30000, description = "30000 workers, 10 second compute and small folder read on initialization, 5 million tasks for 20-35 seconds of compute." },
-    { name = "hpa_5m_360s_s_read_small", testfile = "/data/tasks/5m_30s_360s_read_5_small.jsonl.gz", parallel = 0, description = "Autoscaling workers, 10 second compute and small folder read on initialization, 5 million tasks for 20-35 second compute." },
   ]
   test_configs_dict = {
     for config in local.test_configs :
