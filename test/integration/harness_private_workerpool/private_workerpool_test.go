@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
 
 func TestPrivateWorkerPool(t *testing.T) {
