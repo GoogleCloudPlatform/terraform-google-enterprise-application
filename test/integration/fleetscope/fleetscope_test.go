@@ -16,6 +16,7 @@ package fleetscope
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"slices"
 	"strconv"
@@ -26,9 +27,9 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/stretchr/testify/assert"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 	"github.com/tidwall/gjson"
 )
 
@@ -62,6 +63,22 @@ func TestFleetscope(t *testing.T) {
 		"bucket": backend_bucket,
 	}
 
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
+	loggingHarnessPath := "../../setup/harness/logging_bucket"
+	loggingHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(loggingHarnessPath),
+	)
+
+	attestation := map[string]interface{}{}
+
+	if len(testutils.EnvNames(t)) == 1 {
+		attestation = map[string]interface{}{"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode")}
+	}
+
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		// retrieve namespaces from test/setup, they will be used to create the specific namespaces with the environment suffix
@@ -84,16 +101,6 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 			)
 
-			multitenantHarnessPath := "../../setup/harness/multitenant"
-			multitenantHarness := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(multitenantHarnessPath),
-			)
-
-			loggingHarnessPath := "../../setup/harness/logging_bucket"
-			loggingHarness := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(loggingHarnessPath),
-			)
-
 			// retrieve cluster location and fleet membership from 2-multitenant
 			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
 			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
@@ -109,13 +116,14 @@ func TestFleetscope(t *testing.T) {
 				"remote_state_bucket":         backend_bucket,
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 				"config_sync_secret_type":     "none",
-				"config_sync_repository_url":  "https://github.com/caetano-colin/terraform-google-enterprise-application",
+				"config_sync_repository_url":  "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application",
 				"config_sync_policy_dir":      fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName),
-				"config_sync_branch":          "cymbal-bank-isolation",
+				"config_sync_branch":          "main",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
-				"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode"),
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
+
+			maps.Copy(vars, attestation)
 
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
@@ -229,7 +237,7 @@ func TestFleetscope(t *testing.T) {
 								configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
 
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
-								assert.Equal("1.19.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
+								assert.Equal("1.22.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 							}
 						}
 					case "policycontroller":

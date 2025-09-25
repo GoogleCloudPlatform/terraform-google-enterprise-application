@@ -1,26 +1,26 @@
 module github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent
 
 go 1.24
-toolchain go1.24.5
+toolchain go1.24.1
 
 require (
-	cloud.google.com/go/compute/metadata v0.7.0
-	cloud.google.com/go/pubsub v1.49.0
-	cloud.google.com/go/storage v1.55.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.53.0
+	cloud.google.com/go/compute/metadata v0.5.2
+	cloud.google.com/go/pubsub v1.44.0
+	cloud.google.com/go/storage v1.44.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.2
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/jhump/protoreflect v1.17.0
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.8.1
 	go.opencensus.io v0.24.0
-	go.opentelemetry.io/contrib/detectors/gcp v1.37.0
-	go.opentelemetry.io/otel v1.37.0
-	go.opentelemetry.io/otel/bridge/opencensus v1.37.0
-	go.opentelemetry.io/otel/sdk v1.37.0
-	go.opentelemetry.io/otel/sdk/metric v1.37.0
-	golang.org/x/oauth2 v0.30.0
-	google.golang.org/api v0.241.0
-	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
+	go.opentelemetry.io/contrib/detectors/gcp v1.30.0
+	go.opentelemetry.io/otel v1.31.0
+	go.opentelemetry.io/otel/bridge/opencensus v1.31.0
+	go.opentelemetry.io/otel/sdk v1.31.0
+	go.opentelemetry.io/otel/sdk/metric v1.31.0
+	golang.org/x/oauth2 v0.23.0
+	google.golang.org/api v0.203.0
+	google.golang.org/grpc v1.67.1
+	google.golang.org/protobuf v1.35.1
 )
 
 require (
