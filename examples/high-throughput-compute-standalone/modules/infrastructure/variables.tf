@@ -104,13 +104,13 @@ variable "scaled_control_plane" {
 
 variable "cluster_max_cpus" {
   type        = number
-  default     = 10000
+  default     = 100
   description = "Maximum CPU cores in cluster autoscaling resource limits"
 }
 
 variable "cluster_max_memory" {
   type        = number
-  default     = 80000
+  default     = 1024
   description = "Maximum memory (in GB) in cluster autoscaling resource limits"
 }
 
@@ -129,13 +129,13 @@ variable "create_spot_nodepool" {
 variable "node_machine_type_ondemand" {
   type        = string
   description = "Machine type for on-demand node pools in GKE clusters"
-  default     = "n2-standard-16"
+  default     = "e2-standard-2"
 }
 
 variable "node_machine_type_spot" {
   type        = string
   description = "Machine type for spot node pools in GKE clusters"
-  default     = "n2-standard-64"
+  default     = "e2-standard-2"
 }
 
 variable "min_nodes_ondemand" {
@@ -147,19 +147,19 @@ variable "min_nodes_ondemand" {
 variable "max_nodes_ondemand" {
   type        = number
   description = "Maximum number of on-demand nodes in the node pool"
-  default     = 32
+  default     = 1
 }
 
 variable "min_nodes_spot" {
   type        = number
   description = "Minimum number of spot nodes in the node pool"
-  default     = 1
+  default     = 0
 }
 
 variable "max_nodes_spot" {
   type        = number
   description = "Maximum number of spot nodes in the node pool"
-  default     = 3000
+  default     = 1
 }
 
 variable "release_channel" {
