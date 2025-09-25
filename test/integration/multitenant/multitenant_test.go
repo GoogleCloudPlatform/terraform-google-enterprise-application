@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/gjson"
 
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
 
 func TestMultitenant(t *testing.T) {
@@ -72,7 +72,7 @@ func TestMultitenant(t *testing.T) {
 			t.Parallel()
 			multitenant := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
-				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 5, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
 				tft.WithVars(vars),
 				tft.WithParallelism(100),

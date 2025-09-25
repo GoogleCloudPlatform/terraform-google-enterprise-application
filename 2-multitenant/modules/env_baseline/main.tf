@@ -293,7 +293,7 @@ module "gke-standard" {
 
   fleet_project_grant_service_agent = true
 
-  deletion_protection = false # set to true to prevent the module from deleting the cluster on destroy
+  deletion_protection = var.deletion_protection
 
 }
 
@@ -530,7 +530,8 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   perimeter = var.service_perimeter_name
   title     = "servmesh-${local.cluster_project_id}-${var.network_project_id}"
   ingress_from {
-    identities = [google_project_iam_member.servicemesh_service_agent.member]
+    # identities = [google_project_iam_member.servicemesh_service_agent.member]
+    identity_type = "ANY_IDENTITY"
     sources {
       resource = "projects/${data.google_project.eab_cluster_project.number}"
     }
@@ -554,7 +555,8 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "servi
   perimeter = var.service_perimeter_name
   title     = "servmesh-${local.cluster_project_id}-${var.network_project_id}"
   ingress_from {
-    identities = [google_project_iam_member.servicemesh_service_agent.member]
+    # identities = [google_project_iam_member.servicemesh_service_agent.member]
+    identity_type = "ANY_IDENTITY"
     sources {
       resource = "projects/${data.google_project.eab_cluster_project.number}"
     }

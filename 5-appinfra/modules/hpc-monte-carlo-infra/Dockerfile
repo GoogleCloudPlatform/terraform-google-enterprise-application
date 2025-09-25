@@ -16,7 +16,7 @@
 # * Install python3-venv for the built-in Python3 venv module (not installed by default)
 # * Install gcc libpython3-dev to compile C Python modules
 # * In the virtualenv: Update pip setuputils and wheel to support building new packages
-FROM debian@sha256:35286826a88dc879b4f438b645ba574a55a14187b483d09213a024dc0c0a64ed AS build
+FROM debian@sha256:6d87375016340817ac2391e670971725a9981cfc24e221c47734681ed0f6c0f5 AS build
 RUN apt-get update && \
     apt-get install --no-install-suggests --no-install-recommends --yes python3-venv gcc libpython3-dev && \
     python3 -m venv /venv && \
@@ -28,7 +28,7 @@ COPY mc_run_reqs.txt /requirements.txt
 RUN /venv/bin/pip install --disable-pip-version-check -r /requirements.txt
 
 # Copy the virtualenv into a distroless image
-FROM gcr.io/distroless/python3-debian12@sha256:d9fd857eb4a7639c5de33a65582aebe0339bd4e15e2551de27a1d95f73aa0a82
+FROM gcr.io/distroless/python3-debian12@sha256:77ee7a4d9c7b14acc6daf20fda71d2e2ad63d1b85aee94f70b32d0ffefa055db
 COPY --from=build-venv /venv /venv
 COPY . /app
 WORKDIR /app

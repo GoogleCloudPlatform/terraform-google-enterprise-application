@@ -20,8 +20,8 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/terraform-google-modules/enterprise-application/test/integration/testutils"
 )
 
 func TestMultitenantHarness(t *testing.T) {
@@ -39,6 +39,16 @@ func TestMultitenantHarness(t *testing.T) {
 			firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID.String()).Array()
 			for i := range firewallRules {
 				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID.String())
+			}
+
+			endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID.String()).Array()
+			for i := range endpoints {
+				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID.String())
+			}
+
+			endpointsGroups := gcloud.Runf(t, "compute network-endpoint-groups list --project %s", clusterProjectID.String()).Array()
+			for i := range endpointsGroups {
+				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", endpointsGroups[i].Get("name"), clusterProjectID.String())
 			}
 		}
 		multiTenant.DefaultTeardown(assert)
