@@ -18,6 +18,8 @@ remote_state_bucket   = "REMOTE_STATE_BUCKET"
 buckets_force_destroy = true
 region                = "us-central1"
 environment_names     = ["development", "nonproduction", "production"]
+bucket_kms_key        = "projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/KMS_KEYRING_NAME/cryptoKeys/BUCKET_KMS_KEY_NAME"
+attestation_kms_key   = "projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/KMS_KEYRING_NAME/cryptoKeys/ATTESTATION_KMS_KEY_NAME"
 
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"
