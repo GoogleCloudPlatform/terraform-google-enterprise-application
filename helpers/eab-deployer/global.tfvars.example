@@ -28,39 +28,34 @@ buckets_force_destroy = true
 deletion_protection   = false
 
 infra_cloudbuildv2_repository_config = {
-  repo_type = "GITHUBv2"
+ github_app_id_secret_id                     = "projects/REPLACE_ME/secrets/github-app-id"
+  github_secret_id                            = "projects/REPLACE_ME/secrets/github-pat"
+  gitlab_authorizer_credential_secret_id      = ""
+  gitlab_enterprise_ca_certificate            = ""
+  gitlab_enterprise_host_uri                  = ""
+  gitlab_enterprise_service_directory         = ""
+  gitlab_read_authorizer_credential_secret_id = ""
+  gitlab_webhook_secret_id                    = ""
+  repo_type                                   = "GITHUBv2"
   repositories = {
-    multitenant = {
-      repository_name = "eab-multitenant"
-      repository_url  = "https://github.com/USER/eab-multitenant.git"
-    },
     applicationfactory = {
       repository_name = "eab-appfactory"
-      repository_url  = "https://github.com/USER/eab-appfactory.git"
-    },
+      repository_url  = "https://github.com/REPLACE_ME/eab-appfactory.git"
+    }
     fleetscope = {
       repository_name = "eab-fleetscope"
-      repository_url  = "https://github.com/USER/eab-fleetscope.git"
-    },
+      repository_url  = "https://github.com/REPLACE_ME/eab-fleetscope.git"
+    }
     hello-world = {
       repository_name = "hello-world-admin"
-      repository_url  = "https://github.com/USER/hello-world-admin.git"
+      repository_url  = "https://github.com/REPLACE_ME/hello-world-admin.git"
+    }
+    multitenant = {
+      repository_name = "eab-multitenant"
+      repository_url  = "https://github.com/REPLACE_ME/eab-multitenant.git"
     }
   }
-  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
-  gitlab_authorizer_credential_secret_id      = null
-  gitlab_read_authorizer_credential_secret_id = null
-  gitlab_webhook_secret_id                    = null
-  # If you are using a self-hosted instance, you may change the URL below accordingly
-  gitlab_enterprise_host_uri = null
-  # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
-  gitlab_enterprise_service_directory = null
-  # .pem string
-  gitlab_enterprise_ca_certificate = null
-  secret_project_id                = "SECRET_PROJECT_ID"
-
-  github_app_id_secret_id = "projects/SECRET_PROJECT_NUMER/secrets/github-app-id"
-  github_secret_id        = "projects/SECRET_PROJECT_NUMER/secrets/github-pat"
+  secret_project_id = "REPLACE_ME"
 }
 
 app_services_cloudbuildv2_repository_config = {
@@ -68,23 +63,23 @@ app_services_cloudbuildv2_repository_config = {
   repositories = {
     eab-default-example-hello-world = {
       repository_name = "hello-world-i-r"
-      repository_url  = "https://github.com/USER/hello-world-i-r.git"
+      repository_url  = "https://github.com/REPLACE_ME/hello-world-i-r.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
-  gitlab_authorizer_credential_secret_id      = null
-  gitlab_read_authorizer_credential_secret_id = null
-  gitlab_webhook_secret_id                    = null
+  gitlab_authorizer_credential_secret_id      = ""
+  gitlab_read_authorizer_credential_secret_id = ""
+  gitlab_webhook_secret_id                    = ""
   # If you are using a self-hosted instance, you may change the URL below accordingly
-  gitlab_enterprise_host_uri = null
+  gitlab_enterprise_host_uri = ""
   # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
-  gitlab_enterprise_service_directory = null
+  gitlab_enterprise_service_directory = ""
   # .pem string
-  gitlab_enterprise_ca_certificate = null
-  secret_project_id                = "SECRET_PROJECT_ID"
+  gitlab_enterprise_ca_certificate = ""
+  secret_project_id                = "REPLACE_ME"
 
-  github_app_id_secret_id = "projects/SECRET_PROJECT_NUMER/secrets/github-app-id"
-  github_secret_id        = "projects/SECRET_PROJECT_NUMER/secrets/github-pat"
+  github_app_id_secret_id = "projects/REPLACE_ME/secrets/REPLACE_ME"
+  github_secret_id        = "projects/REPLACE_ME/secrets/REPLACE_ME"
 }
 
 
@@ -95,12 +90,13 @@ app_services_cloudbuildv2_repository_config = {
 // 1-bootstrap inputs
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/tree/main/1-bootstrap#inputs
 
-common_folder_id = "folders/COMMON_FOLDER_NUMBER"
-project_id       = "SEED_PROJECT_ID"
-workerpool_id    = "projects/WORKERPOOL_PROJECT_ID/locations/REGION/workerPools/CB_PRIVATE_WORKERPOOL_NAME"
-bucket_kms_key   = "projects/KMS_PROJECT_ID/locations/REGION/keyRings/KEYRING_NAME/cryptoKeys/KEY_NAME"
-logging_bucket   = "BUCKET_LOGGIN_NAME"
-kms_project_id   ="KMS_PROJECT_ID"
+
+common_folder_id = "folders/REPLACE_ME"
+project_id       = "REPLACE_ME"
+workerpool_id    = "projects/REPLACE_ME/locations/REPLACE_ME/workerPools/REPLACE_ME"
+bucket_kms_key   = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/KEYRING_NAME/cryptoKeys/REPLACE_ME"
+logging_bucket   = "REPLACE_ME"
+kms_project_id   ="REPLACE_ME"
 
 // 2-multitenant inputs
 apps = {
@@ -113,36 +109,36 @@ apps = {
 
 envs = {
   "development" = {
-    "billing_account"    = "000000-000000-000000"
-    "folder_id"          = "folders/FOLDER_ID"
-    "network_project_id" = "DEV_NETWORK_PROJECT_ID"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/DEV_NETWORK_PROJECT_ID/global/networks/vpc-eab-vpc-development"
-    "org_id"             = "000000000000"
+    "billing_account"    = "REPLACE_ME"
+    "folder_id"          = "folders/REPLACE_ME"
+    "network_project_id" = "REPLACE_ME"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/vpc-eab-vpc-development"
+    "org_id"             = "REPLACE_ME"
     "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/DEV_NETWORK_PROJECT_ID/regions/REGION/subnetworks/eab-development-REGION",
-      "https://www.googleapis.com/compute/v1/projects/DEV_NETWORK_PROJECT_ID/regions/REGION2/subnetworks/eab-development-REGION2",
+      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-development-REPLACE_ME",
+      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-development-REPLACE_ME",
     ]
   }
   "nonproduction" = {
-    "billing_account"    = "000000-000000-000000"
-    "folder_id"          = "folders/FOLDER_ID"
-    "network_project_id" = "NONPROD_NETWORK_PROJECT_ID"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/NONPROD_NETWORK_PROJECT_ID/global/networks/vpc-eab-vpc-nonproduction"
-    "org_id"             = "000000000000"
+    "billing_account"    = "REPLACE_ME"
+    "folder_id"          = "folders/REPLACE_ME"
+    "network_project_id" = "REPLACE_ME"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/vpc-eab-vpc-nonproduction"
+    "org_id"             = "REPLACE_ME"
     "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/NONPROD_NETWORK_PROJECT_ID/regions/REGION/subnetworks/eab-nonproduction-REGION",
-      "https://www.googleapis.com/compute/v1/projects/NONPROD_NETWORK_PROJECT_ID/regions/REGION2/subnetworks/eab-nonproduction-REGION2",
+      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-nonproduction-REPLACE_ME",
+      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-nonproduction-REPLACE_ME",
     ]
   }
   "production" = {
-    "billing_account"    = "000000-000000-000000"
-    "folder_id"          = "folders/FOLDER_ID"
-    "network_project_id" = "PROD_NETWORK_PROJECT_ID"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/PROD_NETWORK_PROJECT_ID/global/networks/vpc-eab-vpc-production"
-    "org_id"             = "000000000000"
+    "billing_account"    = "REPLACE_ME"
+    "folder_id"          = "folders/REPLACE_ME"
+    "network_project_id" = "REPLACE_ME"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/vpc-eab-vpc-production"
+    "org_id"             = "REPLACE_ME"
     "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/PROD_NETWORK_PROJECT_ID/regions/REGION/subnetworks/eab-production-REGION",
-      "https://www.googleapis.com/compute/v1/projects/PROD_NETWORK_PROJECT_ID/regions/REGION2/subnetworks/eab-production-REGION2",
+      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-production-REPLACE_ME",
+      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-production-REPLACE_ME",
     ]
   }
 }
@@ -150,13 +146,13 @@ envs = {
 // 3-fleetscope inputs
 
 namespace_ids = {
-  "hw-example" = "hw-example@DOMAIN.com"
+  "hw-example" = "hw-example@example.com"
 }
 
-remote_state_bucket         = "REMOTE_STATE_BUCKET"
+remote_state_bucket         = "REPLACE_ME"
 attestation_evaluation_mode = "ALWAYS_ALLOW"
-attestation_kms_key         = "projects/ATTESTATION_PROJECT_ID/locations/REGION/keyRings/KMS_KEYRING_ATTESTATION_NAME/cryptoKeys/KMS_ATTESTATION_KEY_NAME"
-attestation_kms_project     = "ATTESTATION_PROJECT_ID"
+attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME"
+attestation_kms_project     = "REPLACE_ME"
 enable_kueue                = false
 config_sync_branch          = ""
 config_sync_repository_url  = ""
@@ -165,8 +161,8 @@ disable_istio_on_namespaces = []
 
 // 4-appfactory
 
-billing_account = "000000-000000-000000"
-org_id          = "000000000000"
+billing_account = "REPLACE_ME"
+org_id          = "REPLACE_ME"
 
 infra_project_apis = [
   "iam.googleapis.com",
@@ -174,23 +170,23 @@ infra_project_apis = [
   "serviceusage.googleapis.com",
   "cloudbilling.googleapis.com"
 ]
-service_perimeter_name = "accessPolicies/ACCESS_POLICY_ID/servicePerimeters/PERIMETER_NAME"
+service_perimeter_name = "accessPolicies/REPLACE_ME/servicePerimeters/REPLACE_ME"
 service_perimeter_mode = "DRY_RUN"
-access_level_name      = "accessPolicies/ACCESS_POLICY_ID/accessLevels/ACCESS_LEVEL_NAME"
+access_level_name      = "accessPolicies/REPLACE_ME/accessLevels/REPLACE_ME"
 applications = {
   "default-example" = {
     "hello-world" = {
       create_infra_project = false
       create_admin_project = true
-      admin_project_id     = null
+      admin_project_id     = ""
     }
   }
 }
-cb_private_workerpool_project_id = "SECRET_PROJECT_ID"
-location                         = "REGION"
+cb_private_workerpool_project_id = "REPLACE_ME"
+location                         = "REPLACE_ME"
 
 // 5-appinfra
 
-region            = "REGION"
-trigger_location  = "REGION"
+region            = "REPLACE_ME"
+trigger_location  = "REPLACE_ME"
 bucket_prefix     = "bkt"
