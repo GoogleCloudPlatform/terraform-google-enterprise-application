@@ -36,6 +36,8 @@ module "env" {
 
   enable_kueue = var.enable_kueue
 
+  enable_multicluster_discovery = var.enable_multicluster_discovery
+
   attestation_kms_key         = var.attestation_kms_key
   attestation_evaluation_mode = var.attestation_evaluation_mode
 

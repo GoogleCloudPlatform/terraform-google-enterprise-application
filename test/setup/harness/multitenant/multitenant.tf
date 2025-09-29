@@ -158,7 +158,7 @@ module "cluster_vpc" {
   ]
 
   subnets = [
-   merge( {
+    merge({
       subnet_name           = "eab-${each.key}-us-central1"
       subnet_ip             = "10.1.20.0/24"
       subnet_region         = "us-central1"
@@ -168,7 +168,7 @@ module "cluster_vpc" {
       subnet_ip             = "10.1.10.0/24"
       subnet_region         = "us-east4"
       subnet_private_access = true
-  }: {})]
+  } : {})]
 
   secondary_ranges = merge({
     "eab-${each.key}-us-central1" = [
@@ -180,7 +180,7 @@ module "cluster_vpc" {
         range_name    = "eab-${each.key}-us-central1-secondary-02"
         ip_cidr_range = "192.168.64.0/18"
       },
-    ]}, var.agent ? {
+    ] }, var.agent ? {
     "eab-${each.key}-us-east4" = [
       {
         range_name    = "eab-${each.key}-us-east4-secondary-01"

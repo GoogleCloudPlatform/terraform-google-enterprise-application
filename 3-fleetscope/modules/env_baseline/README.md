@@ -29,6 +29,7 @@ The following resources are created:
 | config\_sync\_secret\_type | The type of `Secret` configured for access to the Config Sync Git repo. Must be `ssh`, `cookiefile`, `gcenode`, `gcpserviceaccount`, `githubapp`, `token`, or `none`. Depending on the credential type, additional steps must be executed prior to this step. Refer to the following documentation for guidance: https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync#git-creds-secret | `string` | `"gcpserviceaccount"` | no |
 | disable\_istio\_on\_namespaces | List the namespaces where you don't want the service mesh to be enabled (i.e. sidecar proxy injection). Ensure that the namespace names match exactly with those defined in 'var.namespace\_ids'. | `list(string)` | `[]` | no |
 | enable\_kueue | Enables Kueue private installation. | `bool` | `false` | no |
+| enable\_multicluster\_discovery | Enables Multicluster discovery. | `bool` | `true` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | fleet\_project\_id | The fleet project ID | `string` | n/a | yes |
 | namespace\_ids | The fleet namespace IDs with team | `map(string)` | n/a | yes |
