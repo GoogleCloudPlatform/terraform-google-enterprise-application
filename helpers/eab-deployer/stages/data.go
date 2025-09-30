@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -29,14 +30,17 @@ import (
 )
 
 const (
-	PoliciesRepo    = "gcp-policies"
-	BootstrapRepo   = "gcp-bootstrap"
-	BootstrapStep   = "1-bootstrap"
-	MultitenantStep = "2-multitenant"
-	FleetscopeStep  = "3-fleetscope"
-	AppFactoryStep  = "4-appfactory"
-	AppInfraStep    = "5-appinfra"
-	AppSourceStep   = "6-appsource"
+	PoliciesRepo            = "gcp-policies"
+	BootstrapRepo           = "gcp-bootstrap"
+	BootstrapStep           = "1-bootstrap"
+	MultitenantStep         = "2-multitenant"
+	FleetscopeStep          = "3-fleetscope"
+	AppFactoryStep          = "4-appfactory"
+	AppInfraStep            = "5-appinfra"
+	AppSourceStep           = "6-appsource"
+	MaxErrorRetries         = 2
+	TimeBetweenErrorRetries = 2 * time.Minute
+	MaxBuildRetries         = 40
 )
 
 type CommonConf struct {
@@ -280,9 +284,11 @@ type AppInfraTfvars struct {
 
 func GetBootstrapStepOutputs(t testing.TB, eabPath string) BootstrapOutputs {
 	options := &terraform.Options{
-		TerraformDir: filepath.Join(eabPath, "1-bootstrap"),
-		Logger:       logger.Discard,
-		NoColor:      true,
+		TerraformDir:       filepath.Join(eabPath, "1-bootstrap"),
+		Logger:             logger.Discard,
+		NoColor:            true,
+		MaxRetries:         MaxErrorRetries,
+		TimeBetweenRetries: TimeBetweenErrorRetries,
 	}
 	return BootstrapOutputs{
 		ProjectID:                       terraform.Output(t, options, "project_id"),

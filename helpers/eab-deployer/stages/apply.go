@@ -59,9 +59,11 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 
 	terraformDir := filepath.Join(c.EABPath, BootstrapStep)
 	options := &terraform.Options{
-		TerraformDir: terraformDir,
-		Logger:       c.Logger,
-		NoColor:      true,
+		TerraformDir:       terraformDir,
+		Logger:             c.Logger,
+		NoColor:            true,
+		MaxRetries:         MaxErrorRetries,
+		TimeBetweenRetries: TimeBetweenErrorRetries,
 	}
 	// terraform deploy
 	err = applyLocal(t, options, "", c.PolicyPath, c.ValidatorProject)
@@ -358,9 +360,11 @@ func deployStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error 
 	for _, bu := range groupunit {
 		for _, localStep := range sc.LocalSteps {
 			buOptions := &terraform.Options{
-				TerraformDir: filepath.Join(filepath.Join(c.CheckoutPath, sc.Repo), bu, localStep),
-				Logger:       c.Logger,
-				NoColor:      true,
+				TerraformDir:       filepath.Join(filepath.Join(c.CheckoutPath, sc.Repo), bu, localStep),
+				Logger:             c.Logger,
+				NoColor:            true,
+				MaxRetries:         MaxErrorRetries,
+				TimeBetweenRetries: TimeBetweenErrorRetries,
 			}
 
 			err := s.RunStep(fmt.Sprintf("%s.%s.apply-%s", sc.Stage, bu, localStep), func() error {
@@ -532,7 +536,7 @@ func planStage(t testing.TB, conf utils.GitRepo, project, region, repo string) e
 		return err
 	}
 
-	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s plan build Failed.", repo), MaxBuildRetries)
+	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s plan build Failed.", repo), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
 }
 
 func saveBootstrapCodeOnly(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error {
@@ -599,7 +603,7 @@ func deployEnvApp(t testing.TB, conf utils.GitRepo, project, region, repo, servi
 		return err
 	}
 
-	err = gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Build %s env %s build Failed.", repo, service), MaxBuildRetries)
+	err = gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Build %s env %s build Failed.", repo, service), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
 	if err != nil {
 		return err
 	}
@@ -623,7 +627,7 @@ func applyEnv(t testing.TB, conf utils.GitRepo, project, region, repo, environme
 		return err
 	}
 
-	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s apply %s build Failed.", repo, environment), MaxBuildRetries)
+	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s apply %s build Failed.", repo, environment), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
 }
 
 func applyLocal(t testing.TB, options *terraform.Options, serviceAccount, policyPath, validatorProjectId string) error {
