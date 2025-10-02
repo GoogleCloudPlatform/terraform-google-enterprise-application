@@ -209,7 +209,7 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		CloudbuildV2RepositoryConfig: tfvars.InfraCloudbuildV2RepositoryConfig,
 		KMSProjectID:                 tfvars.KMSProjectID,
 		ServicePerimeterName:         tfvars.ServicePerimeterName,
-		ServicePerimeterMode:         *tfvars.ServicePerimeterMode,
+		ServicePerimeterMode:         tfvars.ServicePerimeterMode,
 		InfraProjectAPIs:             tfvars.InfraProjectAPIs,
 	}
 	err := utils.WriteTfvars(filepath.Join(c.EABPath, AppFactoryStep, "terraform.tfvars"), appFactory)
