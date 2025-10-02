@@ -153,7 +153,7 @@ resource "google_project_iam_member" "secret_iam_member" {
 
   role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${each.value.email}"
-  project = local.worker_pool_project
+  project = var.cloudbuildv2_repository_config.secret_project_id
 }
 
 resource "google_project_iam_member" "kms_iam_member" {
