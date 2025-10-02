@@ -16,7 +16,6 @@ package stages
 
 import (
 	"fmt"
-	"io/ioutil"
 	"maps"
 	"os"
 	"path/filepath"
@@ -501,7 +500,7 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 		fmt.Printf("Error writing to file: %v\n", err)
 	}
 
-	fileContent, err := ioutil.ReadFile(filepath.Join(gcpPath, "tf-wrapper.sh"))
+	fileContent, err := os.ReadFile(filepath.Join(gcpPath, "tf-wrapper.sh"))
 	if err != nil {
 		return fmt.Errorf("error reading file: %w", err)
 	}
@@ -512,7 +511,7 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 	modifiedContent := strings.ReplaceAll(string(fileContent), oldValue, newValue)
 
 	// Write the modified content back to the file
-	err = ioutil.WriteFile(filepath.Join(gcpPath, "tf-wrapper.sh"), []byte(modifiedContent), 0o644) // 0o644 for read/write by owner, read by others
+	err = os.WriteFile(filepath.Join(gcpPath, "tf-wrapper.sh"), []byte(modifiedContent), 0o644) // 0o644 for read/write by owner, read by others
 	if err != nil {
 		return fmt.Errorf("error writing file: %w", err)
 	}
