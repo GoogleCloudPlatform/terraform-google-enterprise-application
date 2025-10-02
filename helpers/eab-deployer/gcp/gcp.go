@@ -109,8 +109,10 @@ func triggerNewBuild(t testing.TB, ctx context.Context, buildName string) (strin
 // NewGCP creates a new wrapper for Google Cloud Platform CLI.
 func NewGCP() GCP {
 	return GCP{
-		Runf:      gcloud.Runf,
-		sleepTime: 20,
+		Runf:            gcloud.Runf,
+		RunCmd:          runCmd,
+		TriggerNewBuild: triggerNewBuild,
+		sleepTime:       20,
 	}
 }
 
@@ -142,9 +144,13 @@ func (g GCP) GetBuildStatus(t testing.TB, projectID, region, buildID string) str
 }
 
 // GetRunningBuildID gets the current build running for the given project, region, and filter
-func (g GCP) GetRunningBuildID(t testing.TB, projectID, region, filter string) string {
+func (g GCP) GetRunningBuildID(t testing.TB, projectID, region, filter string, retryGetBuild int) string {
+	currentRetry := 1
 	time.Sleep(g.sleepTime * time.Second)
 	builds := g.GetBuilds(t, projectID, region, filter)
+	if len(builds) == 0 && currentRetry <= retryGetBuild {
+		return g.GetRunningBuildID(t, projectID, region, filter, retryGetBuild-currentRetry)
+	}
 	for id, status := range builds {
 		if status == BuildStatusQueued || status == BuildStatusWorking {
 			return id
@@ -211,10 +217,10 @@ func (g GCP) WaitBuildSuccess(t testing.TB, project, region, repo, commitSha, fa
 	if commitSha == "" {
 		filter = fmt.Sprintf("source.repoSource.repoName:%s", repo)
 	} else {
-		filter = fmt.Sprintf("source.repoSource.commitSha:%s", commitSha)
+		filter = fmt.Sprintf("substitutions.COMMIT_SHA:%s", commitSha)
 	}
 
-	build = g.GetRunningBuildID(t, project, region, filter)
+	build = g.GetRunningBuildID(t, project, region, filter, 5)
 	for i := 0; i < maxErrorRetries; i++ {
 		if build != "" {
 			status, timeoutErr = g.GetFinalBuildState(t, project, region, build, maxBuildRetry)
