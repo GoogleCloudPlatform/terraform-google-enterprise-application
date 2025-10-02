@@ -101,8 +101,15 @@ func main() {
 
 	// validate inputs
 	if cfg.validate {
+		stages.ValidateComponents(t)
 		stages.ValidateBasicFields(t, globalTFVars)
 		stages.ValidateDestroyFlags(t, globalTFVars)
+		stages.ValidatePermissions(t, globalTFVars)
+		stages.ValidateRequiredAPIs(t, globalTFVars)
+		stages.ValidateRepositories(t, globalTFVars)
+		stages.ValidateNetworkRequirementes(t, globalTFVars)
+		stages.ValidatePrivateWorkerPoolRequirementes(t, globalTFVars)
+		stages.ValidateVPCSCRequirements(t, globalTFVars)
 		return
 	}
 
