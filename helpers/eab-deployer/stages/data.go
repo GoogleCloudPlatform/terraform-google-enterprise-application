@@ -140,11 +140,11 @@ type GlobalTFVars struct {
 	DeletionProtection                      bool                                     `hcl:"deletion_protection"`
 	NamespaceIDs                            map[string]string                        `hcl:"namespace_ids"`
 	RemoteStateBucket                       string                                   `hcl:"remote_state_bucket"`
-	ConfigSyncSecretType                    string                                   `hcl:"config_sync_secret_type"`
-	ConfigSyncRepositoryURL                 string                                   `hcl:"config_sync_repository_url"`
+	ConfigSyncSecretType                    *string                                  `hcl:"config_sync_secret_type"`
+	ConfigSyncRepositoryURL                 *string                                  `hcl:"config_sync_repository_url"`
 	DisableIstioOnNamespaces                []string                                 `hcl:"disable_istio_on_namespaces"`
-	ConfigSyncPolicyDir                     string                                   `hcl:"config_sync_policy_dir"`
-	ConfigSyncBranch                        string                                   `hcl:"config_sync_branch"`
+	ConfigSyncPolicyDir                     *string                                  `hcl:"config_sync_policy_dir"`
+	ConfigSyncBranch                        *string                                  `hcl:"config_sync_branch"`
 	AttestationKMSKey                       string                                   `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
 	EnableKueue                             bool                                     `hcl:"enable_kueue"`
@@ -170,14 +170,14 @@ type Env struct {
 type CloudbuildV2RepositoryConfig struct {
 	RepoType                               string                `hcl:"repo_type" cty:"repo_type"`
 	Repositories                           map[string]Repository `hcl:"repositories" cty:"repositories"`
-	GithubSecretID                         string                `hcl:"github_secret_id" cty:"github_secret_id"`
-	GithubAppIDSecretID                    string                `hcl:"github_app_id_secret_id" cty:"github_app_id_secret_id"`
-	GitlabReadAuthorizerCredentialSecretID string                `hcl:"gitlab_read_authorizer_credential_secret_id" cty:"gitlab_read_authorizer_credential_secret_id"`
-	GitlabAuthorizerCredentialSecretID     string                `hcl:"gitlab_authorizer_credential_secret_id" cty:"gitlab_authorizer_credential_secret_id"`
-	GitlabWebhookSecretID                  string                `hcl:"gitlab_webhook_secret_id" cty:"gitlab_webhook_secret_id"`
-	GitlabEnterpriseHostURI                string                `hcl:"gitlab_enterprise_host_uri" cty:"gitlab_enterprise_host_uri"`
-	GitlabEnterpriseServiceDirectory       string                `hcl:"gitlab_enterprise_service_directory" cty:"gitlab_enterprise_service_directory"`
-	GitlabEnterpriseCACertificate          string                `hcl:"gitlab_enterprise_ca_certificate" cty:"gitlab_enterprise_ca_certificate"`
+	GithubSecretID                         *string               `hcl:"github_secret_id" cty:"github_secret_id"`
+	GithubAppIDSecretID                    *string               `hcl:"github_app_id_secret_id" cty:"github_app_id_secret_id"`
+	GitlabReadAuthorizerCredentialSecretID *string               `hcl:"gitlab_read_authorizer_credential_secret_id" cty:"gitlab_read_authorizer_credential_secret_id"`
+	GitlabAuthorizerCredentialSecretID     *string               `hcl:"gitlab_authorizer_credential_secret_id" cty:"gitlab_authorizer_credential_secret_id"`
+	GitlabWebhookSecretID                  *string               `hcl:"gitlab_webhook_secret_id" cty:"gitlab_webhook_secret_id"`
+	GitlabEnterpriseHostURI                *string               `hcl:"gitlab_enterprise_host_uri" cty:"gitlab_enterprise_host_uri"`
+	GitlabEnterpriseServiceDirectory       *string               `hcl:"gitlab_enterprise_service_directory" cty:"gitlab_enterprise_service_directory"`
+	GitlabEnterpriseCACertificate          *string               `hcl:"gitlab_enterprise_ca_certificate" cty:"gitlab_enterprise_ca_certificate"`
 	SecretProjectID                        string                `hcl:"secret_project_id" cty:"secret_project_id"`
 }
 
@@ -193,9 +193,9 @@ type App struct {
 }
 
 type ApplicationService struct {
-	AdminProjectID     string `hcl:"admin_project_id" cty:"admin_project_id"`
-	CreateInfraProject bool   `hcl:"create_infra_project" cty:"create_infra_project"`
-	CreateAdminProject bool   `hcl:"create_admin_project" cty:"create_admin_project"`
+	AdminProjectID     *string `hcl:"admin_project_id" cty:"admin_project_id"`
+	CreateInfraProject bool    `hcl:"create_infra_project" cty:"create_infra_project"`
+	CreateAdminProject bool    `hcl:"create_admin_project" cty:"create_admin_project"`
 }
 
 // CheckString checks if any of the string fields in the GlobalTFVars has the given string
@@ -241,11 +241,11 @@ type MultiTenantTfvars struct {
 type FleetscopeTfvars struct {
 	NamespaceIDs              map[string]string `hcl:"namespace_ids"`
 	RemoteStateBucket         string            `hcl:"remote_state_bucket"`
-	ConfigSyncSecretType      string            `hcl:"config_sync_secret_type"`
-	ConfigSyncRepositoryURL   string            `hcl:"config_sync_repository_url"`
+	ConfigSyncSecretType      *string           `hcl:"config_sync_secret_type"`
+	ConfigSyncRepositoryURL   *string           `hcl:"config_sync_repository_url"`
 	DisableIstioOnNamespaces  []string          `hcl:"disable_istio_on_namespaces"`
-	ConfigSyncPolicyDir       string            `hcl:"config_sync_policy_dir"`
-	ConfigSyncBranch          string            `hcl:"config_sync_branch"`
+	ConfigSyncPolicyDir       *string           `hcl:"config_sync_policy_dir"`
+	ConfigSyncBranch          *string           `hcl:"config_sync_branch"`
 	AttestationKMSKey         string            `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode string            `hcl:"attestation_evaluation_mode"`
 	EnableKueue               bool              `hcl:"enable_kueue"`

@@ -131,20 +131,20 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
 	}
 
 	if g.InfraCloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" &&
-		(g.InfraCloudbuildV2RepositoryConfig.GithubAppIDSecretID == "" || g.InfraCloudbuildV2RepositoryConfig.GithubSecretID == "") {
+		(g.InfraCloudbuildV2RepositoryConfig.GithubAppIDSecretID == nil || g.InfraCloudbuildV2RepositoryConfig.GithubSecretID == nil) {
 		fmt.Println("# You must provide `github_app_id_secret_id` and `github_secret_id` for infra_cloudbuildv2_repository_config")
 	}
 	if g.AppServicesCloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" &&
-		(g.AppServicesCloudbuildV2RepositoryConfig.GithubAppIDSecretID == "" || g.AppServicesCloudbuildV2RepositoryConfig.GithubSecretID == "") {
+		(g.AppServicesCloudbuildV2RepositoryConfig.GithubAppIDSecretID == nil || g.AppServicesCloudbuildV2RepositoryConfig.GithubSecretID == nil) {
 		fmt.Println("# You must provide `github_app_id_secret_id` and `github_secret_id` for app_services_cloudbuildv2_repository_config")
 	}
 
 	if g.InfraCloudbuildV2RepositoryConfig.RepoType == "GITLABv2" &&
-		(g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == "" || g.InfraCloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == "" || g.InfraCloudbuildV2RepositoryConfig.GitlabWebhookSecretID == "") {
+		(g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == nil || g.InfraCloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == nil || g.InfraCloudbuildV2RepositoryConfig.GitlabWebhookSecretID == nil) {
 		fmt.Println("# You must provide `gitlab_authorizer_credential_secret_id`, `gitlab_webhook_secret_id` and `gitlab_read_authorizer_credential_secret_id` for infra_cloudbuildv2_repository_config")
 	}
 	if g.AppServicesCloudbuildV2RepositoryConfig.RepoType == "GITLABv2" &&
-		(g.AppServicesCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == "" || g.AppServicesCloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == "" || g.AppServicesCloudbuildV2RepositoryConfig.GitlabWebhookSecretID == "") {
+		(g.AppServicesCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == nil || g.AppServicesCloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == nil || g.AppServicesCloudbuildV2RepositoryConfig.GitlabWebhookSecretID == nil) {
 		fmt.Println("# You must provide `gitlab_authorizer_credential_secret_id`, `gitlab_webhook_secret_id` and `gitlab_read_authorizer_credential_secret_id` for app_services_cloudbuildv2_repository_config")
 	}
 }
@@ -169,9 +169,9 @@ func ValidateRepositories(t testing.TB, g GlobalTFVars) {
 
 	switch g.InfraCloudbuildV2RepositoryConfig.RepoType {
 	case "GITHUBv2":
-		pat = gcp.NewGCP().GetSecretValue(t, g.InfraCloudbuildV2RepositoryConfig.GithubSecretID)
+		pat = gcp.NewGCP().GetSecretValue(t, *g.InfraCloudbuildV2RepositoryConfig.GithubSecretID)
 	case "GITLABv2":
-		pat = gcp.NewGCP().GetSecretValue(t, g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID)
+		pat = gcp.NewGCP().GetSecretValue(t, *g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID)
 	}
 
 	for _, repo := range g.InfraCloudbuildV2RepositoryConfig.Repositories {
