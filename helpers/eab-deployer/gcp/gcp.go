@@ -15,6 +15,7 @@
 package gcp
 
 import (
+	"encoding/base64"
 	"fmt"
 	"maps"
 	"slices"
@@ -227,4 +228,40 @@ func (g GCP) EnableApis(t testing.TB, project string, apis []string) {
 func (g GCP) IsApiEnabled(t testing.TB, project, api string) bool {
 	filter := fmt.Sprintf("config.name=%s", api)
 	return len(g.Runf(t, "services list --enabled --project %s --filter %s", project, filter).Array()) > 0
+}
+
+// IsApiEnabled checks if the api is enabled in the given project
+func (g GCP) GetSecretValue(t testing.TB, secretID string) string {
+	secret := g.Runf(t, "secrets versions access %s/versions/latest", secretID)
+	decoded, err := base64.StdEncoding.DecodeString(secret.Get("payload.data").String())
+	if err != nil {
+		fmt.Printf("Error decoding string: %s", err.Error())
+	}
+	return string(decoded)
+}
+
+// IsComponentInstalled checks if a given gcloud component is installed
+func (g GCP) IsComponentInstalled(t testing.TB, componentID string) bool {
+	filter := fmt.Sprintf("\"id='%s'\"", componentID)
+	components := g.Runf(t, "components list --filter %s", filter).Array()
+	if len(components) == 0 {
+		return false
+	}
+	return components[0].Get("state.name").String() != "Not Installed"
+}
+
+func (g GCP) GetRolePermissions(t testing.TB, roleName string) ([]string, error) {
+	result := g.Runf(t, "iam roles describe %s", roleName)
+
+	permissions := []string{}
+	for _, permission := range result.Get("includedPermissions").Array() {
+		permissions = append(permissions, permission.String())
+	}
+	return permissions, nil
+}
+
+func (g GCP) GetAuthToken(t testing.TB) string {
+	result := g.Runf(t, "auth print-access-token")
+
+	return result.Get("token").String()
 }
