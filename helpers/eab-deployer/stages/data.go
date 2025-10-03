@@ -139,7 +139,6 @@ type GlobalTFVars struct {
 	CBPrivateWorkerpoolProjectID            string                                   `hcl:"cb_private_workerpool_project_id"`
 	DeletionProtection                      bool                                     `hcl:"deletion_protection"`
 	NamespaceIDs                            map[string]string                        `hcl:"namespace_ids"`
-	RemoteStateBucket                       string                                   `hcl:"remote_state_bucket"`
 	ConfigSyncSecretType                    *string                                  `hcl:"config_sync_secret_type"`
 	ConfigSyncRepositoryURL                 *string                                  `hcl:"config_sync_repository_url"`
 	DisableIstioOnNamespaces                []string                                 `hcl:"disable_istio_on_namespaces"`

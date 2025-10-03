@@ -241,13 +241,13 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 	return deployStage(t, stageConf, s, c)
 }
 
-func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs AppFactoryOutputs, c CommonConf) error {
+func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, bootstrapOutputs BootstrapOutputs, outputs AppFactoryOutputs, c CommonConf) error {
 	//for each environment
 
 	appInfraTfvars := AppInfraTfvars{
 		Region:                       tfvars.Region,
 		BucketsForceDestroy:          tfvars.BucketsForceDestroy,
-		RemoteStateBucket:            tfvars.RemoteStateBucket,
+		RemoteStateBucket:            bootstrapOutputs.StateBucket,
 		EnvironmentNames:             slices.Collect(maps.Keys(tfvars.Envs)),
 		CloudbuildV2RepositoryConfig: tfvars.AppServicesCloudbuildV2RepositoryConfig,
 		AccessLevelName:              tfvars.AccessLevelName,

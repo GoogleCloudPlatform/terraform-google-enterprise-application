@@ -149,7 +149,6 @@ namespace_ids = {
   "hw-example" = "hw-example@example.com"
 }
 
-remote_state_bucket         = "REPLACE_ME"
 attestation_evaluation_mode = "ALWAYS_ALLOW"
 attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME"
 attestation_kms_project     = "REPLACE_ME"
