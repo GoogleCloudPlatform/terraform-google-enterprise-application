@@ -89,8 +89,8 @@ app_services_cloudbuildv2_repository_config = {
 common_folder_id = "folders/REPLACE_ME" //folder where the admin project for application will be created - MANDATORY
 project_id       = "REPLACE_ME" // project where the cici pipelines will be created for infra deployment - MANDATORY
 workerpool_id    = "projects/REPLACE_ME/locations/REPLACE_ME/workerPools/REPLACE_ME" //workerpool to be used by cicd pipeline - MANDATORY
-bucket_kms_key   = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/KEYRING_NAME/cryptoKeys/REPLACE_ME" //KMS Key to encrypt buckets - OPTIONAL
-logging_bucket   = "REPLACE_ME" // Logging bucket - OPTIONAL
+bucket_kms_key   = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/KEYRING_NAME/cryptoKeys/REPLACE_ME" //KMS Key to encrypt buckets - OPTIONAL - use `null` is not configuring it
+logging_bucket   = "REPLACE_ME" // Logging bucket - OPTIONAL - use `null` is not configuring it
 
 // 2-multitenant inputs
 apps = {
@@ -147,7 +147,7 @@ namespace_ids = {
 }
 
 attestation_evaluation_mode = "ALWAYS_ALLOW"
-attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME" // KMS Attestation key ID to be used by binary authorization - OPTIONAL
+attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME" // KMS Attestation key ID to be used by binary authorization - OPTIONAL - use `null` is not configuring it
 enable_kueue                = false
 
 //Config sync configuration
@@ -171,9 +171,9 @@ infra_project_apis = [
   "cloudbilling.googleapis.com"
 ]
 
-service_perimeter_name = "accessPolicies/REPLACE_ME/servicePerimeters/REPLACE_ME" // The service perimeter name - OPTIONAL
+service_perimeter_name = "accessPolicies/REPLACE_ME/servicePerimeters/REPLACE_ME" // The service perimeter name - OPTIONAL - use `null` is not configuring it
 service_perimeter_mode = "DRY_RUN"
-access_level_name      = "accessPolicies/REPLACE_ME/accessLevels/REPLACE_ME" // The access level name associated to the perimeter - OPTIONAL
+access_level_name      = "accessPolicies/REPLACE_ME/accessLevels/REPLACE_ME" // The access level name associated to the perimeter - OPTIONAL - use `null` is not configuring it
 
 
 // Applications to be created infra - admin and infra project, cicd pipelines

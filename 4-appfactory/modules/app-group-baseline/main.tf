@@ -44,8 +44,8 @@ locals {
   service_repo_name   = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
   worker_pool_project = element(split("/", var.workerpool_id), index(split("/", var.workerpool_id), "projects") + 1, )
 
-  secret_id             = var.cloudbuildv2_repository_config.github_secret_id != null ? var.cloudbuildv2_repository_config.github_secret_id : var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
-  secret_project_number = regex("projects/([^/]*)/", local.secret_id)[0]
+  secret_id             = !local.use_csr && var.cloudbuildv2_repository_config.github_secret_id != null ? var.cloudbuildv2_repository_config.github_secret_id : var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id
+  secret_project_number = !local.use_csr ? regex("projects/([^/]*)/", local.secret_id)[0] : null
 }
 
 data "google_project" "admin_project" {
@@ -316,6 +316,7 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_project_iam_member" "secretManager_admin" {
+  count   = local.use_csr ? 0 : 1
   project = var.cloudbuildv2_repository_config.secret_project_id
   role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"

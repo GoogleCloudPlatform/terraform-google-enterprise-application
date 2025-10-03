@@ -226,10 +226,10 @@ type BootstrapTfvars struct {
 type MultiTenantTfvars struct {
 	Envs                         map[string]Env `hcl:"envs"`
 	Apps                         map[string]App `hcl:"apps"`
-	ServicePerimeterName         string         `hcl:"service_perimeter_name"`
+	ServicePerimeterName         *string        `hcl:"service_perimeter_name"`
 	ServicePerimeterMode         string         `hcl:"service_perimeter_mode"`
 	CBPrivateWorkerpoolProjectID string         `hcl:"cb_private_workerpool_project_id"`
-	AccessLevelName              string         `hcl:"access_level_name"`
+	AccessLevelName              *string        `hcl:"access_level_name"`
 	DeletionProtection           bool           `hcl:"deletion_protection"`
 }
 
@@ -260,7 +260,7 @@ type AppFactoryTfvars struct {
 	Applications                 map[string]map[string]ApplicationService `hcl:"applications"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"cloudbuildv2_repository_config"`
 	KMSProjectID                 string                                   `hcl:"kms_project_id"`
-	ServicePerimeterName         string                                   `hcl:"service_perimeter_name"`
+	ServicePerimeterName         *string                                  `hcl:"service_perimeter_name"`
 	ServicePerimeterMode         string                                   `hcl:"service_perimeter_mode"`
 	InfraProjectAPIs             []string                                 `hcl:"infra_project_apis"`
 }
@@ -271,10 +271,10 @@ type AppInfraTfvars struct {
 	RemoteStateBucket            string                       `hcl:"remote_state_bucket"`
 	EnvironmentNames             []string                     `hcl:"environment_names"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
-	AccessLevelName              string                       `hcl:"access_level_name"`
-	LoggingBucket                string                       `hcl:"logging_bucket"`
-	BucketKMSKey                 string                       `hcl:"bucket_kms_key"`
-	AttestationKMSKey            string                       `hcl:"attestation_kms_key"`
+	AccessLevelName              *string                      `hcl:"access_level_name"`
+	LoggingBucket                *string                      `hcl:"logging_bucket"`
+	BucketKMSKey                 *string                      `hcl:"bucket_kms_key"`
+	AttestationKMSKey            *string                      `hcl:"attestation_kms_key"`
 }
 
 func GetBootstrapStepOutputs(t testing.TB, eabPath string) BootstrapOutputs {

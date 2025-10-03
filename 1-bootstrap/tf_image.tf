@@ -50,7 +50,7 @@ module "build_logs" {
 
   versioning = true
 
-  encryption = var.bucket_kms_key == null ? {} : {
+  encryption = var.bucket_kms_key == null ? null : {
     default_kms_key_name = var.bucket_kms_key
   }
 

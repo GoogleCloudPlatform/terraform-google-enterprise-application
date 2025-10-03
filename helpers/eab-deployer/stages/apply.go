@@ -140,10 +140,10 @@ func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 	multitenantTfvars := MultiTenantTfvars{
 		Envs:                         tfvars.Envs,
 		Apps:                         tfvars.Apps,
-		ServicePerimeterName:         *tfvars.ServicePerimeterName,
+		ServicePerimeterName:         tfvars.ServicePerimeterName,
 		ServicePerimeterMode:         *tfvars.ServicePerimeterMode,
 		CBPrivateWorkerpoolProjectID: workerPoolInfo["project"],
-		AccessLevelName:              *tfvars.AccessLevelName,
+		AccessLevelName:              tfvars.AccessLevelName,
 		DeletionProtection:           tfvars.DeletionProtection,
 	}
 	err = utils.WriteTfvars(filepath.Join(c.EABPath, MultitenantStep, "terraform.tfvars"), multitenantTfvars)
@@ -237,7 +237,7 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		Applications:                 tfvars.Applications,
 		CloudbuildV2RepositoryConfig: tfvars.InfraCloudbuildV2RepositoryConfig,
 		KMSProjectID:                 kmsProject,
-		ServicePerimeterName:         *tfvars.ServicePerimeterName,
+		ServicePerimeterName:         tfvars.ServicePerimeterName,
 		ServicePerimeterMode:         *tfvars.ServicePerimeterMode,
 		InfraProjectAPIs:             tfvars.InfraProjectAPIs,
 	}
@@ -278,10 +278,10 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, boots
 		RemoteStateBucket:            bootstrapOutputs.StateBucket,
 		EnvironmentNames:             slices.Collect(maps.Keys(tfvars.Envs)),
 		CloudbuildV2RepositoryConfig: tfvars.AppServicesCloudbuildV2RepositoryConfig,
-		AccessLevelName:              *tfvars.AccessLevelName,
-		LoggingBucket:                *tfvars.LoggingBucket,
-		BucketKMSKey:                 *tfvars.BucketKMSKey,
-		AttestationKMSKey:            *tfvars.AttestationKMSKey,
+		AccessLevelName:              tfvars.AccessLevelName,
+		LoggingBucket:                tfvars.LoggingBucket,
+		BucketKMSKey:                 tfvars.BucketKMSKey,
+		AttestationKMSKey:            tfvars.AttestationKMSKey,
 	}
 
 	var err error
