@@ -539,7 +539,7 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 	modifiedContent := strings.ReplaceAll(string(fileContent), oldValue, newValue)
 
 	// Write the modified content back to the file
-	err = os.WriteFile(filepath.Join(gcpPath, "tf-wrapper.sh"), []byte(modifiedContent), 0o644) // 0o644 for read/write by owner, read by others
+	err = os.WriteFile(filepath.Join(gcpPath, "tf-wrapper.sh"), []byte(modifiedContent), 0o755) // 0o755 for read/write by owner, read by others
 	if err != nil {
 		return fmt.Errorf("error writing file: %w", err)
 	}
