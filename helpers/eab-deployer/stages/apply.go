@@ -31,6 +31,19 @@ import (
 )
 
 func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
+	var kmsProject *string
+	if tfvars.AttestationKMSKey != nil {
+		kmsInfo, err := extractInfoWithRegex(*tfvars.AttestationKMSKey, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/keyRings/(?P<keyRing>[^/]+)/cryptoKeys/(?P<cryptoKey>[^/]+)`)
+		if err != nil {
+			fmt.Printf("# error extracting info for attestation KMS key. %v \n", err)
+			return err
+		}
+
+		if len(kmsInfo) > 0 {
+			auxProject := kmsInfo["project"]
+			kmsProject = &auxProject
+		}
+	}
 	bootstrapTfvars := BootstrapTfvars{
 		ProjectID:                    tfvars.ProjectID,
 		BucketPrefix:                 tfvars.BucketPrefix,
@@ -47,7 +60,7 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		ServicePerimeterMode:         tfvars.ServicePerimeterMode,
 		LoggingBucket:                tfvars.LoggingBucket,
 		BucketKMSKey:                 tfvars.BucketKMSKey,
-		AttestationKMSProject:        tfvars.AttestationKMSProject,
+		AttestationKMSProject:        kmsProject,
 		OrgID:                        tfvars.OrgID,
 	}
 
@@ -119,16 +132,21 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 
 func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 
+	workerPoolInfo, err := extractInfoWithRegex(tfvars.WorkerPoolID, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/workerPools/(?P<workerPool>[^/]+)`)
+	if err != nil {
+		fmt.Printf("# error extracting info for private workerpool. %v \n", err)
+		return err
+	}
 	multitenantTfvars := MultiTenantTfvars{
 		Envs:                         tfvars.Envs,
 		Apps:                         tfvars.Apps,
-		ServicePerimeterName:         tfvars.ServicePerimeterName,
-		ServicePerimeterMode:         tfvars.ServicePerimeterMode,
-		CBPrivateWorkerpoolProjectID: tfvars.CBPrivateWorkerpoolProjectID,
-		AccessLevelName:              tfvars.AccessLevelName,
+		ServicePerimeterName:         *tfvars.ServicePerimeterName,
+		ServicePerimeterMode:         *tfvars.ServicePerimeterMode,
+		CBPrivateWorkerpoolProjectID: workerPoolInfo["project"],
+		AccessLevelName:              *tfvars.AccessLevelName,
 		DeletionProtection:           tfvars.DeletionProtection,
 	}
-	err := utils.WriteTfvars(filepath.Join(c.EABPath, MultitenantStep, "terraform.tfvars"), multitenantTfvars)
+	err = utils.WriteTfvars(filepath.Join(c.EABPath, MultitenantStep, "terraform.tfvars"), multitenantTfvars)
 	if err != nil {
 		return err
 	}
@@ -163,7 +181,7 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		DisableIstioOnNamespaces:  tfvars.DisableIstioOnNamespaces,
 		ConfigSyncPolicyDir:       tfvars.ConfigSyncPolicyDir,
 		ConfigSyncBranch:          tfvars.ConfigSyncBranch,
-		AttestationKMSKey:         tfvars.AttestationKMSKey,
+		AttestationKMSKey:         *tfvars.AttestationKMSKey,
 		AttestationEvaluationMode: tfvars.AttestationEvaluationMode,
 		EnableKueue:               tfvars.EnableKueue,
 	}
@@ -195,6 +213,16 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 
 func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 
+	kmsProject := ""
+	if tfvars.BucketKMSKey != nil {
+		kmsInfo, err := extractInfoWithRegex(*tfvars.BucketKMSKey, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/keyRings/(?P<keyRing>[^/]+)/cryptoKeys/(?P<cryptoKey>[^/]+)`)
+		if err != nil {
+			fmt.Printf("# error extracting info for BUCKET KMS PROJECT. %v \n", err)
+		}
+		if len(kmsInfo) > 0 {
+			kmsProject = kmsInfo["project"]
+		}
+	}
 	appFactory := AppFactoryTfvars{
 		RemoteStateBucket:            outputs.StateBucket,
 		CommonFolderID:               tfvars.CommonFolderID,
@@ -208,9 +236,9 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		TFApplyBranches:              slices.Collect(maps.Keys(tfvars.Envs)),
 		Applications:                 tfvars.Applications,
 		CloudbuildV2RepositoryConfig: tfvars.InfraCloudbuildV2RepositoryConfig,
-		KMSProjectID:                 tfvars.KMSProjectID,
-		ServicePerimeterName:         tfvars.ServicePerimeterName,
-		ServicePerimeterMode:         tfvars.ServicePerimeterMode,
+		KMSProjectID:                 kmsProject,
+		ServicePerimeterName:         *tfvars.ServicePerimeterName,
+		ServicePerimeterMode:         *tfvars.ServicePerimeterMode,
 		InfraProjectAPIs:             tfvars.InfraProjectAPIs,
 	}
 	err := utils.WriteTfvars(filepath.Join(c.EABPath, AppFactoryStep, "terraform.tfvars"), appFactory)
@@ -246,14 +274,14 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, boots
 
 	appInfraTfvars := AppInfraTfvars{
 		Region:                       tfvars.Region,
-		BucketsForceDestroy:          tfvars.BucketsForceDestroy,
+		BucketsForceDestroy:          tfvars.BucketForceDestroy,
 		RemoteStateBucket:            bootstrapOutputs.StateBucket,
 		EnvironmentNames:             slices.Collect(maps.Keys(tfvars.Envs)),
 		CloudbuildV2RepositoryConfig: tfvars.AppServicesCloudbuildV2RepositoryConfig,
-		AccessLevelName:              tfvars.AccessLevelName,
-		LoggingBucket:                tfvars.LoggingBucket,
-		BucketKMSKey:                 tfvars.BucketKMSKey,
-		AttestationKMSKey:            tfvars.AttestationKMSKey,
+		AccessLevelName:              *tfvars.AccessLevelName,
+		LoggingBucket:                *tfvars.LoggingBucket,
+		BucketKMSKey:                 *tfvars.BucketKMSKey,
+		AttestationKMSKey:            *tfvars.AttestationKMSKey,
 	}
 
 	var err error

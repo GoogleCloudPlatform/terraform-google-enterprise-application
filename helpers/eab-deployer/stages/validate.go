@@ -120,16 +120,6 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
 		}
 	}
 
-	test, _ := regexp.MatchString(g.KMSProjectID, g.BucketKMSKey)
-	if !test {
-		fmt.Println("# You `kms_project_id` must be the same in your `bucket_kms_key`")
-	}
-
-	test, _ = regexp.MatchString(g.AttestationKMSProject, g.AttestationKMSKey)
-	if !test {
-		fmt.Println("# You `attestation_kms_project` must be the same in your `attestation_kms_key`")
-	}
-
 	if g.InfraCloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" &&
 		(g.InfraCloudbuildV2RepositoryConfig.GithubAppIDSecretID == nil || g.InfraCloudbuildV2RepositoryConfig.GithubSecretID == nil) {
 		fmt.Println("# You must provide `github_app_id_secret_id` and `github_secret_id` for infra_cloudbuildv2_repository_config")
@@ -238,26 +228,62 @@ func ValidatePermissions(t testing.TB, g GlobalTFVars) {
 	fmt.Println("")
 	fmt.Println("# Validating if identity has required roles.")
 
-	projectRoles := map[string][]string{
+	workerPoolInfo, err := extractInfoWithRegex(g.WorkerPoolID, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/workerPools/(?P<workerPool>[^/]+)`)
+	if err != nil {
+		fmt.Printf("# error extracting info for private workerpool. %v \n", err)
+	}
 
-		fmt.Sprintf("infraSecretProject:%s", g.InfraCloudbuildV2RepositoryConfig.SecretProjectID): {
-			"roles/secretmanager.admin",
-		},
-		fmt.Sprintf("AppSecretProject:%s", g.AppServicesCloudbuildV2RepositoryConfig.SecretProjectID): {
-			"roles/secretmanager.admin",
-		},
+	projectRoles := map[string][]string{
 		fmt.Sprintf("seedProject:%s", g.ProjectID): {
 			"roles/cloudbuild.connectionAdmin",
 			"roles/compute.networkAdmin",
 			"roles/resourcemanager.projectIamAdmin",
 		},
-		fmt.Sprintf("kmsProject:%s", g.KMSProjectID): {
-			"roles/resourcemanager.projectIamAdmin",
-		},
-		fmt.Sprintf("cbPrivateWorkerPoolProject:%s", g.CBPrivateWorkerpoolProjectID): {
+	}
+
+	if g.InfraCloudbuildV2RepositoryConfig.SecretProjectID != nil && *g.InfraCloudbuildV2RepositoryConfig.SecretProjectID != "" {
+		projectRoles[fmt.Sprintf("infraSecretProject:%s", *g.InfraCloudbuildV2RepositoryConfig.SecretProjectID)] = []string{
+			"roles/secretmanager.admin",
+		}
+	}
+
+	if g.AppServicesCloudbuildV2RepositoryConfig.SecretProjectID != nil && *g.AppServicesCloudbuildV2RepositoryConfig.SecretProjectID != "" {
+		projectRoles[fmt.Sprintf("appSourceSecretProject:%s", *g.AppServicesCloudbuildV2RepositoryConfig.SecretProjectID)] = []string{
+			"roles/secretmanager.admin",
+		}
+	}
+
+	if g.AttestationKMSKey != nil {
+		kmsInfo, err := extractInfoWithRegex(*g.AttestationKMSKey, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/keyRings/(?P<keyRing>[^/]+)/cryptoKeys/(?P<cryptoKey>[^/]+)`)
+		if err != nil {
+			fmt.Printf("# error extracting info for ATTESTATION KMS PROJECT. %v \n", err)
+		}
+
+		if len(kmsInfo) > 0 {
+			projectRoles[fmt.Sprintf("attestationKMSProject:%s", kmsInfo["project"])] = []string{
+				"roles/resourcemanager.projectIamAdmin",
+			}
+		}
+	}
+
+	if g.BucketKMSKey != nil {
+		kmsInfo, err := extractInfoWithRegex(*g.BucketKMSKey, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/keyRings/(?P<keyRing>[^/]+)/cryptoKeys/(?P<cryptoKey>[^/]+)`)
+		if err != nil {
+			fmt.Printf("# error extracting info for BUCKET KMS PROJECT. %v \n", err)
+		}
+
+		if len(kmsInfo) > 0 {
+			projectRoles[fmt.Sprintf("bucketKMSProject:%s", kmsInfo["project"])] = []string{
+				"roles/resourcemanager.projectIamAdmin",
+			}
+		}
+	}
+
+	if len(workerPoolInfo) > 0 {
+		projectRoles[fmt.Sprintf("cbPrivateWorkerPoolProject:%s", workerPoolInfo["project"])] = []string{
 			"roles/cloudbuild.workerPoolUser",
 			"roles/resourcemanager.projectIamAdmin",
-		},
+		}
 	}
 
 	orgLevelRoles := []string{
@@ -408,9 +434,6 @@ func ValidateDestroyFlags(t testing.TB, g GlobalTFVars) {
 	if !g.BucketForceDestroy {
 		trueFlags = append(trueFlags, "buckets_force_destroy")
 	}
-	if !g.BucketsForceDestroy {
-		trueFlags = append(trueFlags, "buckets_force_destroy")
-	}
 
 	projectDeletion = g.DeletionProtection
 
@@ -537,8 +560,8 @@ func ValidatePrivateWorkerPoolRequirementes(t testing.TB, g GlobalTFVars) {
 
 func ValidateVPCSCRequirements(t testing.TB, g GlobalTFVars) {
 	fmt.Println("#Checking VPC-SC requirementes.")
-	if g.ServicePerimeterName != "" {
-		if g.AccessLevelName == "" {
+	if *g.ServicePerimeterName != "" {
+		if *g.AccessLevelName == "" {
 			fmt.Println("You must provide the associated Access Level name to be used with Service Perimeter.")
 			return
 		}
@@ -547,11 +570,11 @@ func ValidateVPCSCRequirements(t testing.TB, g GlobalTFVars) {
 		res := gcp.NewGCP().Runf(t, "access-context-manager perimeters describe %s ", g.ServicePerimeterName)
 		found := false
 		fieldToCheck := "status"
-		if g.ServicePerimeterMode == "DRY_RUN" {
+		if *g.ServicePerimeterMode == "DRY_RUN" {
 			fieldToCheck = "spec"
 		}
 		res.Get(fieldToCheck).Get("accessLevels").ForEach(func(k, v gjson.Result) bool {
-			if v.String() == g.AccessLevelName {
+			if v.String() == *g.AccessLevelName {
 				found = true
 				return false
 			}

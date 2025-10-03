@@ -128,15 +128,13 @@ type GlobalTFVars struct {
 	InfraCloudbuildV2RepositoryConfig       CloudbuildV2RepositoryConfig             `hcl:"infra_cloudbuildv2_repository_config"`
 	AppServicesCloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"app_services_cloudbuildv2_repository_config"`
 	WorkerPoolID                            string                                   `hcl:"workerpool_id"`
-	AccessLevelName                         string                                   `hcl:"access_level_name"`
-	ServicePerimeterName                    string                                   `hcl:"service_perimeter_name"`
-	ServicePerimeterMode                    string                                   `hcl:"service_perimeter_mode"`
-	LoggingBucket                           string                                   `hcl:"logging_bucket"`
-	BucketKMSKey                            string                                   `hcl:"bucket_kms_key"`
-	AttestationKMSProject                   string                                   `hcl:"attestation_kms_project"`
+	AccessLevelName                         *string                                  `hcl:"access_level_name"`
+	ServicePerimeterName                    *string                                  `hcl:"service_perimeter_name"`
+	ServicePerimeterMode                    *string                                  `hcl:"service_perimeter_mode"`
+	LoggingBucket                           *string                                  `hcl:"logging_bucket"`
+	BucketKMSKey                            *string                                  `hcl:"bucket_kms_key"`
 	OrgID                                   string                                   `hcl:"org_id"`
 	Apps                                    map[string]App                           `hcl:"apps"`
-	CBPrivateWorkerpoolProjectID            string                                   `hcl:"cb_private_workerpool_project_id"`
 	DeletionProtection                      bool                                     `hcl:"deletion_protection"`
 	NamespaceIDs                            map[string]string                        `hcl:"namespace_ids"`
 	ConfigSyncSecretType                    *string                                  `hcl:"config_sync_secret_type"`
@@ -144,15 +142,13 @@ type GlobalTFVars struct {
 	DisableIstioOnNamespaces                []string                                 `hcl:"disable_istio_on_namespaces"`
 	ConfigSyncPolicyDir                     *string                                  `hcl:"config_sync_policy_dir"`
 	ConfigSyncBranch                        *string                                  `hcl:"config_sync_branch"`
-	AttestationKMSKey                       string                                   `hcl:"attestation_kms_key"`
+	AttestationKMSKey                       *string                                  `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
 	EnableKueue                             bool                                     `hcl:"enable_kueue"`
 	BillingAccount                          string                                   `hcl:"billing_account"`
 	Applications                            map[string]map[string]ApplicationService `hcl:"applications"`
-	KMSProjectID                            string                                   `hcl:"kms_project_id"`
 	InfraProjectAPIs                        []string                                 `hcl:"infra_project_apis"`
 	Region                                  string                                   `hcl:"region"`
-	BucketsForceDestroy                     bool                                     `hcl:"buckets_force_destroy"`
 	EABCodePath                             string                                   `hcl:"eab_code_path"`
 	CodeCheckoutPath                        string                                   `hcl:"code_checkout_path"`
 }
@@ -177,7 +173,7 @@ type CloudbuildV2RepositoryConfig struct {
 	GitlabEnterpriseHostURI                *string               `hcl:"gitlab_enterprise_host_uri" cty:"gitlab_enterprise_host_uri"`
 	GitlabEnterpriseServiceDirectory       *string               `hcl:"gitlab_enterprise_service_directory" cty:"gitlab_enterprise_service_directory"`
 	GitlabEnterpriseCACertificate          *string               `hcl:"gitlab_enterprise_ca_certificate" cty:"gitlab_enterprise_ca_certificate"`
-	SecretProjectID                        string                `hcl:"secret_project_id" cty:"secret_project_id"`
+	SecretProjectID                        *string               `hcl:"secret_project_id" cty:"secret_project_id"`
 }
 
 type Repository struct {
@@ -218,12 +214,12 @@ type BootstrapTfvars struct {
 	CommonFolderID               string                       `hcl:"common_folder_id"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
 	WorkerPoolID                 string                       `hcl:"workerpool_id"`
-	AccessLevelName              string                       `hcl:"access_level_name"`
-	ServicePerimeterName         string                       `hcl:"service_perimeter_name"`
-	ServicePerimeterMode         string                       `hcl:"service_perimeter_mode"`
-	LoggingBucket                string                       `hcl:"logging_bucket"`
-	BucketKMSKey                 string                       `hcl:"bucket_kms_key"`
-	AttestationKMSProject        string                       `hcl:"attestation_kms_project"`
+	AccessLevelName              *string                      `hcl:"access_level_name"`
+	ServicePerimeterName         *string                      `hcl:"service_perimeter_name"`
+	ServicePerimeterMode         *string                      `hcl:"service_perimeter_mode"`
+	LoggingBucket                *string                      `hcl:"logging_bucket"`
+	BucketKMSKey                 *string                      `hcl:"bucket_kms_key"`
+	AttestationKMSProject        *string                      `hcl:"attestation_kms_project"`
 	OrgID                        string                       `hcl:"org_id"`
 }
 

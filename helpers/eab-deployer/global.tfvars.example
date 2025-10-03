@@ -24,62 +24,57 @@ code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITO
 eab_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EAB_CODE_WAS_CHECKED_OUT"
 
 bucket_force_destroy  = true
-buckets_force_destroy = true
 deletion_protection   = false
 
+// :TODO comments explaining variables.
 infra_cloudbuildv2_repository_config = {
- github_app_id_secret_id                     = "projects/REPLACE_ME/secrets/github-app-id"
-  github_secret_id                            = "projects/REPLACE_ME/secrets/github-pat"
+  github_app_id_secret_id                     = null
+  github_secret_id                            = null
   gitlab_authorizer_credential_secret_id      = null
   gitlab_enterprise_ca_certificate            = null
   gitlab_enterprise_host_uri                  = null
   gitlab_enterprise_service_directory         = null
   gitlab_read_authorizer_credential_secret_id = null
   gitlab_webhook_secret_id                    = null
-  repo_type                                   = "GITHUBv2"
+  repo_type                                   = "CSR"
   repositories = {
     applicationfactory = {
       repository_name = "eab-appfactory"
-      repository_url  = "https://github.com/REPLACE_ME/eab-appfactory.git"
+      repository_url = ""
     }
     fleetscope = {
       repository_name = "eab-fleetscope"
-      repository_url  = "https://github.com/REPLACE_ME/eab-fleetscope.git"
+      repository_url = ""
     }
     hello-world = {
       repository_name = "hello-world-admin"
-      repository_url  = "https://github.com/REPLACE_ME/hello-world-admin.git"
+      repository_url = ""
     }
     multitenant = {
       repository_name = "eab-multitenant"
-      repository_url  = "https://github.com/REPLACE_ME/eab-multitenant.git"
+      repository_url = ""
     }
   }
-  secret_project_id = "REPLACE_ME"
+  secret_project_id = null
 }
 
 app_services_cloudbuildv2_repository_config = {
-  repo_type = "GITHUBv2"
+  github_app_id_secret_id                     = null
+  github_secret_id                            = null
+  gitlab_authorizer_credential_secret_id      = null
+  gitlab_enterprise_ca_certificate            = null
+  gitlab_enterprise_host_uri                  = null
+  gitlab_enterprise_service_directory         = null
+  gitlab_read_authorizer_credential_secret_id = null
+  gitlab_webhook_secret_id                    = null
+  repo_type                                   = "CSR"
   repositories = {
     eab-default-example-hello-world = {
       repository_name = "hello-world-i-r"
-      repository_url  = "https://github.com/REPLACE_ME/hello-world-i-r.git"
+      repository_url = ""
     }
   }
-  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
-  gitlab_authorizer_credential_secret_id      = null
-  gitlab_read_authorizer_credential_secret_id = null
-  gitlab_webhook_secret_id                    = null
-  # If you are using a self-hosted instance, you may change the URL below accordingly
-  gitlab_enterprise_host_uri = null
-  # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
-  gitlab_enterprise_service_directory = null
-  # .pem string
-  gitlab_enterprise_ca_certificate = null
-  secret_project_id                = "REPLACE_ME"
-
-  github_app_id_secret_id = "projects/REPLACE_ME/secrets/REPLACE_ME"
-  github_secret_id        = "projects/REPLACE_ME/secrets/REPLACE_ME"
+  secret_project_id = null
 }
 
 
@@ -91,12 +86,11 @@ app_services_cloudbuildv2_repository_config = {
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/tree/main/1-bootstrap#inputs
 
 
-common_folder_id = "folders/REPLACE_ME"
-project_id       = "REPLACE_ME"
-workerpool_id    = "projects/REPLACE_ME/locations/REPLACE_ME/workerPools/REPLACE_ME"
-bucket_kms_key   = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/KEYRING_NAME/cryptoKeys/REPLACE_ME"
-logging_bucket   = "REPLACE_ME"
-kms_project_id   ="REPLACE_ME"
+common_folder_id = "folders/REPLACE_ME" //folder where the admin project for application will be created - MANDATORY
+project_id       = "REPLACE_ME" // project where the cici pipelines will be created for infra deployment - MANDATORY
+workerpool_id    = "projects/REPLACE_ME/locations/REPLACE_ME/workerPools/REPLACE_ME" //workerpool to be used by cicd pipeline - MANDATORY
+bucket_kms_key   = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/KEYRING_NAME/cryptoKeys/REPLACE_ME" //KMS Key to encrypt buckets - OPTIONAL
+logging_bucket   = "REPLACE_ME" // Logging bucket - OPTIONAL
 
 // 2-multitenant inputs
 apps = {
@@ -107,14 +101,17 @@ apps = {
   }
 }
 
+// List all the enviroments to be deployed:
+// the enviroment folder
+//
 envs = {
-  "development" = {
-    "billing_account"    = "REPLACE_ME"
-    "folder_id"          = "folders/REPLACE_ME"
-    "network_project_id" = "REPLACE_ME"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/vpc-eab-vpc-development"
-    "org_id"             = "REPLACE_ME"
-    "subnets_self_links" = [
+  "development" = { //enviroment name
+    "billing_account"    = "REPLACE_ME" // billing to be used to create enviroment projects
+    "folder_id"          = "folders/REPLACE_ME" //folder where the enviroment projects will be creatd
+    "network_project_id" = "REPLACE_ME" // the network project id for the enviroment
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/REPLACE_ME" // the network self link for the enviroment
+    "org_id"             = "REPLACE_ME" // the org id
+    "subnets_self_links" = [ // the subnetwork self link for the enviroment, each subnet provided will be used to create cluster in the same region.
       "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-development-REPLACE_ME",
       "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-development-REPLACE_ME",
     ]
@@ -123,7 +120,7 @@ envs = {
     "billing_account"    = "REPLACE_ME"
     "folder_id"          = "folders/REPLACE_ME"
     "network_project_id" = "REPLACE_ME"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/vpc-eab-vpc-nonproduction"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/REPLACE_ME"
     "org_id"             = "REPLACE_ME"
     "subnets_self_links" = [
       "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-nonproduction-REPLACE_ME",
@@ -134,7 +131,7 @@ envs = {
     "billing_account"    = "REPLACE_ME"
     "folder_id"          = "folders/REPLACE_ME"
     "network_project_id" = "REPLACE_ME"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/vpc-eab-vpc-production"
+    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/REPLACE_ME"
     "org_id"             = "REPLACE_ME"
     "subnets_self_links" = [
       "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-production-REPLACE_ME",
@@ -150,28 +147,36 @@ namespace_ids = {
 }
 
 attestation_evaluation_mode = "ALWAYS_ALLOW"
-attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME"
-attestation_kms_project     = "REPLACE_ME"
+attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME" // KMS Attestation key ID to be used by binary authorization - OPTIONAL
 enable_kueue                = false
-config_sync_branch          = ""
-config_sync_repository_url  = ""
-config_sync_secret_type     = "none"
+
+//Config sync configuration
+config_sync_branch          = "" // Config sync branch - OPTIONAL
+config_sync_repository_url  = "" //  Config sync repository url - OPTIONAL
+config_sync_secret_type     = "none" // Config sync secret type - None to not use - Valid values: `ssh`, `cookiefile`, `gcenode`, `gcpserviceaccount`, `githubapp`, `token`, or `none`.
+config_sync_policy_dir      = "" // Config sync policy directory - OPTIONAL
+
 disable_istio_on_namespaces = []
 
 // 4-appfactory
 
-billing_account = "REPLACE_ME"
-org_id          = "REPLACE_ME"
+billing_account = "REPLACE_ME" // billing to be used to create projects - MANDATORY
+org_id          = "REPLACE_ME" // org where is going to be deployed - MANDATORY
 
+// APIs to be enabled on infra projects
 infra_project_apis = [
   "iam.googleapis.com",
   "cloudresourcemanager.googleapis.com",
   "serviceusage.googleapis.com",
   "cloudbilling.googleapis.com"
 ]
-service_perimeter_name = "accessPolicies/REPLACE_ME/servicePerimeters/REPLACE_ME"
+
+service_perimeter_name = "accessPolicies/REPLACE_ME/servicePerimeters/REPLACE_ME" // The service perimeter name - OPTIONAL
 service_perimeter_mode = "DRY_RUN"
-access_level_name      = "accessPolicies/REPLACE_ME/accessLevels/REPLACE_ME"
+access_level_name      = "accessPolicies/REPLACE_ME/accessLevels/REPLACE_ME" // The access level name associated to the perimeter - OPTIONAL
+
+
+// Applications to be created infra - admin and infra project, cicd pipelines
 applications = {
   "default-example" = {
     "hello-world" = {
@@ -181,11 +186,10 @@ applications = {
     }
   }
 }
-cb_private_workerpool_project_id = "REPLACE_ME"
-location                         = "REPLACE_ME"
+
+location                         = "REPLACE_ME" //Location for build buckets
+trigger_location  = "REPLACE_ME" // Trigger location
+bucket_prefix     = "bkt"
 
 // 5-appinfra
-
-region            = "REPLACE_ME"
-trigger_location  = "REPLACE_ME"
-bucket_prefix     = "bkt"
+region            = "REPLACE_ME" // CICD region
