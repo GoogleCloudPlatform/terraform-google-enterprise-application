@@ -155,7 +155,7 @@ func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 	if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
 		conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName), c.Logger)
 	} else {
-		conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName), outputs.ProjectID, c.Logger)
+		conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName), outputs.ProjectID, c.Logger)
 	}
 	stageConf := StageConf{
 		Stage:         tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["multitenant"].RepositoryName,
@@ -194,7 +194,7 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 	if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
 		conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName), c.Logger)
 	} else {
-		conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName), outputs.ProjectID, c.Logger)
+		conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["fleetscope"].RepositoryName), outputs.ProjectID, c.Logger)
 	}
 
 	stageConf := StageConf{
@@ -250,7 +250,7 @@ func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 	if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
 		conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName), c.Logger)
 	} else {
-		conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName), outputs.ProjectID, c.Logger)
+		conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName), outputs.ProjectID, c.Logger)
 	}
 
 	stageConf := StageConf{
@@ -309,7 +309,7 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, boots
 			if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
 				conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName), c.Logger)
 			} else {
-				conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName), outputs.AppGroup[appGroupIndex].AppAdminProjectID, c.Logger)
+				conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName), outputs.AppGroup[appGroupIndex].AppAdminProjectID, c.Logger)
 			}
 
 			stageConf := StageConf{
@@ -344,7 +344,7 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outp
 		if tfvars.AppServicesCloudbuildV2RepositoryConfig.RepoType != "CSR" {
 			conf = utils.CloneGit(t, repository.RepositoryURL, filepath.Join(c.CheckoutPath, outputs.ServiceRepositoryName), c.Logger)
 		} else {
-			conf = utils.CloneCSR(t, repository.RepositoryURL, filepath.Join(c.CheckoutPath, outputs.ServiceRepositoryName), outputs.ServiceRepositoryProjectID, c.Logger)
+			conf = utils.CloneCSR(t, repository.RepositoryName, filepath.Join(c.CheckoutPath, outputs.ServiceRepositoryName), outputs.ServiceRepositoryProjectID, c.Logger)
 		}
 		stageConf := StageConf{
 			Stage:         outputs.ServiceRepositoryName,
