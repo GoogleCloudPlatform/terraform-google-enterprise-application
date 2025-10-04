@@ -189,7 +189,7 @@ resource "google_sourcerepo_repository" "app_infra_repo" {
   count = local.use_csr ? 1 : 0
 
   project                      = local.admin_project_id
-  name                         = "${var.service_name}-i-r"
+  name                         = var.cloudbuildv2_repository_config.repositories[var.service_name].repository_name
   create_ignore_already_exists = true
 }
 
