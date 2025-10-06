@@ -153,74 +153,75 @@ func ValidateRequiredAPIs(t testing.TB, g GlobalTFVars) {
 
 // ValidateRepositories checks if provided repositories are accessible.
 func ValidateRepositories(t testing.TB, g GlobalTFVars) {
-	fmt.Println("")
-	fmt.Println("# Validating if repositories are accessible.")
-	var pat string
+	if g.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
+		fmt.Println("")
+		fmt.Println("# Validating if repositories are accessible.")
+		var pat string
 
-	switch g.InfraCloudbuildV2RepositoryConfig.RepoType {
-	case "GITHUBv2":
-		pat = gcp.NewGCP().GetSecretValue(t, *g.InfraCloudbuildV2RepositoryConfig.GithubSecretID)
-	case "GITLABv2":
-		pat = gcp.NewGCP().GetSecretValue(t, *g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID)
-	}
-
-	for _, repo := range g.InfraCloudbuildV2RepositoryConfig.Repositories {
-		repoParts := strings.Split(repo.RepositoryURL, "/")
-
-		client := &http.Client{}
-		resp, err := client.Get(repo.RepositoryURL)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "# Error making request: %v\n", err)
+		switch g.InfraCloudbuildV2RepositoryConfig.RepoType {
+		case "GITHUBv2":
+			pat = gcp.NewGCP().GetSecretValue(t, *g.InfraCloudbuildV2RepositoryConfig.GithubSecretID)
+		case "GITLABv2":
+			pat = gcp.NewGCP().GetSecretValue(t, *g.InfraCloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID)
 		}
-		defer resp.Body.Close()
 
-		// Check for common success status codes (200-299).
-		if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
-			switch g.InfraCloudbuildV2RepositoryConfig.RepoType {
-			case "GITHUBv2":
-				repoURL := fmt.Sprintf("https://api.github.com/repos/%s/%s", repoParts[len(repoParts)-2], strings.ReplaceAll(repoParts[len(repoParts)-1], ".git", ""))
-				req, err := http.NewRequest("GET", repoURL, nil)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
-				}
-				req.Header.Add("Authorization", "Bearer "+pat)
-				resp, err := client.Do(req)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error making request: %v\n", err)
-				}
-				defer resp.Body.Close()
+		for _, repo := range g.InfraCloudbuildV2RepositoryConfig.Repositories {
+			repoParts := strings.Split(repo.RepositoryURL, "/")
 
-				if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-					fmt.Printf("# Repository is accessible and PRIVATE! %s\n", repo.RepositoryURL)
-				} else {
-					fmt.Printf("# Repository %s is NOT ACCESSIBLE! %d\n", repo.RepositoryURL, resp.StatusCode)
-				}
-			case "GITLABv2":
-				repoURL := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/%s", repoParts[len(repoParts)-2], strings.ReplaceAll(repoParts[len(repoParts)-1], ".git", ""))
-				req, err := http.NewRequest("HEAD", repoURL, nil)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
-				}
-
-				// GitLab uses the "PRIVATE-TOKEN" header for authentication with a PAT
-				req.Header.Add("PRIVATE-TOKEN", pat)
-
-				resp, err := client.Do(req)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error making request: %v\n", err)
-				}
-				defer resp.Body.Close()
-				if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-					fmt.Printf("# Repository is accessible and PRIVATE! %s\n", repo.RepositoryURL)
-				} else {
-					fmt.Printf("# Repository %s is NOT ACCESSIBLE! %d\n", repo.RepositoryURL, resp.StatusCode)
-				}
+			client := &http.Client{}
+			resp, err := client.Get(repo.RepositoryURL)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "# Error making request: %v\n", err)
 			}
-		} else {
-			fmt.Printf("# Repository is PUBLIC! %s\n", repo.RepositoryURL)
+			defer resp.Body.Close()
+
+			// Check for common success status codes (200-299).
+			if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
+				switch g.InfraCloudbuildV2RepositoryConfig.RepoType {
+				case "GITHUBv2":
+					repoURL := fmt.Sprintf("https://api.github.com/repos/%s/%s", repoParts[len(repoParts)-2], strings.ReplaceAll(repoParts[len(repoParts)-1], ".git", ""))
+					req, err := http.NewRequest("GET", repoURL, nil)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
+					}
+					req.Header.Add("Authorization", "Bearer "+pat)
+					resp, err := client.Do(req)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Error making request: %v\n", err)
+					}
+					defer resp.Body.Close()
+
+					if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+						fmt.Printf("# Repository is accessible and PRIVATE! %s\n", repo.RepositoryURL)
+					} else {
+						fmt.Printf("# Repository %s is NOT ACCESSIBLE! %d\n", repo.RepositoryURL, resp.StatusCode)
+					}
+				case "GITLABv2":
+					repoURL := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/%s", repoParts[len(repoParts)-2], strings.ReplaceAll(repoParts[len(repoParts)-1], ".git", ""))
+					req, err := http.NewRequest("HEAD", repoURL, nil)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
+					}
+
+					// GitLab uses the "PRIVATE-TOKEN" header for authentication with a PAT
+					req.Header.Add("PRIVATE-TOKEN", pat)
+
+					resp, err := client.Do(req)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Error making request: %v\n", err)
+					}
+					defer resp.Body.Close()
+					if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+						fmt.Printf("# Repository is accessible and PRIVATE! %s\n", repo.RepositoryURL)
+					} else {
+						fmt.Printf("# Repository %s is NOT ACCESSIBLE! %d\n", repo.RepositoryURL, resp.StatusCode)
+					}
+				}
+			} else {
+				fmt.Printf("# Repository is PUBLIC! %s\n", repo.RepositoryURL)
+			}
 		}
 	}
-
 }
 
 // ValidateRepositories checks if provided repositories are accessible.
@@ -560,8 +561,8 @@ func ValidatePrivateWorkerPoolRequirementes(t testing.TB, g GlobalTFVars) {
 
 func ValidateVPCSCRequirements(t testing.TB, g GlobalTFVars) {
 	fmt.Println("#Checking VPC-SC requirementes.")
-	if *g.ServicePerimeterName != "" {
-		if *g.AccessLevelName == "" {
+	if g.ServicePerimeterName != nil {
+		if g.AccessLevelName == nil {
 			fmt.Println("You must provide the associated Access Level name to be used with Service Perimeter.")
 			return
 		}
