@@ -16,5 +16,5 @@
 
 output "attestor_id" {
   description = "Attestor ID."
-  value       = var.attestation_kms_key != null ? module.env.attestor_id[0] : null
+  value       = var.attestation_kms_key != null ? module.env.attestor_id : null
 }

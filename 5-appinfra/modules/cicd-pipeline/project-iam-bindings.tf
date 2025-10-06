@@ -188,7 +188,11 @@ resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
 }
 
 resource "google_binary_authorization_attestor_iam_member" "member" {
-  count    = var.attestor_id != null ? 1 : 0
+  // attestor_id is only created by fleetscope step if the attestation_kms_key is != null,
+  // to avoid the error `The "count" value depends on resource attributes that cannot be determined
+  // until apply, so Terraform cannot predict how many instances will be created.` during single project examples
+  // the code will only grant role to attestor_id if attestation_kms_key != null
+  count    = var.attestation_kms_key != null ? 1 : 0
   project  = regex("projects/([^/]*)/", var.attestor_id)[0]
   attestor = regex("attestors/([^/]*)", var.attestor_id)[0]
   role     = "roles/binaryauthorization.attestorsVerifier"
