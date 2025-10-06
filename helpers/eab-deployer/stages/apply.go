@@ -181,7 +181,7 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		DisableIstioOnNamespaces:  tfvars.DisableIstioOnNamespaces,
 		ConfigSyncPolicyDir:       tfvars.ConfigSyncPolicyDir,
 		ConfigSyncBranch:          tfvars.ConfigSyncBranch,
-		AttestationKMSKey:         *tfvars.AttestationKMSKey,
+		AttestationKMSKey:         tfvars.AttestationKMSKey,
 		AttestationEvaluationMode: tfvars.AttestationEvaluationMode,
 		EnableKueue:               tfvars.EnableKueue,
 	}
@@ -213,14 +213,15 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 
 func DeployAppFactoryStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 
-	kmsProject := ""
+	var kmsProject *string
 	if tfvars.BucketKMSKey != nil {
 		kmsInfo, err := extractInfoWithRegex(*tfvars.BucketKMSKey, `projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/keyRings/(?P<keyRing>[^/]+)/cryptoKeys/(?P<cryptoKey>[^/]+)`)
 		if err != nil {
 			fmt.Printf("# error extracting info for BUCKET KMS PROJECT. %v \n", err)
 		}
 		if len(kmsInfo) > 0 {
-			kmsProject = kmsInfo["project"]
+			auxProject := kmsInfo["project"]
+			kmsProject = &auxProject
 		}
 	}
 	appFactory := AppFactoryTfvars{
@@ -312,15 +313,17 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, boots
 				conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName), outputs.AppGroup[appGroupIndex].AppAdminProjectID, c.Logger)
 			}
 
+			serviceAccountID := strings.Split(outputs.AppGroup[appGroupIndex].AppCloudbuildWorkspaceCloudbuildSAEmail, "/")
 			stageConf := StageConf{
 				Stage:         tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName,
-				StageSA:       outputs.AppGroup[appGroupIndex].AppCloudbuildWorkspaceCloudbuildSAEmail,
+				StageSA:       serviceAccountID[len(serviceAccountID)-1],
 				CICDProject:   outputs.AppGroup[appGroupIndex].AppAdminProjectID,
 				Step:          AppInfraStep,
 				Repo:          tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[serviceName].RepositoryName,
 				GitConf:       conf,
 				HasLocalStep:  true,
 				LocalSteps:    []string{"shared"},
+				GroupingUnits: []string{fmt.Sprintf("apps/%s/%s/envs/", exampleName, serviceName)},
 				Envs:          envs,
 				DefaultRegion: tfvars.TriggerLocation,
 			}

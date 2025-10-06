@@ -241,7 +241,7 @@ type FleetscopeTfvars struct {
 	DisableIstioOnNamespaces  []string          `hcl:"disable_istio_on_namespaces"`
 	ConfigSyncPolicyDir       *string           `hcl:"config_sync_policy_dir"`
 	ConfigSyncBranch          *string           `hcl:"config_sync_branch"`
-	AttestationKMSKey         string            `hcl:"attestation_kms_key"`
+	AttestationKMSKey         *string           `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode string            `hcl:"attestation_evaluation_mode"`
 	EnableKueue               bool              `hcl:"enable_kueue"`
 }
@@ -259,7 +259,7 @@ type AppFactoryTfvars struct {
 	RemoteStateBucket            string                                   `hcl:"remote_state_bucket"`
 	Applications                 map[string]map[string]ApplicationService `hcl:"applications"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"cloudbuildv2_repository_config"`
-	KMSProjectID                 string                                   `hcl:"kms_project_id"`
+	KMSProjectID                 *string                                  `hcl:"kms_project_id"`
 	ServicePerimeterName         *string                                  `hcl:"service_perimeter_name"`
 	ServicePerimeterMode         string                                   `hcl:"service_perimeter_mode"`
 	InfraProjectAPIs             []string                                 `hcl:"infra_project_apis"`
