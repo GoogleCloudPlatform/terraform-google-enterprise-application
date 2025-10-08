@@ -36,7 +36,8 @@ module "env" {
 
   enable_kueue = var.enable_kueue
 
-  attestation_kms_key = var.attestation_kms_key
+  attestation_kms_key         = var.attestation_kms_key
+  attestation_evaluation_mode = var.attestation_evaluation_mode
 
   disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

@@ -13,21 +13,23 @@
 # limitations under the License.
 
 resource "google_binary_authorization_attestor" "attestor" {
+  count   = var.attestation_kms_key != null ? 1 : 0
   project = var.cluster_project_id
   name    = "gke-attestor"
   attestation_authority_note {
     note_reference = google_container_analysis_note.note.name
     public_keys {
-      id = data.google_kms_crypto_key_version.version.id
+      id = data.google_kms_crypto_key_version.version[0].id
       pkix_public_key {
-        public_key_pem      = data.google_kms_crypto_key_version.version.public_key[0].pem
-        signature_algorithm = data.google_kms_crypto_key_version.version.public_key[0].algorithm
+        public_key_pem      = data.google_kms_crypto_key_version.version[0].public_key[0].pem
+        signature_algorithm = data.google_kms_crypto_key_version.version[0].public_key[0].algorithm
       }
     }
   }
 }
 
 data "google_kms_crypto_key_version" "version" {
+  count      = var.attestation_kms_key != null ? 1 : 0
   crypto_key = var.attestation_kms_key
 }
 
@@ -43,11 +45,12 @@ resource "google_container_analysis_note" "note" {
 }
 
 resource "google_binary_authorization_policy" "policy" {
+  count   = var.attestation_kms_key != null ? 1 : 0
   project = var.cluster_project_id
   default_admission_rule {
     evaluation_mode         = var.attestation_evaluation_mode
     enforcement_mode        = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-    require_attestations_by = var.attestation_evaluation_mode == "REQUIRE_ATTESTATION" ? [google_binary_authorization_attestor.attestor.name] : null
+    require_attestations_by = var.attestation_evaluation_mode == "REQUIRE_ATTESTATION" ? [google_binary_authorization_attestor.attestor[0].name] : null
   }
 
   dynamic "admission_whitelist_patterns" {

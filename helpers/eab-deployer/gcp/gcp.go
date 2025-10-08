@@ -15,16 +15,22 @@
 package gcp
 
 import (
+	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"maps"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/mitchellh/go-testing-interface"
 	"github.com/tidwall/gjson"
+	"google.golang.org/api/cloudbuild/v1"
+	"google.golang.org/api/option"
 
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
@@ -42,16 +48,71 @@ const (
 	ReleaseStatusCancelled = "CANCELLED"
 )
 
+type RetryOp struct {
+	Type  string `json:"@type"`
+	Build Build  `json:"build"`
+}
+type Build struct {
+	ID         string `json:"id"`
+	Status     string `json:"status"`
+	CreateTime string `json:"createTime"`
+}
+
+var (
+	retryRegexp = map[*regexp.Regexp]string{}
+	// ctx         = context.Background()
+)
+
+func init() {
+	for e, m := range testutils.RetryableTransientErrors {
+		r, err := regexp.Compile(fmt.Sprintf("(?s)%s", e)) //(?s) enables dot (.) to match newline.
+		if err != nil {
+			panic(fmt.Sprintf("failed to compile regex %s: %s", e, err.Error()))
+		}
+		retryRegexp[r] = m
+	}
+}
+
 type GCP struct {
-	Runf      func(t testing.TB, cmd string, args ...interface{}) gjson.Result
-	sleepTime time.Duration
+	Runf            func(t testing.TB, cmd string, args ...interface{}) gjson.Result
+	RunCmd          func(t testing.TB, cmd string, args ...interface{}) string
+	TriggerNewBuild func(t testing.TB, ctx context.Context, buildName string) (string, error)
+	sleepTime       time.Duration
+}
+
+// runCmd is a wrapper around gcloud.RunCmd because the original function has an input with a private type
+func runCmd(t testing.TB, cmd string, args ...interface{}) string {
+	return gcloud.RunCmd(t, utils.StringFromTextAndArgs(append([]interface{}{cmd}, args...)...))
+}
+
+// triggerNewBuild triggers a new build based on the build provided
+func triggerNewBuild(t testing.TB, ctx context.Context, buildName string) (string, error) {
+
+	buildService, err := cloudbuild.NewService(ctx, option.WithScopes(cloudbuild.CloudPlatformScope))
+	if err != nil {
+		return "", fmt.Errorf("failed to create Cloud Build service: %w", err)
+	}
+	retryOperation, err := buildService.Projects.Locations.Builds.Retry(buildName, &cloudbuild.RetryBuildRequest{}).Do()
+	if err != nil {
+		return "", fmt.Errorf("failed to retry build: %w", err)
+	}
+
+	var data RetryOp
+	err = json.Unmarshal(retryOperation.Metadata, &data)
+	if err != nil {
+		return "", fmt.Errorf("error unmarshaling retry operation metadata: %v", err)
+	}
+
+	return data.Build.ID, nil
 }
 
 // NewGCP creates a new wrapper for Google Cloud Platform CLI.
 func NewGCP() GCP {
 	return GCP{
-		Runf:      gcloud.Runf,
-		sleepTime: 20,
+		Runf:            gcloud.Runf,
+		RunCmd:          runCmd,
+		TriggerNewBuild: triggerNewBuild,
+		sleepTime:       20,
 	}
 }
 
@@ -68,10 +129,13 @@ func (g GCP) GetBuilds(t testing.TB, projectID, region, filter string) map[strin
 }
 
 // GetLastBuildStatus gets the status of the last build form a project and region that satisfy the given filter.
-func (g GCP) GetLastBuildStatus(t testing.TB, projectID, region, filter string) string {
-	cmd := fmt.Sprintf("builds list --project %s --region %s --limit 1 --sort-by ~createTime --filter %s", projectID, region, filter)
-	fmt.Printf("Running command %s", cmd)
-	return g.Runf(t, cmd).Array()[0].Get("status").String()
+func (g GCP) GetLastBuildStatus(t testing.TB, projectID, region, filter string) (string, string) {
+	builds := g.Runf(t, "builds list --project %s --region %s --limit 1 --sort-by ~createTime --filter %s", projectID, region, filter).Array()
+	if len(builds) == 0 {
+		return "", ""
+	}
+	build := builds[0]
+	return build.Get("status").String(), build.Get("id").String()
 }
 
 // GetBuildStatus gets the status of the given build
@@ -80,9 +144,13 @@ func (g GCP) GetBuildStatus(t testing.TB, projectID, region, buildID string) str
 }
 
 // GetRunningBuildID gets the current build running for the given project, region, and filter
-func (g GCP) GetRunningBuildID(t testing.TB, projectID, region, filter string) string {
+func (g GCP) GetRunningBuildID(t testing.TB, projectID, region, filter string, retryGetBuild int) string {
+	currentRetry := 1
 	time.Sleep(g.sleepTime * time.Second)
 	builds := g.GetBuilds(t, projectID, region, filter)
+	if len(builds) == 0 && currentRetry <= retryGetBuild {
+		return g.GetRunningBuildID(t, projectID, region, filter, retryGetBuild-currentRetry)
+	}
 	for id, status := range builds {
 		if status == BuildStatusQueued || status == BuildStatusWorking {
 			return id
@@ -92,7 +160,7 @@ func (g GCP) GetRunningBuildID(t testing.TB, projectID, region, filter string) s
 }
 
 // GetFinalBuildState gets the terminal status of the given build. It will wait if build is not finished.
-func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string, maxRetry int) (string, error) {
+func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string, maxBuildRetry int) (string, error) {
 	var status string
 	count := 0
 	fmt.Printf("waiting for build %s execution.\n", buildID)
@@ -100,7 +168,7 @@ func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string,
 	fmt.Printf("build status is %s\n", status)
 	for status != BuildStatusSuccess && status != BuildStatusFailure && status != BuildStatusCancelled {
 		fmt.Printf("build status is %s\n", status)
-		if count >= maxRetry {
+		if count >= maxBuildRetry {
 			return "", fmt.Errorf("timeout waiting for build '%s' execution", buildID)
 		}
 		count = count + 1
@@ -141,29 +209,71 @@ func (g GCP) GetFinalRolloutState(t testing.TB, projectID, region, serviceName, 
 }
 
 // WaitBuildSuccess waits for the current build in a repo to finish.
-func (g GCP) WaitBuildSuccess(t testing.TB, project, region, repo, commitSha, failureMsg string, maxRetry int) error {
-	var filter string
+func (g GCP) WaitBuildSuccess(t testing.TB, project, region, repo, commitSha, failureMsg string, maxBuildRetry, maxErrorRetries int, timeBetweenErrorRetries time.Duration) error {
+	var filter, status, build string
+	var timeoutErr, err error
+	ctx := context.Background()
+
 	if commitSha == "" {
-		filter = fmt.Sprintf("substitutions.REPO_FULL_NAME:%s", repo)
+		filter = fmt.Sprintf("source.repoSource.repoName:%s", repo)
 	} else {
 		filter = fmt.Sprintf("substitutions.COMMIT_SHA:%s", commitSha)
 	}
-	build := g.GetRunningBuildID(t, project, region, filter)
-	if build != "" {
-		status, err := g.GetFinalBuildState(t, project, region, build, maxRetry)
+
+	build = g.GetRunningBuildID(t, project, region, filter, 5)
+	for i := 0; i < maxErrorRetries; i++ {
+		if build != "" {
+			status, timeoutErr = g.GetFinalBuildState(t, project, region, build, maxBuildRetry)
+			if timeoutErr != nil {
+				return timeoutErr
+			}
+		} else {
+			status, build = g.GetLastBuildStatus(t, project, region, filter)
+			if build == "" {
+				return fmt.Errorf("no build found for filter: %s", filter)
+			}
+		}
+
+		if status != BuildStatusSuccess {
+			if !g.IsRetryableError(t, project, region, build) {
+				return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details", failureMsg, region, build, project)
+			}
+			fmt.Println("build failed with retryable error. a new build will be triggered.")
+		} else {
+			return nil // Build succeeded
+		}
+
+		// Trigger a new build
+		build, err = g.TriggerNewBuild(t, ctx, fmt.Sprintf("projects/%s/locations/%s/builds/%s", project, region, build))
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to trigger new build (attempt %d/%d): %w", i+1, maxErrorRetries, err)
 		}
-		if status != BuildStatusSuccess {
-			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details.\n", failureMsg, region, build, project)
-		}
-	} else {
-		status := g.GetLastBuildStatus(t, project, region, filter)
-		if status != BuildStatusSuccess {
-			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details.\n", failureMsg, region, build, project)
+		fmt.Printf("triggered new build with ID: %s (attempt %d/%d)\n", build, i+1, maxErrorRetries)
+		if i < maxErrorRetries-1 {
+			time.Sleep(timeBetweenErrorRetries) // Wait before retrying
 		}
 	}
-	return nil
+	return fmt.Errorf("%s\nbuild failed after %d retries.\nSee Cloud Build logs for details", failureMsg, maxErrorRetries)
+}
+
+// IsRetryableError checks the logs of a failed Cloud Build build
+// and verify if the error is a transient one and can be retried
+func (g GCP) IsRetryableError(t testing.TB, projectID, region, build string) bool {
+	logs := g.GetBuildLogs(t, projectID, region, build)
+	found := false
+	for pattern, msg := range retryRegexp {
+		if pattern.MatchString(logs) {
+			found = true
+			fmt.Printf("error '%s' is worth of a retry\n", msg)
+			break
+		}
+	}
+	return found
+}
+
+// GetBuildLogs get the execution logs of the given build
+func (g GCP) GetBuildLogs(t testing.TB, projectID, region, buildID string) string {
+	return g.RunCmd(t, "builds log %s --project %s --region %s", buildID, projectID, region)
 }
 
 // WaitReleaseSuccess waits for the current release in a repo to finish.
