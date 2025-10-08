@@ -164,7 +164,7 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 				}
 
 				gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName)
-				conf := utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
+				conf = utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
 
 				branch := e
 				if branch == "shared" {
