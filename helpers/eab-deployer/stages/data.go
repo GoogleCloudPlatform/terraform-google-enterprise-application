@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -29,14 +30,17 @@ import (
 )
 
 const (
-	PoliciesRepo    = "gcp-policies"
-	BootstrapRepo   = "gcp-bootstrap"
-	BootstrapStep   = "1-bootstrap"
-	MultitenantStep = "2-multitenant"
-	FleetscopeStep  = "3-fleetscope"
-	AppFactoryStep  = "4-appfactory"
-	AppInfraStep    = "5-appinfra"
-	AppSourceStep   = "6-appsource"
+	PoliciesRepo            = "gcp-policies"
+	BootstrapRepo           = "gcp-bootstrap"
+	BootstrapStep           = "1-bootstrap"
+	MultitenantStep         = "2-multitenant"
+	FleetscopeStep          = "3-fleetscope"
+	AppFactoryStep          = "4-appfactory"
+	AppInfraStep            = "5-appinfra"
+	AppSourceStep           = "6-appsource"
+	MaxErrorRetries         = 2
+	TimeBetweenErrorRetries = 2 * time.Minute
+	MaxBuildRetries         = 40
 )
 
 type CommonConf struct {
@@ -124,32 +128,27 @@ type GlobalTFVars struct {
 	InfraCloudbuildV2RepositoryConfig       CloudbuildV2RepositoryConfig             `hcl:"infra_cloudbuildv2_repository_config"`
 	AppServicesCloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"app_services_cloudbuildv2_repository_config"`
 	WorkerPoolID                            string                                   `hcl:"workerpool_id"`
-	AccessLevelName                         string                                   `hcl:"access_level_name"`
-	ServicePerimeterName                    string                                   `hcl:"service_perimeter_name"`
-	ServicePerimeterMode                    string                                   `hcl:"service_perimeter_mode"`
-	LoggingBucket                           string                                   `hcl:"logging_bucket"`
-	BucketKMSKey                            string                                   `hcl:"bucket_kms_key"`
-	AttestationKMSProject                   string                                   `hcl:"attestation_kms_project"`
+	AccessLevelName                         *string                                  `hcl:"access_level_name"`
+	ServicePerimeterName                    *string                                  `hcl:"service_perimeter_name"`
+	ServicePerimeterMode                    *string                                  `hcl:"service_perimeter_mode"`
+	LoggingBucket                           *string                                  `hcl:"logging_bucket"`
+	BucketKMSKey                            *string                                  `hcl:"bucket_kms_key"`
 	OrgID                                   string                                   `hcl:"org_id"`
 	Apps                                    map[string]App                           `hcl:"apps"`
-	CBPrivateWorkerpoolProjectID            string                                   `hcl:"cb_private_workerpool_project_id"`
 	DeletionProtection                      bool                                     `hcl:"deletion_protection"`
 	NamespaceIDs                            map[string]string                        `hcl:"namespace_ids"`
-	RemoteStateBucket                       string                                   `hcl:"remote_state_bucket"`
-	ConfigSyncSecretType                    string                                   `hcl:"config_sync_secret_type"`
-	ConfigSyncRepositoryURL                 string                                   `hcl:"config_sync_repository_url"`
+	ConfigSyncSecretType                    *string                                  `hcl:"config_sync_secret_type"`
+	ConfigSyncRepositoryURL                 *string                                  `hcl:"config_sync_repository_url"`
 	DisableIstioOnNamespaces                []string                                 `hcl:"disable_istio_on_namespaces"`
-	ConfigSyncPolicyDir                     string                                   `hcl:"config_sync_policy_dir"`
-	ConfigSyncBranch                        string                                   `hcl:"config_sync_branch"`
-	AttestationKMSKey                       string                                   `hcl:"attestation_kms_key"`
+	ConfigSyncPolicyDir                     *string                                  `hcl:"config_sync_policy_dir"`
+	ConfigSyncBranch                        *string                                  `hcl:"config_sync_branch"`
+	AttestationKMSKey                       *string                                  `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
 	EnableKueue                             bool                                     `hcl:"enable_kueue"`
 	BillingAccount                          string                                   `hcl:"billing_account"`
 	Applications                            map[string]map[string]ApplicationService `hcl:"applications"`
-	KMSProjectID                            string                                   `hcl:"kms_project_id"`
 	InfraProjectAPIs                        []string                                 `hcl:"infra_project_apis"`
 	Region                                  string                                   `hcl:"region"`
-	BucketsForceDestroy                     bool                                     `hcl:"buckets_force_destroy"`
 	EABCodePath                             string                                   `hcl:"eab_code_path"`
 	CodeCheckoutPath                        string                                   `hcl:"code_checkout_path"`
 }
@@ -166,15 +165,15 @@ type Env struct {
 type CloudbuildV2RepositoryConfig struct {
 	RepoType                               string                `hcl:"repo_type" cty:"repo_type"`
 	Repositories                           map[string]Repository `hcl:"repositories" cty:"repositories"`
-	GithubSecretID                         string                `hcl:"github_secret_id" cty:"github_secret_id"`
-	GithubAppIDSecretID                    string                `hcl:"github_app_id_secret_id" cty:"github_app_id_secret_id"`
-	GitlabReadAuthorizerCredentialSecretID string                `hcl:"gitlab_read_authorizer_credential_secret_id" cty:"gitlab_read_authorizer_credential_secret_id"`
-	GitlabAuthorizerCredentialSecretID     string                `hcl:"gitlab_authorizer_credential_secret_id" cty:"gitlab_authorizer_credential_secret_id"`
-	GitlabWebhookSecretID                  string                `hcl:"gitlab_webhook_secret_id" cty:"gitlab_webhook_secret_id"`
-	GitlabEnterpriseHostURI                string                `hcl:"gitlab_enterprise_host_uri" cty:"gitlab_enterprise_host_uri"`
-	GitlabEnterpriseServiceDirectory       string                `hcl:"gitlab_enterprise_service_directory" cty:"gitlab_enterprise_service_directory"`
-	GitlabEnterpriseCACertificate          string                `hcl:"gitlab_enterprise_ca_certificate" cty:"gitlab_enterprise_ca_certificate"`
-	SecretProjectID                        string                `hcl:"secret_project_id" cty:"secret_project_id"`
+	GithubSecretID                         *string               `hcl:"github_secret_id" cty:"github_secret_id"`
+	GithubAppIDSecretID                    *string               `hcl:"github_app_id_secret_id" cty:"github_app_id_secret_id"`
+	GitlabReadAuthorizerCredentialSecretID *string               `hcl:"gitlab_read_authorizer_credential_secret_id" cty:"gitlab_read_authorizer_credential_secret_id"`
+	GitlabAuthorizerCredentialSecretID     *string               `hcl:"gitlab_authorizer_credential_secret_id" cty:"gitlab_authorizer_credential_secret_id"`
+	GitlabWebhookSecretID                  *string               `hcl:"gitlab_webhook_secret_id" cty:"gitlab_webhook_secret_id"`
+	GitlabEnterpriseHostURI                *string               `hcl:"gitlab_enterprise_host_uri" cty:"gitlab_enterprise_host_uri"`
+	GitlabEnterpriseServiceDirectory       *string               `hcl:"gitlab_enterprise_service_directory" cty:"gitlab_enterprise_service_directory"`
+	GitlabEnterpriseCACertificate          *string               `hcl:"gitlab_enterprise_ca_certificate" cty:"gitlab_enterprise_ca_certificate"`
+	SecretProjectID                        *string               `hcl:"secret_project_id" cty:"secret_project_id"`
 }
 
 type Repository struct {
@@ -189,9 +188,9 @@ type App struct {
 }
 
 type ApplicationService struct {
-	AdminProjectID     string `hcl:"admin_project_id" cty:"admin_project_id"`
-	CreateInfraProject bool   `hcl:"create_infra_project" cty:"create_infra_project"`
-	CreateAdminProject bool   `hcl:"create_admin_project" cty:"create_admin_project"`
+	AdminProjectID     *string `hcl:"admin_project_id" cty:"admin_project_id"`
+	CreateInfraProject bool    `hcl:"create_infra_project" cty:"create_infra_project"`
+	CreateAdminProject bool    `hcl:"create_admin_project" cty:"create_admin_project"`
 }
 
 // CheckString checks if any of the string fields in the GlobalTFVars has the given string
@@ -215,34 +214,34 @@ type BootstrapTfvars struct {
 	CommonFolderID               string                       `hcl:"common_folder_id"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
 	WorkerPoolID                 string                       `hcl:"workerpool_id"`
-	AccessLevelName              string                       `hcl:"access_level_name"`
-	ServicePerimeterName         string                       `hcl:"service_perimeter_name"`
-	ServicePerimeterMode         string                       `hcl:"service_perimeter_mode"`
-	LoggingBucket                string                       `hcl:"logging_bucket"`
-	BucketKMSKey                 string                       `hcl:"bucket_kms_key"`
-	AttestationKMSProject        string                       `hcl:"attestation_kms_project"`
+	AccessLevelName              *string                      `hcl:"access_level_name"`
+	ServicePerimeterName         *string                      `hcl:"service_perimeter_name"`
+	ServicePerimeterMode         *string                      `hcl:"service_perimeter_mode"`
+	LoggingBucket                *string                      `hcl:"logging_bucket"`
+	BucketKMSKey                 *string                      `hcl:"bucket_kms_key"`
+	AttestationKMSProject        *string                      `hcl:"attestation_kms_project"`
 	OrgID                        string                       `hcl:"org_id"`
 }
 
 type MultiTenantTfvars struct {
 	Envs                         map[string]Env `hcl:"envs"`
 	Apps                         map[string]App `hcl:"apps"`
-	ServicePerimeterName         string         `hcl:"service_perimeter_name"`
+	ServicePerimeterName         *string        `hcl:"service_perimeter_name"`
 	ServicePerimeterMode         string         `hcl:"service_perimeter_mode"`
 	CBPrivateWorkerpoolProjectID string         `hcl:"cb_private_workerpool_project_id"`
-	AccessLevelName              string         `hcl:"access_level_name"`
+	AccessLevelName              *string        `hcl:"access_level_name"`
 	DeletionProtection           bool           `hcl:"deletion_protection"`
 }
 
 type FleetscopeTfvars struct {
 	NamespaceIDs              map[string]string `hcl:"namespace_ids"`
 	RemoteStateBucket         string            `hcl:"remote_state_bucket"`
-	ConfigSyncSecretType      string            `hcl:"config_sync_secret_type"`
-	ConfigSyncRepositoryURL   string            `hcl:"config_sync_repository_url"`
+	ConfigSyncSecretType      *string           `hcl:"config_sync_secret_type"`
+	ConfigSyncRepositoryURL   *string           `hcl:"config_sync_repository_url"`
 	DisableIstioOnNamespaces  []string          `hcl:"disable_istio_on_namespaces"`
-	ConfigSyncPolicyDir       string            `hcl:"config_sync_policy_dir"`
-	ConfigSyncBranch          string            `hcl:"config_sync_branch"`
-	AttestationKMSKey         string            `hcl:"attestation_kms_key"`
+	ConfigSyncPolicyDir       *string           `hcl:"config_sync_policy_dir"`
+	ConfigSyncBranch          *string           `hcl:"config_sync_branch"`
+	AttestationKMSKey         *string           `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode string            `hcl:"attestation_evaluation_mode"`
 	EnableKueue               bool              `hcl:"enable_kueue"`
 }
@@ -260,8 +259,8 @@ type AppFactoryTfvars struct {
 	RemoteStateBucket            string                                   `hcl:"remote_state_bucket"`
 	Applications                 map[string]map[string]ApplicationService `hcl:"applications"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig             `hcl:"cloudbuildv2_repository_config"`
-	KMSProjectID                 string                                   `hcl:"kms_project_id"`
-	ServicePerimeterName         string                                   `hcl:"service_perimeter_name"`
+	KMSProjectID                 *string                                  `hcl:"kms_project_id"`
+	ServicePerimeterName         *string                                  `hcl:"service_perimeter_name"`
 	ServicePerimeterMode         string                                   `hcl:"service_perimeter_mode"`
 	InfraProjectAPIs             []string                                 `hcl:"infra_project_apis"`
 }
@@ -272,17 +271,19 @@ type AppInfraTfvars struct {
 	RemoteStateBucket            string                       `hcl:"remote_state_bucket"`
 	EnvironmentNames             []string                     `hcl:"environment_names"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
-	AccessLevelName              string                       `hcl:"access_level_name"`
-	LoggingBucket                string                       `hcl:"logging_bucket"`
-	BucketKMSKey                 string                       `hcl:"bucket_kms_key"`
-	AttestationKMSKey            string                       `hcl:"attestation_kms_key"`
+	AccessLevelName              *string                      `hcl:"access_level_name"`
+	LoggingBucket                *string                      `hcl:"logging_bucket"`
+	BucketKMSKey                 *string                      `hcl:"bucket_kms_key"`
+	AttestationKMSKey            *string                      `hcl:"attestation_kms_key"`
 }
 
 func GetBootstrapStepOutputs(t testing.TB, eabPath string) BootstrapOutputs {
 	options := &terraform.Options{
-		TerraformDir: filepath.Join(eabPath, "1-bootstrap"),
-		Logger:       logger.Discard,
-		NoColor:      true,
+		TerraformDir:       filepath.Join(eabPath, "1-bootstrap"),
+		Logger:             logger.Discard,
+		NoColor:            true,
+		MaxRetries:         MaxErrorRetries,
+		TimeBetweenRetries: TimeBetweenErrorRetries,
 	}
 	return BootstrapOutputs{
 		ProjectID:                       terraform.Output(t, options, "project_id"),

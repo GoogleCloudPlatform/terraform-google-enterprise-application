@@ -173,7 +173,7 @@ variable "bucket_kms_key" {
 variable "binary_authorization_image" {
   type        = string
   description = "The Binary Authorization image to be used to create attestation."
-  default     = ""
+  default     = null
 }
 
 variable "binary_authorization_repository_id" {
@@ -184,6 +184,7 @@ variable "binary_authorization_repository_id" {
 variable "attestation_kms_key" {
   type        = string
   description = "The KMS Key ID to be used by attestor in format projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/KMS_KEYRING_NAME/cryptoKeys/KMS_KEY_NAME/cryptoKeyVersions/KMS_KEY_VERSION."
+  default     = null
 }
 
 variable "attestor_id" {

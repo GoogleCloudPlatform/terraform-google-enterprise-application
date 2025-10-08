@@ -136,7 +136,7 @@ func TestSourceHelloWorld(t *testing.T) {
 						return false, nil
 					} else if latestWorkflowRunStatus == "FAILURE" {
 						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
-						logs := gcloud.Runf(t, logsCmd).String()
+						logs := gcloud.RunCmd(t, logsCmd)
 						t.Logf("%s build-log: %s", serviceName, logs)
 						return false, errors.New("Build failed.")
 					}
