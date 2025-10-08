@@ -271,7 +271,7 @@ module "cicd" {
   logging_bucket             = var.logging_bucket
   bucket_kms_key             = var.bucket_kms_key
   attestation_kms_key        = var.attestation_kms_key
-  attestor_id                = module.fleetscope_infra.attestor_id
+  attestor_id                = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null
   binary_authorization_image = var.binary_authorization_image
 
   binary_authorization_repository_id = var.binary_authorization_repository_id
