@@ -29,7 +29,7 @@ module "stocks_data" {
   public_access_prevention = "enforced"
 
   versioning = true
-  encryption = var.bucket_kms_key == null ? {} : {
+  encryption = var.bucket_kms_key == null ? null : {
     default_kms_key_name = var.bucket_kms_key
   }
 

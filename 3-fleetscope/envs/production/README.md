@@ -3,7 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | n/a | yes |
+| attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | `null` | no |
 | config\_sync\_branch | The branch of the repository to sync from. Default: master | `string` | `"master"` | no |
 | config\_sync\_policy\_dir | The path within the Git repository that represents the top level of the repo to sync | `string` | `null` | no |
 | config\_sync\_repository\_url | The Git repository url for Config Sync. If `config_sync_secret_type` value is `gcpserviceaccount`, a Cloud Source Repository will automatically be created and this variable will be ignored. | `string` | `""` | no |
