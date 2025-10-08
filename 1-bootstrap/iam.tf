@@ -100,6 +100,30 @@ resource "google_folder_iam_member" "owner" {
 }
 
 
+resource "google_project_iam_member" "self_kms_admin_iam_member" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if var.bucket_kms_key == null })
+
+  role    = "roles/cloudkms.admin"
+  member  = "serviceAccount:${each.value.email}"
+  project = var.project_id
+}
+
+resource "google_project_iam_member" "self_kms_encrypter_iam_member" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if var.bucket_kms_key == null })
+
+  role    = "roles/cloudkms.cryptoKeyEncrypter"
+  member  = "serviceAccount:${each.value.email}"
+  project = var.project_id
+}
+
+resource "google_project_iam_member" "self_kms_decrypter_iam_member" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if var.bucket_kms_key == null })
+
+  role    = "roles/cloudkms.cryptoKeyDecrypter"
+  member  = "serviceAccount:${each.value.email}"
+  project = var.project_id
+}
+
 resource "google_project_iam_member" "kms_sign" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" && var.attestation_kms_project != null })
 
@@ -149,11 +173,11 @@ resource "google_project_iam_member" "project_iam_member" {
 }
 
 resource "google_project_iam_member" "secret_iam_member" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" && var.cloudbuildv2_repository_config.secret_project_id != null })
 
   role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${each.value.email}"
-  project = local.worker_pool_project
+  project = var.cloudbuildv2_repository_config.secret_project_id
 }
 
 resource "google_project_iam_member" "kms_iam_member" {
@@ -192,7 +216,7 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
-  for_each = var.bucket_kms_key != "" ? {
+  for_each = var.bucket_kms_key != null ? {
     "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
     "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
   } : {}

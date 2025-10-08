@@ -105,6 +105,7 @@ module "eab_cluster_project" {
     "multiclusterservicediscovery.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com",
     "sqladmin.googleapis.com",
     "trafficdirector.googleapis.com",
   ]

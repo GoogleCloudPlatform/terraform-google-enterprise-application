@@ -65,7 +65,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "secret_manager_egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && var.create_admin_project && local.secret_project_number != null ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "scr-${data.google_project.admin_project.project_id}-${local.secret_project_number}"
   egress_from {
@@ -90,7 +90,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "secret
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "secret_manager_egress_policy" {
-  count     = var.service_perimeter_name != null && var.create_admin_project ? 1 : 0
+  count     = var.service_perimeter_name != null && var.create_admin_project && local.secret_project_number != null ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "scr-${data.google_project.admin_project.project_id}-${local.secret_project_number}"
   egress_from {
