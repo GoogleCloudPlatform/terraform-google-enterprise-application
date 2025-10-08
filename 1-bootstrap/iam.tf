@@ -83,6 +83,14 @@ resource "google_folder_iam_member" "project_creator" {
   folder = each.value.folder_id
 }
 
+resource "google_project_iam_member" "xpn_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+
+  role    = "roles/compute.xpnAdmin"
+  member  = "serviceAccount:${each.value.email}"
+  project = each.value.network_project_id
+}
+
 resource "google_folder_iam_member" "xpn_admin" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
 
