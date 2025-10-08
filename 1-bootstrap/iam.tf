@@ -17,18 +17,25 @@
 locals {
   expanded_environment_with_service_accounts = flatten(
     [for key, email in local.cb_service_accounts_emails :
-      [for fields in values(var.envs) :
+      [for env, fields in var.envs :
         {
-          multitenant_pipeline = key
-          email                = email
-          network_project_id   = fields.network_project_id
-          billing_account      = fields.billing_account
-          folder_id            = fields.folder_id
-          org_id               = fields.org_id
+          multitenant_pipeline  = key
+          email                 = email
+          network_project_id    = fields.network_project_id
+          network_ancestry_id   = data.google_project_ancestry.network_ancestry[env].parent_id
+          network_ancestry_type = data.google_project_ancestry.network_ancestry[env].parent_type
+          billing_account       = fields.billing_account
+          folder_id             = fields.folder_id
+          org_id                = fields.org_id
         }
       ]
     ]
   )
+}
+
+data "google_project_ancestry" "network_ancestry" {
+  for_each = var.envs
+  project  = each.value.network_project_id
 }
 
 # IAM Bindings for Google Service Accounts
@@ -83,20 +90,28 @@ resource "google_folder_iam_member" "project_creator" {
   folder = each.value.folder_id
 }
 
-resource "google_project_iam_member" "xpn_admin" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
-
-  role    = "roles/compute.xpnAdmin"
-  member  = "serviceAccount:${each.value.email}"
-  project = each.value.network_project_id
-}
-
 resource "google_folder_iam_member" "xpn_admin" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.network_ancestry_type == "folder" })
 
   role   = "roles/compute.xpnAdmin"
   member = "serviceAccount:${each.value.email}"
-  folder = each.value.folder_id
+  folder = each.value.network_ancestry_id
+}
+
+resource "google_organization_iam_member" "xpn_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.network_ancestry_type != "folder" })
+
+  role   = "roles/compute.xpnAdmin"
+  member = "serviceAccount:${each.value.email}"
+  org_id = each.value.network_ancestry_id
+}
+
+resource "google_project_iam_member" "network_user" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:${each.value.email}"
+  project = each.value.network_project_id
 }
 
 resource "google_folder_iam_member" "owner" {
