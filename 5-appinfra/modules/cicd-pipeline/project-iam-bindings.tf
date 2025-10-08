@@ -178,16 +178,21 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
-  for_each = {
+  for_each = var.bucket_kms_key != null ? {
     "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
     "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
-  }
+  } : {}
   crypto_key_id = var.bucket_kms_key
   role          = each.value
   member        = data.google_storage_project_service_account.gcs_account.member
 }
 
 resource "google_binary_authorization_attestor_iam_member" "member" {
+  // attestor_id is only created by fleetscope step if the attestation_kms_key is != null,
+  // to avoid the error `The "count" value depends on resource attributes that cannot be determined
+  // until apply, so Terraform cannot predict how many instances will be created.` during single project examples
+  // the code will only grant role to attestor_id if attestation_kms_key != null
+  count    = var.attestation_kms_key != null ? 1 : 0
   project  = regex("projects/([^/]*)/", var.attestor_id)[0]
   attestor = regex("attestors/([^/]*)", var.attestor_id)[0]
   role     = "roles/binaryauthorization.attestorsVerifier"
@@ -195,6 +200,7 @@ resource "google_binary_authorization_attestor_iam_member" "member" {
 }
 
 resource "google_kms_crypto_key_iam_member" "attestor_crypto_key" {
+  count         = var.attestation_kms_key != null ? 1 : 0
   crypto_key_id = var.attestation_kms_key
   role          = "roles/cloudkms.signerVerifier"
   member        = google_service_account.cloud_build.member

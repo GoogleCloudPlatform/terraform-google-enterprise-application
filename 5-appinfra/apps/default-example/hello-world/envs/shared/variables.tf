@@ -117,4 +117,5 @@ variable "bucket_kms_key" {
 variable "attestation_kms_key" {
   type        = string
   description = "The KMS Key ID to be used by attestor."
+  default     = null
 }

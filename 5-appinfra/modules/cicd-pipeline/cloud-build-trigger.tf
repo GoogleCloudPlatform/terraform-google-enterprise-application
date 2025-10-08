@@ -53,7 +53,7 @@ resource "google_cloudbuild_trigger" "ci" {
       _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
       _WORKER_POOL               = var.workerpool_id
       _ATTESTOR_ID               = var.attestor_id
-      _KMS_KEY_VERSION           = data.google_kms_crypto_key_version.version.name
+      _KMS_KEY_VERSION           = var.attestation_kms_key != null ? data.google_kms_crypto_key_version.version[0].name : null
       _BINARY_AUTH_IMAGE         = var.binary_authorization_image
     },
     var.additional_substitutions, local.optional_worker_pool
@@ -69,5 +69,6 @@ resource "google_project_iam_member" "pool_user" {
 }
 
 data "google_kms_crypto_key_version" "version" {
+  count      = var.attestation_kms_key != null ? 1 : 0
   crypto_key = var.attestation_kms_key
 }
