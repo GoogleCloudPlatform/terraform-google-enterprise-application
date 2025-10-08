@@ -31,6 +31,7 @@ type GitRepo struct {
 	conf *git.CmdCfg
 }
 
+// GitClone clones git repositories, supporting CSR, Github and Gitlab type of source control
 func GitClone(t testing.TB, repositoryType, repositoryName, repositoryURL, path, project string, logger *logger.Logger) GitRepo {
 	conf := GitRepo{}
 	if repositoryType != "CSR" {
