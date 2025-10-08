@@ -8,9 +8,9 @@
 | access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | additional\_substitutions | A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (\_). | `map(string)` | `{}` | no |
 | app\_build\_trigger\_yaml | Path to the Cloud Build YAML file for the application | `string` | n/a | yes |
-| attestation\_kms\_key | The KMS Key ID to be used by attestor in format projects/PROJECT\_ID/locations/KMS\_KEY\_LOCATION/keyRings/KMS\_KEYRING\_NAME/cryptoKeys/KMS\_KEY\_NAME/cryptoKeyVersions/KMS\_KEY\_VERSION. | `string` | n/a | yes |
+| attestation\_kms\_key | The KMS Key ID to be used by attestor in format projects/PROJECT\_ID/locations/KMS\_KEY\_LOCATION/keyRings/KMS\_KEYRING\_NAME/cryptoKeys/KMS\_KEY\_NAME/cryptoKeyVersions/KMS\_KEY\_VERSION. | `string` | `null` | no |
 | attestor\_id | The attestor name in format projects/PROJECT\_ID/attestors/ATTESTOR\_NAME. | `string` | n/a | yes |
-| binary\_authorization\_image | The Binary Authorization image to be used to create attestation. | `string` | `""` | no |
+| binary\_authorization\_image | The Binary Authorization image to be used to create attestation. | `string` | `null` | no |
 | binary\_authorization\_repository\_id | The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`. | `string` | n/a | yes |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
 | buckets\_force\_destroy | When deleting the bucket for storing CICD artifacts, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |

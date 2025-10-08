@@ -280,7 +280,7 @@ func TestSourceCymbalBank(t *testing.T) {
 							return true, nil
 						} else {
 							logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
-							logs := gcloud.Runf(t, logsCmd).String()
+							logs := gcloud.RunCmd(t, logsCmd)
 							t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
 							if strings.Contains(logs, "Insufficient memory") || strings.Contains(logs, "Insufficient CPU") {
 								t.Logf("Re-trying rollout due to Cluster scalling.")

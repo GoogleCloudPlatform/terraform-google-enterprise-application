@@ -220,8 +220,6 @@ func main() {
 
 	bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
 
-	globalTFVars.RemoteStateBucket = bo.StateBucket
-
 	// 2-Multitenant
 	msg.PrintStageMsg("Deploying 2-Multitenant stage")
 	err = s.RunStep("gcp-multitenant", func() error {
@@ -258,7 +256,7 @@ func main() {
 	io := stages.GetAppFactoryStepOutputs(t, filepath.Join(conf.CheckoutPath, globalTFVars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName))
 
 	err = s.RunStep("appinfra-hello-world", func() error {
-		return stages.DeployAppInfraStage(t, s, globalTFVars, io, conf)
+		return stages.DeployAppInfraStage(t, s, globalTFVars, bo, io, conf)
 	})
 	if err != nil {
 		fmt.Printf("# Example app infra step failed. Error: %s\n", err.Error())
