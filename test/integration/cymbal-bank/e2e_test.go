@@ -204,12 +204,12 @@ func checkTransaction(ctx context.Context, c *http.Client, ipAddress string, amo
 		fmt.Println(resp)
 		return nil, err
 	}
-	defer func() {
-		err := resp.Body.Close()
-		if err != nil {
-			fmt.Printf("Error closing body %s", err)
-		}
-	}()
+defer func() {
+	if err := resp.Body.Close(); err != nil {
+		// Consider passing *testing.T to this function to use t.Errorf() for logging.
+		fmt.Printf("Error closing response body: %v\n", err)
+	}
+}()
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

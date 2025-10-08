@@ -139,9 +139,8 @@ func TestSourceCymbalBank(t *testing.T) {
 					t.Fatal(err)
 				}
 				defer func() {
-					err := datefile.Close()
-					if err != nil {
-						t.Fatal(err)
+					if err := datefile.Close(); err != nil {
+						t.Errorf("failed to close datefile: %v", err)
 					}
 				}()
 

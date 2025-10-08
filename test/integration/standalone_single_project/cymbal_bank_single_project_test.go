@@ -141,9 +141,8 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					t.Fatal(err)
 				}
 				defer func() {
-					err := datefile.Close()
-					if err != nil {
-						fmt.Printf("Error closing body %s", err)
+					if err := datefile.Close(); err != nil {
+						t.Errorf("Error closing datefile: %v", err)
 					}
 				}()
 
@@ -230,9 +229,8 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 									t.Fatal(err)
 								}
 								defer func() {
-									err := datefile.Close()
-									if err != nil {
-										fmt.Printf("Error closing body %s", err)
+									if err := datefile.Close(); err != nil {
+										t.Errorf("Error closing datefile: %v", err)
 									}
 								}()
 

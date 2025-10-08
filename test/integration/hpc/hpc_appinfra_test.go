@@ -110,11 +110,11 @@ provider "google-beta" {
 			fmt.Println(l, "bytes written successfully")
 			if err != nil {
 				fmt.Println(err)
-				err = f.Close()
-				if err != nil {
-					fmt.Println(err)
-				}
-				return
+err = f.Close()
+if err != nil {
+	t.Fatalf("failed to close file: %v", err)
+}
+return
 			}
 
 			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, fullServiceName)).String(), "/")
