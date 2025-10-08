@@ -46,7 +46,7 @@ func TestGit(t *testing.T) {
 	err := CopyDirectory(repo, originPath)
 	assert.NoError(t, err)
 
-	local := CloneCSR(t, "my-git-repo", repo, "", logger.Discard)
+	local := cloneCSR(t, "my-git-repo", repo, "", logger.Discard)
 	err = local.AddRemote(remote, originPath)
 	assert.NoError(t, err)
 
@@ -70,7 +70,7 @@ func TestGit(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, hasUpstream, "branch 'unit-test' should have a remote")
 
-	origin := CloneCSR(t, "my-git-repo", originPath, "", logger.Discard)
+	origin := cloneCSR(t, "my-git-repo", originPath, "", logger.Discard)
 	files, err := FindFiles(originPath, "go.mod")
 	assert.NoError(t, err)
 	assert.Len(t, files, 0, "'go.mod' file should not exist on main branch")

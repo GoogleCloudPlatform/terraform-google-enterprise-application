@@ -162,13 +162,10 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 					MaxRetries:               MaxErrorRetries,
 					TimeBetweenRetries:       TimeBetweenErrorRetries,
 				}
-				conf := utils.GitRepo{}
 
-				if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
-					conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), c.Logger)
-				} else {
-					conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), sc.CICDProject, c.Logger)
-				}
+				gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName)
+				conf := utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
+
 				branch := e
 				if branch == "shared" {
 					branch = "production"
@@ -203,11 +200,10 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 				TimeBetweenRetries:       TimeBetweenErrorRetries,
 			}
 			t.Log("Clonning repo")
-			if tfvars.InfraCloudbuildV2RepositoryConfig.RepoType != "CSR" {
-				conf = utils.CloneGit(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), c.Logger)
-			} else {
-				conf = utils.CloneCSR(t, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName), sc.CICDProject, c.Logger)
-			}
+
+			gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName)
+			conf := utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
+
 			err := conf.CheckoutBranch("production")
 			if err != nil {
 				return err
