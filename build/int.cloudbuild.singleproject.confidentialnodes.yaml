@@ -127,7 +127,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose || (cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage apply --verbose && cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose)",
+        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose",
       ]
 
   - id: single-project-confidential-nodes-teardown
