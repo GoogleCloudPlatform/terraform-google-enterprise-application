@@ -17,25 +17,18 @@
 locals {
   expanded_environment_with_service_accounts = flatten(
     [for key, email in local.cb_service_accounts_emails :
-      [for env, fields in var.envs :
+      [for fields in values(var.envs) :
         {
-          multitenant_pipeline  = key
-          email                 = email
-          network_project_id    = fields.network_project_id
-          network_ancestry_id   = data.google_project_ancestry.network_ancestry[env].parent_id
-          network_ancestry_type = data.google_project_ancestry.network_ancestry[env].parent_type
-          billing_account       = fields.billing_account
-          folder_id             = fields.folder_id
-          org_id                = fields.org_id
+          multitenant_pipeline = key
+          email                = email
+          network_project_id   = fields.network_project_id
+          billing_account      = fields.billing_account
+          folder_id            = fields.folder_id
+          org_id               = fields.org_id
         }
       ]
     ]
   )
-}
-
-data "google_project_ancestry" "network_ancestry" {
-  for_each = var.envs
-  project  = each.value.network_project_id
 }
 
 # IAM Bindings for Google Service Accounts
@@ -90,38 +83,101 @@ resource "google_folder_iam_member" "project_creator" {
   folder = each.value.folder_id
 }
 
+resource "google_folder_iam_member" "gkehub_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+
+  role   = "roles/gkehub.admin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
+resource "google_folder_iam_member" "env_folder_projectIamAdmin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+
+  role   = "roles/resourcemanager.projectIamAdmin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
+resource "google_folder_iam_member" "env_folder_service_account_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+
+  role   = "roles/iam.serviceAccountAdmin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
+resource "google_folder_iam_member" "env_folder_source_repository_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" || obj.multitenant_pipeline == "applicationfactory" })
+
+  role   = "roles/source.admin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
+resource "google_folder_iam_member" "env_folder_artifactregistry_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" || obj.multitenant_pipeline == "applicationfactory" })
+
+  role   = "roles/artifactregistry.admin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
+resource "google_folder_iam_member" "containeranalysis_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" })
+
+  role   = "roles/containeranalysis.admin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
+resource "google_folder_iam_member" "binaryauth_attestor_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" })
+
+  role   = "roles/binaryauthorization.attestorsAdmin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
+resource "google_folder_iam_member" "binaryauth_policy_admin" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "fleetscope" })
+
+  role   = "roles/binaryauthorization.policyAdmin"
+  member = "serviceAccount:${each.value.email}"
+  folder = each.value.folder_id
+}
+
 resource "google_folder_iam_member" "xpn_admin" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.network_ancestry_type == "folder" })
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline != "fleetscope" })
 
   role   = "roles/compute.xpnAdmin"
   member = "serviceAccount:${each.value.email}"
-  folder = each.value.network_ancestry_id
+  folder = each.value.folder_id
 }
 
 resource "google_organization_iam_member" "xpn_admin" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.network_ancestry_type != "folder" })
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline != "fleetscope" })
 
   role   = "roles/compute.xpnAdmin"
   member = "serviceAccount:${each.value.email}"
-  org_id = each.value.network_ancestry_id
+  org_id = each.value.org_id
+}
+
+resource "google_project_iam_member" "network_project_iam_member" {
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+
+  role    = "roles/resourcemanager.projectIamAdmin"
+  member  = "serviceAccount:${each.value.email}"
+  project = each.value.network_project_id
 }
 
 resource "google_project_iam_member" "network_user" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "multitenant" })
 
   role    = "roles/compute.networkUser"
   member  = "serviceAccount:${each.value.email}"
   project = each.value.network_project_id
 }
-
-resource "google_folder_iam_member" "owner" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
-
-  role   = "roles/owner"
-  member = "serviceAccount:${each.value.email}"
-  folder = each.value.folder_id
-}
-
 
 resource "google_project_iam_member" "self_kms_admin_iam_member" {
   for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if var.bucket_kms_key == null })
