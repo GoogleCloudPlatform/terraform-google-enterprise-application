@@ -210,7 +210,7 @@ func TestStandaloneSingleProjectConfidentialNodesExample(t *testing.T) {
 					retryStatus := []string{"PROVISIONING", "STALLED"}
 					if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
 						retry = true
-					} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
+					} else if dataPlaneManagement != "ACTIVE" || controlPlaneManagement != "ACTIVE" {
 						generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
 						generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
 						return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)
