@@ -106,12 +106,15 @@ provider "google-beta" {
 	impersonate_service_account = "%s"
 }
 			`
-			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
+			l, err := fmt.Fprintf(f, provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1])
 			fmt.Println(l, "bytes written successfully")
 			if err != nil {
 				fmt.Println(err)
-				f.Close()
-				return
+err = f.Close()
+if err != nil {
+	t.Fatalf("failed to close file: %v", err)
+}
+return
 			}
 
 			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, fullServiceName)).String(), "/")

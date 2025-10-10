@@ -134,9 +134,10 @@ func TestSourceCymbalShop(t *testing.T) {
 						return true, nil
 					}
 					latestWorkflowRunStatus := build[0].Get("status").String()
-					if latestWorkflowRunStatus == "SUCCESS" {
+					switch latestWorkflowRunStatus {
+					case "SUCCESS":
 						return false, nil
-					} else if latestWorkflowRunStatus == "FAILURE" {
+					case "FAILURE":
 						return false, errors.New("Build failed.")
 					}
 					return true, nil
