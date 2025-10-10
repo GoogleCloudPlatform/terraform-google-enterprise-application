@@ -140,7 +140,11 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				defer datefile.Close()
+				defer func() {
+					if err := datefile.Close(); err != nil {
+						t.Errorf("Error closing datefile: %v", err)
+					}
+				}()
 
 				_, err = datefile.WriteString(time.Now().String() + "\n")
 				if err != nil {
@@ -224,7 +228,11 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 								if err != nil {
 									t.Fatal(err)
 								}
-								defer datefile.Close()
+								defer func() {
+									if err := datefile.Close(); err != nil {
+										t.Errorf("Error closing datefile: %v", err)
+									}
+								}()
 
 								_, err = datefile.WriteString(time.Now().String() + "\n")
 								if err != nil {
@@ -242,10 +250,11 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 						}
 						latestWorkflowRunStatus := build[0].Get("status").String()
 						t.Logf("Build found for commit %s: %s \n", lastCommit, build[0].Get("buildTriggerId"))
-						if latestWorkflowRunStatus == "SUCCESS" {
+						switch latestWorkflowRunStatus {
+						case "SUCCESS":
 							t.Logf("Build finished successfully %s. \n", build[0].Get("buildTriggerId"))
 							return false, nil
-						} else if latestWorkflowRunStatus == "FAILURE" {
+						case "FAILURE":
 							logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
 							logs := gcloud.Runf(t, logsCmd).String()
 							t.Logf("%s ci-build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
