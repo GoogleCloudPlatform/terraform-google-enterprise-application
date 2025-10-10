@@ -138,7 +138,11 @@ func TestSourceCymbalBank(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				defer datefile.Close()
+				defer func() {
+					if err := datefile.Close(); err != nil {
+						t.Errorf("failed to close datefile: %v", err)
+					}
+				}()
 
 				_, err = datefile.WriteString(time.Now().String() + "\n")
 				if err != nil {
@@ -217,7 +221,12 @@ func TestSourceCymbalBank(t *testing.T) {
 								if err != nil {
 									t.Fatal(err)
 								}
-								defer datefile.Close()
+								defer func() {
+									err := datefile.Close()
+									if err != nil {
+										t.Fatal(err)
+									}
+								}()
 
 								_, err = datefile.WriteString(time.Now().String() + "\n")
 								if err != nil {
@@ -234,9 +243,10 @@ func TestSourceCymbalBank(t *testing.T) {
 							return true, nil
 						}
 						latestWorkflowRunStatus := build[0].Get("status").String()
-						if latestWorkflowRunStatus == "SUCCESS" {
+						switch latestWorkflowRunStatus {
+						case "SUCCESS":
 							return false, nil
-						} else if latestWorkflowRunStatus == "FAILURE" {
+						case "FAILURE":
 							logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
 							logs := gcloud.Runf(t, logsCmd).String()
 							t.Logf("%s ci-build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
