@@ -268,6 +268,7 @@ type AppFactoryTfvars struct {
 type AppInfraTfvars struct {
 	Region                       string                       `hcl:"region"`
 	BucketsForceDestroy          bool                         `hcl:"buckets_force_destroy"`
+	BucketPrefix                 string                       `hcl:"bucket_prefix"`
 	RemoteStateBucket            string                       `hcl:"remote_state_bucket"`
 	EnvironmentNames             []string                     `hcl:"environment_names"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
