@@ -56,7 +56,10 @@ func TestFleetscope(t *testing.T) {
 		hpc = false
 	}
 
-	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
+err = os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
+if err != nil {
+	t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+}
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
@@ -311,7 +314,7 @@ func TestFleetscope(t *testing.T) {
 							retryStatus := []string{"PROVISIONING", "STALLED"}
 							if slices.Contains(retryStatus, dataPlaneManagement) || slices.Contains(retryStatus, controlPlaneManagement) {
 								retry = true
-							} else if !(dataPlaneManagement == "ACTIVE" && controlPlaneManagement == "ACTIVE") {
+							} else if dataPlaneManagement != "ACTIVE" || controlPlaneManagement != "ACTIVE" {
 								generalState := result.Get("membershipStates").Get(memberShipName).Get("state.code").String()
 								generalDescription := result.Get("membershipStates").Get(memberShipName).Get("state.description").String()
 								return false, fmt.Errorf("Service mesh provisioning failed for %s: status='%s' description='%s'", memberShipName, generalState, generalDescription)

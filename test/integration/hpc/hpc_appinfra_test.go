@@ -106,11 +106,14 @@ provider "google-beta" {
 	impersonate_service_account = "%s"
 }
 			`
-			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
+			l, err := fmt.Fprintf(f, provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1])
 			fmt.Println(l, "bytes written successfully")
 			if err != nil {
 				fmt.Println(err)
-				f.Close()
+				err = f.Close()
+				if err != nil {
+					t.Fatalf("failed to close file: %v", err)
+				}
 				return
 			}
 
@@ -127,6 +130,7 @@ provider "google-beta" {
 					"bucket_force_destroy": true,
 					"logging_bucket":       loggingHarness.GetStringOutput("logging_bucket"),
 					"bucket_kms_key":       loggingHarness.GetStringOutput("bucket_kms_key"),
+					"bucket_prefix":        "bkt",
 				}
 
 				appService := tft.NewTFBlueprintTest(t,

@@ -62,7 +62,10 @@ func TestHPCAppfactory(t *testing.T) {
 		tft.WithTFDir(loggingHarnessPath),
 	)
 
-	os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
+err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
+if err != nil {
+	t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+}
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
@@ -82,7 +85,7 @@ func TestHPCAppfactory(t *testing.T) {
 	appFactoryPath := "../../../4-appfactory/envs/shared"
 
 	from := "../../../examples/hpc/4-appfactory"
-	err := cp.Copy(from, appFactoryPath)
+	err = cp.Copy(from, appFactoryPath)
 	if err != nil {
 		t.Fatal(err)
 	}

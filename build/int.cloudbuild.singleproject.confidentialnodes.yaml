@@ -28,10 +28,10 @@ steps:
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
       - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
 
-  - id: cleans-access-level
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestCleanVPCSC --stage apply --verbose"]
+  # - id: cleans-access-level
+  #   name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+  #   args:
+  #     ["/bin/bash", "-c", "cft test run TestCleanVPCSC --stage apply --verbose"]
 
   - id: private-workerpool-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -127,7 +127,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose || (cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage apply --verbose && cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose)",
+        "cft test run TestStandaloneSingleProjectConfidentialNodesExample --stage verify --verbose",
       ]
 
   - id: single-project-confidential-nodes-teardown

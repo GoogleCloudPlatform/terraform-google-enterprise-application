@@ -122,7 +122,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneSingleProjectExample --stage verify --verbose || (cft test run TestStandaloneSingleProjectExample --stage apply --verbose && cft test run TestStandaloneSingleProjectExample --stage verify --verbose)",
+        "cft test run TestStandaloneSingleProjectExample --stage verify --verbose",
       ]
 
   - id: single-project-app-deployment
@@ -142,7 +142,7 @@ steps:
   - id: app-single-project-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestAppE2ECymbalBankSingleProject --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 120s && cft test run TestAppE2ECymbalBankSingleProject --stage verify --verbose"]
 
   - id: single-project-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"

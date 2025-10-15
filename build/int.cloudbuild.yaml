@@ -246,7 +246,7 @@ steps:
   - id: appinfra-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestAppInfra --stage verify --verbose || (cft test run TestAppInfra --stage apply --verbose && cft test run TestAppInfra --stage verify --verbose)"]
+      ["/bin/bash", "-c", "cft test run TestAppInfra --stage verify --verbose"]
     waitFor:
       - appinfra-apply
 
@@ -304,21 +304,21 @@ steps:
   - id: cymbal-bank-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "sleep 60s && cft test run TestCymbalBankE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 120s && cft test run TestCymbalBankE2E --stage verify --verbose"]
     waitFor:
       - cymbal-bank-app-deployment
 
   - id: cymbal-shop-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "sleep 60s && cft test run TestCymbalShopE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 120s && cft test run TestCymbalShopE2E --stage verify --verbose"]
     waitFor:
       - cymbal-shop-app-deployment
 
   - id: hello-world-e2e
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "sleep 60s && cft test run TestHelloWorldE2E --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 120s && cft test run TestHelloWorldE2E --stage verify --verbose"]
     waitFor:
       - hello-world-app-deployment
 

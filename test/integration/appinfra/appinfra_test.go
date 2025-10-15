@@ -70,6 +70,7 @@ func TestAppInfra(t *testing.T) {
 	)
 	servicesInfoMap := make(map[string]ServiceInfos)
 	region := "us-central1" // TODO: Move to terraform.tfvars?
+	bktPrefix := "bkt"
 
 	for appName, serviceNames := range testutils.ServicesNames {
 		appName := appName
@@ -104,11 +105,14 @@ func TestAppInfra(t *testing.T) {
 		impersonate_service_account = "%s"
 	}
 `
-			l, err := f.WriteString(fmt.Sprintf(provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1]))
+			l, err := fmt.Fprintf(f, provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1])
 			fmt.Println(l, "bytes written successfully")
 			if err != nil {
 				fmt.Println(err)
-				f.Close()
+				err := f.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
 				return
 			}
 
@@ -135,6 +139,7 @@ func TestAppInfra(t *testing.T) {
 					"bucket_kms_key":        bucketKMSKey,
 					"logging_bucket":        loggingBucket,
 					"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
+					"bucket_prefix":         bktPrefix,
 				}
 
 				appService := tft.NewTFBlueprintTest(t,
@@ -188,8 +193,8 @@ func TestAppInfra(t *testing.T) {
 					ciServiceAccountEmail := fmt.Sprintf("ci-%s@%s.iam.gserviceaccount.com", servicesInfoMap[fullServiceName].ServiceName, servicesInfoMap[fullServiceName].ProjectID)
 
 					cloudBuildBucketNames := []string{
-						fmt.Sprintf("build-cache-%s-%s", servicesInfoMap[fullServiceName].ServiceName, projectNumber),
-						fmt.Sprintf("release-source-development-%s-%s", servicesInfoMap[fullServiceName].ServiceName, projectNumber),
+						fmt.Sprintf("%s-build-cache-%s-%s", bktPrefix, servicesInfoMap[fullServiceName].ServiceName, projectNumber),
+						fmt.Sprintf("%s-release-source-development-%s-%s", bktPrefix, servicesInfoMap[fullServiceName].ServiceName, projectNumber),
 					}
 
 					for _, bucketName := range cloudBuildBucketNames {
@@ -209,7 +214,7 @@ func TestAppInfra(t *testing.T) {
 					}
 
 					for env := range env_cluster_membership_ids {
-						bucketName := fmt.Sprintf("artifacts-%s-%s-%s", env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
+						bucketName := fmt.Sprintf("%s-artifacts-%s-%s-%s", bktPrefix, env, projectNumber, servicesInfoMap[fullServiceName].ServiceName)
 
 						bucketOp := gcloud.Runf(t, "storage buckets describe gs://%s --project %s", bucketName, servicesInfoMap[fullServiceName].ProjectID)
 						assert.True(bucketOp.Get("uniform_bucket_level_access").Bool(), fmt.Sprintf("Bucket %s should have uniform access level.", bucketName))

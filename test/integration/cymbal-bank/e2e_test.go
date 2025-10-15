@@ -204,15 +204,21 @@ func checkTransaction(ctx context.Context, c *http.Client, ipAddress string, amo
 		fmt.Println(resp)
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			// Consider passing *testing.T to this function to use t.Errorf() for logging.
+			fmt.Printf("Error closing response body: %v\n", err)
+		}
+	}()
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	bodyString := string(bodyBytes)
-	if typeTransaction == "DEPOSIT" {
+	switch typeTransaction {
+	case "DEPOSIT":
 		amount = fmt.Sprintf("+$%s", amount)
-	} else if typeTransaction == "PAYMENT" {
+	case "PAYMENT":
 		amount = fmt.Sprintf("-$%s", amount)
 	}
 	if !strings.Contains(bodyString, amount) {
