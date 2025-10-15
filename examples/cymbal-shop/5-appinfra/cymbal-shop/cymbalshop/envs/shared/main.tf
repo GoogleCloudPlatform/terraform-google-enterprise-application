@@ -39,6 +39,7 @@ module "app" {
   app_build_trigger_yaml = "cloudbuild.yaml"
 
   buckets_force_destroy = var.buckets_force_destroy
+  bucket_prefix         = var.bucket_prefix
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 

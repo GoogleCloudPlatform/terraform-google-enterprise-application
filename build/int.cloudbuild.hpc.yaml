@@ -259,7 +259,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestHPCMonteCarloE2E --stage verify --verbose",
+        "sleep 120s && cft test run TestHPCMonteCarloE2E --stage verify --verbose",
       ]
     waitFor:
       - appinfra-apply
