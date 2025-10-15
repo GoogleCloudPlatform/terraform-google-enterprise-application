@@ -174,16 +174,16 @@ func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 
 	fleetscopeTfvars := FleetscopeTfvars{
-		RemoteStateBucket:         outputs.StateBucket,
-		NamespaceIDs:              tfvars.NamespaceIDs,
-		ConfigSyncSecretType:      tfvars.ConfigSyncSecretType,
-		ConfigSyncRepositoryURL:   tfvars.ConfigSyncRepositoryURL,
-		DisableIstioOnNamespaces:  tfvars.DisableIstioOnNamespaces,
-		ConfigSyncPolicyDir:       tfvars.ConfigSyncPolicyDir,
-		ConfigSyncBranch:          tfvars.ConfigSyncBranch,
-		AttestationKMSKey:         tfvars.AttestationKMSKey,
-		AttestationEvaluationMode: tfvars.AttestationEvaluationMode,
-		EnableKueue:               tfvars.EnableKueue,
+		RemoteStateBucket:           outputs.StateBucket,
+		NamespaceIDs:                tfvars.NamespaceIDs,
+		ConfigSyncSecretType:        tfvars.ConfigSyncSecretType,
+		ConfigSyncRepositoryURL:     tfvars.ConfigSyncRepositoryURL,
+		DisableIstioOnNamespaces:    tfvars.DisableIstioOnNamespaces,
+		ConfigSyncPolicyDir:         tfvars.ConfigSyncPolicyDir,
+		ConfigSyncBranch:            tfvars.ConfigSyncBranch,
+		AttestationKMSKey:           tfvars.AttestationKMSKey,
+		AttestationEvaluationMode:   tfvars.AttestationEvaluationMode,
+		EnableKueue:                 tfvars.EnableKueue,
 	}
 	err := utils.WriteTfvars(filepath.Join(c.EABPath, FleetscopeStep, "terraform.tfvars"), fleetscopeTfvars)
 	if err != nil {
@@ -283,6 +283,7 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, boots
 		LoggingBucket:                tfvars.LoggingBucket,
 		BucketKMSKey:                 tfvars.BucketKMSKey,
 		AttestationKMSKey:            tfvars.AttestationKMSKey,
+		BucketPrefix:                 tfvars.BucketPrefix,
 	}
 
 	var err error
@@ -502,16 +503,17 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 	}
 
 	fileName := filepath.Join(gcpPath, ".gitignore")
-	content := `### https://raw.github.com/github/gitignore/90f149de451a5433aebd94d02d11b0e28843a1af/Terraform.gitignore
-# Local .terraform directories
-**/.terraform/*
+	content := `
+	### https://raw.github.com/github/gitignore/90f149de451a5433aebd94d02d11b0e28843a1af/Terraform.gitignore
+	# Local .terraform directories
+	**/.terraform/*
 
-# .tfstate files
-*.tfstate
-*.tfstate.*
-# tf lock file
-.terraform.lock.hcl
-`
+	# .tfstate files
+	*.tfstate
+	*.tfstate.*
+	# tf lock file
+	.terraform.lock.hcl
+	`
 	file, err := os.Create(fileName)
 	if err != nil {
 		fmt.Printf("Error creating file: %v\n", err)
@@ -524,27 +526,28 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 	// file.WriteString returns the number of bytes written and an error.
 	_, err = file.WriteString(content)
 	if err != nil {
-		fmt.Printf("Error writing to file: %v\n", err)
+		return err
 	}
 	err = utils.CopyFile(filepath.Join(EABPath, "build/tf-wrapper.sh"), filepath.Join(gcpPath, "tf-wrapper.sh"))
 	if err != nil {
-		fmt.Printf("Error writing to file: %v\n", err)
-	}
-
-	fileContent, err := os.ReadFile(filepath.Join(gcpPath, "tf-wrapper.sh"))
-	if err != nil {
-		return fmt.Errorf("error reading file: %w", err)
+		return err
 	}
 
 	oldValue := "^(development|nonproduction|production|shared)$"
 	newValue := fmt.Sprintf("^(%s)$", strings.Join(environmentNames, "|"))
-	// Convert content to string and perform replacement
-	modifiedContent := strings.ReplaceAll(string(fileContent), oldValue, newValue)
-
-	// Write the modified content back to the file
-	err = os.WriteFile(filepath.Join(gcpPath, "tf-wrapper.sh"), []byte(modifiedContent), 0o777) // 0o777 for read/write by all
+	err = utils.ReplaceStringInFile(filepath.Join(gcpPath, "tf-wrapper.sh"), oldValue, newValue)
 	if err != nil {
-		return fmt.Errorf("error writing file: %w", err)
+		return err
+	}
+	s, err := os.Stat(filepath.Join(gcpPath, "tf-wrapper.sh"))
+	if err != nil {
+		return err
+	}
+	permissions := s.Mode().Perm()
+	newPermissions := permissions | 0111
+	err = os.Chmod(filepath.Join(gcpPath, "tf-wrapper.sh"), newPermissions)
+	if err != nil {
+		return err
 	}
 
 	return nil
