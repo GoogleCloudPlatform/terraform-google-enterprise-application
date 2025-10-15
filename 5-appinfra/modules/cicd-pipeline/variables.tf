@@ -60,6 +60,12 @@ variable "buckets_force_destroy" {
   default     = false
 }
 
+variable "bucket_prefix" {
+  description = "Name prefix to use for buckets created."
+  type        = string
+  default     = "bkt"
+}
+
 variable "additional_substitutions" {
   description = "A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (_)."
   type        = map(string)

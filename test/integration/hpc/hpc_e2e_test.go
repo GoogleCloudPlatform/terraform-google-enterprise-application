@@ -147,7 +147,8 @@ func runBatchJobs(t *testing.T) {
 
 func runDownloadDataScript(t *testing.T, infraProjectTeamB string) {
 	codeDirectory := "/workspace/examples/hpc/6-appsource/helpers"
-	stocksBucketName := fmt.Sprintf("%s-stocks-historical-data", infraProjectTeamB)
+	bucketPrefix := "bkt"
+	stocksBucketName := fmt.Sprintf("%s-%s-stocks-historical-data", bucketPrefix, infraProjectTeamB)
 
 	// Create a virtual environment
 	venvCmd := shell.Command{

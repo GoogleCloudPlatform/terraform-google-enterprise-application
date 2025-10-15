@@ -167,6 +167,9 @@ The seed project is the GCP project where the initial infrastructure resources w
    containerscanning.googleapis.com \
    gkehub.googleapis.com \
    iam.googleapis.com \
+   --project=YOUR_PROJECT_ID
+
+   gcloud services enable \
    iap.googleapis.com \
    mesh.googleapis.com \
    monitoring.googleapis.com \
