@@ -493,17 +493,17 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 	}
 
 	fileName := filepath.Join(gcpPath, ".gitignore")
-	content := `
-	### https://raw.github.com/github/gitignore/90f149de451a5433aebd94d02d11b0e28843a1af/Terraform.gitignore
-	# Local .terraform directories
-	**/.terraform/*
+	content := `### https://raw.github.com/github/gitignore/90f149de451a5433aebd94d02d11b0e28843a1af/Terraform.gitignore
+# Local .terraform directories
+*.terraform*
+**/.terraform/*
 
-	# .tfstate files
-	*.tfstate
-	*.tfstate.*
-	# tf lock file
-	.terraform.lock.hcl
-	`
+# .tfstate files
+*.tfstate
+*.tfstate.*
+# tf lock file
+.terraform.lock.hcl
+`
 	file, err := os.Create(fileName)
 	if err != nil {
 		fmt.Printf("Error creating file: %v\n", err)

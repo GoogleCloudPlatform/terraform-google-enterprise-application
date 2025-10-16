@@ -251,7 +251,7 @@ module "cicd" {
 
   service_name           = each.value.service_name
   team_name              = each.value.team_name
-  repo_name              = each.value.team_name != each.value.service_name ? "eab-${each.value.application_name}-${each.value.team_name}-${each.value.service_name}" : "eab-${each.value.application_name}-${each.value.service_name}"
+  repo_name              = each.value.cloudbuildv2_repository_config.repositories[each.value.team_name != each.value.service_name ? "eab-${each.value.application_name}-${each.value.team_name}-${each.value.service_name}" : "eab-${each.value.application_name}-${each.value.service_name}"].repository_name
   repo_branch            = each.value.repo_branch
   app_build_trigger_yaml = "src/${each.value.team_name}/cloudbuild.yaml"
 
