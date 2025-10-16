@@ -40,7 +40,7 @@ const (
 	AppSourceStep           = "6-appsource"
 	MaxErrorRetries         = 2
 	TimeBetweenErrorRetries = 2 * time.Minute
-	MaxBuildRetries         = 40
+	MaxBuildRetries         = 60
 )
 
 type CommonConf struct {
