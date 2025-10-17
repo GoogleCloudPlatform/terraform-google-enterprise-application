@@ -32,7 +32,7 @@ module "app" {
 
   service_name           = local.service_name
   team_name              = local.team_name
-  repo_name              = local.repo_name
+  repo_name              = var.cloudbuildv2_repository_config.repositories[local.repo_name].repository_name
   repo_branch            = local.repo_branch
   app_build_trigger_yaml = "cloudbuild.yaml"
 
