@@ -37,4 +37,5 @@ module "provision-ai-training-infra" {
   workerpool_id            = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
   logging_bucket           = var.logging_bucket
   bucket_kms_key           = var.bucket_kms_key
+  bucket_prefix            = var.bucket_prefix
 }

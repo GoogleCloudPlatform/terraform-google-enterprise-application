@@ -39,7 +39,7 @@ module "build_logs" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
   version = "~> 11.0"
 
-  name              = "cb-tf-builder-logs-${var.project_id}"
+  name              = "${var.bucket_prefix}-cb-tf-builder-logs-${var.project_id}"
   project_id        = var.project_id
   location          = var.location
   log_bucket        = var.logging_bucket

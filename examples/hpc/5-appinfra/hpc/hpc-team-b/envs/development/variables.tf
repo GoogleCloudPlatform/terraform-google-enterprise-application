@@ -36,3 +36,9 @@ variable "bucket_kms_key" {
   type        = string
   default     = null
 }
+
+variable "bucket_prefix" {
+  description = "Name prefix to use for buckets created."
+  type        = string
+  default     = "bkt"
+}

@@ -37,4 +37,5 @@ module "provision-monte-carlo-infra" {
   team                     = "hpc-team-b"
   logging_bucket           = var.logging_bucket
   bucket_kms_key           = var.bucket_kms_key
+  bucket_prefix            = var.bucket_prefix
 }

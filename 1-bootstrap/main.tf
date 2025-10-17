@@ -113,6 +113,7 @@ module "tf_cloudbuild_workspace" {
   trigger_location      = var.trigger_location
   artifacts_bucket_name = "${var.bucket_prefix}-${var.project_id}-${local.cb_config[each.key].bucket_infix}-build"
   log_bucket_name       = "${var.bucket_prefix}-${var.project_id}-${local.cb_config[each.key].bucket_infix}-logs"
+  buckets_force_destroy = var.bucket_force_destroy
 
   create_state_bucket    = false
   state_bucket_self_link = module.tfstate_bucket.bucket.self_link

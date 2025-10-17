@@ -59,6 +59,16 @@ module "folder_common" {
   deletion_protection = false
 }
 
+# Create mock network folder
+module "folder_network" {
+  source              = "terraform-google-modules/folders/google"
+  version             = "~> 5.0"
+  prefix              = random_string.prefix.result
+  parent              = var.seed_folder_id
+  names               = ["network"]
+  deletion_protection = false
+}
+
 # Create mock environment folders
 module "folders" {
   source  = "terraform-google-modules/folders/google"
@@ -87,6 +97,14 @@ resource "google_folder_iam_member" "common_folder_iam" {
   member   = "serviceAccount:${var.sa_email}"
 }
 
+# Admin roles to network folder
+resource "google_folder_iam_member" "networ_folder_iam" {
+  for_each = toset(local.folder_admin_roles)
+  folder   = module.folder_network.ids["network"]
+  role     = each.value
+  member   = "serviceAccount:${var.sa_email}"
+}
+
 # Create SVPC host projects
 module "vpc_project" {
   for_each = { for i, folder in module.folders.ids : (i) => folder }
@@ -97,7 +115,7 @@ module "vpc_project" {
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id
-  folder_id                = each.value
+  folder_id                = module.folder_network.ids["network"]
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"

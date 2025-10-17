@@ -54,6 +54,8 @@ func TestBootstrap(t *testing.T) {
 		tft.WithTFDir(loggingHarnessPath),
 	)
 
+	bktPrefix := "bkt"
+
 	vars := map[string]interface{}{
 		"bucket_force_destroy":    true,
 		"project_id":              vpcsc.GetTFSetupStringOutput("seed_project_id"),
@@ -66,6 +68,7 @@ func TestBootstrap(t *testing.T) {
 		"logging_bucket":          loggingHarness.GetStringOutput("logging_bucket"),
 		"bucket_kms_key":          loggingHarness.GetStringOutput("bucket_kms_key"),
 		"attestation_kms_project": loggingHarness.GetStringOutput("project_id"),
+		"bucket_prefix":           bktPrefix,
 	}
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -117,20 +120,26 @@ func TestBootstrap(t *testing.T) {
 			"fs",
 		}
 		for _, infix := range bucketInfix {
-			urlBuildBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s-build", projectID, infix)
-			opBuildBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://bkt-%s-%s-build", projectID, infix), gcloudArgsBucket).Array()
+			urlBuildBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/%s-%s-%s-build", bktPrefix, projectID, infix)
+			opBuildBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://%s-%s-%s-build", bktPrefix, projectID, infix), gcloudArgsBucket).Array()
 			assert.True(opBuildBucket[0].Exists(), "Bucket %s should exist.", urlBuildBucket)
 
-			urlLogsBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-%s-logs", projectID, infix)
-			opLogsBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://bkt-%s-%s-logs", projectID, infix), gcloudArgsBucket).Array()
+			urlLogsBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/%s-%s-%s-logs", bktPrefix, projectID, infix)
+			opLogsBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://%s-%s-%s-logs", bktPrefix, projectID, infix), gcloudArgsBucket).Array()
 			assert.True(opLogsBucket[0].Exists(), "Bucket %s should exist.", urlLogsBucket)
 		}
 
-		urlStateBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/bkt-%s-tf-state", projectID)
-		opStateBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://bkt-%s-tf-state", projectID), gcloudArgsBucket).Array()
+		urlStateBucket := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/%s-%s-tf-state", bktPrefix, projectID)
+		opStateBucket := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://%s-%s-tf-state", bktPrefix, projectID), gcloudArgsBucket).Array()
 		assert.True(opStateBucket[0].Exists(), "Bucket %s should exist.", urlStateBucket)
 		assert.Equal(loggingBucket, opStateBucket[0].Get("logging_config.logBucket").String(), fmt.Sprintf("The bucket should have logging bucket %s.", loggingBucket))
 		assert.Equal(kmsKey, opStateBucket[0].Get("default_kms_key").String(), fmt.Sprintf("The bucket should have the default kms key %s.", kmsKey))
+
+		urlBuilderLogs := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/%s-cb-tf-builder-logs-%s", bktPrefix, projectID)
+		opBuilderLogs := gcloud.Run(t, fmt.Sprintf("storage buckets describe gs://%s-cb-tf-builder-logs-%s", bktPrefix, projectID), gcloudArgsBucket).Array()
+		assert.True(opBuilderLogs[0].Exists(), "Bucket %s should exist.", urlBuilderLogs)
+		assert.Equal(loggingBucket, opBuilderLogs[0].Get("logging_config.logBucket").String(), fmt.Sprintf("The bucket should have logging bucket %s.", loggingBucket))
+		assert.Equal(kmsKey, opBuilderLogs[0].Get("default_kms_key").String(), fmt.Sprintf("The bucket should have the default kms key %s.", kmsKey))
 
 		// Source Repo
 		repos := []string{

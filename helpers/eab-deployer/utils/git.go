@@ -31,8 +31,19 @@ type GitRepo struct {
 	conf *git.CmdCfg
 }
 
-// CloneCSR clones a Google Cloud Source repository and returns a CmdConfig pointing to the repository.
-func CloneCSR(t testing.TB, name, path, project string, logger *logger.Logger) GitRepo {
+// GitClone clones git repositories, supporting CSR, Github and Gitlab type of source control
+func GitClone(t testing.TB, repositoryType, repositoryName, repositoryURL, path, project string, logger *logger.Logger) GitRepo {
+	conf := GitRepo{}
+	if repositoryType != "CSR" {
+		conf = cloneGit(t, repositoryURL, path, logger)
+	} else {
+		conf = cloneCSR(t, repositoryName, path, project, logger)
+	}
+	return conf
+}
+
+// cloneCSR clones a Google Cloud Source repository and returns a CmdConfig pointing to the repository.
+func cloneCSR(t testing.TB, name, path, project string, logger *logger.Logger) GitRepo {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		gcloud.Runf(t, "source repos clone %s %s --project %s", name, path, project)
@@ -42,8 +53,8 @@ func CloneCSR(t testing.TB, name, path, project string, logger *logger.Logger) G
 	}
 }
 
-// CloneGit clones a Github or Gitlab repository and returns a CmdConfig pointing to the repository.
-func CloneGit(t testing.TB, repositoryUrl, path string, logger *logger.Logger) GitRepo {
+// cloneGit clones a Github or Gitlab repository and returns a CmdConfig pointing to the repository.
+func cloneGit(t testing.TB, repositoryUrl, path string, logger *logger.Logger) GitRepo {
 	_, err := os.Stat(path)
 
 	if os.IsNotExist(err) {

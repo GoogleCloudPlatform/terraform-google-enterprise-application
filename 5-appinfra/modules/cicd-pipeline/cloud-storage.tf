@@ -17,7 +17,7 @@ module "build_cache" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
   version = "~> 11.0"
 
-  name              = "build-cache-${var.service_name}-${data.google_project.project.number}"
+  name              = "${var.bucket_prefix}-build-cache-${var.service_name}-${data.google_project.project.number}"
   project_id        = var.project_id
   location          = var.region
   log_bucket        = var.logging_bucket
@@ -57,7 +57,7 @@ module "release_source_development" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
   version = "~> 11.0"
 
-  name              = "release-source-development-${var.service_name}-${data.google_project.project.number}"
+  name              = "${var.bucket_prefix}-release-source-development-${var.service_name}-${data.google_project.project.number}"
   project_id        = var.project_id
   location          = var.region
   log_bucket        = var.logging_bucket

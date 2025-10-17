@@ -70,11 +70,12 @@ func CopyDirectory(src string, dest string) error {
 
 // ReplaceStringInFile replaces a string in a file with a new value.
 func ReplaceStringInFile(filename, old, new string) error {
+	s, err := os.Stat(filename)
 	f, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filename, bytes.Replace(f, []byte(old), []byte(new), -1), 0644)
+	return os.WriteFile(filename, bytes.Replace(f, []byte(old), []byte(new), -1), s.Mode())
 }
 
 // FindFiles find files with the given filename under the directory skipping terraform temp dir.

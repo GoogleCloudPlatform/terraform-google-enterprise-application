@@ -40,7 +40,7 @@ const (
 	AppSourceStep           = "6-appsource"
 	MaxErrorRetries         = 2
 	TimeBetweenErrorRetries = 2 * time.Minute
-	MaxBuildRetries         = 40
+	MaxBuildRetries         = 60
 )
 
 type CommonConf struct {
@@ -144,10 +144,10 @@ type GlobalTFVars struct {
 	ConfigSyncBranch                        *string                                  `hcl:"config_sync_branch"`
 	AttestationKMSKey                       *string                                  `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
-	EnableKueue                             bool                                     `hcl:"enable_kueue"`
+	EnableKueue                             *bool                                    `hcl:"enable_kueue"`
 	BillingAccount                          string                                   `hcl:"billing_account"`
 	Applications                            map[string]map[string]ApplicationService `hcl:"applications"`
-	InfraProjectAPIs                        []string                                 `hcl:"infra_project_apis"`
+	InfraProjectAPIs                        *[]string                                `hcl:"infra_project_apis"`
 	Region                                  string                                   `hcl:"region"`
 	EABCodePath                             string                                   `hcl:"eab_code_path"`
 	CodeCheckoutPath                        string                                   `hcl:"code_checkout_path"`
@@ -243,7 +243,7 @@ type FleetscopeTfvars struct {
 	ConfigSyncBranch          *string           `hcl:"config_sync_branch"`
 	AttestationKMSKey         *string           `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode string            `hcl:"attestation_evaluation_mode"`
-	EnableKueue               bool              `hcl:"enable_kueue"`
+	EnableKueue               *bool             `hcl:"enable_kueue"`
 }
 
 type AppFactoryTfvars struct {
@@ -262,12 +262,13 @@ type AppFactoryTfvars struct {
 	KMSProjectID                 *string                                  `hcl:"kms_project_id"`
 	ServicePerimeterName         *string                                  `hcl:"service_perimeter_name"`
 	ServicePerimeterMode         string                                   `hcl:"service_perimeter_mode"`
-	InfraProjectAPIs             []string                                 `hcl:"infra_project_apis"`
+	InfraProjectAPIs             *[]string                                `hcl:"infra_project_apis"`
 }
 
 type AppInfraTfvars struct {
 	Region                       string                       `hcl:"region"`
 	BucketsForceDestroy          bool                         `hcl:"buckets_force_destroy"`
+	BucketPrefix                 string                       `hcl:"bucket_prefix"`
 	RemoteStateBucket            string                       `hcl:"remote_state_bucket"`
 	EnvironmentNames             []string                     `hcl:"environment_names"`
 	CloudbuildV2RepositoryConfig CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
