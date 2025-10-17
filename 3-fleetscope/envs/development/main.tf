@@ -37,6 +37,8 @@ module "env" {
 
   enable_kueue = var.enable_kueue
 
+  enable_multicluster_discovery = var.enable_multicluster_discovery
+
   attestation_evaluation_mode = var.attestation_evaluation_mode
   disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

@@ -101,6 +101,7 @@ module "eab_cluster_project" {
     "gkehub.googleapis.com",
     "iam.googleapis.com",
     "mesh.googleapis.com",
+    "modelarmor.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
     "servicenetworking.googleapis.com",
