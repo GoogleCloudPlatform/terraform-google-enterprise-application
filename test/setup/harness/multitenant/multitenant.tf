@@ -40,7 +40,6 @@ locals {
       }
     ]
   ])
-
 }
 
 resource "random_string" "prefix" {
@@ -157,18 +156,26 @@ module "cluster_vpc" {
     },
   ]
 
-  subnets = [
-    merge({
-      subnet_name           = "eab-${each.key}-us-central1"
-      subnet_ip             = "10.1.20.0/24"
-      subnet_region         = "us-central1"
-      subnet_private_access = true
-      }, !var.agent ? {
+  subnets = [{
+    subnet_name           = "eab-${each.key}-us-central1"
+    subnet_ip             = "10.1.20.0/24"
+    subnet_region         = "us-central1"
+    subnet_private_access = true
+    }, !var.agent ?
+    {
       subnet_name           = "eab-${each.key}-us-east4"
       subnet_ip             = "10.1.10.0/24"
       subnet_region         = "us-east4"
       subnet_private_access = true
-  } : {})]
+    } :
+    {
+      subnet_name           = "eab-reg-proxy-${each.key}-us-central1"
+      subnet_ip             = "10.129.0.0/23"
+      subnet_region         = "us-central1"
+      purpose               = "REGIONAL_MANAGED_PROXY"
+      role                  = "ACTIVE"
+      subnet_private_access = false
+  }]
 
   secondary_ranges = merge({
     "eab-${each.key}-us-central1" = [
