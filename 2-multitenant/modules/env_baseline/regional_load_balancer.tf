@@ -20,7 +20,7 @@ data "google_compute_network" "network" {
 }
 
 module "regional_load_balancer" {
-  source   = "../modules/regional_load_balancer"
+  source   = "../regional_load_balancer"
   for_each = var.create_regional_loadbalancer ? local.subnets : {}
 
   vpc_id             = data.google_compute_network.network.id
