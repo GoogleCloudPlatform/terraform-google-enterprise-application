@@ -187,7 +187,7 @@ module "cluster_vpc" {
         range_name    = "eab-${each.key}-us-central1-secondary-02"
         ip_cidr_range = "192.168.64.0/18"
       },
-    ] }, var.agent ? {
+    ] }, !var.agent ? {
     "eab-${each.key}-us-east4" = [
       {
         range_name    = "eab-${each.key}-us-east4-secondary-01"
