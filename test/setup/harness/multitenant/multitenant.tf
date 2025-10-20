@@ -153,29 +153,20 @@ module "cluster_vpc" {
           ports    = ["22"]
         }
       ]
-    },
+    }
   ]
 
-  subnets = [{
+  subnets = concat([{
     subnet_name           = "eab-${each.key}-us-central1"
     subnet_ip             = "10.1.20.0/24"
     subnet_region         = "us-central1"
     subnet_private_access = true
-    }, !var.agent ?
-    {
-      subnet_name           = "eab-${each.key}-us-east4"
-      subnet_ip             = "10.1.10.0/24"
-      subnet_region         = "us-east4"
-      subnet_private_access = true
-    } :
-    {
-      subnet_name           = "eab-reg-proxy-${each.key}-us-central1"
-      subnet_ip             = "10.129.0.0/23"
-      subnet_region         = "us-central1"
-      purpose               = "REGIONAL_MANAGED_PROXY"
-      role                  = "ACTIVE"
-      subnet_private_access = false
-  }]
+    }], !var.agent ? [{
+    subnet_name           = "eab-${each.key}-us-east4"
+    subnet_ip             = "10.1.10.0/24"
+    subnet_region         = "us-east4"
+    subnet_private_access = true
+  }] : [])
 
   secondary_ranges = merge({
     "eab-${each.key}-us-central1" = [
@@ -198,4 +189,13 @@ module "cluster_vpc" {
         ip_cidr_range = "192.168.192.0/18"
       },
   ] } : {})
+}
+
+module "regional_load_balancer" {
+  source   = "../../modules/regional_load_balancer"
+  for_each = var.agent ? module.cluster_vpc : {}
+
+  vpc_id     = each.value.network_id
+  project_id = each.value.project_id
+  region     = "us-central1"
 }

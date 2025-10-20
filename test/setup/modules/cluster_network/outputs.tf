@@ -38,3 +38,8 @@ output "network_name" {
   description = "Network name."
   value       = module.cluster_vpc.network_name
 }
+
+output "network_id" {
+  description = "Network name."
+  value       = module.cluster_vpc.network_id
+}
