@@ -1,0 +1,62 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
+    args: ['run', '--privileged', 'multiarch/qemu-user-static@sha256:fe60359c92e86a43cc87b3d906006245f77bfc0565676b80004cc666e4feb9f0']
+    id: 'initialize-qemu'
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
+    args: ['buildx', 'create', '--name', 'multiarch', "--use"]
+    id: 'create-builder-and-use'
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
+    args: ['buildx', 'inspect', '--bootstrap']
+    id: 'show-target-build-platforms'
+  - name: 'gcr.io/cloud-builders/docker:20.10.24'
+    entrypoint: sh
+    args:
+      - "-c"
+      - |
+        apk add --no-cache curl
+        curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+        install skaffold /usr/local/bin/
+        skaffold build --file-output=/workspace/artifacts.json --default-repo=$_CONTAINER_REGISTRY --cache-artifacts=false
+    id: build-multi-arch-image
+#  - id: 'create-attestation'
+#    name: '$_BINARY_AUTH_IMAGE'
+#    args:
+#      - '--artifact-url'
+#      - '$_CONTAINER_REGISTRY/skaffold-example:$COMMIT_SHA-dirty'
+#      - '--attestor'
+#
+#      - '$_ATTESTOR_ID'
+#      - '--keyversion'
+#      - '$_KMS_KEY_VERSION'
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - "deploy"
+      - "releases"
+      - "create"
+      - "hello-world-$SHORT_SHA"
+      - "--delivery-pipeline=$_CLOUDDEPLOY_PIPELINE_NAME"
+      - "--build-artifacts=/workspace/artifacts.json"
+      - "--gcs-source-staging-dir=$_SOURCE_STAGING_BUCKET/$SHORT_SHA"
+      - "--skaffold-file=skaffold.yaml"
+      - "--region=$LOCATION"
+    id: start-release-pipeline
+options:
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - 'DOCKER_CLI_EXPERIMENTAL=enabled'
+  pool:
+    name: '${_PRIVATE_POOL}'
