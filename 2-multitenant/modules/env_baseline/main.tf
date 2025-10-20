@@ -24,7 +24,7 @@ locals {
 
   subnets = { for idx, v in var.cluster_subnetworks : idx => v }
 
-  network = distinct([for idx, v in var.cluster_subnetworks : v.network_self_link])[0]
+  network = distinct([for idx, v in data.google_compute_subnetwork.default : v.network])[0]
 
   subnets_to_cidr = {
     for idx, subnet_key in keys(data.google_compute_subnetwork.default) : subnet_key => local.available_cidr_ranges[idx]

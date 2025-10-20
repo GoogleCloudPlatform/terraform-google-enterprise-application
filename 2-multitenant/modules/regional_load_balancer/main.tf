@@ -16,7 +16,7 @@
 
 resource "google_compute_subnetwork" "default" {
   name                       = "backend-subnet"
-  project                    = var.project_id
+  project                    = var.network_project_id
   ip_cidr_range              = "10.1.2.0/24"
   network                    = var.vpc_id
   private_ipv6_google_access = "DISABLE_GOOGLE_ACCESS"
@@ -27,7 +27,7 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_compute_subnetwork" "proxy_only" {
   name          = "proxy-only-subnet"
-  project       = var.project_id
+  project       = var.network_project_id
   ip_cidr_range = "10.129.0.0/23"
   network       = var.vpc_id
   purpose       = "REGIONAL_MANAGED_PROXY"
@@ -37,7 +37,7 @@ resource "google_compute_subnetwork" "proxy_only" {
 
 resource "google_compute_firewall" "default" {
   name    = "fw-allow-health-check"
-  project = var.project_id
+  project = var.network_project_id
   allow {
     protocol = "tcp"
   }
@@ -50,7 +50,7 @@ resource "google_compute_firewall" "default" {
 
 resource "google_compute_firewall" "allow_proxy" {
   name    = "fw-allow-proxies"
-  project = var.project_id
+  project = var.network_project_id
   allow {
     ports    = ["443"]
     protocol = "tcp"
@@ -137,7 +137,7 @@ resource "google_compute_instance_group_manager" "default" {
 
 resource "google_compute_address" "default" {
   name         = "address-name"
-  project      = var.project_id
+  project      = var.network_project_id
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
   region       = var.region

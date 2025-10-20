@@ -13,17 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-data "google_compute_network" "network" {
-  project = var.network_project_id
-  name    = regex(local.projects_re, local.network)[0]
-}
-
 module "regional_load_balancer" {
   source   = "../regional_load_balancer"
   for_each = var.create_regional_loadbalancer ? local.subnets : {}
 
-  vpc_id             = data.google_compute_network.network.id
+  vpc_id             = local.network
   project_id         = local.cluster_project_id
   network_project_id = var.network_project_id
   region             = data.google_compute_subnetwork.default[each.key].region
