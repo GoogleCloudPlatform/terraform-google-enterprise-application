@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-variable "vpc_id" {
-  description = "The VPC ID to be used."
-  type        = string
+data "google_compute_network" "network" {
+  project = var.network_project_id
+  name    = regex(local.projects_re, local.network)[0]
 }
 
-variable "project_id" {
-  description = "The project to where the VPC is hosted."
-  type        = string
-}
+module "regional_load_balancer" {
+  source   = "../modules/regional_load_balancer"
+  for_each = var.create_regional_loadbalancer ? local.subnets : {}
 
-variable "region" {
-  description = "The region where the regional load balancer will be configured."
-  type        = string
+  vpc_id             = data.google_compute_network.network.id
+  project_id         = local.cluster_project_id
+  network_project_id = var.network_project_id
+  region             = data.google_compute_subnetwork.default[each.key].region
 }

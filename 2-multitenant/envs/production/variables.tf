@@ -79,3 +79,9 @@ variable "deletion_protection" {
   description = "Whether or not to allow Terraform to destroy the cluster."
   default     = true
 }
+
+variable "create_regional_loadbalancer" {
+  type        = bool
+  description = "Enable Regional Load Balancer infra in the cluster project."
+  default     = false
+}

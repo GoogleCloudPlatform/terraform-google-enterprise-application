@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 resource "google_compute_subnetwork" "default" {
   name                       = "backend-subnet"
   project                    = var.project_id

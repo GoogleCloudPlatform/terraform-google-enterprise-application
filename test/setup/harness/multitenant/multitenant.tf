@@ -190,12 +190,3 @@ module "cluster_vpc" {
       },
   ] } : {})
 }
-
-module "regional_load_balancer" {
-  source   = "../../modules/regional_load_balancer"
-  for_each = var.agent ? module.cluster_vpc : {}
-
-  vpc_id     = each.value.network_id
-  project_id = each.value.project_id
-  region     = "us-central1"
-}
