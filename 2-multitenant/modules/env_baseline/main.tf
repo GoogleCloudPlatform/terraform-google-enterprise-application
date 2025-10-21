@@ -113,6 +113,13 @@ module "eab_cluster_project" {
     "sqladmin.googleapis.com",
     "trafficdirector.googleapis.com",
   ]
+
+  activate_api_identities = [
+    {
+      api   = "networkservices.googleapis.com",
+      roles = []
+    }
+  ]
 }
 
 data "google_project" "eab_cluster_project" {
@@ -216,11 +223,19 @@ resource "google_project_iam_member" "artifactregistry_reader" {
   member  = each.value
 }
 
+
+
+resource "google_project_service_identity" "network_services_sa" {
+  provider = google-beta
+  project  = local.cluster_project_id
+  service  = "networkservices.googleapis.com"
+}
+
 resource "google_project_iam_member" "model_armor_service_network_extension_roles" {
   for_each = toset(["roles/container.admin", "roles/modelarmor.calloutUser", "roles/serviceusage.serviceUsageConsumer", "roles/modelarmor.user"])
   project  = data.google_project.eab_cluster_project.project_id
   role     = each.value
-  member   = "serviceAccount:service-${data.google_project.eab_cluster_project.number}@gcp-sa-dep.iam.gserviceaccount.com"
+  member   = google_project_service_identity.network_services_sa.member
 }
 
 module "gke-standard" {

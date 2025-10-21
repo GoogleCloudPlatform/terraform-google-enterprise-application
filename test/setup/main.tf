@@ -54,11 +54,11 @@ module "seed_project" {
 
   activate_apis = [
     "accesscontextmanager.googleapis.com",
-    "artifactregistry.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
+    "anthospolicycontroller.googleapis.com",
     "apikeys.googleapis.com",
-    "binaryauthorization.googleapis.com",
+    "artifactregistry.googleapis.com",
     "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -76,10 +76,12 @@ module "seed_project" {
     "iam.googleapis.com",
     "iap.googleapis.com",
     "mesh.googleapis.com",
+    "modelarmor.googleapis.com",
     "monitoring.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
     "networkmanagement.googleapis.com",
+    "networkservices.googleapis.com",
     "orgpolicy.googleapis.com",
     "secretmanager.googleapis.com",
     "servicedirectory.googleapis.com",
@@ -130,6 +132,10 @@ module "seed_project" {
     },
     {
       api   = "storage.googleapis.com",
+      roles = []
+    },
+    {
+      api   = "networkservices.googleapis.com",
       roles = []
     }
   ]
