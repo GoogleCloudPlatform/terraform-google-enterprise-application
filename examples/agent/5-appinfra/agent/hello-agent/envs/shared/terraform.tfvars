@@ -25,9 +25,9 @@ environment_names = ["development", "nonproduction", "production"]
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"
   repositories = {
-    "eab-agent-example-hello-agent" = {
-      repository_name = "eab-agent-example-hello-agent"
-      repository_url  = "https://gitlab.com/user/eab-agent-example-hello-agent.git"
+    "eab-agent-hello-agent" = {
+      repository_name = "eab-agent-hello-agent"
+      repository_url  = "https://gitlab.com/user/eab-agent-hello-agent.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME

@@ -1,8 +1,8 @@
 applications = {
-  "agt" = {
-    "agent" = {
-      create_infra_project = true
-      create_admin_project = false
+  "agent" = {
+    "hello-agent" = {
+      create_infra_project = false
+      create_admin_project = true
     }
   }
 }
@@ -10,9 +10,9 @@ applications = {
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"
   repositories = {
-    agent = {
-      repository_name = "agent-i-r"
-      repository_url  = "https://gitlab.com/user/agent-i-r.git"
+    hello-agent = {
+      repository_name = "hello-agent-i-r"
+      repository_url  = "https://gitlab.com/user/hello-agent-i-r.git"
     },
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
