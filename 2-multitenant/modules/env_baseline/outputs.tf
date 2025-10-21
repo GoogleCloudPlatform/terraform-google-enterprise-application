@@ -38,12 +38,10 @@ output "cluster_names" {
 output "cluster_project_id" {
   description = "Cluster Project ID."
   value       = data.google_project.eab_cluster_project.project_id
-
-  depends_on = [module.gke-standard, module.gke-autopilot]
 }
 
 output "cluster_project_number" {
-  description = "Cluster Project ID."
+  description = "Cluster Project Number."
   value       = data.google_project.eab_cluster_project.number
 }
 

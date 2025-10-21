@@ -218,9 +218,9 @@ resource "google_project_iam_member" "artifactregistry_reader" {
 
 resource "google_project_iam_member" "model_armor_service_network_extension_roles" {
   for_each = toset(["roles/container.admin", "roles/modelarmor.calloutUser", "roles/serviceusage.serviceUsageConsumer", "roles/modelarmor.user"])
-  project = data.google_project.eab_cluster_project.project_id
-  role    = each.value
-  member  = "serviceAccount:service-${data.google_project.eab_cluster_project.number}@gcp-sa-dep.iam.gserviceaccount.com"
+  project  = data.google_project.eab_cluster_project.project_id
+  role     = each.value
+  member   = "serviceAccount:service-${data.google_project.eab_cluster_project.number}@gcp-sa-dep.iam.gserviceaccount.com"
 }
 
 module "gke-standard" {
