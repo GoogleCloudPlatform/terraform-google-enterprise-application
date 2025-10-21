@@ -136,6 +136,7 @@ type GlobalTFVars struct {
 	OrgID                                   string                                   `hcl:"org_id"`
 	Apps                                    map[string]App                           `hcl:"apps"`
 	DeletionProtection                      bool                                     `hcl:"deletion_protection"`
+	CreateRegionalLoadBalancer              *bool                                    `hcl:"create_regional_loadbalancer"`
 	NamespaceIDs                            map[string]string                        `hcl:"namespace_ids"`
 	ConfigSyncSecretType                    *string                                  `hcl:"config_sync_secret_type"`
 	ConfigSyncRepositoryURL                 *string                                  `hcl:"config_sync_repository_url"`
@@ -145,7 +146,8 @@ type GlobalTFVars struct {
 	AttestationKMSKey                       *string                                  `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
 	EnableKueue                             *bool                                    `hcl:"enable_kueue"`
-	EnableMulticlusterDiscovry              *bool                                    `hcl:"enable_multicluster_discovery"`
+	EnableMulticlusterDiscovery             *bool                                    `hcl:"enable_multicluster_discovery"`
+	EnableInferenceGateway                  *bool                                    `hcl:"enable_inference_gateway"`
 	BillingAccount                          string                                   `hcl:"billing_account"`
 	Applications                            map[string]map[string]ApplicationService `hcl:"applications"`
 	InfraProjectAPIs                        *[]string                                `hcl:"infra_project_apis"`
@@ -232,20 +234,22 @@ type MultiTenantTfvars struct {
 	CBPrivateWorkerpoolProjectID string         `hcl:"cb_private_workerpool_project_id"`
 	AccessLevelName              *string        `hcl:"access_level_name"`
 	DeletionProtection           bool           `hcl:"deletion_protection"`
+	CreateRegionalLoadBalancer   *bool          `hcl:"create_regional_loadbalancer"`
 }
 
 type FleetscopeTfvars struct {
-	NamespaceIDs               map[string]string `hcl:"namespace_ids"`
-	RemoteStateBucket          string            `hcl:"remote_state_bucket"`
-	ConfigSyncSecretType       *string           `hcl:"config_sync_secret_type"`
-	ConfigSyncRepositoryURL    *string           `hcl:"config_sync_repository_url"`
-	DisableIstioOnNamespaces   []string          `hcl:"disable_istio_on_namespaces"`
-	ConfigSyncPolicyDir        *string           `hcl:"config_sync_policy_dir"`
-	ConfigSyncBranch           *string           `hcl:"config_sync_branch"`
-	AttestationKMSKey          *string           `hcl:"attestation_kms_key"`
-	AttestationEvaluationMode  string            `hcl:"attestation_evaluation_mode"`
-	EnableKueue                *bool             `hcl:"enable_kueue"`
-	EnableMulticlusterDiscovry *bool             `hcl:"enable_multicluster_discovery"`
+	NamespaceIDs                map[string]string `hcl:"namespace_ids"`
+	RemoteStateBucket           string            `hcl:"remote_state_bucket"`
+	ConfigSyncSecretType        *string           `hcl:"config_sync_secret_type"`
+	ConfigSyncRepositoryURL     *string           `hcl:"config_sync_repository_url"`
+	DisableIstioOnNamespaces    []string          `hcl:"disable_istio_on_namespaces"`
+	ConfigSyncPolicyDir         *string           `hcl:"config_sync_policy_dir"`
+	ConfigSyncBranch            *string           `hcl:"config_sync_branch"`
+	AttestationKMSKey           *string           `hcl:"attestation_kms_key"`
+	AttestationEvaluationMode   string            `hcl:"attestation_evaluation_mode"`
+	EnableKueue                 *bool             `hcl:"enable_kueue"`
+	EnableMulticlusterDiscovery *bool             `hcl:"enable_multicluster_discovery"`
+	EnableInferenceGateway      *bool             `hcl:"enable_inference_gateway"`
 }
 
 type AppFactoryTfvars struct {
