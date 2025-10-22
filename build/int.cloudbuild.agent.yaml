@@ -354,9 +354,11 @@ options:
     - "TF_VAR_service_perimeter_mode=ENFORCE"
     - "TF_VAR_deletion_protection=false"
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
-    - "TF_VAR_enable_kueue=true"
-    - 'INSTALL_KUEUE=true'
+    - "TF_VAR_enable_kueue=false"
+    - 'INSTALL_KUEUE=false'
     - "TF_VAR_single_project=false"
     - "TF_VAR_hpc=false"
     - "TF_VAR_agent=true"
     - "TF_VAR_enable_inference_gateway=true"
+    - "TF_VAR_create_regional_loadbalancer=true"
+    - "TF_VAR_enable_multicluster_discovery=false"

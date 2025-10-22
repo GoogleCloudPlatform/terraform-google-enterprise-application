@@ -119,7 +119,7 @@ module "eab_cluster_project" {
   activate_api_identities = [
     {
       api   = "networkservices.googleapis.com",
-      roles = ["roles/networkactions.serviceAgent"]
+      roles = []
     }
   ]
 }
