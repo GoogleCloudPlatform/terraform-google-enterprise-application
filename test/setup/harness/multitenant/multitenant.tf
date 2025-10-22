@@ -126,6 +126,9 @@ module "vpc_project" {
     "containeranalysis.googleapis.com",
     "containerscanning.googleapis.com",
     "iam.googleapis.com",
+    "networkmanagement.googleapis.com",
+    "networkservices.googleapis.com",
+    "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
   ]
