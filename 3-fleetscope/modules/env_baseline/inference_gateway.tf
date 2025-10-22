@@ -20,7 +20,7 @@ module "inference_gateway" {
 
   source = "../private_install_manifest"
   // file only exists in main branch
-  url                      = "https://github.com/GoogleCloudPlatform/gke-gateway-api/tree/main/config/crd/networking.gke.io_gcptrafficextensions.yaml"
+  url                      = "https://raw.githubusercontent.com/GoogleCloudPlatform/gke-gateway-api/refs/heads/main/config/crd/networking.gke.io_gcptrafficextensions.yaml"
   project_id               = regex(local.fleet_membership_regex, each.value)[0]
   region                   = regex(local.fleet_membership_regex, each.value)[1]
   k8s_registry             = "registry.k8s.io"
