@@ -1,0 +1,42 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: capital-agent-gateway # Name for your Gateway resource
+  # Ensure this namespace matches where your InferencePool/HTTPRoute will be
+  namespace: default # Or <YOUR_APP_NAMESPACE>
+spec:
+  # This GatewayClass creates a Regional External Application Load Balancer.
+  # Use 'gke-l7-global-external-managed' for a Global External ALB.
+  # Use 'gke-l7-regional-internal-managed' for a Regional Internal ALB.
+  gatewayClassName: gke-l7-regional-external-managed
+  listeners:
+    - name: http # A name for this listener
+      protocol: HTTP # Use HTTPS for TLS/SSL
+      port: 8080       # Use 443 for HTTPS
+      allowedRoutes:
+        namespaces:
+          # Security best practice: Only allow HTTPRoutes from the same namespace
+          # where this Gateway resides to attach.
+          from: Same
+      # --- Optional: Add TLS Configuration for HTTPS ---
+      # If protocol is HTTPS, uncomment and configure this section:
+      # tls:
+      #   mode: Terminate # Terminate TLS at the Load Balancer
+      #   certificateRefs:
+      #     - kind: Secret
+      #       name: <YOUR_TLS_SECRET_NAME> # K8s Secret containing your TLS cert and key
+      # -----------------------------------------------

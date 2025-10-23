@@ -1,0 +1,26 @@
+# rootsync-helm-gke-inference-gw.yaml
+apiVersion: configsync.gke.io/v1beta1
+kind: RootSync
+metadata:
+  name: helm-gke-inference-gateway # Name for this sync configuration
+  namespace: config-management-system # Standard namespace for RootSync
+spec:
+  # Specify Helm as the source type
+  sourceType: helm
+  helm:
+    # URL of the Helm repository containing the chart
+    repo: https://packages.cloud.google.com/apt/doc/apt-key.gpg # Use the correct GKE Inference Gateway repo URL
+    # Name of the chart in the repository
+    chart: inference-gateway # Use the correct chart name
+    # Specific version of the chart to install and sync
+    version: 0.1.0  # e.g., "0.1.0" - IMPORTANT: Pin the version
+    # Target namespace for the Helm release resources
+    namespace: gateway-system # Namespace where inference gateway should be installed
+    # Authentication type to access the repository (if needed)
+    # 'none' for public repos, 'gcenode'/'gcpserviceaccount' for private Artifact Registry repos
+    auth: none
+    # Optional: Specify custom values
+    # values:
+    #   someParameter: someValue
+    # Or reference a values file stored elsewhere (e.g., in another Git repo synced by ACM)
+    # valuesFile: /path/to/values.yaml
