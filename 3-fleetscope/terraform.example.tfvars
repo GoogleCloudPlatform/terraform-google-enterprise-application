@@ -26,7 +26,7 @@ attestation_kms_key = "projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/K
 
 config_sync_secret_type = "token"
 
-config_sync_repository_url = "https://github.com/<GITHUB-OWNER or ORGANIZATION/eab-fleetscope.git"
+config_sync_repository_url = "https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-fleetscope.git"
 
 config_sync_branch = "production"
 

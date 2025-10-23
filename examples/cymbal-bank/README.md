@@ -28,7 +28,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 ```
 
 #### Add Cymbal Bank App at Multitenant repository
-1. Navigate to Multitenant repository and add the Cymbal Bank app at `terraform.tfvars` if it was not created before:
+1. Navigate to Multitenant repository and add the Cymbal Bank app in `terraform.tfvars`, if it was not added before:
 
    ```hcl
     "cymbal-bank" : {
@@ -96,7 +96,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 
 #### Add Cymbal Bank envs at App Factory
 
-1. Navigate to App Factory repository and add the Cymbal Bank application at `terraform.tfvars` if it was not created:
+1. Navigate to App Factory repository and add the Cymbal Bank application in `terraform.tfvars`, if it was not previously added:
 
     ```hcl
     applications = {
@@ -129,7 +129,7 @@ The steps below assume that you are checked out on the same level as `terraform-
     }
     ```
 
-1. Navigate to App Factory repository and update `cloudbuildv2_repository_config` at `terraform.tfvars` with cymbal-bank repositories if it was not updated:
+1. Navigate to App Factory repository and update `cloudbuildv2_repository_config` in `terraform.tfvars` to include the cymbal-bank repositories if it was not previously updated:
 
     ```hcl
     repositories = {
