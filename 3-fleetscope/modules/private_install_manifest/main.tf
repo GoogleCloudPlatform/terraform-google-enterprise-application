@@ -79,7 +79,7 @@ resource "google_artifact_registry_vpcsc_config" "vpcsc_config" {
 
 module "kubectl" {
   source  = "terraform-google-modules/gcloud/google//modules/kubectl-fleet-wrapper"
-  version = "~> 3.5"
+  version = "~> 4.0"
 
   skip_download = true
   create_cmd_triggers = {

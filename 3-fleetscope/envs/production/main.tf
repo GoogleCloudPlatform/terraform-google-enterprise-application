@@ -38,7 +38,6 @@ module "env" {
 
   enable_kueue = var.enable_kueue
 
-  enable_inference_gateway      = var.enable_inference_gateway
   enable_multicluster_discovery = var.enable_multicluster_discovery
 
   disable_istio_on_namespaces = var.disable_istio_on_namespaces

@@ -9,7 +9,7 @@ spec:
   sourceType: helm
   helm:
     # URL of the Helm repository containing the chart
-    repo: https://packages.cloud.google.com/apt/doc/apt-key.gpg # Use the correct GKE Inference Gateway repo URL
+    repo: oci://us-docker.pkg.dev/google-gateways/gateways # Use the correct GKE Inference Gateway repo URL
     # Name of the chart in the repository
     chart: inference-gateway # Use the correct chart name
     # Specific version of the chart to install and sync
