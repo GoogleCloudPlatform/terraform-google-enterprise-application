@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: gateway.gke.io/v1alpha1
+apiVersion: inference.networking.x-k8s.io/v1alpha2
 kind: InferenceObjective
 metadata:
   # Give your objective a descriptive name
   name: capital-agent-default-priority
   # Ensure this matches the namespace of your InferencePool and Pod
-  namespace: # default
+  namespace: default # default
 spec:
   # Assign a priority level (higher value means higher priority)
   # This value helps the Inference Gateway prioritize requests if resources are limited.
@@ -26,7 +26,6 @@ spec:
   priority: 10 # Example priority value
   poolRef:
     # This must point to the InferencePool resource you created
-    group: gateway.gke.io
-    kind: InferencePool
+    group: "inference.networking.k8s.io"
     # Make sure this name matches your actual InferencePool resource name
     name: capital-agent-pool

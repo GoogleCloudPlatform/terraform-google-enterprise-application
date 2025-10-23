@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: gateway.gke.io/v1alpha1
+apiVersion: inference.networking.k8s.io/v1
 kind: InferencePool
 metadata:
   name: capital-agent-pool # Name for your Inference Pool
@@ -21,9 +21,9 @@ metadata:
 spec:
   # This selector MUST match the labels defined in your capital-agent Deployment's pod template
   selector:
-    matchLabels:
-      app: capital-agent-server # This label connects the pool to the pods
+    app: capital-agent-server # This label connects the pool to the pods
   # This is the port your container is listening on (defined in the Deployment and Dockerfile)
-  targetPortNumber: 8080
+  targetPorts:
+    - number: 8080
   # Note: The 'extensionRef' for an Endpoint Picker is omitted for simplicity.
   # This defaults to round-robin load balancing across the pods in the pool.
