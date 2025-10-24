@@ -17,6 +17,7 @@ package agent
 import (
 	"errors"
 	"fmt"
+	"log"
 	"slices"
 	"strings"
 	"testing"
@@ -28,6 +29,8 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/stretchr/testify/assert"
+
+	"os"
 
 	cp "github.com/otiai10/copy"
 )
@@ -59,6 +62,8 @@ func TestSourceAgent(t *testing.T) {
 	serviceName := "hello-agent"
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
 
+	fmt.Println(appSourcePath)
+
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
 	projectID := appFactory.GetJsonOutput("app-group").Get("agent\\.hello-agent.app_admin_project_id").String()
@@ -87,7 +92,7 @@ func TestSourceAgent(t *testing.T) {
 
 		appsource.DefineVerify(func(assert *assert.Assertions) {
 
-			// Push cymbal bank app source code
+			// Push agent app source code
 			gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
 			gitAppRun := func(args ...string) {
 				_, err := gitApp.RunCmdE(args...)
@@ -105,12 +110,30 @@ func TestSourceAgent(t *testing.T) {
 			gitAppRun("remote", "add", "google", appRepo)
 
 			// copy contents from 6-appsource to the cloned repository
-			err := cp.Copy(appSourcePath, tmpDirApp)
+			err = cp.Copy(appSourcePath, tmpDirApp)
 			if err != nil {
 				t.Fatal(err)
 			}
+			for _, envName := range testutils.EnvNames(t) {
+				modelArmorTemplateID := appInfra.GetJsonOutput("model_armor").Get(envName).String()
+				trafficFile := fmt.Sprintf("%s/%s-traffic.yaml", tmpDirApp, envName)
+				// Read the file content
+				content, err := os.ReadFile(trafficFile)
+				if err != nil {
+					log.Fatalf("Error reading file: %v", err)
+				}
 
-			gitAppRun("add", ".")
+				fmt.Println(appInfra.GetJsonOutput("model_armor").String())
+				// Convert content to string and perform replacement
+				modifiedContent := strings.ReplaceAll(string(content), "{MODEL_ARMOR_TEMPLATE_ID}", modelArmorTemplateID)
+				// Write the modified content back to the file
+				err = os.WriteFile(trafficFile, []byte(modifiedContent), 0644)
+				if err != nil {
+					log.Fatalf("Error writing file: %v", err)
+				}
+			}
+
+			gitApp.AddAll()
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 			gitAppRun("push", "google", "main", "--force")
 
@@ -199,5 +222,4 @@ func TestSourceAgent(t *testing.T) {
 		})
 		appsource.Test()
 	})
-
 }

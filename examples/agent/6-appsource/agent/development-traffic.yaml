@@ -41,7 +41,6 @@ spec:
           model_armor_settings: '[
             {
               "model": "meta-llama/Llama-3.1-8B-Instruct",
-              "model_response_template_id": "projects/PROJECT_ID/locations/LOCATION/templates/RESPONSE_TEMPLATE",
-              "user_prompt_template_id": "projects/PROJECT_ID/locations/LOCATION/templates/PROMPT_TEMPLATE"
+              "model_response_template_id": "{MODEL_ARMOR_TEMPLATE_ID}",
             }
           ]'

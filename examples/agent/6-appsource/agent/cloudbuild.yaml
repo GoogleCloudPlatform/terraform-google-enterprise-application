@@ -32,16 +32,16 @@ steps:
         install skaffold /usr/local/bin/
         skaffold build --file-output=/workspace/artifacts.json --default-repo=$_CONTAINER_REGISTRY --cache-artifacts=false
     id: build-multi-arch-image
-#  - id: 'create-attestation'
-#    name: '$_BINARY_AUTH_IMAGE'
-#    args:
-#      - '--artifact-url'
-#      - '$_CONTAINER_REGISTRY/skaffold-example:$COMMIT_SHA-dirty'
-#      - '--attestor'
-#
-#      - '$_ATTESTOR_ID'
-#      - '--keyversion'
-#      - '$_KMS_KEY_VERSION'
+  - id: 'create-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    args:
+      - '--artifact-url'
+      - '$_CONTAINER_REGISTRY/skaffold-example:$COMMIT_SHA-dirty'
+      - '--attestor'
+
+      - '$_ATTESTOR_ID'
+      - '--keyversion'
+      - '$_KMS_KEY_VERSION'
   - name: gcr.io/cloud-builders/gcloud
     args:
       - "deploy"
