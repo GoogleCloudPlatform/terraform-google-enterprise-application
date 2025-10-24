@@ -31,6 +31,18 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
+func renameWorkerPoolFile(t *testing.T) {
+	tf_file_old := "../../../4-appfactory/modules/app-group-baseline/additional_workerpool_permissions.tf.example"
+	tf_file_new := "../../../4-appfactory/modules/app-group-baseline/additional_workerpool_permissions.tf"
+	// if file does not exist, create it by renaming
+	if _, err := os.Stat(tf_file_new); err != nil {
+		err = os.Rename(tf_file_old, tf_file_new)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 func TestAgentAppfactory(t *testing.T) {
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -70,6 +82,9 @@ func TestAgentAppfactory(t *testing.T) {
 		"common_folder_id":       multitenantHarness.GetStringOutput("common_folder_id"),
 		"envs":                   multitenantHarness.GetJsonOutput("envs").Map(),
 	}
+
+	// Apply additional permissions required to use workerpools on 4-appfactory
+	renameWorkerPoolFile(t)
 
 	appFactoryPath := "../../../4-appfactory/envs/shared"
 

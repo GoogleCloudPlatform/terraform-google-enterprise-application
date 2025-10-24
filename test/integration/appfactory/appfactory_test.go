@@ -63,10 +63,10 @@ func TestAppfactory(t *testing.T) {
 		tft.WithTFDir(loggingHarnessPath),
 	)
 
-err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
-if err != nil {
-	t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-}
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
