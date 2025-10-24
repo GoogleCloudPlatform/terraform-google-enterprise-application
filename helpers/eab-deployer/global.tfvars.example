@@ -151,6 +151,7 @@ namespace_ids = {
 attestation_evaluation_mode = "ALWAYS_ALLOW"
 attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME" // KMS Attestation key ID to be used by binary authorization - OPTIONAL - use `null` is not configuring it
 enable_kueue                = false
+enable_inference_gateway    = false //install gcp traffic extensions on cluster
 
 //Config sync configuration
 config_sync_branch          = null // Config sync branch - OPTIONAL

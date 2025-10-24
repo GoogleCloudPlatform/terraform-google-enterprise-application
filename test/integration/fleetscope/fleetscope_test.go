@@ -103,7 +103,7 @@ func TestFleetscope(t *testing.T) {
 
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
-			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_enable_inference_gateway")) == "true"
+			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
 
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			if enableInferenceGateway {
@@ -132,39 +132,6 @@ func TestFleetscope(t *testing.T) {
 				tft.WithBackendConfig(backendConfig),
 				tft.WithParallelism(3),
 			)
-
-			fleetscope.DefineApply(func(assert *assert.Assertions) {
-				fleetscope.DefaultApply(assert)
-
-				// push config sync code
-				// tmpDirApp := t.TempDir()
-				// gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
-				// gitAppRun := func(args ...string) {
-				// 	_, err := gitApp.RunCmdE(args...)
-				// 	if err != nil {
-				// 		t.Fatal(err)
-				// 	}
-				// }
-
-				// appRepo :=
-				// 	gitAppRun("init", tmpDirApp)
-				// gitAppRun("config", "user.email", "eab-robot@example.com")
-				// gitAppRun("config", "user.name", "EAB Robot")
-				// gitAppRun("config", "init.defaultBranch", "main")
-				// gitAppRun("config", "http.postBuffer", "157286400")
-				// gitAppRun("checkout", "-b", "main")
-				// gitAppRun("remote", "add", "google", appRepo)
-
-				// // copy contents from examples/app/fleetscope/configsync to the cloned repository
-				// err := cp.Copy(configSyncPath, tmpDirApp)
-				// if err != nil {
-				// 	t.Fatal(err)
-				// }
-
-				// gitAppRun("add", ".")
-				// gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
-				// gitAppRun("push", "google", "main", "--force")
-			})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
@@ -225,13 +192,19 @@ func TestFleetscope(t *testing.T) {
 					membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
 				}
 				// GKE Feature
-				for _, feature := range []string{
+				features := []string{
 					"configmanagement",
 					"servicemesh",
-					"multiclusteringress",
-					"multiclusterservicediscovery",
 					"policycontroller",
-				} {
+				}
+
+				if strings.ToLower(os.Getenv("enable_multicluster_discovery")) == "true" {
+					features = append(features, []string{
+						"multiclusteringress",
+						"multiclusterservicediscovery"}...)
+				}
+
+				for _, feature := range features {
 					gkeFeatureOp := gcloud.Runf(t, "container hub features describe %s --project %s", feature, clusterProjectID)
 					assert.Equal("ACTIVE", gkeFeatureOp.Get("resourceState.state").String(), fmt.Sprintf("Hub Feature %s should have resource state equal to ACTIVE", feature))
 

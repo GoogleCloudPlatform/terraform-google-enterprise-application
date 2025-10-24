@@ -185,6 +185,7 @@ func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 		AttestationEvaluationMode:   tfvars.AttestationEvaluationMode,
 		EnableKueue:                 tfvars.EnableKueue,
 		EnableMulticlusterDiscovery: tfvars.EnableMulticlusterDiscovery,
+		EnableInferenceGateway:      tfvars.EnableInferenceGateway,
 	}
 	err := utils.WriteTfvars(filepath.Join(c.EABPath, FleetscopeStep, "terraform.tfvars"), fleetscopeTfvars)
 	if err != nil {

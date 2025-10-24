@@ -1,0 +1,33 @@
+kind: GCPTrafficExtension
+metadata:
+  name: traffic-ext
+spec:
+  targetRefs:
+  - group: "gateway.networking.k8s.io"
+    kind: Gateway
+    name: inference-gateway
+  extensionChains:
+  - name: "chain1-model-armor"
+    matchCondition:
+      celExpressions:
+      - celMatcher: 'request.path == "/v1/chat/completions"'
+      extensions:
+      - name: extension-chain-1-model-armor
+        googleAPIServiceName: modelarmor.us-central1.rep.googleapis.com
+        failOpen: true
+        supportedEvents:
+        - RequestHeaders
+        - RequestBody
+        - RequestTrailers
+        - ResponseHeaders
+        - ResponseBody
+        - ResponseTrailers
+        timeout: 1s
+        metadata:
+          model_armor_settings: '[
+            {
+              "model": "MODEL_NAME",
+              "model_response_template_id": "projects/PROJECT_ID/locations/LOCATION/templates/RESPONSE_TEMPLATE",
+              "user_prompt_template_id": "projects/PROJECT_ID/locations/LOCATION/templates/PROMPT_TEMPLATE"
+            }
+          ]'

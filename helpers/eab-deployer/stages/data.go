@@ -147,6 +147,7 @@ type GlobalTFVars struct {
 	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
 	EnableKueue                             *bool                                    `hcl:"enable_kueue"`
 	EnableMulticlusterDiscovery             *bool                                    `hcl:"enable_multicluster_discovery"`
+	EnableInferenceGateway                  *bool                                    `hcl:"enable_inference_gateway"`
 	BillingAccount                          string                                   `hcl:"billing_account"`
 	Applications                            map[string]map[string]ApplicationService `hcl:"applications"`
 	InfraProjectAPIs                        *[]string                                `hcl:"infra_project_apis"`
@@ -248,6 +249,7 @@ type FleetscopeTfvars struct {
 	AttestationEvaluationMode   string            `hcl:"attestation_evaluation_mode"`
 	EnableKueue                 *bool             `hcl:"enable_kueue"`
 	EnableMulticlusterDiscovery *bool             `hcl:"enable_multicluster_discovery"`
+	EnableInferenceGateway      *bool             `hcl:"enable_inference_gateway"`
 }
 
 type AppFactoryTfvars struct {

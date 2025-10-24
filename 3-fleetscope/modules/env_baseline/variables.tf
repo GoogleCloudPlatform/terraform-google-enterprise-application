@@ -129,3 +129,9 @@ variable "enable_multicluster_discovery" {
   description = "Enables Multicluster discovery."
   default     = true
 }
+
+variable "enable_inference_gateway" {
+  type        = bool
+  description = "Enables Inference Gateway on Cluster."
+  default     = false
+}

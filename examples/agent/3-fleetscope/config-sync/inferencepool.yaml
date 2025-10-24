@@ -21,9 +21,27 @@ metadata:
 spec:
   # This selector MUST match the labels defined in your capital-agent Deployment's pod template
   selector:
-    app: capital-agent-server # This label connects the pool to the pods
+    matchLabels:
+      app: captial-agent-server # This label connects the pool to the pods
   # This is the port your container is listening on (defined in the Deployment and Dockerfile)
   targetPorts:
-    - number: 8080
+      - number: 8080
   # Note: The 'extensionRef' for an Endpoint Picker is omitted for simplicity.
   # This defaults to round-robin load balancing across the pods in the pool.
+  # --- Required: Endpoint Picker Extension Reference ---
+  # This section is REQUIRED by the CRD validation on your cluster.
+  endpointPickerRef:
+    # group: "" # Optional field: Defaults to "" (core API group)
+    # kind: Service # Optional field: Defaults to "Service"
+
+    # Required: Name of the EPP's Kubernetes Service
+    # Use a placeholder if you haven't deployed an EPP yet.
+    name: capital-agent-epp-service-placeholder
+
+    # Required if kind is Service: Port the EPP Service listens on
+    # Use a placeholder port if you haven't deployed an EPP yet.
+    port:
+      number: 9002 # PortNumber must be between 1 and 65535
+
+    # Optional field: How to handle EPP failure. Defaults to "FailClose".
+    # failureMode: FailClose # Options: FailClose, FailOpen
