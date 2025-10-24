@@ -294,7 +294,7 @@ func TestSourceCymbalBank(t *testing.T) {
 							t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
 							if strings.Contains(logs, "Insufficient memory") || strings.Contains(logs, "Insufficient CPU") {
 								t.Logf("Re-trying rollout due to Cluster scalling.")
-								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase=stable", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName))
+								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName))
 								return true, nil
 							}
 							return false, fmt.Errorf("Rollout %s.", latestRolloutState)
