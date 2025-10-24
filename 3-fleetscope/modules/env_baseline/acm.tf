@@ -15,7 +15,7 @@
  */
 
 locals {
-  cluster_membership_ids = { for k, v in var.cluster_membership_ids : k => v }
+  cluster_membership_ids = { for k, v in distinct(var.cluster_membership_ids) : k => v }
   use_csr                = var.config_sync_secret_type == "gcpserviceaccount"
 }
 
