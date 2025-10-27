@@ -26,22 +26,22 @@ spec:
     matchCondition:
       celExpressions:
       - celMatcher: 'request.path == "/v1/chat/completions"'
-      extensions:
-      - name: extension-chain-1-model-armor
-        googleAPIServiceName: modelarmor.us-central1.rep.googleapis.com
-        failOpen: true
-        supportedEvents:
-        - RequestHeaders
-        - RequestBody
-        - RequestTrailers
-        - ResponseHeaders
-        - ResponseBody
-        - ResponseTrailers
-        timeout: 1s
-        metadata:
-          model_armor_settings: '[
-            {
-              "model": "meta-llama/Llama-3.1-8B-Instruct",
-              "model_response_template_id": "{MODEL_ARMOR_TEMPLATE_ID}",
-            }
-          ]'
+    extensions:
+    - name: extension-chain-1-model-armor
+      googleAPIServiceName: modelarmor.us-central1.rep.googleapis.com
+      failOpen: true
+      supportedEvents:
+      - RequestHeaders
+      - RequestBody
+      - RequestTrailers
+      - ResponseHeaders
+      - ResponseBody
+      - ResponseTrailers
+      timeout: 1s
+      metadata:
+        model_armor_settings: '[
+          {
+            "model": "meta-llama/Llama-3.1-8B-Instruct",
+            "model_response_template_id": "{MODEL_ARMOR_TEMPLATE_ID}",
+          }
+        ]'
