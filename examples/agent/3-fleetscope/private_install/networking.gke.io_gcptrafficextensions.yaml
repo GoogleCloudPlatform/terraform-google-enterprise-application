@@ -16,9 +16,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    configsync.gke.io/ignore-fields: |
-      metadata.annotations
-      metadata.labels
     controller-gen.kubebuilder.io/version: v0.15.0
   labels:
     gateway.networking.k8s.io/policy: "true"
