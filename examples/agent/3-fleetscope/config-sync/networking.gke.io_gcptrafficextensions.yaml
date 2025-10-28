@@ -17,6 +17,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+    configmanagement.gke.io/managed: enabled
   labels:
     gateway.networking.k8s.io/policy: "true"
   name: gcptrafficextensions.networking.gke.io
