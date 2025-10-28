@@ -15,7 +15,8 @@
  */
 
 locals {
-  cluster_membership_ids = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => { "cluster_membership_ids" = (state.outputs.cluster_membership_ids) } }
+  cluster_membership_ids    = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => { "cluster_membership_ids" = (state.outputs.cluster_membership_ids) } }
+  clusters_memberships_flat = flatten([for state in data.terraform_remote_state.multitenant : state.outputs.cluster_membership_ids])
   cluster_service_accounts = zipmap(
     flatten(
       [for item in data.terraform_remote_state.multitenant : keys(item.outputs.cluster_service_accounts)]
