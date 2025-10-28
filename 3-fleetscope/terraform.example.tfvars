@@ -21,3 +21,13 @@ namespace_ids = {
 }
 
 remote_state_bucket = "REMOTE_STATE_BUCKET"
+
+attestation_kms_key = "projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/KMS_KEYRING_NAME/cryptoKeys/KMS_KEY_NAME"
+
+config_sync_secret_type = "token"
+
+config_sync_repository_url = "https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-fleetscope.git"
+
+config_sync_branch = "production"
+
+config_sync_policy_dir = "envs/production"
