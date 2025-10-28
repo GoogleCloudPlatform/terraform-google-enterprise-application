@@ -91,17 +91,3 @@ module "model_armor_configuration" {
     "foo" = "bar"
   }
 }
-
-module "kubectl" {
-  for_each = toset(local.clusters_memberships_flat)
-  source   = "terraform-google-modules/gcloud/google//modules/kubectl-fleet-wrapper"
-  version  = "~> 4.0"
-
-  skip_download = true
-
-  membership_project_id   = regex(local.membership_re, each.value)[0]
-  membership_name         = regex(local.membership_re, each.value)[2]
-  membership_location     = regex(local.membership_re, each.value)[1]
-  kubectl_create_command  = "kubectl create --save-config -f ${path.module}/networking.gke.io_gcptrafficextensions.yaml"
-  kubectl_destroy_command = "timeout 300s kubectl delete -f ${path.module}/networking.gke.io_gcptrafficextensions.yaml || exit 0"
-}
