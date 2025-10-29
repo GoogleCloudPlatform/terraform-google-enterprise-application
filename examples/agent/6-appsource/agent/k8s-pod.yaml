@@ -12,19 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: getting-started
-  labels:
-    app: capital-agent-server
+  name: capital-agent-deployment
 spec:
-  runtimeClassName: gvisor
-  containers:
-  - name: getting-started
-    image: skaffold-example
-#    env:
-#     - name: "PORT"
-#       value: "8080"
-    ports:
-     - containerPort: 8080
+  replicas: 1
+  selector:
+    matchLabels:
+      app: capital-agent-server
+  template:
+    metadata:
+      labels:
+        app: capital-agent-server
+    spec:
+      runtimeClassName: gvisor
+      containers:
+      - name: capital-agent
+        image: skaffold-example
+        ports:
+         - containerPort: 8080

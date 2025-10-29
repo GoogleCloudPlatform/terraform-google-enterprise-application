@@ -171,7 +171,8 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
   access_level = var.access_level_name
   members = distinct([
     data.google_compute_default_service_account.compute_sa.member,
-    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com"
+    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@gcp-sa-dep.iam.gserviceaccount.com" //model armor api call
   ])
 }
 

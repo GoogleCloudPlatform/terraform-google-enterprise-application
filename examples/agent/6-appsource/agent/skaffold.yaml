@@ -29,17 +29,5 @@ manifests:
   - k8s-pod.yaml
 profiles:
   - name: development
-    manifests:
-      rawYaml:
-      - k8s-pod.yaml
-      - development-traffic.yaml
   - name: nonproduction
-    manifests:
-      rawYaml:
-      - k8s-pod.yaml
-      - nonproduction-traffic.yaml
   - name: production
-    manifests:
-      rawYaml:
-      - k8s-pod.yaml
-      - production-traffic.yaml

@@ -23,3 +23,13 @@ output "instance_template" {
   description = "Backend template."
   value       = google_compute_instance_template.default
 }
+
+output "backend_service_id" {
+  value       = google_compute_region_backend_service.default.id
+  description = "Default backend service ID."
+}
+
+output "forwarding_rule_id" {
+  value       = google_compute_forwarding_rule.default.id
+  description = "Default fowarding rule ID."
+}

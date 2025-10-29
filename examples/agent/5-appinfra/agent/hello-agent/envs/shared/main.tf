@@ -90,3 +90,39 @@ module "model_armor_configuration" {
     "foo" = "bar"
   }
 }
+
+resource "null_resource" "create_service_extension" {
+  for_each = local.backend_services_names
+
+  triggers = {
+    location = regex("/regions/([^/]+)/", each.value)[0]
+    project  = local.cluster_projects_id[each.key]
+    file    = data.template_file.url_map_config[each.key].rendered
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      gcloud service-extensions lb-traffic-extensions import traffic-ext \
+      --location=${self.triggers.location} \
+      --project=${self.triggers.project} \
+      --source=- <<CONFIG
+      ${data.template_file.url_map_config[each.key].rendered}
+      CONFIG
+    EOT
+  }
+}
+
+data "template_file" "url_map_config" {
+  for_each = local.backend_services_names
+  template = file("${path.module}/traffic_callout_service.yaml")
+
+  # Variáveis a serem injetadas no template YAML
+  vars = {
+    url_map_name            = "traffic_callout_service_${regex("/regions/([^/]+)/", each.value)[0]}"
+    forwarding_rule         = local.forwarding_rule_ids[each.key]
+    project_id              = local.cluster_projects_id[each.key]
+    region                  = regex("/regions/([^/]+)/", each.value)[0]
+    model_name              = "meta-llama/Llama-3.1-8B-Instruct"
+    model_armor_template_id = module.model_armor_configuration[each.key].template.id
+  }
+}

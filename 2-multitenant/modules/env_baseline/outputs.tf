@@ -91,3 +91,13 @@ output "cluster_service_accounts" {
     { for i, value in module.eab_cluster_project : "project_${var.env}_${i}" => "${value.project_number}-compute@developer.gserviceaccount.com" }
   )
 }
+
+output "backend_service_ids" {
+  description = "Backends services id on regional load balancer."
+  value       = [for i in module.regional_load_balancer : i.backend_service_id]
+}
+
+output "forwarding_rule_ids" {
+  value       = [for i in module.regional_load_balancer : i.forwarding_rule_id]
+  description = "Default fowarding rule ID."
+}

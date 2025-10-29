@@ -83,3 +83,13 @@ output "cluster_service_accounts" {
   description = "The default service accounts used for nodes, if not overridden in node_pools."
   value       = module.env.cluster_service_accounts
 }
+
+output "backend_service_ids" {
+  description = "Backends services id on regional load balancer."
+  value       = module.env.backend_service_ids
+}
+
+output "forwarding_rule_ids" {
+  description = "Default fowarding rule ID for load balancer."
+  value       = module.env.forwarding_rule_ids
+}

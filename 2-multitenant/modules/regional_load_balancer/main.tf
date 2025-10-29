@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+
+// 1051598905437@cloudservices.gserviceaccount.com
+data "google_project" "eab_cluster_project" {
+  project_id = var.project_id
+}
+
+resource "google_project_iam_member" "model_armor_service_network_extension_roles" {
+  for_each = toset(["roles/compute.networkUser"])
+  project  = var.network_project_id
+  role     = each.value
+  member   = "serviceAccount:${data.google_project.eab_cluster_project.number}@cloudservices.gserviceaccount.com"
+}
+
 resource "google_compute_subnetwork" "default" {
   name                       = "backend-subnet"
   project                    = var.network_project_id
@@ -46,6 +59,9 @@ resource "google_compute_firewall" "default" {
   priority      = 1000
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
   target_tags   = ["load-balanced-backend"]
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
 }
 
 resource "google_compute_firewall" "allow_proxy" {
@@ -68,6 +84,9 @@ resource "google_compute_firewall" "allow_proxy" {
   priority      = 1000
   source_ranges = ["10.129.0.0/23"]
   target_tags   = ["load-balanced-backend"]
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
 }
 
 resource "google_compute_instance_template" "default" {
@@ -156,6 +175,9 @@ resource "google_compute_region_health_check" "default" {
   region              = var.region
   timeout_sec         = 5
   unhealthy_threshold = 2
+  log_config {
+    enable = true
+  }
 }
 
 resource "google_compute_region_backend_service" "default" {
@@ -172,6 +194,10 @@ resource "google_compute_region_backend_service" "default" {
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
   }
+
+  log_config {
+    enable = true
+  }
 }
 
 resource "google_compute_region_url_map" "default" {
@@ -179,6 +205,7 @@ resource "google_compute_region_url_map" "default" {
   project         = var.project_id
   region          = var.region
   default_service = google_compute_region_backend_service.default.id
+
 }
 
 resource "google_compute_region_target_http_proxy" "default" {

@@ -19,6 +19,7 @@
 | acronyms | App Acronyms. |
 | app\_certificates | App Certificates. |
 | app\_ip\_addresses | App IP Addresses. |
+| backend\_service\_ids | Backends services id on regional load balancer. |
 | cluster\_membership\_ids | GKE cluster membership IDs. |
 | cluster\_names | GKE cluster names. |
 | cluster\_project\_id | Cluster Project ID. |
@@ -28,6 +29,7 @@
 | cluster\_type | Cluster type. |
 | env | Environments. |
 | fleet\_project\_id | Fleet Project ID. |
+| forwarding\_rule\_ids | Default fowarding rule ID for load balancer. |
 | network\_names | Network Names. |
 | network\_project\_id | Network Project ID. |
 
