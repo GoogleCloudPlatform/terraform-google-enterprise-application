@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,18 +13,18 @@
 # limitations under the License.
 
 apiVersion: v1
-kind: Pod
+kind: Service
 metadata:
-  name: getting-started
-  labels:
-    app: capital-agent-server
+  name: capital-agent-service
+  namespace: default
+  annotations:
+    cloud.google.com/neg: '{"exposed_ports": {"8080":{}}}'
 spec:
-  runtimeClassName: gvisor
-  containers:
-  - name: getting-started
-    image: skaffold-example
-#    env:
-#     - name: "PORT"
-#       value: "8080"
-    ports:
-     - containerPort: 8080
+  type: ClusterIP
+  selector:
+    app: capital-agent-server
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080

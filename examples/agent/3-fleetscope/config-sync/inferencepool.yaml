@@ -22,7 +22,7 @@ spec:
   # This selector MUST match the labels defined in your capital-agent Deployment's pod template
   selector:
     matchLabels:
-      app: captial-agent-server # This label connects the pool to the pods
+      app: capital-agent-server # This label connects the pool to the pods
   # This is the port your container is listening on (defined in the Deployment and Dockerfile)
   targetPorts:
       - number: 8080
