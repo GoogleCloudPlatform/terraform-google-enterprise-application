@@ -18,7 +18,7 @@ metadata:
   name: capital-agent-service
   namespace: default
   annotations:
-    cloud.google.com/neg: '{"exposed_ports": {"8080":{}}}'
+     cloud.google.com/neg: '{"standalone": true, "name": "capital-agent-neg"}'
 spec:
   type: ClusterIP
   selector:
