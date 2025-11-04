@@ -17,6 +17,18 @@ import os
 import uvicorn
 from fastapi import FastAPI
 from google.adk.cli.fast_api import get_fast_api_app
+from google.cloud import aiplatform
+
+PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT")
+LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION")
+
+if not PROJECT_ID or not LOCATION:
+    raise EnvironmentError(
+        """GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION environment
+        variables must be set."""
+    )
+
+aiplatform.init(project=PROJECT_ID, location=LOCATION)
 
 # Get the directory where main.py is located
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))

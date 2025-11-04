@@ -93,3 +93,8 @@ output "forwarding_rule_ids" {
   description = "Default fowarding rule ID for load balancer."
   value       = module.env.forwarding_rule_ids
 }
+
+output "cluster_zones" {
+  description = "Default fowarding rule ID for load balancer."
+  value       = module.env.cluster_zones
+}

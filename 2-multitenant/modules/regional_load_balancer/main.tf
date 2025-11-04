@@ -15,7 +15,6 @@
  */
 
 
-// 1051598905437@cloudservices.gserviceaccount.com
 data "google_project" "eab_cluster_project" {
   project_id = var.project_id
 }
@@ -205,7 +204,20 @@ resource "google_compute_region_url_map" "default" {
   project         = var.project_id
   region          = var.region
   default_service = google_compute_region_backend_service.default.id
+  host_rule {
+    hosts        = ["*"]
+    path_matcher = "api-paths"
+  }
 
+  path_matcher {
+    name = "api-paths"
+
+    default_service = google_compute_region_backend_service.default.id
+    path_rule {
+      paths   = ["/v1/chat/completions", "/v1/chat/completions/*"]
+      service = google_compute_region_backend_service.default.id
+    }
+  }
 }
 
 resource "google_compute_region_target_http_proxy" "default" {

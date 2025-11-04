@@ -117,7 +117,7 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_repository_url":  "https://github.com/amandakarina/terraform-google-enterprise-application",
 				"config_sync_policy_dir":      configSyncPath,
 				"config_sync_branch":          "feat/agent-example",
-				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent"},
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
 

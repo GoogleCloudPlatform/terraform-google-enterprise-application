@@ -43,3 +43,8 @@ variable "hpc" {
   description = "HPC Example being deployed."
   type        = bool
 }
+
+variable "agent" {
+  description = "Agent Example being deployed."
+  type        = bool
+}

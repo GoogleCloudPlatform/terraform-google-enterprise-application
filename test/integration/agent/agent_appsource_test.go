@@ -50,11 +50,13 @@ func TestSourceAgent(t *testing.T) {
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
+	clusterProjectID := map[string]string{}
 
 	for _, envName := range testutils.EnvNames(t) {
 		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
 		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
+		clusterProjectID[envName] = multitenant.GetStringOutput("cluster_project_id")
 	}
 
 	region := "us-central1" // TODO: Plumb output from appInfra
@@ -115,19 +117,32 @@ func TestSourceAgent(t *testing.T) {
 				t.Fatal(err)
 			}
 			for _, envName := range testutils.EnvNames(t) {
-				modelArmorTemplateID := appInfra.GetJsonOutput("model_armor").Get(envName).String()
-				trafficFile := fmt.Sprintf("%s/%s-traffic.yaml", tmpDirApp, envName)
+				kustomization := fmt.Sprintf("%s/k8s/overlays/%s/kustomization.yaml", tmpDirApp, envName)
 				// Read the file content
-				content, err := os.ReadFile(trafficFile)
+				content, err := os.ReadFile(kustomization)
 				if err != nil {
 					log.Fatalf("Error reading file: %v", err)
 				}
 
-				fmt.Println(appInfra.GetJsonOutput("model_armor").String())
 				// Convert content to string and perform replacement
-				modifiedContent := strings.ReplaceAll(string(content), "{MODEL_ARMOR_TEMPLATE_ID}", modelArmorTemplateID)
+				modifiedContent := strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
 				// Write the modified content back to the file
-				err = os.WriteFile(trafficFile, []byte(modifiedContent), 0644)
+				err = os.WriteFile(kustomization, []byte(modifiedContent), 0644)
+				if err != nil {
+					log.Fatalf("Error writing file: %v", err)
+				}
+
+				patchFile := fmt.Sprintf("%s/k8s/overlays/%s/patch-sa-annotation.yaml", tmpDirApp, envName)
+				// Read the file content
+				content, err = os.ReadFile(patchFile)
+				if err != nil {
+					log.Fatalf("Error reading file: %v", err)
+				}
+
+				// Convert content to string and perform replacement
+				modifiedContent = strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
+				// Write the modified content back to the file
+				err = os.WriteFile(patchFile, []byte(modifiedContent), 0644)
 				if err != nil {
 					log.Fatalf("Error writing file: %v", err)
 				}

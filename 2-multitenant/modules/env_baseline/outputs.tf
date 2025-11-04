@@ -28,11 +28,18 @@ output "cluster_membership_ids" {
   ]
 }
 
+output "cluster_zones" {
+  description = "GKE cluster membership IDs."
+  value = flatten([
+    for value in merge(module.gke-standard, module.gke-autopilot) : value.zones
+  ])
+}
+
 output "cluster_names" {
   description = "GKE cluster names."
-  value = [
+  value = flatten([
     for value in merge(module.gke-standard, module.gke-autopilot) : value.name
-  ]
+  ])
 }
 
 output "cluster_project_id" {
@@ -100,4 +107,9 @@ output "backend_service_ids" {
 output "forwarding_rule_ids" {
   value       = [for i in module.regional_load_balancer : i.forwarding_rule_id]
   description = "Default fowarding rule ID."
+}
+
+output "cloud_armor" {
+  value       = module.cloud_armor
+  description = "Cloud Armor configuration."
 }

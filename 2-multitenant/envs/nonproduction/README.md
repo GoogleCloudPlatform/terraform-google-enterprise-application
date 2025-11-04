@@ -27,6 +27,7 @@
 | cluster\_regions | Regions with clusters. |
 | cluster\_service\_accounts | The default service accounts used for nodes, if not overridden in node\_pools. |
 | cluster\_type | Cluster type. |
+| cluster\_zones | Default fowarding rule ID for load balancer. |
 | env | Environments. |
 | fleet\_project\_id | Fleet Project ID. |
 | forwarding\_rule\_ids | Default fowarding rule ID for load balancer. |

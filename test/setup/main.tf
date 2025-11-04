@@ -15,7 +15,7 @@
  */
 
 locals {
-  teams = var.hpc ? ["hpc-team-a", "hpc-team-b"] : setunion([
+  teams = var.hpc ? ["hpc-team-a", "hpc-team-b"] : var.agent ? ["capital-agent"] : setunion([
     "cb-frontend",
     "cb-accounts",
     "cb-ledger"],

@@ -33,3 +33,8 @@ output "model_armor" {
   description = "Model armor template_id"
   value       = { for env, model in module.model_armor_configuration : (env) => model.template.id }
 }
+
+output "zones" {
+  description = "Zones"
+  value       = local.cluster_zones
+}

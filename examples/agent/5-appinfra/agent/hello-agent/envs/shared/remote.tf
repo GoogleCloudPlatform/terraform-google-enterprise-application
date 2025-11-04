@@ -43,6 +43,16 @@ locals {
       [for item in data.terraform_remote_state.multitenant : item.outputs.forwarding_rule_ids]
     )
   )
+
+  cluster_zones = flatten([
+    for env, remote_outputs in data.terraform_remote_state.multitenant : {
+      for zone in remote_outputs.outputs.cluster_zones :
+      "${env}-${zone}" => {
+        env  = env
+        zone = zone
+      }
+    }
+  ])[0]
 }
 
 data "terraform_remote_state" "multitenant" {

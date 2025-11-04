@@ -89,6 +89,7 @@ module "eab_cluster_project" {
   disable_services_on_destroy = false
 
   activate_apis = [
+    "aiplatform.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "anthospolicycontroller.googleapis.com",

@@ -41,6 +41,7 @@ The following resources are created:
 | app\_certificates | App Certificates. |
 | app\_ip\_addresses | App IP Addresses. |
 | backend\_service\_ids | Backends services id on regional load balancer. |
+| cloud\_armor | Cloud Armor configuration. |
 | cluster\_membership\_ids | GKE cluster membership IDs. |
 | cluster\_names | GKE cluster names. |
 | cluster\_project\_id | Cluster Project ID. |
@@ -48,6 +49,7 @@ The following resources are created:
 | cluster\_regions | Regions with clusters. |
 | cluster\_service\_accounts | The default service accounts used for nodes, if not overridden in node\_pools. |
 | cluster\_type | Cluster type. |
+| cluster\_zones | GKE cluster membership IDs. |
 | fleet\_project\_id | Fleet Project ID. |
 | forwarding\_rule\_ids | Default fowarding rule ID. |
 | network\_names | Network name. |
