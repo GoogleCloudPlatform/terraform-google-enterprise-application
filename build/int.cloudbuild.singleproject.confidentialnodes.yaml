@@ -189,3 +189,4 @@ options:
     - "single_project_example_type=CONFIDENTIAL_NODES"
     - "TF_VAR_single_project=true"
     - "TF_VAR_hpc=false"
+    - "TF_VAR_agent=false"
