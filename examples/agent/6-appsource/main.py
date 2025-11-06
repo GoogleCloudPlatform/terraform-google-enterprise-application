@@ -18,14 +18,15 @@ import uvicorn
 from fastapi import FastAPI
 from google.adk.cli.fast_api import get_fast_api_app
 from google.cloud import aiplatform
+from fastapi.responses import PlainTextResponse
 
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT")
 LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION")
 
 if not PROJECT_ID or not LOCATION:
     raise EnvironmentError(
-        """GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION environment
-        variables must be set."""
+        """GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION
+        environment variables must be set."""
     )
 
 aiplatform.init(project=PROJECT_ID, location=LOCATION)
@@ -54,6 +55,18 @@ app: FastAPI = get_fast_api_app(
 # async def read_root():
 #     return {"Hello": "World"}
 #
+
+
+@app.get("/health", include_in_schema=False)
+async def health() -> PlainTextResponse:
+    return PlainTextResponse("ok", status_code=200)
+
+
+@app.get("/ready", include_in_schema=False)
+async def ready() -> PlainTextResponse:
+    # coloque aqui checagens mínimas (ex.: ping em dependências) se necessário
+    return PlainTextResponse("ready", status_code=200)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

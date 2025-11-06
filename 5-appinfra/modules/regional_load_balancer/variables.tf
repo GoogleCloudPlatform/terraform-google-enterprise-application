@@ -33,3 +33,18 @@ variable "region" {
   description = "The region where the regional load balancer will be configured."
   type        = string
 }
+
+variable "group_endpoint" {
+  description = "The cluster endpoint."
+  type        = list(string)
+}
+
+variable "service_name" {
+  description = "The service name for the Load balancer will be created."
+  type        = string
+}
+
+variable "cluster_service_accounts" {
+  description = "The services accounts cluster is using."
+  type        = list(string)
+}

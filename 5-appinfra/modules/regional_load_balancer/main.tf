@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+resource "random_string" "random" {
+  length  = 4
+  special = false
+  upper   = false
+}
 
 data "google_project" "eab_cluster_project" {
   project_id = var.project_id
@@ -27,7 +32,7 @@ resource "google_project_iam_member" "model_armor_service_network_extension_role
 }
 
 resource "google_compute_subnetwork" "default" {
-  name                       = "backend-subnet"
+  name                       = "sb-load-balancer-${var.service_name}-${random_string.random.result}"
   project                    = var.network_project_id
   ip_cidr_range              = "10.1.2.0/24"
   network                    = var.vpc_id
@@ -38,7 +43,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_subnetwork" "proxy_only" {
-  name          = "proxy-only-subnet"
+  name          = "sb-proxy-only-${var.service_name}-${random_string.random.result}"
   project       = var.network_project_id
   ip_cidr_range = "10.129.0.0/23"
   network       = var.vpc_id
@@ -48,23 +53,23 @@ resource "google_compute_subnetwork" "proxy_only" {
 }
 
 resource "google_compute_firewall" "default" {
-  name    = "fw-allow-health-check"
+  name    = "fw-allow-health-check-${var.service_name}-${random_string.random.result}"
   project = var.network_project_id
   allow {
     protocol = "tcp"
   }
-  direction     = "INGRESS"
-  network       = var.vpc_id
-  priority      = 1000
-  source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
-  target_tags   = ["load-balanced-backend"]
+  direction               = "INGRESS"
+  network                 = var.vpc_id
+  priority                = 1000
+  source_ranges           = ["130.211.0.0/22", "35.191.0.0/16"]
+  target_service_accounts = var.cluster_service_accounts
   log_config {
     metadata = "INCLUDE_ALL_METADATA"
   }
 }
 
 resource "google_compute_firewall" "allow_proxy" {
-  name    = "fw-allow-proxies"
+  name    = "fw-allow-proxies-${var.service_name}-${random_string.random.result}"
   project = var.network_project_id
   allow {
     ports    = ["443"]
@@ -78,83 +83,18 @@ resource "google_compute_firewall" "allow_proxy" {
     ports    = ["8080"]
     protocol = "tcp"
   }
-  direction     = "INGRESS"
-  network       = var.vpc_id
-  priority      = 1000
-  source_ranges = ["10.129.0.0/23"]
-  target_tags   = ["load-balanced-backend"]
+  direction               = "INGRESS"
+  network                 = var.vpc_id
+  priority                = 1000
+  source_ranges           = ["10.129.0.0/23"]
+  target_service_accounts = var.cluster_service_accounts
   log_config {
     metadata = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_instance_template" "default" {
-  name    = "l7-xlb-backend-template"
-  project = var.project_id
-  disk {
-    auto_delete  = true
-    boot         = true
-    device_name  = "persistent-disk-0"
-    mode         = "READ_WRITE"
-    source_image = "projects/debian-cloud/global/images/family/debian-12"
-    type         = "PERSISTENT"
-  }
-  labels = {
-    managed-by-cnrm = "true"
-  }
-  machine_type = "n1-standard-1"
-  metadata = {
-    startup-script = <<EOF
-    #! /bin/bash
-    sudo apt-get update
-    sudo apt-get install apache2 -y
-    sudo a2ensite default-ssl
-    sudo a2enmod ssl
-    vm_hostname="$(curl -H "Metadata-Flavor:Google" \
-    http://169.254.169.254/computeMetadata/v1/instance/name)"
-    sudo echo "Page served from: $vm_hostname" | \
-    tee /var/www/html/index.html
-    sudo systemctl restart apache2
-    EOF
-  }
-  network_interface {
-    access_config {
-      network_tier = "PREMIUM"
-    }
-    network    = var.vpc_id
-    subnetwork = google_compute_subnetwork.default.id
-  }
-  region = var.region
-  scheduling {
-    automatic_restart   = true
-    on_host_maintenance = "MIGRATE"
-    provisioning_model  = "STANDARD"
-  }
-  service_account {
-    email  = "default"
-    scopes = ["https://www.googleapis.com/auth/devstorage.read_only", "https://www.googleapis.com/auth/logging.write", "https://www.googleapis.com/auth/monitoring.write", "https://www.googleapis.com/auth/pubsub", "https://www.googleapis.com/auth/service.management.readonly", "https://www.googleapis.com/auth/servicecontrol", "https://www.googleapis.com/auth/trace.append"]
-  }
-  tags = ["load-balanced-backend"]
-}
-
-resource "google_compute_instance_group_manager" "default" {
-  name    = "l7-xlb-backend-example"
-  project = var.project_id
-  zone    = "${var.region}-a"
-  named_port {
-    name = "http"
-    port = 80
-  }
-  version {
-    instance_template = google_compute_instance_template.default.id
-    name              = "primary"
-  }
-  base_instance_name = "vm"
-  target_size        = 2
-}
-
 resource "google_compute_address" "default" {
-  name         = "address-name"
+  name         = "adr-load-balancer-${var.service_name}-${random_string.random.result}"
   project      = var.network_project_id
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
@@ -162,14 +102,14 @@ resource "google_compute_address" "default" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  name               = "l7-xlb-basic-check"
+  name               = "hck-l7-xlb-basic-check-${var.service_name}-${random_string.random.result}"
   project            = var.project_id
   check_interval_sec = 5
   healthy_threshold  = 2
   http_health_check {
     port_specification = "USE_SERVING_PORT"
     proxy_header       = "NONE"
-    request_path       = "/"
+    request_path       = "/health"
   }
   region              = var.region
   timeout_sec         = 5
@@ -180,7 +120,7 @@ resource "google_compute_region_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  name                  = "l7-xlb-backend-service"
+  name                  = "bs-l7-xlb-${var.service_name}-${random_string.random.result}"
   project               = var.project_id
   region                = var.region
   load_balancing_scheme = "EXTERNAL_MANAGED"
@@ -188,19 +128,26 @@ resource "google_compute_region_backend_service" "default" {
   protocol              = "HTTP"
   session_affinity      = "NONE"
   timeout_sec           = 30
-  backend {
-    group           = google_compute_instance_group_manager.default.instance_group
-    balancing_mode  = "UTILIZATION"
-    capacity_scaler = 1.0
+
+  dynamic "backend" {
+    for_each = toset(var.group_endpoint)
+    content {
+      group                 = backend.value
+      balancing_mode        = "RATE"
+      max_rate_per_endpoint = 100
+      capacity_scaler       = 1.0
+    }
   }
 
   log_config {
     enable = true
   }
+
+
 }
 
 resource "google_compute_region_url_map" "default" {
-  name            = "regional-l7-xlb-map"
+  name            = "url-map-regional-l7-xlb-${var.service_name}-${random_string.random.result}"
   project         = var.project_id
   region          = var.region
   default_service = google_compute_region_backend_service.default.id
@@ -221,14 +168,14 @@ resource "google_compute_region_url_map" "default" {
 }
 
 resource "google_compute_region_target_http_proxy" "default" {
-  name    = "l7-xlb-proxy"
+  name    = "http-proxy-l7-xlb-${var.service_name}-${random_string.random.result}"
   project = var.project_id
   region  = var.region
   url_map = google_compute_region_url_map.default.id
 }
 
 resource "google_compute_forwarding_rule" "default" {
-  name       = "l7-xlb-forwarding-rule"
+  name       = "fr-l7-xlb-${var.service_name}-${random_string.random.result}"
   project    = var.project_id
   provider   = google-beta
   depends_on = [google_compute_subnetwork.proxy_only]

@@ -80,8 +80,8 @@ variable "deletion_protection" {
   default     = true
 }
 
-variable "create_regional_loadbalancer" {
-  type        = bool
-  description = "Enable Regional Load Balancer infra in the cluster project."
-  default     = false
+variable "cluster_release_channel" {
+  description = "The release channel for the clusters"
+  type        = string
+  default     = "REGULAR"
 }

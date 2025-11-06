@@ -19,7 +19,7 @@ loadBalancingScheme: EXTERNAL_MANAGED
 extensionChains:
 - name: "chain1-model-armor"
   matchCondition:
-    celExpression: 'request.path == "/v1/chat/completions"'
+    celExpression: 'request.path.startsWith("/apps/capital_agent")'
   extensions:
   - name: extension-chain-1-model-armor
     service: modelarmor.${region}.rep.googleapis.com

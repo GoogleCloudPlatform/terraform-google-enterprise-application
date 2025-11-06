@@ -27,22 +27,9 @@ locals {
   cluster_projects_id = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => state.outputs.cluster_project_id }
   app_admin_project   = data.terraform_remote_state.appfactory.outputs.app-group["agent.hello-agent"].app_admin_project_id
 
-  backend_services_names = zipmap(
-    flatten(
-      keys(data.terraform_remote_state.multitenant)
-    ),
-    flatten(
-      [for item in data.terraform_remote_state.multitenant : item.outputs.backend_service_ids]
-    )
-  )
-  forwarding_rule_ids = zipmap(
-    flatten(
-      keys(data.terraform_remote_state.multitenant)
-    ),
-    flatten(
-      [for item in data.terraform_remote_state.multitenant : item.outputs.forwarding_rule_ids]
-    )
-  )
+  network_projects_id = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => state.outputs.network_project_id }
+
+  network_names = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => state.outputs.network_names }
 
   cluster_zones = flatten([
     for env, remote_outputs in data.terraform_remote_state.multitenant : {

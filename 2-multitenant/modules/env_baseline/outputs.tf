@@ -99,16 +99,6 @@ output "cluster_service_accounts" {
   )
 }
 
-output "backend_service_ids" {
-  description = "Backends services id on regional load balancer."
-  value       = [for i in module.regional_load_balancer : i.backend_service_id]
-}
-
-output "forwarding_rule_ids" {
-  value       = [for i in module.regional_load_balancer : i.forwarding_rule_id]
-  description = "Default fowarding rule ID."
-}
-
 output "cloud_armor" {
   value       = module.cloud_armor
   description = "Cloud Armor configuration."

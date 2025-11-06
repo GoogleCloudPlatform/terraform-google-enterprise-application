@@ -84,17 +84,7 @@ output "cluster_service_accounts" {
   value       = module.env.cluster_service_accounts
 }
 
-output "backend_service_ids" {
-  description = "Backends services id on regional load balancer."
-  value       = module.env.backend_service_ids
-}
-
-output "forwarding_rule_ids" {
-  description = "Default fowarding rule ID for load balancer."
-  value       = module.env.forwarding_rule_ids
-}
-
 output "cluster_zones" {
-  description = "Default fowarding rule ID for load balancer."
+  description = "Cluster zones."
   value       = module.env.cluster_zones
 }

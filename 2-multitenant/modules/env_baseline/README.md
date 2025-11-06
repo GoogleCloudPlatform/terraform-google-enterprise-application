@@ -23,7 +23,6 @@ The following resources are created:
 | cluster\_subnetworks | The subnetwork self\_links for clusters. Adding more subnetworks will increase the number of clusters. You will need a IP block defined on `master_ipv4_cidr_blocks` variable for each cluster subnetwork. | `list(string)` | n/a | yes |
 | cluster\_type | GKE multi-tenant cluster types: STANDARD, STANDARD-NAP (Standard with node auto-provisioning), AUTOPILOT | `string` | `"STANDARD-NAP"` | no |
 | create\_cluster\_project | Create Cluster Project ID, otherwise the Network Project ID is used | `bool` | `true` | no |
-| create\_regional\_loadbalancer | Enable Regional Load Balancer infra in the cluster project. | `bool` | `false` | no |
 | deletion\_protection | Whether or not to allow Terraform to destroy the cluster. | `bool` | `true` | no |
 | enable\_confidential\_nodes | An optional flag to enable confidential node config. | `bool` | `false` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
@@ -40,7 +39,6 @@ The following resources are created:
 |------|-------------|
 | app\_certificates | App Certificates. |
 | app\_ip\_addresses | App IP Addresses. |
-| backend\_service\_ids | Backends services id on regional load balancer. |
 | cloud\_armor | Cloud Armor configuration. |
 | cluster\_membership\_ids | GKE cluster membership IDs. |
 | cluster\_names | GKE cluster names. |
@@ -51,7 +49,6 @@ The following resources are created:
 | cluster\_type | Cluster type. |
 | cluster\_zones | GKE cluster membership IDs. |
 | fleet\_project\_id | Fleet Project ID. |
-| forwarding\_rule\_ids | Default fowarding rule ID. |
 | network\_names | Network name. |
 | network\_project\_id | Network Project ID. |
 

@@ -34,6 +34,18 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
           env:
             - name: GOOGLE_GENAI_USE_VERTEXAI
               value: "true"

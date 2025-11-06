@@ -20,8 +20,6 @@ locals {
   team_name        = "default"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
-
-  negs = [for i in data.google_compute_network_endpoint_group.agent_neg : i.id if strcontains(i.self_link, "capital-agent-service")]
 }
 
 module "app" {
@@ -93,84 +91,6 @@ module "model_armor_configuration" {
   }
 }
 
-resource "null_resource" "create_service_extension" {
-  for_each = local.backend_services_names
-
-  triggers = {
-    location = regex("/regions/([^/]+)/", each.value)[0]
-    project  = local.cluster_projects_id[each.key]
-    file     = data.template_file.url_map_config[each.key].rendered
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      gcloud service-extensions lb-traffic-extensions import traffic-ext \
-      --location=${self.triggers.location} \
-      --project=${self.triggers.project} \
-      --source=- <<CONFIG
-      ${data.template_file.url_map_config[each.key].rendered}
-      CONFIG
-    EOT
-  }
-}
-
-data "template_file" "url_map_config" {
-  for_each = local.backend_services_names
-  template = file("${path.module}/traffic_callout_service.yaml")
-
-  # Variáveis a serem injetadas no template YAML
-  vars = {
-    url_map_name            = "traffic_callout_service_${regex("/regions/([^/]+)/", each.value)[0]}"
-    forwarding_rule         = local.forwarding_rule_ids[each.key]
-    project_id              = local.cluster_projects_id[each.key]
-    region                  = regex("/regions/([^/]+)/", each.value)[0]
-    model_name              = "meta-llama/Llama-3.1-8B-Instruct"
-    model_armor_template_id = module.model_armor_configuration[each.key].template.id
-  }
-}
-
-data "google_compute_network_endpoint_group" "agent_neg" {
-  for_each = local.cluster_zones
-  project  = local.cluster_projects_id[each.value.env]
-  zone     = each.value.zone
-  name     = "k8s1-5087f385-default-capital-agent-service-8080-98c69603"
-}
-
-resource "google_compute_region_backend_service" "backend_agent" {
-  for_each              = local.backend_services_names
-  name                  = "bs-capital-agent-${regex("/regions/([^/]+)/", each.value)[0]}"
-  project               = local.cluster_projects_id[each.key]
-  region                = regex("/regions/([^/]+)/", each.value)[0]
-  protocol              = "HTTP"
-  load_balancing_scheme = "EXTERNAL_MANAGED"
-
-  dynamic "backend" {
-    for_each = local.negs
-    content {
-      group                 = backend.value
-      balancing_mode        = "RATE"
-      max_rate_per_endpoint = 100
-      capacity_scaler       = 1.0
-
-    }
-  }
-
-  health_checks = [for i in google_compute_region_health_check.default : i.id]
-
-  log_config { enable = true }
-}
-
-resource "google_compute_region_health_check" "default" {
-  for_each = local.backend_services_names
-  name     = "health-check-capital-agent-${regex("/regions/([^/]+)/", each.value)[0]}"
-  project  = local.cluster_projects_id[each.key]
-  region   = regex("/regions/([^/]+)/", each.value)[0]
-
-  http_health_check {
-    port         = 8080
-    request_path = "/healthz" # ou "/" se seu app retornar 200 proxy_header = "NONE"
-  }
-}
 resource "google_service_account" "gsa_capital_agent" {
   for_each     = local.cluster_projects_id
   project      = each.value

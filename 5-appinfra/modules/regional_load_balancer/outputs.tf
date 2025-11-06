@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module "regional_load_balancer" {
-  source   = "../regional_load_balancer"
-  for_each = var.create_regional_loadbalancer ? local.subnets : {}
 
-  vpc_id             = local.network
-  project_id         = local.cluster_project_id
-  network_project_id = var.network_project_id
-  region             = data.google_compute_subnetwork.default[each.key].region
+output "backend_service_id" {
+  value       = google_compute_region_backend_service.default.id
+  description = "Default backend service ID."
+}
+
+output "forwarding_rule_id" {
+  value       = google_compute_forwarding_rule.default.id
+  description = "Default fowarding rule ID."
 }
