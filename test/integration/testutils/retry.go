@@ -55,7 +55,7 @@ var (
 
 		".*Error 400.*@*.iam.gserviceaccount.com*does not exist.*": "Service Agent propagation.",
 
-		".*dial tcp: lookup.*.nip.io on.*: server misbehaving.*": "VM Gitlab issues.",
+		".*dial tcp: lookup.*.sslip.io on.*: server misbehaving.*": "VM Gitlab issues.",
 
 		".*Error 400.*The subnetwork resource*projects/*/regions/*/subnetworks/*is already being used by.*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
 
