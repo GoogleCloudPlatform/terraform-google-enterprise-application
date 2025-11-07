@@ -119,6 +119,10 @@ module "eab_cluster_project" {
     {
       api   = "networkservices.googleapis.com",
       roles = []
+    },
+    {
+      api   = "aiplatform.googleapis.com",
+      roles = ["roles/aiplatform.serviceAgent"]
     }
   ]
 }
@@ -171,7 +175,8 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
   members = distinct([
     data.google_compute_default_service_account.compute_sa.member,
     "serviceAccount:service-${data.google_project.eab_cluster_project.number}@container-engine-robot.iam.gserviceaccount.com",
-    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@gcp-sa-dep.iam.gserviceaccount.com" //model armor api call
+    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@gcp-sa-dep.iam.gserviceaccount.com",        //model armor api call
+    "serviceAccount:service-${data.google_project.eab_cluster_project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com", // aiplatform api call
   ])
 }
 
