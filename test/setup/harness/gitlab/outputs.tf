@@ -31,7 +31,7 @@ output "gitlab_project_number" {
 }
 
 output "gitlab_url" {
-  value = "https://${google_compute_instance.default.network_interface[0].access_config[0].nat_ip}.nip.io"
+  value = "https://${google_compute_instance.default.network_interface[0].access_config[0].nat_ip}.sslip.io"
 }
 
 output "gitlab_internal_ip" {
