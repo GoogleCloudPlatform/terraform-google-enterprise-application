@@ -54,6 +54,7 @@ module "seed_project" {
 
   activate_apis = [
     "accesscontextmanager.googleapis.com",
+    "aiplatform.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "anthospolicycontroller.googleapis.com",
@@ -137,6 +138,10 @@ module "seed_project" {
     {
       api   = "networkservices.googleapis.com",
       roles = []
+    },
+    {
+      api   = "aiplatform.googleapis.com",
+      roles = ["roles/aiplatform.serviceAgent"]
     }
   ]
 }
