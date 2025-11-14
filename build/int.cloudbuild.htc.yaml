@@ -183,3 +183,4 @@ options:
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
     - "TF_VAR_single_project=true"
     - "TF_VAR_hpc=false"
+    - "TF_VAR_agent=false"

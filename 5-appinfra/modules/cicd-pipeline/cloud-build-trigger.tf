@@ -14,7 +14,7 @@
 
 locals {
   # If the user specify a Cloud Build Worker Pool, utilize it in the trigger
-  optional_worker_pool = var.workerpool_id != "" ? { "_PRIVATE_POOL" = var.workerpool_id } : {}
+  optional_worker_pool = var.workerpool_id != null ? { "_PRIVATE_POOL" = var.workerpool_id } : {}
 }
 # CI trigger configuration
 resource "google_cloudbuild_trigger" "ci" {

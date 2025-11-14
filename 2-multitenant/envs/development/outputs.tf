@@ -83,3 +83,8 @@ output "cluster_service_accounts" {
   description = "The default service accounts used for nodes, if not overridden in node_pools."
   value       = module.env.cluster_service_accounts
 }
+
+output "cluster_zones" {
+  description = "Cluster zones."
+  value       = module.env.cluster_zones
+}

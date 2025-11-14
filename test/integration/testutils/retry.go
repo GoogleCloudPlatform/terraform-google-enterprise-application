@@ -51,16 +51,22 @@ var (
 
 		".*Error 400.*Invalid Directional Policies set in Perimeter.*": "Propagation issues on Service Perimeter.",
 
-		".*Error 400.*@*.iam.gserviceaccount.com*is invalid or non-existent.*": "Service Agent propagation.",
+		".*Error 400.*@.*.iam.gserviceaccount.com.*is invalid or non-existent.*": "Service Agent propagation.",
 
-		".*Error 400.*@*.iam.gserviceaccount.com*does not exist.*": "Service Agent propagation.",
+		".*Error 400.*@.*.iam.gserviceaccount.com.*does not exist.*": "Service Agent propagation.",
+
+		".*Error 400: Identity Pool does not exist (.*).*": "Identity pool propagation.",
 
 		".*dial tcp: lookup.*.sslip.io on.*: server misbehaving.*": "VM Gitlab issues.",
 
-		".*Error 400.*The subnetwork resource*projects/*/regions/*/subnetworks/*is already being used by.*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
+		".*Error 400.*The subnetwork resource.*projects/.*/regions/.*/subnetworks/.*is already being used by.*, resourceInUseByAnotherResource": "Destroy resources usage propagation issues",
 
-		".*The network resource*projects/*/global/networks/*is already being used by.*": "Destroy resources usage propagation issues",
+		".*The network resource.*projects/.*/global/networks/.*is already being used by.*": "Destroy resources usage propagation issues",
+
+		".*Error waiting for Disabling Shared VPC Resource: The resource.*.is still linked to shared VPC host.*": "Destroy resources usage propagation issues",
 
 		".*Error 400.*Invalid value for field.*resource.networkInterfaces[0].subnetwork.*:.*projects/.*/regions/.*/subnetworks/.*. The referenced subnetwork resource cannot be found.*": "Network propagation",
+
+		".*Error: Error creating FeatureMembership: Resource already exists - apply blocked by lifecycle params.*": "Duplicated membership request",
 	}
 )

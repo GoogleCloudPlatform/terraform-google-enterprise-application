@@ -71,3 +71,9 @@ variable "enable_kueue" {
   description = "Enables Kueue private installation."
   default     = false
 }
+
+variable "enable_multicluster_discovery" {
+  type        = bool
+  description = "Enables Multicluster discovery."
+  default     = true
+}

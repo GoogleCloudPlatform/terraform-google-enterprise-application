@@ -31,17 +31,6 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-func renameWorkerPoolFile(t *testing.T) {
-	tf_file_old := "../../../4-appfactory/modules/app-group-baseline/additional_workerpool_permissions.tf.example"
-	tf_file_new := "../../../4-appfactory/modules/app-group-baseline/additional_workerpool_permissions.tf"
-	// if file does not exist, create it by renaming
-	if _, err := os.Stat(tf_file_new); err != nil {
-		err = os.Rename(tf_file_old, tf_file_new)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-}
 func TestHPCAppfactory(t *testing.T) {
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -62,10 +51,10 @@ func TestHPCAppfactory(t *testing.T) {
 		tft.WithTFDir(loggingHarnessPath),
 	)
 
-err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
-if err != nil {
-	t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-}
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("applicationfactory").String())
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
@@ -90,8 +79,6 @@ if err != nil {
 		t.Fatal(err)
 	}
 
-	// Apply additional permissions required to use workerpools on 4-appfactory
-	renameWorkerPoolFile(t)
 	t.Run(appFactoryPath, func(t *testing.T) {
 		t.Parallel()
 

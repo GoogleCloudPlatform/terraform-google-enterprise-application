@@ -50,5 +50,5 @@ module "multitenant_infra" {
   deletion_protection       = false
   enable_confidential_nodes = true
 
-  cb_private_workerpool_project_id = var.workerpool_id == "" ? google_cloudbuild_worker_pool.pool[0].project : regex("projects/([^/]*)", var.workerpool_id)[0]
+  cb_private_workerpool_project_id = var.workerpool_id == null ? google_cloudbuild_worker_pool.pool[0].project : regex("projects/([^/]*)", var.workerpool_id)[0]
 }
