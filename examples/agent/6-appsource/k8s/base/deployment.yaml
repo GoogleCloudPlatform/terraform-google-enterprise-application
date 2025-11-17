@@ -36,16 +36,18 @@ spec:
             - containerPort: 8080
           readinessProbe:
             httpGet:
-              path: /health
+              path: /ready
               port: 8080
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
           env:
             - name: GOOGLE_GENAI_USE_VERTEXAI
               value: "true"

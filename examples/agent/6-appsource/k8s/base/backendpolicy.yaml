@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - ../../base
-  - traffic-extension.yaml
-configMapGenerator:
-  - name: capital-agent-config
-    behavior: replace
-    literals:
-      - GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
-      - GOOGLE_CLOUD_LOCATION=global
-      - MODEL_ID=meta/llama-3.1-8b-instruct
-patches:
-  - path: patch-sa-annotation.yaml
+apiVersion: networking.gke.io/v1
+kind: BackendPolicy
+metadata:
+  name: capital-agent-backend-policy
+  namespace: default
+spec:
+  targetRef:
+    group: ""
+    kind: Service
+    name: capital-agent-service
+  healthCheck:
+    requestPath: /ready
+  timeoutSec: 30
+  logging:
+    enable: true
