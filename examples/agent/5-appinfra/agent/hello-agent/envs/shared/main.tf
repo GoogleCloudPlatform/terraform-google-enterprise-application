@@ -105,6 +105,13 @@ resource "google_project_iam_member" "gsa_vertex_user" {
   member   = each.value.member
 }
 
+resource "google_project_iam_member" "gsa_trace_agent" {
+  for_each = google_service_account.gsa_capital_agent
+  project  = each.value.project
+  role     = "roles/cloudtrace.agent"
+  member   = each.value.member
+}
+
 resource "google_service_account_iam_member" "wi_binding" {
   for_each           = google_service_account.gsa_capital_agent
   service_account_id = each.value.name
