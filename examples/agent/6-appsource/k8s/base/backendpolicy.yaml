@@ -13,7 +13,7 @@
 # limitations under the License.
 
 apiVersion: networking.gke.io/v1
-kind: BackendPolicy
+kind: GCPBackendPolicy
 metadata:
   name: capital-agent-backend-policy
   namespace: default
