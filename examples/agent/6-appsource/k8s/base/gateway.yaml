@@ -18,7 +18,7 @@ metadata:
   name: capital-agent-gw
   namespace: default
 spec:
-  gatewayClassName: gke-l7-rilb
+  gatewayClassName: gke-l7-regional-external-managed
   listeners:
     - name: http
       protocol: HTTP

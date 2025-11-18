@@ -17,19 +17,13 @@ import os
 import uvicorn
 from fastapi import FastAPI
 from google.adk.cli.fast_api import get_fast_api_app
-from google.cloud import aiplatform
 from fastapi.responses import PlainTextResponse
+import logging
 
-PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT")
-LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION")
-
-if not PROJECT_ID or not LOCATION:
-    raise EnvironmentError(
-        """GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION
-        environment variables must be set."""
-    )
-
-aiplatform.init(project=PROJECT_ID, location=LOCATION)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+)
 
 # Get the directory where main.py is located
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -47,14 +41,8 @@ app: FastAPI = get_fast_api_app(
     session_service_uri=SESSION_SERVICE_URI,
     allow_origins=ALLOWED_ORIGINS,
     web=SERVE_WEB_INTERFACE,
+    trace_to_cloud=True,
 )
-
-# You can add more FastAPI routes or configurations below if needed
-# Example:
-# @app.get("/hello")
-# async def read_root():
-#     return {"Hello": "World"}
-#
 
 
 @app.get("/health", include_in_schema=False)
@@ -64,7 +52,6 @@ async def health() -> PlainTextResponse:
 
 @app.get("/ready", include_in_schema=False)
 async def ready() -> PlainTextResponse:
-    # coloque aqui checagens mínimas (ex.: ping em dependências) se necessário
     return PlainTextResponse("ready", status_code=200)
 
 

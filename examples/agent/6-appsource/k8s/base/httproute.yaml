@@ -32,6 +32,13 @@ spec:
     - matches:
         - path:
             type: PathPrefix
+            value: /dev-ui
+      backendRefs:
+        - name: capital-agent-service
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
             value: /
       backendRefs:
         - name: capital-agent-service

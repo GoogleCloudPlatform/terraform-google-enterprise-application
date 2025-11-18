@@ -17,6 +17,8 @@ kind: Service
 metadata:
   name: capital-agent-service
   namespace: default
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
 spec:
   type: ClusterIP
   selector:

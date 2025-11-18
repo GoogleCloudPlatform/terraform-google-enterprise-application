@@ -20,7 +20,7 @@ resources:
   - service.yaml
   - httproute.yaml
   - gateway.yaml
-  - backendpolicy.yaml
+  - healthcheck.yaml
 configMapGenerator:
   - name: capital-agent-config
     literals:

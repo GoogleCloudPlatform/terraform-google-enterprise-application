@@ -25,7 +25,7 @@ spec:
   - name: "chain1-model-armor"
     matchCondition:
       celExpressions:
-      - celMatcher: 'request.path.startsWith("/")'
+      - celMatcher: 'request.path.startsWith("/v1/chat/completions")'
     extensions:
     - name: extension-chain-1-model-armor
       googleAPIServiceName: modelarmor.REGION.rep.googleapis.com
