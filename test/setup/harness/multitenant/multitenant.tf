@@ -182,7 +182,7 @@ module "cluster_vpc" {
       log_config = {
         metadata = "INCLUDE_ALL_METADATA"
       }
-      source_ranges =  ["10.129.0.0/23"]
+      source_ranges = ["10.129.0.0/23"]
       allow = [
         {
           protocol = "tcp"
