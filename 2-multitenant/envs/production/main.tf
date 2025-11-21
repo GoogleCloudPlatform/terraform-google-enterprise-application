@@ -33,4 +33,5 @@ module "env" {
   access_level_name                = var.access_level_name
   deletion_protection              = var.deletion_protection
   cb_private_workerpool_project_id = var.cb_private_workerpool_project_id
+  cluster_release_channel          = var.cluster_release_channel
 }

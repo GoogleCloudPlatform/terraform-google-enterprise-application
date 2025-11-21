@@ -33,18 +33,6 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func renameKueueFile(t *testing.T) {
-	tf_file_old := "../../../3-fleetscope/modules/env_baseline/kueue.tf.example"
-	tf_file_new := "../../../3-fleetscope/modules/env_baseline/kueue.tf"
-	err := os.Rename(tf_file_old, tf_file_new)
-	if err != nil {
-		// Test if the error is because the file was already move in other environment test
-		if !strings.Contains(err.Error(), "no such file or directory") {
-			t.Fatal(err)
-		}
-	}
-}
-
 func TestFleetscope(t *testing.T) {
 	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -56,10 +44,10 @@ func TestFleetscope(t *testing.T) {
 		hpc = false
 	}
 
-err = os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
-if err != nil {
-	t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-}
+	err = os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
 
 	backend_bucket := bootstrap.GetStringOutput("state_bucket")
 	backendConfig := map[string]interface{}{
@@ -115,14 +103,21 @@ if err != nil {
 
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
+			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
+
+			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
+			if enableInferenceGateway {
+				configSyncPath = "examples/agent/3-fleetscope/config-sync"
+			}
+
 			vars := map[string]interface{}{
 				"remote_state_bucket":         backend_bucket,
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 				"config_sync_secret_type":     "none",
-				"config_sync_repository_url":  "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application",
-				"config_sync_policy_dir":      fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName),
-				"config_sync_branch":          "main",
-				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend"},
+				"config_sync_repository_url":  "https://github.com/amandakarina/terraform-google-enterprise-application",
+				"config_sync_policy_dir":      configSyncPath,
+				"config_sync_branch":          "feat/agent-example",
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent"},
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
 
@@ -137,19 +132,6 @@ if err != nil {
 				tft.WithBackendConfig(backendConfig),
 				tft.WithParallelism(3),
 			)
-
-			fleetscope.DefineInit(func(assert *assert.Assertions) {
-				// install keueue on 3-fleetscope if environment variable INSTALL_KUEUE is true
-				if strings.ToLower(os.Getenv("INSTALL_KUEUE")) == "true" {
-					// by renaming kueue.tf.example to kueue.tf the module will install kueue
-					renameKueueFile(t)
-				}
-				fleetscope.DefaultInit(assert)
-			})
-
-			fleetscope.DefineApply(func(assert *assert.Assertions) {
-				fleetscope.DefaultApply(assert)
-			})
 
 			fleetscope.DefineVerify(func(assert *assert.Assertions) {
 				fleetscope.DefaultVerify(assert)
@@ -210,13 +192,19 @@ if err != nil {
 					membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
 				}
 				// GKE Feature
-				for _, feature := range []string{
+				features := []string{
 					"configmanagement",
 					"servicemesh",
-					"multiclusteringress",
-					"multiclusterservicediscovery",
 					"policycontroller",
-				} {
+				}
+
+				if strings.ToLower(os.Getenv("enable_multicluster_discovery")) == "true" {
+					features = append(features, []string{
+						"multiclusteringress",
+						"multiclusterservicediscovery"}...)
+				}
+
+				for _, feature := range features {
 					gkeFeatureOp := gcloud.Runf(t, "container hub features describe %s --project %s", feature, clusterProjectID)
 					assert.Equal("ACTIVE", gkeFeatureOp.Get("resourceState.state").String(), fmt.Sprintf("Hub Feature %s should have resource state equal to ACTIVE", feature))
 

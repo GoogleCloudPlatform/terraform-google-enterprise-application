@@ -36,7 +36,7 @@ locals {
   cb_service_accounts_emails = { for k, v in module.tf_cloudbuild_workspace : k => reverse(split("/", v.cloudbuild_sa))[0] }
 
   // If the user specify a Cloud Build Worker Pool, utilize it in the trigger
-  optional_worker_pool = var.workerpool_id != "" ? { "_PRIVATE_POOL" = var.workerpool_id } : {}
+  optional_worker_pool = var.workerpool_id != null ? { "_PRIVATE_POOL" = var.workerpool_id } : {}
 
   projects_re         = "projects/([^/]+)/"
   worker_pool_project = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : null

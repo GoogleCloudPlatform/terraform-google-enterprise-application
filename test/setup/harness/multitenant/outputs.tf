@@ -21,7 +21,7 @@ output "envs" {
     billing_account    = var.billing_account
     network_project_id = vpc.project_id
     network_self_link  = vpc.network_self_link,
-    subnets_self_links = vpc.subnets_self_links,
+    subnets_self_links = [for sub in vpc.subnets_self_links : sub if strcontains(sub, "subnetworks/eab")],
   } }
 }
 

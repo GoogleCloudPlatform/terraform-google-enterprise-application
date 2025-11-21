@@ -40,7 +40,6 @@ locals {
       }
     ]
   ])
-
 }
 
 resource "random_string" "prefix" {
@@ -127,6 +126,9 @@ module "vpc_project" {
     "containeranalysis.googleapis.com",
     "containerscanning.googleapis.com",
     "iam.googleapis.com",
+    "networkmanagement.googleapis.com",
+    "networkservices.googleapis.com",
+    "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
   ]
@@ -154,23 +156,63 @@ module "cluster_vpc" {
           ports    = ["22"]
         }
       ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
     },
+    {
+      name     = "fw-allow-health-check"
+      priority = 1000
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
+      allow = [
+        {
+          protocol = "tcp"
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+    },
+    {
+      name     = "fw-allow-proxies"
+      priority = 1000
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["10.129.0.0/23"]
+      allow = [
+        {
+          protocol = "tcp"
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+    }
   ]
 
-  subnets = [
-    {
-      subnet_name           = "eab-${each.key}-us-central1"
-      subnet_ip             = "10.1.20.0/24"
-      subnet_region         = "us-central1"
-      subnet_private_access = true
-      }, {
-      subnet_name           = "eab-${each.key}-us-east4"
-      subnet_ip             = "10.1.10.0/24"
-      subnet_region         = "us-east4"
-      subnet_private_access = true
-  }]
+  subnets = concat([{
+    subnet_name           = "eab-${each.key}-us-central1"
+    subnet_ip             = "10.1.20.0/24"
+    subnet_region         = "us-central1"
+    subnet_private_access = true
+    }], !var.agent ? [{
+    subnet_name           = "eab-${each.key}-us-east4"
+    subnet_ip             = "10.1.10.0/24"
+    subnet_region         = "us-east4"
+    subnet_private_access = true
+    }] : [{
+    subnet_name   = "sb-proxy-only-us-central1"
+    subnet_ip     = "10.129.0.0/23"
+    purpose       = "REGIONAL_MANAGED_PROXY"
+    subnet_region = "us-central1"
+    role          = "ACTIVE"
+  }])
 
-  secondary_ranges = {
+  secondary_ranges = merge({
     "eab-${each.key}-us-central1" = [
       {
         range_name    = "eab-${each.key}-us-central1-secondary-01"
@@ -180,7 +222,7 @@ module "cluster_vpc" {
         range_name    = "eab-${each.key}-us-central1-secondary-02"
         ip_cidr_range = "192.168.64.0/18"
       },
-    ],
+    ] }, !var.agent ? {
     "eab-${each.key}-us-east4" = [
       {
         range_name    = "eab-${each.key}-us-east4-secondary-01"
@@ -190,5 +232,5 @@ module "cluster_vpc" {
         range_name    = "eab-${each.key}-us-east4-secondary-02"
         ip_cidr_range = "192.168.192.0/18"
       },
-  ] }
+  ] } : {})
 }

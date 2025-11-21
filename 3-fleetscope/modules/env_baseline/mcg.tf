@@ -19,6 +19,7 @@ locals {
 }
 
 resource "google_gke_hub_feature" "mci" {
+  count    = var.enable_multicluster_discovery ? 1 : 0
   name     = "multiclusteringress"
   location = "global"
   project  = var.cluster_project_id
@@ -35,12 +36,14 @@ resource "google_gke_hub_feature" "mci" {
 }
 
 resource "google_gke_hub_feature" "mcs" {
+  count    = var.enable_multicluster_discovery ? 1 : 0
   name     = "multiclusterservicediscovery"
   location = "global"
   project  = var.cluster_project_id
 }
 
 resource "google_project_service_identity" "fleet_mci_sa" {
+  count    = var.enable_multicluster_discovery ? 1 : 0
   provider = google-beta
   project  = var.cluster_project_id
   service  = "multiclusteringress.googleapis.com"
@@ -53,12 +56,14 @@ resource "google_project_service_identity" "fleet_mci_sa" {
 
 // Grant IAM permissions for the Gateway controller in the fleet
 resource "google_project_iam_member" "cluster_admin_mci" {
+  count   = var.enable_multicluster_discovery ? 1 : 0
   project = var.cluster_project_id
   role    = "roles/container.admin"
-  member  = "serviceAccount:${google_project_service_identity.fleet_mci_sa.email}"
+  member  = "serviceAccount:${google_project_service_identity.fleet_mci_sa[0].email}"
 }
 
 resource "google_project_service_identity" "fleet_mcs_sa" {
+  count    = var.enable_multicluster_discovery ? 1 : 0
   provider = google-beta
   project  = var.cluster_project_id
   service  = "multiclusterservicediscovery.googleapis.com"
@@ -68,14 +73,15 @@ resource "google_project_service_identity" "fleet_mcs_sa" {
 
 // Grant MCS service account access to the network project
 resource "google_project_iam_member" "network_service_agent_mcs" {
+  count   = var.enable_multicluster_discovery ? 1 : 0
   project = var.network_project_id
   role    = "roles/multiclusterservicediscovery.serviceAgent"
-  member  = "serviceAccount:${google_project_service_identity.fleet_mcs_sa.email}"
+  member  = "serviceAccount:${google_project_service_identity.fleet_mcs_sa[0].email}"
 }
 
 // Grant MCS controller service account access to the cluster project
 resource "google_project_iam_member" "cluster_network_viewer_mcs" {
-  for_each = toset(["roles/compute.networkViewer", "roles/trafficdirector.client"])
+  for_each = var.enable_multicluster_discovery ? toset(["roles/compute.networkViewer", "roles/trafficdirector.client"]) : []
   project  = var.cluster_project_id
   role     = each.key
   member   = "serviceAccount:${var.cluster_project_id}.svc.id.goog[gke-mcs/gke-mcs-importer]"

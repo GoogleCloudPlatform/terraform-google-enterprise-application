@@ -31,6 +31,8 @@ resource "google_project_iam_binding" "acm_wi_trace_agent" {
     local.namespace_wide_access,
     var.additional_project_role_identities
   )
+
+  depends_on = [google_gke_hub_feature_membership.acm_feature_member]
 }
 
 # Allow Services Accounts to send metrics
@@ -45,4 +47,5 @@ resource "google_project_iam_binding" "acm_wi_metricWriter" {
     local.namespace_wide_access,
     var.additional_project_role_identities
   )
+  depends_on = [google_gke_hub_feature_membership.acm_feature_member]
 }

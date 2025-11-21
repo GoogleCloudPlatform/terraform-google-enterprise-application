@@ -10,6 +10,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| agent | Agent Example being deployed. | `bool` | n/a | yes |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cloud\_build\_sa | Cloud Build Service Account email to be granted Encrypt/Decrypt role. | `string` | n/a | yes |
 | folder\_id | The folder to deploy in | `string` | n/a | yes |

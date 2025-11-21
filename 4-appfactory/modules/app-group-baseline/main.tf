@@ -35,7 +35,7 @@ locals {
     {
       for cluster_project_id in var.cluster_projects_ids : cluster_project_id => {
         project_id = cluster_project_id
-        roles      = ["roles/resourcemanager.projectIamAdmin", "roles/gkehub.admin"]
+        roles      = ["roles/resourcemanager.projectIamAdmin", "roles/gkehub.admin", "roles/modelarmor.admin", "roles/compute.loadBalancerAdmin", "roles/iam.serviceAccountAdmin"]
       }
     }
   )
@@ -96,7 +96,7 @@ module "cloudbuild_repositories" {
   }
   cloud_build_repositories = var.cloudbuildv2_repository_config.repositories
 
-  depends_on = [time_sleep.wait_propagation]
+  depends_on = [time_sleep.wait_propagation, time_sleep.wait_roles_propagation]
 }
 
 resource "time_sleep" "wait_propagation" {
@@ -219,6 +219,8 @@ module "tf_cloudbuild_workspace" {
   cloudbuild_plan_filename  = "cloudbuild-tf-plan.yaml"
   cloudbuild_apply_filename = "cloudbuild-tf-apply.yaml"
   tf_apply_branches         = var.tf_apply_branches
+
+  depends_on = [time_sleep.wait_roles_propagation]
 }
 
 resource "google_project_iam_member" "worker_pool_builder_logging_writer" {
@@ -285,6 +287,20 @@ resource "google_service_account_iam_member" "account_access" {
   service_account_id = module.tf_cloudbuild_workspace.cloudbuild_sa
   role               = each.value
   member             = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "project_iam_admin_network_project" {
+  for_each = data.google_project.vpc_projects
+  project  = each.value.project_id
+  role     = "roles/resourcemanager.projectIamAdmin"
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
+}
+
+resource "google_project_iam_member" "compute_admin_network_project" {
+  for_each = data.google_project.vpc_projects
+  project  = each.value.project_id
+  role     = "roles/compute.admin"
+  member   = "serviceAccount:${reverse(split("/", module.tf_cloudbuild_workspace.cloudbuild_sa))[0]}"
 }
 
 // Create infra project

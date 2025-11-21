@@ -29,6 +29,12 @@ variable "region" {
   type        = string
 }
 
+variable "create_k8s_remote_artifact_registry" {
+  description = "Creates Remote Artifact Registry"
+  type        = bool
+  default     = true
+}
+
 variable "k8s_registry" {
   description = "Kubernetes registry domain"
   type        = string

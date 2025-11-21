@@ -171,7 +171,7 @@ variable "workerpool_id" {
     `service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`
   EOT
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "access_level_name" {
