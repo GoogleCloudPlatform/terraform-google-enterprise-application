@@ -27,15 +27,12 @@ spec:
             type: PathPrefix
             value: /v1/chat/completions
       backendRefs:
-        - group: ""
-          kind: Service
-          name: capital-agent-service
+        - name: capital-agent-service
           port: 8080
     - matches:
-        - path: { type: PathPrefix, value: /health }
-        - path: { type: PathPrefix, value: / }
+        - path:
+            type: PathPrefix
+            value: /
       backendRefs:
-        - group: ""
-          kind: Service
-          name: capital-agent-service
+        - name: capital-agent-service
           port: 8080

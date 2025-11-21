@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - deployment.yaml
-  - serviceaccount.yaml
-  - service.yaml
-  - httproute.yaml
-  - gateway.yaml
-  - healthcheck.yaml
-  - inferencepool.yaml
-  - inferenceobjectives.yaml
-configMapGenerator:
-  - name: capital-agent-config
-    literals:
-      - GOOGLE_CLOUD_PROJECT=DUMMY
-      - GOOGLE_CLOUD_LOCATION=DUMMY
-      - MODEL_ID=meta/llama-3.1-8b-instruct
+apiVersion: inference.networking.k8s.io/v1
+kind: InferencePool
+metadata:
+  name: capital-agent-pool
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: capital-agent-server
+  targetPorts:
+    - number: 8080
+  endpointPickerRef:
+    group: ""
+    kind: Service
+    name: capital-agent-service
+    port:
+      number: 8080

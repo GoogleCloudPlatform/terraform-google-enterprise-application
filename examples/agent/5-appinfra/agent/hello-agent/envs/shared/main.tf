@@ -54,11 +54,11 @@ module "app" {
 
 module "model_armor_configuration" {
   source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 2.0"
+  version = "~> 2.3"
 
   for_each    = local.cluster_projects_id
   template_id = "ma-${local.application_name}-${local.service_name}"
-  location    = "us"
+  location    = var.region
   project_id  = each.value
 
   rai_filters = {
@@ -78,7 +78,7 @@ module "model_armor_configuration" {
     enforcement_type                         = "INSPECT_AND_BLOCK"
     enable_multi_language_detection          = true
     log_sanitize_operations                  = true
-    log_template_operations                  = false
+    log_template_operations                  = true
     ignore_partial_invocation_failures       = false
     custom_prompt_safety_error_code          = "799"
     custom_prompt_safety_error_message       = "error 799"
@@ -87,7 +87,7 @@ module "model_armor_configuration" {
   }
 
   labels = {
-    "foo" = "bar"
+    "agent" = "capital-agent"
   }
 }
 
