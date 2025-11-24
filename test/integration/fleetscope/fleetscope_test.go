@@ -19,7 +19,6 @@ import (
 	"maps"
 	"os"
 	"slices"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -39,12 +38,7 @@ func TestFleetscope(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
-	hpc, err := strconv.ParseBool(setup.GetTFSetupStringOutput("hpc"))
-	if err != nil {
-		hpc = false
-	}
-
-	err = os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
 	if err != nil {
 		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
 	}
@@ -272,17 +266,11 @@ func TestFleetscope(t *testing.T) {
 				}
 
 				// GKE Scopes and Namespaces
-				for _, namespaces := range func() []string {
-					if hpc {
-						return []string{"hpc-team-a", "hpc-team-b"}
-					} else {
-						return []string{"cb-frontend", "cb-accounts", "cb-ledger", "cymbalshops"}
-					}
-				}() {
-					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s-%s", clusterProjectID, namespaces, envName)
-					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)
-					gkeNamespaces := fmt.Sprintf("projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s", clusterProjectID, namespaces, envName)
-					opNamespaces := gcloud.Runf(t, "container hub scopes namespaces describe projects/%[1]s/locations/global/scopes/%[2]s-%[3]s/namespaces/%[2]s-%[3]s --project=%[1]s", clusterProjectID, namespaces, envName)
+				for _, namespaces := range currentEnvNamespaces {
+					gkeScopes := fmt.Sprintf("projects/%s/locations/global/scopes/%s", clusterProjectID, namespaces)
+					opGKEScopes := gcloud.Runf(t, "container fleet scopes describe projects/%[1]s/locations/global/scopes/%[2]s --project=%[1]s", clusterProjectID, namespaces)
+					gkeNamespaces := fmt.Sprintf("projects/%[1]s/locations/global/scopes/%[2]s/namespaces/%[2]s", clusterProjectID, namespaces)
+					opNamespaces := gcloud.Runf(t, "container hub scopes namespaces describe projects/%[1]s/locations/global/scopes/%[2]s/namespaces/%[2]s --project=%[1]s", clusterProjectID, namespaces)
 					assert.Equal(gkeNamespaces, opNamespaces.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeNamespaces))
 					assert.True(opNamespaces.Exists(), "Namespace %s should exist", gkeNamespaces)
 					assert.Equal(gkeScopes, opGKEScopes.Get("name").String(), fmt.Sprintf("The GKE Namespace should be %s", gkeScopes))
