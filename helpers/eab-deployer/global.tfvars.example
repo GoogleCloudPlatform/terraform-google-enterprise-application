@@ -102,7 +102,6 @@ apps = {
 }
 
 enable_multicluster_discovery = true
-create_regional_loadbalancer  = false
 
 // List all the enviroments to be deployed:
 // At least one of the enviroments MUST be production

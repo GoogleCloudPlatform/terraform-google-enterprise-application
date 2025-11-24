@@ -145,7 +145,6 @@ func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 		CBPrivateWorkerpoolProjectID: workerPoolInfo["project"],
 		AccessLevelName:              tfvars.AccessLevelName,
 		DeletionProtection:           tfvars.DeletionProtection,
-		CreateRegionalLoadBalancer:   tfvars.CreateRegionalLoadBalancer,
 	}
 	err = utils.WriteTfvars(filepath.Join(c.EABPath, MultitenantStep, "terraform.tfvars"), multitenantTfvars)
 	if err != nil {
