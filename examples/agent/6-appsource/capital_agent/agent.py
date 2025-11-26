@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from google.adk.agents import LlmAgent
+
+MODEL_ID = os.getenv("MODEL_ID", "gemini-2.0-flash")
 
 
 # Define a tool function
@@ -25,7 +28,7 @@ def get_capital_city(country: str) -> str:
 
 
 capital_agent = LlmAgent(
-    model="gemini-2.0-flash",
+    model=MODEL_ID,
     name="capital_agent",
     description="""Answers user questions about the capital
     city of a given country.""",

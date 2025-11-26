@@ -28,7 +28,7 @@ spec:
       - celMatcher: '(request.path == "/run" || request.path == "/run_sse") && request.method == "POST"'
     extensions:
     - name: capital-agent-model-armor-service
-      googleAPIServiceName: modelarmor.us-central1.rep.googleapis.com
+      googleAPIServiceName: modelarmor.${LOCATION}.rep.googleapis.com
       failOpen: true
       supportedEvents:
       - RequestHeaders
@@ -40,7 +40,7 @@ spec:
         model_armor_settings: '[
           {
             "model": "gemini-2.0-flash",
-            "model_response_template_id": "projects/PROJECT_ID/locations/LOCATION/templates/RESPONSE_TEMPLATE",
-            "user_prompt_template_id": "projects/PROJECT_ID/locations/LOCATION/templates/PROMPT_TEMPLATE"
+            "model_response_template_id": "${TEMPLATE_ID}",
+            "user_prompt_template_id": "${TEMPLATE_ID}"
           }
         ]'
