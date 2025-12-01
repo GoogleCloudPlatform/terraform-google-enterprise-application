@@ -1,0 +1,60 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package main;
+
+option go_package = "github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/loadtest;main";
+
+message LoadTask {
+
+  // Individual task
+  message Task {
+
+    // Unique id for this task
+    int64 id = 1;
+
+    // Likelihood of failure (for a simulator)
+    double  perc_crash = 2;
+    double  perc_fail = 3;
+
+    // How long it takes to run (for compute)
+    int64 max_micros = 4;
+    int64 min_micros = 5;
+
+    // Size of payload results (all risk metrics, sensitivities, etc)
+    int64 result_size = 6;
+
+    // Payload includes all marketdata, trade information,
+    // risk metric parameters, etc..
+    bytes  payload = 7;
+
+    // Read from a POSIX file
+    string read_file = 8;
+
+    // Read from a POSIX dir (all files in the directory)
+    string read_dir = 9;
+
+    // Write output to a POSIX file
+    string write_file = 10;
+    int64  write_bytes = 11;
+  }
+
+  // Initialization task (do it only once for the same id!)
+  Task init = 1;
+
+  // This task
+  Task task = 2;
+}

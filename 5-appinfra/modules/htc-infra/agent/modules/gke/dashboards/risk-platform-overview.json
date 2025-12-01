@@ -1,0 +1,1255 @@
+{
+    "displayName": "Risk Platform Overview",
+    "mosaicLayout": {
+      "columns": 48,
+      "tiles": [
+        {
+          "xPos": 24,
+          "yPos": 8,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"pubsub.googleapis.com/subscription/num_undelivered_messages\" resource.type=\"pubsub_subscription\" resource.label.\"subscription_id\"=\"gke_hpa_request_sub\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "Pending Tasks",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"pubsub.googleapis.com/topic/send_request_count\" resource.type=\"pubsub_topic\" resource.label.\"topic_id\"=\"gke_hpa_response\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "Completed Tasks",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              },
+              "y2Axis": {
+                "label": "",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "title": "Number of pending and completed tasks",
+            "id": ""
+          }
+        },
+        {
+          "yPos": 8,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "prometheusQuery": "count(rate(kubernetes_io:pod_network_received_bytes_count{monitored_resource=\"k8s_pod\",pod_name=~\"gke-hpa.+\"}[${__interval}]))",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "prometheusQuery": "sum(avg_over_time(pubsub_googleapis_com:subscription_num_undelivered_messages{monitored_resource=\"pubsub_subscription\",subscription_id=\"gke_hpa_request_sub\"}[${__interval}]))",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "Number of workers",
+                "scale": "LINEAR"
+              },
+              "y2Axis": {
+                "label": "Number of pending tasks",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "title": "Number of workers vs pending tasks",
+            "id": ""
+          }
+        },
+        {
+          "xPos": 8,
+          "width": 8,
+          "height": 8,
+          "widget": {
+            "scorecard": {
+              "timeSeriesQuery": {
+                "prometheusQuery": "sum(avg_over_time(kubernetes_io:node_cpu_total_cores{monitored_resource=\"k8s_node\"}[${__interval}]))",
+                "unitOverride": "",
+                "outputFullDuration": false
+              },
+              "sparkChartView": {
+                "sparkChartType": "SPARK_LINE"
+              },
+              "thresholds": [],
+              "dimensions": [],
+              "measures": []
+            },
+            "title": "Total vCPU's",
+            "id": ""
+          }
+        },
+        {
+          "xPos": 16,
+          "width": 8,
+          "height": 8,
+          "widget": {
+            "scorecard": {
+              "timeSeriesQuery": {
+                "prometheusQuery": "sum(avg_over_time(kubernetes_io:node_memory_total_bytes{monitored_resource=\"k8s_node\"}[${__interval}]))",
+                "unitOverride": "",
+                "outputFullDuration": false
+              },
+              "sparkChartView": {
+                "sparkChartType": "SPARK_LINE"
+              },
+              "thresholds": [],
+              "dimensions": [],
+              "measures": []
+            },
+            "title": "Total memory",
+            "id": ""
+          }
+        },
+        {
+          "width": 8,
+          "height": 8,
+          "widget": {
+            "scorecard": {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/node/cpu/core_usage_time\" resource.type=\"k8s_node\"",
+                  "aggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_RATE",
+                    "groupByFields": []
+                  },
+                  "secondaryAggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_COUNT",
+                    "groupByFields": []
+                  }
+                },
+                "unitOverride": "",
+                "outputFullDuration": false
+              },
+              "sparkChartView": {
+                "sparkChartType": "SPARK_LINE"
+              },
+              "thresholds": [],
+              "dimensions": [],
+              "measures": []
+            },
+            "title": "Kubernetes Node - CPU usage time [COUNT]",
+            "id": ""
+          }
+        },
+        {
+          "xPos": 24,
+          "width": 8,
+          "height": 8,
+          "widget": {
+            "scorecard": {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/pod/network/received_bytes_count\" resource.type=\"k8s_pod\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                  "aggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_RATE",
+                    "groupByFields": []
+                  },
+                  "secondaryAggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_COUNT",
+                    "groupByFields": []
+                  }
+                },
+                "unitOverride": "",
+                "outputFullDuration": false
+              },
+              "sparkChartView": {
+                "sparkChartType": "SPARK_LINE"
+              },
+              "thresholds": [],
+              "dimensions": [],
+              "measures": []
+            },
+            "title": "Total Number of Workers",
+            "id": ""
+          }
+        },
+        {
+          "xPos": 32,
+          "width": 8,
+          "height": 8,
+          "widget": {
+            "scorecard": {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"pubsub.googleapis.com/subscription/num_unacked_messages_by_region\" resource.type=\"pubsub_subscription\" resource.label.\"subscription_id\"=\"gke_hpa_request_sub\"",
+                  "aggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_MEAN",
+                    "crossSeriesReducer": "REDUCE_SUM",
+                    "groupByFields": []
+                  }
+                },
+                "unitOverride": "",
+                "outputFullDuration": false
+              },
+              "sparkChartView": {
+                "sparkChartType": "SPARK_LINE"
+              },
+              "thresholds": [],
+              "dimensions": [],
+              "measures": []
+            },
+            "title": "Tasks Remaining",
+            "id": ""
+          }
+        },
+        {
+          "xPos": 40,
+          "width": 8,
+          "height": 8,
+          "widget": {
+            "scorecard": {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"pubsub.googleapis.com/topic/send_request_count\" resource.type=\"pubsub_topic\" resource.label.\"topic_id\"=\"gke_hpa_response\"",
+                  "aggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_RATE",
+                    "crossSeriesReducer": "REDUCE_SUM",
+                    "groupByFields": []
+                  }
+                },
+                "unitOverride": "",
+                "outputFullDuration": false
+              },
+              "sparkChartView": {
+                "sparkChartType": "SPARK_LINE"
+              },
+              "thresholds": [],
+              "dimensions": [],
+              "measures": []
+            },
+            "title": "Tasks Processed per second",
+            "id": ""
+          }
+        },
+        {
+          "xPos": 24,
+          "yPos": 24,
+          "width": 24,
+          "height": 8,
+          "widget": {
+            "title": "Worker replica stats",
+            "timeSeriesTable": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_spec_min_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "tableTemplate": "",
+                  "minAlignmentPeriod": "60s"
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_spec_max_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "tableTemplate": "",
+                  "minAlignmentPeriod": "60s"
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_status_desired_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "tableTemplate": "",
+                  "minAlignmentPeriod": "60s"
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_status_current_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "tableTemplate": "",
+                  "minAlignmentPeriod": "60s"
+                }
+              ],
+              "metricVisualization": "NUMBER",
+              "columnSettings": [
+                {
+                  "column": "project_id",
+                  "visible": false
+                },
+                {
+                  "column": "value",
+                  "visible": true,
+                  "displayName": "Min Replicas"
+                },
+                {
+                  "column": "value-1",
+                  "visible": true,
+                  "displayName": "Max Replicas"
+                },
+                {
+                  "column": "value-2",
+                  "visible": true,
+                  "displayName": "Desired Replicas"
+                },
+                {
+                  "column": "value-3",
+                  "visible": true,
+                  "displayName": "Current Replicas"
+                }
+              ],
+              "opsAnalyticsSettings": {
+                "maxRows": "0",
+                "showFilterBar": false,
+                "pageSize": "0"
+              },
+              "displayColumnType": false
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 112,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Oldest unacked message age",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"pubsub.googleapis.com/subscription/oldest_unacked_message_age\" resource.type=\"pubsub_subscription\" resource.label.\"subscription_id\"=\"gke_hpa_request_sub\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_MAX",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "timeshiftDuration": "0s",
+              "thresholds": [],
+              "yAxis": {
+                "label": "y1Axis",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 96,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Worker Requests ",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesQueryLanguage": "\nfetch pubsub_subscription\n| metric 'pubsub.googleapis.com/subscription/sent_message_count'\n| filter\n  resource.project_id == 'fsi-research-1' &&\n  resource.subscription_id == 'gke_hpa_request_sub'\n| align rate(1m)\n| every 1m\n| group_by [],\n  [value_sent_message_count: sum(value.sent_message_count)]",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesQueryLanguage": "\nfetch pubsub_subscription\n| metric 'pubsub.googleapis.com/subscription/ack_message_count'\n| filter\n  resource.project_id == 'fsi-research-1' &&\n  resource.subscription_id == 'gke_hpa_request_sub'\n| align rate(1m)\n| every 1m\n| group_by [],\n  [value_ack_message_count: sum(value.ack_message_count)]",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesQueryLanguage": "\nfetch pubsub_topic\n| metric 'pubsub.googleapis.com/topic/message_sizes'\n| filter\n  resource.project_id == 'fsi-research-1' &&\n  resource.topic_id == 'gke_hpa_request'\n| align delta(1m)\n| every 1m\n| group_by [resource.topic_id],\n  [value_message_sizes_sum: count(value.message_sizes)]\n| rate 1m",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "timeshiftDuration": "0s",
+              "thresholds": [],
+              "yAxis": {
+                "label": "y1Axis",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "xPos": 24,
+          "yPos": 96,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Worker Requests - Pull to Ack delta",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesQueryLanguage": "\nfetch pubsub_subscription\n| {\n   metric 'pubsub.googleapis.com/subscription/sent_message_count'\n   | filter resource.project_id == 'fsi-research-1' &&\n     resource.subscription_id = 'gke_hpa_request_sub'\n   | align delta(1m)\n   | every 1m\n   | group_by [],\n     [value_sent_message_count: sum(value.sent_message_count)];\n\n   metric 'pubsub.googleapis.com/subscription/ack_message_count'\n   | filter resource.project_id == 'fsi-research-1' &&\n     resource.subscription_id = 'gke_hpa_request_sub'\n   | align delta(1m)\n   | every 1m\n   | group_by [],\n     [value_ack_message_count: sum(value.ack_message_count)]\n  }\n| outer_join 0\n| sub",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "timeshiftDuration": "0s",
+              "thresholds": [],
+              "yAxis": {
+                "label": "y1Axis",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "xPos": 24,
+          "yPos": 112,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Worker Published - Message count",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesQueryLanguage": "\nfetch pubsub_topic\n| metric 'pubsub.googleapis.com/topic/message_sizes'\n| filter resource.project_id == 'fsi-research-1'\n&& resource.topic_id == 'gke_hpa_response'\n| align delta(1m)\n| every 1m\n| group_by [resource.topic_id],\n[value_message_sizes_sum: count(value.message_sizes)]\n| rate 1m",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "timeshiftDuration": "0s",
+              "thresholds": [],
+              "yAxis": {
+                "label": "y1Axis",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 48,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Number of GKE Nodes vs Tasks",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "legendTemplate": "Number of Pending Tasks",
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "LINE",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_MEAN"
+                      },
+                      "filter": "metric.type=\"pubsub.googleapis.com/subscription/num_undelivered_messages\" resource.type=\"pubsub_subscription\""
+                    }
+                  }
+                },
+                {
+                  "legendTemplate": "Number of GKE Nodes",
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "LINE",
+                  "targetAxis": "Y2",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_RATE"
+                      },
+                      "filter": "metric.type=\"kubernetes.io/node/network/received_bytes_count\" resource.type=\"k8s_node\"",
+                      "secondaryAggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_COUNT",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_MEAN"
+                      }
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "y2Axis": {
+                "label": "Number of Nodes",
+                "scale": "LINEAR"
+              },
+              "yAxis": {
+                "label": "Number of Pending Tasks",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "xPos": 24,
+          "yPos": 32,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Worker starts and restarts (total)",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "prometheusQuery": "sum(increase(kubernetes_io:container_uptime{monitored_resource=\"k8s_container\",pod_name=~\"gke-hpa.+\"}[${__interval}]) > bool 60)",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "STACKED_BAR",
+                  "legendTemplate": "",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "prometheusQuery": "sum(increase(kubernetes_io:container_restart_count{monitored_resource=\"k8s_container\",pod_name=~\"gke-hpa.+\"}[${__interval}]))",
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "STACKED_BAR",
+                  "legendTemplate": "",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "y2Axis": {
+                "label": "Count",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 48,
+          "width": 48,
+          "height": 48,
+          "widget": {
+            "title": "GKE",
+            "collapsibleGroup": {
+              "collapsed": true
+            },
+            "id": ""
+          }
+        },
+        {
+          "xPos": 24,
+          "yPos": 48,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Number of instances per machine type",
+            "timeSeriesTable": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"compute.googleapis.com/instance/cpu/utilization\" resource.type=\"gce_instance\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_COUNT",
+                        "groupByFields": [
+                          "metadata.system_labels.\"machine_type\""
+                        ]
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "tableTemplate": "",
+                  "minAlignmentPeriod": "60s"
+                }
+              ],
+              "metricVisualization": "NUMBER",
+              "columnSettings": [
+                {
+                  "column": "system_labels.machine_type",
+                  "visible": true,
+                  "displayName": "Machine Type"
+                },
+                {
+                  "column": "project_id",
+                  "visible": false
+                },
+                {
+                  "column": "value",
+                  "visible": true
+                }
+              ],
+              "opsAnalyticsSettings": {
+                "maxRows": "0",
+                "showFilterBar": false,
+                "pageSize": "0"
+              },
+              "displayColumnType": false
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 64,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "CPU - total usage / request / limit",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/cpu/core_usage_time\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/cpu/limit_cores\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/cpu/request_cores\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "xPos": 24,
+          "yPos": 64,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Memory - total usage / request / limit",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/memory/used_bytes\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/memory/limit_bytes\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/memory/request_bytes\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "y2Axis": {
+                "label": "",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 24,
+          "width": 48,
+          "height": 24,
+          "widget": {
+            "title": "Worker",
+            "collapsibleGroup": {
+              "collapsed": true
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 96,
+          "width": 48,
+          "height": 32,
+          "widget": {
+            "title": "Pub / Sub",
+            "collapsibleGroup": {
+              "collapsed": true
+            },
+            "id": ""
+          }
+        },
+        {
+          "xPos": 24,
+          "yPos": 80,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Autoscaler events",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"logging.googleapis.com/log_entry_count\" resource.type=\"k8s_cluster\" metric.label.\"log\"=\"container.googleapis.com/cluster-autoscaler-visibility\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "STACKED_BAR",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 80,
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "title": "Ephemeral Storage - total usage / request / limit",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/ephemeral_storage/used_bytes\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/ephemeral_storage/limit_bytes\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"kubernetes.io/container/ephemeral_storage/request_bytes\" resource.type=\"k8s_container\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"gke-hpa.+\")",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y2",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "y2Axis": {
+                "label": "",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        },
+        {
+          "yPos": 24,
+          "width": 24,
+          "height": 24,
+          "widget": {
+            "title": "Worker replica stats",
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_spec_min_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "Min Replicas",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_spec_max_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "Max Replicas",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_status_desired_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "Desired Replicas",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"prometheus.googleapis.com/kube_horizontalpodautoscaler_status_current_replicas/gauge\" resource.type=\"prometheus_target\"",
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    },
+                    "unitOverride": "",
+                    "outputFullDuration": false
+                  },
+                  "plotType": "LINE",
+                  "legendTemplate": "Current Replicas",
+                  "minAlignmentPeriod": "60s",
+                  "targetAxis": "Y1",
+                  "dimensions": [],
+                  "measures": [],
+                  "breakdowns": []
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              },
+              "chartOptions": {
+                "mode": "COLOR",
+                "showLegend": false,
+                "displayHorizontal": false
+              }
+            },
+            "id": ""
+          }
+        }
+      ]
+    },
+    "dashboardFilters": [],
+    "labels": {}
+  }
