@@ -1,0 +1,44 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 5 files (1-5mb)
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fio-config-gcs
+data:
+  fio.conf: |
+    [global]
+    bs=4k
+    direct=1
+    ioengine=sync
+    numjobs=1
+    runtime=300
+    time_based
+    group_reporting
+    invalidate=1
+    startdelay=10
+
+    [randomreads]
+    name=small_files_random_read_${POD_NAME}
+    directory=${MOUNT_PATH}/${TEST_DIR}
+    filename_format=testfile_*
+    rw=randread
+    file_service_type=random
+    openfiles=5
+    nrfiles=1000
+    randrepeat=0
+    filesize=1M-5M
+    create_on_open=0
+    size=0

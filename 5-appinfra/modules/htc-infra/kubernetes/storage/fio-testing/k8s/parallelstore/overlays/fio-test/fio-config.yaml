@@ -1,0 +1,67 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parallelstore-fio-config
+data:
+  fio.conf: |
+    [global]
+    directory=${MOUNT_PATH}/${TEST_DIR}
+    bs=4k
+    direct=1
+    ioengine=libaio
+    iodepth=32
+    time_based
+    runtime=300
+    group_reporting
+    invalidate=1
+    size=100G
+    # Small Reads
+    [parallel_reads]
+    name=library_parallel_reads_${POD_NAME}
+    filename_format=testfile_*
+    rw=randread
+    numjobs=32
+    nrfiles=1000
+    openfiles=100
+    filesize=50k-1M
+    file_service_type=random
+    randrepeat=0
+    norandommap=1
+    startdelay=10
+    # Large files
+    # [parallel_reads]
+    # name=library_parallel_reads_${POD_NAME}
+    # filename_format=testfile_*
+    # rw=randread
+    # numjobs=32
+    # nrfiles=125
+    # openfiles=100
+    # filesize=50m-250m
+    # file_service_type=random
+    # randrepeat=0
+    # norandommap=1
+    # startdelay=10
+
+    # [sequential_reads]
+    # stonewall
+    # name=library_sequential_reads_${POD_NAME}
+    # filename_format=testfile_*
+    # rw=read
+    # numjobs=16
+    # openfiles=100
+    # nrfiles=1000
+    # filesize=10k-1M
