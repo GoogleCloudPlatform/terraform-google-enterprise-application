@@ -16,7 +16,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: capital-agent-service
-  namespace: default
+  namespace: capital-agent
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
 spec:

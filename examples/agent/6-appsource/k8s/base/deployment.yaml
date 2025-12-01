@@ -16,7 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: capital-agent-deployment
-  namespace: default
+  namespace: capital-agent
 spec:
   replicas: 1
   selector:
