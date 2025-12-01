@@ -16,7 +16,7 @@
 
 locals {
   application_name = "agent"
-  service_name     = "hello-agent"
+  service_name     = "capital-agent"
   team_name        = "default"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"

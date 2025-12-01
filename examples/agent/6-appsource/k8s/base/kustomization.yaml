@@ -21,11 +21,9 @@ resources:
   - httproute.yaml
   - gateway.yaml
   - healthcheck.yaml
-  - inferencepool.yaml
-  - inferenceobjectives.yaml
 configMapGenerator:
   - name: capital-agent-config
     literals:
       - GOOGLE_CLOUD_PROJECT=DUMMY
       - GOOGLE_CLOUD_LOCATION=DUMMY
-      - MODEL_ID=meta/llama-3.1-8b-instruct
+      - MODEL_ID=${MODEL_ID}

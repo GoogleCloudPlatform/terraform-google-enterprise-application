@@ -59,7 +59,7 @@ func TestAgentAppInfra(t *testing.T) {
 
 	for appName, serviceNames := range map[string][]string{
 		"agent": {
-			"hello-agent",
+			"capital-agent",
 		}} {
 		appName := appName
 		serviceNames := serviceNames

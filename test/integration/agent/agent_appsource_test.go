@@ -61,17 +61,16 @@ func TestSourceAgent(t *testing.T) {
 
 	region := "us-central1" // TODO: Plumb output from appInfra
 	appName := "agent"
-	serviceName := "hello-agent"
-	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/capital-%s", appName, appName)
+	serviceName := "capital-agent"
+	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/", appName)
 
 	fmt.Println(appSourcePath)
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
-	projectID := appFactory.GetJsonOutput("app-group").Get("agent\\.hello-agent.app_admin_project_id").String()
+	projectID := appFactory.GetJsonOutput("app-group").Get("agent\\.capital-agent.app_admin_project_id").String()
 	appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/5-appinfra/%s/%s/envs/shared", appName, appName, serviceName)))
 	deployTargets := appInfra.GetJsonOutput("clouddeploy_targets_names")
-	modelArmorTemplatesID := appInfra.GetJsonOutput("model_armor")
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
@@ -142,23 +141,6 @@ func TestSourceAgent(t *testing.T) {
 
 				// Convert content to string and perform replacement
 				modifiedContent = strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
-				// Write the modified content back to the file
-				err = os.WriteFile(patchFile, []byte(modifiedContent), 0644)
-				if err != nil {
-					log.Fatalf("Error writing file: %v", err)
-				}
-
-				trafficExtension := fmt.Sprintf("%s/k8s/overlays/%s/traffic-extension.yaml", tmpDirApp, envName)
-				// Read the file content
-				content, err = os.ReadFile(trafficExtension)
-				if err != nil {
-					log.Fatalf("Error reading file: %v", err)
-				}
-
-				// Convert content to string and perform replacement
-				modifiedContent = strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
-				modifiedContent = strings.ReplaceAll(modifiedContent, "${LOCATION}", region)
-				modifiedContent = strings.ReplaceAll(modifiedContent, "${TEMPLATE_ID}", modelArmorTemplatesID.Get(envName).String())
 				// Write the modified content back to the file
 				err = os.WriteFile(patchFile, []byte(modifiedContent), 0644)
 				if err != nil {

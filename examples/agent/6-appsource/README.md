@@ -21,19 +21,19 @@ A CI/CD pipeline was created for this application on 5-appinfra, it uses Cloud B
 1. Clone the CI/CD repository
 
 ```bash
-gcloud source repos clone eab-agent-example-hello-agent --project=REPLACE_WITH_ADMIN_PROJECT
+gcloud source repos clone eab-agent-example-capital-agent --project=REPLACE_WITH_ADMIN_PROJECT
 ```
 
 1. Copy the contents of this directory to the repository:
 
 ```bash
-cp -r terraform-google-enterprise-application/6-appsource/agent/* eab-agent-example-hello-agent
+cp -r terraform-google-enterprise-application/6-appsource/agent/* eab-agent-example-capital-agent
 ```
 
 1. Commit changes
 
 ```bash
-cd eab-agent-example-hello-agent
+cd eab-agent-example-capital-agent
 git checkout -b main
 git add .
 git commit -m "Add code to cicd repository"

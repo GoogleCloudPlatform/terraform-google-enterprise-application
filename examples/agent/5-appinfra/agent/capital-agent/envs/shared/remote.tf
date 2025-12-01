@@ -25,7 +25,7 @@ locals {
     )
   )
   cluster_projects_id = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => state.outputs.cluster_project_id }
-  app_admin_project   = data.terraform_remote_state.appfactory.outputs.app-group["agent.hello-agent"].app_admin_project_id
+  app_admin_project   = data.terraform_remote_state.appfactory.outputs.app-group["agent.capital-agent"].app_admin_project_id
 }
 
 data "terraform_remote_state" "multitenant" {
