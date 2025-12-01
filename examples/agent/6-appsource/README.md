@@ -4,7 +4,6 @@ This is a modified version of a [Capital Agent](https://google.github.io/adk-doc
 
 * **building** a single Go file app and with a multistage `Dockerfile` using local docker to build
 * **tagging** using the default tagPolicy (`gitCommit`)
-* **deploying** a single deployment using `kubectl`
 
 ## Using the CI/CD Pipeline
 
@@ -36,4 +35,4 @@ git push origin main
 
 1. After the CI build succesfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
-1. Once the CD pipeline succesfully runs, you should be able to see a pod named `getting-started` on your cluster that prints the "Hello world!" message.
+1. Once the CD pipeline succesfully runs, you should be able to see a deployment named `capital-agent-deployment` on your cluster and be able to access the UI by Load Balancer IP.
