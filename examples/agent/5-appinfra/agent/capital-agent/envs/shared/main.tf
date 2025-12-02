@@ -116,5 +116,5 @@ resource "google_service_account_iam_member" "wi_binding" {
   for_each           = google_service_account.gsa_capital_agent
   service_account_id = each.value.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${each.value.project}.svc.id.goog[default/capital-agent-ksa]"
+  member             = "serviceAccount:${each.value.project}.svc.id.goog[capital-agent-${each.key}/capital-agent-ksa]"
 }
