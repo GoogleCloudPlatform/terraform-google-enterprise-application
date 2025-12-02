@@ -16,7 +16,6 @@ apiVersion: networking.gke.io/v1
 kind: HealthCheckPolicy
 metadata:
   name: capital-agent-healthcheck-policy
-  namespace: capital-agent
 spec:
   # targetRef points to the Service you want to apply the health check to
   targetRef:

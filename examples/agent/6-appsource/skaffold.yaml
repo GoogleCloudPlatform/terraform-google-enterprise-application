@@ -24,9 +24,6 @@ build:
     custom:
       buildCommand: |
         docker buildx build --platform=$PLATFORMS --tag=$IMAGE --push .
-manifests:
-  rawYaml:
-  - k8s/base/deployment.yaml
 profiles:
   - name: development
     activation:
