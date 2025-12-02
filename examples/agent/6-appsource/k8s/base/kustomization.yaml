@@ -21,6 +21,7 @@ resources:
   - httproute.yaml
   - gateway.yaml
   - healthcheck.yaml
+  - hpa-capital-agent.yaml
 configMapGenerator:
   - name: capital-agent-config
     literals:
