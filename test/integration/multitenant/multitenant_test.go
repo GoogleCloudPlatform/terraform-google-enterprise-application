@@ -252,15 +252,6 @@ func TestMultitenant(t *testing.T) {
 				for i := range endpoints {
 					gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID)
 				}
-
-				endpointsGroups := gcloud.Runf(t, "compute network-endpoint-groups list --project %s", clusterProjectID).Array()
-				for i := range endpointsGroups {
-					zone := strings.Split(endpointsGroups[i].Get("zone").String(), "/")
-					_, err := gcloud.RunCmdE(t, fmt.Sprintf("compute network-endpoint-groups delete %s --project %s --zone %s -q", endpointsGroups[i].Get("name"), clusterProjectID, zone[len(zone)-1]))
-					if err != nil {
-						fmt.Printf("Error deleting neg: %s \n", err)
-					}
-				}
 				multitenant.DefaultTeardown(assert)
 
 			})

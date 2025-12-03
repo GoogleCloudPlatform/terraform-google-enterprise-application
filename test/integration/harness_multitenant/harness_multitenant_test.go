@@ -15,8 +15,6 @@
 package harness_multitenant
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -46,15 +44,6 @@ func TestMultitenantHarness(t *testing.T) {
 			endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID.String()).Array()
 			for i := range endpoints {
 				gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID.String())
-			}
-
-			endpointsGroups := gcloud.Runf(t, "compute network-endpoint-groups list --project %s", clusterProjectID.String()).Array()
-			for i := range endpointsGroups {
-				zone := strings.Split(endpointsGroups[i].Get("zone").String(), "/")
-				_, err := gcloud.RunCmdE(t, fmt.Sprintf("compute network-endpoint-groups delete %s --project %s --zone %s -q", endpointsGroups[i].Get("name"), clusterProjectID.String(), zone[len(zone)-1]))
-				if err != nil {
-					fmt.Printf("Error deleting neg: %s \n", err)
-				}
 			}
 		}
 		multiTenant.DefaultTeardown(assert)
