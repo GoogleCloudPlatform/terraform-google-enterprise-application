@@ -10,7 +10,7 @@ It also requires a newer version of Kubernetes installed in your cluster. You ca
 
 This example requires:
 
-1.`jq` installed.
+1. `jq` installed.
 1. [1-bootstrap](../../1-bootstrap/README.md) phase executed successfully.
 1. [2-multitenant](../../2-multitenant/README.md) phase executed successfully.
 1. [3-fleetscope](../../3-fleetscope/README.md) phase executed successfully.
