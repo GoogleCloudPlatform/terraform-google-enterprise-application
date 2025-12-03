@@ -17,6 +17,6 @@
 terraform {
   backend "gcs" {
     bucket = "UPDATE_INFRA_REPO_STATE"
-    prefix = "terraform/appinfra/cymbal-bank/contacts/shared"
+    prefix = "terraform/appinfra/agents/capital-agent/shared"
   }
 }
