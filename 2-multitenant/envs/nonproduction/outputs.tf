@@ -85,6 +85,6 @@ output "cluster_service_accounts" {
 }
 
 output "cluster_zones" {
-  description = "Default fowarding rule ID for load balancer."
+  description = "GKE cluster zones."
   value       = module.env.cluster_zones
 }

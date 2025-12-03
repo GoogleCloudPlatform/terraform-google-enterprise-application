@@ -26,7 +26,7 @@
 | cluster\_regions | Regions with clusters. |
 | cluster\_service\_accounts | The default service accounts used for nodes, if not overridden in node\_pools. |
 | cluster\_type | Cluster type. |
-| cluster\_zones | Default fowarding rule ID for load balancer. |
+| cluster\_zones | GKE cluster zones. |
 | env | Environments. |
 | fleet\_project\_id | Fleet Project ID. |
 | network\_names | Network Names. |

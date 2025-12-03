@@ -29,7 +29,7 @@ output "cluster_membership_ids" {
 }
 
 output "cluster_zones" {
-  description = "GKE cluster membership IDs."
+  description = "GKE cluster zones."
   value = flatten([
     for value in merge(module.gke-standard, module.gke-autopilot) : value.zones
   ])
