@@ -12,8 +12,7 @@ A CI/CD pipeline was created for this application on 5-appinfra, it uses Cloud B
 1. Clone the CI/CD repository
 
 ```bash
-gcloud source repos clone eab-agent-example-capital-agent --project=REPLACE_WITH_ADMIN_PROJECT
-```
+gcloud source repos clone eab-default-capital-agent --project=REPLACE_WITH_ADMIN_PROJECT
 
 1. Copy the contents of this directory to the repository:
 
