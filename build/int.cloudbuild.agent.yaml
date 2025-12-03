@@ -228,11 +228,16 @@ steps:
   - id: appsource-agent
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      [
-        "/bin/bash",
-        "-c",
-        "sleep 120s && cft test run TestSourceAgent --stage verify --verbose",
-      ]
+      - "-c"
+      - |-
+       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        sleep 5m
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSourceAgent --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
     waitFor:
       - appinfra-apply
       - fleetscope-verify
