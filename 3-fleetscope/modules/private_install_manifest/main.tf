@@ -52,7 +52,6 @@ data "google_artifact_registry_repository" "k8s" {
 }
 
 resource "google_artifact_registry_repository" "k8s" {
-  count         = var.create_k8s_remote_artifact_registry ? 1 : 0
   project       = var.project_id
   location      = var.region
   repository_id = "k8s"
