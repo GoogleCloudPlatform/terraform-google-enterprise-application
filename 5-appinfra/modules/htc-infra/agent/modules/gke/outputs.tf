@@ -22,12 +22,6 @@ output "topics" {
   ]
 }
 
-# Dashboard for Platform Overview
-output "monitoring_dashboard_url" {
-  description = "Cloud Monitoring dashboard"
-  value       = "https://console.cloud.google.com/monitoring/dashboards/builder/${regex("projects/[0-9]+/dashboards/(.*)$", google_monitoring_dashboard.risk-platform-overview.id)[0]};project=${var.project_id}"
-}
-
 # Test scripts (shell scripts)
 output "test_scripts_list" {
   description = "Test configuration shell scripts as a list"
@@ -40,7 +34,7 @@ output "test_scripts_list" {
 
 output "first_test_script" {
   description = "First test script"
-  value       = module.config_apply[0].test_scripts
+  value       = length(var.gke_cluster_names) > 0 ? module.config_apply[0].test_scripts : ""
 }
 
 # Cluster

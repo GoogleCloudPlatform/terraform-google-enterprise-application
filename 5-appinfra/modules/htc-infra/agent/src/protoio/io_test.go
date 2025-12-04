@@ -81,7 +81,7 @@ func TestProtoDefinition(t *testing.T) {
 
 	//ReadProto(context.Background(), desc, "testInput")
 	// tmpdir := t.TempDir()
-	tmpdir := "/tmp"
+	tmpdir := t.TempDir()
 	tmpFile := path.Join(tmpdir, "testOutput")
 
 	// Produce ten in a row!

@@ -67,18 +67,6 @@ resource "google_pubsub_subscription" "subscription" {
   }
 }
 
-# Dashboard
-
-resource "google_monitoring_dashboard" "risk-platform-overview" {
-  project        = data.google_project.environment.project_id
-  dashboard_json = file("${path.module}/${var.dashboard}")
-
-  lifecycle {
-    ignore_changes = [
-      dashboard_json
-    ]
-  }
-}
 # Regional Resources
 
 # GCS bucket per region

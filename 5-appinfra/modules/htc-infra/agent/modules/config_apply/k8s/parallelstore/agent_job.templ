@@ -16,6 +16,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: ${name}
+  namespace: ${namespace}
 spec:
   parallelism: ${parallel}
   ttlSecondsAfterFinished: 30
@@ -38,7 +39,6 @@ spec:
       - name: workload
         image: ${workload_image}
         args: ${jsonencode(workload_args)}
-        restartPolicy: Always
         workingDir: /data
         resources:
           requests:
