@@ -15,19 +15,13 @@
 apiVersion: skaffold/v4beta10
 kind: Config
 build:
-  tagPolicy:
-    gitCommit:
-      variant: CommitSha
   artifacts:
-  - image: skaffold-example
-    platforms: ["linux/amd64"]
-    custom:
-      buildCommand: |
-        docker buildx build --platform=$PLATFORMS --tag=$IMAGE --push .
+  - image: capital-agent
+    context: .
+  tagPolicy:
+    gitCommit: {}
 profiles:
   - name: development
-    activation:
-    - command: dev
     manifests:
       kustomize:
         paths:

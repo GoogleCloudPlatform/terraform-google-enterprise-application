@@ -29,7 +29,7 @@ spec:
       serviceAccountName: capital-agent-ksa
       containers:
         - name: capital-agent
-          image: skaffold-example
+          image: capital-agent
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
