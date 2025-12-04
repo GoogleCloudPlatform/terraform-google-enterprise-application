@@ -39,7 +39,6 @@ spec:
       - name: workload
         image: ${workload_image}
         args: ${jsonencode(workload_args)}
-        restartPolicy: Always
         workingDir: /data
         resources:
           requests:
@@ -104,4 +103,4 @@ spec:
       onExitCodes:
         containerName: agent
         operator: NotIn
-        values: [1]
+        values: [0]

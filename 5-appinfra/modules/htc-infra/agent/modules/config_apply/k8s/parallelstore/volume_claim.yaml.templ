@@ -16,6 +16,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: parallelstore-pvc-${location}
+  namespace: ${namespace}
 spec:
   accessModes:
     - ReadWriteMany

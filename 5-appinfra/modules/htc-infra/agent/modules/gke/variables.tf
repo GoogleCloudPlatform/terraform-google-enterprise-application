@@ -69,12 +69,6 @@ variable "workload_args" {
   description = "Workload image for Cloud Run templates"
 }
 
-variable "dashboard" {
-  type        = string
-  default     = "dashboards/risk-platform-overview.json"
-  description = "dashboard JSON configuration. Default is 'dashboards/risk-platform-overview.json'."
-}
-
 #
 # Optional functionality
 # (Review suggested)

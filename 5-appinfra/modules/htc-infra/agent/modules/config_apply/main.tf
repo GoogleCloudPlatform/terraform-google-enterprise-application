@@ -146,7 +146,7 @@ resource "null_resource" "cluster_init" {
     ${local.kubeconfig_script}
 
     mkdir -p ./generated/k8s_configs
-    echo "${each.value}" ./generated/k8s_configs/${each.key}
+    echo "${each.value}" > ./generated/k8s_configs/${each.key}
 
     kubectl apply -f - <<EOF
     ${each.value}
@@ -201,7 +201,7 @@ resource "null_resource" "job_init" {
       parallel          = 1,
       image             = cfg.image,
       args              = cfg.args,
-      namespace         = var.namespace
+      namespace         = var.namespace,
       pubsub_project_id = var.infra_project_id
     })
   }
@@ -237,7 +237,7 @@ resource "null_resource" "parallelstore_init" {
       pubsub_project_id   = var.infra_project_id
       name                = each.value.name
       access_points       = var.parallelstore_access_points
-      infra_project_id_id = var.infra_project_id
+      infra_project_id    = var.infra_project_id
       vpc                 = var.parallelstore_vpc_name
       location            = var.parallelstore_location
       instance_name       = var.parallelstore_instance_name

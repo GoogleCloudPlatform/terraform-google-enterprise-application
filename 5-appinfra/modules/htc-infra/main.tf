@@ -31,26 +31,6 @@ locals {
     config.name => config
   }
 
-  ui_config_file = yamlencode({
-    "project_id" : var.infra_project,
-    "region" : var.region,
-    "pubsub_summary_table" : "${google_bigquery_table.messages_summary.project}.${google_bigquery_table.messages_summary.dataset_id}.${google_bigquery_table.messages_summary.table_id}",
-    "urls" : {
-      "dashboard" = module.gke.monitoring_dashboard_url
-      "cluster"   = module.gke.cluster_urls
-    },
-    "tasks" : concat(
-      length(module.gke) == 0 ? [] : [
-        for config in local.test_configs : {
-          "name" = "GKE ${config.name}",
-          # "script"      = module.gke.first_test_script[config.name],
-          "script"      = module.gke.test_scripts_list[0],
-          "parallel"    = config.parallel,
-          "description" = config.description,
-        }
-      ],
-    ),
-  })
   parallelstore_instances = var.storage_type == "PARALLELSTORE" ? {
     for region, instance in module.parallelstore : region => {
       name          = instance.name_short

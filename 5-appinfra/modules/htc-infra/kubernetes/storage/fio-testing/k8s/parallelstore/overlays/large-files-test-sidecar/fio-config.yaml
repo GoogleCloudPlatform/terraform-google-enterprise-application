@@ -30,7 +30,6 @@ data:
     invalidate=1
     size=100G
 
-    Large files
     [parallel_reads]
     name=library_parallel_reads_${POD_NAME}
     filename_format=testfile_*

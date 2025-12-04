@@ -16,6 +16,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: ${name}
+  namespace: ${namespace}
 spec:
   minReplicas: 1
   maxReplicas: 50000
@@ -39,6 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${name}
+  namespace: ${namespace}
   labels:
     app: ${name}
 spec:
