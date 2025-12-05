@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "ui_config" {
-  description = "Yaml configuration for UI deployment"
-  value       = local.ui_config_file
-}
-
 output "test_scripts" {
   description = "Test configuration shell scripts"
   value       = module.gke.test_scripts_list

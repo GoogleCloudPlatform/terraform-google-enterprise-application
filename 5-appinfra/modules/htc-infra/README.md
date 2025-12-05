@@ -142,6 +142,5 @@ links into the Console.
 | Name | Description |
 |------|-------------|
 | test\_scripts | Test configuration shell scripts |
-| ui\_config | Yaml configuration for UI deployment |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
