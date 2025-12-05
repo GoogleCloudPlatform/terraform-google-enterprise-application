@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-data "google_project" "environment" {
-  project_id = var.project_id
-}
-
 locals {
   enable_jobs = (var.gke_job_request != "" && var.gke_job_response != "") ? 1 : 0
   enable_hpa  = (var.gke_hpa_request != "" && var.gke_job_response != "") ? 1 : 0
