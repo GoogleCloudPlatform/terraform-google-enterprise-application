@@ -108,9 +108,9 @@ func TestFleetscope(t *testing.T) {
 				"remote_state_bucket":         backend_bucket,
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 				"config_sync_secret_type":     "none",
-				"config_sync_repository_url":  "https://github.com/amandakarina/terraform-google-enterprise-application",
+				"config_sync_repository_url":  "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application",
 				"config_sync_policy_dir":      configSyncPath,
-				"config_sync_branch":          "feat/agent-example",
+				"config_sync_branch":          "main",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent"},
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
