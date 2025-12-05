@@ -37,10 +37,10 @@ func TestMultitenant(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
-err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("multitenant").String())
-if err != nil {
-	t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-}
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("multitenant").String())
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
 
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../setup/vpcsc"),
@@ -246,6 +246,11 @@ if err != nil {
 				firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
 				for i := range firewallRules {
 					gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
+				}
+
+				endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID).Array()
+				for i := range endpoints {
+					gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID)
 				}
 				multitenant.DefaultTeardown(assert)
 

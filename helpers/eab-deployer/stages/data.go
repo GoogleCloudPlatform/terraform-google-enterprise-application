@@ -145,6 +145,7 @@ type GlobalTFVars struct {
 	AttestationKMSKey                       *string                                  `hcl:"attestation_kms_key"`
 	AttestationEvaluationMode               string                                   `hcl:"attestation_evaluation_mode"`
 	EnableKueue                             *bool                                    `hcl:"enable_kueue"`
+	EnableMulticlusterDiscovery             *bool                                    `hcl:"enable_multicluster_discovery"`
 	BillingAccount                          string                                   `hcl:"billing_account"`
 	Applications                            map[string]map[string]ApplicationService `hcl:"applications"`
 	InfraProjectAPIs                        *[]string                                `hcl:"infra_project_apis"`
@@ -234,16 +235,17 @@ type MultiTenantTfvars struct {
 }
 
 type FleetscopeTfvars struct {
-	NamespaceIDs              map[string]string `hcl:"namespace_ids"`
-	RemoteStateBucket         string            `hcl:"remote_state_bucket"`
-	ConfigSyncSecretType      *string           `hcl:"config_sync_secret_type"`
-	ConfigSyncRepositoryURL   *string           `hcl:"config_sync_repository_url"`
-	DisableIstioOnNamespaces  []string          `hcl:"disable_istio_on_namespaces"`
-	ConfigSyncPolicyDir       *string           `hcl:"config_sync_policy_dir"`
-	ConfigSyncBranch          *string           `hcl:"config_sync_branch"`
-	AttestationKMSKey         *string           `hcl:"attestation_kms_key"`
-	AttestationEvaluationMode string            `hcl:"attestation_evaluation_mode"`
-	EnableKueue               *bool             `hcl:"enable_kueue"`
+	NamespaceIDs                map[string]string `hcl:"namespace_ids"`
+	RemoteStateBucket           string            `hcl:"remote_state_bucket"`
+	ConfigSyncSecretType        *string           `hcl:"config_sync_secret_type"`
+	ConfigSyncRepositoryURL     *string           `hcl:"config_sync_repository_url"`
+	DisableIstioOnNamespaces    []string          `hcl:"disable_istio_on_namespaces"`
+	ConfigSyncPolicyDir         *string           `hcl:"config_sync_policy_dir"`
+	ConfigSyncBranch            *string           `hcl:"config_sync_branch"`
+	AttestationKMSKey           *string           `hcl:"attestation_kms_key"`
+	AttestationEvaluationMode   string            `hcl:"attestation_evaluation_mode"`
+	EnableKueue                 *bool             `hcl:"enable_kueue"`
+	EnableMulticlusterDiscovery *bool             `hcl:"enable_multicluster_discovery"`
 }
 
 type AppFactoryTfvars struct {

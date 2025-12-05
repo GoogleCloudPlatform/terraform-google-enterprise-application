@@ -101,6 +101,8 @@ apps = {
   }
 }
 
+enable_multicluster_discovery = true
+
 // List all the enviroments to be deployed:
 // At least one of the enviroments MUST be production
 envs = {

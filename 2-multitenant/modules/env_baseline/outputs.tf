@@ -28,11 +28,18 @@ output "cluster_membership_ids" {
   ]
 }
 
+output "cluster_zones" {
+  description = "GKE cluster zones."
+  value = flatten([
+    for value in merge(module.gke-standard, module.gke-autopilot) : value.zones
+  ])
+}
+
 output "cluster_names" {
   description = "GKE cluster names."
-  value = [
+  value = flatten([
     for value in merge(module.gke-standard, module.gke-autopilot) : value.name
-  ]
+  ])
 }
 
 output "cluster_project_id" {
@@ -43,7 +50,7 @@ output "cluster_project_id" {
 }
 
 output "cluster_project_number" {
-  description = "Cluster Project ID."
+  description = "Cluster Project Number."
   value       = data.google_project.eab_cluster_project.number
 }
 
@@ -90,4 +97,9 @@ output "cluster_service_accounts" {
     { for i, value in merge(module.gke-standard, module.gke-autopilot) : "cluster_${var.env}_${i}" => value.service_account },
     { for i, value in module.eab_cluster_project : "project_${var.env}_${i}" => "${value.project_number}-compute@developer.gserviceaccount.com" }
   )
+}
+
+output "cloud_armor" {
+  value       = module.cloud_armor
+  description = "Cloud Armor configuration."
 }

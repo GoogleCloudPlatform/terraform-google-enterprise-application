@@ -15,7 +15,7 @@
  */
 
 locals {
-  repository_url   = "${google_artifact_registry_repository.k8s.location}-docker.pkg.dev/${google_artifact_registry_repository.k8s.project}/${google_artifact_registry_repository.k8s.repository_id}"
+  repository_url   = "${data.google_artifact_registry_repository.k8s.location}-docker.pkg.dev/${data.google_artifact_registry_repository.k8s.project}/${data.google_artifact_registry_repository.k8s.repository_id}"
   applied_manifest = local_file.downloaded_file.content
 }
 
@@ -29,9 +29,9 @@ resource "random_uuid" "uid" {
 resource "google_artifact_registry_repository_iam_member" "cluster_service_accounts_reader" {
   for_each = toset(var.cluster_service_accounts)
 
-  repository = google_artifact_registry_repository.k8s.repository_id
-  project    = google_artifact_registry_repository.k8s.project
-  location   = google_artifact_registry_repository.k8s.location
+  repository = data.google_artifact_registry_repository.k8s.repository_id
+  project    = data.google_artifact_registry_repository.k8s.project
+  location   = data.google_artifact_registry_repository.k8s.location
   role       = "roles/artifactregistry.reader"
   member     = "serviceAccount:${each.value}"
 }
@@ -41,6 +41,14 @@ resource "local_file" "downloaded_file" {
   filename = "${path.module}/manifest-${random_uuid.uid.result}-${var.cluster_name}.yaml"
 
   depends_on = [google_artifact_registry_repository_iam_member.cluster_service_accounts_reader]
+}
+
+data "google_artifact_registry_repository" "k8s" {
+  project       = var.project_id
+  location      = var.region
+  repository_id = "k8s"
+
+  depends_on = [google_artifact_registry_repository.k8s]
 }
 
 resource "google_artifact_registry_repository" "k8s" {
@@ -63,14 +71,14 @@ resource "google_artifact_registry_repository" "k8s" {
 resource "google_artifact_registry_vpcsc_config" "vpcsc_config" {
   count        = var.vpcsc_policy == "ALLOW" ? 1 : 0
   provider     = google-beta
-  location     = google_artifact_registry_repository.k8s.location
-  project      = google_artifact_registry_repository.k8s.project
+  location     = data.google_artifact_registry_repository.k8s.location
+  project      = data.google_artifact_registry_repository.k8s.project
   vpcsc_policy = var.vpcsc_policy
 }
 
 module "kubectl" {
   source  = "terraform-google-modules/gcloud/google//modules/kubectl-fleet-wrapper"
-  version = "~> 3.5"
+  version = "~> 4.0"
 
   skip_download = true
   create_cmd_triggers = {

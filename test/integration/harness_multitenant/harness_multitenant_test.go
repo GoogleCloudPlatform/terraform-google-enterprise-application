@@ -43,12 +43,7 @@ func TestMultitenantHarness(t *testing.T) {
 
 			endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID.String()).Array()
 			for i := range endpoints {
-				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID.String())
-			}
-
-			endpointsGroups := gcloud.Runf(t, "compute network-endpoint-groups list --project %s", clusterProjectID.String()).Array()
-			for i := range endpointsGroups {
-				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", endpointsGroups[i].Get("name"), clusterProjectID.String())
+				gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID.String())
 			}
 		}
 		multiTenant.DefaultTeardown(assert)

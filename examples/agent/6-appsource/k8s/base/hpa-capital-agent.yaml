@@ -1,0 +1,43 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: capital-agent-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: capital-agent-deployment
+  # Set the minimum and maximum number of replicas the Deployment can scale to.
+  minReplicas: 1
+  maxReplicas: 10
+  # This section defines that scaling should be based on the fullness of load balancer
+  # capacity, using the following configuration.
+  metrics:
+  - type: Object
+    object:
+      describedObject:
+        kind: Service
+        name: capital-agent-service
+      metric:
+        # The name of the custom metric which measures how "full" a backend is
+        # relative to its configured capacity.
+        name: "autoscaling.googleapis.com|gclb-capacity-fullness"
+      target:
+        # The target average value for the metric. The autoscaler adjusts the number
+        # of replicas to maintain an average capacity fullness of 70% across all Pods.
+        averageValue: 70
+        type: AverageValue

@@ -173,16 +173,17 @@ func DeployMultitenantStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, ou
 func DeployFleetscopeStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 
 	fleetscopeTfvars := FleetscopeTfvars{
-		RemoteStateBucket:         outputs.StateBucket,
-		NamespaceIDs:              tfvars.NamespaceIDs,
-		ConfigSyncSecretType:      tfvars.ConfigSyncSecretType,
-		ConfigSyncRepositoryURL:   tfvars.ConfigSyncRepositoryURL,
-		DisableIstioOnNamespaces:  tfvars.DisableIstioOnNamespaces,
-		ConfigSyncPolicyDir:       tfvars.ConfigSyncPolicyDir,
-		ConfigSyncBranch:          tfvars.ConfigSyncBranch,
-		AttestationKMSKey:         tfvars.AttestationKMSKey,
-		AttestationEvaluationMode: tfvars.AttestationEvaluationMode,
-		EnableKueue:               tfvars.EnableKueue,
+		RemoteStateBucket:           outputs.StateBucket,
+		NamespaceIDs:                tfvars.NamespaceIDs,
+		ConfigSyncSecretType:        tfvars.ConfigSyncSecretType,
+		ConfigSyncRepositoryURL:     tfvars.ConfigSyncRepositoryURL,
+		DisableIstioOnNamespaces:    tfvars.DisableIstioOnNamespaces,
+		ConfigSyncPolicyDir:         tfvars.ConfigSyncPolicyDir,
+		ConfigSyncBranch:            tfvars.ConfigSyncBranch,
+		AttestationKMSKey:           tfvars.AttestationKMSKey,
+		AttestationEvaluationMode:   tfvars.AttestationEvaluationMode,
+		EnableKueue:                 tfvars.EnableKueue,
+		EnableMulticlusterDiscovery: tfvars.EnableMulticlusterDiscovery,
 	}
 	err := utils.WriteTfvars(filepath.Join(c.EABPath, FleetscopeStep, "terraform.tfvars"), fleetscopeTfvars)
 	if err != nil {
@@ -326,7 +327,6 @@ func DeployAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, boots
 			if err != nil {
 				return err
 			}
-
 		}
 	}
 	return err

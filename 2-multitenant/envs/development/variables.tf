@@ -80,3 +80,9 @@ variable "deletion_protection" {
   description = "Whether or not to allow Terraform to destroy the cluster."
   default     = true
 }
+
+variable "cluster_release_channel" {
+  description = "The release channel for the clusters"
+  type        = string
+  default     = "REGULAR"
+}

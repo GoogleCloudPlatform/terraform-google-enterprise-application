@@ -27,7 +27,7 @@ module "env" {
   fleet_project_id         = local.fleet_project_id
   namespace_ids            = var.namespace_ids
   cluster_membership_ids   = local.cluster_membership_ids
-  cluster_service_accounts = values(local.cluster_service_accounts)
+  cluster_service_accounts = distinct(values(local.cluster_service_accounts))
 
   config_sync_secret_type    = var.config_sync_secret_type
   config_sync_repository_url = var.config_sync_repository_url
@@ -35,6 +35,8 @@ module "env" {
   config_sync_policy_dir     = var.config_sync_policy_dir
 
   enable_kueue = var.enable_kueue
+
+  enable_multicluster_discovery = var.enable_multicluster_discovery
 
   attestation_kms_key         = var.attestation_kms_key
   attestation_evaluation_mode = var.attestation_evaluation_mode
