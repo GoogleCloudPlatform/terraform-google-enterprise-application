@@ -32,7 +32,7 @@ resource "google_project_service" "alloydb_api" {
 
 module "alloydb" {
   source  = "GoogleCloudPlatform/alloy-db/google"
-  version = "~> 7.0"
+  version = "~> 8.0"
 
   cluster_id = "cluster-${var.db_region}-psc-${var.env}"
   location   = var.db_region
