@@ -140,7 +140,7 @@ resource "google_artifact_registry_repository" "private_images" {
 
 module "build_ai_run_image_image" {
   source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.5"
+  version = "~> 4.0"
   upgrade = false
 
   create_cmd_triggers = {
