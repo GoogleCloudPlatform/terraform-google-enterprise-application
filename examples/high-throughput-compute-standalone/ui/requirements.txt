@@ -64,7 +64,7 @@ tqdm==4.67.0
 typer==0.13.0
 typing-extensions==4.12.2
 tzdata==2024.2
-urllib3==2.5.0
+urllib3==2.6.0
 uvicorn==0.32.0
 websockets==12.0
 
