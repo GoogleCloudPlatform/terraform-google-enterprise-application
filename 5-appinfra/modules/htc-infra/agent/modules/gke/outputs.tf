@@ -32,11 +32,6 @@ output "test_scripts_list" {
   ])
 }
 
-output "first_test_script" {
-  description = "First test script"
-  value       = length(var.gke_cluster_names) > 0 ? module.config_apply[0].test_scripts : ""
-}
-
 # Cluster
 output "cluster_urls" {
   description = "Cluster urls"

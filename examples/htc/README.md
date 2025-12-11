@@ -121,7 +121,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Retrieve HTC repositories created on 4-appfactory.
 
     ```bash
-    cd eab-applicationfactory/envs/production/
+    cd eab-applicationfactory/envs/shared/
     terraform init
 
     export htc_project=$(terraform output -json app-group | jq -r '.["htc.htc"]["app_admin_project_id"]')

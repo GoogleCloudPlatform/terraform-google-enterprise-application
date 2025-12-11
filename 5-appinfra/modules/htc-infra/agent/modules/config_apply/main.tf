@@ -126,6 +126,7 @@ resource "null_resource" "cluster_init" {
       "adapter_new_resource_model_yaml" = templatefile(
         "${path.module}/k8s/adapter_new_resource_model.yaml.templ", {
           namespace = var.namespace
+          ca_bundle = local.ca_bundle_base64
       }),
       "volume_claim_yaml" = templatefile(
         "${path.module}/k8s/volume_claim.yaml.templ", {
@@ -137,7 +138,6 @@ resource "null_resource" "cluster_init" {
   triggers = {
     template       = each.value
     cluster_change = local.cluster_config
-    test           = true
   }
 
   provisioner "local-exec" {

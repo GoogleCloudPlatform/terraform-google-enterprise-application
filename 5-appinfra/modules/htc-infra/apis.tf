@@ -23,7 +23,8 @@ module "enabled_google_apis" {
     "bigquery.googleapis.com",
     "parallelstore.googleapis.com",
     "container.googleapis.com",
-    "logging.googleapis.com"
+    "logging.googleapis.com",
+    "privateca.googleapis.com"
   ]
 }
 
@@ -34,7 +35,8 @@ resource "google_project_iam_member" "team_roles_infra_project" {
     "roles/pubsub.publisher",
     "roles/pubsub.viewer",
     "roles/pubsub.subscriber",
-    "roles/monitoring.viewer"
+    "roles/monitoring.viewer",
+    "roles/privateca.admin"
   ])
 
   project = var.infra_project
@@ -49,7 +51,8 @@ resource "google_project_iam_member" "team_roles_cluster_project" {
     "roles/pubsub.publisher",
     "roles/pubsub.viewer",
     "roles/pubsub.subscriber",
-    "roles/monitoring.viewer"
+    "roles/monitoring.viewer",
+    "roles/privateca.admin"
   ])
 
   project = var.cluster_project_id
