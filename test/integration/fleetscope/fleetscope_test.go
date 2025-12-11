@@ -101,7 +101,7 @@ func TestFleetscope(t *testing.T) {
 
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			if enableInferenceGateway {
-				configSyncPath = "examples/agent/3-fleetscope/config-sync"
+				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
 			}
 
 			vars := map[string]interface{}{
