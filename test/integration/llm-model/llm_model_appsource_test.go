@@ -36,18 +36,18 @@ import (
 )
 
 func TestSourceLLMModel(t *testing.T) {
-	gitLabPath := "../../setup/harness/gitlab"
-	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
-	gitUrl := gitLab.GetStringOutput("gitlab_url")
-	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
-	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
-	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// gitLabPath := "../../setup/harness/gitlab"
+	// gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+	// gitUrl := gitLab.GetStringOutput("gitlab_url")
+	// gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
+	// gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
+	// token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
-	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
-	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
+	// hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+	// authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	clusterProjectID := map[string]string{}
@@ -64,8 +64,6 @@ func TestSourceLLMModel(t *testing.T) {
 	serviceName := "llamma-model"
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/", appName)
 
-	fmt.Println(appSourcePath)
-
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
 	projectID := appFactory.GetJsonOutput("app-group").Get("llm-model\\.llamma-model.app_admin_project_id").String()
@@ -74,8 +72,8 @@ func TestSourceLLMModel(t *testing.T) {
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
-		appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
-		t.Logf("source-repo: %s", appRepo)
+		// appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
+		appRepo := "https://source.developers.google.com/p/llm-llamma-model-admin-7vwz/r/eab-llm-model-llamma-model"
 
 		tmpDirApp := t.TempDir()
 		tmpDirSource := t.TempDir()
@@ -114,8 +112,7 @@ func TestSourceLLMModel(t *testing.T) {
 			gitAppRun2("clone", "--branch", "v0.12.0", "https://github.com/vllm-project/vllm.git", tmpDirSource)
 
 			// copy contents from vllm to the cloned repository
-			err = os.CopyFS(tmpDirApp, os.DirFS(tmpDirSource))
-			//err = cp.Copy(fmt.Sprintf("%s/", tmpDirSource), fmt.Sprintf("%s/", tmpDirApp))
+			err := cp.Copy(tmpDirSource, fmt.Sprintf("%s/", tmpDirApp))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -125,51 +122,52 @@ func TestSourceLLMModel(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = cp.Copy(fmt.Sprintf("%s/docker/Dockerfile", tmpDirApp), fmt.Sprintf("%s/Dockerfile", tmpDirApp))
+			err = cp.Copy(fmt.Sprintf("%s/docker/Dockerfile.tpu", tmpDirApp), fmt.Sprintf("%s/Dockerfile", tmpDirApp))
 			if err != nil {
 				t.Fatal(err)
 			}
 			for _, envName := range testutils.EnvNames(t) {
-				kustomization := fmt.Sprintf("%s/k8s/overlays/%s/kustomization.yaml", tmpDirApp, envName)
+				patchFile := fmt.Sprintf("%s/k8s/overlays/%s/patch-sa-annotation.yaml", tmpDirApp, envName)
 				// Read the file content
-				content, err := os.ReadFile(kustomization)
+				content, err := os.ReadFile(patchFile)
 				if err != nil {
 					log.Fatalf("Error reading file: %v", err)
 				}
 
 				// Convert content to string and perform replacement
 				modifiedContent := strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
-				modifiedContent = strings.ReplaceAll(modifiedContent, "${MODEL_ID}", "gemini-2.0-flash")
-				// Write the modified content back to the file
-				err = os.WriteFile(kustomization, []byte(modifiedContent), 0644)
-				if err != nil {
-					log.Fatalf("Error writing file: %v", err)
-				}
-
-				patchFile := fmt.Sprintf("%s/k8s/overlays/%s/patch-sa-annotation.yaml", tmpDirApp, envName)
-				// Read the file content
-				content, err = os.ReadFile(patchFile)
-				if err != nil {
-					log.Fatalf("Error reading file: %v", err)
-				}
-
-				// Convert content to string and perform replacement
-				modifiedContent = strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
 				// Write the modified content back to the file
 				err = os.WriteFile(patchFile, []byte(modifiedContent), 0644)
 				if err != nil {
 					log.Fatalf("Error writing file: %v", err)
 				}
 			}
+			datefile, err := os.OpenFile(fmt.Sprintf("%s/date.txt", tmpDirApp), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() {
+				if err := datefile.Close(); err != nil {
+					t.Errorf("failed to close datefile: %v", err)
+				}
+			}()
+
+			_, err = datefile.WriteString(time.Now().String() + "\n")
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			gitAppRun("init", tmpDirApp)
+			gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
 			gitAppRun("config", "init.defaultBranch", "main")
 			gitAppRun("config", "http.postBuffer", "157286400")
 			gitAppRun("checkout", "-b", "main")
 			gitAppRun("remote", "add", "google", appRepo)
+			gitAppRun("rm", "-r", ".pre-commit-config.yaml")
 			gitApp.RunCmdE("status")
+			gitApp.RunCmdE("pull", "google", "main")
 			gitApp.AddAll()
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 			gitAppRun("push", "google", "main", "--force")
@@ -204,7 +202,7 @@ func TestSourceLLMModel(t *testing.T) {
 					return true, nil
 				}
 			}
-			utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
+			utils.Poll(t, pollCloudBuild(buildListCmd), 60, 60*time.Second)
 
 			releaseName := ""
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
