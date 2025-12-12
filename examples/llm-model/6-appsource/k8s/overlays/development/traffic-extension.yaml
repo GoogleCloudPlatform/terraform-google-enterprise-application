@@ -1,0 +1,36 @@
+apiVersion: networking.gke.io/v1
+kind: GCPTrafficExtension
+metadata:
+  name: llamma-model-armor-extension
+  namespace: llamma-model
+spec:
+  extensionChains:
+    - name: llamma-model-model-armor
+      matchCondition:
+        celExpressions:
+          - celMatcher: request.method == "POST" && (request.path == "/v1/chat/completions" || request.path == "/v1/completions")
+      extensions:
+        - name: llamma-model-model-armor-service
+          googleAPIServiceName: modelarmor.${LOCATION}.rep.googleapis.com
+          timeout: 10s
+          failOpen: true
+          supportedEvents:
+            - RequestHeaders
+            - RequestBody
+            - RequestTrailers
+            - ResponseHeaders
+            - ResponseBody
+            - ResponseTrailers
+          metadata:
+            model_armor_settings: >
+              [
+                {
+                  "model": "${MODEL_ID}",
+                  "model_response_template_id": "${TEMPLATE_ID}",
+                  "user_prompt_template_id": "${TEMPLATE_ID}"
+                }
+              ]
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: llamma-model-gw
