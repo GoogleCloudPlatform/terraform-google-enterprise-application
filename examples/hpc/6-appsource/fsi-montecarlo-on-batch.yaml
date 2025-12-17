@@ -97,7 +97,7 @@ deployment_groups:
         '
 
   - id: data_bucket
-    source: community/modules/file-system/cloud-storage-bucket
+    source: modules/file-system/cloud-storage-bucket
     settings:
       name_prefix: data_bucket
       random_suffix: true
