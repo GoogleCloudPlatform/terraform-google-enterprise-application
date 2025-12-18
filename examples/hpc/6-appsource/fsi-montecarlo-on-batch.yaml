@@ -108,7 +108,7 @@ deployment_groups:
     source: community/modules/compute/notebook
     use: [data_bucket]
     settings:
-      machine_type: n1-standard-4
+      machine_type: n2-standard-4
       instance_image: {"family": "workbench-instances", "name": null, "project": "cloud-notebooks-managed"}
 
   - id: bq_subscription
