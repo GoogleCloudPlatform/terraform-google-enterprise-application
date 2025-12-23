@@ -19,7 +19,6 @@ metadata:
 spec:
   parentRefs:
     - name: llamma-model-gw
-      namespace: llamma-model
   rules:
     - matches:
         - path:

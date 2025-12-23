@@ -91,7 +91,7 @@ module "model_armor_configuration" {
   }
 }
 
-resource "google_service_account" "gsa_capital_model" {
+resource "google_service_account" "gsa_llamma_model" {
   for_each     = local.cluster_projects_id
   project      = each.value
   account_id   = "gsa-llamma-model"
@@ -99,14 +99,14 @@ resource "google_service_account" "gsa_capital_model" {
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  for_each = google_service_account.gsa_capital_model
+  for_each = google_service_account.gsa_llamma_model
   project  = each.value.project
   role     = "roles/cloudtrace.agent"
   member   = each.value.member
 }
 
 resource "google_service_account_iam_member" "wi_binding" {
-  for_each           = google_service_account.gsa_capital_model
+  for_each           = google_service_account.gsa_llamma_model
   service_account_id = each.value.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${each.value.project}.svc.id.goog[llamma-model-${each.key}/llamma-model-ksa]"
