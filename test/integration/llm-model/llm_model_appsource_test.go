@@ -36,18 +36,18 @@ import (
 )
 
 func TestSourceLLMModel(t *testing.T) {
-	// gitLabPath := "../../setup/harness/gitlab"
-	// gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
-	// gitUrl := gitLab.GetStringOutput("gitlab_url")
-	// gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
-	// gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
-	// token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	gitLabPath := "../../setup/harness/gitlab"
+	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+	gitUrl := gitLab.GetStringOutput("gitlab_url")
+	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
+	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
+	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	// hostNameWithPath := strings.Split(gitUrl, "https://")[1]
-	// authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
+	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
+	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	clusterProjectID := map[string]string{}
@@ -72,8 +72,7 @@ func TestSourceLLMModel(t *testing.T) {
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
-		// appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
-		appRepo := "https://source.developers.google.com/p/llm-llamma-model-admin-7vwz/r/eab-llm-model-llamma-model"
+		appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
 
 		tmpDirApp := t.TempDir()
 		tmpDirSource := t.TempDir()
@@ -158,7 +157,7 @@ func TestSourceLLMModel(t *testing.T) {
 			}
 
 			gitAppRun("init", tmpDirApp)
-			gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
+			// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
 			gitAppRun("config", "init.defaultBranch", "main")
