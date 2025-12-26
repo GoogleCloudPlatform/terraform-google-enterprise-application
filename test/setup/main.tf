@@ -83,6 +83,7 @@ module "seed_project" {
     "multiclusterservicediscovery.googleapis.com",
     "networkmanagement.googleapis.com",
     "networkservices.googleapis.com",
+    "notebooks.googleapis.com",
     "orgpolicy.googleapis.com",
     "secretmanager.googleapis.com",
     "servicedirectory.googleapis.com",

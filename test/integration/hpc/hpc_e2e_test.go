@@ -232,7 +232,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 		runBatchJobs(t)
 
 		t.Log("Validating Batch Jobs:")
-		for count := 0; count < 15; count++ {
+		for count := 0; count < 30; count++ {
 			jobsOutput, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "jobs", "-n", "hpc-team-b-development", "-o", "json")
 			if err != nil {
 				t.Fatal(err)
@@ -300,7 +300,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 			t.Fatal(err)
 		}
 		// validate job finished
-		for count := 0; count < 15; count++ {
+		for count := 0; count < 30; count++ {
 			jobsOutput, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "-n", "hpc-team-a-development", "logs", "jobs/mnist-training-job", "-c", "tensorflow")
 			if err != nil {
 				t.Log(err)
