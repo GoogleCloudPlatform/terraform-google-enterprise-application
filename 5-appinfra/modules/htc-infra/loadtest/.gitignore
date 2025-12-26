@@ -1,0 +1,5 @@
+# Produced binary
+loadtest
+
+# Generated protobuf code
+*.pb.go
