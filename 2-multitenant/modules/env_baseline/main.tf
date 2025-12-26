@@ -248,7 +248,7 @@ resource "google_project_iam_member" "model_armor_service_network_extension_role
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 36.0"
+  version = "~> 42.0"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
   name                   = "cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
@@ -335,7 +335,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 36.0"
+  version = "~> 42.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
