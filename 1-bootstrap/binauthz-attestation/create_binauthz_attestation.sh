@@ -39,9 +39,11 @@ fi
 OUTPUT=$(python3 /work/parse_arguments.py "$@")
 declare -A args="($OUTPUT)"
 
+echo "Pull image ${args[artifact_url]}"
 docker pull "${args[artifact_url]}"
-IMAGE_AND_DIGEST="$(docker inspect "${args[artifact_url]}" --format='{{index .RepoDigests 0}}')"
-echo "$IMAGE_AND_DIGEST"
+
+echo "Get image digest ${args[artifact_url]}"
+IMAGE_AND_DIGEST="${args[artifact_url]}"
 
 if [ -n "${args[pgp_key_fingerprint]}" ]; then
     if [ -z "$PGP_SECRET_KEY" ]; then
