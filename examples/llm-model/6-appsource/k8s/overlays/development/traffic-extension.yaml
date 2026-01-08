@@ -10,7 +10,7 @@ spec:
           - celMatcher: request.method == "POST" && (request.path == "/v1/chat/completions" || request.path == "/v1/completions")
       extensions:
         - name: llamma-model-model-armor-service
-          googleAPIServiceName: modelarmor.${LOCATION}.rep.googleapis.com
+          googleAPIServiceName: modelarmor.__MODEL_ARMOR_LOCATION__.rep.googleapis.com # from-param: modelarmor.${model_armor_location}.rep.googleapis.com
           timeout: 10s
           failOpen: true
           supportedEvents:
@@ -24,9 +24,14 @@ spec:
             model_armor_settings: >
               [
                 {
-                  "model": "${MODEL_ID}",
-                  "model_response_template_id": "${TEMPLATE_ID}",
-                  "user_prompt_template_id": "${TEMPLATE_ID}"
+                  "model": "food-review-1",
+                  "model_response_template_id": "__MODEL_ARMOR_TEMPLATE_ID__",
+                  "user_prompt_template_id": "__MODEL_ARMOR_TEMPLATE_ID__"
+                },
+                {
+                  "model": "meta-llama/Llama-3.1-8B-Instruct",
+                  "model_response_template_id": "__MODEL_ARMOR_TEMPLATE_ID__",
+                  "user_prompt_template_id": "__MODEL_ARMOR_TEMPLATE_ID__"
                 }
               ]
   targetRefs:

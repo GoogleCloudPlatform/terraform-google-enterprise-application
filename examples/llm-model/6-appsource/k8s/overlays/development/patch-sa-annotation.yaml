@@ -17,4 +17,4 @@ kind: ServiceAccount
 metadata:
   name: llamma-model-ksa
   annotations:
-    iam.gke.io/gcp-service-account: gsa-llamma-model@${PROJECT_ID}.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: gsa-llamma-model@__CLUSTER_PROJECT_ID__.iam.gserviceaccount.com # from-param: gsa-llamma-model@${cluster_project_id}.iam.gserviceaccount.com

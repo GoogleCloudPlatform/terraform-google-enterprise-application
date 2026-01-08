@@ -17,10 +17,10 @@ kind: Config
 build:
   artifacts:
   - image: llm-model
-    context: .
-    custom:
-      buildCommand: |
-        docker buildx build --tag=$IMAGE --push .
+    docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          VLLM_VERSION: "v0.8.5"
   tagPolicy:
     gitCommit: {}
 profiles:
@@ -29,13 +29,34 @@ profiles:
       kustomize:
         paths:
         - k8s/overlays/development
+        buildArgs:
+          - "--enable-helm"
+      hooks:
+        before:
+          - host:
+              command: ["sh", "-c", "echo \"DEBUG: Template ID is $SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID\" && find k8s -name '*.yaml' -exec sed -i 's/__MODEL_ARMOR_TEMPLATE_ID__/'$SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID'/g' {} +"]
+              os: [linux, darwin]
   - name: nonproduction
     manifests:
       kustomize:
         paths:
         - k8s/overlays/nonproduction
+        buildArgs:
+          - "--enable-helm"
+      hooks:
+        before:
+          - host:
+              command: ["sh", "-c", "echo \"DEBUG: Template ID is $SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID\" && find k8s -name '*.yaml' -exec sed -i 's/__MODEL_ARMOR_TEMPLATE_ID__/'$SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID'/g' {} +"]
+              os: [linux, darwin]
   - name: production
     manifests:
       kustomize:
         paths:
         - k8s/overlays/production
+        buildArgs:
+          - "--enable-helm"
+      hooks:
+        before:
+          - host:
+              command: ["sh", "-c", "echo \"DEBUG: Template ID is $SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID\" && find k8s -name '*.yaml' -exec sed -i 's/__MODEL_ARMOR_TEMPLATE_ID__/'$SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID'/g' {} +"]
+              os: [linux, darwin]

@@ -19,4 +19,4 @@ metadata:
 spec:
   parentRefs:
   - name: llamma-model-gw
-    namespace: llamma-model-development
+    namespace: default

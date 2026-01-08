@@ -20,6 +20,21 @@ resources:
   - healthcheck.yaml
   - httproute.yaml
   - inferenceobjectives.yaml
-  - inferencepool.yaml
   - service.yaml
   - serviceaccount.yaml
+helmCharts:
+- name: inferencepool
+  repo: oci://registry.k8s.io/gateway-api-inference-extension/charts
+  version: v1.0.1
+  releaseName: vllm-llama3-8b-instruct
+  valuesInline:
+    provider:
+      name: gke
+    inferenceExtension:
+      monitoring:
+        gke:
+          enabled: true
+    inferencePool:
+      modelServers:
+        matchLabels:
+          app: vllm-llama3-8b-instruct

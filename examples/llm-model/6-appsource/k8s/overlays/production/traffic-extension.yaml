@@ -2,6 +2,7 @@ apiVersion: networking.gke.io/v1
 kind: GCPTrafficExtension
 metadata:
   name: llamma-model-armor-extension
+  namespace: llamma-model
 spec:
   extensionChains:
     - name: llamma-model-model-armor
