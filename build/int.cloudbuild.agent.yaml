@@ -287,7 +287,7 @@ steps:
       ]
     waitFor:
       - appsource-agent
-      - appinfra-verify
+      - appinfra-agent-verify
       - appfactory-verify
       - fleetscope-verify
       - multitenant-verify
@@ -303,7 +303,7 @@ steps:
       ]
     waitFor:
       - appsource-llm-model
-      - appinfra-verify
+      - appinfra-llm-model-verify
       - appfactory-verify
       - fleetscope-verify
       - multitenant-verify
