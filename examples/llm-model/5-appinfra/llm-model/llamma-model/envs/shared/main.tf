@@ -20,6 +20,13 @@ locals {
   team_name        = "default"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
+
+  target_deploy_parameters = { for i, p in local.cluster_projects_id : (i) => {
+    "cluster_project_id"      = i
+    "model_armor_template_id" = module.model_armor_configuration[i].template.id
+    "model_armor_location"    = var.region
+  } }
+
 }
 
 module "app" {
@@ -46,10 +53,13 @@ module "app" {
   logging_bucket    = var.logging_bucket
   bucket_kms_key    = var.bucket_kms_key
 
+  target_deploy_parameters = local.target_deploy_parameters
+
   attestation_kms_key                = var.attestation_kms_key
   attestor_id                        = var.attestation_kms_key != null ? contains(var.environment_names, "production") ? data.terraform_remote_state.fleetscope["production"].outputs.attestor_id : data.terraform_remote_state.fleetscope[var.environment_names[0]].outputs.attestor_id : null
   binary_authorization_image         = data.terraform_remote_state.bootstrap.outputs.binary_authorization_image
   binary_authorization_repository_id = data.terraform_remote_state.bootstrap.outputs.binary_authorization_repository_id
+
 }
 
 module "model_armor_configuration" {

@@ -197,3 +197,9 @@ variable "attestor_id" {
   type        = string
   description = "The attestor name in format projects/PROJECT_ID/attestors/ATTESTOR_NAME."
 }
+
+variable "target_deploy_parameters" {
+  type        = map(map(string))
+  description = "Optional. The deploy parameters to use for this target. The key must be the environment name."
+  default     = {}
+}

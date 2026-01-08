@@ -18,11 +18,14 @@ metadata:
   name: llamma-model-service
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
+  labels:
+    app: vllm-llama3-8b-instruct
 spec:
-  type: ClusterIP
-  selector:
-    app: llamma-model-server
   ports:
     - name: http
-      port: 8080
-      targetPort: 8080
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: vllm-llama3-8b-instruct
+  type: ClusterIP

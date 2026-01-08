@@ -17,7 +17,6 @@ package llm_model
 import (
 	"errors"
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 	"testing"
@@ -75,7 +74,6 @@ func TestSourceLLMModel(t *testing.T) {
 		appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
 
 		tmpDirApp := t.TempDir()
-		tmpDirSource := t.TempDir()
 
 		vars := map[string]interface{}{
 			"project_id":                 projectID,
@@ -100,47 +98,13 @@ func TestSourceLLMModel(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			gitApp2 := git.NewCmdConfig(t, git.WithDir(tmpDirSource))
-			gitAppRun2 := func(args ...string) {
-				_, err := gitApp2.RunCmdE(args...)
-				if err != nil {
-					t.Fatal(err)
-				}
-			}
-
-			gitAppRun2("clone", "--branch", "v0.12.0", "https://github.com/vllm-project/vllm.git", tmpDirSource)
-
-			// copy contents from vllm to the cloned repository
-			err := cp.Copy(tmpDirSource, fmt.Sprintf("%s/", tmpDirApp))
-			if err != nil {
-				t.Fatal(err)
-			}
 
 			// copy contents from 6-appsource to the cloned repository
 			err = cp.Copy(appSourcePath, fmt.Sprintf("%s/", tmpDirApp))
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = cp.Copy(fmt.Sprintf("%s/docker/Dockerfile.tpu", tmpDirApp), fmt.Sprintf("%s/Dockerfile", tmpDirApp))
-			if err != nil {
-				t.Fatal(err)
-			}
-			for _, envName := range testutils.EnvNames(t) {
-				patchFile := fmt.Sprintf("%s/k8s/overlays/%s/patch-sa-annotation.yaml", tmpDirApp, envName)
-				// Read the file content
-				content, err := os.ReadFile(patchFile)
-				if err != nil {
-					log.Fatalf("Error reading file: %v", err)
-				}
 
-				// Convert content to string and perform replacement
-				modifiedContent := strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
-				// Write the modified content back to the file
-				err = os.WriteFile(patchFile, []byte(modifiedContent), 0644)
-				if err != nil {
-					log.Fatalf("Error writing file: %v", err)
-				}
-			}
 			datefile, err := os.OpenFile(fmt.Sprintf("%s/date.txt", tmpDirApp), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				t.Fatal(err)

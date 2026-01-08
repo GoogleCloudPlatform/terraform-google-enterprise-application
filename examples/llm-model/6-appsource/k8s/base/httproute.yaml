@@ -16,14 +16,27 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: llamma-model-route
+  namespace: default
 spec:
   parentRefs:
     - name: llamma-model-gw
+      namespace: default
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: llamma-model-service
-          port: 8080
+        - group: inference.networking.k8s.io
+          kind: InferencePool
+          name: vllm-llama3-8b-instruct
+          weight: 100
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /force-infra-creation-do-not-use
+      backendRefs:
+        - kind: Service
+          name: llamma-model-service
+          port: 8000
+          weight: 100

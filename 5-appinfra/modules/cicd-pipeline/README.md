@@ -25,6 +25,7 @@
 | repo\_branch | Branch to sync ACM configs from & trigger CICD if pushed to. | `string` | n/a | yes |
 | repo\_name | Short version of repository to sync ACM configs from & use source for CI (e.g. 'bank-of-anthos' for https://www.github.com/GoogleCloudPlatform/bank-of-anthos) | `string` | n/a | yes |
 | service\_name | service name (e.g. 'transactionhistory') | `string` | n/a | yes |
+| target\_deploy\_parameters | Optional. The deploy parameters to use for this target. The key must be the environment name. | `map(map(string))` | `null` | no |
 | team\_name | Team name (e.g. 'ledger'). This will be the prefix to the service CI Build Trigger Name. | `string` | n/a | yes |
 | workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | `string` | `null` | no |
 

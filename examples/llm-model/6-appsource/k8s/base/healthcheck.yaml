@@ -35,5 +35,5 @@ spec:
       type: HTTP
       # Protocol specific settings (e.g., HTTP, HTTPS, HTTP2, GRPC, SSL, TCP)
       httpHealthCheck:
-        port: 8080 # The port number for the health check
+        port: 8000 # The port number for the health check
         requestPath: /health # The URL path for the health check
