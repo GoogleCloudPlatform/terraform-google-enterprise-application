@@ -205,24 +205,43 @@ steps:
     waitFor:
       - appfactory-apply
 
-  - id: appinfra-init
+  - id: appinfra-llm-model-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLLMModelAppInfra --stage init --verbose"]
+    waitFor:
+      - appfactory-apply
+  - id: appinfra-llm-model-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLLMModelAppInfra --stage apply --verbose"]
+    waitFor:
+      - appinfra-llm-model-init
+  - id: appinfra-llm-model-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLLMModelAppInfra --stage verify --verbose"]
+    waitFor:
+      - appinfra-llm-model-apply
+
+  - id: appinfra-agent-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestAgentAppInfra --stage init --verbose"]
     waitFor:
       - appfactory-apply
-  - id: appinfra-apply
+  - id: appinfra-agent-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestAgentAppInfra --stage apply --verbose"]
     waitFor:
-      - appinfra-init
-  - id: appinfra-verify
+      - appinfra-agent-init
+  - id: appinfra-agent-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestAgentAppInfra --stage verify --verbose"]
     waitFor:
-      - appinfra-apply
+      - appinfra-agent-apply
 
   - id: appsource-agent
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -238,10 +257,27 @@ steps:
             echo ERROR: Was not able to download certificate and update system bundle.
         fi
     waitFor:
-      - appinfra-apply
+      - appinfra-agent-apply
       - fleetscope-verify
 
-  - id: appinfra-teardown
+  - id: appsource-llm-model
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSourceLLMModel --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
+    waitFor:
+      - appinfra-llm-model-apply
+      - fleetscope-verify
+
+  - id: appinfra-agent-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
@@ -257,6 +293,22 @@ steps:
       - multitenant-verify
       - bootstrap-verify
 
+  - id: appinfra-llm-model-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestLLMModelAppInfra --stage teardown --verbose",
+      ]
+    waitFor:
+      - appsource-llm-model
+      - appinfra-verify
+      - appfactory-verify
+      - fleetscope-verify
+      - multitenant-verify
+      - bootstrap-verify
+
   - id: appfactory-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -266,7 +318,8 @@ steps:
         "cft test run TestAgentAppfactory --stage teardown --verbose",
       ]
     waitFor:
-      - appinfra-teardown
+      - appinfra-agent-teardown
+      - appinfra-llm-model-teardown
 
   - id: fleetscope-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
