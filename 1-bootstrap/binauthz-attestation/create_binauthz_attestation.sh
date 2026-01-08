@@ -43,8 +43,8 @@ echo "Pull image ${args[artifact_url]}"
 docker pull "${args[artifact_url]}"
 
 echo "Get image digest ${args[artifact_url]}"
-IMAGE_AND_DIGEST=$(gcloud artifacts docker images describe ${args[artifact_url]} --format='value(image_summary.digest)')
-echo ${IMAGE_AND_DIGEST}
+IMAGE_AND_DIGEST=$(gcloud artifacts docker images describe "${args[artifact_url]}" --format='value(image_summary.digest)')
+echo "${IMAGE_AND_DIGEST}"
 
 if [ -n "${args[pgp_key_fingerprint]}" ]; then
     if [ -z "$PGP_SECRET_KEY" ]; then
