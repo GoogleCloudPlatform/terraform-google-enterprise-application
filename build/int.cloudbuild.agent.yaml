@@ -418,3 +418,5 @@ options:
     - "TF_VAR_agent=true"
     - "TF_VAR_cluster_release_channel=RAPID"
     - "TF_VAR_enable_multicluster_discovery=false"
+    - "HEAD_BRANCH=$_HEAD_BRANCH"
+    - "HEAD_REPO_URL=$_HEAD_REPO_URL"
