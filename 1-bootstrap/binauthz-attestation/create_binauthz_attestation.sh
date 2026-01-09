@@ -42,12 +42,17 @@ declare -A args="($OUTPUT)"
 echo "Pull image ${args[artifact_url]}"
 docker pull "${args[artifact_url]}"
 
-echo "Get image digest ${args[artifact_url]}"
-IMAGE_AND_DIGEST=$(gcloud artifacts docker images describe "${args[artifact_url]}" --format='value(image_summary.digest)')
-echo echo "image_summary.digest: ${IMAGE_AND_DIGEST}"
-if ! echo "$IMAGE_STRING" | grep -Eq "^[a-z0-9-]+-docker\.pkg\.dev/.+/.+:sha256:[a-f0-9]{64}$"; then
-    IMAGE_AND_DIGEST="$(docker inspect "${args[artifact_url]}" --format='{{index .RepoDigests 0}}')"
-    echo "Docker digest: ${IMAGE_AND_DIGEST}"
+IMAGE_AND_DIGEST="$(docker inspect "${args[artifact_url]}" --format='{{index .RepoDigests 0}}')"
+echo "Docker digest: ${IMAGE_AND_DIGEST}"
+
+if ! echo "$IMAGE_AND_DIGEST" | grep -Eq "^[a-z0-9-]+-docker\.pkg\.dev/.+/.+@sha256:[a-f0-9]{64}$"; then
+    DIGEST_ONLY=$(gcloud artifacts docker images describe "${args[artifact_url]}" --format='value(image_summary.digest)')
+    IMAGE_BASE_URL="${args[artifact_url]%:*}"
+    IMAGE_AND_DIGEST="${IMAGE_BASE_URL}@${DIGEST_ONLY}"
+fi
+
+if [[ -z "$IMAGE_AND_DIGEST" ]] || [[ "$IMAGE_AND_DIGEST" != *"@"* ]]; then
+    die "Critical failure: Not possible to get image digest (Host + Digest)."
 fi
 
 if [ -n "${args[pgp_key_fingerprint]}" ]; then

@@ -98,8 +98,8 @@ func TestFleetscope(t *testing.T) {
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
 			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
-			forkRepository := os.Getenv("_HEAD_REPO_URL")
-			branch := os.Getenv("_HEAD_BRANCH")
+			forkRepository := os.Getenv("HEAD_REPO_URL")
+			branch := os.Getenv("HEAD_BRANCH")
 
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			if enableInferenceGateway {
