@@ -44,7 +44,11 @@ docker pull "${args[artifact_url]}"
 
 echo "Get image digest ${args[artifact_url]}"
 IMAGE_AND_DIGEST=$(gcloud artifacts docker images describe "${args[artifact_url]}" --format='value(image_summary.digest)')
-echo "${IMAGE_AND_DIGEST}"
+echo echo "image_summary.digest: ${IMAGE_AND_DIGEST}"
+if ! echo "$IMAGE_STRING" | grep -Eq "^[a-z0-9-]+-docker\.pkg\.dev/.+/.+:sha256:[a-f0-9]{64}$"; then
+    IMAGE_AND_DIGEST="$(docker inspect "${args[artifact_url]}" --format='{{index .RepoDigests 0}}')"
+    echo "Docker digest: ${IMAGE_AND_DIGEST}"
+fi
 
 if [ -n "${args[pgp_key_fingerprint]}" ]; then
     if [ -z "$PGP_SECRET_KEY" ]; then
