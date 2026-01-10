@@ -106,6 +106,7 @@ resource "google_service_account" "gsa_llamma_model" {
   project      = each.value
   account_id   = "gsa-llamma-model"
   display_name = "GSA for llamma-model"
+  create_ignore_already_exists = true
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {

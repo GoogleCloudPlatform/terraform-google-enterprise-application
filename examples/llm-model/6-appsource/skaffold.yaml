@@ -19,8 +19,6 @@ build:
   - image: llm-model
     docker:
         dockerfile: Dockerfile
-        buildArgs:
-          VLLM_VERSION: "v0.8.5"
   tagPolicy:
     gitCommit: {}
 profiles:
@@ -31,11 +29,6 @@ profiles:
         - k8s/overlays/development
         buildArgs:
           - "--enable-helm"
-      hooks:
-        before:
-          - host:
-              command: ["sh", "-c", "echo \"DEBUG: Template ID is $SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID\" && find k8s -name '*.yaml' -exec sed -i 's/__MODEL_ARMOR_TEMPLATE_ID__/'$SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID'/g' {} +"]
-              os: [linux, darwin]
   - name: nonproduction
     manifests:
       kustomize:
@@ -43,11 +36,6 @@ profiles:
         - k8s/overlays/nonproduction
         buildArgs:
           - "--enable-helm"
-      hooks:
-        before:
-          - host:
-              command: ["sh", "-c", "echo \"DEBUG: Template ID is $SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID\" && find k8s -name '*.yaml' -exec sed -i 's/__MODEL_ARMOR_TEMPLATE_ID__/'$SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID'/g' {} +"]
-              os: [linux, darwin]
   - name: production
     manifests:
       kustomize:
@@ -55,8 +43,3 @@ profiles:
         - k8s/overlays/production
         buildArgs:
           - "--enable-helm"
-      hooks:
-        before:
-          - host:
-              command: ["sh", "-c", "echo \"DEBUG: Template ID is $SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID\" && find k8s -name '*.yaml' -exec sed -i 's/__MODEL_ARMOR_TEMPLATE_ID__/'$SKAFFOLD_MODEL_ARMOR_TEMPLATE_ID'/g' {} +"]
-              os: [linux, darwin]

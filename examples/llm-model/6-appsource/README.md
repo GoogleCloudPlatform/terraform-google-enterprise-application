@@ -57,4 +57,4 @@ git push origin main
 
 1. After the CI build succesfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
-1. Once the CD pipeline succesfully runs, you should be able to see a deployment named `vllm-llama3-8b-instruct` on your cluster and be able to access the UI by Load Balancer IP.
+1. Once the CD pipeline succesfully runs, you should be able to see a deployment named `openai-app` on your cluster and be able to access the UI by Load Balancer IP.
