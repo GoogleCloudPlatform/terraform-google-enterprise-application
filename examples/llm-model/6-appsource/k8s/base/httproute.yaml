@@ -29,7 +29,7 @@ spec:
       backendRefs:
         - group: inference.networking.k8s.io
           kind: InferencePool
-          name: vllm-llama3-8b-instruct
+          name: openai-app
           weight: 100
     - matches:
         - path:

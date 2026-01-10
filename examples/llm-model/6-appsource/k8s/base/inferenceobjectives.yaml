@@ -19,14 +19,14 @@ metadata:
 spec:
   priority: 10
   poolRef:
-    name: vllm-llama3-8b-instruct
+    name: openai-app
     group: "inference.networking.k8s.io"
 ---
 apiVersion: inference.networking.x-k8s.io/v1alpha2
 kind: InferenceObjective
 metadata:
-  name: llama3-base-model
+  name: openai-base-model
 spec:
   priority: 20
   poolRef:
-    name: vllm-llama3-8b-instruct
+    name: openai-app

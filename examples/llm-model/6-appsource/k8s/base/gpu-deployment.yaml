@@ -15,179 +15,91 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-llama3-8b-instruct
+  name: openai-app
 spec:
+  progressDeadlineSeconds: 600
   replicas: 1
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: vllm-llama3-8b-instruct
+      app: openai-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: vllm-llama3-8b-instruct
-        image-policy.k8s.io/break-glass: "true"
+        app: openai-app
+        version: v1
     spec:
-      # -----------------------------------------------------------------------
-      # 1. INFRASTRUCTURE: Node Selector (GKE Autopilot / L4 GPU)
-      # -----------------------------------------------------------------------
+      containers:
+      - args:
+        - python
+        - -m
+        - vllm.entrypoints.api_server
+        - --host=0.0.0.0
+        - --port=8080
+        - --swap-space=16
+        - --model=openai/gpt-oss-safeguard-20b
+        - --max-model-len=2048
+        - --gpu-memory-utilization=0.9
+        - --enforce-eager
+        - --tensor-parallel-size=1
+        - --enable-chunked-prefill
+        - --revision=9a23d08c99110d1bebe8a6799d33485cbb8dc390
+        env:
+        - name: DEPLOY_SOURCE
+          value: UI_HF_VERIFIED_MODEL
+        - name: MODEL_ID
+          value: openai/gpt-oss-safeguard-20b
+        image: us-docker.pkg.dev/vertex-ai/vertex-vision-model-garden-dockers/pytorch-vllm-serve:20251023_0916_RC01
+        imagePullPolicy: IfNotPresent
+        name: inference-server
+        resources:
+          limits:
+            cpu: "9"
+            ephemeral-storage: 80Gi
+            memory: 34Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: "9"
+            ephemeral-storage: 80Gi
+            memory: 34Gi
+            nvidia.com/gpu: "1"
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+      dnsPolicy: ClusterFirst
       nodeSelector:
         cloud.google.com/gke-accelerator: nvidia-l4
-        cloud.google.com/gke-spot: "true"
-
-      terminationGracePeriodSeconds: 130
-
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-
-      containers:
-        - name: vllm
-          image: "llm-model"
-          imagePullPolicy: IfNotPresent
-
-          # 3. Resources obrigatórios para o nodeSelector funcionar
-          resources:
-            limits:
-              nvidia.com/gpu: "1"
-              memory: "24Gi"
-              cpu: "8"
-            requests:
-              nvidia.com/gpu: "1"
-              memory: "24Gi"
-              cpu: "8"
-
-          command: ["python3", "-m", "vllm.entrypoints.openai.api_server"]
-          args:
-          - "--model"
-          - "meta-llama/Llama-3.1-8B-Instruct"
-          - "--tensor-parallel-size"
-          - "1"
-          - "--port"
-          - "8000"
-          - "--max-num-seqs"
-          - "1024"
-          - "--compilation-config"
-          - "3"
-          - "--enable-lora"
-          - "--max-loras"
-          - "2"
-          - "--max-lora-rank"
-          - "8"
-          - "--max-cpu-loras"
-          - "12"
-          - "--max-model-len"
-          - "8192"
-          - "--gpu-memory-utilization"
-          - "0.85"
-          env:
-            - name: PYTORCH_CUDA_ALLOC_CONF
-              value: "expandable_segments:True"
-            - name: VLLM_USE_V1
-              value: "1"
-            - name: PORT
-              value: "8000"
-            - name: HUGGING_FACE_HUB_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: hf-secret
-                  key: hf_api_token
-            - name: VLLM_ALLOW_RUNTIME_LORA_UPDATING
-              value: "true"
-            - name: LLM_LOGGING_LEVEL
-              value: "DEBUG"
-          ports:
-            - containerPort: 8000
-              name: http
-              protocol: TCP
-
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
-            readOnlyRootFilesystem: false
-
-          lifecycle:
-            preStop:
-              sleep:
-                seconds: 25
-
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: http
-            periodSeconds: 15
-            successThreshold: 1
-            failureThreshold: 5
-            timeoutSeconds: 3
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: http
-            periodSeconds: 5
-            successThreshold: 1
-            failureThreshold: 3
-            timeoutSeconds: 3
-          startupProbe:
-            failureThreshold: 600
-            initialDelaySeconds: 2
-            periodSeconds: 5
-            httpGet:
-              path: /health
-              port: http
-
-          volumeMounts:
-            - mountPath: /data
-              name: data
-            - mountPath: /dev/shm
-              name: shm
-            - name: adapters
-              mountPath: "/adapters"
-            - mountPath: /root/.cache/huggingface
-              name: hf-cache
-
-      initContainers:
-        - name: lora-adapter-syncer
-          tty: true
-          stdin: true
-          image: registry.k8s.io/gateway-api-inference-extension/lora-syncer:v1.0.2
-          restartPolicy: Always
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: DYNAMIC_LORA_ROLLOUT_CONFIG
-              value: "/config/configmap.yaml"
-          volumeMounts:
-          - name: config-volume
-            mountPath:  /config
+        cloud.google.com/gke-accelerator-count: "1"
       restartPolicy: Always
-      enableServiceLinks: false
-
+      schedulerName: default-scheduler
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: kubernetes.io/arch
+        operator: Equal
+        value: amd64
+      - effect: NoSchedule
+        key: cloud.google.com/gke-accelerator
+        operator: Equal
+        value: nvidia-l4
+      - effect: NoSchedule
+        key: cloud.google.com/machine-family
+        operator: Exists
       volumes:
-        - name: data
-          emptyDir: {}
-        - name: shm
-          emptyDir:
-            medium: Memory
-            sizeLimit: "4Gi"
-        - name: adapters
-          emptyDir: {}
-        - name: config-volume
-          configMap:
-            name: vllm-llama3-8b-instruct-adapters
-        - name: hf-cache
-          emptyDir: {}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: vllm-llama3-8b-instruct-adapters
-data:
-  configmap.yaml: |
-      vLLMLoRAConfig:
-        name: vllm-llama3-8b-instruct-adapters
-        port: 8000
-        defaultBaseModel: meta-llama/Llama-3.1-8B-Instruct
-        ensureExist:
-          models:
-          - id: food-review-1
-            source: Kawon/llama3.1-food-finetune_v14_r8
+      - emptyDir:
+          medium: Memory
+        name: dshm

@@ -19,7 +19,7 @@ metadata:
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
   labels:
-    app: vllm-llama3-8b-instruct
+    app: openai-app
 spec:
   ports:
     - name: http
@@ -27,5 +27,5 @@ spec:
       targetPort: 8000
       protocol: TCP
   selector:
-    app: vllm-llama3-8b-instruct
+    app: openai-app
   type: ClusterIP
