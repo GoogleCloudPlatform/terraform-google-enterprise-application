@@ -22,7 +22,7 @@ locals {
   repo_branch      = "main"
 
   target_deploy_parameters = { for i, p in local.cluster_projects_id : (i) => {
-    "cluster_project_id"      = i
+    "cluster_project_id"      = p
     "model_armor_template_id" = module.model_armor_configuration[i].template.id
     "model_armor_location"    = var.region
   } }
@@ -120,5 +120,5 @@ resource "google_service_account_iam_member" "wi_binding" {
   for_each           = google_service_account.gsa_llamma_model
   service_account_id = each.value.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${each.value.project}.svc.id.goog[llamma-model-${each.key}/llamma-model-ksa]"
+  member             = "serviceAccount:${each.value.project}.svc.id.goog[capital-agent-${each.key}/llamma-model-ksa]"
 }
