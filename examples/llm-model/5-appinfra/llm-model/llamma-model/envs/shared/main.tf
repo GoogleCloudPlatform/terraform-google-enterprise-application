@@ -15,11 +15,18 @@
  */
 
 locals {
-  application_name = "agent"
-  service_name     = "capital-agent"
+  application_name = "llm-model"
+  service_name     = "llamma-model"
   team_name        = "default"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
+
+  target_deploy_parameters = { for i, p in local.cluster_projects_id : (i) => {
+    "cluster_project_id"      = p
+    "model_armor_template_id" = module.model_armor_configuration[i].template.id
+    "model_armor_location"    = var.region
+  } }
+
 }
 
 module "app" {
@@ -46,36 +53,72 @@ module "app" {
   logging_bucket    = var.logging_bucket
   bucket_kms_key    = var.bucket_kms_key
 
+  target_deploy_parameters = local.target_deploy_parameters
+
   attestation_kms_key                = var.attestation_kms_key
   attestor_id                        = var.attestation_kms_key != null ? contains(var.environment_names, "production") ? data.terraform_remote_state.fleetscope["production"].outputs.attestor_id : data.terraform_remote_state.fleetscope[var.environment_names[0]].outputs.attestor_id : null
   binary_authorization_image         = data.terraform_remote_state.bootstrap.outputs.binary_authorization_image
   binary_authorization_repository_id = data.terraform_remote_state.bootstrap.outputs.binary_authorization_repository_id
+
 }
 
-resource "google_service_account" "gsa_capital_agent" {
+module "model_armor_configuration" {
+  source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
+  version = "~> 2.3"
+
+  for_each    = local.cluster_projects_id
+  template_id = "ma-${local.application_name}-${local.service_name}"
+  location    = var.region
+  project_id  = each.value
+
+  rai_filters = {
+    dangerous         = "LOW_AND_ABOVE"
+    sexually_explicit = "MEDIUM_AND_ABOVE"
+  }
+
+  enable_malicious_uri_filter_settings = true
+
+  pi_and_jailbreak_filter_settings = "MEDIUM_AND_ABOVE"
+
+  sdp_settings = {
+    basic_config_filter_enforcement = true
+  }
+
+  metadata_configs = {
+    enforcement_type                         = "INSPECT_AND_BLOCK"
+    enable_multi_language_detection          = true
+    log_sanitize_operations                  = true
+    log_template_operations                  = true
+    ignore_partial_invocation_failures       = false
+    custom_prompt_safety_error_code          = "799"
+    custom_prompt_safety_error_message       = "error 799"
+    custom_llm_response_safety_error_message = "error 798"
+    custom_llm_response_safety_error_code    = "798"
+  }
+
+  labels = {
+    "model" = "llamma-model"
+  }
+}
+
+resource "google_service_account" "gsa_llamma_model" {
   for_each     = local.cluster_projects_id
   project      = each.value
-  account_id   = "gsa-capital-agent"
-  display_name = "GSA for capital-agent"
-}
-
-resource "google_project_iam_member" "gsa_vertex_user" {
-  for_each = google_service_account.gsa_capital_agent
-  project  = each.value.project
-  role     = "roles/aiplatform.user"
-  member   = each.value.member
+  account_id   = "gsa-llamma-model"
+  display_name = "GSA for llamma-model"
+  create_ignore_already_exists = true
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  for_each = google_service_account.gsa_capital_agent
+  for_each = google_service_account.gsa_llamma_model
   project  = each.value.project
   role     = "roles/cloudtrace.agent"
   member   = each.value.member
 }
 
 resource "google_service_account_iam_member" "wi_binding" {
-  for_each           = google_service_account.gsa_capital_agent
+  for_each           = google_service_account.gsa_llamma_model
   service_account_id = each.value.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${each.value.project}.svc.id.goog[capital-agent-${each.key}/capital-agent-ksa]"
+  member             = "serviceAccount:${each.value.project}.svc.id.goog[capital-agent-${each.key}/llamma-model-ksa]"
 }

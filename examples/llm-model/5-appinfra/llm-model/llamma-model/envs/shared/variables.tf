@@ -1,57 +1,23 @@
-# Copyright 2024 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-variable "project_id" {
-  type        = string
-  description = "CI/CD project ID"
-}
+/**
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 variable "region" {
+  description = "CI/CD region"
   type        = string
-  description = "CI/CD Region (e.g. us-central1)"
-}
-
-variable "cluster_service_accounts" {
-  description = "Cluster services accounts to be granted the Artifact Registry reader role."
-  type        = map(string)
-}
-
-variable "env_cluster_membership_ids" {
-  description = "Env Cluster Membership IDs"
-  type = map(object({
-    cluster_membership_ids = list(string)
-  }))
-}
-
-variable "service_name" {
-  type        = string
-  description = "service name (e.g. 'transactionhistory')"
-}
-
-variable "team_name" {
-  type        = string
-  description = "Team name (e.g. 'ledger'). This will be the prefix to the service CI Build Trigger Name."
-}
-
-variable "repo_name" {
-  type        = string
-  description = "Short version of repository to sync ACM configs from & use source for CI (e.g. 'bank-of-anthos' for https://www.github.com/GoogleCloudPlatform/bank-of-anthos)"
-}
-
-variable "repo_branch" {
-  type        = string
-  description = "Branch to sync ACM configs from & trigger CICD if pushed to."
+  default     = "us-central1"
 }
 
 variable "buckets_force_destroy" {
@@ -66,21 +32,14 @@ variable "bucket_prefix" {
   default     = "bkt"
 }
 
-variable "additional_substitutions" {
-  description = "A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (_)."
-  type        = map(string)
-  default     = {}
-}
-
-variable "app_build_trigger_yaml" {
+variable "remote_state_bucket" {
+  description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string
-  description = "Path to the Cloud Build YAML file for the application"
 }
 
-variable "ci_build_included_files" {
+variable "environment_names" {
+  description = "A list of environment names."
   type        = list(string)
-  description = "(Optional) includedFiles are file glob matches using https://golang.org/pkg/path/filepath/#Match extended with support for **. If any of the files altered in the commit pass the ignoredFiles filter and includedFiles is empty, then as far as this filter is concerned, we should trigger the build. If any of the files altered in the commit pass the ignoredFiles filter and includedFiles is not empty, then we make sure that at least one of those files matches a includedFiles glob. If not, then we do not trigger a build."
-  default     = []
 }
 
 variable "cloudbuildv2_repository_config" {
@@ -143,21 +102,6 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
-variable "workerpool_id" {
-  description = <<-EOT
-    Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
-
-    The expected format is:
-    `projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.
-
-    If you are using worker pools from a different project, ensure that you grant the
-    `roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:
-    `service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`
-  EOT
-  type        = string
-  default     = null
-}
-
 variable "access_level_name" {
   description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
   type        = string
@@ -176,30 +120,7 @@ variable "bucket_kms_key" {
   default     = null
 }
 
-variable "binary_authorization_image" {
-  type        = string
-  description = "The Binary Authorization image to be used to create attestation."
-  default     = null
-}
-
-variable "binary_authorization_repository_id" {
-  type        = string
-  description = "The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`."
-}
-
 variable "attestation_kms_key" {
   type        = string
-  description = "The KMS Key ID to be used by attestor in format projects/PROJECT_ID/locations/KMS_KEY_LOCATION/keyRings/KMS_KEYRING_NAME/cryptoKeys/KMS_KEY_NAME/cryptoKeyVersions/KMS_KEY_VERSION."
-  default     = null
-}
-
-variable "attestor_id" {
-  type        = string
-  description = "The attestor name in format projects/PROJECT_ID/attestors/ATTESTOR_NAME."
-}
-
-variable "target_deploy_parameters" {
-  type        = map(map(string))
-  description = "Optional. The deploy parameters to use for this target. The key must be the environment name."
-  default     = {}
+  description = "The KMS Key ID to be used by attestor."
 }
