@@ -38,3 +38,6 @@ helmCharts:
       modelServers:
         matchLabels:
           app: openai-app
+images:
+  - name: registry.k8s.io/gateway-api-inference-extension/epp
+    newName: custom-epp
