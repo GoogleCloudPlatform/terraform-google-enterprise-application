@@ -34,27 +34,27 @@ spec:
         app: openai-app
         version: v1
     spec:
+      serviceAccountName: llamma-model-ksa
       containers:
       - args:
         - python
         - -m
         - vllm.entrypoints.api_server
         - --host=0.0.0.0
-        - --port=8080
+        - --port=8000
         - --swap-space=16
-        - --model=openai/gpt-oss-safeguard-20b
+        - --model=Qwen/Qwen2.5-7B-Instruct
         - --max-model-len=2048
         - --gpu-memory-utilization=0.9
         - --enforce-eager
         - --tensor-parallel-size=1
         - --enable-chunked-prefill
-        - --revision=9a23d08c99110d1bebe8a6799d33485cbb8dc390
         env:
         - name: DEPLOY_SOURCE
           value: UI_HF_VERIFIED_MODEL
         - name: MODEL_ID
-          value: openai/gpt-oss-safeguard-20b
-        image: us-docker.pkg.dev/vertex-ai/vertex-vision-model-garden-dockers/pytorch-vllm-serve:20251023_0916_RC01
+          value: Qwen/Qwen2.5-7B-Instruct
+        image: pytorch-vllm-serve
         imagePullPolicy: IfNotPresent
         name: inference-server
         resources:

@@ -57,4 +57,49 @@ git push origin main
 
 1. After the CI build succesfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
-1. Once the CD pipeline succesfully runs, you should be able to see a deployment named `openai-app` on your cluster and be able to access the UI by Load Balancer IP.
+1. Once the CD pipeline succesfully runs, you should be able to see a deployment named `openai-app` on your cluster and be able to send request by Load Balancer IP.
+
+    1. Set the following environment variables:
+
+    ```sh
+    export CLUSTER_PROJECT=<CLUSTER_PROJECT_ID>
+    export CLUSTER_REGION=<CLUSTER_REGION>
+    export CLUSTER_ENVIROMENT="development" # change for your enviroment name
+    export GATEWAY_NAME=<GATEWAY_NAME>
+    export PORT_NUMBER=<PORT_NUMBER> # Use 80 for HTTP
+    ```
+    1. Get your cluster credentials
+
+    ```sh
+    gcloud container fleet memberships get-credentials  cluster-${CLUSTER_REGION}-${CLUSTER_ENVIROMENT}  --project ${CLUSTER_PROJECT}
+    ```
+
+    1. To get the Gateway endpoint, run the following command:
+
+    ```sh
+    echo "Waiting for the Gateway IP address..."
+    IP=""
+    while [ -z "$IP" ]; do
+    IP=$(kubectl get gateway/${GATEWAY_NAME} -n capital-agent-${CLUSTER_ENVIROMENT} -o jsonpath='{.status.addresses[0].value}' 2>/dev/null)
+    if [ -z "$IP" ]; then
+        echo "Gateway IP not found, waiting 5 seconds..."
+        sleep 5
+    fi
+    done
+
+    echo "Gateway IP address is: $IP"
+    PORT=${PORT_NUMBER}
+    ```
+    1. To send a request to the /v1/completions endpoint using curl, run the following command:
+
+    ```sh
+    curl -i -X POST ${IP}:${PORT}/v1/chat/completions \
+    -H 'Content-Type: application/json' \
+    -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+    -d '{
+        "model": "Qwen/Qwen2.5-7B-Instruct",
+        "prompt": "What is the best pizza in the world?",
+        "max_tokens": 2048,
+        "temperature": "0"
+    }'
+    ```

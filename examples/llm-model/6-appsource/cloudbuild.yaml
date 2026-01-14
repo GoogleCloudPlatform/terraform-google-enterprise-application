@@ -17,7 +17,7 @@ steps:
   - name: gcr.io/cloud-builders/gsutil
     id: download-skaffold-cache
     args: ['cp', $_CACHE_URI, '/workspace/cache'] # always write skaffold cache to filename cache in workspace
-  - name: gcr.io/k8s-skaffold/skaffold:v2.17.0
+  - name: gcr.io/k8s-skaffold/skaffold:v2.17.1
     id: build-and-push-images
     entrypoint: 'bash'
     args:
@@ -37,22 +37,36 @@ steps:
     id: upload-skaffold-cache
     args: ['cp', '/workspace/$_CACHE',  $_CACHE_URI]
   - name: 'bash'
-    id: 'get-image-url'
+    id: 'get-image-urls'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         apk add --no-cache jq
-        jq -r '.builds[0].tag' /workspace/artifacts.json > /workspace/image_url.txt
+        jq -r '.builds[] | select(.imageName=="pytorch-vllm-serve") | .tag' /workspace/artifacts.json > /workspace/main_image.txt
+        jq -r '.builds[] | select(.imageName=="custom-epp") | .tag' /workspace/artifacts.json > /workspace/epp_image.txt
+        echo "Main Image: $(cat /workspace/main_image.txt)"
+        echo "EPP Image:  $(cat /workspace/epp_image.txt)"
   - id: 'create-attestation'
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - "$$(cat /workspace/image_url.txt)"
+      - "$$(cat /workspace/main_image.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
       - '$_KMS_KEY_VERSION'
+    allowFailure: true
+  - id: 'create-attestation-epp'
+    name: '$_BINARY_AUTH_IMAGE'
+    args:
+      - '--artifact-url'
+      - "$$(cat /workspace/epp_image.txt)"
+      - '--attestor'
+      - '$_ATTESTOR_ID'
+      - '--keyversion'
+      - '$_KMS_KEY_VERSION'
+    allowFailure: true
   - name: gcr.io/cloud-builders/gcloud
     args:
       - "deploy"

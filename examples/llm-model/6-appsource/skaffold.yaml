@@ -16,9 +16,12 @@ apiVersion: skaffold/v4beta10
 kind: Config
 build:
   artifacts:
-  - image: llm-model
+  - image: pytorch-vllm-serve
     docker:
         dockerfile: Dockerfile
+  - image: custom-epp
+    docker:
+        dockerfile: Dockerfile-epp
   tagPolicy:
     gitCommit: {}
 profiles:

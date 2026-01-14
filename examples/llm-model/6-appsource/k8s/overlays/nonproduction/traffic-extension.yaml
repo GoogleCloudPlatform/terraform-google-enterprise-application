@@ -35,7 +35,7 @@ spec:
             - ResponseBody
             - ResponseTrailers
           metadata:
-            model_armor_settings: "model_armor_settings" # from-param: [ { "model": "food-review-1", "model_response_template_id": "${model_armor_template_id}", "user_prompt_template_id": "${model_armor_template_id}" }, { "model": "meta-llama/Llama-3.1-8B-Instruct", "model_response_template_id": "${model_armor_template_id}", "user_prompt_template_id": "${model_armor_template_id}" } ]
+            model_armor_settings: "model_armor_settings" # from-param: [ { "model": "food-review-1", "model_response_template_id": "${model_armor_template_id}", "user_prompt_template_id": "${model_armor_template_id}" }, { "model": "Qwen/Qwen2.5-7B-Instruct", "model_response_template_id": "${model_armor_template_id}", "user_prompt_template_id": "${model_armor_template_id}" } ]
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
