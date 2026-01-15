@@ -15,7 +15,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openai-app
+  name: openai-app-deployment
 spec:
   progressDeadlineSeconds: 600
   replicas: 1

@@ -25,30 +25,47 @@ if [ $# -eq 0 ]; then
     die "missing arguments"
 fi
 
-# Running the Python script with "--help" causes it to exit with status 0
-# This would cause this bash script to try to take that output and interpret
-# it as an associative array, like it would in normal usage. Therefore,
-# we must intervene and run the help command ourselves, exiting afterwards.
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     python3 /work/parse_arguments.py --help
     exit 0
 fi
 
-# Technique from https://stackoverflow.com/a/11682266
-# Use a Python script to parse the arguments to this bash script, then returns them to be parsed as an array
+# Parse arguments using the python helper
 OUTPUT=$(python3 /work/parse_arguments.py "$@")
 declare -A args="($OUTPUT)"
 
 echo "Pull image ${args[artifact_url]}"
 docker pull "${args[artifact_url]}"
 
-IMAGE_AND_DIGEST="$(docker inspect "${args[artifact_url]}" --format='{{index .RepoDigests 0}}')"
-echo "Docker digest: ${IMAGE_AND_DIGEST}"
+echo "Resolving correct digest for ${args[artifact_url]}..."
+
+ALL_DIGESTS=$(docker inspect "${args[artifact_url]}" --format='{{range .RepoDigests}}{{.}} {{end}}')
+echo "All local digests found: $ALL_DIGESTS"
+
+TARGET_BASE="${args[artifact_url]%:*}"
+TARGET_BASE="${TARGET_BASE%@*}"
+
+IMAGE_AND_DIGEST=""
+
+for digest in $ALL_DIGESTS; do
+    if [[ "$digest" == "${TARGET_BASE}"* ]]; then
+        IMAGE_AND_DIGEST="$digest"
+        break
+    fi
+done
+
+if [[ -z "$IMAGE_AND_DIGEST" ]]; then
+    echo "Warning: Specific repository digest not found in local Docker list. Falling back to first available..."
+    IMAGE_AND_DIGEST=$(echo "$ALL_DIGESTS" | awk '{print $1}')
+fi
+
+echo "Selected Docker digest: ${IMAGE_AND_DIGEST}"
 
 if ! echo "$IMAGE_AND_DIGEST" | grep -Eq "^[a-z0-9-]+-docker\.pkg\.dev/.+/.+@sha256:[a-f0-9]{64}$"; then
+    echo "Local digest is not in Artifact Registry format. Attempting cloud lookup..."
     DIGEST_ONLY=$(gcloud artifacts docker images describe "${args[artifact_url]}" --format='value(image_summary.digest)')
-    IMAGE_BASE_URL="${args[artifact_url]%:*}"
-    IMAGE_AND_DIGEST="${IMAGE_BASE_URL}@${DIGEST_ONLY}"
+    IMAGE_AND_DIGEST="${TARGET_BASE}@${DIGEST_ONLY}"
+    echo "Cloud resolved digest: ${IMAGE_AND_DIGEST}"
 fi
 
 if [[ -z "$IMAGE_AND_DIGEST" ]] || [[ "$IMAGE_AND_DIGEST" != *"@"* ]]; then
@@ -57,7 +74,7 @@ fi
 
 if [ -n "${args[pgp_key_fingerprint]}" ]; then
     if [ -z "$PGP_SECRET_KEY" ]; then
-        die "PGP_SECRET_KEY environment variable is required if providing the PGP signing key through an environment variable. Please consult the documentation for more information."
+        die "PGP_SECRET_KEY environment variable is required if providing the PGP signing key through an environment variable."
     fi
 
     gcloud container binauthz create-signature-payload \
