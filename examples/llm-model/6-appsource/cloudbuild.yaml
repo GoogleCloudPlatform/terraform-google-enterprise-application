@@ -14,9 +14,9 @@
 
 timeout: 7200s
 steps:
-  - name: gcr.io/cloud-builders/gsutil
+  - name: gcr.io/cloud-builders/gcloud
     id: download-skaffold-cache
-    args: ['cp', $_CACHE_URI, '/workspace/cache'] # always write skaffold cache to filename cache in workspace
+    args: ['storage', 'cp', $_CACHE_URI, '/workspace/cache'] # always write skaffold cache to filename cache in workspace
   - name: gcr.io/k8s-skaffold/skaffold:v2.17.1
     id: build-and-push-images
     entrypoint: 'bash'
@@ -33,9 +33,9 @@ steps:
           --cache-file=/workspace/$_CACHE
     env:
       - 'HOME=/root'
-  - name: gcr.io/cloud-builders/gsutil
+  - name: gcr.io/cloud-builders/gcloud
     id: upload-skaffold-cache
-    args: ['cp', '/workspace/$_CACHE',  $_CACHE_URI]
+    args: ['storage', 'cp', '/workspace/$_CACHE',  $_CACHE_URI]
   - name: 'bash'
     id: 'get-image-urls'
     entrypoint: 'bash'
