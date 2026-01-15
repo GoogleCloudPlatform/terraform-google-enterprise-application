@@ -56,7 +56,6 @@ steps:
       - '$_ATTESTOR_ID'
       - '--keyversion'
       - '$_KMS_KEY_VERSION'
-    allowFailure: true
   - id: 'create-attestation-epp'
     name: '$_BINARY_AUTH_IMAGE'
     args:
@@ -66,7 +65,6 @@ steps:
       - '$_ATTESTOR_ID'
       - '--keyversion'
       - '$_KMS_KEY_VERSION'
-    allowFailure: true
   - name: gcr.io/cloud-builders/gcloud
     args:
       - "deploy"
