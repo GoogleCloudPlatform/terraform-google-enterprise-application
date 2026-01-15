@@ -95,11 +95,15 @@ git push origin main
     ```sh
     curl -i -X POST ${IP}:${PORT}/v1/chat/completions \
     -H 'Content-Type: application/json' \
-    -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
     -d '{
         "model": "Qwen/Qwen2.5-7B-Instruct",
-        "prompt": "What is the best pizza in the world?",
-        "max_tokens": 2048,
-        "temperature": "0"
+        "messages": [
+        {
+            "role": "user",
+            "content": "What is the best pizza in the world?"
+        }
+        ],
+        "max_tokens": 512,
+        "temperature": 0.7
     }'
     ```
