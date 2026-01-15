@@ -42,8 +42,9 @@ echo "Resolving correct digest for ${args[artifact_url]}..."
 ALL_DIGESTS=$(docker inspect "${args[artifact_url]}" --format='{{range .RepoDigests}}{{.}} {{end}}')
 echo "All local digests found: $ALL_DIGESTS"
 
-TARGET_BASE="${args[artifact_url]%:*}"
-TARGET_BASE="${TARGET_BASE%@*}"
+TARGET_BASE="${args[artifact_url]%%@*}"
+TARGET_BASE="${TARGET_BASE%%:*}"
+echo "Looking for repo base: ${TARGET_BASE}@"
 
 IMAGE_AND_DIGEST=""
 
