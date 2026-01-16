@@ -268,7 +268,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
     chmod 755 $llm_model_infra_repo/tf-wrapper.sh
     cp -RT ./terraform-example-foundation/policy-library/ $llm_model_infra_repo/policy-library
     rm -rf $llm_model_infra_repo/policy-library/policies/constraints/*
-    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $llm_model_infra_repo/cloudbuild-tf-*
+    sed -i'' -e 's/CLOUDSOURCE/FILESYSTEM/g' $llm_model_infra_repo/cloudbuild-tf-*
     sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$llm_model_statebucket/" $llm_model_infra_repo/envs/shared/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $llm_model_infra_repo/envs/shared/terraform.tfvars
     ```
