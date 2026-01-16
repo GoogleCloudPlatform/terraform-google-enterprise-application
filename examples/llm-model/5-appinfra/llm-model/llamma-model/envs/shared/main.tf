@@ -25,6 +25,7 @@ locals {
     "cluster_project_id"      = p
     "model_armor_template_id" = module.model_armor_configuration[i].template.id
     "model_armor_location"    = var.region
+    "namespace_id"            = "vllm-model-${i}"
   } }
 
 }
@@ -102,10 +103,10 @@ module "model_armor_configuration" {
 }
 
 resource "google_service_account" "gsa_llamma_model" {
-  for_each     = local.cluster_projects_id
-  project      = each.value
-  account_id   = "gsa-llamma-model"
-  display_name = "GSA for llamma-model"
+  for_each                     = local.cluster_projects_id
+  project                      = each.value
+  account_id                   = "gsa-llamma-model"
+  display_name                 = "GSA for llamma-model"
   create_ignore_already_exists = true
 }
 
@@ -120,5 +121,5 @@ resource "google_service_account_iam_member" "wi_binding" {
   for_each           = google_service_account.gsa_llamma_model
   service_account_id = each.value.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${each.value.project}.svc.id.goog[capital-agent-${each.key}/llamma-model-ksa]"
+  member             = "serviceAccount:${each.value.project}.svc.id.goog[vllm-model-${each.key}/llamma-model-ksa]"
 }
