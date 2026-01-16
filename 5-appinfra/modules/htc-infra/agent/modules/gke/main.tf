@@ -15,7 +15,6 @@
 locals {
   enable_jobs = (var.gke_job_request != "" && var.gke_job_response != "") ? 1 : 0
   enable_hpa  = (var.gke_hpa_request != "" && var.gke_job_response != "") ? 1 : 0
-  # Topics
   pubsub_topics = concat(
     local.enable_jobs == 1 ? [
       var.gke_job_request,
@@ -78,32 +77,31 @@ resource "google_storage_bucket" "gcs_storage_data" {
   }
 }
 
-# Apply Resource to each GKE cluster
 module "config_apply" {
-  for_each           = { for idx, cluster in local.clusters : idx => cluster }
-  source             = "../config_apply"
-  cluster_project_id = var.cluster_project_id
-  infra_project_id   = var.project_id
-  region             = each.value.location
-  cluster_name       = each.value.name
-  agent_image        = var.agent_image
-  namespace          = var.namespace
-  # Workload options
+  for_each               = { for idx, cluster in local.clusters : idx => cluster }
+  source                 = "../config_apply"
+  cluster_project_id     = var.cluster_project_id
+  infra_project_id       = var.project_id
+  region                 = each.value.location
+  cluster_name           = each.value.name
+  agent_image            = var.agent_image
+  namespace              = var.namespace
   workload_image         = var.workload_image
   workload_args          = var.workload_args
   workload_grpc_endpoint = var.workload_grpc_endpoint
   workload_init_args     = var.workload_init_args
   test_configs           = var.test_configs
   gcs_bucket             = google_storage_bucket.gcs_storage_data[each.value.location].id
-  # set this to empty string if not enabled
-  pubsub_hpa_request = local.enable_hpa == 1 ? google_pubsub_subscription.subscription[var.gke_hpa_request].name : ""
-  pubsub_job_request = local.enable_jobs == 1 ? google_pubsub_subscription.subscription[var.gke_job_request].name : ""
+  pubsub_hpa_request     = local.enable_hpa == 1 ? google_pubsub_subscription.subscription[var.gke_hpa_request].name : ""
+  pubsub_job_request     = local.enable_jobs == 1 ? google_pubsub_subscription.subscription[var.gke_job_request].name : ""
 
-  # Parallelstore Config
   parallelstore_enabled       = var.parallelstore_enabled
   parallelstore_access_points = var.parallelstore_enabled ? join(",", var.parallelstore_instances[each.value.location].access_points) : null
   parallelstore_vpc_name      = var.parallelstore_enabled ? var.vpc_name : null
   parallelstore_location      = var.parallelstore_enabled ? var.parallelstore_instances[each.value.location].location : null
   parallelstore_instance_name = var.parallelstore_enabled ? var.parallelstore_instances[each.value.location].name : null
   parallelstore_capacity_gib  = var.parallelstore_enabled ? var.parallelstore_instances[each.value.location].capacity_gib : null
+
+  keda_image           = var.keda_image
+  keda_apiserver_image = var.keda_apiserver_image
 }

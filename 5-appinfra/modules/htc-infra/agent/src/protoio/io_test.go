@@ -21,7 +21,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/gcp"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/gcp"
 )
 
 // Command to compile the protobuf for tests:

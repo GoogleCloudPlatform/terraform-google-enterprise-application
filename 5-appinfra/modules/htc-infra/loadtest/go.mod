@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/loadtest
+module github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/loadtest
 
 go 1.24
 

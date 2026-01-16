@@ -26,12 +26,10 @@ import (
 	"strings"
 
 	"cloud.google.com/go/storage"
-	"google.golang.org/api/option"
 )
 
 func (cfg *GoogleConfig) NewStorageClient(ctxt context.Context) (*storage.Client, error) {
-	return storage.NewClient(ctxt, option.WithUserAgent(
-		"cloud-solutions/fsi-rdp-agent-v1.0.0"))
+	return storage.NewClient(ctxt)
 }
 
 type gzipReadWrapper struct {

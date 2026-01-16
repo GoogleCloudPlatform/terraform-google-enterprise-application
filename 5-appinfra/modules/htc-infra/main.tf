@@ -74,6 +74,15 @@ module "agent" {
   }
 }
 
+module "keda" {
+  source = "./modules/keda"
+
+  project_id        = var.admin_project
+  region            = var.region
+  repository_region = var.region
+  repository_id     = var.service_name
+}
+
 #-----------------------------------------------------
 # GKE Deployment
 #-----------------------------------------------------
@@ -104,6 +113,9 @@ module "gke" {
   parallelstore_enabled   = var.storage_type == "PARALLELSTORE"
   parallelstore_instances = local.parallelstore_instances
   vpc_name                = var.network_name
+
+  keda_image           = module.keda.keda_images.keda
+  keda_apiserver_image = module.keda.keda_images.keda-metrics-apiserver
 
   depends_on = [
     module.agent

@@ -7,7 +7,7 @@ This is an example of running a loadtest library on Google Cloud infrastructure.
 
 It will run using GKE horizontal pod autoscaler orchestrated using Pub/Sub, and will
 also run on Cloud Run through BigQuery. For details on the loadtest library, see
-its [README.md](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/blob/main/examples/risk/loadtest/src/README.md). The same techniques can be used to run any kind of
+its [README.md](github.com/GoogleCloudPlatform/risk-and-research-blueprints/blob/main/examples/risk/loadtest/src/README.md). The same techniques can be used to run any kind of
 library that is exposing gRPC.
 
 Cloud Logging, Pub/Sub, Cloud Monitoring, BigQuery, and Looker Studio will all be used
@@ -126,7 +126,7 @@ The link to the [subscription](https://console.cloud.google.com/cloudpubsub/subs
 will show you the health, statistics, and also allow you to pull messages (tasks).
 
 Pull some messages (do not Ack!) and see the messages appear. These messages
-will be JSON, but adhering to the [protobuf request](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/blob/main/examples/risk/loadtest/src/request.proto) schema.
+will be JSON, but adhering to the [protobuf request](github.com/GoogleCloudPlatform/risk-and-research-blueprints/blob/main/examples/risk/loadtest/src/request.proto) schema.
 
 ### Inspect the workers
 

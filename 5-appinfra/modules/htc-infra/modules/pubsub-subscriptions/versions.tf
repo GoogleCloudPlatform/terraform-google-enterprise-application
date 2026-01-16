@@ -37,7 +37,4 @@ terraform {
       version = ">= 2.5.3"
     }
   }
-  provider_meta "google" {
-    module_name = "cloud-solutions/fsi-rdp-agent-v1.0.0"
-  }
 }

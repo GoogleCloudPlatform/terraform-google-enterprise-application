@@ -58,6 +58,16 @@ variable "workload_image" {
   description = "Map of image name to configuration (source)"
 }
 
+variable "keda_image" {
+  type        = string
+  description = "Map of image name to configuration (source)"
+}
+
+variable "keda_apiserver_image" {
+  type        = string
+  description = "Map of image name to configuration (source)"
+}
+
 # Sidecar configuration
 variable "workload_grpc_endpoint" {
   type        = string

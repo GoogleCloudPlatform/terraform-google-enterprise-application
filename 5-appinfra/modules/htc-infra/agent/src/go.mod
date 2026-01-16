@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent
+module github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent
 
 go 1.24
 toolchain go1.24.1

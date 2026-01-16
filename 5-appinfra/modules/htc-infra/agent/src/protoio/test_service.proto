@@ -16,7 +16,7 @@ syntax = "proto3";
 
 package main;
 
-option go_package = "github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/protoio";
+option go_package = "github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/protoio";
 
 service TestService {
 

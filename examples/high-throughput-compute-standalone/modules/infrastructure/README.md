@@ -22,7 +22,7 @@ This Terraform example demonstrates how to deploy a core infrastructure setup in
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/GoogleCloudPlatform/risk-and-research-blueprints.git
+   git clone github.com/GoogleCloudPlatform/risk-and-research-blueprints.git
    cd risk-and-research-blueprints/examples/infrastructure
    ```
 

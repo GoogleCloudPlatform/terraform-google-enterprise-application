@@ -23,9 +23,7 @@ steps:
         AGENT_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
                  --format='get(image_summary.digest)')
         echo "Found digest for agent: $$AGENT_DIGEST"
-        # Store the digest in a file for subsequent steps
         echo "export AGENT_DIGEST=$$AGENT_DIGEST" >> /workspace/digests.env
-    # We write to /workspace/digests.env, which is shared across steps
 
   - id: 'get-loadtest-image-digest'
     name: 'gcr.io/cloud-builders/gcloud'
@@ -37,8 +35,31 @@ steps:
         LOADTEST_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
                  --format='get(image_summary.digest)')
         echo "Found digest for loadtest: $$LOADTEST_DIGEST"
-        # Append the digest to the same file
         echo "export LOADTEST_DIGEST=$$LOADTEST_DIGEST" >> /workspace/digests.env
+
+  - id: 'get-keda-image-digest'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE_URI="$_CONTAINER_REGISTRY/keda:latest"
+        KEDA_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
+                 --format='get(image_summary.digest)')
+        echo "Found digest for keda: $$KEDA_DIGEST"
+        echo "export KEDA_DIGEST=$$KEDA_DIGEST" >> /workspace/digests.env
+
+  - id: 'get-keda-api-server-image-digest'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE_URI="$_CONTAINER_REGISTRY/keda-metrics-apiserver:latest"
+        KEDA_API_SERVER_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
+                 --format='get(image_summary.digest)')
+        echo "Found digest for keda api server: $$KEDA_API_SERVER_DIGEST"
+        echo "export KEDA_API_SERVER_DIGEST=$$KEDA_API_SERVER_DIGEST" >> /workspace/digests.env
 
   - id: 'get-american-option-image-digest'
     name: 'gcr.io/cloud-builders/gcloud'
@@ -46,11 +67,10 @@ steps:
     args:
       - '-c'
       - |
-        IMAGE_URI="$_CONTAINER_REGISTRY/american_option:latest" # Corrected from agent:latest
+        IMAGE_URI="$_CONTAINER_REGISTRY/american_option:latest"
         AMERICANOPTION_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
                  --format='get(image_summary.digest)')
         echo "Found digest for american-option: $$AMERICANOPTION_DIGEST"
-        # Append the digest to the same file
         echo "export AMERICANOPTION_DIGEST=$$AMERICANOPTION_DIGEST" >> /workspace/digests.env
 
   - id: 'log-image-paths'
@@ -59,7 +79,6 @@ steps:
     args:
       - '-c'
       - |
-        # Source the file to load the variables into this step's environment
         source /workspace/digests.env
         echo "Attesting agent image: $_CONTAINER_REGISTRY/agent@$$AGENT_DIGEST"
         echo "Attesting loadtest image: $_CONTAINER_REGISTRY/loadtest@$$LOADTEST_DIGEST"
@@ -73,7 +92,6 @@ steps:
     args:
       - '-c'
       - |
-        # Source the file to load the variables into this step's environment
         source /workspace/digests.env
         /work/create_binauthz_attestation.sh \
           '--artifact-url' \
@@ -108,6 +126,36 @@ steps:
         /work/create_binauthz_attestation.sh \
           '--artifact-url' \
           "$_CONTAINER_REGISTRY/american_option@$$AMERICANOPTION_DIGEST" \
+          '--attestor' \
+          "$_ATTESTOR_ID" \
+          '--keyversion' \
+          "$_KMS_KEY_VERSION"
+
+  - id: 'create-keda-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        /work/create_binauthz_attestation.sh \
+          '--artifact-url' \
+          "$_CONTAINER_REGISTRY/keda@$$KEDA_DIGEST" \
+          '--attestor' \
+          "$_ATTESTOR_ID" \
+          '--keyversion' \
+          "$_KMS_KEY_VERSION"
+
+  - id: 'create-keda-api-server-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        /work/create_binauthz_attestation.sh \
+          '--artifact-url' \
+          "$_CONTAINER_REGISTRY/keda-metrics-apiserver@$$KEDA_API_SERVER_DIGEST" \
           '--attestor' \
           "$_ATTESTOR_ID" \
           '--keyversion' \

@@ -22,7 +22,8 @@ import (
 	"iter"
 	"log/slog"
 
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/gcp"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/gcp"
+
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )

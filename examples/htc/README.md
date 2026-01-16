@@ -7,7 +7,7 @@ This example shows how to deploy the HTC example using the infrastructure create
 This is an example of running a loadtest library on Google Cloud infrastructure.
 
 It will run using GKE horizontal pod autoscaler orchestrated using Pub/Sub. For details on the loadtest library, see
-its [README.md](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/blob/main/examples/risk/loadtest/src/README.md). The same techniques can be used to run any kind of
+its [README.md](github.com/GoogleCloudPlatform/risk-and-research-blueprints/blob/main/examples/risk/loadtest/src/README.md). The same techniques can be used to run any kind of
 library that is exposing gRPC.
 
 Cloud Logging, Pub/Sub, Cloud Monitoring, BigQuery, and Looker Studio will all be used
@@ -130,6 +130,8 @@ The steps below assume that you are checked out on the same level as `terraform-
     echo htc_repository=$htc_repository
     export htc_statebucket=$(terraform output -json app-group | jq -r '.["htc.htc"]["app_cloudbuild_workspace_state_bucket_name"]' | sed 's/.*\///')
     echo htc_statebucket=$htc_statebucket
+    export htc_cb_sa=$(terraform output -json app-group | jq -r '.["htc.htc"]["app_cloudbuild_workspace_cloudbuild_sa_email"]' | sed 's/.*\///')
+    echo htc_cb_sa=$htc_cb_sa
     cd ../../../
     ```
 
@@ -202,9 +204,28 @@ The steps below assume that you are checked out on the same level as `terraform-
 
 1. Merge plan to production branch:
 
-   ```bash
+    ```bash
     git checkout -b production
     git push --set-upstream origin production
+    ```
+
+##### Workspace group
+
+The HTC example requires the cloud build's service account created during the app infra stage to be added to the namespace's workspace group.
+
+1. Define your target group email
+
+    ```bash
+    GROUP_EMAIL="example@groupemail.com"
+    ```
+
+2. Execute the gcloud command
+
+    ```bash
+    gcloud identity groups memberships add \
+        --group-email="$GROUP_EMAIL" \
+        --member-email="$htc_cb_sa" \
+        --roles="MEMBER"
     ```
 
 #### Application Source Code pipeline
@@ -228,19 +249,19 @@ First, retrieve the names of the source code repository and its Google Cloud pro
 1. Clone the empty repository created by the App Factory. (CSR Only)
 
     ```bash
-        gcloud source repos clone $app_source_repository --project=$app_source_project
+    gcloud source repos clone $app_source_repository --project=$app_source_project
     ```
 
 1. Clone the empty repository created by the App Factory. (CSR Only)
 
     ```bash
-        git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/$app_source_repository.git
+    git clone git@github.com:<GITHUB-OWNER or ORGANIZATION>/$app_source_repository.git
     ```
 
 1. Clone the empty repository created by the App Factory. (Gitlab Only)
 
     ```bash
-        git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/$app_source_repository.git
+    git clone git@gitlab.com:<GITLAB-GROUP or ACCOUNT>/$app_source_repository.git
     ```
 
 1. Copy and Commit the Example Source Code
@@ -248,11 +269,11 @@ First, retrieve the names of the source code repository and its Google Cloud pro
 Define the path to the example source code, copy it into your new repository, and commit the files.
 
     ```bash
-        export APP_SOURCE_DIR_PATH=$(readlink -f ./terraform-google-enterprise-application/examples/htc/6-appsource)
-        cd $app_source_repository
-        cp -r $APP_SOURCE_DIR_PATH/* ./
-        git add .
-        git commit -m "Add HTC application source code"
+    export APP_SOURCE_DIR_PATH=$(readlink -f ./terraform-google-enterprise-application/examples/htc/6-appsource)
+    cd $app_source_repository
+    cp -r $APP_SOURCE_DIR_PATH/* ./
+    git add .
+    git commit -m "Add HTC application source code"
     ```
 
 1. Push to main to Trigger the Pipeline
@@ -260,5 +281,5 @@ Define the path to the example source code, copy it into your new repository, an
 Push the code to the main branch. This will trigger the Cloud Build pipeline to build and deploy the HTC application.
 
     ```bash
-        git push --set-upstream origin main
+    git push --set-upstream origin main
     ```

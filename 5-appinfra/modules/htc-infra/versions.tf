@@ -37,7 +37,4 @@ terraform {
       version = ">= 3.7.2"
     }
   }
-  provider_meta "google" {
-    module_name = "cloud-solutions/fsi-rdp-loadtest-v1.0.0"
-  }
 }

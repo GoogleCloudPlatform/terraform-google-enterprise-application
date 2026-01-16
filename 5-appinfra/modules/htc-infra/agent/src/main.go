@@ -24,10 +24,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/gcp"
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/serve"
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/stats"
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/test"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/gcp"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/serve"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/stats"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/test"
+
 	"github.com/spf13/cobra"
 )
 

@@ -49,6 +49,16 @@ variable "workload_image" {
   description = "Map of image name to configuration (source)"
 }
 
+variable "keda_image" {
+  type        = string
+  description = "Map of image name to configuration (source)"
+}
+
+variable "keda_apiserver_image" {
+  type        = string
+  description = "Map of image name to configuration (source)"
+}
+
 # Sidecar configuration
 variable "workload_grpc_endpoint" {
   type        = string
@@ -76,11 +86,6 @@ variable "pubsub_job_request" {
 }
 
 
-#
-# Optional functionality
-# (Review suggested)
-#
-
 # Configurations to create shell scripts for
 variable "test_configs" {
   type = map(object({
@@ -96,11 +101,6 @@ variable "workload_init_args" {
   default     = []
   description = "Workload initialization arguments to run"
 }
-
-#
-# Naming defaults
-# (Only change if conflicting with other modules)
-#
 
 variable "gke_job_request" {
   type        = string

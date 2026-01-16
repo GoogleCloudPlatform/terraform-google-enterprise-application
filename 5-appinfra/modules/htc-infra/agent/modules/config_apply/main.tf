@@ -19,6 +19,8 @@ resource "random_string" "suffix" {
 }
 
 locals {
+  get_credentials_cmd = "gcloud container fleet memberships get-credentials ${var.cluster_name} --project ${var.cluster_project_id} --location ${var.region}"
+
   workload_init_args = {
     for idx, args in var.workload_init_args :
     "job-${idx}-${substr(sha256(jsonencode(args)), 0, 10)}" => {
@@ -34,12 +36,6 @@ locals {
     template_path = "${path.module}/k8s/parallelstore/${fname}"
   } }
 
-  cluster_config = "${var.cluster_name}-${var.region}-${var.cluster_project_id}"
-
-  kubeconfig_script = "gcloud container fleet memberships get-credentials ${var.cluster_name} --project ${var.cluster_project_id} --location ${var.region}"
-
-
-  # Test output
   test_job_template = {
     for id, cfg in var.test_configs :
     id => templatefile(
@@ -100,11 +96,8 @@ locals {
         KUBECONFIG        = "/tmp/kubeconfig_${var.cluster_name}-${var.cluster_project_id}.yaml"
     })
   }
-}
 
-# Apply configurations to the cluster
-resource "null_resource" "cluster_init" {
-  for_each = merge(
+  cluster_init_files = merge(
     { for fname in fileset(".", "${path.module}/k8s/*.yaml") : fname => file(fname) },
     { "volume_yaml" = templatefile(
       "${path.module}/k8s/volume.yaml.templ", {
@@ -123,75 +116,121 @@ resource "null_resource" "cluster_init" {
           gke_hpa_request_sub = var.pubsub_hpa_request
           gke_hpa_response    = var.gke_hpa_response
       }),
-      "adapter_new_resource_model_yaml" = templatefile(
-        "${path.module}/k8s/adapter_new_resource_model.yaml.templ", {
-          namespace = var.namespace
-          ca_bundle = local.ca_bundle_base64
-      }),
       "volume_claim_yaml" = templatefile(
         "${path.module}/k8s/volume_claim.yaml.templ", {
           namespace = var.namespace
       })
     }
   )
+}
 
+resource "local_file" "keda_rendered_manifest" {
+  content = templatefile("${path.module}/k8s/keda/keda-2.18.3-core.yaml.templ", {
+    namespace            = var.namespace
+    keda_image           = var.keda_image
+    keda_apiserver_image = var.keda_apiserver_image
+  })
+  filename = "${path.module}/k8s/keda/keda-rendered.yaml"
+}
+
+resource "null_resource" "keda_install" {
   triggers = {
-    template       = each.value
-    cluster_change = local.cluster_config
+    manifest_sha = sha256(local_file.keda_rendered_manifest.content)
+    auth_cmd     = local.get_credentials_cmd
   }
 
   provisioner "local-exec" {
-    when    = create
+    command = <<EOT
+      ${local.get_credentials_cmd}
+      kubectl apply --server-side --force-conflicts -f "${local_file.keda_rendered_manifest.filename}"
+    EOT
+  }
+
+  depends_on = [
+    local_file.keda_rendered_manifest,
+  ]
+}
+
+resource "null_resource" "cluster_init" {
+  for_each = local.cluster_init_files
+
+  triggers = {
+    manifest = each.value
+    auth_cmd = local.get_credentials_cmd
+  }
+
+  depends_on = [
+    null_resource.keda_install
+  ]
+
+  provisioner "local-exec" {
     command = <<-EOT
-    ${local.kubeconfig_script}
+      ${local.get_credentials_cmd}
+      kubectl apply --server-side -f - <<EOF
+      ${each.value}
+      EOF
+    EOT
+  }
 
-    mkdir -p ./generated/k8s_configs
-    echo "${each.value}" > ./generated/k8s_configs/${each.key}
-
-    kubectl apply -f - <<EOF
-    ${each.value}
-    EOF
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      ${self.triggers.auth_cmd}
+      timeout 300s kubectl delete --ignore-not-found=true -f - <<EOF
+      ${self.triggers.manifest}
+      EOF
     EOT
   }
 }
 
 resource "null_resource" "apply_custom_compute_class" {
   triggers = {
-    cluster_change = local.cluster_config
-    kustomize_change = sha512(join("", [
-      for f in fileset(".", "${path.module}/../../../kubernetes/compute-classes/**") :
-      filesha512(f)
-    ]))
+    path_ref = "${path.module}/../../../kubernetes/compute-classes/"
+    auth_cmd = local.get_credentials_cmd
+  }
+
+  depends_on = [null_resource.cluster_init]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      ${local.get_credentials_cmd}
+      kubectl apply --server-side -k "${abspath("${path.module}/../../../kubernetes/compute-classes/")}"
+    EOT
   }
 
   provisioner "local-exec" {
-    when    = create
+    when    = destroy
     command = <<-EOT
-    ${local.kubeconfig_script}
-    kubectl apply -k "${path.module}/../../../kubernetes/compute-classes/"
+      ${self.triggers.auth_cmd}
+      timeout 300s kubectl delete -k "${abspath("${path.module}/../../../kubernetes/compute-classes/")}" --ignore-not-found=true
     EOT
   }
 }
 
 resource "null_resource" "apply_custom_priority_class" {
   triggers = {
-    cluster_change = local.cluster_config
-    kustomize_change = sha512(join("", [
-      for f in fileset(".", "${path.module}/../../../kubernetes/priority-classes/**") :
-      filesha512(f)
-    ]))
+    path_ref = "${path.module}/../../../kubernetes/priority-classes/"
+    auth_cmd = local.get_credentials_cmd
+  }
+
+  depends_on = [null_resource.cluster_init]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      ${local.get_credentials_cmd}
+      kubectl apply --server-side -k "${abspath("${path.module}/../../../kubernetes/priority-classes/")}"
+    EOT
   }
 
   provisioner "local-exec" {
-    when    = create
+    when    = destroy
     command = <<-EOT
-    ${local.kubeconfig_script}
-    kubectl apply -k "${path.module}/../../../kubernetes/priority-classes/"
+      ${self.triggers.auth_cmd}
+      timeout 300s kubectl delete -k "${abspath("${path.module}/../../../kubernetes/priority-classes/")}" --ignore-not-found=true
     EOT
   }
 }
 
-# Run workload initialization jobs
 resource "null_resource" "job_init" {
   for_each = {
     for id, cfg in local.workload_init_args :
@@ -206,33 +245,39 @@ resource "null_resource" "job_init" {
     })
   }
 
+  triggers = {
+    manifest = each.value
+    auth_cmd = local.get_credentials_cmd
+  }
+
   depends_on = [null_resource.cluster_init]
 
-  triggers = {
-    cluster_change = local.cluster_config
+  provisioner "local-exec" {
+    command = <<-EOT
+      ${local.get_credentials_cmd}
+      kubectl apply --server-side --v=6 -f - <<EOF
+      ${each.value}
+      EOF
+    EOT
   }
 
   provisioner "local-exec" {
-    when    = create
+    when    = destroy
     command = <<-EOT
-    ${local.kubeconfig_script}
-
-    mkdir -p ${path.module}/../../../generated/k8s_configs/job_init
-    echo "${each.value}" > ${path.module}/../../../generated/k8s_configs/job_init/${each.key}.yaml
-
-    kubectl apply --v=6 -f - <<EOF
-    ${each.value}
-    EOF
+      ${self.triggers.auth_cmd}
+      timeout 300s kubectl delete -f - <<EOF
+      ${self.triggers.manifest}
+      EOF
     EOT
   }
 }
 
-# Parallelstore initialization
 resource "null_resource" "parallelstore_init" {
   for_each = local.parallelstore_configs
 
   triggers = {
-    template = templatefile(each.value.template_path, {
+    auth_cmd = local.get_credentials_cmd
+    manifest = templatefile(each.value.template_path, {
       namespace           = var.namespace
       pubsub_project_id   = var.infra_project_id
       name                = each.value.name
@@ -249,23 +294,28 @@ resource "null_resource" "parallelstore_init" {
       gke_hpa_request_sub = var.pubsub_hpa_request
       gke_hpa_response    = var.gke_hpa_response
     })
-    cluster_change = local.cluster_config
   }
 
   provisioner "local-exec" {
-    when    = create
     command = <<-EOT
-    ${local.kubeconfig_script}
-    mkdir -p ${path.module}/../../../generated/k8s_configs/parallelstore_init
-    echo "${self.triggers.template}" > ${path.module}/../../../generated/k8s_configs/parallelstore_init/${each.key}
-    kubectl apply -f - <<EOF
-    ${self.triggers.template}
-    EOF
+      ${local.get_credentials_cmd}
+      kubectl apply --server-side -f - <<EOF
+      ${self.triggers.manifest}
+      EOF
+    EOT
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      ${self.triggers.auth_cmd}
+      timeout 300s kubectl delete -f - <<EOF
+      ${self.triggers.manifest}
+      EOF
     EOT
   }
 }
 
-# Run workload initialization jobs
 resource "null_resource" "parallelstore_job_init" {
   for_each = var.parallelstore_enabled ? {
     for id, cfg in local.workload_init_args :
@@ -286,20 +336,29 @@ resource "null_resource" "parallelstore_job_init" {
     })
   } : {}
 
+  triggers = {
+    manifest = each.value
+    auth_cmd = local.get_credentials_cmd
+  }
+
   depends_on = [null_resource.parallelstore_init]
 
-  triggers = {
-    cluster_change = local.cluster_config
+  provisioner "local-exec" {
+    command = <<-EOT
+      ${local.get_credentials_cmd}
+      kubectl apply --server-side -f - <<EOF
+      ${each.value}
+      EOF
+    EOT
   }
 
   provisioner "local-exec" {
-    when    = create
+    when    = destroy
     command = <<-EOT
-    ${local.kubeconfig_script}
-    mkdir -p ${path.module}/../../../generated/k8s_configs/parallelstore_job_init
-    echo "${each.value}" > ${path.module}/../../../generated/k8s_configs/parallelstore_job_init/${each.key}.yaml
-    kubectl apply -f - <<EOF
-    ${each.value}
+      ${self.triggers.auth_cmd}
+      timeout 300s kubectl delete -f - <<EOF
+      ${self.triggers.manifest}
+      EOF
     EOT
   }
 }

@@ -36,7 +36,7 @@ resource "google_project_iam_member" "team_roles_infra_project" {
     "roles/pubsub.viewer",
     "roles/pubsub.subscriber",
     "roles/monitoring.viewer",
-    "roles/privateca.admin"
+    "roles/privateca.certificateManager"
   ])
 
   project = var.infra_project
@@ -52,7 +52,7 @@ resource "google_project_iam_member" "team_roles_cluster_project" {
     "roles/pubsub.viewer",
     "roles/pubsub.subscriber",
     "roles/monitoring.viewer",
-    "roles/privateca.admin"
+    "roles/privateca.certificateManager"
   ])
 
   project = var.cluster_project_id

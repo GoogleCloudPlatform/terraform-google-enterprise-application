@@ -194,9 +194,6 @@ func (cfg *GoogleConfig) PubSubClient(ctxt context.Context) (*pubsub.Client, err
 	}
 	opts = append(opts, option.WithEndpoint(endpoint))
 
-	// Tracking Options
-	opts = append(opts, option.WithUserAgent("cloud-solutions/fsi-rdp-agent-v1.0.0"))
-
 	// Create the client
 	client, err := pubsub.NewClient(ctxt, cfg.ProjectID, opts...)
 	if err != nil {

@@ -12,17 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-terraform {
-  required_version = ">= 1.3"
-
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 6.29.0"
-    }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 6.29.0"
-    }
+output "keda_images" {
+  description = "KEDA image URLs including SHA digests, ready for Binary Authorization"
+  value = {
+    keda                   = data.google_artifact_registry_docker_image.keda_operator.self_link
+    keda-metrics-apiserver = data.google_artifact_registry_docker_image.keda_api_server.self_link
   }
+
+  depends_on = [
+    null_resource.mirror_keda_images
+  ]
 }

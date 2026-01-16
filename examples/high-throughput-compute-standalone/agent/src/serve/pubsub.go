@@ -20,10 +20,11 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/gcp"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/protoio"
+	"github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent/stats"
+
 	"cloud.google.com/go/pubsub"
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/gcp"
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/protoio"
-	"github.com/GoogleCloudPlatform/finance-research-risk-examples/examples/risk/agent/stats"
 	"github.com/spf13/cobra"
 )
 
