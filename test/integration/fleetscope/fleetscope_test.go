@@ -106,6 +106,11 @@ func TestFleetscope(t *testing.T) {
 				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
 			}
 
+			if forkRepository == "" || branch == "" {
+				forkRepository = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
+				branch = "main"
+			}
+
 			vars := map[string]interface{}{
 				"remote_state_bucket":         backend_bucket,
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
@@ -113,7 +118,7 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_repository_url":  forkRepository,
 				"config_sync_policy_dir":      configSyncPath,
 				"config_sync_branch":          branch,
-				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent"},
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent", "vllm-model"},
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
 
