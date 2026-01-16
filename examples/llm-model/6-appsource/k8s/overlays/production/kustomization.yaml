@@ -14,7 +14,7 @@
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: capital-agent-production
+namespace: vllm-model-production # from-param: ${namespace_id}
 resources:
   - ../../base
   - traffic-extension.yaml
