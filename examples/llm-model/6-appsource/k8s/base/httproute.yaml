@@ -19,7 +19,6 @@ metadata:
 spec:
   parentRefs:
     - name: llamma-model-gw
-      namespace: vllm-model # from-param: ${namespace_id}
   rules:
     - matches:
         - path:
