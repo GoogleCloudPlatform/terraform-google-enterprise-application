@@ -21,23 +21,16 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: openai-app-deployment
-  # Set the minimum and maximum number of replicas the Deployment can scale to.
   minReplicas: 1
   maxReplicas: 10
-  # This section defines that scaling should be based on the fullness of load balancer
-  # capacity, using the following configuration.
   metrics:
   - type: Object
     object:
       describedObject:
         kind: Service
-        name: openai-app-service
+        name: llamma-model-service
       metric:
-        # The name of the custom metric which measures how "full" a backend is
-        # relative to its configured capacity.
         name: "autoscaling.googleapis.com|gclb-capacity-fullness"
       target:
-        # The target average value for the metric. The autoscaler adjusts the number
-        # of replicas to maintain an average capacity fullness of 70% across all Pods.
         averageValue: 70
         type: AverageValue
