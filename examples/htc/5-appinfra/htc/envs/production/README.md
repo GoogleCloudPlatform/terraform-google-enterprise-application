@@ -1,4 +1,3 @@
-
 # Load Test for HTC
 
 ## Overview

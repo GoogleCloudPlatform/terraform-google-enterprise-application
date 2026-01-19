@@ -36,40 +36,6 @@ variable "pubsub_exactly_once" {
   default     = true
 }
 
-# variable "request_topic" {
-#   description = "Request topic for tasks"
-#   type        = string
-#   default     = "request"
-# }
-
-# variable "request_subscription" {
-#   description = "Request subscription for tasks"
-#   type        = string
-#   default     = "request_sub"
-# }
-
-# variable "response_topic" {
-#   description = "Response topic for tasks"
-#   type        = string
-#   default     = "response"
-# }
-
-# variable "response_subscription" {
-#   description = "Response subscription for tasks"
-#   type        = string
-#   default     = "response_sub"
-# }
-
-#-----------------------------------------------------
-# BigQuery Configuration
-#-----------------------------------------------------
-
-# variable "dataset_id" {
-#   description = "BigQuery dataset in the project to create the tables"
-#   type        = string
-#   default     = "pubsub_msgs"
-# }
-
 #-----------------------------------------------------
 # Quota Configuration
 #-----------------------------------------------------
@@ -86,24 +52,6 @@ variable "quota_contact_email" {
   default     = ""
 }
 
-# variable "scaled_control_plane" {
-#   description = "Deploy a larger initial nodepool to ensure larger control plane nodes are provisioned"
-#   type        = bool
-#   default     = false
-# }
-
-# variable "cluster_max_cpus" {
-#   description = "Maximum CPU cores in cluster autoscaling resource limits"
-#   type        = number
-#   default     = 10000
-# }
-
-# variable "cluster_max_memory" {
-#   description = "Maximum memory (in GB) in cluster autoscaling resource limits"
-#   type        = number
-#   default     = 80000
-# }
-
 #-----------------------------------------------------
 # Storage Configuration
 #-----------------------------------------------------
@@ -112,22 +60,12 @@ variable "storage_type" {
   description = "The type of storage system to deploy (PARALLELSTORE, LUSTRE, or null for none)"
   type        = string
   default     = null
-
-  # validation {
-  #   condition     = var.storage_type == null || contains(["PARALLELSTORE", "LUSTRE"], var.storage_type)
-  #   error_message = "The storage_type must be null, PARALLELSTORE, or LUSTRE."
-  # }
 }
 
 variable "storage_capacity_gib" {
   description = "Capacity in GiB for the selected storage system (Parallelstore or Lustre)"
   type        = number
   default     = null
-
-  # validation {
-  #   condition     = var.storage_capacity_gib > 0
-  #   error_message = "Storage capacity must be a positive number or null."
-  # }
 }
 
 variable "storage_locations" {
