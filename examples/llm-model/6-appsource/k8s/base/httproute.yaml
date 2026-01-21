@@ -28,7 +28,7 @@ spec:
       backendRefs:
         - group: inference.networking.k8s.io
           kind: InferencePool
-          name: openai-app
+          name: inferencepool
           weight: 100
     - matches:
         - path:
