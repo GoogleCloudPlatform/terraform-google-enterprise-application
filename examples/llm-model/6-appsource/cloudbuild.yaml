@@ -42,7 +42,12 @@ steps:
           --set inferenceExtension.monitoring.gke.enabled=true \
           --set inferencePool.modelServers.matchLabels.app=openai-app\
           --dependency-update \
+          --namespace "vllm-model" \
           > k8s/base/helm-expanded.yaml
+
+        sed -i 's/namespace: vllm-model/namespace: vllm-model # from-param: ${env_namespace_id}/g' k8s/base/helm-expanded.yaml
+        sed -i 's/- vllm-model/- vllm-model # from-param: ${env_namespace_id}/g' k8s/base/helm-expanded.yaml
+
 
         sed -i 's/---apiVersion/\n---apiVersion/g' k8s/base/helm-expanded.yaml
 
