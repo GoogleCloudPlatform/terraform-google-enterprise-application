@@ -36,7 +36,7 @@ steps:
         curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
         echo "Render Chart..."
-        helm template inferencepool oci://registry.k8s.io/gateway-api-inference-extension/charts/inferencepool \
+        helm template openai-app oci://registry.k8s.io/gateway-api-inference-extension/charts/inferencepool \
           --version v1.2.1 \
           --set provider.name=gke \
           --set inferenceExtension.monitoring.gke.enabled=true \
