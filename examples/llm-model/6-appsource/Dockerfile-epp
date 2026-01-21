@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM registry.k8s.io/gateway-api-inference-extension/epp:v1.0.1
+FROM registry.k8s.io/gateway-api-inference-extension/epp:v1.2.1

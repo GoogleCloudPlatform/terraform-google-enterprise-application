@@ -19,4 +19,4 @@ metadata:
 spec:
   parentRefs:
   - name: llamma-model-gw
-    namespace: vllm-model-development # from-param: ${namespace_id}
+    namespace: vllm-model # from-param: ${env_namespace_id}

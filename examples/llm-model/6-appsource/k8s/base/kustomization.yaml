@@ -23,22 +23,7 @@ resources:
   - openai-app-deployment.yaml
   - service.yaml
   - serviceaccount.yaml
-helmCharts:
-- name: inferencepool
-  repo: oci://registry.k8s.io/gateway-api-inference-extension/charts
-  version: v1.0.1
-  releaseName: openai-app
-  valuesInline:
-    provider:
-      name: gke
-    inferenceExtension:
-      monitoring:
-        gke:
-          enabled: true
-    inferencePool:
-      modelServers:
-        matchLabels:
-          app: openai-app
+  - helm-expanded.yaml
 images:
   - name: registry.k8s.io/gateway-api-inference-extension/epp
     newName: custom-epp
