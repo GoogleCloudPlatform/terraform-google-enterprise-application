@@ -16,6 +16,7 @@ apiVersion: networking.gke.io/v1
 kind: GCPTrafficExtension
 metadata:
   name: llamma-model-armor-extension
+  namespace: vllm-model # from-param: ${env_namespace_id}
 spec:
   extensionChains:
     - name: llamma-model-model-armor

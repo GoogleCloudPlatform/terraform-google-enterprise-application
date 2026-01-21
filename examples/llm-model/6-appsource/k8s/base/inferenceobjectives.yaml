@@ -16,6 +16,7 @@ apiVersion: inference.networking.x-k8s.io/v1alpha2
 kind: InferenceObjective
 metadata:
   name: food-review
+  namespace: vllm-model # from-param: ${env_namespace_id}
 spec:
   priority: 10
   poolRef:
@@ -26,6 +27,7 @@ apiVersion: inference.networking.x-k8s.io/v1alpha2
 kind: InferenceObjective
 metadata:
   name: openai-base-model
+  namespace: vllm-model # from-param: ${env_namespace_id}
 spec:
   priority: 20
   poolRef:

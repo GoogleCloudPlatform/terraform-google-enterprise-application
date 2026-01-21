@@ -16,6 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: openai-app-deployment
+  namespace: vllm-model # from-param: ${env_namespace_id}
 spec:
   progressDeadlineSeconds: 600
   replicas: 1

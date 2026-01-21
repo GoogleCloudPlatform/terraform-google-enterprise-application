@@ -16,6 +16,7 @@ apiVersion: networking.gke.io/v1
 kind: HealthCheckPolicy
 metadata:
   name: llamma-model-healthcheck-policy
+  namespace: vllm-model # from-param: ${env_namespace_id}
 spec:
   # targetRef points to the Service you want to apply the health check to
   targetRef:
