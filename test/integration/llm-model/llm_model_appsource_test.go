@@ -162,7 +162,7 @@ func TestSourceLLMModel(t *testing.T) {
 					return true, nil
 				}
 			}
-			utils.Poll(t, pollCloudBuild(buildListCmd), 60, 60*time.Second)
+			utils.Poll(t, pollCloudBuild(buildListCmd), 80, 60*time.Second)
 
 			releaseName := ""
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])

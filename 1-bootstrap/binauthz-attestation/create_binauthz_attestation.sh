@@ -57,7 +57,7 @@ done
 
 if [[ -z "$IMAGE_AND_DIGEST" ]]; then
     echo "Warning: Specific repository digest not found in local Docker list. Falling back to first available..."
-    IMAGE_AND_DIGEST=$(echo "$ALL_DIGESTS" | awk '{print $1}')
+    IMAGE_AND_DIGEST="${ALL_DIGESTS%% *}"
 fi
 
 echo "Selected Docker digest: ${IMAGE_AND_DIGEST}"

@@ -19,20 +19,34 @@ steps:
     args: ['storage', 'cp', $_CACHE_URI, '/workspace/cache'] # always write skaffold cache to filename cache in workspace
   - name: gcr.io/k8s-skaffold/skaffold:v2.17.1
     id: build-and-push-images
-    entrypoint: 'bash'
+    args:
+        - "skaffold"
+        - "build"
+        - "--file-output=/workspace/artifacts.json"
+        - "--default-repo=$_CONTAINER_REGISTRY"
+        - "--cache-file=/workspace/$_CACHE"
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:alpine'
+    id: helm-render
+    entrypoint: 'sh'
     args:
       - '-c'
       - |
-        gcloud auth configure-docker $LOCATION-docker.pkg.dev --quiet
-        export DOCKER_BUILDKIT=1
-        export DOCKER_CLI_EXPERIMENTAL=enabled
+        set -e
+        apk add --no-cache curl openssl bash
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-        skaffold build \
-          --file-output=/workspace/artifacts.json \
-          --default-repo=$_CONTAINER_REGISTRY \
-          --cache-file=/workspace/$_CACHE
-    env:
-      - 'HOME=/root'
+        echo "Render Chart..."
+        helm template inferencepool oci://registry.k8s.io/gateway-api-inference-extension/charts/inferencepool \
+          --version v1.2.1 \
+          --set provider.name=gke \
+          --set inferenceExtension.monitoring.gke.enabled=true \
+          --set inferencePool.modelServers.matchLabels.app=openai-app\
+          --dependency-update \
+          > k8s/base/helm-expanded.yaml
+
+        sed -i 's/---apiVersion/\n---apiVersion/g' k8s/base/helm-expanded.yaml
+
+        ls -l k8s/base/helm-expanded.yaml
   - name: gcr.io/cloud-builders/gcloud
     id: upload-skaffold-cache
     args: ['storage', 'cp', '/workspace/$_CACHE',  $_CACHE_URI]
@@ -65,6 +79,9 @@ steps:
       - '$_ATTESTOR_ID'
       - '--keyversion'
       - '$_KMS_KEY_VERSION'
+  - name: gcr.io/cloud-builders/gcloud
+    id: upload-docker-cache
+    args: ['storage', 'cp', '/workspace/$_CACHE',  $_CACHE_URI]
   - name: gcr.io/cloud-builders/gcloud
     args:
       - "deploy"
