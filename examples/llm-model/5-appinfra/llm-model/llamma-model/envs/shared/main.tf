@@ -25,7 +25,7 @@ locals {
     "cluster_project_id"      = p
     "model_armor_template_id" = module.model_armor_configuration[i].template.id
     "model_armor_location"    = var.region
-    # "env_namespace_id"            = "vllm-model-${i}"
+    "env_namespace_id"            = "vllm-model-${i}"
   } }
 
 }

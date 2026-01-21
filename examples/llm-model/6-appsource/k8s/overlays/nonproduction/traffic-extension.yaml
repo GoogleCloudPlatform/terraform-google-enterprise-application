@@ -27,7 +27,7 @@ spec:
         - name: llamma-model-model-armor-service
           googleAPIServiceName: modelarmor.__MODEL_ARMOR_LOCATION__.rep.googleapis.com # from-param: modelarmor.${model_armor_location}.rep.googleapis.com
           timeout: 10s
-          failOpen: true
+          failOpen: false
           supportedEvents:
             - RequestHeaders
             - RequestBody
