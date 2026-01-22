@@ -15,8 +15,13 @@
 package llm_model
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"slices"
 	"strings"
 	"testing"
@@ -27,7 +32,10 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
+	"github.com/gruntwork-io/terratest/modules/k8s"
+	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/stretchr/testify/assert"
+	"github.com/tidwall/gjson"
 
 	"os"
 
@@ -217,4 +225,159 @@ func TestSourceLLMModel(t *testing.T) {
 		})
 		appsource.Test()
 	})
+}
+
+func TestE2ELLMModel(t *testing.T) {
+	const (
+		sleepBetweenRetries time.Duration = time.Duration(60) * time.Second
+		maxRetries          int           = 30
+	)
+	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+	bootstrap := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../1-bootstrap"),
+	)
+
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", bootstrap.GetJsonOutput("cb_service_accounts_emails").Get("fleetscope").String())
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
+
+	backend_bucket := bootstrap.GetStringOutput("state_bucket")
+	backendConfig := map[string]interface{}{
+		"bucket": backend_bucket,
+	}
+
+	for _, envName := range testutils.EnvNames(t) {
+		envName := envName
+		// retrieve namespaces from test/setup, they will be used to create the specific namespaces with the environment suffix
+		setupNamespaces := setup.GetJsonOutput("teams")
+		var namespacesSlice []string
+		setupNamespaces.ForEach(func(key, value gjson.Result) bool {
+			namespacesSlice = append(namespacesSlice, key.String())
+			return true // keep iterating
+		})
+
+		t.Run(envName, func(t *testing.T) {
+			t.Parallel()
+			multitenant := tft.NewTFBlueprintTest(t,
+				tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)),
+				tft.WithBackendConfig(backendConfig),
+			)
+
+			// retrieve cluster location and fleet membership from 2-multitenant
+			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
+			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
+			clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
+			splitClusterMembership := strings.Split(clusterMembership, "/")
+			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
+			namespace := fmt.Sprintf("vllm-model-%s", envName)
+
+			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
+
+			ipAddress, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "gateway/llamma-model-gw", "-o", "jsonpath={.status.addresses[0].value}", "-n", namespace)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			client := &http.Client{}
+			ctx := context.Background()
+
+			// Test webserver is avaliable
+			heartbeat := func() (string, error) {
+				req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("http://%s/health", ipAddress), nil)
+				if err != nil {
+					return "", err
+				}
+				resp, err := client.Do(req)
+				if err != nil {
+					return "", err
+				}
+				if resp.StatusCode != 200 {
+					fmt.Println(resp)
+					return "", err
+				}
+				return fmt.Sprint(resp.StatusCode), err
+			}
+			statusCode, err := retry.DoWithRetryE(
+				t,
+				fmt.Sprintf("Checking: %s", ipAddress),
+				maxRetries,
+				sleepBetweenRetries,
+				heartbeat,
+			)
+			if err != nil {
+				t.Fatalf("Error: webserver (%s) not ready after %d attemps, status code: %q",
+					ipAddress,
+					maxRetries,
+					statusCode,
+				)
+			}
+			type Message struct {
+				Role    string `json:"role"`
+				Content string `json:"content"`
+			}
+			type RequestPayload struct {
+				Model       string    `json:"model"`
+				Messages    []Message `json:"messages"`
+				MaxTokens   int       `json:"max_tokens"`
+				Temperature float64   `json:"temperature"`
+			}
+
+			fmt.Println("Get best pizza.")
+			modelURL := fmt.Sprintf("http://%s/v1/chat/completions", ipAddress)
+			requestBody := RequestPayload{
+				Model: "Qwen/Qwen2.5-7B-Instruct",
+				Messages: []Message{
+					{
+						Role:    "user",
+						Content: "What is the best pizza in the world?",
+					},
+				},
+				MaxTokens:   512,
+				Temperature: 0.7,
+			}
+
+			// 3. Marshal the struct into JSON bytes
+			jsonData, err := json.Marshal(requestBody)
+			if err != nil {
+				fmt.Printf("Error marshalling JSON: %v\n", err)
+				return
+			}
+
+			// 4. Create the HTTP Request
+			// Using NewRequestWithContext is a best practice for handling cancellations/timeouts
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			req, err := http.NewRequestWithContext(ctx, "POST", modelURL, bytes.NewBuffer(jsonData))
+			if err != nil {
+				fmt.Printf("Error creating request: %v\n", err)
+				return
+			}
+
+			req.Header.Set("Content-Type", "application/json")
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Printf("Error sending request: %v\n", err)
+				return
+			}
+			defer func() {
+				if err := resp.Body.Close(); err != nil {
+					t.Logf("Error closing response body: %v", err)
+				}
+			}()
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Printf("Error reading response body: %v\n", err)
+				return
+			}
+			fmt.Println("Response Body:", string(body))
+			if resp.StatusCode != 200 {
+				fmt.Println(resp)
+				t.Fatal(err)
+			}
+		})
+	}
+
 }
