@@ -283,6 +283,7 @@ steps:
     args:
       - "-c"
       - |-
+        sleep 10m
         gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
         update-ca-certificates
         if (ls /etc/ssl/certs | grep gitlab.pem); then
