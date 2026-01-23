@@ -278,12 +278,12 @@ steps:
       - fleetscope-verify
 
   - id: appsource-llm-model-e2e
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKEteR_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: "bash"
     args:
       - "-c"
       - |-
-        sleep 10m
+        sleep 15m
         gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
         update-ca-certificates
         if (ls /etc/ssl/certs | grep gitlab.pem); then
@@ -303,7 +303,6 @@ steps:
         "cft test run TestAgentAppInfra --stage teardown --verbose",
       ]
     waitFor:
-      - appsource-llm-model-e2e
       - appsource-agent
       - appinfra-agent-verify
       - appfactory-verify
@@ -320,6 +319,7 @@ steps:
         "cft test run TestLLMModelAppInfra --stage teardown --verbose",
       ]
     waitFor:
+      - appsource-llm-model-e2e
       - appsource-llm-model
       - appinfra-llm-model-verify
       - appfactory-verify
