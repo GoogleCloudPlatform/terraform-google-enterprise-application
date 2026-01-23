@@ -487,7 +487,7 @@ This stage will setup the application admin project, and infrastructure specific
     export CLUSTER_PROJECT=<CLUSTER_PROJECT_ID>
     export CLUSTER_REGION=<CLUSTER_REGION>
     export CLUSTER_ENVIRONMENT="development" # change for your ENVIRONMENT name
-    export GATEWAY_NAME=<GATEWAY_NAME>
+    export GATEWAY_NAME="llamma-model-gw"
     export PORT_NUMBER=<PORT_NUMBER> # Use 80 for HTTP
     ```
     1. Get your cluster credentials
@@ -522,7 +522,7 @@ This stage will setup the application admin project, and infrastructure specific
         "messages": [
         {
             "role": "user",
-            "content": "What is the best pizza in the world?"
+            "content": "What is the besst pizza in the world?"
         }
         ],
         "max_tokens": 512,
