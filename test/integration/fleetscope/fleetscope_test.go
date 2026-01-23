@@ -104,6 +104,8 @@ func TestFleetscope(t *testing.T) {
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			if enableInferenceGateway {
 				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
+				forkRepository = "https://github.com/amandakarina/terraform-google-enterprise-application"
+				branch = "feat/adds-model-serving"
 			}
 
 			if forkRepository == "" || branch == "" {
