@@ -278,7 +278,7 @@ steps:
       - fleetscope-verify
 
   - id: appsource-llm-model-e2e
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKEteR_TAG_VERSION_DEVELOPER_TOOLS"
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: "bash"
     args:
       - "-c"
@@ -303,6 +303,8 @@ steps:
         "cft test run TestAgentAppInfra --stage teardown --verbose",
       ]
     waitFor:
+      - appsource-llm-model-e2e
+      - appsource-llm-model
       - appsource-agent
       - appinfra-agent-verify
       - appfactory-verify
