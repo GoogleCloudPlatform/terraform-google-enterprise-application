@@ -345,38 +345,55 @@ func TestE2ELLMModel(t *testing.T) {
 				return
 			}
 
-			// 4. Create the HTTP Request
-			// Using NewRequestWithContext is a best practice for handling cancellations/timeouts
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
+			// 4. Create the Retryable Closure
+			chatCompletionsReady := func() (string, error) {
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
 
-			req, err := http.NewRequestWithContext(ctx, "POST", modelURL, bytes.NewBuffer(jsonData))
-			if err != nil {
-				fmt.Printf("Error creating request: %v\n", err)
-				return
-			}
-
-			req.Header.Set("Content-Type", "application/json")
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Printf("Error sending request: %v\n", err)
-				return
-			}
-			defer func() {
-				if err := resp.Body.Close(); err != nil {
-					t.Logf("Error closing response body: %v", err)
+				req, err := http.NewRequestWithContext(ctx, "POST", modelURL, bytes.NewBuffer(jsonData))
+				if err != nil {
+					return "", fmt.Errorf("error creating request: %w", err)
 				}
-			}()
-			body, err := io.ReadAll(resp.Body)
+
+				req.Header.Set("Content-Type", "application/json")
+
+				resp, err := client.Do(req)
+				if err != nil {
+					return "", fmt.Errorf("network error: %w", err)
+				}
+				defer func() {
+					if err := resp.Body.Close(); err != nil {
+						t.Logf("Error closing response body: %v", err)
+					}
+				}()
+
+				bodyBytes, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return "", fmt.Errorf("error reading response body: %w", err)
+				}
+				bodyString := string(bodyBytes)
+
+				if resp.StatusCode == 200 {
+					return bodyString, nil
+				}
+
+				return "", fmt.Errorf("model not ready (status %d): %s", resp.StatusCode, bodyString)
+			}
+
+			// 5. Execute the Retry Loop
+			responseBody, err := retry.DoWithRetryE(
+				t,
+				fmt.Sprintf("Waiting for valid LLM response from %s", modelURL),
+				maxRetries,
+				sleepBetweenRetries,
+				chatCompletionsReady,
+			)
+
 			if err != nil {
-				fmt.Printf("Error reading response body: %v\n", err)
-				return
+				t.Fatalf("Failed to get chat completion after %d retries. Last error: %v", maxRetries, err)
 			}
-			fmt.Println("Response Body:", string(body))
-			if resp.StatusCode != 200 {
-				fmt.Println(resp)
-				t.Fatal(err)
-			}
+
+			fmt.Println("Response Body:", responseBody)
 		})
 	}
 
