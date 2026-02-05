@@ -134,7 +134,7 @@ data "google_project" "eab_cluster_project" {
 // Create Cloud Armor policy
 module "cloud_armor" {
   source  = "GoogleCloudPlatform/cloud-armor/google"
-  version = "~> 5.0"
+  version = "~> 7.0"
 
   project_id                           = local.cluster_project_id
   name                                 = "eab-cloud-armor"
