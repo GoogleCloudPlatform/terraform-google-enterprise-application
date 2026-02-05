@@ -8,6 +8,7 @@
 | cb\_private\_workerpool\_project\_id | Private Worker Pool Project ID used for Cloud Build Triggers. | `string` | `""` | no |
 | cluster\_release\_channel | The release channel for the clusters | `string` | `"REGULAR"` | no |
 | deletion\_protection | Whether or not to allow Terraform to destroy the cluster. | `bool` | `true` | no |
+| enable\_csi\_gcs\_fuse | Enable the GCS Fuse CSI Driver for HTC example | `bool` | `false` | no |
 | envs | Environments | <pre>map(object({<br>    billing_account    = string<br>    folder_id          = string<br>    network_project_id = string<br>    network_self_link  = string<br>    org_id             = string<br>    subnets_self_links = list(string)<br>  }))</pre> | n/a | yes |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |

@@ -321,6 +321,8 @@ module "gke-standard" {
     data.google_compute_default_service_account.compute_sa,
   ]
 
+  gcs_fuse_csi_driver = var.enable_csi_gcs_fuse
+
   // Private Cluster Configuration
   enable_private_nodes    = true
   enable_private_endpoint = true

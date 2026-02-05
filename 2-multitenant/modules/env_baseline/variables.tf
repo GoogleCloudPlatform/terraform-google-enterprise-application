@@ -127,3 +127,9 @@ variable "deletion_protection" {
   description = "Whether or not to allow Terraform to destroy the cluster."
   default     = true
 }
+
+variable "enable_csi_gcs_fuse" {
+  description = "Enable the GCS Fuse CSI Driver for HTC example"
+  type        = bool
+  default     = false
+}

@@ -156,7 +156,7 @@ module "cb-gke-project-iam-bindings" {
   for_each   = local.gke_projects
   project_id = each.value
 
-  project_roles           = ["roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor", "roles/cloudbuild.workerPoolUser", "roles/containeranalysis.notes.attacher"]
+  project_roles           = ["roles/privateca.certificateManager", "roles/container.admin", "roles/container.developer", "roles/gkehub.viewer", "roles/gkehub.gatewayEditor", "roles/cloudbuild.workerPoolUser", "roles/containeranalysis.notes.attacher"]
   prefix                  = "serviceAccount"
   service_account_address = google_service_account.cloud_build.email
 }

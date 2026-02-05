@@ -1,0 +1,6 @@
+# Protobuf generated python files
+*_pb2*.py
+
+# Generate python files
+__pycache__/**
+.venv/**
