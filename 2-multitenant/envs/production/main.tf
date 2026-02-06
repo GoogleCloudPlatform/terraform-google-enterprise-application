@@ -34,4 +34,5 @@ module "env" {
   deletion_protection              = var.deletion_protection
   cb_private_workerpool_project_id = var.cb_private_workerpool_project_id
   cluster_release_channel          = var.cluster_release_channel
+  enable_csi_gcs_fuse              = var.enable_csi_gcs_fuse
 }

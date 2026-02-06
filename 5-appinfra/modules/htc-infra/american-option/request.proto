@@ -1,0 +1,149 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package main;
+
+// Interest rate swap proto
+message PricingRequest {
+
+  message Date {
+    int32 year = 1;
+    int32 month = 2;
+    int32 day = 3;
+  }
+
+  enum Currency {
+    CURRENCY_UNDEFINED = 0;
+
+    // G10 Currencies.
+    USD = 1;   // US dollar
+    GBP = 2;   // British Pound
+    EUR = 3;   // Euro
+  }
+
+
+  // Represents decimal numbers exactly. Protobufs don't have native support for
+  // decimals. A commonly used pattern to represent decimals is shown here:
+  // https://github.com/googleapis/googleapis/blob/master/google/type/money.proto
+  // This is also a pattern recommended here:
+  // https://docs.microsoft.com/en-us/dotnet/architecture/grpc-for-wcf-developers/protobuf-data-types#decimals
+  message Decimal {
+    int64 units = 1;
+    sfixed32 nanos = 2;
+  }
+
+
+  // Align with Quantlib
+  // From https://quantlib-python-docs.readthedocs.io/en/latest/dates.html#weekday-correction
+
+  // Business day convention proto. Determines how non-business days are treated
+  // if the payment is due on a non-business
+  enum BusinessDayConvention {
+    NONE = 0;
+    FOLLOWING = 1;
+    MODIFIED_FOLLOWING = 2;
+    PRECEDING = 3;
+    MODIFIED_PRECEDING = 4;
+  }
+
+
+  // Align with Quantlib
+  // From https://quantlib-python-docs.readthedocs.io/en/latest/dates.html#ql.Calendar.holidayList
+
+  // Bank holidays captures the calendar used to generate public holidays.
+  enum BankHolidays {
+    BANK_HOLIDAYS_UNKNOWN = 0;
+    US = 1;
+    UK = 2;
+  }
+
+
+  // Holds metadata for an instrument.
+  message InstrumentMetadata {
+    // The type of the instrument. This should be the name of the containing
+    // message (e.g. ForwardRateAgreement).
+    string instrument_type = 1;
+    // An arbitrary identifier for the instrument/trade. This ID should be
+    // immutable once assigned to an instrument - in particular, aging events
+    // shouldn't change this ID.
+    string id = 2;
+    // Counterparty to this trade.
+    string counterparty = 3;
+  }
+
+
+  message AmericanOptionRequest {
+    bool short_position = 1;
+    Date expiry_date = 2;
+    Currency currency = 3;
+    string equity = 4;
+    Decimal contract_amount = 5;
+    Decimal strike = 6;
+    BusinessDayConvention business_day_convention = 8;
+    BankHolidays bank_holidays = 9;
+    int32 settlement_days = 10;
+    InstrumentMetadata metadata = 11;
+    bool is_call_option = 12;
+  }
+
+
+  // MarketData protobuf definition
+  message MarketData {
+    message RateDiscount {
+      Date date = 1;
+      Decimal value = 2;
+    }
+
+    message EquityOption {
+      string id = 1;
+      Currency currency = 2;
+      Decimal spot_price = 3;
+
+      // Strike details
+      repeated Date strike_dates = 4;
+      repeated Decimal strike_prices = 5;
+
+      // Single array that is len(dates) * len(strike_prices)
+      repeated Decimal implied_vols = 6;
+    }
+
+    enum RateType {
+      RATE_UNDEFINED = 0;
+      RISK_FREE_CURVE = 1;
+    }
+
+    message RateCurve {
+      RateType rate_type = 1;
+      Currency currency = 2;
+      repeated RateDiscount discounts = 3;
+    }
+
+    Date reference_date = 1;
+
+    repeated RateCurve rate_curves = 2;
+    repeated EquityOption equity_options = 3;
+  }
+
+
+  // Pricing requests
+  repeated AmericanOptionRequest american_option_request = 1;
+
+  // Source of Marketdata
+  oneof marketdata_source {
+    MarketData marketdata = 100;
+    string marketdata_ref_id = 101;
+  }
+}

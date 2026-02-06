@@ -1,0 +1,113 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: file-generator-config
+data:
+  generate_files.sh: |
+    #!/bin/bash
+
+    MAX_RETRIES=${MAX_RETRIES:-5}
+    SLEEP_TIME=${SLEEP_TIME:-1}
+    NUM_FILES=${NUM_FILES:-1000}
+    MIN_FILE_SIZE_KB=${MIN_FILE_SIZE_KB:-10}
+    MAX_FILE_SIZE_KB=${MAX_FILE_SIZE_KB:-1000}
+    OUTPUT_DIR=${OUTPUT_DIR}
+
+    RETRY_COUNTER=0
+
+    echo "Sleeping for ${SLEEP_TIME} seconds..."
+    sleep ${SLEEP_TIME}
+
+    # Check if OUTPUT_DIR environment variable is set
+    if [ -z "${OUTPUT_DIR}" ]; then
+        echo "ERROR: OUTPUT_DIR not set. Please set it before running the script."
+        exit 1
+    fi
+
+    # Ensure the parent directory exists
+    if [ ! -d "/data" ]; then
+        echo "ERROR: /data directory does not exist. Please create it."
+        exit 1
+    fi
+
+    # Create or clean directory for test files
+    if [ -d "${OUTPUT_DIR}" ]; then
+        echo "Cleaning existing directory: ${OUTPUT_DIR}"
+        rm -rf "${OUTPUT_DIR}"/*
+    fi
+
+    echo "Creating directory: ${OUTPUT_DIR}"
+    mkdir -p "${OUTPUT_DIR}"
+
+    # Check if directory was created successfully.
+    if [ ! -d "${OUTPUT_DIR}" ]; then
+        echo "ERROR: Failed to create directory ${OUTPUT_DIR}"
+        exit 1
+    fi
+
+    # Function to generate a single file using FIO
+    generate_file() {
+        file_num=$1
+        size=$2
+        fio --name=generate_file_${file_num} \
+            --ioengine=libaio \
+            --rw=write \
+            --bs=4k \
+            --size=${size} \
+            --filename="${OUTPUT_DIR}/testfile_${file_num}" \
+            --thread \
+            --group_reporting \
+            --minimal
+    }
+
+    start_time=$(date +%s)
+    echo "Starting file generation..."
+
+    # Generate files with random sizes between MIN_FILE_SIZE_KB and MAX_FILE_SIZE_KB
+    for file_num in $(seq 1 "${NUM_FILES}"); do
+        # Generate random size between MIN_FILE_SIZE_KB and MAX_FILE_SIZE_KB (in KB)
+        size_kb=$(( (RANDOM % (MAX_FILE_SIZE_KB - MIN_FILE_SIZE_KB + 1)) + MIN_FILE_SIZE_KB ))
+
+        # Convert to KB for fio
+        size="${size_kb}K"
+
+        # Show progress every 100 files
+        if [ $((file_num % 100)) -eq 0 ]; then
+            echo "Generated $file_num files..."
+        fi
+
+        generate_file "$file_num" "$size" # Sequential
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Failed to create file testfile_$file_num"
+        fi
+    done
+
+
+    end_time=$(date +%s)
+    elapsed_time=$((end_time - start_time))
+    echo "File generation complete!"
+    echo "Total time taken: $elapsed_time seconds"
+
+    # Display summary of generated files
+    total_size=$(du -sh "${OUTPUT_DIR}" | cut -f1)
+    echo "Total size of generated files: $total_size"
+    echo "File size distribution:"
+    ls -l "${OUTPUT_DIR}" | awk '{print $5}' | awk '{ sum += $1; n++ } END { print "Average file size: " sum/n/1024/1024 " MB" }'
+
+    # Optional: Show detailed distribution
+    echo -e "\nDetailed size distribution:"
+    ls -l "${OUTPUT_DIR}" | awk '{print int($5/1024/1024)"MB"}' | sort | uniq -c

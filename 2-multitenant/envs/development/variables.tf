@@ -86,3 +86,9 @@ variable "cluster_release_channel" {
   type        = string
   default     = "REGULAR"
 }
+
+variable "enable_csi_gcs_fuse" {
+  description = "Enable the GCS Fuse CSI Driver for HTC example"
+  type        = bool
+  default     = false
+}

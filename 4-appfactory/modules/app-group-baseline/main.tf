@@ -39,7 +39,8 @@ locals {
           "roles/resourcemanager.projectIamAdmin",
           "roles/gkehub.admin",
           "roles/modelarmor.admin", //permission to create model armor template
-          "roles/iam.serviceAccountAdmin"
+          "roles/iam.serviceAccountAdmin",
+          "roles/container.admin"
         ]
       }
     }

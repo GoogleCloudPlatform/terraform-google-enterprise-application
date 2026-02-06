@@ -1,0 +1,167 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+  - id: 'get-agent-image-digest'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE_URI="$_CONTAINER_REGISTRY/agent:latest"
+        AGENT_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
+                 --format='get(image_summary.digest)')
+        echo "Found digest for agent: $$AGENT_DIGEST"
+        echo "export AGENT_DIGEST=$$AGENT_DIGEST" >> /workspace/digests.env
+
+  - id: 'get-loadtest-image-digest'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE_URI="$_CONTAINER_REGISTRY/loadtest:latest"
+        LOADTEST_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
+                 --format='get(image_summary.digest)')
+        echo "Found digest for loadtest: $$LOADTEST_DIGEST"
+        echo "export LOADTEST_DIGEST=$$LOADTEST_DIGEST" >> /workspace/digests.env
+
+  - id: 'get-keda-image-digest'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE_URI="$_CONTAINER_REGISTRY/keda:latest"
+        KEDA_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
+                 --format='get(image_summary.digest)')
+        echo "Found digest for keda: $$KEDA_DIGEST"
+        echo "export KEDA_DIGEST=$$KEDA_DIGEST" >> /workspace/digests.env
+
+  - id: 'get-keda-api-server-image-digest'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE_URI="$_CONTAINER_REGISTRY/keda-metrics-apiserver:latest"
+        KEDA_API_SERVER_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
+                 --format='get(image_summary.digest)')
+        echo "Found digest for keda api server: $$KEDA_API_SERVER_DIGEST"
+        echo "export KEDA_API_SERVER_DIGEST=$$KEDA_API_SERVER_DIGEST" >> /workspace/digests.env
+
+  - id: 'get-american-option-image-digest'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE_URI="$_CONTAINER_REGISTRY/american_option:latest"
+        AMERICANOPTION_DIGEST=$(gcloud artifacts docker images describe "$$IMAGE_URI" \
+                 --format='get(image_summary.digest)')
+        echo "Found digest for american-option: $$AMERICANOPTION_DIGEST"
+        echo "export AMERICANOPTION_DIGEST=$$AMERICANOPTION_DIGEST" >> /workspace/digests.env
+
+  - id: 'log-image-paths'
+    name: 'ubuntu'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        echo "Attesting agent image: $_CONTAINER_REGISTRY/agent@$$AGENT_DIGEST"
+        echo "Attesting loadtest image: $_CONTAINER_REGISTRY/loadtest@$$LOADTEST_DIGEST"
+        echo "Attesting american-option image: $_CONTAINER_REGISTRY/american_option@$$AMERICANOPTION_DIGEST"
+        echo "Attestor ID: $_ATTESTOR_ID"
+        echo "KMS Key Version: $_KMS_KEY_VERSION"
+
+  - id: 'create-agent-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        /work/create_binauthz_attestation.sh \
+          '--artifact-url' \
+          "$_CONTAINER_REGISTRY/agent@$$AGENT_DIGEST" \
+          '--attestor' \
+          "$_ATTESTOR_ID" \
+          '--keyversion' \
+          "$_KMS_KEY_VERSION"
+
+  - id: 'create-loadtest-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        /work/create_binauthz_attestation.sh \
+          '--artifact-url' \
+          "$_CONTAINER_REGISTRY/loadtest@$$LOADTEST_DIGEST" \
+          '--attestor' \
+          "$_ATTESTOR_ID" \
+          '--keyversion' \
+          "$_KMS_KEY_VERSION"
+
+  - id: 'create-american-option-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        /work/create_binauthz_attestation.sh \
+          '--artifact-url' \
+          "$_CONTAINER_REGISTRY/american_option@$$AMERICANOPTION_DIGEST" \
+          '--attestor' \
+          "$_ATTESTOR_ID" \
+          '--keyversion' \
+          "$_KMS_KEY_VERSION"
+
+  - id: 'create-keda-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        /work/create_binauthz_attestation.sh \
+          '--artifact-url' \
+          "$_CONTAINER_REGISTRY/keda@$$KEDA_DIGEST" \
+          '--attestor' \
+          "$_ATTESTOR_ID" \
+          '--keyversion' \
+          "$_KMS_KEY_VERSION"
+
+  - id: 'create-keda-api-server-attestation'
+    name: '$_BINARY_AUTH_IMAGE'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/digests.env
+        /work/create_binauthz_attestation.sh \
+          '--artifact-url' \
+          "$_CONTAINER_REGISTRY/keda-metrics-apiserver@$$KEDA_API_SERVER_DIGEST" \
+          '--attestor' \
+          "$_ATTESTOR_ID" \
+          '--keyversion' \
+          "$_KMS_KEY_VERSION"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  pool:
+    name: '${_PRIVATE_POOL}'
