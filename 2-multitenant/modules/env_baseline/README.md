@@ -25,6 +25,7 @@ The following resources are created:
 | create\_cluster\_project | Create Cluster Project ID, otherwise the Network Project ID is used | `bool` | `true` | no |
 | deletion\_protection | Whether or not to allow Terraform to destroy the cluster. | `bool` | `true` | no |
 | enable\_confidential\_nodes | An optional flag to enable confidential node config. | `bool` | `false` | no |
+| enable\_csi\_gcs\_fuse | Enable the GCS Fuse CSI Driver for HTC example | `bool` | `false` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |
 | master\_ipv4\_cidr\_blocks | List of IP ranges (One range per cluster) in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. | `list(string)` | <pre>[<br>  "10.11.10.0/28",<br>  "10.11.20.0/28"<br>]</pre> | no |

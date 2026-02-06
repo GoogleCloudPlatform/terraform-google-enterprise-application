@@ -9,7 +9,7 @@ This document presents two use cases that demonstrate the utilization of `kueue`
 
 ## Use Case 1: HPC Financial Analysis Using Monte Carlo Simulations (Team: `hpc-team-b`)
 
-This example is an adaptation from [Google Cloud Platform's Risk and Research Blueprints](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/main/examples/research/monte-carlo).
+This example is an adaptation from [Google Cloud Platform's Risk and Research Blueprints](github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/main/examples/research/monte-carlo).
 
 ### Requirements
 
@@ -226,7 +226,7 @@ After uploading the data to the bucket, you may proceed.
 
 Follow the steps outlined in the following document, after the "Open the Vertex AI Workbench Notebook" section:
 
-[Open the Vertex AI Workbench Notebook](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/0e3134b8478f3ffaa12031d7fda3ac6b94e61b17/examples/research/monte-carlo#open-the-vertex-ai-workbench-notebook)
+[Open the Vertex AI Workbench Notebook](github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/0e3134b8478f3ffaa12031d7fda3ac6b94e61b17/examples/research/monte-carlo#open-the-vertex-ai-workbench-notebook)
 
 **IMPORTANT**: Your Vertex AI Workbench Instance will be located on the application infrastructure project that was created on 4-appfactory.
 
