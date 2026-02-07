@@ -1,10 +1,4 @@
 applications = {
-  "agent" = {
-    "capital-agent" = {
-      create_infra_project = false
-      create_admin_project = true
-    }
-  },
   "llm-model" = {
     "llamma-model" = {
       create_infra_project = false
@@ -16,10 +10,6 @@ applications = {
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"
   repositories = {
-    capital-agent = {
-      repository_name = "capital-agent-i-r"
-      repository_url  = "https://gitlab.com/user/capital-agent-i-r.git"
-    },
     llamma-model = {
       repository_name = "llamma-model-i-r"
       repository_url  = "https://gitlab.example.com/root/llamma-model-i-r.git"
