@@ -34,7 +34,7 @@ spec:
       containers:
       - name: accounts-db
       # TODO: pull out the version as a variable
-        image: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/accounts-db:v0.6.7@sha256:d1f7b4b42fbbad5b3f8c85c67a15f4e27cc9a054ae8bc2379e3f0319e313ce9d
+        image: us-central1-docker.pkg.dev/bank-of-anthos-ci/bank-of-anthos/accounts-db:latest@sha256:c5f46f5ff76ad45c795438ed60e277d661dc28aebb32f55b917ec9770f2de603
         envFrom:
           - configMapRef:
               name: environment-config
