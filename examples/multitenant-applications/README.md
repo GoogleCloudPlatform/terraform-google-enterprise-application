@@ -604,7 +604,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Clone Bank of Anthos repository:
 
     ```bash
-    git clone --branch v0.6.7 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
+    git clone --branch v0.6.8 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
     ```
 
 1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.
@@ -1170,7 +1170,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Clone Bank of Anthos repository:
 
     ```bash
-    git clone --branch v0.6.7 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
+    git clone --branch v0.6.8 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
     ```
 
 1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.
