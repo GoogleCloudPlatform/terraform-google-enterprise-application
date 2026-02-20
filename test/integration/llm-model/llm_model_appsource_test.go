@@ -205,6 +205,7 @@ func TestSourceLLMModel(t *testing.T) {
 								nextTargetId := deployTargets.Array()[i]
 								promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s", releaseName, serviceName, region, nextTargetId)
 								t.Logf("Promoting release to next target: %s", nextTargetId)
+								targetId = nextTargetId
 								// Execute the promote command
 								gcloud.Runf(t, promoteCmd)
 							}
@@ -290,12 +291,25 @@ func TestE2ELLMModel(t *testing.T) {
 					return "", err
 				}
 				resp, err := client.Do(req)
+
+				fmt.Println(resp.StatusCode)
 				if err != nil {
 					return "", err
 				}
 				if resp.StatusCode != 200 {
 					fmt.Println(resp)
-					return "", err
+					defer func() {
+						if err := resp.Body.Close(); err != nil {
+							t.Logf("Error closing response body: %v", err)
+						}
+					}()
+
+					bodyBytes, err := io.ReadAll(resp.Body)
+					if err != nil {
+						return "", fmt.Errorf("error reading response body: %w", err)
+					}
+					bodyString := string(bodyBytes)
+					return "", fmt.Errorf("Response Body: %s", bodyString)
 				}
 				return fmt.Sprint(resp.StatusCode), err
 			}
