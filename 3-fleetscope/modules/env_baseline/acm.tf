@@ -74,7 +74,7 @@ resource "google_gke_hub_feature_membership" "acm_feature_member" {
   membership_location = regex(local.membership_re, each.value)[1]
 
   configmanagement {
-    version = "1.22.0"
+    version = "1.23.1"
     config_sync {
       enabled       = true
       source_format = "unstructured"
