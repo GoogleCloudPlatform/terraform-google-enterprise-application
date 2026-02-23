@@ -66,7 +66,7 @@ spec:
             nvidia.com/gpu: "1"
           requests:
             cpu: "9"
-            ephemeral-storage: 80Gi
+            ephemeral-storage: 40Gi
             memory: 34Gi
             nvidia.com/gpu: "1"
         securityContext:
