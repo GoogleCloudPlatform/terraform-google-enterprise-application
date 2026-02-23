@@ -81,7 +81,6 @@ spec:
       dnsPolicy: ClusterFirst
       nodeSelector:
         cloud.google.com/gke-accelerator: nvidia-l4
-        cloud.google.com/gke-accelerator-count: "1"
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext:
@@ -94,12 +93,15 @@ spec:
         operator: Equal
         value: amd64
       - effect: NoSchedule
-        key: cloud.google.com/gke-accelerator
-        operator: Equal
-        value: nvidia-l4
-      - effect: NoSchedule
         key: cloud.google.com/machine-family
         operator: Exists
+      - key: "nvidia.com/gpu"
+        operator: "Equal"
+        value: "present"
+        effect: "NoSchedule"
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
       volumes:
       - emptyDir:
           medium: Memory
