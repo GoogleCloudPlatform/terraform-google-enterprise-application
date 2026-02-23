@@ -80,7 +80,7 @@ spec:
           name: dshm
       dnsPolicy: ClusterFirst
       nodeSelector:
-        cloud.google.com/gke-accelerator: nvidia-tesla-t4
+        cloud.google.com/gke-accelerator: nvidia-l4
         cloud.google.com/gke-accelerator-count: "1"
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -96,7 +96,7 @@ spec:
       - effect: NoSchedule
         key: cloud.google.com/gke-accelerator
         operator: Equal
-        value: nvidia-tesla-t4
+        value: nvidia-l4
       - effect: NoSchedule
         key: cloud.google.com/machine-family
         operator: Exists

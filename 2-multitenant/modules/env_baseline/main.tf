@@ -285,7 +285,7 @@ module "gke-standard" {
     min_memory_gb       = 0
     gpu_resources = [
       {
-        resource_type = "nvidia-tesla-t4"
+        resource_type = "nvidia-l4"
         minimum       = 1
         maximum       = 4
       }
