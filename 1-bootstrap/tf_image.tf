@@ -118,7 +118,7 @@ resource "time_sleep" "wait_iam_propagation" {
 # Use Dockerfile to create the custom Terraform Image on Google Cloud Build
 module "build_terraform_image" {
   source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.1"
+  version = "~> 4.0"
   upgrade = false
 
   create_cmd_triggers = {
