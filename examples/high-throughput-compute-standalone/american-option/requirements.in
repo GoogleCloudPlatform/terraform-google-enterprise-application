@@ -16,4 +16,4 @@ quantlib
 grpcio-reflection
 # Due to https://github.com/grpc/grpc/issues/37609 these need to be sync'd
 grpcio-tools==1.66.1
-protobuf==5.27.2
+protobuf==5.29.5
