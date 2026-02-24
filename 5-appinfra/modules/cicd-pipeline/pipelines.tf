@@ -55,7 +55,7 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
 # GCS bucket used by Cloud Deploy for delivery artifact storage
 module "delivery_artifacts" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 11.0"
+  version = "~> 12.0"
 
   for_each = var.env_cluster_membership_ids
 
