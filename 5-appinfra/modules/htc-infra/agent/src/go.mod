@@ -1,6 +1,7 @@
 module github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent
 
 go 1.24
+
 toolchain go1.24.1
 
 require (
@@ -17,7 +18,7 @@ require (
 	go.opentelemetry.io/otel/bridge/opencensus v1.31.0
 	go.opentelemetry.io/otel/sdk v1.31.0
 	go.opentelemetry.io/otel/sdk/metric v1.31.0
-	golang.org/x/oauth2 v0.23.0
+	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.203.0
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.1
