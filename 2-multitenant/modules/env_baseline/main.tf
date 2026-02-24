@@ -313,16 +313,6 @@ module "gke-standard" {
         min_count       = 1
         max_count       = 10
         location_policy = "BALANCED"
-      },
-      {
-        name            = "node-pool-gpu-l4"
-        machine_type    = "g2-standard-12"
-        location_policy = "BALANCED"
-        autoscaling     = true
-        min_count       = 1
-        max_count       = 4
-        node_locations  = "us-central1-a,us-central1-c"
-        strategy        = "SURGE"
       }
   ], local.arm_node_pool[each.key])
 
