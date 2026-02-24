@@ -30,6 +30,6 @@ terraform {
     }
   }
   provider_meta "google" {
-    module_name = "cloud-solutions/fsi-rdp-agent-v1.0.0"
+    module_name = "cloud-solutions/fsi-rdp-agent-v0.4.0"
   }
 }
