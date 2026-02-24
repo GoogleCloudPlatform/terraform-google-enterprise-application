@@ -15,7 +15,9 @@ WORKDIR /e2e
 COPY . .
 
 # install curl and gpg which are needed for fetching the Google Cloud GPG key
-RUN apt-get update
+RUN rm /etc/apt/sources.list.d/google-chrome.list && \
+    rm /etc/apt/sources.list.d/microsoft-edge-stable.list && \
+    apt-get update
 RUN apt-get install -y curl gpg
 
 # install gcloud cli tools to get kubectl context and service/ingress endpoint ip to test
