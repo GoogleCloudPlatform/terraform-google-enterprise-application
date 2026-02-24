@@ -60,6 +60,10 @@ func TestFleetscope(t *testing.T) {
 
 	attestation := map[string]interface{}{}
 
+	enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
+	forkRepository := os.Getenv("HEAD_REPO_URL")
+	branch := os.Getenv("HEAD_BRANCH")
+
 	if len(testutils.EnvNames(t)) == 1 {
 		attestation = map[string]interface{}{"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode")}
 	}
@@ -95,13 +99,8 @@ func TestFleetscope(t *testing.T) {
 			splitClusterMembership := strings.Split(clusterMembership, "/")
 			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
-
-			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
-			forkRepository := os.Getenv("HEAD_REPO_URL")
-			branch := os.Getenv("HEAD_BRANCH")
-
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
+			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 			if enableInferenceGateway {
 				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
 				forkRepository = "https://github.com/amandakarina/terraform-google-enterprise-application"

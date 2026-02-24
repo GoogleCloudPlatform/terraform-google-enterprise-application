@@ -159,8 +159,6 @@ func TestSourceCymbalShop(t *testing.T) {
 			}
 			utils.Poll(t, pollRelease(releaseListCmd), 40, 60*time.Second)
 
-			targetId := deployTargets.Array()[0]
-			rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
 			// Poll CD rollouts until rollout is successful
 			pollCloudDeploy := func(cmd string) func() (bool, error) {
 				return func() (bool, error) {
@@ -176,14 +174,23 @@ func TestSourceCymbalShop(t *testing.T) {
 						t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 						return true, nil
 					} else {
-						logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
-						logs := gcloud.RunCmd(t, logsCmd)
+						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", rollouts[0].Get("deployingBuild").String(), projectID, region)
+						logs := gcloud.Runf(t, logsCmd).String()
 						t.Logf("%s build-log: %s", serviceName, logs)
 						return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 					}
 				}
 			}
-			utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
+			for i, targetId := range deployTargets.Array() {
+				if i > 0 {
+					promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", releaseName, serviceName, region, targetId)
+					t.Logf("Promoting release to next target: %s", targetId)
+					// Execute the promote command
+					gcloud.Runf(t, promoteCmd)
+				}
+				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
+				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 60*time.Second)
+			}
 		})
 		appsource.Test()
 	})
