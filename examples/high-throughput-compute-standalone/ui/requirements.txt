@@ -19,7 +19,7 @@ google-cloud-core==2.4.1
 google-crc32c==1.6.0
 google-resumable-media==2.7.2
 googleapis-common-protos==1.66.0
-gradio==5.11.0
+gradio==5.31.0
 # gradio-client==1.4.2
 grpcio==1.68.0
 grpcio-status==1.68.0
