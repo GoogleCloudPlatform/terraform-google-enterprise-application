@@ -30,7 +30,7 @@ profiles:
       kustomize:
         paths:
         - k8s/overlays/development
-  - name: nonproduction
+  - name: staging
     manifests:
       kustomize:
         paths:
