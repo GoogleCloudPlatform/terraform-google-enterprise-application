@@ -36,6 +36,7 @@ test:
     context: .
     custom:
       - command: |
+          pip install setuptools --quiet
           pip install pylint --quiet
           pip install -r requirements.txt --quiet
           pylint --rcfile=../../../.pylintrc *.py
@@ -49,6 +50,7 @@ test:
     context: .
     custom:
       - command: |
+          pip install setuptools --quiet
           pip install -r requirements.txt --quiet
           python3 -m pytest -v -p no:warnings
         timeoutSeconds: 1200
@@ -60,6 +62,7 @@ test:
     context: .
     custom:
       - command: |
+          pip install setuptools --quiet
           pip install -r requirements.txt --quiet
           python3 -m pytest --cov=./ tests/
         timeoutSeconds: 1200
