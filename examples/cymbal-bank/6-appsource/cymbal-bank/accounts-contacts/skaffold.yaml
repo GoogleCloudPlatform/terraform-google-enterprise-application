@@ -24,6 +24,15 @@ requires:
   - accounts-db
   path: ../accounts-db/skaffold.yaml
 build:
+  custom:
+  - command: |
+      pip install setuptools --quiet
+      pip install -r requirements.txt --quiet
+    timeoutSeconds: 1200
+    dependencies:
+      paths:
+        - "**/*.py"
+        - "requirements.txt"
   artifacts:
   - image: contacts
     context: .
