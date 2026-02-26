@@ -150,33 +150,26 @@ func DestroyAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outp
 func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 	gcpPath := filepath.Join(c.CheckoutPath, sc.Repo)
 	stageName := strings.Split(sc.Stage, "-")[1]
-	conf := utils.GitRepo{}
 	for _, e := range sc.Envs {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s", sc.Repo, e), func() error {
 			for _, g := range sc.GroupingUnits {
+				terraformDir := filepath.Join(gcpPath, g, e)
+
+				if _, err := os.Stat(terraformDir); os.IsNotExist(err) {
+					t.Logf("Terraform directory %s does not exist, skipping destroy.", terraformDir)
+					return nil
+				}
 				options := &terraform.Options{
-					TerraformDir:             filepath.Join(gcpPath, g, e),
+					TerraformDir:             terraformDir,
 					Logger:                   c.Logger,
 					NoColor:                  true,
 					RetryableTerraformErrors: testutils.RetryableTransientErrors,
 					MaxRetries:               MaxErrorRetries,
 					TimeBetweenRetries:       TimeBetweenErrorRetries,
 				}
-
-				gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName)
-				conf = utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
-
-				branch := e
-				if branch == "shared" {
-					branch = "production"
-				}
-				err := conf.CheckoutBranch(branch)
+				err := destroyEnv(t, options, sc.StageSA)
 				if err != nil {
-					return err
-				}
-				err = destroyEnv(t, options, sc.StageSA)
-				if err != nil {
-					return err
+					return fmt.Errorf("error destroying env in dir %s: %w", terraformDir, err)
 				}
 			}
 			return nil
