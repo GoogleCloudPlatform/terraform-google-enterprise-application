@@ -126,13 +126,13 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				gitAppRun("clone", "--branch", "v0.6.7", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+				gitAppRun("clone", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
-				gitAppRun("config", "init.defaultBranch", "main")
+				// gitAppRun("config", "init.defaultBranch", "main")
 				gitAppRun("config", "http.postBuffer", "157286400")
-				gitAppRun("checkout", "-b", "main")
+				// gitAppRun("checkout", "-b", "main")
 				gitAppRun("remote", "add", "google", appRepo)
 				datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
@@ -274,8 +274,6 @@ func TestSourceCymbalBank(t *testing.T) {
 				}
 				utils.Poll(t, pollRelease(releaseListCmd), 10, 60*time.Second)
 
-				targetId := deployTargets.Array()[0]
-				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseFullName, targetId)
 				// Poll CD rollouts until rollout is successful
 				pollCloudDeploy := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
@@ -285,23 +283,29 @@ func TestSourceCymbalBank(t *testing.T) {
 						}
 						latestRolloutState := rollouts[0].Get("state").String()
 						if latestRolloutState == "SUCCEEDED" {
+							t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
 							return false, nil
 						} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
+							t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 							return true, nil
 						} else {
-							logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
-							logs := gcloud.RunCmd(t, logsCmd)
-							t.Logf("%s build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
-							if strings.Contains(logs, "Insufficient memory") || strings.Contains(logs, "Insufficient CPU") {
-								t.Logf("Re-trying rollout due to Cluster scalling.")
-								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName))
-								return true, nil
-							}
+							logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", rollouts[0].Get("deployingBuild").String(), projectID, region)
+							logs := gcloud.Runf(t, logsCmd).String()
+							t.Logf("%s build-log: %s", serviceName, logs)
 							return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 						}
 					}
 				}
-				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 40, 60*time.Second)
+				for i, targetId := range deployTargets.Array() {
+					if i > 0 {
+						promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", releaseName, serviceName, region, targetId)
+						t.Logf("Promoting release to next target: %s", targetId)
+						// Execute the promote command
+						gcloud.Runf(t, promoteCmd)
+					}
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
+					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 60*time.Second)
+				}
 			})
 			appsource.Test()
 		})

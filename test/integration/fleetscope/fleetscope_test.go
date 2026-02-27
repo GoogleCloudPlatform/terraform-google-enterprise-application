@@ -60,6 +60,10 @@ func TestFleetscope(t *testing.T) {
 
 	attestation := map[string]interface{}{}
 
+	enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
+	forkRepository := os.Getenv("HEAD_REPO_URL")
+	branch := os.Getenv("HEAD_BRANCH")
+
 	if len(testutils.EnvNames(t)) == 1 {
 		attestation = map[string]interface{}{"attestation_evaluation_mode": multitenantHarness.GetStringOutput("attestation_evaluation_mode")}
 	}
@@ -95,23 +99,27 @@ func TestFleetscope(t *testing.T) {
 			splitClusterMembership := strings.Split(clusterMembership, "/")
 			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
-
-			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
-
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
+			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 			if enableInferenceGateway {
-				configSyncPath = "examples/agent/3-fleetscope/config-sync"
+				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
+				forkRepository = "https://github.com/amandakarina/terraform-google-enterprise-application"
+				branch = "feat/adds-model-serving"
+			}
+
+			if forkRepository == "" || branch == "" {
+				forkRepository = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
+				branch = "main"
 			}
 
 			vars := map[string]interface{}{
 				"remote_state_bucket":         backend_bucket,
 				"namespace_ids":               setup.GetJsonOutput("teams").Value().(map[string]interface{}),
 				"config_sync_secret_type":     "none",
-				"config_sync_repository_url":  "https://github.com/amandakarina/terraform-google-enterprise-application",
+				"config_sync_repository_url":  forkRepository,
 				"config_sync_policy_dir":      configSyncPath,
-				"config_sync_branch":          "feat/agent-example",
-				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent"},
+				"config_sync_branch":          branch,
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent", "vllm-model"},
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
 
@@ -222,7 +230,7 @@ func TestFleetscope(t *testing.T) {
 								configmanagementPath := fmt.Sprintf("membershipSpecs.%s.configmanagement", membershipName)
 
 								assert.Equal("unstructured", gkeFeatureOp.Get(configmanagementPath+".configSync.sourceFormat").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
-								assert.Equal("1.22.0", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
+								assert.Equal("1.23.1", gkeFeatureOp.Get(configmanagementPath+".version").String(), fmt.Sprintf("Hub Feature %s should have source format equal to unstructured", membershipName))
 							}
 						}
 					case "policycontroller":

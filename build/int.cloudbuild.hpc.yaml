@@ -387,3 +387,5 @@ options:
     - "TF_VAR_single_project=false"
     - "TF_VAR_hpc=true"
     - "TF_VAR_agent=false"
+    - "HEAD_BRANCH=$_HEAD_BRANCH"
+    - "HEAD_REPO_URL=$_HEAD_REPO_URL"

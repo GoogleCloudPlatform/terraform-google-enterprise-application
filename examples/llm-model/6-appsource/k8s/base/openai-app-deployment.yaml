@@ -1,0 +1,108 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openai-app-deployment
+  namespace: vllm-model # from-param: ${env_namespace_id}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: openai-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: openai-app
+        version: v1
+    spec:
+      serviceAccountName: llamma-model-ksa
+      containers:
+      - args:
+        - python
+        - -m
+        - vllm.entrypoints.api_server
+        - --host=0.0.0.0
+        - --port=8000
+        - --swap-space=16
+        - --model=Qwen/Qwen2.5-7B-Instruct
+        - --max-model-len=2048
+        - --gpu-memory-utilization=0.9
+        - --enforce-eager
+        - --tensor-parallel-size=1
+        - --enable-chunked-prefill
+        env:
+        - name: DEPLOY_SOURCE
+          value: UI_HF_VERIFIED_MODEL
+        - name: MODEL_ID
+          value: Qwen/Qwen2.5-7B-Instruct
+        image: pytorch-vllm-serve
+        imagePullPolicy: IfNotPresent
+        name: inference-server
+        resources:
+          limits:
+            cpu: "9"
+            ephemeral-storage: 80Gi
+            memory: 34Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: "9"
+            ephemeral-storage: 40Gi
+            memory: 34Gi
+            nvidia.com/gpu: "1"
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-l4
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: kubernetes.io/arch
+        operator: Equal
+        value: amd64
+      - effect: NoSchedule
+        key: cloud.google.com/machine-family
+        operator: Exists
+      - key: "nvidia.com/gpu"
+        operator: "Equal"
+        value: "present"
+        effect: "NoSchedule"
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+      volumes:
+      - emptyDir:
+          medium: Memory
+        name: dshm

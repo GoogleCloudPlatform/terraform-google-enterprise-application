@@ -248,7 +248,7 @@ resource "google_project_iam_member" "model_armor_service_network_extension_role
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 36.0"
+  version = "~> 40.0"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
   name                   = "cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
@@ -283,10 +283,11 @@ module "gke-standard" {
     min_cpu_cores       = 0
     max_memory_gb       = 1024
     min_memory_gb       = 0
+    disk_size           = 200
     gpu_resources = [
       {
-        resource_type = "nvidia-tesla-t4"
-        minimum       = 0
+        resource_type = "nvidia-l4"
+        minimum       = 1
         maximum       = 4
       }
     ]
@@ -309,6 +310,8 @@ module "gke-standard" {
         max_surge       = 1
         max_unavailable = 0
         autoscaling     = true
+        min_count       = 1
+        max_count       = 10
         location_policy = "BALANCED"
       }
   ], local.arm_node_pool[each.key])
@@ -337,7 +340,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 36.0"
+  version = "~> 40.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
