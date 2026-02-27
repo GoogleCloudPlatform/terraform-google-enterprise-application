@@ -128,13 +128,13 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				gitAppRun("clone", "--branch", "v0.6.7", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+				gitAppRun("clone", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
-				gitAppRun("config", "init.defaultBranch", "main")
+				// gitAppRun("config", "init.defaultBranch", "main")
 				gitAppRun("config", "http.postBuffer", "157286400")
-				gitAppRun("checkout", "-b", "main")
+				// gitAppRun("checkout", "main")
 				gitAppRun("remote", "add", "google", appRepo)
 				datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
