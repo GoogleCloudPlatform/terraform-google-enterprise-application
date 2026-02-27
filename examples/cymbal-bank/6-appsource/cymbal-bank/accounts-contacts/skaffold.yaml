@@ -44,7 +44,7 @@ test:
   - image: contacts # code style
     context: .
     custom:
-      - command: |
+      - buildCommand: 
           pip install setuptools --quiet
           pip install pylint --quiet
           pip install -r requirements.txt --quiet
