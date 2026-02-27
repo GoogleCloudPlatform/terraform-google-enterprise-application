@@ -26,15 +26,6 @@ requires:
 build:
   artifacts:
   - image: contacts
-    custom:
-    - command: |
-        pip install setuptools --quiet
-        pip install -r requirements.txt --quiet
-      timeoutSeconds: 1200
-      dependencies:
-        paths:
-          - "**/*.py"
-          - "requirements.txt"
     context: .
   tagPolicy:
     sha256: {}
@@ -44,7 +35,7 @@ test:
   - image: contacts # code style
     context: .
     custom:
-      - buildCommand: 
+      - command: |
           pip install setuptools --quiet
           pip install pylint --quiet
           pip install -r requirements.txt --quiet
