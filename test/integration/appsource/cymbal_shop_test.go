@@ -97,7 +97,7 @@ func TestSourceCymbalShop(t *testing.T) {
 				}
 			}
 
-			gitAppRun("clone", "--branch", "v0.10.3", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
+			gitAppRun("clone", "--branch", "main", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
 			// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
