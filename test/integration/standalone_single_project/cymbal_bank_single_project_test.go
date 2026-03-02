@@ -249,7 +249,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 							return true, nil
 						}
 						latestWorkflowRunStatus := build[0].Get("status").String()
-						t.Logf("Build found for commit %s: %s \n", lastCommit, build[0].Get("buildTriggerId"))
+						t.Logf("Build found for commit %s: %s", lastCommit, build[0].Get("buildTriggerId"))
 						switch latestWorkflowRunStatus {
 						case "SUCCESS":
 							t.Logf("Build finished successfully %s. \n", build[0].Get("buildTriggerId"))
@@ -258,7 +258,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 							logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
 							logs := gcloud.Runf(t, logsCmd).String()
 							t.Logf("%s ci-build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
-							return false, fmt.Errorf("Build failed %s.", build[0].Get("buildTriggerId"))
+							return false, fmt.Errorf("Build failed %s. \n", build[0].Get("buildTriggerId"))
 						}
 						return true, nil
 					}
@@ -268,8 +268,10 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
 				pollRelease := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
+						t.Logf("Polling Release Name for %s", serviceName)
 						releases := gcloud.Runf(t, cmd).Array()
 						if len(releases) == 0 {
+							t.Logf("Release not found for %s", serviceName)
 							return true, nil
 						}
 						releaseName = releases[0].Get("name").String()
@@ -281,8 +283,10 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				// Poll CD rollouts until rollout is successful
 				pollCloudDeploy := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
+						t.Logf("Polling rollout Name for %s-%s", serviceName, releaseName)
 						rollouts := gcloud.Runf(t, cmd).Array()
-						if len(rollouts) < 1 {
+						if len(rollouts) == 0 {
+							t.Logf("Rollout not found for %s-%s", serviceName, releaseName)
 							return true, nil
 						}
 						latestRolloutState := rollouts[0].Get("state").String()
@@ -300,14 +304,15 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 						}
 					}
 				}
-				for i, targetId := range deployTargets.Array() {
+				for i, targetId := range deployTargets.Get(serviceName).Array() {
 					if i > 0 {
-						promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", releaseName, serviceName, region, targetId.Get(serviceName).Array()[0])
+						promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", releaseName, serviceName, region, targetId)
 						t.Logf("Promoting release to next target: %s", targetId)
 						// Execute the promote command
 						gcloud.Runf(t, promoteCmd)
 					}
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId.Get(serviceName).Array()[0])
+					t.Logf("Getting rollout for target %s", targetId)
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
 					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 60*time.Second)
 				}
 			})
