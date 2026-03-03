@@ -143,7 +143,7 @@ func TestSourceCymbalShop(t *testing.T) {
 					return true, nil
 				}
 			}
-			utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
+			utils.Poll(t, pollCloudBuild(buildListCmd), 60, 60*time.Second)
 
 			releaseName := ""
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
@@ -157,7 +157,7 @@ func TestSourceCymbalShop(t *testing.T) {
 					return false, nil
 				}
 			}
-			utils.Poll(t, pollRelease(releaseListCmd), 40, 60*time.Second)
+			utils.Poll(t, pollRelease(releaseListCmd), 60, 60*time.Second)
 
 			targetId := deployTargets.Array()[0]
 			rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
