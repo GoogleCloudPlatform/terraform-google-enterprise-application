@@ -132,7 +132,7 @@ func TestSourceCymbalBank(t *testing.T) {
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 				// gitAppRun("config", "init.defaultBranch", "main")
 				gitAppRun("config", "http.postBuffer", "157286400")
-				// gitAppRun("checkout", "-b", "main")
+				gitAppRun("checkout", "main")
 				gitAppRun("remote", "add", "google", appRepo)
 				datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
