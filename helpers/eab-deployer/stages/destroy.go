@@ -188,7 +188,7 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 					return err
 				}
 
-				// O 'terraform destroy' é executado como no original.
+				// The 'terraform destroy' is executed like original.
 				err = destroyEnv(t, options, sc.StageSA)
 				if err != nil {
 					return err
