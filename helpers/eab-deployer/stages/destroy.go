@@ -149,7 +149,6 @@ func DestroyAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outp
 
 func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 	gcpPath := filepath.Join(c.CheckoutPath, sc.Repo)
-	stageName := strings.Split(sc.Stage, "-")[1]
 	for _, e := range sc.Envs {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s", sc.Repo, e), func() error {
 			for _, g := range sc.GroupingUnits {
@@ -184,22 +183,20 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 	}
 	for _, g := range groupingUnits {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s.apply-shared", sc.Repo, g), func() error {
+			terraformDir := filepath.Join(gcpPath, g, "shared")
+
+			if _, err := os.Stat(terraformDir); os.IsNotExist(err) {
+				t.Logf("Terraform directory %s does not exist, skipping destroy.", terraformDir)
+				return nil
+			}
+
 			options := &terraform.Options{
-				TerraformDir:             filepath.Join(gcpPath, g, "shared"),
+				TerraformDir:             terraformDir,
 				Logger:                   c.Logger,
 				NoColor:                  true,
 				RetryableTerraformErrors: testutils.RetryableTransientErrors,
 				MaxRetries:               MaxErrorRetries,
 				TimeBetweenRetries:       TimeBetweenErrorRetries,
-			}
-			t.Log("Clonning repo")
-
-			gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName)
-			conf := utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
-
-			err := conf.CheckoutBranch("production")
-			if err != nil {
-				return err
 			}
 			return destroyEnv(t, options, sc.StageSA)
 		})
@@ -222,7 +219,6 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 			if err != nil {
 				return err
 			}
-
 			return nil
 		})
 		if err != nil {
