@@ -148,27 +148,50 @@ func DestroyAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outp
 }
 
 func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
-	gcpPath := filepath.Join(c.CheckoutPath, sc.Repo)
 	for _, e := range sc.Envs {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s", sc.Repo, e), func() error {
 			for _, g := range sc.GroupingUnits {
-				terraformDir := filepath.Join(gcpPath, g, e)
-
-				if _, err := os.Stat(terraformDir); os.IsNotExist(err) {
-					t.Logf("Terraform directory %s does not exist, skipping destroy.", terraformDir)
-					return nil
-				}
 				options := &terraform.Options{
-					TerraformDir:             terraformDir,
+					TerraformDir:             filepath.Join(c.CheckoutPath, sc.Repo, g, e),
 					Logger:                   c.Logger,
 					NoColor:                  true,
 					RetryableTerraformErrors: testutils.RetryableTransientErrors,
 					MaxRetries:               MaxErrorRetries,
 					TimeBetweenRetries:       TimeBetweenErrorRetries,
 				}
-				err := destroyEnv(t, options, sc.StageSA)
+				stageKey := ""
+				for k, repo := range tfvars.InfraCloudbuildV2RepositoryConfig.Repositories {
+					if repo.RepositoryName == sc.Repo {
+						stageKey = k
+						break
+					}
+				}
+				if stageKey == "" {
+					for k, repo := range tfvars.AppServicesCloudbuildV2RepositoryConfig.Repositories {
+						if repo.RepositoryName == sc.Repo {
+							stageKey = k
+							break
+						}
+					}
+				}
+				if stageKey == "" {
+					return fmt.Errorf("repository %s not found in any repository config", sc.Repo)
+				}
+				gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageKey].RepositoryName)
+				conf := utils.GetRepoOnly(t, gitPath, c.Logger)
+				branch := e
+				if branch == "shared" {
+					branch = "production"
+				}
+				err := conf.CheckoutBranch(branch)
 				if err != nil {
-					return fmt.Errorf("error destroying env in dir %s: %w", terraformDir, err)
+					return err
+				}
+
+				// O 'terraform destroy' é executado como no original.
+				err = destroyEnv(t, options, sc.StageSA)
+				if err != nil {
+					return err
 				}
 			}
 			return nil
@@ -177,55 +200,6 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 			return err
 		}
 	}
-	groupingUnits := []string{}
-	if sc.HasLocalStep {
-		groupingUnits = sc.GroupingUnits
-	}
-	for _, g := range groupingUnits {
-		err := s.RunDestroyStep(fmt.Sprintf("%s.%s.apply-shared", sc.Repo, g), func() error {
-			terraformDir := filepath.Join(gcpPath, g, "shared")
-
-			if _, err := os.Stat(terraformDir); os.IsNotExist(err) {
-				t.Logf("Terraform directory %s does not exist, skipping destroy.", terraformDir)
-				return nil
-			}
-
-			options := &terraform.Options{
-				TerraformDir:             terraformDir,
-				Logger:                   c.Logger,
-				NoColor:                  true,
-				RetryableTerraformErrors: testutils.RetryableTransientErrors,
-				MaxRetries:               MaxErrorRetries,
-				TimeBetweenRetries:       TimeBetweenErrorRetries,
-			}
-			return destroyEnv(t, options, sc.StageSA)
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	if len(groupingUnits) == 0 && len(sc.Envs) == 0 {
-		err := s.RunDestroyStep(fmt.Sprintf("%s", sc.Repo), func() error {
-			options := &terraform.Options{
-				TerraformDir:             filepath.Join(c.EABPath, sc.Stage),
-				Logger:                   c.Logger,
-				NoColor:                  true,
-				RetryableTerraformErrors: testutils.RetryableTransientErrors,
-				MaxRetries:               MaxErrorRetries,
-				TimeBetweenRetries:       TimeBetweenErrorRetries,
-			}
-			err := destroyEnv(t, options, sc.StageSA)
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-	}
-
 	fmt.Println("end of", sc.Step, "destroy")
 	return nil
 }
