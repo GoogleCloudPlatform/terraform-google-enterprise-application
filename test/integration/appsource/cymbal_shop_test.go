@@ -138,6 +138,9 @@ func TestSourceCymbalShop(t *testing.T) {
 					case "SUCCESS":
 						return false, nil
 					case "FAILURE":
+						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
+						logs := gcloud.Runf(t, logsCmd).String()
+						t.Logf("ci-build-log: %s", logs)
 						return false, errors.New("Build failed.")
 					}
 					return true, nil
