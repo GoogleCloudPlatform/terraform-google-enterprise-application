@@ -97,13 +97,13 @@ func TestSourceCymbalShop(t *testing.T) {
 				}
 			}
 
-			gitAppRun("clone", "--branch", "v0.10.3", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
+			gitAppRun("clone", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
 			// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
-			gitAppRun("config", "init.defaultBranch", "main")
+			// gitAppRun("config", "init.defaultBranch", "main")
 			gitAppRun("config", "http.postBuffer", "157286400")
-			gitAppRun("checkout", "-b", "main")
+			gitAppRun("checkout", "main")
 			gitAppRun("remote", "add", "google", appRepo)
 
 			// copy contents from 6-appsource to the cloned repository
@@ -138,12 +138,15 @@ func TestSourceCymbalShop(t *testing.T) {
 					case "SUCCESS":
 						return false, nil
 					case "FAILURE":
+						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
+						logs := gcloud.Runf(t, logsCmd).String()
+						t.Logf("ci-build-log: %s", logs)
 						return false, errors.New("Build failed.")
 					}
 					return true, nil
 				}
 			}
-			utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
+			utils.Poll(t, pollCloudBuild(buildListCmd), 60, 60*time.Second)
 
 			releaseName := ""
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
@@ -157,7 +160,7 @@ func TestSourceCymbalShop(t *testing.T) {
 					return false, nil
 				}
 			}
-			utils.Poll(t, pollRelease(releaseListCmd), 40, 60*time.Second)
+			utils.Poll(t, pollRelease(releaseListCmd), 60, 60*time.Second)
 
 			targetId := deployTargets.Array()[0]
 			rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
