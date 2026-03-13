@@ -39,7 +39,7 @@ resource "google_artifact_registry_repository_iam_member" "builder_on_attestatio
 
 module "build_binary_authz_image" {
   source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.5"
+  version = "~> 4.0"
   upgrade = false
 
   create_cmd_triggers = {
