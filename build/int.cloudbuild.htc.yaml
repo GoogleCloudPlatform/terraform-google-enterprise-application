@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,46 +32,67 @@ steps:
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage init --verbose"]
+    waitFor:
+      - prepare
 
   - id: private-workerpool-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage apply --verbose"]
+    waitFor:
+      - private-workerpool-init
 
   - id: logging-bucket-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
+    waitFor:
+      - prepare
 
   - id: logging-bucket-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage apply --verbose"]
+    waitFor:
+      - logging-bucket-init
 
   - id: gitlab-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestGitLab --stage init --verbose"]
+    waitFor:
+      - private-workerpool-apply
+      - logging-bucket-apply
 
   - id: gitlab-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestGitLab --stage apply --verbose"]
-
-  - id: harness-init
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestSingleProjectHarness --stage init --verbose"]
-
-  - id: harness-apply
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestSingleProjectHarness --stage apply --verbose"]
+    waitFor:
+      - gitlab-init
 
   - id: wait-startup-script
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestValidateStartupScript --stage verify --verbose"]
+    waitFor:
+      - private-workerpool-apply
+      - gitlab-apply
+
+  - id: harness-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestMultitenantHarness --stage init --verbose"]
+    waitFor:
+      - private-workerpool-apply
+      - gitlab-apply
+
+  - id: harness-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestMultitenantHarness --stage apply --verbose"]
+    waitFor:
+      - harness-init
 
   - id: bootstrap-gitlab-vm
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -86,6 +107,8 @@ steps:
         else
             echo ERROR: Was not able to download certificate and update system bundle. && exit 1
         fi
+    waitFor:
+      - wait-startup-script
 
   - id: vpc-sc
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -97,42 +120,218 @@ steps:
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
+    waitFor:
+      - harness-apply
+      - bootstrap-gitlab-vm
 
-  - id: single-project-htc-init
+  # Distinct init stages for tf output state passing
+  - id: bootstrap-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestBootstrap --stage init --verbose"]
+    waitFor:
+      - vpc-sc
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+
+  - id: bootstrap-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestBootstrap --stage apply --verbose"]
+    waitFor:
+      - bootstrap-init
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+
+  - id: bootstrap-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestBootstrap --stage verify --verbose"]
+    waitFor:
+      - bootstrap-apply
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+
+  - id: multitenant-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestMultitenant --stage init --verbose"]
+    waitFor:
+      - bootstrap-apply
+  - id: multitenant-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneHTCExample --stage init --verbose",
+        "cft test run TestMultitenant --stage apply --verbose",
       ]
-
-  - id: single-project-htc-apply
+    waitFor:
+      - multitenant-init
+  - id: multitenant-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneHTCExample --stage apply --verbose",
+        "cft test run TestMultitenant --stage verify --verbose",
       ]
+    waitFor:
+      - multitenant-apply
 
-  - id: single-project-htc-verify
+  - id: fleetscope-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestFleetscope --stage init --verbose"]
+    waitFor:
+      - multitenant-apply
+  - id: fleetscope-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestFleetscope --stage apply --verbose"]
+    waitFor:
+      - fleetscope-init
+  - id: fleetscope-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |-
+       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        sleep 5m
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            sleep 5m && cft test run TestFleetscope --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
+    waitFor:
+      - fleetscope-apply
+
+  - id: appfactory-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHTCAppfactory --stage init --verbose"]
+    waitFor:
+      - fleetscope-apply
+  - id: appfactory-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHTCAppfactory --stage apply --verbose"]
+    waitFor:
+      - appfactory-init
+  - id: appfactory-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneHTCExample --stage verify --verbose",
+        "cft test run TestHTCAppfactory --stage verify --verbose",
       ]
+    waitFor:
+      - appfactory-apply
 
-  - id: single-project-htc-teardown
+  - id: appinfra-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHTCAppInfra --stage init --verbose"]
+    waitFor:
+      - appfactory-apply
+  - id: appinfra-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHTCAppInfra --stage apply --verbose"]
+    waitFor:
+      - appinfra-init
+  - id: appinfra-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestHTCAppInfra --stage verify --verbose"]
+    waitFor:
+      - appinfra-apply
+
+  - id: htc-deployment
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |-
+       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSourceHTC --stage verify --verbose
+        else
+            echo ERROR: Was not able to download certificate and update system bundle.
+        fi
+    waitFor:
+      - appinfra-apply
+      - fleetscope-verify
+
+  - id: appinfra-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "cft test run TestStandaloneHTCExample --stage teardown --verbose",
+        "cft test run TestHTCAppInfra --stage teardown --verbose",
       ]
+    waitFor:
+      - htc-deployment
+      - appinfra-verify
+      - appfactory-verify
+      - fleetscope-verify
+      - multitenant-verify
+      - bootstrap-verify
+
+  - id: appfactory-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestHTCAppfactory --stage teardown --verbose",
+      ]
+    waitFor:
+      - appinfra-teardown
+
+  - id: fleetscope-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestFleetscope --stage teardown --verbose",
+      ]
+    waitFor:
+      - appfactory-teardown
+
+  - id: multitenant-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestMultitenant --stage teardown --verbose",
+      ]
+    waitFor:
+      - fleetscope-teardown
+
+  - id: bootstrap-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestBootstrap --stage teardown --verbose",
+      ]
+    waitFor:
+      - multitenant-teardown
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
 
   - id: vpcsc-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -142,30 +341,37 @@ steps:
         "-c",
         "cft test run TestVPCSC  --stage teardown --verbose",
       ]
+    waitFor:
+      - bootstrap-teardown
 
   - id: harness-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      [
-        "/bin/bash",
-        "-c",
-        "cft test run TestSingleProjectHarness  --stage teardown --verbose",
-      ]
+      ["/bin/bash", "-c", "cft test run TestMultitenantHarness --stage teardown --verbose"]
+    waitFor:
+      - vpcsc-teardown
 
   - id: gitlab-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestGitLab --stage teardown --verbose"]
+    waitFor:
+      - harness-teardown
 
   - id: private-workerpool-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage teardown --verbose"]
+    waitFor:
+      - gitlab-teardown
 
   - id: logging-bucket-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage teardown --verbose"]
+    waitFor:
+      - gitlab-teardown
+      - private-workerpool-teardown
 
 tags:
   - "ci"
@@ -181,6 +387,8 @@ options:
     - "TF_VAR_service_perimeter_mode=ENFORCE"
     - "TF_VAR_deletion_protection=false"
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
-    - "TF_VAR_single_project=true"
+    - "TF_VAR_enable_kueue=true"
+    - 'INSTALL_KUEUE=true'
+    - "TF_VAR_single_project=false"
     - "TF_VAR_hpc=false"
     - "TF_VAR_agent=false"
