@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHPCAppInfra(t *testing.T) {
+func TestHTCAppInfra(t *testing.T) {
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 
 	for _, envName := range testutils.EnvNames(t) {
