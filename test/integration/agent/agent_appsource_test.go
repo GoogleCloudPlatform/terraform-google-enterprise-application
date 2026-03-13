@@ -199,8 +199,6 @@ func TestSourceAgent(t *testing.T) {
 			}
 			utils.Poll(t, pollRelease(releaseListCmd), 60, 60*time.Second)
 
-			targetId := deployTargets.Array()[0]
-			rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
 			// Poll CD rollouts until rollout is successful
 			pollCloudDeploy := func(cmd string) func() (bool, error) {
 				return func() (bool, error) {
@@ -211,17 +209,6 @@ func TestSourceAgent(t *testing.T) {
 					latestRolloutState := rollouts[0].Get("state").String()
 					if latestRolloutState == "SUCCEEDED" {
 						t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
-						// if the application has more than one deploy target, promote it
-						if len(deployTargets.Array()) > 1 {
-							// start promoting for n+1
-							for i := 1; i < len(deployTargets.Array()); i++ {
-								nextTargetId := deployTargets.Array()[i]
-								promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s", releaseName, serviceName, region, nextTargetId)
-								t.Logf("Promoting release to next target: %s", nextTargetId)
-								// Execute the promote command
-								gcloud.Runf(t, promoteCmd)
-							}
-						}
 						return false, nil
 					} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
 						t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
@@ -234,7 +221,16 @@ func TestSourceAgent(t *testing.T) {
 					}
 				}
 			}
-			utils.Poll(t, pollCloudDeploy(rolloutListCmd), 60, 60*time.Second)
+			for i, targetId := range deployTargets.Array() {
+				if i > 0 {
+					promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", releaseName, serviceName, region, targetId)
+					t.Logf("Promoting release to next target: %s", targetId)
+					// Execute the promote command
+					gcloud.Runf(t, promoteCmd)
+				}
+				rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
+				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 60*time.Second)
+			}
 		})
 		appsource.Test()
 	})

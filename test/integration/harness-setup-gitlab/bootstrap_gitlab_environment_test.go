@@ -108,6 +108,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"hpc-team-a-i-r",
 		"hpc-team-b-i-r",
 		"capital-agent-i-r",
+		"llamma-model-i-r",
 		// 5-appinfra repositories
 		"eab-cymbal-bank-frontend",
 		"eab-cymbal-bank-accounts-contacts",
@@ -118,6 +119,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"eab-cymbal-shop-cymbalshop",
 		"eab-default-example-hello-world",
 		"eab-agent-capital-agent",
+		"eab-llm-model-llamma-model",
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
@@ -200,6 +202,8 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"../../../examples/multitenant-applications/4-appfactory/terraform.tfvars",
 		"../../../examples/agent/4-appfactory/terraform.tfvars",
 		"../../../examples/agent/5-appinfra/agent/capital-agent/envs/shared/terraform.tfvars",
+		"../../../examples/llm-model/4-appfactory/terraform.tfvars",
+		"../../../examples/llm-model/5-appinfra/llm-model/llamma-model/envs/shared/terraform.tfvars",
 		"../../../examples/multitenant-applications/5-appinfra/cymbal-bank/accounts-contacts/envs/shared/terraform.tfvars",
 		"../../../examples/multitenant-applications/5-appinfra/cymbal-shop/cymbalshop/envs/shared/terraform.tfvars",
 	}
