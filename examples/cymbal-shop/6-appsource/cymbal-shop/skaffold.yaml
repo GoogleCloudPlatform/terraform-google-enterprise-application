@@ -18,6 +18,7 @@ kind: Config
 metadata:
   name: app
 build:
+  platforms: ["linux/amd64"]
   artifacts:
   # image tags are relative; to specify an image repo (e.g. GCR), you
   # must provide a "default repo" using one of the methods described
@@ -50,7 +51,8 @@ build:
   tagPolicy:
     gitCommit: {}
   local:
-    useBuildkit: false
+    useDockerCLI: true
+    useBuildkit: true
 manifests:
   kustomize:
     paths:
@@ -103,9 +105,13 @@ requires:
 - configs:
   - app
 build:
+  platforms: ["linux/amd64"]
   artifacts:
   - image: loadgenerator
     context: src/loadgenerator
+  local:
+    useDockerCLI: true
+    useBuildkit: true
 manifests:
   rawYaml:
   - ./kubernetes-manifests/loadgenerator.yaml
