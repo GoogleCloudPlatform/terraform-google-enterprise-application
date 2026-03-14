@@ -53,35 +53,29 @@ func TestHTCAppInfra(t *testing.T) {
 
 	servicesInfoMap := make(map[string]ServiceInfos)
 
-	for appName, serviceNames := range map[string][]string{
-		"htc": {
-			"htc-team-a",
-			"htc-team-b",
-		}} {
-		appName := appName
-		serviceNames := serviceNames
-		appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
-		appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
-		for _, fullServiceName := range serviceNames {
+	appName := "htc"
 
-			projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, fullServiceName)).String()
-			servicesInfoMap[fullServiceName] = ServiceInfos{
-				ApplicationName: appName,
-				ProjectID:       projectID,
-				ServiceName:     fullServiceName,
-				TeamName:        "htc",
-			}
+	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
+	appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
 
-			remoteState := bootstrap.GetStringOutput("state_bucket")
-			infraPath := fmt.Sprintf("%s/%s/envs/development", appSourcePath, fullServiceName)
-			serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, fullServiceName)).String(), "/")
-			t.Logf("Setting Service Account %s to be impersonated.", serviceAccount[len(serviceAccount)-1])
-			f, err := os.Create(fmt.Sprintf("%s/providers.tf", infraPath))
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			provider := `
+	projectID := appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_admin_project_id", appName, appName)).String()
+	servicesInfoMap[appName] = ServiceInfos{
+		ApplicationName: appName,
+		ProjectID:       projectID,
+		ServiceName:     appName,
+		TeamName:        "htc",
+	}
+
+	remoteState := bootstrap.GetStringOutput("state_bucket")
+	infraPath := fmt.Sprintf("%s/envs/production", appSourcePath)
+	serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, appName)).String(), "/")
+	t.Logf("Setting Service Account %s to be impersonated.", serviceAccount[len(serviceAccount)-1])
+	f, err := os.Create(fmt.Sprintf("%s/providers.tf", infraPath))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	provider := `
 provider "google" {
 	impersonate_service_account = "%s"
 }
@@ -90,46 +84,44 @@ provider "google-beta" {
 	impersonate_service_account = "%s"
 }
 			`
-			l, err := fmt.Fprintf(f, provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1])
-			fmt.Println(l, "bytes written successfully")
-			if err != nil {
-				fmt.Println(err)
-				err = f.Close()
-				if err != nil {
-					t.Fatalf("failed to close file: %v", err)
-				}
-				return
-			}
-
-			backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, fullServiceName)).String(), "/")
-			backendConfig := map[string]interface{}{
-				"bucket": backend_bucket[len(backend_bucket)-1],
-			}
-
-			t.Run(infraPath, func(t *testing.T) {
-				t.Parallel()
-
-				vars := map[string]interface{}{
-					"remote_state_bucket":  remoteState,
-					"bucket_force_destroy": true,
-					"logging_bucket":       loggingHarness.GetStringOutput("logging_bucket"),
-					"bucket_kms_key":       loggingHarness.GetStringOutput("bucket_kms_key"),
-					"bucket_prefix":        "bkt",
-				}
-
-				appService := tft.NewTFBlueprintTest(t,
-					tft.WithTFDir(infraPath),
-					tft.WithVars(vars),
-					tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-					tft.WithBackendConfig(backendConfig),
-					tft.WithParallelism(100),
-				)
-
-				appService.DefineVerify(func(assert *assert.Assertions) {
-					appService.DefaultVerify(assert)
-				})
-				appService.Test()
-			})
+	l, err := fmt.Fprintf(f, provider, serviceAccount[len(serviceAccount)-1], serviceAccount[len(serviceAccount)-1])
+	fmt.Println(l, "bytes written successfully")
+	if err != nil {
+		fmt.Println(err)
+		err = f.Close()
+		if err != nil {
+			t.Fatalf("failed to close file: %v", err)
 		}
+		return
 	}
+
+	backend_bucket := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_state_bucket_name", appName, appName)).String(), "/")
+	backendConfig := map[string]interface{}{
+		"bucket": backend_bucket[len(backend_bucket)-1],
+	}
+
+	t.Run(infraPath, func(t *testing.T) {
+		t.Parallel()
+
+		vars := map[string]interface{}{
+			"remote_state_bucket":  remoteState,
+			"bucket_force_destroy": true,
+			"logging_bucket":       loggingHarness.GetStringOutput("logging_bucket"),
+			"bucket_kms_key":       loggingHarness.GetStringOutput("bucket_kms_key"),
+			"bucket_prefix":        "bkt",
+		}
+
+		appService := tft.NewTFBlueprintTest(t,
+			tft.WithTFDir(infraPath),
+			tft.WithVars(vars),
+			tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+			tft.WithBackendConfig(backendConfig),
+			tft.WithParallelism(100),
+		)
+
+		appService.DefineVerify(func(assert *assert.Assertions) {
+			appService.DefaultVerify(assert)
+		})
+		appService.Test()
+	})
 }
