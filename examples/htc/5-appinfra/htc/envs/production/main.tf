@@ -15,9 +15,8 @@
 locals {
   env              = "production"
   application_name = "htc"
-  service_name     = "htc"
   team_name        = "default"
-  repo_name        = "eab-${local.application_name}-${local.service_name}"
+  repo_name        = "eab-${local.application_name}"
   repo_branch      = "main"
 }
 
@@ -29,7 +28,7 @@ module "app" {
   env_cluster_membership_ids = local.cluster_membership_ids
   cluster_service_accounts   = { for i, sa in local.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
 
-  service_name           = local.service_name
+  service_name           = local.application_name
   team_name              = local.team_name
   repo_name              = local.repo_name
   repo_branch            = local.repo_branch
@@ -52,7 +51,7 @@ module "app" {
 module "htc-infra" {
   source = "../../modules/htc-infra"
 
-  service_name           = local.service_name
+  service_name           = local.application_name
   gke_cluster_names      = local.gke_cluster_names
   infra_project          = local.app_infra_project
   region                 = var.region
