@@ -32,7 +32,7 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-func TestSourceHTC(t *testing.T) {
+func TestHTCSource(t *testing.T) {
 	gitLabPath := "../../setup/harness/gitlab"
 	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
 	gitUrl := gitLab.GetStringOutput("gitlab_url")
@@ -61,7 +61,7 @@ func TestSourceHTC(t *testing.T) {
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
 	projectID := appFactory.GetJsonOutput("app-group").Get("htc\\.htc.app_admin_project_id").String()
-	appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/5-appinfra/%s/%s/envs/shared", appName, appName, appName)))
+	appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/5-appinfra/%s/envs/production", appName, appName)))
 	deployTargets := appInfra.GetJsonOutput("clouddeploy_targets_names")
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
