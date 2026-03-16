@@ -16,7 +16,7 @@ google-auth==2.36.0
 google-cloud-bigquery==3.27.0
 google-cloud-bigquery-storage==2.27.0
 google-cloud-core==2.4.1
-google-crc32c==1.6.0
+google-crc32c==1.8.0
 google-resumable-media==2.7.2
 googleapis-common-protos==1.66.0
 gradio==5.11.0
