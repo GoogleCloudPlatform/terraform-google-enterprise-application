@@ -62,7 +62,7 @@ starlette==0.41.2
 tomlkit==0.12.0
 tqdm==4.67.0
 typer==0.13.0
-typing-extensions==4.12.2
+typing-extensions==4.15.0
 tzdata==2024.2
 urllib3==2.5.0
 uvicorn==0.32.0
