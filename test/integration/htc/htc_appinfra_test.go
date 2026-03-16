@@ -39,6 +39,11 @@ func TestHTCAppInfra(t *testing.T) {
 		tft.WithTFDir("../../../1-bootstrap"),
 	)
 
+	multitenantHarnessPath := "../../setup/harness/multitenant"
+	multitenantHarness := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(multitenantHarnessPath),
+	)
+
 	loggingHarnessPath := "../../setup/harness/logging_bucket"
 	loggingHarness := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(loggingHarnessPath),
@@ -54,6 +59,9 @@ func TestHTCAppInfra(t *testing.T) {
 	servicesInfoMap := make(map[string]ServiceInfos)
 
 	appName := "htc"
+	vpcsc := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../setup/vpcsc"),
+	)
 
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 	appSourcePath := fmt.Sprintf("../../../examples/%s/5-appinfra/%s", appName, appName)
@@ -104,11 +112,15 @@ provider "google-beta" {
 		t.Parallel()
 
 		vars := map[string]interface{}{
-			"remote_state_bucket":  remoteState,
-			"bucket_force_destroy": true,
-			"logging_bucket":       loggingHarness.GetStringOutput("logging_bucket"),
-			"bucket_kms_key":       loggingHarness.GetStringOutput("bucket_kms_key"),
-			"bucket_prefix":        "bkt",
+			"remote_state_bucket":   remoteState,
+			"logging_bucket":        loggingHarness.GetStringOutput("logging_bucket"),
+			"bucket_kms_key":        loggingHarness.GetStringOutput("bucket_kms_key"),
+			"access_level_name":     vpcsc.GetStringOutput("access_level_name"),
+			"attestation_kms_key":   loggingHarness.GetStringOutput("attestation_kms_key"),
+			"buckets_force_destroy": "true",
+			"environment_names":     testutils.EnvNames(t),
+			"team":                  "htc",
+			"envs":                  multitenantHarness.GetJsonOutput("envs").Map(),
 		}
 
 		appService := tft.NewTFBlueprintTest(t,
