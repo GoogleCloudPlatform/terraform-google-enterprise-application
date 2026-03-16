@@ -24,7 +24,7 @@ gradio==5.11.0
 grpcio==1.68.0
 grpcio-status==1.68.0
 # h11==0.16.0
-httpcore==1.0.7
+httpcore==1.0.9
 httpx==0.27.2
 huggingface-hub==0.26.2
 idna==3.10
