@@ -31,4 +31,5 @@ module "htc-infra" {
   cluster_project_id     = local.cluster_project_id
   cluster_project_number = local.cluster_project_number
   env                    = local.env
+  regions                = local.regions
 }

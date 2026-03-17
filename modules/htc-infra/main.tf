@@ -92,7 +92,7 @@ module "gke" {
   gke_cluster_names  = var.gke_cluster_names
   project_id         = var.infra_project
   cluster_project_id = var.cluster_project_id
-  regions            = ["us-central1"]
+  regions            = var.regions
   agent_image        = module.agent.status["agent"].image_url
   namespace          = local.namespace
   env                = var.env
