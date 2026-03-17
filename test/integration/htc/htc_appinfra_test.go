@@ -81,10 +81,6 @@ func TestHTCAppInfra(t *testing.T) {
 	envs = append(envs, testutils.EnvNames(t)...)
 	for _, envName := range envs {
 		envName := envName
-
-		env_cluster_membership_ids[envName] = make(map[string][]string, 0)
-		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
-		env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 		infraPath := fmt.Sprintf("%s/envs/%s", appSourcePath, envName)
 		serviceAccount := strings.Split(appFactory.GetJsonOutput("app-group").Get(fmt.Sprintf("%s\\.%s.app_cloudbuild_workspace_cloudbuild_sa_email", appName, appName)).String(), "/")
 		t.Logf("Setting Service Account %s to be impersonated.", serviceAccount[len(serviceAccount)-1])
@@ -131,6 +127,9 @@ provider "google-beta" {
 					"team":                "htc",
 					"envs":                multitenantHarness.GetJsonOutput("envs").Map(),
 				}
+				env_cluster_membership_ids[envName] = make(map[string][]string, 0)
+				multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
+				env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
 			}
 
 			appService := tft.NewTFBlueprintTest(t,
