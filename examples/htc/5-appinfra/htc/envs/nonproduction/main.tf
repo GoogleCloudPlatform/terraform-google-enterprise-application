@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  env              = "production"
+  env              = "nonproduction"
   application_name = "htc"
 }
 
