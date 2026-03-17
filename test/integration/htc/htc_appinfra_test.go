@@ -75,10 +75,14 @@ func TestHTCAppInfra(t *testing.T) {
 		"bucket": backend_bucket[len(backend_bucket)-1],
 	}
 
-	envs := []string{
-		"shared",
+	i := 0
+	envs := map[int]string{
+		i: "shared",
 	}
-	envs = append(envs, testutils.EnvNames(t)...)
+	for _, envName := range testutils.EnvNames(t) {
+		i = i + 1
+		envs[i] = envName
+	}
 	for _, envName := range envs {
 		envName := envName
 		infraPath := fmt.Sprintf("%s/envs/%s", appSourcePath, envName)
