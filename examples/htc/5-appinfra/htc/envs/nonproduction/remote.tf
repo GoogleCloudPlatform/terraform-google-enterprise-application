@@ -15,11 +15,13 @@
  */
 
 locals {
+  regions_re        = "regions/([^/]+)"
   app_admin_project = data.terraform_remote_state.appfactory.outputs.app-group["htc.htc"].app_admin_project_id
   app_infra_project = data.terraform_remote_state.appfactory.outputs.app-group["htc.htc"].app_infra_project_ids[local.env]
 
   gke_cluster_names      = data.terraform_remote_state.multitenant.outputs.cluster_names
   network_name           = data.terraform_remote_state.multitenant.outputs.network_names
+  regions                = [for k, v in local.network_name : regex(local.regions_re, v)[0]]
   cluster_project_id     = data.terraform_remote_state.multitenant.outputs.cluster_project_id
   cluster_project_number = data.terraform_remote_state.multitenant.outputs.cluster_project_number
 }
