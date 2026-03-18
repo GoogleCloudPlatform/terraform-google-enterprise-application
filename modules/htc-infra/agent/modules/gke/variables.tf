@@ -164,6 +164,12 @@ variable "parallelstore_instances" {
   }
 }
 
+variable "compute_class" {
+  type        = string
+  default     = "spot-capacity"
+  description = "The compute class annotation value. Default is 'spot-capacity'."
+}
+
 variable "vpc_name" {
   type        = string
   description = "Name of the VPC used by Parallelstore"

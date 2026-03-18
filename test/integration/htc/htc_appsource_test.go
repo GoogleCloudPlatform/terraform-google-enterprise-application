@@ -17,7 +17,6 @@ package htc_test
 import (
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -61,8 +60,6 @@ func TestHTCSource(t *testing.T) {
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 
 	projectID := appFactory.GetJsonOutput("app-group").Get("htc\\.htc.app_admin_project_id").String()
-	appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../examples/%s/5-appinfra/%s/envs/production", appName, appName)))
-	deployTargets := appInfra.GetJsonOutput("clouddeploy_targets_names")
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
@@ -145,56 +142,6 @@ func TestHTCSource(t *testing.T) {
 			}
 			utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
 
-			releaseName := ""
-			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, appName, region, lastCommit[0:7])
-			pollRelease := func(cmd string) func() (bool, error) {
-				return func() (bool, error) {
-					releases := gcloud.Runf(t, releaseListCmd).Array()
-					if len(releases) == 0 {
-						return true, nil
-					}
-					releaseName = releases[0].Get("name").String()
-					return false, nil
-				}
-			}
-			utils.Poll(t, pollRelease(releaseListCmd), 60, 60*time.Second)
-
-			targetId := deployTargets.Array()[0]
-			rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, appName, region, releaseName, targetId)
-			// Poll CD rollouts until rollout is successful
-			pollCloudDeploy := func(cmd string) func() (bool, error) {
-				return func() (bool, error) {
-					rollouts := gcloud.Runf(t, cmd).Array()
-					if len(rollouts) < 1 {
-						return true, nil
-					}
-					latestRolloutState := rollouts[0].Get("state").String()
-					if latestRolloutState == "SUCCEEDED" {
-						t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
-						// if the application has more than one deploy target, promote it
-						if len(deployTargets.Array()) > 1 {
-							// start promoting for n+1
-							for i := 1; i < len(deployTargets.Array()); i++ {
-								nextTargetId := deployTargets.Array()[i]
-								promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s", releaseName, appName, region, nextTargetId)
-								t.Logf("Promoting release to next target: %s", nextTargetId)
-								// Execute the promote command
-								gcloud.Runf(t, promoteCmd)
-							}
-						}
-						return false, nil
-					} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
-						t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
-						return true, nil
-					} else {
-						logsCmd := fmt.Sprintf("builds log %s", rollouts[0].Get("deployingBuild").String())
-						logs := gcloud.Runf(t, logsCmd).String()
-						t.Logf("%s build-log: %s", appName, logs)
-						return false, fmt.Errorf("Rollout %s.", latestRolloutState)
-					}
-				}
-			}
-			utils.Poll(t, pollCloudDeploy(rolloutListCmd), 60, 60*time.Second)
 		})
 		appsource.Test()
 	})

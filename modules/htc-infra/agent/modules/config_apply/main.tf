@@ -48,6 +48,7 @@ locals {
         pubsub_project_id = var.infra_project_id,
         agent_image       = var.agent_image,
         workload_endpoint = var.workload_grpc_endpoint,
+        compute_class     = var.compute_class
         workload_request_sub = (cfg.parallel > 0 ?
           var.pubsub_job_request :
         var.pubsub_hpa_request)
@@ -115,6 +116,7 @@ locals {
           agent_image         = var.agent_image
           gke_hpa_request_sub = var.pubsub_hpa_request
           gke_hpa_response    = var.gke_hpa_response
+          compute_class       = var.compute_class
       }),
       "volume_claim_yaml" = templatefile(
         "${path.module}/k8s/volume_claim.yaml.templ", {

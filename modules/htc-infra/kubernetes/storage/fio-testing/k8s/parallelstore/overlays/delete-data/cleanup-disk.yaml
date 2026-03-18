@@ -22,7 +22,7 @@ spec:
   template:
     spec:
       nodeSelector:
-        cloud.google.com/compute-class: spot-capacity
+        cloud.google.com/compute-class: : ${compute_class}
       priorityClassName: higher-priority
       containers:
       - name: cleanup
