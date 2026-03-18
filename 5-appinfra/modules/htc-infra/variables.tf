@@ -159,6 +159,12 @@ variable "parallelstore_deployment_type" {
   }
 }
 
+variable "compute_class" {
+  type        = string
+  default     = "spot-capacity"
+  description = "The compute class annotation value. Default is 'spot-capacity'."
+}
+
 variable "cluster_project_id" {
   type        = string
   description = "The GCP project ID where the cluster is created."

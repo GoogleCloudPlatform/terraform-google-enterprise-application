@@ -32,4 +32,5 @@ module "htc-infra" {
   cluster_project_number = local.cluster_project_number
   env                    = local.env
   regions                = local.regions
+  compute_class          = "autopilot-spot"
 }
