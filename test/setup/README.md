@@ -12,12 +12,13 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| agent | Agent Example being deployed. | `bool` | n/a | yes |
+| agent | Agent Example being deployed. | `bool` | `false` | no |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cloud\_build\_sa | Cloud Build Service Account email to be granted Encrypt/Decrypt role. | `string` | n/a | yes |
 | examples\_tested | List of examples to create projects. | `list(string)` | `[]` | no |
 | folder\_id | The folder to deploy in | `string` | n/a | yes |
-| hpc | HPC Example being deployed. | `bool` | n/a | yes |
+| hpc | HPC Example being deployed. | `bool` | `false` | no |
+| htc | HTC Example being deployed. | `bool` | `false` | no |
 | org\_id | The numeric organization id | `string` | n/a | yes |
 | region | Region for hub network. | `string` | `"us-central1"` | no |
 | single\_project | Single Project example being deployed. | `bool` | n/a | yes |
