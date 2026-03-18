@@ -58,7 +58,7 @@ spec:
         gke-gcsfuse/ephemeral-storage-request: "1Gi"
     spec:
       nodeSelector:
-        cloud.google.com/compute-class: spot-capacity
+        cloud.google.com/compute-class: ${compute_class}
       containers:
       - name: workload
         image: ${workload_image}

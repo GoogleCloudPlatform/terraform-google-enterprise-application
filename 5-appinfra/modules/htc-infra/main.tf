@@ -113,6 +113,7 @@ module "gke" {
   parallelstore_enabled   = var.storage_type == "PARALLELSTORE"
   parallelstore_instances = local.parallelstore_instances
   vpc_name                = var.network_name
+  compute_class           = var.compute_class
 
   keda_image           = module.keda.keda_images.keda
   keda_apiserver_image = module.keda.keda_images.keda-metrics-apiserver
