@@ -9,7 +9,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	google.golang.org/api v0.215.0
 	google.golang.org/grpc v1.68.1
-	google.golang.org/protobuf v1.36.4
+	google.golang.org/protobuf v1.36.11
 )
 
 require (

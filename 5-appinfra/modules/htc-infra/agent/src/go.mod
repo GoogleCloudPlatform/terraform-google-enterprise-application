@@ -1,6 +1,7 @@
 module github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent
 
 go 1.24
+
 toolchain go1.24.1
 
 require (
@@ -20,7 +21,7 @@ require (
 	golang.org/x/oauth2 v0.23.0
 	google.golang.org/api v0.203.0
 	google.golang.org/grpc v1.67.1
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
