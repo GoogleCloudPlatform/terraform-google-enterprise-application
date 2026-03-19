@@ -1,7 +1,8 @@
 module github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk/agent
 
-go 1.24
-toolchain go1.24.1
+go 1.24.0
+
+toolchain go1.24.13
 
 require (
 	cloud.google.com/go/compute/metadata v0.5.2
@@ -9,7 +10,7 @@ require (
 	cloud.google.com/go/storage v1.44.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.2
 	github.com/bufbuild/protocompile v0.14.1
-	github.com/jhump/protoreflect v1.17.0
+	github.com/jhump/protoreflect v1.18.0
 	github.com/spf13/cobra v1.8.1
 	go.opencensus.io v0.24.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.30.0
@@ -20,7 +21,7 @@ require (
 	golang.org/x/oauth2 v0.23.0
 	google.golang.org/api v0.203.0
 	google.golang.org/grpc v1.67.1
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
@@ -48,6 +49,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jhump/protoreflect/v2 v2.0.0-beta.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.55.0 // indirect
