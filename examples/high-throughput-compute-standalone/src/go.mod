@@ -8,7 +8,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.16.1
 	github.com/spf13/cobra v1.8.1
 	google.golang.org/api v0.215.0
-	google.golang.org/grpc v1.68.1
+	google.golang.org/grpc v1.79.2
 	google.golang.org/protobuf v1.36.4
 )
 
