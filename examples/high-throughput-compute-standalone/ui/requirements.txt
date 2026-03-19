@@ -37,7 +37,7 @@ orjson==3.10.11
 packaging==24.2
 pandas==2.2.3
 pillow==10.4.0
-proto-plus==1.25.0
+proto-plus==1.27.1
 protobuf==5.28.3
 pyarrow==18.0.0
 pyasn1==0.6.1

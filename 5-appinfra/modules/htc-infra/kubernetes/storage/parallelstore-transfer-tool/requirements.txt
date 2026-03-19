@@ -26,7 +26,7 @@ grpcio-status==1.70.0
     # via google-api-core
 idna==3.10
     # via requests
-proto-plus==1.26.0
+proto-plus==1.27.1
     # via
     #   google-api-core
     #   google-cloud-parallelstore
