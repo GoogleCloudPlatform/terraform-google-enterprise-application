@@ -1,4 +1,4 @@
-aiofiles==23.2.1
+aiofiles==25.1.0
 annotated-types==0.7.0
 anyio==4.6.2.post1
 cachetools==5.5.0
