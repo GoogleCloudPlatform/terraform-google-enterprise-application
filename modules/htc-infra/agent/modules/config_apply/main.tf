@@ -49,6 +49,7 @@ locals {
         agent_image       = var.agent_image,
         workload_endpoint = var.workload_grpc_endpoint,
         compute_class     = var.compute_class
+        region            = var.region
         workload_request_sub = (cfg.parallel > 0 ?
           var.pubsub_job_request :
         var.pubsub_hpa_request)
@@ -67,6 +68,7 @@ locals {
         namespace         = var.namespace,
         image             = var.agent_image,
         pubsub_project_id = var.infra_project_id,
+        region            = var.region
         args = [
           "test", "pubsub",
           "--logJSON",
@@ -103,6 +105,7 @@ locals {
     { "volume_yaml" = templatefile(
       "${path.module}/k8s/volume.yaml.templ", {
         gcs_storage_data = var.gcs_bucket
+        region           = var.region
         namespace        = var.namespace
       }),
       "hpa_yaml" = templatefile(
@@ -117,10 +120,12 @@ locals {
           gke_hpa_request_sub = var.pubsub_hpa_request
           gke_hpa_response    = var.gke_hpa_response
           compute_class       = var.compute_class
+          region              = var.region
       }),
       "volume_claim_yaml" = templatefile(
         "${path.module}/k8s/volume_claim.yaml.templ", {
           namespace = var.namespace
+          region    = var.region
       })
     }
   )
@@ -131,6 +136,8 @@ resource "local_file" "keda_rendered_manifest" {
     namespace            = var.namespace
     keda_image           = var.keda_image
     keda_apiserver_image = var.keda_apiserver_image
+    region               = var.region
+
   })
   filename = "${path.module}/k8s/keda/keda-rendered.yaml"
 }
@@ -244,6 +251,7 @@ resource "null_resource" "job_init" {
       args              = cfg.args,
       namespace         = var.namespace,
       pubsub_project_id = var.infra_project_id
+      region            = var.region
     })
   }
 
