@@ -39,6 +39,9 @@ apps = {
   "hpc" : {
     "acronym" = "hpc",
   }
+  "htc" : {
+    "acronym" = "htc",
+  }
   "agent" : {
     "acronym" = "agt",
   }

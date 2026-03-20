@@ -114,6 +114,12 @@ variable "gke_job_response" {
   description = "The identifier for the GKE job response. Default is 'gke_job_response'."
 }
 
+variable "compute_class" {
+  type        = string
+  default     = "spot-capacity"
+  description = "The compute class annotation value. Default is 'spot-capacity'."
+}
+
 variable "gke_hpa_request" {
   type        = string
   default     = "gke_hpa_request"
@@ -167,4 +173,9 @@ variable "parallelstore_capacity_gib" {
 variable "namespace" {
   type        = string
   description = "The environment's fleet namespace'"
+}
+
+variable "app_cloud_deploy_sa_email" {
+  description = "Service Account to apply changes on fleetscope."
+  type        = string
 }

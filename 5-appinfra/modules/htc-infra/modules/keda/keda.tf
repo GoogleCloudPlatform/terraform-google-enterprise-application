@@ -60,6 +60,8 @@ resource "null_resource" "mirror_keda_images" {
         --gcs-log-dir gs://${google_storage_bucket.cloudbuild_keda.id}/logs/keda-operator \
         --tag "${local.keda_target_operator}:${local.keda_version}" \
         --tag "${local.keda_target_operator}:latest" \
+        --service-account "${var.app_cloudbuild_workspace_cloudbuild_sa_email}" \
+        --worker-pool=${var.workerpool_id} \
         keda_mirror_build
 
       # --- BUILD KEDA ADAPTER ---
@@ -74,6 +76,8 @@ resource "null_resource" "mirror_keda_images" {
         --gcs-log-dir gs://${google_storage_bucket.cloudbuild_keda.id}/logs/keda-adapter \
         --tag "${local.keda_target_adapter}:${local.keda_version}" \
         --tag "${local.keda_target_adapter}:latest" \
+        --service-account "${var.app_cloudbuild_workspace_cloudbuild_sa_email}" \
+        --worker-pool=${var.workerpool_id} \
         keda_mirror_build_apiserver
 
       # Cleanup local temp directory
