@@ -20,16 +20,19 @@ locals {
 module "htc-infra" {
   source = "../../modules/htc-infra"
 
-  service_name           = local.application_name
-  gke_cluster_names      = local.gke_cluster_names
-  infra_project          = local.app_infra_project
-  region                 = var.region
-  network_self_link      = var.envs[local.env].network_self_link
-  network_name           = local.network_name
-  team                   = var.team
-  admin_project          = local.app_admin_project
-  cluster_project_id     = local.cluster_project_id
-  cluster_project_number = local.cluster_project_number
-  env                    = local.env
-  regions                = local.regions
+  service_name                                 = local.application_name
+  gke_cluster_names                            = local.gke_cluster_names
+  infra_project                                = local.app_infra_project
+  region                                       = var.region
+  network_self_link                            = var.envs[local.env].network_self_link
+  network_name                                 = local.network_name
+  team                                         = var.team
+  admin_project                                = local.app_admin_project
+  cluster_project_id                           = local.cluster_project_id
+  cluster_project_number                       = local.cluster_project_number
+  env                                          = local.env
+  regions                                      = local.regions
+  app_cloudbuild_workspace_cloudbuild_sa_email = data.terraform_remote_state.appinfra.outputs.cloudbuild_service_account
+  workerpool_id                                = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
+  app_cloud_deploy_sa_email                    = data.terraform_remote_state.appinfra.outputs.clouddeploy_service_account
 }

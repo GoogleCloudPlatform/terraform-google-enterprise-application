@@ -46,6 +46,7 @@ This module creates the following resources:
 | Name | Description |
 |------|-------------|
 | cloudbuild\_service\_account | Service Account created to run Cloud Build. |
+| clouddeploy\_service\_account | Service Account created to run Cloud Deploy. |
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | service\_repository\_name | The Source Repository name. |
 | service\_repository\_project\_id | The Source Repository project id. |

@@ -19,7 +19,7 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  get_credentials_cmd = "gcloud container fleet memberships get-credentials ${var.cluster_name} --project ${var.cluster_project_id} --location ${var.region}"
+  get_credentials_cmd = "gcloud container fleet memberships get-credentials ${var.cluster_name} --project ${var.cluster_project_id} --location ${var.region} --impersonate-service-account ${var.app_cloud_deploy_sa_email}"
 
   workload_init_args = {
     for idx, args in var.workload_init_args :

@@ -184,3 +184,8 @@ variable "namespace" {
   type        = string
   description = "The environment's fleet namespace'"
 }
+
+variable "app_cloud_deploy_sa_email" {
+  description = "Service Account to apply changes on fleetscope."
+  type        = string
+}

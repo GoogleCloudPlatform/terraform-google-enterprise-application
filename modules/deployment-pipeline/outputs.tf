@@ -31,3 +31,8 @@ output "cloudbuild_service_account" {
   description = "Service Account created to run Cloud Build."
   value       = google_service_account.cloud_build.email
 }
+
+output "clouddeploy_service_account" {
+  description = "Service Account created to run Cloud Deploy."
+  value       = google_service_account.cloud_deploy.email
+}

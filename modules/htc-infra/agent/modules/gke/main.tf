@@ -103,6 +103,7 @@ module "config_apply" {
   parallelstore_capacity_gib  = var.parallelstore_enabled ? var.parallelstore_instances[each.value.location].capacity_gib : null
   compute_class               = var.compute_class
 
-  keda_image           = var.keda_image
-  keda_apiserver_image = var.keda_apiserver_image
+  keda_image                = var.keda_image
+  keda_apiserver_image      = var.keda_apiserver_image
+  app_cloud_deploy_sa_email = var.app_cloud_deploy_sa_email
 }

@@ -61,6 +61,9 @@ module "agent" {
   repository_region = var.region
   repository_id     = var.service_name
 
+  app_cloudbuild_workspace_cloudbuild_sa_email = var.app_cloudbuild_workspace_cloudbuild_sa_email
+  workerpool_id                                = var.workerpool_id
+
   containers = {
     agent = {
       source = "${path.module}/agent/src"
@@ -77,10 +80,12 @@ module "agent" {
 module "keda" {
   source = "./modules/keda"
 
-  project_id        = var.admin_project
-  region            = var.region
-  repository_region = var.region
-  repository_id     = var.service_name
+  project_id                                   = var.admin_project
+  region                                       = var.region
+  repository_region                            = var.region
+  repository_id                                = var.service_name
+  app_cloudbuild_workspace_cloudbuild_sa_email = var.app_cloudbuild_workspace_cloudbuild_sa_email
+  workerpool_id                                = var.workerpool_id
 }
 
 #-----------------------------------------------------
@@ -117,6 +122,8 @@ module "gke" {
 
   keda_image           = module.keda.keda_images.keda
   keda_apiserver_image = module.keda.keda_images.keda-metrics-apiserver
+
+  app_cloud_deploy_sa_email = var.app_cloud_deploy_sa_email
 
   depends_on = [
     module.agent
