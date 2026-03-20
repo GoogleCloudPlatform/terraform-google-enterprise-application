@@ -26,3 +26,13 @@ output "service_repository_project_id" {
   description = "The Source Repository project id."
   value       = module.app.service_repository_project_id
 }
+
+output "cloudbuild_service_account" {
+  description = "Service Account created to run Cloud Build."
+  value       = module.app.cloudbuild_service_account
+}
+
+output "clouddeploy_service_account" {
+  description = "Service Account created to run Cloud Deploy."
+  value       = module.app.clouddeploy_service_account
+}
