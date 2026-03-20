@@ -413,10 +413,10 @@ This error occurs during the destroy process (either via `$HOME/go/bin/eab-deplo
 
 To resolve this, you need to manually remove the problematic Shared VPC attachment resource from the Terraform state. This will allow the destroy process to proceed without being blocked by the linked NEG.
 
-1.  **Navigate to the deployment path where the resource is located:**
+1.  **Navigate to the deployment path for the failing environment.** The environment name (e.g., `development`) can be identified from the resource names in the error message. Replace `<ENVIRONMENT>` with your environment name in the command below.
 
     ```bash
-    cd eab-multitenant/envs/development
+    cd eab-multitenant/envs/<ENVIRONMENT>
     ```
 
 2.  **Remove the Shared VPC attachment resource from the Terraform state:**
