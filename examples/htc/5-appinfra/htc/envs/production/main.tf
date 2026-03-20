@@ -32,7 +32,7 @@ module "htc-infra" {
   cluster_project_number                       = local.cluster_project_number
   env                                          = local.env
   regions                                      = local.regions
-  app_cloudbuild_workspace_cloudbuild_sa_email = data.terraform_remote_state.appinfra.outputs.cloudbuild_service_account
+  app_cloudbuild_workspace_cloudbuild_sa_email = data.terraform_remote_state.appinfra.outputs.cloudbuild_service_account.id
   workerpool_id                                = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
-  app_cloud_deploy_sa_email                    = data.terraform_remote_state.appinfra.outputs.clouddeploy_service_account
+  app_cloud_deploy_sa_email                    = data.terraform_remote_state.appinfra.outputs.clouddeploy_service_account.email
 }

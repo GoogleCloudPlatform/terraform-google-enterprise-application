@@ -33,7 +33,7 @@ module "htc-infra" {
   env                                          = local.env
   regions                                      = local.regions
   compute_class                                = "autopilot-spot"
-  app_cloudbuild_workspace_cloudbuild_sa_email = data.terraform_remote_state.appinfra.outputs.cloudbuild_service_account
+  app_cloudbuild_workspace_cloudbuild_sa_email = data.terraform_remote_state.appinfra.outputs.cloudbuild_service_account.id
   workerpool_id                                = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
-  app_cloud_deploy_sa_email                    = data.terraform_remote_state.appinfra.outputs.clouddeploy_service_account
+  app_cloud_deploy_sa_email                    = data.terraform_remote_state.appinfra.outputs.clouddeploy_service_account.email
 }
