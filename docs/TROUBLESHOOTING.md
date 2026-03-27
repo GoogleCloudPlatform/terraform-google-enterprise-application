@@ -411,7 +411,7 @@ This error occurs during the destroy process (either via `$HOME/go/bin/eab-deplo
 
 **Solution:**
 
-To resolve this, you need to manually remove the problematic Shared VPC attachment resource from the Terraform state. This will allow the destroy process to proceed without being blocked by the linked NEG.
+To resolve this, you need to manually remove the Shared VPC attachment resource from the Terraform state. This will allow the destroy process to proceed without being blocked by the linked NEG.
 
 1.  **Navigate to the deployment path for the failing environment.** The environment name (e.g., `development`) can be identified from the resource names in the error message. Replace `<ENVIRONMENT>` with your environment name in the command below.
 
@@ -438,5 +438,5 @@ To resolve this, you need to manually remove the problematic Shared VPC attachme
 
     ```bash
     cd ../../../
-    $HOME/go/bin/eab-deployer -tfvars_file="./global.tfvars" -steps_file="./.steps.json" -destroy
+    $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
     ```
