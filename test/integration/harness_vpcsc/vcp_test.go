@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 )
 
@@ -104,11 +103,7 @@ func TestCleanVPCSC(t *testing.T) {
 	vpcPath := "../../setup/vpcsc"
 	temp := tft.NewTFBlueprintTest(t, tft.WithTFDir(vpcPath))
 	orgID := temp.GetTFSetupStringOutput("org_id")
-
-	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
-	if strings.Contains(branchName, "force-acm-cleanup") {
-		testutils.CleanOrgACMPolicyID(t, orgID)
-	}
+	testutils.CleanOrgACMPolicyID(t, orgID)
 	if testutils.GetOrgACMPolicyID(t, orgID) == "" {
 		_, err := testutils.CreateOrgACMPolicyID(t, orgID)
 		if err != nil {
