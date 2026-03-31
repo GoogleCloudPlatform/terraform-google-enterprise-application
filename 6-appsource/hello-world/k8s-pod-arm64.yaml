@@ -17,8 +17,21 @@ kind: Pod
 metadata:
   name: getting-started
 spec:
-  nodeSelector:
-    cloud.google.com/machine-family: t2a
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+          - key: kubernetes.io/arch
+            operator: In
+            values: ["arm64"]
+      - weight: 50
+        preference:
+          matchExpressions:
+          - key: cloud.google.com/machine-family
+            operator: In
+            values: ["t2a"]
   runtimeClassName: gvisor
   containers:
   - name: getting-started
