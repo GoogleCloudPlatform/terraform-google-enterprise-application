@@ -148,24 +148,37 @@ func DestroyAppInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outp
 }
 
 func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
-	gcpPath := filepath.Join(c.CheckoutPath, sc.Repo)
-	stageName := strings.Split(sc.Stage, "-")[1]
-	conf := utils.GitRepo{}
 	for _, e := range sc.Envs {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s", sc.Repo, e), func() error {
 			for _, g := range sc.GroupingUnits {
 				options := &terraform.Options{
-					TerraformDir:             filepath.Join(gcpPath, g, e),
+					TerraformDir:             filepath.Join(c.CheckoutPath, sc.Repo, g, e),
 					Logger:                   c.Logger,
 					NoColor:                  true,
 					RetryableTerraformErrors: testutils.RetryableTransientErrors,
 					MaxRetries:               MaxErrorRetries,
 					TimeBetweenRetries:       TimeBetweenErrorRetries,
 				}
-
-				gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName)
-				conf = utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
-
+				stageKey := ""
+				for k, repo := range tfvars.InfraCloudbuildV2RepositoryConfig.Repositories {
+					if repo.RepositoryName == sc.Repo {
+						stageKey = k
+						break
+					}
+				}
+				if stageKey == "" {
+					for k, repo := range tfvars.AppServicesCloudbuildV2RepositoryConfig.Repositories {
+						if repo.RepositoryName == sc.Repo {
+							stageKey = k
+							break
+						}
+					}
+				}
+				if stageKey == "" {
+					return fmt.Errorf("repository %s not found in any repository config", sc.Repo)
+				}
+				gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageKey].RepositoryName)
+				conf := utils.GetRepoOnly(t, gitPath, c.Logger)
 				branch := e
 				if branch == "shared" {
 					branch = "production"
@@ -174,6 +187,8 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 				if err != nil {
 					return err
 				}
+
+				// The 'terraform destroy' is executed like original.
 				err = destroyEnv(t, options, sc.StageSA)
 				if err != nil {
 					return err
@@ -185,58 +200,6 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, tfvars GlobalTFVars
 			return err
 		}
 	}
-	groupingUnits := []string{}
-	if sc.HasLocalStep {
-		groupingUnits = sc.GroupingUnits
-	}
-	for _, g := range groupingUnits {
-		err := s.RunDestroyStep(fmt.Sprintf("%s.%s.apply-shared", sc.Repo, g), func() error {
-			options := &terraform.Options{
-				TerraformDir:             filepath.Join(gcpPath, g, "shared"),
-				Logger:                   c.Logger,
-				NoColor:                  true,
-				RetryableTerraformErrors: testutils.RetryableTransientErrors,
-				MaxRetries:               MaxErrorRetries,
-				TimeBetweenRetries:       TimeBetweenErrorRetries,
-			}
-			t.Log("Clonning repo")
-
-			gitPath := filepath.Join(c.CheckoutPath, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName)
-			conf := utils.GitClone(t, tfvars.InfraCloudbuildV2RepositoryConfig.RepoType, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryName, tfvars.InfraCloudbuildV2RepositoryConfig.Repositories[stageName].RepositoryURL, gitPath, sc.CICDProject, c.Logger)
-
-			err := conf.CheckoutBranch("production")
-			if err != nil {
-				return err
-			}
-			return destroyEnv(t, options, sc.StageSA)
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	if len(groupingUnits) == 0 && len(sc.Envs) == 0 {
-		err := s.RunDestroyStep(fmt.Sprintf("%s", sc.Repo), func() error {
-			options := &terraform.Options{
-				TerraformDir:             filepath.Join(c.EABPath, sc.Stage),
-				Logger:                   c.Logger,
-				NoColor:                  true,
-				RetryableTerraformErrors: testutils.RetryableTransientErrors,
-				MaxRetries:               MaxErrorRetries,
-				TimeBetweenRetries:       TimeBetweenErrorRetries,
-			}
-			err := destroyEnv(t, options, sc.StageSA)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-	}
-
 	fmt.Println("end of", sc.Step, "destroy")
 	return nil
 }
