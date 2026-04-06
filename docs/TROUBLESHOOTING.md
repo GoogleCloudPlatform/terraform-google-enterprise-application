@@ -399,15 +399,15 @@ gcloud compute networks subnets update SUBNET_NAME \
 **Error message:**
 
 ```text
-# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Destroying... [id=eab-vpc-development-wiiy/eab-gke-development-ioxw]
-# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Still destroying... [id=eab-vpc-development-wiiy/eab-gke-development-ioxw, 00m10s elapsed]
+# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID]
+# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Still destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID, 00m10s elapsed]
 #
-# Error: Error disabling Shared VPC Resource "eab-gke-development-ioxw": Error waiting for Disabling Shared VPC Resource: The resource 'projects/eab-gke-development-ioxw/zones/us-central1-a/networkEndpointGroups/k8s1-bf6ca629-kube-system-default-http-backend-80-75e27959' is still linked to shared VPC host 'projects/eab-vpc-development-wiiy'.
+# Error: Error disabling Shared VPC Resource "GKE_PROJECT_ID": Error waiting for Disabling Shared VPC Resource: The resource 'projects/GKE_PROJECT_ID/zones/ZONE/networkEndpointGroups/k8s1-CLUSTER_ID-kube-system-default-http-backend-80-RANDOM_HASH' is still linked to shared VPC host 'projects/VPC_DEVELOPMENT_PROJECT_ID'.
 ```
 
 **Cause:**
 
-This error occurs during the destroy process (either via `$HOME/go/bin/eab-deployer -destroy` or `terraform destroy`) because there is a problem when a Autopilot GKE cluster uses a Shared VPC network. The project where the Autopilot GKE cluster is deployed retains a network endpoint group (NEG) attached to the shared VPC network. This persistent link prevents the successful destruction of the Shared VPC attachment.
+This error occurs during the destroy process (either via `$HOME/go/bin/eab-deployer -destroy` or `terraform destroy`) because there is a problem when a Autopilot GKE cluster uses a Shared VPC network. The project where the Autopilot GKE cluster is deployed retains a network endpoint group (NEG) attached to the shared VPC network, even after the deletion on the Autopilot GKE cluster. This persistent link prevents the successful destruction of the Shared VPC attachment.
 
 **Solution:**
 
