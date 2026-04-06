@@ -407,7 +407,7 @@ gcloud compute networks subnets update SUBNET_NAME \
 
 **Cause:**
 
-This error occurs during the destroy process (either via `$HOME/go/bin/eab-deployer -destroy` or `terraform destroy`) because an Autopilot GKE cluster has a known issue where it retains a network endpoint group (NEG) attached to the shared VPC network. This persistent link prevents the successful destruction of the Shared VPC attachment.
+This error occurs during the destroy process (either via `$HOME/go/bin/eab-deployer -destroy` or `terraform destroy`) because there is a problem when a Autopilot GKE cluster uses a Shared VPC network. The project where the Autopilot GKE cluster is deployed retains a network endpoint group (NEG) attached to the shared VPC network. This persistent link prevents the successful destruction of the Shared VPC attachment.
 
 **Solution:**
 
