@@ -106,23 +106,6 @@ module "cluster_vpc" {
 
   ingress_rules = [
     {
-      name     = "allow-ssh"
-      priority = 65534
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      source_ranges = ["0.0.0.0/0"]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["22"]
-        }
-      ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-    },
-    {
       name     = "fw-allow-health-check"
       priority = 1000
       log_config = {
@@ -134,9 +117,6 @@ module "cluster_vpc" {
           protocol = "tcp"
         }
       ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
     },
     {
       name     = "fw-allow-proxies"
@@ -150,9 +130,6 @@ module "cluster_vpc" {
           protocol = "tcp"
         }
       ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
     }
   ]
 

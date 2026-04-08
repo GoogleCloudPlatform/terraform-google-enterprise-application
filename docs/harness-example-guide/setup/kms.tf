@@ -15,12 +15,14 @@ module "kms" {
     "serviceAccount:${var.cloud_build_sa}"
   ]
   set_encrypters_for = ["bucket"]
-  encrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},serviceAccount:${var.cloud_build_sa}",
+    encrypters = [
+    data.google_storage_project_service_account.ci_gcs_account.member,
+    "serviceAccount:${var.cloud_build_sa}",
   ]
   set_decrypters_for = ["bucket"]
   decrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},serviceAccount:${var.cloud_build_sa}",
+    data.google_storage_project_service_account.ci_gcs_account.member,
+    "serviceAccount:${var.cloud_build_sa}",
   ]
   prevent_destroy = false
 }

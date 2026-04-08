@@ -27,22 +27,7 @@ module "vpc" {
   shared_vpc_host                        = false
   delete_default_internet_gateway_routes = true
 
-  ingress_rules = [
-    {
-      name     = "allow-ssh"
-      priority = 500
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      source_ranges = ["0.0.0.0/0"]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["22"]
-        }
-      ]
-    },
-  ]
+  ingress_rules = []
 
   subnets = [
     {

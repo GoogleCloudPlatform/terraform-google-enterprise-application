@@ -40,12 +40,12 @@ variable "region" {
 }
 
 variable "workpool_region" {
-  description = "The region to deploy in"
+  description = "The region to deploy in."
   type        = string
 }
 
 variable "workerpool_machine_type" {
-  description = "The project to deploy in"
+  description = "The workerpool machine type."
   type        = string
 }
 
