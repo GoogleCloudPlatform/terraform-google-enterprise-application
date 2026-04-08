@@ -36,7 +36,7 @@ variable "workpool_region" {
 }
 
 variable "workerpool_machine_type" {
-  description = "The project to deploy in"
+  description = "The machine type for the workerpool."
   type        = string
   default     = "e2-standard-4"
 }
