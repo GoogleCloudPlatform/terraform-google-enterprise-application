@@ -51,7 +51,7 @@ variable "workerpool_machine_type" {
 
 variable "enabled_environments" {
   description = "A map of environments to deploy. Set the value to 'true' for each environment you want to create."
-  type = map(bool)
+  type        = map(bool)
 }
 
 variable "network_regions_to_deploy" {

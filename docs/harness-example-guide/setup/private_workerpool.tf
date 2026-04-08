@@ -16,10 +16,8 @@
 
 module "private_workerpool" {
   source                  = "./modules/private_workerpool"
-  network_name            = "priv-workerpool"
   workerpool_machine_type = var.workerpool_machine_type
   workpool_region         = var.workpool_region
-  seed_project_number     = module.seed_project.project_number
   org_id                  = var.org_id
   billing_account         = var.billing_account
   seed_folder_id          = module.folder_seed.id
