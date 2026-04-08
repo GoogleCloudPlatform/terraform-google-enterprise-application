@@ -25,6 +25,8 @@ locals {
       [for item in data.terraform_remote_state.multitenant : values(item.outputs.cluster_service_accounts)]
     )
   )
+  cluster_projects_id     = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => state.outputs.cluster_project_id }
+  cluster_projects_number = { for state in data.terraform_remote_state.multitenant : (state.outputs.env) => state.outputs.cluster_project_number }
 }
 
 data "terraform_remote_state" "multitenant" {

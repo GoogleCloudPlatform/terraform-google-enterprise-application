@@ -98,10 +98,13 @@ func TestFleetscope(t *testing.T) {
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 
 			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
+			htcExample := strings.ToLower(os.Getenv("TF_VAR_htc")) == "true"
 
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			if enableInferenceGateway {
 				configSyncPath = "examples/agent/3-fleetscope/config-sync"
+			} else if htcExample {
+				configSyncPath = "examples/htc/3-fleetscope/config-sync"
 			}
 
 			vars := map[string]interface{}{
@@ -110,7 +113,7 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_secret_type":     "none",
 				"config_sync_repository_url":  "https://github.com/amandakarina/terraform-google-enterprise-application",
 				"config_sync_policy_dir":      configSyncPath,
-				"config_sync_branch":          "feat/agent-example",
+				"config_sync_branch":          "chore/remove-old-htc-examples",
 				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent"},
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
