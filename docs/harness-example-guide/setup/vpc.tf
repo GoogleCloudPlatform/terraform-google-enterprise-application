@@ -1,24 +1,6 @@
 locals {
   envs = [for env, enabled in var.enabled_environments : env if enabled]
 
-  folder_admin_roles = [
-    "roles/owner",
-    "roles/resourcemanager.folderAdmin",
-    "roles/resourcemanager.projectCreator",
-    "roles/compute.networkAdmin",
-    "roles/compute.xpnAdmin"
-  ]
-
-  folder_role_mapping = flatten([
-    for env in local.envs : [
-      for role in local.folder_admin_roles : {
-        folder_id = module.folders.ids[env]
-        role      = role
-        env       = env
-      }
-    ]
-  ])
-
   # Rename the regions of the subnet configs based on the
   # network_regions_to_deploy variable that you provided
   subnet_configs = {

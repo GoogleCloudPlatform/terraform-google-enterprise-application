@@ -16,29 +16,35 @@
 
 output "workerpool_project_id" {
   value = module.private_workerpool_project.project_id
+  description = "The ID of the project where the worker pool is located."
 }
 
 output "workerpool_id" {
   value = google_cloudbuild_worker_pool.pool.id
+  description = "The ID of the Cloud Build worker pool."
 }
 
 output "workerpool_project_number" {
   value = module.private_workerpool_project.project_number
+  description = "The number of the project where the worker pool is located."
 }
 
 output "workerpool_network_name" {
   value = module.vpc.network_name
+  description = "The name of the VPC network for the worker pool."
 }
 
 output "workerpool_network_id" {
   value = module.vpc.network_id
+  description = "The ID of the VPC network for the worker pool."
 }
 
 output "workerpool_network_self_link" {
   value = module.vpc.network_self_link
+  description = "The self-link of the VPC network for the worker pool."
 }
 
 output "workerpool_subnets_self_links" {
   value = module.vpc.subnets_self_links
+  description = "The self-links of the subnets for the worker pool."
 }
-

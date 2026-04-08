@@ -15,7 +15,7 @@
  */
 
 locals {
-  use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
+  use_csr = var.cloudbuildv2_repository_config.repo_type == "CSR"
 }
 
 # DEPRECATED - TODO: Remove after CSR support is removed

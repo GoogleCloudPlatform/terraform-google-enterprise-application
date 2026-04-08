@@ -5,15 +5,16 @@ The focus of this document is to provide a step-by-step guide to deploy an examp
 ## Pre-requisites
 
 You must have a folder and a project inside of it with the following:
+
 1. billing account linked;
 2. services enabled:
-    - iam.googleapis.com
-    - cloudidentity.googleapis.com
-    - cloudbilling.googleapis.com
-    - cloudbuild.googleapis.com
+   - iam.googleapis.com
+   - cloudidentity.googleapis.com
+   - cloudbilling.googleapis.com
+   - cloudbuild.googleapis.com
 3. service account created on this project;
 4. group created for the deployment;
-    - example: example-name@domain.com
+   - example: example-name@domain.com
 
 ### Authenticate with gcloud
 

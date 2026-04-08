@@ -15,7 +15,7 @@ module "kms" {
     "serviceAccount:${var.cloud_build_sa}"
   ]
   set_encrypters_for = ["bucket"]
-    encrypters = [
+  encrypters = [
     data.google_storage_project_service_account.ci_gcs_account.member,
     "serviceAccount:${var.cloud_build_sa}",
   ]
