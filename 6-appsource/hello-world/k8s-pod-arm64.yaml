@@ -18,6 +18,7 @@ metadata:
   name: getting-started
 spec:
   nodeSelector:
+    cloud.google.com/compute-class: Performance
     kubernetes.io/arch: arm64
   runtimeClassName: gvisor
   containers:
