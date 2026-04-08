@@ -23,7 +23,7 @@ You must have a folder and a project inside of it with the following:
 gcloud auth login
 ```
 
-- Make sure you have the project mentioned on the pre-requisites session set on the gcloud and authenticate with the application-default:
+- Make sure you have the project mentioned on the pre-requisites section set on the gcloud and authenticate with the application-default:
 
 ```bash
 gcloud auth application-default login
@@ -44,7 +44,7 @@ deploy-directory/
 ```text
 deploy-directory/
 └── eab-harness
-└── terraform-example-foundation
+└── terraform-google-enterprise-applications
 ```
 
 - Rename the file `terraform.tfvars.example` to `terraform.tfvars` on `eab-harness` folder.

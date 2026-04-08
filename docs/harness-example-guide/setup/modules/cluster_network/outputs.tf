@@ -25,7 +25,7 @@ output "subnets_self_links" {
 }
 
 output "subnets_names" {
-  description = "Subnets self-links."
+  description = "Subnets names."
   value       = module.cluster_vpc.subnets_names
 }
 
@@ -40,6 +40,6 @@ output "network_name" {
 }
 
 output "network_id" {
-  description = "Network name."
+  description = "Network id."
   value       = module.cluster_vpc.network_id
 }

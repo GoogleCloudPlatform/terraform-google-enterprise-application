@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-output "seed_project_id" {
-  value = module.seed_project.project_id
-}
-
-output "cloud_build_sa" {
-  value = var.cloud_build_sa
+output "project_id" {
+  value       = module.seed_project.project_id
+  description = "The ID of the seed project."
 }
 
 output "billing_account" {
-  value = var.billing_account
+  value       = var.billing_account
+  description = "The billing account ID."
 }
 
 output "org_id" {
-  value = var.org_id
+  value       = var.org_id
+  description = "The organization ID."
 }
 
 // **********************************************************************
@@ -35,7 +34,8 @@ output "org_id" {
 // **********************************************************************
 
 output "logging_bucket" {
-  value = module.logging_bucket.name
+  value       = module.logging_bucket.name
+  description = "The name of the logging bucket."
 }
 
 // **********************************************************************
@@ -43,11 +43,13 @@ output "logging_bucket" {
 // **********************************************************************
 
 output "bucket_kms_key" {
-  value = module.kms.keys["bucket"]
+  value       = module.kms.keys["bucket"]
+  description = "The KMS key for the bucket."
 }
 
 output "attestation_kms_key" {
-  value = module.kms_attestor.keys["attestation"]
+  value       = module.kms_attestor.keys["attestation"]
+  description = "The KMS key for attestation."
 }
 
 // **********************************************************************
@@ -55,7 +57,8 @@ output "attestation_kms_key" {
 // **********************************************************************
 
 output "workerpool_id" {
-  value = module.private_workerpool.workerpool_id
+  value       = module.private_workerpool.workerpool_id
+  description = "The ID of the private worker pool."
 }
 
 // **********************************************************************
@@ -71,12 +74,15 @@ output "envs" {
     network_self_link  = vpc.network_self_link,
     subnets_self_links = [for sub in vpc.subnets_self_links : sub if strcontains(sub, "subnetworks/eab")],
   } }
+  description = "A map of environments to their respective VPC information."
 }
 
 output "common_folder_id" {
-  value = module.folder_common.ids["common"]
+  value       = module.folder_common.ids["common"]
+  description = "The ID of the common folder."
 }
 
 output "attestation_evaluation_mode" {
-  value = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : "ALWAYS_ALLOW"
+  value       = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : "ALWAYS_ALLOW"
+  description = "The attestation evaluation mode, which is set to 'REQUIRE_ATTESTATION' if there is only one environment, and 'ALWAYS_ALLOW' otherwise."
 }
