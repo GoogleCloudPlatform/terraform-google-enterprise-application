@@ -15,7 +15,6 @@
  */
 
 locals {
-  service_repo_name = var.cloudbuildv2_repository_config.repositories[var.repo_name].repository_name
   use_csr           = var.cloudbuildv2_repository_config.repo_type == "CSR"
 }
 
