@@ -46,3 +46,10 @@ module "app" {
   binary_authorization_image         = data.terraform_remote_state.bootstrap.outputs.binary_authorization_image
   binary_authorization_repository_id = data.terraform_remote_state.bootstrap.outputs.binary_authorization_repository_id
 }
+
+resource "google_project_iam_member" "name" {
+  for_each = local.cluster_projects_id
+  project  = each.value
+  role     = "roles/monitoring.viewer"
+  member   = "principal://iam.googleapis.com/projects/${local.cluster_projects_number[each.key]}global/workloadIdentityPools/${each.value}.svc.id.goog/subject/ns/keda/sa/keda-operator"
+}

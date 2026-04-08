@@ -61,6 +61,7 @@ func TestFleetscope(t *testing.T) {
 	attestation := map[string]interface{}{}
 
 	enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
+	htcExample := strings.ToLower(os.Getenv("TF_VAR_htc")) == "true"
 	forkRepository := os.Getenv("HEAD_REPO_URL")
 	branch := os.Getenv("HEAD_BRANCH")
 
@@ -99,10 +100,13 @@ func TestFleetscope(t *testing.T) {
 			splitClusterMembership := strings.Split(clusterMembership, "/")
 			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
-			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+
+			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			if enableInferenceGateway {
 				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
+			} else if htcExample {
+				configSyncPath = "examples/htc/3-fleetscope/config-sync"
 			}
 
 			if forkRepository == "" || branch == "" {
@@ -117,7 +121,7 @@ func TestFleetscope(t *testing.T) {
 				"config_sync_repository_url":  forkRepository,
 				"config_sync_policy_dir":      configSyncPath,
 				"config_sync_branch":          branch,
-				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent", "vllm-model"},
+				"disable_istio_on_namespaces": []string{"cymbalshops", "hpc-team-a", "hpc-team-b", "cb-accounts", "cb-ledger", "cb-frontend", "capital-agent", "vllm-model", "htc"},
 				"attestation_kms_key":         loggingHarness.GetStringOutput("attestation_kms_key"),
 			}
 
