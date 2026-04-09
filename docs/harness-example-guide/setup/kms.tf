@@ -1,3 +1,19 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 data "google_storage_project_service_account" "ci_gcs_account" {
   project = module.seed_project.project_id
 }
@@ -44,11 +60,13 @@ module "kms_attestor" {
   ]
   set_encrypters_for = ["attestation"]
   encrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},serviceAccount:${var.cloud_build_sa}",
+    data.google_storage_project_service_account.ci_gcs_account.member,
+    "serviceAccount:${var.cloud_build_sa}",
   ]
   set_decrypters_for = ["attestation"]
   decrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},serviceAccount:${var.cloud_build_sa}",
+    data.google_storage_project_service_account.ci_gcs_account.member,
+    "serviceAccount:${var.cloud_build_sa}",
   ]
   prevent_destroy = false
 }
