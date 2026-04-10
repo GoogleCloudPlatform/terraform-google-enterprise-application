@@ -79,15 +79,11 @@ func TestHTCAppInfra(t *testing.T) {
 	fmt.Printf("ENV STATE: %s \n", envStage)
 	var envs []string
 	if envStage == "destroy" || envStage == "teardown" {
-		for _, envName := range testutils.EnvNames(t) {
-			envs = append(envs, envName)
-		}
+		envs = append(envs, testutils.EnvNames(t)...)
 		envs = append(envs, "shared")
 	} else {
 		envs = append(envs, "shared")
-		for _, envName := range testutils.EnvNames(t) {
-			envs = append(envs, envName)
-		}
+		envs = append(envs, testutils.EnvNames(t)...)
 	}
 
 	for _, envName := range envs {
