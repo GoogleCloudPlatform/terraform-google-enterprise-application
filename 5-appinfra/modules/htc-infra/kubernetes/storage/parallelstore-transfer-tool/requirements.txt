@@ -14,7 +14,7 @@ google-auth==2.38.0
     #   google-cloud-parallelstore
 google-cloud-parallelstore==0.2.11
     # via -r requirements.in
-googleapis-common-protos==1.69.1
+googleapis-common-protos==1.74.0
     # via
     #   google-api-core
     #   grpcio-status
