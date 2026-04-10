@@ -19,7 +19,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.31.0
 	golang.org/x/oauth2 v0.23.0
 	google.golang.org/api v0.203.0
-	google.golang.org/grpc v1.67.1
+	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.35.1
 )
 
