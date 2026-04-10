@@ -15,6 +15,6 @@
 google-adk==1.4.1
 fastapi==0.115.13
 uvicorn==0.34.0
-pydantic==2.11.7
+pydantic==2.12.5
 google-cloud-aiplatform==1.122.0
 google-auth==2.42.1
