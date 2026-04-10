@@ -1,11 +1,11 @@
 module github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer
 
-go 1.24.0
+go 1.26
 
 require (
 	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.17.9
 	github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration v0.0.0-20250926170546-bf0c6e6ce5eb
-	github.com/gruntwork-io/terratest v0.51.0
+	github.com/gruntwork-io/terratest v0.56.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/mitchellh/go-testing-interface v1.14.2-0.20210821155943-2d9075ca8770
 	github.com/stretchr/testify v1.11.1
@@ -75,14 +75,14 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.42.0 // indirect
-	golang.org/x/mod v0.28.0 // indirect
-	golang.org/x/net v0.44.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/mod v0.29.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.31.0 // indirect
-	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
-	golang.org/x/tools v0.37.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/tools v0.38.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250929231259-57b25ae835d4 // indirect
 	google.golang.org/grpc v1.75.1 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
