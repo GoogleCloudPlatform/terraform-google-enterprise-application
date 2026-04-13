@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.5.2
 	cloud.google.com/go/pubsub v1.44.0
 	cloud.google.com/go/storage v1.44.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.2
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/jhump/protoreflect v1.17.0
 	github.com/spf13/cobra v1.8.1
