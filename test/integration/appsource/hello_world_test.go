@@ -176,8 +176,15 @@ func TestSourceHelloWorld(t *testing.T) {
 						return true, nil
 					} else {
 						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", rollouts[0].Get("deployingBuild").String(), projectID, region)
-						logs := gcloud.Runf(t, logsCmd).String()
+						logs := gcloud.RunCmd(t, logsCmd)
 						t.Logf("%s build-log: %s", serviceName, logs)
+						if strings.Contains(logs, "Insufficient memory") || strings.Contains(logs, "Insufficient CPU") || strings.Contains(logs, "didn't match Pod's node affinity/selector") {
+							t.Logf("Re-trying rollout due to Cluster scalling.")
+							rolloutFullName := strings.Split(rollouts[0].Get("name").String(), "/")
+							rolloutName := rolloutFullName[len(rolloutFullName)]
+							gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job %s --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable", rolloutName, projectID, serviceName, region, releaseName))
+							return true, nil
+						}
 						return false, fmt.Errorf("Rollout %s.", latestRolloutState)
 					}
 				}
