@@ -131,35 +131,6 @@ locals {
   )
 }
 
-resource "local_file" "keda_rendered_manifest" {
-  content = templatefile("${path.module}/k8s/keda/keda-2.18.3-core.yaml.templ", {
-    namespace            = var.namespace
-    keda_image           = var.keda_image
-    keda_apiserver_image = var.keda_apiserver_image
-    region               = var.region
-
-  })
-  filename = "${path.module}/k8s/keda/keda-rendered.yaml"
-}
-
-resource "null_resource" "keda_install" {
-  triggers = {
-    manifest_sha = sha256(local_file.keda_rendered_manifest.content)
-    auth_cmd     = local.get_credentials_cmd
-  }
-
-  provisioner "local-exec" {
-    command = <<EOT
-      ${local.get_credentials_cmd}
-      kubectl apply --server-side --force-conflicts -f "${local_file.keda_rendered_manifest.filename}"
-    EOT
-  }
-
-  depends_on = [
-    local_file.keda_rendered_manifest,
-  ]
-}
-
 resource "null_resource" "cluster_init" {
   for_each = local.cluster_init_files
 
@@ -167,10 +138,6 @@ resource "null_resource" "cluster_init" {
     manifest = each.value
     auth_cmd = local.get_credentials_cmd
   }
-
-  depends_on = [
-    null_resource.keda_install
-  ]
 
   provisioner "local-exec" {
     command = <<-EOT
