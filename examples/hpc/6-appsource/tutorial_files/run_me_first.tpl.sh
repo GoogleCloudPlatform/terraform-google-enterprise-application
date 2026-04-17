@@ -37,4 +37,4 @@ sudo mv packer /usr/local/bin/
 rm "packer_${PACKER_VERSION}_linux_amd64.zip"
 
 python3 -m pip install -q -r requirements.txt
-sudo apt-get install kubectl google-cloud-cli-gke-gcloud-auth-plugin
+sudo update && sudo apt-get install kubectl google-cloud-cli-gke-gcloud-auth-plugin
