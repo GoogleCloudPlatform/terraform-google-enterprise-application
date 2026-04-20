@@ -30,11 +30,11 @@ GKEBATCH_PROJECT_NUMBER=$(gcloud projects list \
 
 export GKEBATCH_PROJECT_NUMBER
 
-PACKER_VERSION="1.15.0"
-curl -LO "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
+python3 -m pip install -q -r requirements.txt
+sudo update && sudo apt-get install kubectl google-cloud-cli-gke-gcloud-auth-plugin unzip
+
+export PACKER_VERSION="1.15.0"
+curl -fLO "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
 unzip "packer_${PACKER_VERSION}_linux_amd64.zip"
 sudo mv packer /usr/local/bin/
 rm "packer_${PACKER_VERSION}_linux_amd64.zip"
-
-python3 -m pip install -q -r requirements.txt
-sudo update && sudo apt-get install kubectl google-cloud-cli-gke-gcloud-auth-plugin
