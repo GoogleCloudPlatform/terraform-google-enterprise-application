@@ -15,6 +15,15 @@
 FROM tensorflow/tensorflow:latest-gpu@sha256:ef97f51a830268acdffe8829a348c6d283702df7f30b117d3ed2e72129c28946
 WORKDIR /data/tensorflow-mnist-example
 COPY requirements.txt .
+
+RUN apt-get update && apt-get install -y wget gpg lsb-release
+
+# Add HashiCorp GPG key and repository
+RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+
+
+RUN apt-get update && apt-get install packer -y
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 CMD ["/bin/bash", "-c", "--", "python tensorflow_mnist_train_distributed.py"]

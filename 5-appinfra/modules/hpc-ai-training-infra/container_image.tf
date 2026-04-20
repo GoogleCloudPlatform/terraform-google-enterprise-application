@@ -167,3 +167,11 @@ EOF
 
   module_depends_on = [time_sleep.wait_iam_propagation]
 }
+
+data "google_artifact_registry_docker_image" "ai_training_image" {
+  location      = google_artifact_registry_repository.private_images.location
+  repository_id = google_artifact_registry_repository.private_images.repository_id
+  project       = var.infra_project
+  image_name    = "ai-train:${local.docker_tag_version_terraform}"
+  depends_on    = [module.build_ai_run_image_image]
+}
