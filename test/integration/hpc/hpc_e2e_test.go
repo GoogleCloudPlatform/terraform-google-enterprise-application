@@ -37,7 +37,7 @@ func createKueueResources(t *testing.T, options *k8s.KubectlOptions) (string, er
 func setupClusterToolkitInTmpDirectory(t *testing.T) {
 	gitCmd := shell.Command{
 		Command: "git",
-		Args:    []string{"clone", "--branch", "v1.84.0", "https://github.com/GoogleCloudPlatform/cluster-toolkit.git", "/tmp/cluster-toolkit"},
+		Args:    []string{"clone", "--branch", "v1.85.0", "https://github.com/GoogleCloudPlatform/cluster-toolkit.git", "/tmp/cluster-toolkit"},
 	}
 	_, err := shell.RunCommandAndGetStdOutE(t, gitCmd)
 	if err != nil {
