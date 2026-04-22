@@ -30,8 +30,5 @@ GKEBATCH_PROJECT_NUMBER=$(gcloud projects list \
 
 export GKEBATCH_PROJECT_NUMBER
 
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-
 python3 -m pip install -q -r requirements.txt
-sudo update && sudo apt-get install kubectl google-cloud-cli-gke-gcloud-auth-plugin packer -y
+sudo apt-get install kubectl google-cloud-cli-gke-gcloud-auth-plugin
