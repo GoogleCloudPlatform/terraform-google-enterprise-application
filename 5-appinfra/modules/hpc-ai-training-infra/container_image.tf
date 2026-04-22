@@ -151,13 +151,13 @@ module "build_ai_run_image_image" {
 
   create_cmd_body = <<EOF
 gcloud builds submit ${path.module} \
-  --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
+  --tag ${local.image_url} \
   --project=${var.infra_project} \
   --service-account=${google_service_account.builder.id} \
   --gcs-log-dir=${module.build_logs.url} \
   --worker-pool=${var.workerpool_id} || (
     sleep 45 && gcloud builds submit ${path.module} \
-      --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
+      --tag ${local.image_url} \
       --project=${var.infra_project} \
       --service-account=${google_service_account.builder.id} \
       --gcs-log-dir=${module.build_logs.url}\
