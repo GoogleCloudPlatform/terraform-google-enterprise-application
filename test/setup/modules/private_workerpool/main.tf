@@ -16,7 +16,7 @@
 
 module "private_workerpool_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 18.0"
+  version = "~> 18.2"
 
   name                     = "eab-private-workerpool"
   random_project_id        = "true"
