@@ -20,6 +20,7 @@
 - [Error: Gitlab pipelines access denied](#gitlab-pipelines-access-denied)
 - [The user does not have permission to access Project or it may not exist](#the-user-does-not-have-permission-to-access-project-or-it-may-not-exist)
 - [Quota 'CPUS_ALL_REGIONS' exceeded](#quota-cpus_all_regions-exceeded)
+- [Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link](#shared-vpc-attachment-destruction-failure-due-to-network-endpoint-group-link)
 - - -
 
 ### Project quota exceeded
@@ -392,3 +393,50 @@ gcloud compute networks subnets update SUBNET_NAME \
     --region REGION \
     --add-secondary-ranges RANGE_NAME_1=RANGE_CIDR_1,RANGE_NAME_2=RANGE_CIDR_2,...
 ```
+
+### Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link
+
+**Error message:**
+
+```text
+# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID]
+# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Still destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID, 00m10s elapsed]
+#
+# Error: Error disabling Shared VPC Resource "GKE_PROJECT_ID": Error waiting for Disabling Shared VPC Resource: The resource 'projects/GKE_PROJECT_ID/zones/ZONE/networkEndpointGroups/k8s1-CLUSTER_ID-kube-system-default-http-backend-80-RANDOM_HASH' is still linked to shared VPC host 'projects/VPC_DEVELOPMENT_PROJECT_ID'.
+```
+
+**Cause:**
+
+This error occurs during the destroy process (either via `$HOME/go/bin/eab-deployer -destroy` or `terraform destroy`) because there is a problem when a Autopilot GKE cluster uses a Shared VPC network. The project where the Autopilot GKE cluster is deployed retains a network endpoint group (NEG) attached to the shared VPC network, even after the deletion on the Autopilot GKE cluster. This persistent link prevents the successful destruction of the Shared VPC attachment.
+
+**Solution:**
+
+To resolve this, you need to manually remove the Shared VPC attachment resource from the Terraform state. This will allow the destroy process to proceed without being blocked by the linked NEG.
+
+1.  **Navigate to the deployment path for the failing environment.** The environment name (e.g., `development`) can be identified from the resource names in the error message. Replace `<ENVIRONMENT>` with your environment name in the command below.
+
+    ```bash
+    cd eab-multitenant/envs/<ENVIRONMENT>
+    ```
+
+2.  **Remove the Shared VPC attachment resource from the Terraform state:**
+
+    ```bash
+    terraform state rm module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]
+    ```
+
+    The expected output should be similar to:
+
+    ```bash
+    Acquiring state lock. This may take a few moments...
+    Removed module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]
+    Successfully removed 1 resource instance(s).
+    Releasing state lock. This may take a few moments...
+    ```
+
+3.  **Go back to the root of your deployment path and re-run the destroy helper:**
+
+    ```bash
+    cd ../../../
+    $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
+    ```
