@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM tensorflow/tensorflow:latest-gpu@sha256:ef97f51a830268acdffe8829a348c6d283702df7f30b117d3ed2e72129c28946
+FROM tensorflow/tensorflow:latest-gpu@sha256:61fe1ce25bd26b0a38e310463a5588d4067d2d01b6bdb058a3ca4f5cf2e18f15
 WORKDIR /data/tensorflow-mnist-example
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
