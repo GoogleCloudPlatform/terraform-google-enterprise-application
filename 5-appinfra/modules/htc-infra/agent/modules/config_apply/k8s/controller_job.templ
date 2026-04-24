@@ -60,5 +60,5 @@ spec:
       volumes:
       - name: gcs-data
         persistentVolumeClaim:
-          claimName: data-pvc
+          claimName: data-pvc-${region}
           readOnly: false

@@ -94,6 +94,8 @@ resource "null_resource" "run_cloud_build" {
       --gcs-log-dir gs://${google_storage_bucket.cloudbuild.id}/logs/${each.key} \
       --tag "${local.container_image[each.key]}" \
       --tag "${local.repository_prefix}/${each.key}:latest" \
+      --service-account "${var.app_cloudbuild_workspace_cloudbuild_sa_email}" \
+      --worker-pool=${var.workerpool_id} \
       "${each.value.source}"
 
     # Remove config.yaml
