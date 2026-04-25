@@ -19,20 +19,20 @@
 FROM debian@sha256:6d87375016340817ac2391e670971725a9981cfc24e221c47734681ed0f6c0f5 AS build
 
 RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends --yes python3-venv gcc libpython3-dev && \
+    apt-get install --no-install-suggests --no-install-recommends --yes python3-venv gcc libpython3-dev wget gpg lsb-release && \
     python3 -m venv /venv && \
     /venv/bin/pip install --upgrade pip setuptools wheel
-
-# Build the virtualenv as a separate step: Only re-execute this step when requirements.txt changes
-FROM build AS build-venv
-COPY mc_run_reqs.txt /requirements.txt
-RUN apt-get update && apt-get install -y wget gpg lsb-release
 
 # Add HashiCorp GPG key and repository
 RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 RUN apt-get update && \
     apt-get install --no-install-suggests --no-install-recommends --yes packer
+
+# Build the virtualenv as a separate step: Only re-execute this step when requirements.txt changes
+FROM build AS build-venv
+COPY mc_run_reqs.txt /requirements.txt
+RUN apt-get update && apt-get install -y wget gpg lsb-release
 
 RUN /venv/bin/pip install --disable-pip-version-check -r /requirements.txt
 
