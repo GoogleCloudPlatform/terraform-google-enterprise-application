@@ -19,15 +19,9 @@
 FROM debian@sha256:6d87375016340817ac2391e670971725a9981cfc24e221c47734681ed0f6c0f5 AS build
 
 RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends --yes python3-venv gcc libpython3-dev wget gpg lsb-release && \
+    apt-get install --no-install-suggests --no-install-recommends --yes python3-venv gcc libpython3-dev && \
     python3 -m venv /venv && \
     /venv/bin/pip install --upgrade pip setuptools wheel
-
-# Add HashiCorp GPG key and repository
-RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends --yes packer
 
 # Build the virtualenv as a separate step: Only re-execute this step when requirements.txt changes
 FROM build AS build-venv
@@ -38,7 +32,6 @@ RUN /venv/bin/pip install --disable-pip-version-check -r /requirements.txt
 # Copy the virtualenv into a distroless image
 FROM gcr.io/distroless/python3-debian12@sha256:77ee7a4d9c7b14acc6daf20fda71d2e2ad63d1b85aee94f70b32d0ffefa055db
 COPY --from=build-venv /venv /venv
-COPY --from=build /usr/bin/packer /usr/bin/packer
 COPY . /app
 WORKDIR /app
 ENTRYPOINT ["/venv/bin/python3", "mc_run.py"]
