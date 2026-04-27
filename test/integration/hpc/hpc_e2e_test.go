@@ -16,7 +16,6 @@ package hpc
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -202,8 +201,6 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	appFactory := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../4-appfactory/envs/shared"))
 	appInfra := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/hpc/5-appinfra/hpc/hpc-team-b/envs/development"))
 	infraProjectTeamB := appFactory.GetJsonOutput("app-group").Get("hpc\\.hpc-team-b.app_infra_project_ids.development").String()
-	serviceAccountTeamB := strings.Split(appFactory.GetJsonOutput("app-group").Get("hpc\\.hpc-team-b.app_cloudbuild_workspace_cloudbuild_sa_email").String(), "/")
-	serviceAccountTeamA := strings.Split(appFactory.GetJsonOutput("app-group").Get("hpc\\.hpc-team-a.app_cloudbuild_workspace_cloudbuild_sa_email").String(), "/")
 	vertexServiceAccount := appInfra.GetStringOutput("vertex_instance_sa")
 	// extract clusterName from fleet membership id
 	splitClusterMembership := strings.Split(clusterMembership, "/")
@@ -213,13 +210,8 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
 	t.Run("hpc-monte-carlo-simulation Test", func(t *testing.T) {
-		err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccountTeamB[len(serviceAccountTeamB)-1])
-		if err != nil {
-			t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-		}
-
 		t.Parallel()
-		_, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
+		_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -254,12 +246,8 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 	})
 
 	t.Run("hpc-ai-training Test", func(t *testing.T) {
-		err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccountTeamA[len(serviceAccountTeamA)-1])
-		if err != nil {
-			t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-		}
 		t.Parallel()
-		_, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
+		_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {
 			t.Fatal(err)
 		}
