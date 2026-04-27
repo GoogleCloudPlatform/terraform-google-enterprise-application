@@ -32,13 +32,13 @@ RUN apt-get update && \
 # Build the virtualenv as a separate step: Only re-execute this step when requirements.txt changes
 FROM build AS build-venv
 COPY mc_run_reqs.txt /requirements.txt
-RUN apt-get update && apt-get install -y wget gpg lsb-release
 
 RUN /venv/bin/pip install --disable-pip-version-check -r /requirements.txt
 
 # Copy the virtualenv into a distroless image
 FROM gcr.io/distroless/python3-debian12@sha256:77ee7a4d9c7b14acc6daf20fda71d2e2ad63d1b85aee94f70b32d0ffefa055db
 COPY --from=build-venv /venv /venv
+COPY --from=build /usr/bin/packer /usr/bin/packer
 COPY . /app
 WORKDIR /app
 ENTRYPOINT ["/venv/bin/python3", "mc_run.py"]
