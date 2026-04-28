@@ -16,5 +16,5 @@
 
 output "image_url" {
   description = "AI Image URL"
-  value       = local.image_url
+  value       = data.google_artifact_registry_docker_image.ai_training_image.self_link
 }

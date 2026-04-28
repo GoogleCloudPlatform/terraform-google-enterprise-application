@@ -1,1 +1,3 @@
 tensorflow-datasets
+protobuf
+importlib_resources
