@@ -19,7 +19,7 @@ locals {
 }
 
 module "env" {
-  source = "../../modules/env_baseline"
+  source = "../../../modules/gke"
 
   apps                             = var.apps
   env                              = local.env

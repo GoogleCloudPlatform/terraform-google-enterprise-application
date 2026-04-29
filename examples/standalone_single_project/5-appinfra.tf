@@ -241,7 +241,7 @@ resource "time_sleep" "wait_propagation" {
 }
 
 module "cicd" {
-  source   = "../../5-appinfra/modules/cicd-pipeline"
+  source   = "../../modules/cicd-pipeline"
   for_each = local.cicd_apps
 
   project_id                 = var.project_id

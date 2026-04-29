@@ -131,6 +131,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 
     ```bash
     cp -R ./terraform-google-enterprise-application/5-appinfra/* $helloworld_repository
+    cp -r ../terraform-google-enterprise-application/modules/* $helloworld_repository
     mv $helloworld_repository/apps/default-example/hello-world/envs/shared/terraform.example.tfvars $helloworld_repository/apps/default-example/hello-world/envs/shared/terraform.tfvars
     cp ./terraform-example-foundation/build/cloudbuild-tf-* $helloworld_repository/
     cp ./terraform-example-foundation/build/tf-wrapper.sh $helloworld_repository/
