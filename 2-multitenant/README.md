@@ -245,6 +245,7 @@ Please note that some steps in this documentation are specific to the selected G
     git checkout -b plan
 
     cp -r ../terraform-google-enterprise-application/2-multitenant/* .
+    cp -r ../terraform-google-enterprise-application/modules/* .
     cp ../terraform-example-foundation/build/cloudbuild-tf-* .
     cp ../terraform-example-foundation/build/tf-wrapper.sh .
     chmod 755 ./tf-wrapper.sh
