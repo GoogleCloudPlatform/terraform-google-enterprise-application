@@ -62,5 +62,6 @@ options:
   env:
   - "TEAM=$_TEAM"
   - "SERVICE=$_SERVICE"
+  - 'DOCKER_API_VERSION=1.41'
   pool:
     name: '${_PRIVATE_POOL}'
