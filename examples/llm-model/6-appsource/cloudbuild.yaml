@@ -104,5 +104,6 @@ options:
   env:
     - 'DOCKER_CLI_EXPERIMENTAL=enabled'
     - 'DOCKER_BUILDKIT=1'
+    - 'DOCKER_API_VERSION=1.41'
   pool:
     name: '${_PRIVATE_POOL}'
