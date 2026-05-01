@@ -46,5 +46,5 @@ output "billing_account" {
 }
 
 output "attestation_evaluation_mode" {
-  value = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : "ALWAYS_ALLOW"
+  value = length(local.envs) == 1 && !var.hpc ? "REQUIRE_ATTESTATION" : "ALWAYS_ALLOW"
 }

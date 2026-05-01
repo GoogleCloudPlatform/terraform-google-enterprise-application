@@ -354,6 +354,9 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "servic
       }
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "service_directory_policy" {
@@ -375,6 +378,9 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
         method = "*"
       }
     }
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -402,6 +408,9 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "hpc_al
       }
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "hpc_allow_infra_projects_to_use_workerpool" {
@@ -428,10 +437,64 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
       }
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "hpc_allow_vpc_to_mnist" {
+  // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && contains(local.hpc_specific_applications, var.service_name) ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "hpc_allow_egress_${var.service_name}_to_mnist"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      access_level = "*"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/81941577218"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "hpc_allow_vpc_to_mnist" {
+  // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
+  count     = contains(local.hpc_specific_applications, var.service_name) && var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "hpc_allow_${var.service_name}_egress_to_mnist"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    sources {
+      access_level = "*"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/81941577218"]
+    operations {
+      service_name = "storage.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_from_vpc_project_to_admin" {
-  // Create egress policy only if it is an HPC application (as defined in 'hpc_specific_applications')
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
   perimeter = var.service_perimeter_name
   title     = "vpc-to-${data.google_project.admin_project.project_id}"
@@ -453,6 +516,9 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
         method = "*"
       }
     }
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -478,6 +544,9 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
         method = "*"
       }
     }
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
