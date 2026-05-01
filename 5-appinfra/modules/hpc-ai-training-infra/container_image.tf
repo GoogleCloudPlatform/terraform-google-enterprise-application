@@ -151,13 +151,13 @@ module "build_ai_run_image_image" {
 
   create_cmd_body = <<EOF
 gcloud builds submit ${path.module} \
-  --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
+  --tag ${local.image_url} \
   --project=${var.infra_project} \
   --service-account=${google_service_account.builder.id} \
   --gcs-log-dir=${module.build_logs.url} \
   --worker-pool=${var.workerpool_id} || (
     sleep 45 && gcloud builds submit ${path.module} \
-      --tag ${var.region}-docker.pkg.dev/${var.infra_project}/${google_artifact_registry_repository.private_images.name}/ai-train:${local.docker_tag_version_terraform} \
+      --tag ${local.image_url} \
       --project=${var.infra_project} \
       --service-account=${google_service_account.builder.id} \
       --gcs-log-dir=${module.build_logs.url}\
@@ -166,4 +166,12 @@ gcloud builds submit ${path.module} \
 EOF
 
   module_depends_on = [time_sleep.wait_iam_propagation]
+}
+
+data "google_artifact_registry_docker_image" "ai_training_image" {
+  location      = google_artifact_registry_repository.private_images.location
+  repository_id = google_artifact_registry_repository.private_images.repository_id
+  project       = var.infra_project
+  image_name    = "ai-train:${local.docker_tag_version_terraform}"
+  depends_on    = [module.build_ai_run_image_image]
 }
