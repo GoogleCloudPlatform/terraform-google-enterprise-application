@@ -22,7 +22,7 @@ resource "random_string" "prefix" {
 
 module "logging_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 12.3"
 
   name          = "bkt-logging-${random_string.prefix.result}"
   project_id    = var.seed_project_id
@@ -82,7 +82,7 @@ module "kms" {
 
 module "kms_attestor" {
   source  = "terraform-google-modules/kms/google"
-  version = "~> 4.0"
+  version = "~> 4.1"
 
   project_id          = var.seed_project_id
   location            = var.region
@@ -105,4 +105,3 @@ module "kms_attestor" {
   ]
   prevent_destroy = false
 }
-

@@ -62,7 +62,7 @@ data "google_compute_default_service_account" "compute_sa" {
 // Create cluster project
 module "eab_cluster_project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 18.0"
+  version = "~> 18.2"
 
   count = var.create_cluster_project ? 1 : 0
 
@@ -134,7 +134,7 @@ data "google_project" "eab_cluster_project" {
 // Create Cloud Armor policy
 module "cloud_armor" {
   source  = "GoogleCloudPlatform/cloud-armor/google"
-  version = "~> 5.0"
+  version = "~> 7.0"
 
   project_id                           = local.cluster_project_id
   name                                 = "eab-cloud-armor"
