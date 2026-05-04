@@ -55,7 +55,7 @@ module "cloudbuild_repositories" {
   count = local.use_csr ? 0 : 1
 
   source  = "terraform-google-modules/bootstrap/google//modules/cloudbuild_repo_connection"
-  version = "~> 11.0"
+  version = "~> 12.0"
 
   project_id = var.project_id
 
@@ -75,7 +75,7 @@ module "cloudbuild_repositories" {
 
 module "tfstate_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 11.0"
+  version = "~> 12.3"
 
   name                     = "${var.bucket_prefix}-${var.project_id}-tf-state"
   project_id               = var.project_id
@@ -103,7 +103,7 @@ module "tf_cloudbuild_workspace" {
   for_each = var.cloudbuildv2_repository_config.repositories
 
   source  = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version = "~> 11.0"
+  version = "~> 12.0"
 
   project_id = var.project_id
   location   = var.location
