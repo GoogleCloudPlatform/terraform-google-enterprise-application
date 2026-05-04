@@ -21,7 +21,7 @@ resource "google_service_account" "builder" {
 
 module "build_logs" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 11.0"
+  version = "~> 12.3"
 
   name              = "${var.bucket_prefix}-cb-ai-builder-logs-${var.infra_project}"
   project_id        = var.infra_project
@@ -140,7 +140,7 @@ resource "google_artifact_registry_repository" "private_images" {
 
 module "build_ai_run_image_image" {
   source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.5"
+  version = "~> 4.0"
   upgrade = false
 
   create_cmd_triggers = {
