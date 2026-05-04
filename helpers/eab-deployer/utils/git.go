@@ -142,3 +142,11 @@ func (g GitRepo) AddRemote(name, url string) error {
 func (g GitRepo) GetCommitSha() (string, error) {
 	return g.conf.RunCmdE("rev-parse", "HEAD")
 }
+
+// GetRepoOnly returns a GitRepo object pointed at an existing local directory.
+// It does not clone, it only sets the working directory for future git commands.
+func GetRepoOnly(t testing.TB, path string, logger *logger.Logger) GitRepo {
+	return GitRepo{
+		conf: git.NewCmdConfig(t, git.WithDir(path), git.WithLogger(logger)),
+	}
+}

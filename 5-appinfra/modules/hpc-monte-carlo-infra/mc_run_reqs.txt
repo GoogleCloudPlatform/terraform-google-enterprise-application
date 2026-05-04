@@ -9,3 +9,4 @@ google-cloud-storage
 yfinance
 PyYAML
 pandas
+importlib_resources
