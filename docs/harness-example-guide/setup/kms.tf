@@ -20,7 +20,7 @@ data "google_storage_project_service_account" "ci_gcs_account" {
 
 module "kms" {
   source  = "terraform-google-modules/kms/google"
-  version = "~> 4.0"
+  version = "~> 4.1"
 
   project_id     = module.seed_project.project_id
   location       = var.region
@@ -45,7 +45,7 @@ module "kms" {
 
 module "kms_attestor" {
   source  = "terraform-google-modules/kms/google"
-  version = "~> 4.0"
+  version = "~> 4.1"
 
   project_id          = module.seed_project.project_id
   location            = var.region

@@ -1,19 +1,19 @@
 # Harness Example Guide
 
-The focus of this document is to provide a step-by-step guide to deploy an example of a harness for EAB repository. The user can choose how many environments to deploy, from 1 to 3 being development, nonproduction and production. Besides that, the user also can choose between single region network or multi-region network.
+The user can choose which environments to deploy (development, nonproduction, and production, up to three environments). Besides that, the user also can choose between single region network or multi-region network.
 
 ## Pre-requisites
 
 You must have a folder and a project inside of it with the following:
 
-1. billing account linked;
-2. services enabled:
+1. A billing account linked;
+2. The following services enabled:
    - iam.googleapis.com
    - cloudidentity.googleapis.com
    - cloudbilling.googleapis.com
    - cloudbuild.googleapis.com
-3. service account created on this project;
-4. group created for the deployment;
+3. A service account created on this project;
+4. A group created for the deployment;
    - example: example-name@domain.com
 
 ### Authenticate with gcloud
@@ -40,13 +40,8 @@ deploy-directory/
 └── terraform-google-enterprise-applications
 ```
 
-- Copy the folder [setup](./setup) as `eab-harness` to the same directory.
+- Copy the contents of the [setup](./setup) folder into a new directory named `eab-harness` at the same level as `terraform-google-enterprise-applications`.
 
-```text
-deploy-directory/
-└── eab-harness
-└── terraform-google-enterprise-applications
-```
 
 - Rename the file `terraform.tfvars.example` to `terraform.tfvars` on `eab-harness` folder.
 - Update `terraform.tfvars` with values from your environment.
@@ -59,5 +54,5 @@ terraform plan
 terraform apply
 ```
 
-- The terraform output of this step will be used to fill the variables on `global.tfvars` in helper deploy process.
+- The terraform output of this step will be used to fill the variables on `global.tfvars` during the helper deployment process.
 - Proceed to the instructions of [helper deploy](./../../helpers/eab-deployer/README.md)
