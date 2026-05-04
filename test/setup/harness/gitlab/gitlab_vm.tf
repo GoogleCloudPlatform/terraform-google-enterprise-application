@@ -236,7 +236,7 @@ resource "google_compute_firewall" "allow_https" {
 // =======================================================
 module "ssl_cert" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 10.0"
+  version = "~> 12.3"
 
   name              = "${var.project_id}-ssl-cert"
   project_id        = var.project_id
@@ -344,5 +344,3 @@ resource "google_service_networking_peered_dns_domain" "name" {
     google_dns_managed_zone.sd_zone,
   ]
 }
-
-
