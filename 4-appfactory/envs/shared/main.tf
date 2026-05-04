@@ -39,7 +39,7 @@ resource "google_folder" "app_folder" {
 }
 
 module "components" {
-  source = "../../modules/app-group-baseline"
+  source = "../../../modules/app-group-baseline"
 
   for_each = tomap({
     for app_service in local.expanded_microservices : "${app_service.app_name}.${app_service.service_name}" => app_service

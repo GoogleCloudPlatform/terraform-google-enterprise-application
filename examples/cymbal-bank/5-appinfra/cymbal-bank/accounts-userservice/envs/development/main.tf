@@ -22,7 +22,7 @@ locals {
 }
 
 module "alloydb" {
-  source = "../../modules/alloydb-psc-setup"
+  source = "../../../../../../../modules/alloydb-psc-setup"
 
   env                         = local.env
   network_project_id          = local.network_project_id

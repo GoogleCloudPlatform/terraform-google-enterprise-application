@@ -24,7 +24,7 @@ locals {
 }
 
 module "provision-ai-training-infra" {
-  source = "../../modules/hpc-ai-training-infra"
+  source = "../../../../../../../modules/hpc-ai-training-infra"
 
   infra_project            = local.app_project_id
   cluster_project          = local.cluster_project_id

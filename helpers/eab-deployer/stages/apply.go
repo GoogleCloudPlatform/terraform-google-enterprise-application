@@ -492,6 +492,11 @@ func copyStepCode(t testing.TB, conf utils.GitRepo, EABPath, checkoutPath, repo,
 		return err
 	}
 
+	err = utils.CopyDirectory(filepath.Join(EABPath, "modules"), targetDir)
+	if err != nil {
+		return err
+	}
+
 	fileName := filepath.Join(gcpPath, ".gitignore")
 	content := `### https://raw.github.com/github/gitignore/90f149de451a5433aebd94d02d11b0e28843a1af/Terraform.gitignore
 # Local .terraform directories

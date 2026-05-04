@@ -22,7 +22,7 @@ locals {
 }
 
 module "app" {
-  source = "../../modules/cicd-pipeline"
+  source = "../../../../../../modules/cicd-pipeline"
 
   project_id                 = local.app_admin_project
   region                     = var.region
@@ -50,7 +50,7 @@ module "app" {
 }
 
 module "htc-infra" {
-  source = "../../modules/htc-infra"
+  source = "../../../../../../modules/htc-infra"
 
   service_name           = local.service_name
   gke_cluster_names      = local.gke_cluster_names
