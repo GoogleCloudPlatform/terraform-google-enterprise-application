@@ -37,7 +37,7 @@ resource "google_service_account" "builder" {
 
 module "build_logs" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 11.0"
+  version = "~> 12.3"
 
   name              = "${var.bucket_prefix}-cb-tf-builder-logs-${var.project_id}"
   project_id        = var.project_id
@@ -118,7 +118,7 @@ resource "time_sleep" "wait_iam_propagation" {
 # Use Dockerfile to create the custom Terraform Image on Google Cloud Build
 module "build_terraform_image" {
   source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.1"
+  version = "~> 4.0"
   upgrade = false
 
   create_cmd_triggers = {
