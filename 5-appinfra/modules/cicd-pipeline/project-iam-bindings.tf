@@ -152,7 +152,7 @@ resource "google_project_iam_member" "bin_auth_policy_evaluator" {
 // added to avoid overwriten of roles for each app service deploy service account, since GKE projects are shared between services
 module "cb-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"
-  version    = "~> 8.0"
+  version    = "~> 8.2"
   for_each   = local.gke_projects
   project_id = each.value
 
@@ -163,7 +163,7 @@ module "cb-gke-project-iam-bindings" {
 
 module "deploy-gke-project-iam-bindings" {
   source     = "terraform-google-modules/iam/google//modules/member_iam"
-  version    = "~> 8.0"
+  version    = "~> 8.2"
   for_each   = local.gke_projects
   project_id = each.value
 
