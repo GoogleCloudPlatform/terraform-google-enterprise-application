@@ -6,3 +6,4 @@ PyYAML
 tabulate
 termcolor
 google-auth
+importlib_resources
