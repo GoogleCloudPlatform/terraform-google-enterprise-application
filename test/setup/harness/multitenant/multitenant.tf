@@ -51,7 +51,7 @@ resource "random_string" "prefix" {
 # Create mock common folder
 module "folder_common" {
   source              = "terraform-google-modules/folders/google"
-  version             = "~> 5.0"
+  version             = "~> 5.1"
   prefix              = random_string.prefix.result
   parent              = var.seed_folder_id
   names               = ["common"]
@@ -61,7 +61,7 @@ module "folder_common" {
 # Create mock network folder
 module "folder_network" {
   source              = "terraform-google-modules/folders/google"
-  version             = "~> 5.0"
+  version             = "~> 5.1"
   prefix              = random_string.prefix.result
   parent              = var.seed_folder_id
   names               = ["network"]
@@ -71,7 +71,7 @@ module "folder_network" {
 # Create mock environment folders
 module "folders" {
   source  = "terraform-google-modules/folders/google"
-  version = "~> 5.0"
+  version = "~> 5.1"
 
   prefix              = random_string.prefix.result
   parent              = var.seed_folder_id
@@ -108,7 +108,7 @@ resource "google_folder_iam_member" "networ_folder_iam" {
 module "vpc_project" {
   for_each = { for i, folder in module.folders.ids : (i) => folder }
   source   = "terraform-google-modules/project-factory/google"
-  version  = "~> 18.0"
+  version  = "~> 18.2"
 
   name                     = "eab-vpc-${each.key}"
   random_project_id        = "true"
