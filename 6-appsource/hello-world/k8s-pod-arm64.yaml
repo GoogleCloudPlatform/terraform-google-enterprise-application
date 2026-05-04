@@ -18,7 +18,8 @@ metadata:
   name: getting-started
 spec:
   nodeSelector:
-    cloud.google.com/machine-family: t2a
+    cloud.google.com/compute-class: Performance
+    kubernetes.io/arch: arm64
   runtimeClassName: gvisor
   containers:
   - name: getting-started
