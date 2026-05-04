@@ -15,6 +15,7 @@
 FROM tensorflow/tensorflow:latest-gpu@sha256:ef97f51a830268acdffe8829a348c6d283702df7f30b117d3ed2e72129c28946
 WORKDIR /data/tensorflow-mnist-example
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 CMD ["/bin/bash", "-c", "--", "python tensorflow_mnist_train_distributed.py"]
