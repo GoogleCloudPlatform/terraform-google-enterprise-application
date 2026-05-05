@@ -41,3 +41,12 @@ variable "workerpool_machine_type" {
   default     = "e2-standard-4"
 }
 
+variable "workerpool_peering_address" {
+  description = "The IP address for the worker pool VPC peering."
+  type        = string
+}
+
+variable "workerpool_nat_subnet_ip" {
+  description = "The IP range for the NAT proxy subnet."
+  type        = string
+}

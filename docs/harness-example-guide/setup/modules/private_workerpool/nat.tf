@@ -21,6 +21,7 @@ resource "google_compute_network_peering_routes_config" "peering_routes" {
   import_custom_routes = true
   export_custom_routes = true
   // explicitly allow the peering for public ip address
+  // Required to export the 0.0.0.0/1 and 128.0.0.0/1 NAT routes to the Cloud Build Worker Pool
   import_subnet_routes_with_public_ip = true
   export_subnet_routes_with_public_ip = true
 
@@ -33,37 +34,39 @@ module "firewall_rules" {
   project_id   = module.private_workerpool_project.project_id
   network_name = module.vpc.network_name
 
-  rules = [{
-    name                    = "allow-pool-to-nat"
-    direction               = "INGRESS"
-    priority                = 1000
-    source_tags             = null
-    source_service_accounts = null
-    target_tags             = ["nat-gateway"]
-    target_service_accounts = null
+  rules = [
+    {
+      name                    = "allow-pool-to-nat"
+      direction               = "INGRESS"
+      priority                = 1000
+      source_tags             = null
+      source_service_accounts = null
+      target_tags             = ["nat-gateway"]
+      target_service_accounts = null
 
-    ranges = ["${google_compute_global_address.worker_range.address}/${google_compute_global_address.worker_range.prefix_length}"]
+      ranges = ["${google_compute_global_address.worker_range.address}/${google_compute_global_address.worker_range.prefix_length}"]
 
-    allow = [{
-      protocol = "all"
-      ports    = null
-    }]
+      allow = [{
+        protocol = "all"
+        ports    = null
+      }]
 
-    log_config = {
-      metadata = "INCLUDE_ALL_METADATA"
-    }
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
     },
     {
-      name          = "allow-icmp"
-      description   = "Allow ICMP from anywhere"
+      name          = "allow-iap-ssh"
+      description   = "Allow SSH from GCP IAP"
       direction     = "INGRESS"
       priority      = 65534
-      source_ranges = ["0.0.0.0/0"]
+      source_ranges = ["35.235.240.0/20"]
       log_config = {
         metadata = "INCLUDE_ALL_METADATA"
       }
       allow = [{
-        protocol = "icmp"
+        protocol = "tcp"
+        ports    = ["22"]
       }]
     }
   ]
@@ -74,14 +77,14 @@ resource "google_compute_address" "cloud_build_nat" {
   address_type = "EXTERNAL"
   name         = "cloud-build-nat"
   network_tier = "PREMIUM"
-  region       = "us-central1"
+  region       = var.workpool_region
 }
 
-resource "google_compute_instance" "vm-proxy" {
+resource "google_compute_instance" "vm_proxy" {
   project      = module.private_workerpool_project.project_id
   name         = "cloud-build-nat-vm"
   machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  zone         = "${var.workpool_region}-a"
 
   tags = ["direct-gateway-access", "nat-gateway"]
 
@@ -113,27 +116,27 @@ resource "google_compute_instance" "vm-proxy" {
 
 #  This route will route packets to the NAT VM
 
-resource "google_compute_route" "through-nat" {
+resource "google_compute_route" "through_nat" {
   name              = "through-nat-range1"
   project           = module.private_workerpool_project.project_id
   dest_range        = "0.0.0.0/1"
   network           = module.vpc.network_name
-  next_hop_instance = google_compute_instance.vm-proxy.id
+  next_hop_instance = google_compute_instance.vm_proxy.id
   priority          = 10
 }
 
-resource "google_compute_route" "through-nat2" {
+resource "google_compute_route" "through_nat2" {
   name              = "through-nat-range2"
   project           = module.private_workerpool_project.project_id
   dest_range        = "128.0.0.0/1"
   network           = module.vpc.network_name
-  next_hop_instance = google_compute_instance.vm-proxy.id
+  next_hop_instance = google_compute_instance.vm_proxy.id
   priority          = 10
 }
 
 # This route allow the NAT VM to reach the internet with it's external IP address
 
-resource "google_compute_route" "direct-to-gateway" {
+resource "google_compute_route" "direct_to_gateway" {
   name             = "direct-to-gateway-range1"
   project          = module.private_workerpool_project.project_id
   dest_range       = "0.0.0.0/1"
@@ -143,7 +146,7 @@ resource "google_compute_route" "direct-to-gateway" {
   priority         = 5
 }
 
-resource "google_compute_route" "direct-to-gateway2" {
+resource "google_compute_route" "direct_to_gateway2" {
   name             = "direct-to-gateway-range2"
   project          = module.private_workerpool_project.project_id
   dest_range       = "128.0.0.0/1"

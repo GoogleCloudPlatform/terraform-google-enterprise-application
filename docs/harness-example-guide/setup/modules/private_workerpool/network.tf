@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  nat_proxy_vm_ip_range = "10.1.1.0/24"
-}
-
 module "vpc" {
   source  = "terraform-google-modules/network/google"
   version = "~> 18.0"
@@ -32,8 +28,8 @@ module "vpc" {
   subnets = [
     {
       subnet_name           = "nat-subnet"
-      subnet_ip             = local.nat_proxy_vm_ip_range
-      subnet_region         = "us-central1"
+      subnet_ip             = var.workerpool_nat_subnet_ip
+      subnet_region         = var.workpool_region
       subnet_private_access = true
     },
   ]
