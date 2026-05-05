@@ -66,7 +66,7 @@ variable "enabled_environments" {
 
 variable "network_regions_to_deploy" {
   description = "List of regions where the network resources should be deployed."
-  type = list(string)
+  type        = list(string)
   validation {
     condition     = alltrue([for r in var.network_regions_to_deploy : contains(["us-central1", "us-east4"], r)])
     error_message = "For this harness guide, only 'us-central1' and 'us-east4' are supported."
