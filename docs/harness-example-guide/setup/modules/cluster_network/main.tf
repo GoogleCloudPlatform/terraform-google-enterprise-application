@@ -40,19 +40,21 @@ module "cluster_private_service_connect" {
 }
 
 resource "google_compute_router" "nat_router" {
-  for_each = var.shared_vpc_host ? { "create" : true } : {}
-  name     = "nat-router-us-central-1"
-  region   = "us-central1"
-  network  = module.cluster_vpc.network_self_link
-  project  = module.cluster_vpc.project_id
+  for_each = var.shared_vpc_host ? toset(var.network_regions_to_deploy) : []
+
+  name    = "nat-router-${each.key}"
+  region  = each.key
+  network = module.cluster_vpc.network_self_link
+  project = module.cluster_vpc.project_id
 }
 
-resource "google_compute_router_nat" "cloud_nat" {
-  for_each                           = google_compute_router.nat_router
-  name                               = "cloud-nat"
-  router                             = each.value.name
-  region                             = each.value.region
-  project                            = module.cluster_vpc.project_id
+resource "google_compute_router_nat" "nat_gateway" {
+  for_each = var.shared_vpc_host ? toset(var.network_regions_to_deploy) : []
+
+  name                               = "nat-gateway-${each.key}"
+  router                             = google_compute_router.nat_router[each.key].name
+  region                             = each.key
+  project                            = var.project_id
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 

@@ -52,3 +52,9 @@ variable "egress_rules" {
   type        = any
   default     = []
 }
+
+variable "network_regions_to_deploy" {
+  description = "List of regions where the network resources should be deployed"
+  type        = list(string)
+}
+
