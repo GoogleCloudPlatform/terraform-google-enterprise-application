@@ -15,10 +15,12 @@
  */
 
 module "private_workerpool" {
-  source                  = "./modules/private_workerpool"
-  workerpool_machine_type = var.workerpool_machine_type
-  workpool_region         = var.workpool_region
-  org_id                  = var.org_id
-  billing_account         = var.billing_account
-  seed_folder_id          = module.folder_seed.id
+  source                     = "./modules/private_workerpool"
+  workerpool_machine_type    = var.workerpool_machine_type
+  workpool_region            = var.workpool_region
+  org_id                     = var.org_id
+  billing_account            = var.billing_account
+  seed_folder_id             = module.folder_seed.id
+  workerpool_peering_address = var.workerpool_peering_address
+  workerpool_nat_subnet_ip   = var.workerpool_nat_subnet_ip
 }

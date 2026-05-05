@@ -17,18 +17,45 @@
 locals {
   envs = [for env, enabled in var.enabled_environments : env if enabled]
 
-  # Rename the regions of the subnet configs based on the
-  # network_regions_to_deploy variable that you provided
-  subnet_configs = {
-    "us-central1" = {
-      subnet_ip          = "10.1.20.0/24"
-      secondary_range_01 = "192.168.0.0/18"
-      secondary_range_02 = "192.168.64.0/18"
+  # Nested map defining distinct CIDR blocks per environment and per region.
+  # This ensures 100% isolation by default, but prevents IP conflicts
+  # if the user decides to peer these VPCs together in the future.
+  env_subnet_configs = {
+    "development" = {
+      "us-central1" = {
+        subnet_ip          = "10.10.1.0/24"
+        secondary_range_01 = "10.11.0.0/18"
+        secondary_range_02 = "10.12.0.0/18"
+      },
+      "us-east4" = {
+        subnet_ip          = "10.10.2.0/24"
+        secondary_range_01 = "10.13.0.0/18"
+        secondary_range_02 = "10.14.0.0/18"
+      }
     },
-    "us-east4" = {
-      subnet_ip          = "10.1.10.0/24"
-      secondary_range_01 = "192.168.128.0/18"
-      secondary_range_02 = "192.168.192.0/18"
+    "nonproduction" = {
+      "us-central1" = {
+        subnet_ip          = "10.20.1.0/24"
+        secondary_range_01 = "10.21.0.0/18"
+        secondary_range_02 = "10.22.0.0/18"
+      },
+      "us-east4" = {
+        subnet_ip          = "10.20.2.0/24"
+        secondary_range_01 = "10.23.0.0/18"
+        secondary_range_02 = "10.24.0.0/18"
+      }
+    },
+    "production" = {
+      "us-central1" = {
+        subnet_ip          = "10.30.1.0/24"
+        secondary_range_01 = "10.31.0.0/18"
+        secondary_range_02 = "10.32.0.0/18"
+      },
+      "us-east4" = {
+        subnet_ip          = "10.30.2.0/24"
+        secondary_range_01 = "10.33.0.0/18"
+        secondary_range_02 = "10.34.0.0/18"
+      }
     }
   }
 }
@@ -102,6 +129,8 @@ module "cluster_vpc" {
   vpc_name        = "eab-vpc-${each.key}"
   shared_vpc_host = true
 
+  network_regions_to_deploy = var.network_regions_to_deploy
+
   ingress_rules = [
     {
       name     = "fw-allow-health-check"
@@ -133,8 +162,9 @@ module "cluster_vpc" {
 
   subnets = [
     for region in var.network_regions_to_deploy : {
-      subnet_name           = "eab-${each.key}-${region}"
-      subnet_ip             = local.subnet_configs[region].subnet_ip
+      subnet_name = "eab-${each.key}-${region}"
+      # Dynamically lookup based on the environment (each.key) and the region
+      subnet_ip             = local.env_subnet_configs[each.key][region].subnet_ip
       subnet_region         = region
       subnet_private_access = true
     }
@@ -144,11 +174,11 @@ module "cluster_vpc" {
     for region in var.network_regions_to_deploy : "eab-${each.key}-${region}" => [
       {
         range_name    = "eab-${each.key}-${region}-secondary-01"
-        ip_cidr_range = local.subnet_configs[region].secondary_range_01
+        ip_cidr_range = local.env_subnet_configs[each.key][region].secondary_range_01
       },
       {
         range_name    = "eab-${each.key}-${region}-secondary-02"
-        ip_cidr_range = local.subnet_configs[region].secondary_range_02
+        ip_cidr_range = local.env_subnet_configs[each.key][region].secondary_range_02
       },
     ]
   }

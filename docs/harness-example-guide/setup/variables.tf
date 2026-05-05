@@ -49,19 +49,25 @@ variable "workerpool_machine_type" {
   type        = string
 }
 
+variable "workerpool_peering_address" {
+  description = "The IP address for the Cloud Build private worker pool peering range (e.g., 10.3.3.0). Change this if it conflicts with your corporate network."
+  type        = string
+}
+
+variable "workerpool_nat_subnet_ip" {
+  description = "The IP CIDR range for the worker pool NAT proxy subnet (e.g., 10.1.1.0/24). Change this if it conflicts with your corporate network."
+  type        = string
+}
+
 variable "enabled_environments" {
   description = "A map of environments to deploy. Set the value to 'true' for each environment you want to create."
   type        = map(bool)
 }
 
 variable "network_regions_to_deploy" {
-  description = "A list of GCP regions where VPC subnets should be created. Valid options are 'us-central1' and 'us-east4'."
-  type        = list(string)
-
+  type = list(string)
   validation {
-    condition = alltrue([
-      for region in var.network_regions_to_deploy : contains(["us-central1", "us-east4"], region)
-    ])
-    error_message = "The 'network_regions_to_deploy' variable can only contain 'us-central1' and/or 'us-east4'."
+    condition     = alltrue([for r in var.network_regions_to_deploy : contains(["us-central1", "us-east4"], r)])
+    error_message = "For this harness guide, only 'us-central1' and 'us-east4' are supported."
   }
 }

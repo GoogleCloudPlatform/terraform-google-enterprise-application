@@ -21,8 +21,10 @@ cloud_build_sa  = "REPLACE_ME" // Cloud build service account, as described on p
 
 region = "REPLACE_ME" // Region where KMS and Logging bucket will be deployed - example "us-central1"
 
-workpool_region         = "REPLACE_ME"   // Private workpool region - example "us-central1"
-workerpool_machine_type = "REPLACE_ME" // Workerpool machine type - example "e2-standard-4"
+workpool_region            = "REPLACE_ME" // Private workpool region - example "us-central1"
+workerpool_machine_type    = "REPLACE_ME" // Workerpool machine type - example "e2-standard-4"
+workerpool_peering_address = "REPLACE_ME" // Workerpool peering address - example "10.3.3.0"
+workerpool_nat_subnet_ip   = "REPLACE_ME" // Workerpoool nat subnet ip - example "10.1.1.0/24"
 
 // Enable to deploy environments harness
 enabled_environments = {
