@@ -133,7 +133,7 @@ module "cluster_vpc" {
 
   ingress_rules = [
     {
-      name     = "fw-allow-health-check"
+      name     = "fw-${each.key}-allow-health-check"
       priority = 1000
       log_config = {
         metadata = "INCLUDE_ALL_METADATA"
@@ -146,12 +146,12 @@ module "cluster_vpc" {
       ]
     },
     {
-      name     = "fw-allow-proxies"
+      name     = "fw-${each.key}-allow-proxies"
       priority = 1000
       log_config = {
         metadata = "INCLUDE_ALL_METADATA"
       }
-      source_ranges = ["10.129.0.0/23"]
+      source_ranges = var.proxy_source_ranges
       allow = [
         {
           protocol = "tcp"

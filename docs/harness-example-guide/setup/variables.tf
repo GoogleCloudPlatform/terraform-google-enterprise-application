@@ -72,3 +72,8 @@ variable "network_regions_to_deploy" {
     error_message = "For this harness guide, only 'us-central1' and 'us-east4' are supported."
   }
 }
+
+variable "proxy_source_ranges" {
+  description = "A list of IP CIDR ranges for proxies that need access to the VPCs. Change this to match your corporate proxy network."
+  type        = list(string)
+}

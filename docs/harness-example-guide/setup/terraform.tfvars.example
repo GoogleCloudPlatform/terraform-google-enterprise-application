@@ -37,3 +37,8 @@ enabled_environments = {
 network_regions_to_deploy = [
   "REPLACE_ME"
 ]
+
+// A list of IP CIDR ranges for proxies that need access to the VPCs - example ["10.129.0.0/23"]
+proxy_source_ranges = [
+  "REPLACE_ME"
+]
