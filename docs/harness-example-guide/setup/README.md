@@ -11,10 +11,13 @@ This harness setup creates the required prerequisite resources to deploy the har
 | cloud\_build\_sa | Cloud Build Service Account email to be granted Encrypt/Decrypt role. | `string` | n/a | yes |
 | enabled\_environments | A map of environments to deploy. Set the value to 'true' for each environment you want to create. | `map(bool)` | n/a | yes |
 | folder\_id | The folder to deploy in | `string` | n/a | yes |
-| network\_regions\_to\_deploy | A list of GCP regions where VPC subnets should be created. Valid options are 'us-central1' and 'us-east4'. | `list(string)` | n/a | yes |
+| network\_regions\_to\_deploy | List of regions where the network resources should be deployed. | `list(string)` | n/a | yes |
 | org\_id | The numeric organization id | `string` | n/a | yes |
+| proxy\_source\_ranges | A list of IP CIDR ranges for proxies that need access to the VPCs. Change this to match your corporate proxy network. | `list(string)` | n/a | yes |
 | region | Region where KMS and Logging bucket will be deployed. | `string` | n/a | yes |
 | workerpool\_machine\_type | The workerpool machine type. | `string` | n/a | yes |
+| workerpool\_nat\_subnet\_ip | The IP CIDR range for the worker pool NAT proxy subnet (e.g., 10.1.1.0/24). Change this if it conflicts with your corporate network. | `string` | n/a | yes |
+| workerpool\_peering\_address | The IP address for the Cloud Build private worker pool peering range (e.g., 10.3.3.0). Change this if it conflicts with your corporate network. | `string` | n/a | yes |
 | workpool\_region | The region to deploy in. | `string` | n/a | yes |
 
 ## Outputs
