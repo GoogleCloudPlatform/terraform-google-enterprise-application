@@ -1,0 +1,44 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+org_id          = "REPLACE_ME" // Organization ID where the environment will be created
+folder_id       = "REPLACE_ME" // New folders and projects will be created inside the folder id below
+billing_account = "REPLACE_ME" // Billing account for the new resources
+cloud_build_sa  = "REPLACE_ME" // Cloud build service account, as described on pre-requisite
+
+region = "REPLACE_ME" // Region where KMS and Logging bucket will be deployed - example "us-central1"
+
+workpool_region            = "REPLACE_ME" // Private workpool region - example "us-central1"
+workerpool_machine_type    = "REPLACE_ME" // Workerpool machine type - example "e2-standard-4"
+workerpool_peering_address = "REPLACE_ME" // Workerpool peering address - example "10.3.3.0"
+workerpool_nat_subnet_ip   = "REPLACE_ME" // Workerpoool nat subnet ip - example "10.1.1.0/24"
+
+// Enable to deploy environments harness
+enabled_environments = {
+  "development"   = false
+  "nonproduction" = true
+  "production"    = false
+}
+
+// A list of GCP regions where VPC subnets should be created - example "us-central1", "us-east4"
+network_regions_to_deploy = [
+  "REPLACE_ME"
+]
+
+// A list of IP CIDR ranges for proxies that need access to the VPCs - example ["10.129.0.0/23"]
+proxy_source_ranges = [
+  "REPLACE_ME"
+]
