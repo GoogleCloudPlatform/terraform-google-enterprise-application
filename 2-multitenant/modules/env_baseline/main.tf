@@ -283,10 +283,11 @@ module "gke-standard" {
     min_cpu_cores       = 0
     max_memory_gb       = 1024
     min_memory_gb       = 0
+    disk_size           = 200
     gpu_resources = [
       {
-        resource_type = "nvidia-tesla-t4"
-        minimum       = 0
+        resource_type = "nvidia-l4"
+        minimum       = 1
         maximum       = 4
       }
     ]
@@ -309,6 +310,8 @@ module "gke-standard" {
         max_surge       = 1
         max_unavailable = 0
         autoscaling     = true
+        min_count       = 1
+        max_count       = 10
         location_policy = "BALANCED"
       }
   ], local.arm_node_pool[each.key])
