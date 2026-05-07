@@ -55,15 +55,15 @@ gcloud auth application-default login
 
 ```text
 deploy-directory/
-└── terraform-google-enterprise-application
+└── terraform-google-enterprise-application/
 ```
 
 - Copy the contents of the [setup](./setup) folder into a new directory named `eab-harness` at the same level as `terraform-google-enterprise-application`.
 
 ```text
 deploy-directory/
-├── eab-harness
-└── terraform-google-enterprise-application
+├── eab-harness/
+└── terraform-google-enterprise-application/
 ```
 
 - Rename the file `terraform.tfvars.example` to `terraform.tfvars` on the `eab-harness` folder.
@@ -77,5 +77,83 @@ terraform plan
 terraform apply
 ```
 
+### Migrating Terraform State to Remote GCS Backend
+
+After the initial local deployment, you must migrate your local Terraform state to the newly created, CMEK-encrypted remote GCS bucket. This ensures your state is securely stored and accessible by your CI/CD pipelines.
+
+1. Retrieve the name of the newly created GCS bucket:
+
+   ```bash
+   export backend_bucket=$(terraform output -raw state_bucket)
+   echo "backend_bucket = ${backend_bucket}"
+   ```
+
+2. Rename `backend.tf.example` to `backend.tf` and update it with the bucket name:
+
+   ```bash
+   mv backend.tf.example backend.tf
+   sed -i "s|UPDATE_ME|${backend_bucket}|g" backend.tf
+   ```
+
+3. Re-initialize Terraform and type `yes` when prompted to copy the state to Cloud Storage:
+
+   ```bash
+   terraform init
+   ```
+
+4. (Optional) Run `terraform plan` to verify the state configuration. There should be no changes.
+
 - The terraform output of this step will be used to fill the variables on `global.tfvars` during the helper deployment process.
 - Proceed to the instructions of [helper deploy](./../../helpers/eab-deployer/README.md)
+
+---
+
+## Clean Up
+
+If you have deployed the full Enterprise Application Blueprint (EAB) using this harness, you must follow these steps in order to successfully destroy the environment.
+
+### 1. Delete Orphaned MCSD Firewall Rules
+
+The EAB deployment automatically creates Multi-Cluster Service Discovery (MCSD) firewall rules in your network projects. Because these rules are created dynamically outside of the harness Terraform state, they are left behind as "orphans" when you destroy the EAB. **You must delete them manually, otherwise Terraform will fail to destroy the VPC networks.**
+
+Run the following command to find and delete these orphaned rules. To ensure safety, this script is strictly scoped to only search inside projects created by this harness (projects starting with `eab-vpc`) and will only target firewall rules ending in `-mcsd`. It will also prompt you for confirmation before deleting each rule.
+
+```bash
+# List all projects whose Project ID starts with "eab-vpc"
+for project in $(gcloud projects list --filter="projectId:eab-vpc*" --format="value(projectId)"); do
+  echo "Checking project: $project"
+  # Find firewall rules ending in -mcsd
+  for fw_rule in $(gcloud compute firewall-rules list --project="$project" --filter="name~'-mcsd$'" --format="value(name)"); do
+    echo "Found orphaned firewall rule: $fw_rule in project $project"
+    read -p "Do you want to delete this firewall rule? (y/n): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      gcloud compute firewall-rules delete "$fw_rule" --project="$project" --quiet
+      echo "Deleted $fw_rule."
+    else
+      echo "Skipped $fw_rule."
+    fi
+  done
+done
+```
+
+### 2. Migrate Terraform State Locally
+
+**CRITICAL:** If you migrated the Terraform state to the remote GCS backend, you MUST migrate it back to your local machine before destroying the infrastructure. Because the Terraform state is stored inside the GCS bucket provisioned by this harness, Terraform will crash if it tries to delete the bucket while it holds the active state lock.
+
+1. Disable the remote backend and pull the state locally:
+
+   ```bash
+   mv backend.tf backend.tf.disabled
+   terraform init -migrate-state
+   # Type 'yes' when prompted to copy the state back locally
+   ls -la terraform.tfstate
+   ```
+
+### 3. Destroy the Harness
+
+*Note: `project_deletion_policy = "DELETE"`, `tfstate_bucket_force_destroy = true`, and `kms_prevent_destroy = false` must have been set in your `terraform.tfvars` during the `apply` phase for this command to work successfully.*
+
+```bash
+terraform destroy
+```
