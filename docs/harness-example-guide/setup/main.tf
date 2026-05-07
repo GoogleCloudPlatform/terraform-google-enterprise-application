@@ -91,8 +91,7 @@ module "seed_project" {
     {
       api = "compute.googleapis.com",
       roles = [
-        "roles/compute.networkAdmin",
-        "roles/compute.admin"
+        "roles/compute.serviceAgent",
       ]
     },
     {
