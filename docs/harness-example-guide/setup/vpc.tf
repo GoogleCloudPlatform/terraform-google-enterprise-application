@@ -103,7 +103,7 @@ module "vpc_project" {
   org_id                   = var.org_id
   folder_id                = module.folder_network.ids["network"]
   billing_account          = var.billing_account
-  deletion_policy          = "DELETE"
+  deletion_policy          = var.project_deletion_policy
   default_service_account  = "KEEP"
 
   activate_apis = [

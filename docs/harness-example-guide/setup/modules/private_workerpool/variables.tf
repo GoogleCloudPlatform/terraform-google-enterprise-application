@@ -50,3 +50,9 @@ variable "workerpool_nat_subnet_ip" {
   description = "The IP range for the NAT proxy subnet."
   type        = string
 }
+
+variable "project_deletion_policy" {
+  description = "Project deletion policy."
+  type        = string
+  default     = "PREVENT"
+}

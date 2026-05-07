@@ -86,3 +86,12 @@ output "attestation_evaluation_mode" {
   value       = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : "ALWAYS_ALLOW"
   description = "The attestation evaluation mode, which is set to 'REQUIRE_ATTESTATION' if there is only one environment, and 'ALWAYS_ALLOW' otherwise."
 }
+
+// **********************************************************************
+// Terraform state bucket
+// **********************************************************************
+
+output "state_bucket" {
+  value       = google_storage_bucket.terraform_state.name
+  description = "The tfstate bucket"
+}

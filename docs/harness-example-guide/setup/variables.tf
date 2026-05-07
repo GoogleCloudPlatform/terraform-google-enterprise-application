@@ -35,7 +35,7 @@ variable "cloud_build_sa" {
 }
 
 variable "region" {
-  description = "Region where KMS and Logging bucket will be deployed."
+  description = "Region where KMS, Logging bucket and tfstate bucket will be deployed."
   type        = string
 }
 
@@ -76,4 +76,34 @@ variable "network_regions_to_deploy" {
 variable "proxy_source_ranges" {
   description = "A list of IP CIDR ranges for proxies that need access to the VPCs. Change this to match your corporate proxy network."
   type        = list(string)
+}
+
+variable "storage_bucket_labels" {
+  description = "Labels to apply to the storage bucket."
+  type        = map(string)
+  default     = {}
+}
+
+variable "tfstate_bucket_force_destroy" {
+  description = "If supplied, the state bucket will be deleted even while containing objects."
+  type        = bool
+  default     = false
+}
+
+variable "encrypt_gcs_bucket_tfstate" {
+  description = "value"
+  type        = bool
+  default     = false
+}
+
+variable "kms_prevent_destroy" {
+  description = "If set to false, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  type        = bool
+  default     = true
+}
+
+variable "project_deletion_policy" {
+  description = "Project deletion policy."
+  type        = string
+  default     = "PREVENT"
 }

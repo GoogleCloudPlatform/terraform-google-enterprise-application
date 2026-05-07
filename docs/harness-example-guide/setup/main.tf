@@ -40,7 +40,7 @@ module "seed_project" {
   org_id                   = var.org_id
   folder_id                = module.folder_seed.id
   billing_account          = var.billing_account
-  deletion_policy          = "DELETE"
+  deletion_policy          = var.project_deletion_policy
   default_service_account  = "KEEP"
 
   activate_apis = [
@@ -135,4 +135,23 @@ module "seed_project" {
       roles = ["roles/aiplatform.serviceAgent"]
     }
   ]
+}
+
+resource "google_storage_bucket" "terraform_state" {
+  project                     = module.seed_project.project_id
+  name                        = "tfstate-eab-harness-${random_string.prefix.result}"
+  location                    = var.region
+  labels                      = var.storage_bucket_labels
+  force_destroy               = var.tfstate_bucket_force_destroy
+  uniform_bucket_level_access = true
+  versioning {
+    enabled = true
+  }
+
+  dynamic "encryption" {
+    for_each = var.encrypt_gcs_bucket_tfstate ? ["encryption"] : []
+    content {
+      default_kms_key_name = module.kms_tfstate.keys["state-key"]
+    }
+  }
 }

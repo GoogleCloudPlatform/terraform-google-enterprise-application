@@ -40,7 +40,32 @@ module "kms" {
     data.google_storage_project_service_account.ci_gcs_account.member,
     "serviceAccount:${var.cloud_build_sa}",
   ]
-  prevent_destroy = false
+  prevent_destroy = var.kms_prevent_destroy
+}
+
+module "kms_tfstate" {
+  source  = "terraform-google-modules/kms/google"
+  version = "~> 4.1"
+
+  project_id     = module.seed_project.project_id
+  location       = var.region
+  keyring        = "kms-tfstate-encryption"
+  keys           = ["state-key"]
+  set_owners_for = ["state-key"]
+  owners = [
+    "serviceAccount:${var.cloud_build_sa}",
+  ]
+  set_encrypters_for = ["state-key"]
+  encrypters = [
+    data.google_storage_project_service_account.ci_gcs_account.member,
+    "serviceAccount:${var.cloud_build_sa}",
+  ]
+  set_decrypters_for = ["state-key"]
+  decrypters = [
+    data.google_storage_project_service_account.ci_gcs_account.member,
+    "serviceAccount:${var.cloud_build_sa}",
+  ]
+  prevent_destroy = var.kms_prevent_destroy
 }
 
 module "kms_attestor" {
@@ -68,5 +93,5 @@ module "kms_attestor" {
     data.google_storage_project_service_account.ci_gcs_account.member,
     "serviceAccount:${var.cloud_build_sa}",
   ]
-  prevent_destroy = false
+  prevent_destroy = var.kms_prevent_destroy
 }
