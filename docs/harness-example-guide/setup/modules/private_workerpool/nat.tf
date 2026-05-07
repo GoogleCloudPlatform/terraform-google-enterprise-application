@@ -107,7 +107,8 @@ resource "google_compute_instance" "vm_proxy" {
   can_ip_forward = true
 
   // This script configures the VM to do IP Forwarding
-  metadata_startup_script = "sysctl -w net.ipv4.ip_forward=1 && iptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F: '{print $2}') -j MASQUERADE"
+  // We explicitly use 'ens4' as it is the standard primary interface for GCP Debian images
+  metadata_startup_script = "sysctl -w net.ipv4.ip_forward=1 && iptables -t nat -A POSTROUTING -o ens4 -j MASQUERADE"
 
   service_account {
     scopes = ["cloud-platform"]
