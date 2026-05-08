@@ -35,7 +35,7 @@ module "cluster_private_service_connect" {
   version                    = "~> 18.0"
   project_id                 = module.cluster_vpc.project_id
   network_self_link          = module.cluster_vpc.network_self_link
-  private_service_connect_ip = "10.3.0.5"
+  private_service_connect_ip = var.private_service_connect_ip
   forwarding_rule_target     = "vpc-sc"
 }
 

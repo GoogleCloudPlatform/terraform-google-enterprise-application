@@ -22,6 +22,7 @@ locals {
   # if the user decides to peer these VPCs together in the future.
   env_subnet_configs = {
     "development" = {
+      psc_ip = "10.10.0.5",
       "us-central1" = {
         subnet_ip          = "10.10.1.0/24"
         secondary_range_01 = "10.11.0.0/18"
@@ -34,6 +35,7 @@ locals {
       }
     },
     "nonproduction" = {
+      psc_ip = "10.20.0.5",
       "us-central1" = {
         subnet_ip          = "10.20.1.0/24"
         secondary_range_01 = "10.21.0.0/18"
@@ -46,6 +48,7 @@ locals {
       }
     },
     "production" = {
+      psc_ip = "10.30.0.5",
       "us-central1" = {
         subnet_ip          = "10.30.1.0/24"
         secondary_range_01 = "10.31.0.0/18"
@@ -129,7 +132,8 @@ module "cluster_vpc" {
   vpc_name        = "eab-vpc-${each.key}"
   shared_vpc_host = true
 
-  network_regions_to_deploy = var.network_regions_to_deploy
+  private_service_connect_ip = local.env_subnet_configs[each.key].psc_ip
+  network_regions_to_deploy  = var.network_regions_to_deploy
 
   ingress_rules = [
     {

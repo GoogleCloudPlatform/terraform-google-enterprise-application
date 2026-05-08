@@ -58,3 +58,7 @@ variable "network_regions_to_deploy" {
   type        = list(string)
 }
 
+variable "private_service_connect_ip" {
+  description = "The internal IP address for Google APIs Private Service Connect."
+  type        = string
+}
