@@ -20,7 +20,6 @@ resource "random_string" "prefix" {
   upper   = false
 }
 
-# Create mock seed folder
 module "folder_seed" {
   source              = "terraform-google-modules/folders/google"
   version             = "~> 5.0"

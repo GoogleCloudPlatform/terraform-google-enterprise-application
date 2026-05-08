@@ -63,7 +63,6 @@ locals {
   }
 }
 
-# Create mock common folder
 module "folder_common" {
   source              = "terraform-google-modules/folders/google"
   version             = "~> 5.0"
@@ -73,7 +72,6 @@ module "folder_common" {
   deletion_protection = false
 }
 
-# Create mock network folder
 module "folder_network" {
   source              = "terraform-google-modules/folders/google"
   version             = "~> 5.0"
@@ -83,8 +81,7 @@ module "folder_network" {
   deletion_protection = false
 }
 
-# Create mock environment folders
-module "folders" {
+module "folders_envs" {
   source  = "terraform-google-modules/folders/google"
   version = "~> 5.0"
 
@@ -94,9 +91,9 @@ module "folders" {
   deletion_protection = false
 }
 
-# Create SVPC host projects
+# SVPC host projects
 module "vpc_project" {
-  for_each = { for i, folder in module.folders.ids : (i) => folder }
+  for_each = { for i, folder in module.folders_envs.ids : (i) => folder }
   source   = "terraform-google-modules/project-factory/google"
   version  = "~> 18.0"
 

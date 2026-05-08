@@ -68,7 +68,7 @@ output "workerpool_id" {
 output "envs" {
   value = { for env, vpc in module.cluster_vpc : env => {
     org_id             = var.org_id
-    folder_id          = module.folders.ids[env]
+    folder_id          = module.folders_envs.ids[env]
     billing_account    = var.billing_account
     network_project_id = vpc.project_id
     network_self_link  = vpc.network_self_link,
