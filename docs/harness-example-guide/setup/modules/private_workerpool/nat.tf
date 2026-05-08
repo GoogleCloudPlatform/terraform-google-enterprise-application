@@ -115,42 +115,45 @@ resource "google_compute_instance" "vm_proxy" {
   }
 }
 
-#  This route will route packets to the NAT VM
+# ------------------------------------------------------------------------
+# NOTE: Why 0.0.0.0/1 and 128.0.0.0/1 instead of 0.0.0.0/0?
+#
+# We cannot export a custom default route (0.0.0.0/0) over VPC peering to
+# Google-managed services (like Cloud Build Private Pools). The peered
+# network will ignore it in favor of its own internal default route.
+# By splitting the internet into two /1 routes, we leverage Longest Prefix
+# Match (LPM) routing. These routes are more specific than /0, so they are
+# accepted over the peering connection, forcing Cloud Build worker traffic
+# to route through our NAT VM.
+# ------------------------------------------------------------------------
 
+# This route will route packets to the NAT VM
 resource "google_compute_route" "through_nat" {
-  name              = "through-nat-range1"
+  for_each = {
+    "range1" = "0.0.0.0/1"
+    "range2" = "128.0.0.0/1"
+  }
+
+  name              = "through-nat-${each.key}"
   project           = module.private_workerpool_project.project_id
-  dest_range        = "0.0.0.0/1"
+  dest_range        = each.value
   network           = module.vpc.network_name
   next_hop_instance = google_compute_instance.vm_proxy.id
   priority          = 10
 }
 
-resource "google_compute_route" "through_nat2" {
-  name              = "through-nat-range2"
-  project           = module.private_workerpool_project.project_id
-  dest_range        = "128.0.0.0/1"
-  network           = module.vpc.network_name
-  next_hop_instance = google_compute_instance.vm_proxy.id
-  priority          = 10
-}
-
-# This route allow the NAT VM to reach the internet with it's external IP address
-
+# This route allows the NAT VM to reach the internet with its external IP address.
+# It uses priority 5 (higher precedence than 10) and network tags so ONLY the
+# NAT VM uses this route, preventing a routing loop.
 resource "google_compute_route" "direct_to_gateway" {
-  name             = "direct-to-gateway-range1"
-  project          = module.private_workerpool_project.project_id
-  dest_range       = "0.0.0.0/1"
-  network          = module.vpc.network_name
-  next_hop_gateway = "default-internet-gateway"
-  tags             = ["direct-gateway-access"]
-  priority         = 5
-}
+  for_each = {
+    "range1" = "0.0.0.0/1"
+    "range2" = "128.0.0.0/1"
+  }
 
-resource "google_compute_route" "direct_to_gateway2" {
-  name             = "direct-to-gateway-range2"
+  name             = "direct-to-gateway-${each.key}"
   project          = module.private_workerpool_project.project_id
-  dest_range       = "128.0.0.0/1"
+  dest_range       = each.value
   network          = module.vpc.network_name
   next_hop_gateway = "default-internet-gateway"
   tags             = ["direct-gateway-access"]
