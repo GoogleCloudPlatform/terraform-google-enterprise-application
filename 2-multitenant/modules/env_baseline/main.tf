@@ -33,15 +33,15 @@ locals {
   arm_node_pool = { for k, v in local.subnets : k => (regex(local.regions_re, v)[0]) == "us-central1" ?
     [
       {
-        name            = "regional-arm64-pool"
-        machine_type    = "t2a-standard-4"
-        node_locations  = "us-central1-a,us-central1-b,us-central1-f"
-        strategy        = "SURGE"
-        max_surge       = 1
-        max_unavailable = 0
-        autoscaling     = true
-        location_policy = "BALANCED"
-        sandbox_enabled = true
+        name              = "regional-arm64-pool"
+        machine_type      = "t2a-standard-4"
+        node_locations    = "us-central1-a,us-central1-b,us-central1-f"
+        strategy          = "SURGE"
+        max_surge         = 1
+        max_unavailable   = 0
+        autoscaling       = true
+        location_policy   = "BALANCED"
+        max_pods_per_node = 16
       }
     ] : []
   }
@@ -248,7 +248,7 @@ resource "google_project_iam_member" "model_armor_service_network_extension_role
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 40.0"
+  version = "~> 44.1"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
   name                   = "cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
@@ -341,7 +341,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 40.0"
+  version = "~> 44.1"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "cluster-${each.value.region}-${var.env}"
