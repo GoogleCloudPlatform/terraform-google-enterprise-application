@@ -18,7 +18,6 @@ locals {
   networks_re           = "/networks/([^/]*)$"
   subnetworks_re        = "/subnetworks/([^/]*)$"
   projects_re           = "projects/([^/]*)/"
-  regions_re            = "regions/([^/]+)"
   cluster_project_id    = data.google_project.eab_cluster_project.project_id
   available_cidr_ranges = var.master_ipv4_cidr_blocks
 
@@ -30,12 +29,33 @@ locals {
 
   cluster_sa = [for i in merge(module.gke-standard, module.gke-autopilot) : i.service_account][0]
 
-  arm_node_pool = { for k, v in local.subnets : k => (regex(local.regions_re, v)[0]) == "us-central1" ?
+  # Map each region to zones that support nvidia-tesla-t4
+  gpu_t4_zones = {
+    for r_idx, r in data.google_compute_zones.available : r_idx => [
+      for z in r.names : z if contains([for a in data.google_compute_accelerator_types.t4[z].accelerator_types : a.name], "nvidia-tesla-t4")
+    ]
+  }
+
+  # Map each region to zones that support t2a-standard-4
+  arm_zones = {
+    for r_idx, r in data.google_compute_zones.available : r_idx => [
+      for z in r.names : z if length(data.google_compute_machine_types.arm[z].machine_types) > 0
+    ]
+  }
+
+  # ARM node pool locations must be a subset of cluster zones (which are restricted to T4 zones)
+  arm_node_pool_zones = {
+    for k, v in local.subnets : k => [
+      for z in local.arm_zones[k] : z if contains(local.gpu_t4_zones[k], z)
+    ]
+  }
+
+  arm_node_pool = { for k, v in local.subnets : k => length(local.arm_node_pool_zones[k]) > 0 ?
     [
       {
         name            = "regional-arm64-pool"
         machine_type    = "t2a-standard-4"
-        node_locations  = "us-central1-a,us-central1-b,us-central1-f"
+        node_locations  = join(",", local.arm_node_pool_zones[k])
         strategy        = "SURGE"
         max_surge       = 1
         max_unavailable = 0
@@ -169,6 +189,29 @@ data "google_compute_subnetwork" "default" {
   self_link = each.value
 }
 
+data "google_compute_zones" "available" {
+  for_each = local.subnets
+  region   = data.google_compute_subnetwork.default[each.key].region
+  project  = local.cluster_project_id
+}
+
+locals {
+  all_zones = distinct(flatten([for z in data.google_compute_zones.available : z.names]))
+}
+
+data "google_compute_accelerator_types" "t4" {
+  for_each = toset(local.all_zones)
+  zone     = each.value
+  project  = local.cluster_project_id
+}
+
+data "google_compute_machine_types" "arm" {
+  for_each = toset(local.all_zones)
+  zone     = each.value
+  project  = local.cluster_project_id
+  filter   = "name = \"t2a-standard-4\""
+}
+
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
   count        = var.access_level_name != null ? 1 : 0
   access_level = var.access_level_name
@@ -256,6 +299,7 @@ module "gke-standard" {
   project_id             = local.cluster_project_id
   regional               = true
   region                 = data.google_compute_subnetwork.default[each.key].region
+  zones                  = local.gpu_t4_zones[each.key]
   network_project_id     = regex(local.projects_re, data.google_compute_subnetwork.default[each.key].id)[0]
   network                = regex(local.networks_re, data.google_compute_subnetwork.default[each.key].network)[0]
   subnetwork             = regex(local.subnetworks_re, local.subnets[each.key])[0]
