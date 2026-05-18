@@ -362,7 +362,19 @@ locals {
     }
   ]
 
-  ingress_rules = contains(var.protected_projects, var.logging_bucket_project_number) ? [
+  ingress_rules = concat([{
+    title = "Ingress from gcp-admins@test.blueprints.joonix.net to the perimeter"
+    from = {
+      sources    = { accessLevel = "*" }
+      identities = "group:gcp-admins@test.blueprints.joonix.net"
+    },
+    to = {
+      resources = ["*"],
+      operations = {
+        service_name = "*"
+      }
+    }
+    }], contains(var.protected_projects, var.logging_bucket_project_number) ? [
     {
       title = "Ingress from Gitlab to Single Project project - kms service"
       from = {
@@ -376,7 +388,7 @@ locals {
         }
       }
     }
-  ] : tolist([])
+  ] : tolist([]))
 }
 
 resource "random_string" "prefix" {
