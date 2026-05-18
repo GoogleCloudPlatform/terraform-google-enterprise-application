@@ -80,6 +80,7 @@ spec:
           name: dshm
       dnsPolicy: ClusterFirst
       nodeSelector:
+        kubernetes.io/arch: amd64
         cloud.google.com/gke-accelerator: nvidia-l4
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -87,21 +88,6 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       terminationGracePeriodSeconds: 30
-      tolerations:
-      - effect: NoSchedule
-        key: kubernetes.io/arch
-        operator: Equal
-        value: amd64
-      - effect: NoSchedule
-        key: cloud.google.com/machine-family
-        operator: Exists
-      - key: "nvidia.com/gpu"
-        operator: "Equal"
-        value: "present"
-        effect: "NoSchedule"
-      - key: "nvidia.com/gpu"
-        operator: "Exists"
-        effect: "NoSchedule"
       volumes:
       - emptyDir:
           medium: Memory
