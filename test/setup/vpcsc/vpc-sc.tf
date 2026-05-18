@@ -362,34 +362,48 @@ locals {
     }
   ]
 
-  ingress_rules = concat([{
-    title = "Ingress from gcp-admins@test.blueprints.joonix.net to the perimeter"
-    from = {
-      sources    = { accessLevel = "*" }
-      identities = "group:gcp-admins@test.blueprints.joonix.net"
-    },
-    to = {
-      resources = ["*"],
-      operations = {
-        service_name = "*"
-      }
-    }
-    }], contains(var.protected_projects, var.logging_bucket_project_number) ? [
-    {
-      title = "Ingress from Gitlab to Single Project project - kms service"
-      from = {
-        sources    = { resources = ["projects/${var.gitlab_project_number}"] }
-        identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"] //gitlab storage identity
-      },
-      to = {
-        resources = ["projects/${var.logging_bucket_project_number}"], //logging-kms bucket
-        operations = {
-          "cloudkms.googleapis.com" = { methods = ["*"] }
+  ingress_rules = concat(
+    [
+      {
+        title = "Ingress from gcp-admins@test.blueprints.joonix.net to the perimeter"
+        from = {
+          sources = {
+            access_level = "*"
+            resources    = tolist([])
+          }
+          # CORREÇÃO ERRO 1: Transformado em Lista (Array)
+          identities = ["group:gcp-admins@test.blueprints.joonix.net"]
+        }
+        to = {
+          resources = ["*"]
+          operations = {
+            "*" = { methods = ["*"] }
+          }
         }
       }
-    }
-  ] : tolist([]))
+    ],
+    contains(var.protected_projects, var.logging_bucket_project_number) ? [
+      {
+        title = "Ingress from Gitlab to Single Project project - kms service"
+        from = {
+          # Padronização: Mantemos as mesmas chaves do elemento 0
+          sources = {
+            access_level = null
+            resources    = ["projects/${var.gitlab_project_number}"]
+          }
+          identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"]
+        }
+        to = {
+          resources = ["projects/${var.logging_bucket_project_number}"]
+          operations = {
+            "cloudkms.googleapis.com" = { methods = ["*"] }
+          }
+        }
+      }
+    ] : []
+  )
 }
+
 
 resource "random_string" "prefix" {
   length  = 6
