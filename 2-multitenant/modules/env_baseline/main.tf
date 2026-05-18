@@ -35,7 +35,7 @@ locals {
       {
         name              = "regional-arm64-pool"
         machine_type      = "t2a-standard-4"
-        node_locations    = "us-central1-a,us-central1-b,us-central1-f"
+        node_locations    = "us-central1-a,us-central1-b"
         strategy          = "SURGE"
         max_surge         = 1
         max_unavailable   = 0
@@ -306,7 +306,7 @@ module "gke-standard" {
       {
         name            = "node-pool-1"
         machine_type    = "g2-standard-4"
-        node_locations  = data.google_compute_subnetwork.default[each.key].region == "us-central1" ? "us-central1-a,us-central1-b,us-central1-c" : ""
+        node_locations  = data.google_compute_subnetwork.default[each.key].region == "us-central1" ? "us-central1-a,us-central1-b" : ""
         strategy        = "SURGE"
         max_surge       = 1
         max_unavailable = 0
