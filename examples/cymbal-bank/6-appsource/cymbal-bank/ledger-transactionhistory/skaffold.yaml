@@ -52,6 +52,7 @@ test:
             target/site/jacoco/jacoco.csv
         timeoutSeconds: 1200
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl: {}
 profiles:
 - name: development

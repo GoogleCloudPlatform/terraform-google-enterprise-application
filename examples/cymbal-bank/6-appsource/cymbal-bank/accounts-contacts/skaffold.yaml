@@ -30,6 +30,7 @@ build:
   tagPolicy:
     sha256: {}
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl: {}
 test:
   - image: contacts # code style
@@ -88,4 +89,3 @@ profiles:
     kustomize:
       paths:
       - k8s/overlays/production
-

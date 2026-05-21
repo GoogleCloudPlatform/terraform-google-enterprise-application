@@ -116,6 +116,7 @@ manifests:
   rawYaml:
   - ./kubernetes-manifests/loadgenerator.yaml
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl: {}
 profiles:
 - name: gcb

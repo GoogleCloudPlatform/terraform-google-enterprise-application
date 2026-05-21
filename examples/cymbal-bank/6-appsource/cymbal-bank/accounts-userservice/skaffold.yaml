@@ -63,6 +63,7 @@ test:
             - "**/*.py"
             - "requirements.txt"
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl: {}
 profiles:
 - name: development

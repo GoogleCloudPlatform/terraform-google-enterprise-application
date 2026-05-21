@@ -41,6 +41,7 @@ test:
             - "../../.pylintrc"
             - "requirements.txt"
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl: {}
   tolerateFailuresUntilDeadline: true
 profiles:
