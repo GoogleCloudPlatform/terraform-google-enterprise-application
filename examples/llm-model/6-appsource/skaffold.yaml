@@ -24,6 +24,10 @@ build:
         dockerfile: Dockerfile-epp
   tagPolicy:
     gitCommit: {}
+deploy:
+  statusCheckDeadlineSeconds: 1200
+  kubectl: {}
+  tolerateFailuresUntilDeadline: true
 profiles:
   - name: development
     manifests:

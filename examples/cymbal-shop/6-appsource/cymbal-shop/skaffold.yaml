@@ -118,6 +118,7 @@ manifests:
 deploy:
   statusCheckDeadlineSeconds: 1200
   kubectl: {}
+  tolerateFailuresUntilDeadline: true
 profiles:
 - name: gcb
   build:

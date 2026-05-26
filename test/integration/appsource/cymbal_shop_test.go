@@ -195,7 +195,7 @@ func TestSourceCymbalShop(t *testing.T) {
 			}
 			for i, targetId := range deployTargets.Array() {
 				if i > 0 {
-					promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", releaseName, serviceName, region, targetId)
+					promoteCmd := fmt.Sprintf("deploy releases promote --project=%s --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", projectID, releaseName, serviceName, region, targetId)
 					t.Logf("Promoting release to next target: %s", targetId)
 					// Execute the promote command
 					gcloud.Runf(t, promoteCmd)

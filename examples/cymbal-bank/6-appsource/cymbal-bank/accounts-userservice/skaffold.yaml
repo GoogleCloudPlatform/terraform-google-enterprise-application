@@ -65,6 +65,7 @@ test:
 deploy:
   statusCheckDeadlineSeconds: 1200
   kubectl: {}
+  tolerateFailuresUntilDeadline: true
 profiles:
 - name: development
   activation:

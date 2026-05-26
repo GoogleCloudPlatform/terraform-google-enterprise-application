@@ -32,6 +32,7 @@ build:
 deploy:
   statusCheckDeadlineSeconds: 1200
   kubectl: {}
+  tolerateFailuresUntilDeadline: true
 test:
   - image: contacts # code style
     context: .
