@@ -237,7 +237,7 @@ resource "google_folder_iam_member" "app_factory_project_creator" {
 
 // needed by terraform-vet to get parent folder
 resource "google_organization_iam_member" "app_factory_folder_viewer" {
-  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj if obj.multitenant_pipeline == "applicationfactory" })
+  for_each = tomap({ for i, obj in local.expanded_environment_with_service_accounts : i => obj })
   role     = "roles/resourcemanager.folderViewer"
   org_id   = var.org_id
   member   = "serviceAccount:${each.value.email}"

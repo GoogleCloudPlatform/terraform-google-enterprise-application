@@ -390,15 +390,15 @@ Please note that some steps in this documentation are specific to the selected G
 1. Retrieve Multi-tenant administration project variable value from 1-bootstrap:
 
     ```bash
-    export multitenant_admin_project=$(terraform -chdir=./terraform-google-enterprise-application/1-bootstrap output -raw project_id)
+    export fleetscope_admin_project=$(terraform -chdir=./terraform-google-enterprise-application/1-bootstrap output -raw project_id)
 
-    echo multitenant_admin_project=$multitenant_admin_project
+    echo fleetscope_admin_project=$fleetscope_admin_project
     ```
 
 1. (CSR Only) Clone the infrastructure pipeline repository:
 
     ```bash
-    gcloud source repos clone eab-fleetscope --project=$multitenant_admin_project
+    gcloud source repos clone eab-fleetscope --project=$fleetscope_admin_project
     ```
 
 1. (Github Only) When using Github with Cloud Build, clone the repository with the following command.
@@ -420,7 +420,8 @@ Please note that some steps in this documentation are specific to the selected G
     git checkout -b plan
 
     cp -r ../terraform-google-enterprise-application/3-fleetscope/* .
-    cp -r ../terraform-google-enterprise-application/modules/* .
+    rm modules
+    cp -r ../terraform-google-enterprise-application/modules/ .
     cp ../terraform-example-foundation/build/cloudbuild-tf-* .
     cp ../terraform-example-foundation/build/tf-wrapper.sh .
     chmod 755 ./tf-wrapper.sh

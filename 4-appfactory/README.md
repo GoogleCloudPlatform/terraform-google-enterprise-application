@@ -200,15 +200,15 @@ Please note that some steps in this documentation are specific to the selected G
 1. Retrieve Multi-tenant administration project variable value from 1-bootstrap:
 
     ```bash
-    export multitenant_admin_project=$(terraform -chdir=./terraform-google-enterprise-application/1-bootstrap output -raw project_id)
+    export appfactory_admin_project=$(terraform -chdir=./terraform-google-enterprise-application/1-bootstrap output -raw project_id)
 
-    echo multitenant_admin_project=$multitenant_admin_project
+    echo appfactory_admin_project=$appfactory_admin_project
     ```
 
 1. (CSR Only) Clone the infrastructure pipeline repository:
 
     ```bash
-    gcloud source repos clone eab-applicationfactory --project=$multitenant_admin_project
+    gcloud source repos clone eab-applicationfactory --project=$appfactory_admin_project
     ```
 
 1. (Github Only) When using Github with Cloud Build, clone the repository with the following command.
@@ -229,13 +229,14 @@ Please note that some steps in this documentation are specific to the selected G
     cd eab-applicationfactory
     git checkout -b plan
 
-    cp -r ../terraform-google-enterprise-application/4-appfactory/* .
-    cp -r ../terraform-google-enterprise-application/modules/* .
-    cp ../terraform-example-foundation/build/cloudbuild-tf-* .
-    cp ../terraform-example-foundation/build/tf-wrapper.sh .
+    cp -r ../../terraform-google-enterprise-application/4-appfactory/* .
+    rm modules
+    cp -r ../../terraform-google-enterprise-application/modules/ .
+    cp ../../terraform-example-foundation/build/cloudbuild-tf-* .
+    cp ../../terraform-example-foundation/build/tf-wrapper.sh .
     chmod 755 ./tf-wrapper.sh
 
-    cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+    cp -RT ../../terraform-example-foundation/policy-library/ ./policy-library
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' cloudbuild-tf-*
     ```
 

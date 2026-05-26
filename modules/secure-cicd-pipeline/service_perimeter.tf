@@ -282,6 +282,76 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
         method = "*"
       }
     }
+    operations {
+      service_name = "iam.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iamcredentials.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_policy_gke_cluster_to_private_workerpool" {
+  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "depl-gke-${data.google_project.admin_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.clusters_projects
+      content {
+        resource = "projects/${sources.value.number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_policy_gke_cluster_to_private_workerpool" {
+  count     = var.create_admin_project && var.service_perimeter_name != null ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "depl-gke-${data.google_project.admin_project.project_id}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+
+    dynamic "sources" {
+      for_each = data.google_project.clusters_projects
+      content {
+        resource = "projects/${sources.value.number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.workerpool_project.number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
@@ -294,6 +364,13 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
   title     = "depl-${data.google_project.admin_project.project_id}-gke"
   egress_from {
     identity_type = "ANY_IDENTITY"
+    sources {
+      resource = "projects/${data.google_project.admin_project.number}"
+    }
+    sources {
+      resource = "projects/${data.google_project.workerpool_project.number}"
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
     resources = [for project in data.google_project.clusters_projects : "projects/${project.number}"]
@@ -317,6 +394,9 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     identity_type = "ANY_IDENTITY"
     sources {
       resource = "projects/${data.google_project.admin_project.number}"
+    }
+    sources {
+      resource = "projects/${data.google_project.workerpool_project.number}"
     }
     source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
@@ -629,6 +709,18 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
         method = "*"
       }
     }
+    operations {
+      service_name = "iam.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iamcredentials.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
   }
   lifecycle {
     create_before_destroy = true
@@ -706,6 +798,18 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
     }
     operations {
       service_name = "compute.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iam.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+    operations {
+      service_name = "iamcredentials.googleapis.com"
       method_selectors {
         method = "*"
       }
