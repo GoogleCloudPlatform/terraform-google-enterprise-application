@@ -170,20 +170,6 @@ A previously created **private** GitLab repository for each one of the repositor
     gcloud projects add-iam-policy-binding $GIT_SECRET_PROJECT --role=roles/secretmanager.admin --member=serviceAccount:tf-cb-eab-applicationfactory@YOUR-CLOUDBUILD-PROJECT.iam.gserviceaccount.com
     ```
 
-### Worker Pool Requirements
-
-If you are not using Worker Pools you can skip this step. If you are using Worker Pools, an additional step must be taken before deploying.
-
-There is a terraform script that will assign required permissions on the Worker Pool Host Project and requires `var.workerpool_id` to be specified on the 4-appfactory `terraform.tfvars` file. The script is located at [./modules/secure-cicd-pipeline/additional_workerpool_permissions.tf.example](./modules/secure-cicd-pipeline/additional_workerpool_permissions.tf.example).
-
-1. Enable the permission assignment terraform script on `secure-cicd-pipeline` module.
-
-    ```bash
-    mv ./modules/secure-cicd-pipeline/additional_workerpool_permissions.tf.example ./modules/secure-cicd-pipeline/additional_workerpool_permissions.tf
-    ```
-
-After renaming the file to `additional_workerpool_permissions.tf`, when you run the pipeline, the required permissions will automatically be assigned on the Worker Pool Host Project.
-
 ### Deploying with Google Cloud Build
 
 The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
@@ -229,14 +215,14 @@ Please note that some steps in this documentation are specific to the selected G
     cd eab-applicationfactory
     git checkout -b plan
 
-    cp -r ../../terraform-google-enterprise-application/4-appfactory/* .
+    cp -r ../terraform-google-enterprise-application/4-appfactory/* .
     rm modules
-    cp -r ../../terraform-google-enterprise-application/modules/ .
-    cp ../../terraform-example-foundation/build/cloudbuild-tf-* .
-    cp ../../terraform-example-foundation/build/tf-wrapper.sh .
+    cp -r ../terraform-google-enterprise-application/modules/ .
+    cp ../terraform-example-foundation/build/cloudbuild-tf-* .
+    cp ../terraform-example-foundation/build/tf-wrapper.sh .
     chmod 755 ./tf-wrapper.sh
 
-    cp -RT ../../terraform-example-foundation/policy-library/ ./policy-library
+    cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' cloudbuild-tf-*
     ```
 
