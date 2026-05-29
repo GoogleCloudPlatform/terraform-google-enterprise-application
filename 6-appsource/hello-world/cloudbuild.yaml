@@ -34,6 +34,8 @@ steps:
     id: build-multi-arch-image
   - id: 'create-attestation'
     name: '$_BINARY_AUTH_IMAGE'
+    env:
+      - 'DOCKER_API_VERSION=1.41'
     args:
       - '--artifact-url'
       - '$_CONTAINER_REGISTRY/skaffold-example:$COMMIT_SHA-dirty'
