@@ -17,7 +17,7 @@ steps:
   - name: gcr.io/cloud-builders/gcloud
     id: download-skaffold-cache
     args: ['storage', 'cp', $_CACHE_URI, '/workspace/cache'] # always write skaffold cache to filename cache in workspace
-  - name: gcr.io/k8s-skaffold/skaffold:v2.19.0
+  - name: gcr.io/k8s-skaffold/skaffold:v2.21.0
     id: build-and-push-images
     args:
         - "skaffold"

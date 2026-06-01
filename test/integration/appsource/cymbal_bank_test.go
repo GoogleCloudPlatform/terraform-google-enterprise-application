@@ -306,16 +306,14 @@ func TestSourceCymbalBank(t *testing.T) {
 					}
 				}
 				for i, targetId := range deployTargets.Array() {
-					i := i
-					targetId := targetId
 					if i > 0 {
-						promoteCmd := fmt.Sprintf("deploy releases promote --project=%s --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", projectID, releaseName, serviceName, region, targetId)
+						promoteCmd := fmt.Sprintf("deploy releases promote --project=%s --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", projectID, releaseName, servicesInfoMap[serviceName].ServiceName, region, targetId)
 						t.Logf("Promoting release to next target: %s", targetId)
 						// Execute the promote command
 						gcloud.Runf(t, promoteCmd)
 					}
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, serviceName, region, releaseName, targetId)
-					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 80*time.Second)
+					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
+					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 60*time.Second)
 				}
 			})
 			appsource.Test()

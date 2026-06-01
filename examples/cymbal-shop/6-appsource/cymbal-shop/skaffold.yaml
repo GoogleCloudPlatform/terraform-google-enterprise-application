@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v3
+apiVersion: skaffold/v4beta13
 kind: Config
 metadata:
   name: app
@@ -58,7 +58,9 @@ manifests:
     paths:
     - kubernetes-manifests
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl: {}
+  tolerateFailuresUntilDeadline: true
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
 # installed on the developer machine. However, note that
@@ -97,7 +99,7 @@ profiles:
 - name: staging
 - name: production
 ---
-apiVersion: skaffold/v3
+apiVersion: skaffold/v4beta13
 kind: Config
 metadata:
   name: loadgenerator
@@ -116,9 +118,7 @@ manifests:
   rawYaml:
   - ./kubernetes-manifests/loadgenerator.yaml
 deploy:
-  statusCheckDeadlineSeconds: 1200
   kubectl: {}
-  tolerateFailuresUntilDeadline: true
 profiles:
 - name: gcb
   build:
