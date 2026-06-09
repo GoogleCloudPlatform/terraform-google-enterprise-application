@@ -13,17 +13,58 @@
 # limitations under the License.
 
 steps:
+  - name: gcr.io/cloud-builders/gcloud
+    id: download-skaffold-cache
+    args: ['storage', 'cp', $_CACHE_URI, '/workspace/cache']
   - name: gcr.io/k8s-skaffold/skaffold:v2.21.0
     args:
       - "skaffold"
       - "build"
       - "--file-output=/workspace/artifacts.json"
       - "--default-repo=$_CONTAINER_REGISTRY"
+      - "--file-output=/workspace/artifacts.json"
+      - "--cache-file=/workspace/$_CACHE"
+  - name: gcr.io/cloud-builders/gcloud
+    id: upload-skaffold-cache
+    args: ['storage', 'cp', '/workspace/$_CACHE',  $_CACHE_URI]
+
+  - name: 'bash'
+    id: 'get-image-urls'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        apk add --no-cache jq
+        jq -r '.builds[] | select(.imageName=="emailservice") | .tag' /workspace/artifacts.json > /workspace/emailservice.txt
+        jq -r '.builds[] | select(.imageName=="productcatalogservice") | .tag' /workspace/artifacts.json > /workspace/productcatalogservice.txt
+        jq -r '.builds[] | select(.imageName=="recommendationservice") | .tag' /workspace/artifacts.json > /workspace/recommendationservice.txt
+        jq -r '.builds[] | select(.imageName=="shoppingassistantservice") | .tag' /workspace/artifacts.json > /workspace/shoppingassistantservice.txt
+        jq -r '.builds[] | select(.imageName=="shippingservice") | .tag' /workspace/artifacts.json > /workspace/shippingservice.txt
+        jq -r '.builds[] | select(.imageName=="checkoutservice") | .tag' /workspace/artifacts.json > /workspace/checkoutservice.txt
+        jq -r '.builds[] | select(.imageName=="paymentservice") | .tag' /workspace/artifacts.json > /workspace/paymentservice.txt
+        jq -r '.builds[] | select(.imageName=="currencyservice") | .tag' /workspace/artifacts.json > /workspace/currencyservice.txt
+        jq -r '.builds[] | select(.imageName=="cartservice") | .tag' /workspace/artifacts.json > /workspace/cartservice.txt
+        jq -r '.builds[] | select(.imageName=="frontend") | .tag' /workspace/artifacts.json > /workspace/frontend.txt
+        jq -r '.builds[] | select(.imageName=="adservice") | .tag' /workspace/artifacts.json > /workspace/adservice.txt
+        jq -r '.builds[] | select(.imageName=="loadgenerator") | .tag' /workspace/artifacts.json > /workspace/loadgenerator.txt
+        echo "emailservice Image: $(cat /workspace/emailservice.txt)"
+        echo "productcatalogservice Image:  $(cat /workspace/productcatalogservice.txt)"
+        echo "recommendationservice Image:  $(cat /workspace/recommendationservice.txt)"
+        echo "shoppingassistantservice Image:  $(cat /workspace/shoppingassistantservice.txt)"
+        echo "shippingservice Image:  $(cat /workspace/shippingservice.txt)"
+        echo "checkoutservice Image:  $(cat /workspace/checkoutservice.txt)"
+        echo "paymentservice Image:  $(cat /workspace/paymentservice.txt)"
+        echo "currencyservice Image:  $(cat /workspace/currencyservice.txt)"
+        echo "cartservice Image:  $(cat /workspace/cartservice.txt)"
+        echo "frontend Image:  $(cat /workspace/frontend.txt)"
+        echo "adservice Image:  $(cat /workspace/adservice.txt)"
+        echo "loadgenerator Image:  $(cat /workspace/loadgenerator.txt)"
+
   - id: 'create-attestation-emailservice'
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/emailservice:$SHORT_SHA'
+      - "$$(cat /workspace/emailservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -32,7 +73,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/productcatalogservice:$SHORT_SHA'
+      - "$$(cat /workspace/productcatalogservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -41,7 +82,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/recommendationservice:$SHORT_SHA'
+      - "$$(cat /workspace/recommendationservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -50,7 +91,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/shoppingassistantservice:$SHORT_SHA'
+      - "$$(cat /workspace/shoppingassistantservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -59,25 +100,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/shippingservice:$SHORT_SHA'
-      - '--attestor'
-      - '$_ATTESTOR_ID'
-      - '--keyversion'
-      - '$_KMS_KEY_VERSION'
-  - id: 'create-attestation-adservice'
-    name: '$_BINARY_AUTH_IMAGE'
-    args:
-      - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/adservice:$SHORT_SHA'
-      - '--attestor'
-      - '$_ATTESTOR_ID'
-      - '--keyversion'
-      - '$_KMS_KEY_VERSION'
-  - id: 'create-attestation-loadgenerator'
-    name: '$_BINARY_AUTH_IMAGE'
-    args:
-      - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/loadgenerator:$SHORT_SHA'
+      - "$$(cat /workspace/shippingservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -86,7 +109,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/checkoutservice:$SHORT_SHA'
+      - "$$(cat /workspace/checkoutservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -95,7 +118,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/paymentservice:$SHORT_SHA'
+      - "$$(cat /workspace/paymentservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -104,7 +127,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/currencyservice:$SHORT_SHA'
+      - "$$(cat /workspace/currencyservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -113,7 +136,7 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/cartservice:$SHORT_SHA'
+      - "$$(cat /workspace/cartservice.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
@@ -122,7 +145,25 @@ steps:
     name: '$_BINARY_AUTH_IMAGE'
     args:
       - '--artifact-url'
-      - '$_CONTAINER_REGISTRY/frontend:$SHORT_SHA'
+      - "$$(cat /workspace/frontend.txt)"
+      - '--attestor'
+      - '$_ATTESTOR_ID'
+      - '--keyversion'
+      - '$_KMS_KEY_VERSION'
+  - id: 'create-attestation-adservice'
+    name: '$_BINARY_AUTH_IMAGE'
+    args:
+      - '--artifact-url'
+      - "$$(cat /workspace/adservice.txt)"
+      - '--attestor'
+      - '$_ATTESTOR_ID'
+      - '--keyversion'
+      - '$_KMS_KEY_VERSION'
+  - id: 'create-attestation-loadgenerator'
+    name: '$_BINARY_AUTH_IMAGE'
+    args:
+      - '--artifact-url'
+      - "$$(cat /workspace/loadgenerator.txt)"
       - '--attestor'
       - '$_ATTESTOR_ID'
       - '--keyversion'
