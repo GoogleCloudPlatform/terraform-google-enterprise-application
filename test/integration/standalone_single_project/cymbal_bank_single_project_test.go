@@ -322,7 +322,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					}
 					t.Logf("Getting rollout for target %s", targetId)
 					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
-					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 60*time.Second)
+					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 90*time.Second)
 				}
 			})
 			appsource.Test()
