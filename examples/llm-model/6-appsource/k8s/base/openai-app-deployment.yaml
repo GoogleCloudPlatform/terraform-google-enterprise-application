@@ -81,7 +81,7 @@ spec:
       dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/arch: amd64
-        cloud.google.com/gke-accelerator: nvidia-rtx-pro-6000
+        cloud.google.com/gke-accelerator: nvidia-tesla-a100
         cloud.google.com/gke-spot: "true" # test only - SHOULD NOT BE USED IN PRODUCTION!
       restartPolicy: Always
       schedulerName: default-scheduler
