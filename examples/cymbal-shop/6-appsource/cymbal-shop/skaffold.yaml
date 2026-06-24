@@ -96,8 +96,17 @@ profiles:
     path: /manifests/kustomize/paths/1
     value: kustomize/components/network-policies
 - name: development
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-development
 - name: staging
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-nonproduction
 - name: production
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-production
 ---
 apiVersion: skaffold/v4beta13
 kind: Config
@@ -130,11 +139,20 @@ profiles:
   manifests:
     rawYaml:
       - ./kubernetes-manifests/loadgenerator-development.yaml
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-development
 - name: staging
   manifests:
     rawYaml:
       - ./kubernetes-manifests/loadgenerator-staging.yaml
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-nonproduction
 - name: production
   manifests:
     rawYaml:
       - ./kubernetes-manifests/loadgenerator-production.yaml
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-production
