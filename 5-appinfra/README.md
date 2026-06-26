@@ -41,7 +41,7 @@ An overview of application inrastruction pipeline is shown below, in the context
 
 ### Application CI/CD pipeline
 
-The application infrastructure pipeline creates the following resources to establish the application CI/CD pipeline, as defined in the [`cicd-pipeline`](./modules/cicd-pipeline/) submodule:
+The application infrastructure pipeline creates the following resources to establish the application CI/CD pipeline, as defined in the [`cicd-pipeline`](./modules/deployment-pipeline/) submodule:
 
 - __Artifact Registry Repository:__ Creates a Docker repository in Artifact Registry to store container images.
 - __Cloud Build Trigger:__ Configures a Cloud Build trigger that automatically starts a build on code changes in the application repository.
@@ -131,6 +131,8 @@ The steps below assume that you are checked out on the same level as `terraform-
 
     ```bash
     cp -R ./terraform-google-enterprise-application/5-appinfra/* $helloworld_repository
+    rm $helloworld_repository/modules
+    cp -r ./terraform-google-enterprise-application/modules/ $helloworld_repository
     mv $helloworld_repository/apps/default-example/hello-world/envs/shared/terraform.example.tfvars $helloworld_repository/apps/default-example/hello-world/envs/shared/terraform.tfvars
     cp ./terraform-example-foundation/build/cloudbuild-tf-* $helloworld_repository/
     cp ./terraform-example-foundation/build/tf-wrapper.sh $helloworld_repository/

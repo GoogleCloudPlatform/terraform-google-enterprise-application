@@ -39,7 +39,17 @@ func CopyFile(src string, dest string) error {
 	return os.WriteFile(dest, buf, s.Mode())
 }
 
-// CopyDirectory copies a directory and the files and directories under it.
+// DeleteFile deletes a single file from the src path to the dest path
+func DeleteFile(src string) error {
+	_, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(src)
+	return err
+}
+
+// CopyDirectory copies a directory and the files and directories under it. It will skip symbolic links
 func CopyDirectory(src string, dest string) error {
 	err := os.MkdirAll(dest, 0755)
 	if err != nil {
@@ -58,7 +68,7 @@ func CopyDirectory(src string, dest string) error {
 			if err != nil {
 				return err
 			}
-		} else {
+		} else if !isSymlinkToDir(filepath.Join(src, f.Name())) {
 			err = CopyFile(filepath.Join(src, f.Name()), filepath.Join(dest, f.Name()))
 			if err != nil {
 				return err
@@ -66,6 +76,34 @@ func CopyDirectory(src string, dest string) error {
 		}
 	}
 	return nil
+}
+
+// isSymlinkToDir checks if the given path is a symbolic link
+// AND if its resolved target is a valid directory.
+func isSymlinkToDir(path string) bool {
+	// 1. Verify if the file itself is a symlink using os.Lstat.
+	// os.Lstat does NOT follow the symlink, returning info about the link itself.
+	lstatInfo, err := os.Lstat(path)
+	if err != nil {
+		return false
+	}
+
+	// Check if the os.ModeSymlink bit is present.
+	if lstatInfo.Mode()&os.ModeSymlink == 0 {
+		// It's a regular file or directory, not a symlink.
+		return false
+	}
+
+	// 2. Verify the target. os.Stat automatically follows the symlink.
+	statInfo, err := os.Stat(path)
+	if err != nil {
+		// This commonly fails if the symlink is broken (target does not exist),
+		// if there is a symlink loop, or due to permission denied (e.g., target is restricted).
+		return false
+	}
+
+	// Return true only if the resolved target is a directory.
+	return statInfo.IsDir()
 }
 
 // ReplaceStringInFile replaces a string in a file with a new value.

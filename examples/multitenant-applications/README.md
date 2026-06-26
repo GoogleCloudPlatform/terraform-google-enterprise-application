@@ -553,7 +553,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
     rm -rf $cymbalshop_infra_repo/modules
     cp -R ./terraform-google-enterprise-application/examples/cymbal-shop/5-appinfra/cymbal-shop/cymbalshop/envs $cymbalshop_infra_repo
     rm -rf $cymbalshop_infra_repo/modules
-    cp -R ./terraform-google-enterprise-application//5-appinfra/modules $cymbalshop_infra_repo
+    cp -R ./terraform-google-enterprise-application/modules $cymbalshop_infra_repo
     cp ./terraform-example-foundation/build/cloudbuild-tf-* $cymbalshop_infra_repo/
     cp ./terraform-example-foundation/build/tf-wrapper.sh $cymbalshop_infra_repo/
     chmod 755 $cymbalshop_infra_repo/tf-wrapper.sh

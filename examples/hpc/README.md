@@ -1,136 +1,225 @@
-# HPC Batch Jobs Use Cases
+# HPC Examples
 
-This document presents two use cases that demonstrate the utilization of `kueue` to manage multi-team batch jobs within a Cluster.
+This example shows how to deploy a High-Performance Computing (HPC) environment for batch jobs using the infrastructure created by the [Enterprise Application blueprint](https://cloud.google.com/architecture/enterprise-application-blueprint). It demonstrates the utilization of `kueue` to manage multi-team batch jobs.
 
-### Use Cases:
+The primary use case demonstrated is a Financial Analysis using Monte Carlo Simulations, adapted from [Google Cloud Platform's Risk and Research Blueprints](https://github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/main/examples/research/monte-carlo).
 
-- [Use Case 1: HPC Financial Analysis Using Monte Carlo Simulations (Team: `hpc-team-b`)](#use-case-1-hpc-financial-analysis-using-monte-carlo-simulations-team-hpc-team-b)
-- [Use Case 2: HPC AI Model Training with GPU (Team: `hpc-team-a`)](#use-case-2-hpc-ai-model-training-with-gpu-team-hpc-team-a)
+## Pre-Requisites (Infrastructure)
 
-## Use Case 1: HPC Financial Analysis Using Monte Carlo Simulations (Team: `hpc-team-b`)
+This example requires the following blueprint phases to be executed successfully:
+1. `1-bootstrap`
+2. `2-multitenant`
+3. `3-fleetscope`
 
-This example is an adaptation from [Google Cloud Platform's Risk and Research Blueprints](github.com/GoogleCloudPlatform/risk-and-research-blueprints/tree/main/examples/research/monte-carlo).
+## Additional HPC Requirements
 
-### Requirements
+Before deploying the infrastructure, ensure the following requirements are met for your target cluster.
 
-- **Docker Registry Connectivity**
-  If you are using a private cluster with private nodes, they must be able to fetch Kueue Docker images from `registry.k8s.io`. This can be done by adding Cloud NAT to the private nodes network, having your own NAT setup on your cluster network, or by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md).
+1.  **Kueue Installation**
+    `Kueue` is a K8s-native Job Queueing system. If your cluster has network access to `registry.k8s.io`, you can install it directly.
 
-- **Kubectl with Cluster Connection**
-  If using a private cluster, you can use Connect Gateway.
+    *   **Option 1 (Cluster with NAT):** Install Kueue by running:
+        ```bash
+        kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
+        ```
+        Wait for the installation to complete:
+        ```bash
+        kubectl wait deploy/kueue-controller-manager -nkueue-system --for=condition=available --timeout=5m
+        ```
 
-  ```bash
-  gcloud container fleet memberships get-credentials CLUSTER-NAME --project=YOUR-CLUSTER-PROJECT --location=YOUR-CLUSTER-REGION
-  ```
+    *   **Option 2 (Private Cluster without NAT):** Install Kueue by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md).
 
-  If you have access to specific namespace, you can run:
+2.  **Cluster Toolkit (gcluster)**
+    This guide assumes `gcluster` is installed. For setup instructions, see the [official documentation](https://cloud.google.com/cluster-toolkit/docs/setup/configure-environment#local-shell).
 
-  ```bash
-  gcloud container fleet scopes namespaces get-credentials NAMESPACE
-  ```
+3.  **Kubectl Connection**
+    Ensure you can connect to your cluster. For private clusters, you can use Connect Gateway.
+    ```bash
+    gcloud container fleet memberships get-credentials CLUSTER-NAME --project=YOUR-CLUSTER-PROJECT --location=YOUR-CLUSTER-REGION
+    ```
 
-- **Kueue**
+## Usage (IaC Deployment)
 
-  - **Option 1 (Cluster Network with NAT)**: Install Kueue by running the following command:
+This section details the Infrastructure as Code deployment, which should be performed before running the HPC jobs. The steps below assume you are deploying via Cloud Build.
 
-      ```bash
-      kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
-      ```
+### Deploying with Google Cloud Build
 
-      > **Note:** To uninstall a released version from your cluster, run:
-      >
-      > ```bash
-      > kubectl delete -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.10.1/manifests.yaml
-      > ```
+The steps below assume that you are in a directory containing both the `terraform-google-enterprise-application` and `terraform-example-foundation` repositories.
 
-      Wait for Kueue installation to complete:
+#### 1. Add HPC namespaces at Fleetscope repository
 
-      ```bash
-      kubectl wait deploy/kueue-controller-manager -nkueue-system --for=condition=available --timeout=5m
-      ```
+1.  Navigate to your `3-fleetscope` repository and add the `hpc-team-a` and `hpc-team-b` namespaces to `terraform.tfvars`:
 
-  - **Option 2**: Install Kueue by following the tutorial for [Artifact Registry Remote Repositories](../../docs/remote_repository_kueue_installation.md)
-
-- **Cluster Toolkit (gcluster)**
-
-    This guide assumes you have `gcluster` installed on your home directory. More information on how to setup gcluster in the following [link](https://cloud.google.com/cluster-toolkit/docs/setup/configure-environment#local-shell)
-
-#### Create Namespaces
-
-##### Add `hpc-team-a` and `hpc-team-b` Namespaces at the Fleetscope repository
-
-Typically, the application namespace will be created on 3-fleetscope and specified in 6-appsource.
-
-1. Navigate to Fleetscope repository and add the hpc-team-a and hpc-team-b namespaces at `terraform.tfvars`, if the namespace was not created already:
-
-    ```diff
+    ```hcl
     namespace_ids = {
-    +    "hpc-team-a"     = "your-hpc-team-a-group@yourdomain.com",
-    +    "hpc-team-b"     = "your-hpc-team-b-group@yourdomain.com",
+         "hpc-team-a"     = "your-hpc-team-a-group@yourdomain.com",
+         "hpc-team-b"     = "your-hpc-team-b-group@yourdomain.com",
          ...
     }
-   ```
+    ```
 
-1. Apply changes by commiting to a named environment branch (`development`, `nonproduction`, `production`). After the build associated with the fleetscope repository finishes it's execution, the namespaces should be present in the cluster.
+2.  Commit and push the changes to a named environment branch (`development`, `nonproduction`, or `production`) to trigger the Cloud Build pipeline and apply the changes.
 
-#### Create Teams Environments and Infrastructure
+#### 2. Add HPC envs at App Factory
 
-##### Create projects in 4-appfactory
+1.  Navigate to your `4-appfactory` repository. The example file at `examples/hpc/4-appfactory/terraform.tfvars` shows how to configure the projects for `hpc-team-a` and `hpc-team-b`. Update your main `terraform.tfvars` file accordingly:
 
-You will find an example [terraform.tfvars](./4-appfactory/terraform.tfvars) in this example to create `hpc-team-a` and `hpc-team-b`.
+    ```hcl
+    applications = {
+      "hpc" = {
+        "hpc-team-a" = {
+          create_infra_project = true
+          create_admin_project = true
+        },
+        "hpc-team-b" = {
+          create_infra_project = true
+          create_admin_project = true
+        }
+      }
+    }
 
-```diff
-applications = {
-+  "hpc" = {
-+    "hpc-team-a" = {
-+      create_infra_project = true
-+      create_admin_project = true
-+    },
-+    "hpc-team-b" = {
-+      create_infra_project = true
-+      create_admin_project = true
-+    }
-+  }
-}
+    cloudbuildv2_repository_config = {
+      # ... (your existing Git provider config)
+      repositories = {
+        "hpc-team-a" = {
+          repository_name = "hpc-team-a-i-r"
+          repository_url  = "UPDATE_WITH_YOUR_GIT_REPO_URL_A"
+        },
+        "hpc-team-b" = {
+          repository_name = "hpc-team-b-i-r"
+          repository_url  = "UPDATE_WITH_YOUR_GIT_REPO_URL_B"
+        }
+        # ... other repositories
+      }
+    }
+    ```
 
-cloudbuildv2_repository_config = {
-  repo_type = "GITLABv2"
-  repositories = {
-+    hpc-team-a = {
-+      repository_name = "hpc-team-a-i-r"
-+      repository_url  = "https://gitlab.com/user/hpc-team-a-i-r.git"
-+    },
-+    hpc-team-b = {
-+      repository_name = "hpc-team-b-i-r"
-+      repository_url  = "https://gitlab.com/user/hpc-team-b-i-r.git"
-+    }
-  }
-  # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
-  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-  # If you are using a self-hosted instance, you may change the URL below accordingly
-  gitlab_enterprise_host_uri = "https://gitlab.com"
-}
+2.  Commit and push your changes to a named branch to apply the modifications.
 
-```
+#### 3. Add HPC envs at App Infra
 
-Apply the modifications by pushing code to a named branch, after updating the variables.
+1.  Retrieve team repository and project information created by the `4-appfactory` stage. From your `eab-applicationfactory` directory, run:
 
-##### Deploy baseline infrastructure in 5-appinfra
+    ```bash
+    cd envs/shared/
+    terraform init
 
-Under [5-appinfra](./5-appinfra/) you will find the two environment folders. They just need to be copied to you AppInfra Pipeline repository and pushed to a named branch.
+    # Retrieve outputs for Team A
+    export hpc_team_a_project=$(terraform output -json app-group | jq -r '.["hpc.hpc-team-a"]["app_admin_project_id"]')
+    echo hpc_team_a_project=$hpc_team_a_project
+    export hpc_team_a_repository=$(terraform output -json app-group | jq -r '.["hpc.hpc-team-a"]["app_infra_repository_name"]')
+    echo hpc_team_a_repository=$hpc_team_a_repository
+    export hpc_team_a_statebucket=$(terraform output -json app-group | jq -r '.["hpc.hpc-team-a"]["app_cloudbuild_workspace_state_bucket_name"]' | sed 's/.*\///')
+    echo hpc_team_a_statebucket=$hpc_team_a_statebucket
 
-##### Apply Kueue Resources
+    # Retrieve outputs for Team B
+    export hpc_team_b_project=$(terraform output -json app-group | jq -r '.["hpc.hpc-team-b"]["app_admin_project_id"]')
+    echo hpc_team_b_project=$hpc_team_b_project
+    export hpc_team_b_repository=$(terraform output -json app-group | jq -r '.["hpc.hpc-team-b"]["app_infra_repository_name"]')
+    echo hpc_team_b_repository=$hpc_team_b_repository
+    export hpc_team_b_statebucket=$(terraform output -json app-group | jq -r '.["hpc.hpc-team-b"]["app_cloudbuild_workspace_state_bucket_name"]' | sed 's/.*\///')
+    echo hpc_team_b_statebucket=$hpc_team_b_statebucket
 
-Run the following command to create the necessary Kueue resources (ClusterQueue and LocalQueue), this step should be run by a Batch Administrator, after the namespaces are created and should be run only once:
+    cd ../../
+    ```
+2.  Get the remote state bucket from `1-bootstrap` to be used later.
+    ```bash
+    terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" init
+    export remote_state_bucket=$(terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
+    echo "remote_state_bucket = ${remote_state_bucket}"
+    ```
+3.  Clone the newly created infrastructure repositories for each team.
+
+    ```bash
+    mkdir hpc-teams
+    cd hpc-teams
+
+    # (CSR Only)
+    gcloud source repos clone $hpc_team_a_repository --project=$hpc_team_a_project
+    gcloud source repos clone $hpc_team_b_repository --project=$hpc_team_b_project
+
+    # (GitHub Only)
+    # NOTE: Replace <GITHUB-OWNER or ORGANIZATION> with your actual GitHub owner or organization name.
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$hpc_team_a_repository.git
+    git clone https://github.com/<GITHUB-OWNER or ORGANIZATION>/$hpc_team_b_repository.git
+
+    # (GitLab Only)
+    # NOTE: Make sure to replace <GITLAB-GROUP or ACCOUNT> with your actual GitLab group or account name.
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$hpc_team_a_repository.git
+    git clone https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/$hpc_team_b_repository.git
+    ```
+
+4.  Copy the Terraform code for each team repository and replace placeholders.
+
+    ```bash
+    # Remove existing modules directories
+    rm -rf $hpc_team_a_repository/modules
+    rm -rf $hpc_team_b_repository/modules
+    cp -R ../terraform-google-enterprise-application/examples/hpc/5-appinfra/hpc/hpc-team-a/* $hpc_team_a_repository
+    rm -rf $hpc_team_a_repository/modules
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $hpc_team_a_repository
+    cp ../../terraform-example-foundation/build/cloudbuild-tf-* $hpc_team_a_repository/
+    cp ../../terraform-example-foundation/build/tf-wrapper.sh $hpc_team_a_repository/
+    chmod 755 $hpc_team_a_repository/tf-wrapper.sh
+    cp -RT ../../terraform-example-foundation/policy-library/ $hpc_team_a_repository/policy-library
+    rm -rf $hpc_team_a_repository/policy-library/policies/constraints/*
+    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $hpc_team_a_repository/cloudbuild-tf-*
+    mv $hpc_team_a_repository/*/*/terraform.tfvars.example $hpc_team_a_repository/*/*/terraform.tfvars
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$hpc_team_a_statebucket/" $hpc_team_a_repository/*/*/backend.tf
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $hpc_team_a_repository/*/*/terraform.tfvars
+
+    cp -R ../terraform-google-enterprise-application/examples/hpc/5-appinfra/hpc/hpc-team-b/* $hpc_team_b_repository
+    rm -rf $hpc_team_b_repository/modules
+    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $hpc_team_b_repository
+    cp ../terraform-example-foundation/build/cloudbuild-tf-* $hpc_team_b_repository/
+    cp ../terraform-example-foundation/build/tf-wrapper.sh $hpc_team_b_repository/
+    chmod 755 $hpc_team_b_repository/tf-wrapper.sh
+    cp -RT ../terraform-example-foundation/policy-library/ $hpc_team_b_repository/policy-library
+    rm -rf $hpc_team_b_repository/policy-library/policies/constraints/*
+    sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $hpc_team_b_repository/cloudbuild-tf-*
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$hpc_team_b_statebucket/" $hpc_team_b_repository/*/*/backend.tf
+    mv $hpc_team_b_repository/*/*/terraform.tfvars.example $hpc_team_b_repository/*/*/terraform.tfvars
+    sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $hpc_team_b_repository/*/*/terraform.tfvars
+    ```
+
+5.  Commit and push the infrastructure code for each team.
+
+    ```bash
+    cd $hpc_team_a_repository
+    git checkout -b plan
+    git add .
+    git commit -m 'Initialize hpc-team-a repo'
+    git push --set-upstream origin plan
+    # Create and push environment branches as needed
+    git checkout -b production && git push --set-upstream origin production
+    cd ..
+
+    cd $hpc_team_b_repository
+    git checkout -b plan
+    git add .
+    git commit -m 'Initialize hpc-team-b repo'
+    git push --set-upstream origin plan
+    # Create and push environment branches as needed
+    git checkout -b production && git push --set-upstream origin production
+    cd ..
+    ```
+
+> **Note:** Unlike the Cymbal Bank example, the HPC use case does not have a separate "Application Source Code" pipeline. The application logic is deployed in the final step using the `gcluster` blueprint.
+
+---
+
+## Running the HPC Use Case
+
+After the IaC deployment is complete, a Batch Administrator and the team members can proceed with the following steps.
+
+### 1. Apply Kueue Resources (Admin Task)
+
+A Batch Administrator must apply the Kueue resources (`ClusterQueue` and `LocalQueue`) once, after the namespaces have been created. These queues will be used to schedule the jobs.
 
 ```bash
+# Ensure you have the manifests from the example directory
 kubectl apply -f manifests/kueue-resources.yaml
 ```
-
-The queues that are created in this step will later be used to schedule batch jobs.
-
 ### Usage
 
 #### Permissions within the Developer Platform

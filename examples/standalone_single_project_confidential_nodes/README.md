@@ -12,38 +12,49 @@ This example creates:
 
 ## Pre-requisites
 
-This examples requires one project already created with the following APIs enabled:
+This example requires a single project already created with the following APIs enabled:
 
-- accesscontextmanager.googleapis.com
-- anthos.googleapis.com
-- anthosconfigmanagement.googleapis.com
-- apikeys.googleapis.com
-- certificatemanager.googleapis.com
-- cloudbilling.googleapis.com
-- cloudbuild.googleapis.com
-- clouddeploy.googleapis.com
-- cloudfunctions.googleapis.com
-- cloudresourcemanager.googleapis.com
-- cloudtrace.googleapis.com
-- compute.googleapis.com
-- container.googleapis.com
-- gkehub.googleapis.com
-- iam.googleapis.com
-- iap.googleapis.com
-- mesh.googleapis.com
-- monitoring.googleapis.com
-- multiclusteringress.googleapis.com
-- multiclusterservicediscovery.googleapis.com
-- networkmanagement.googleapis.com
-- secretmanager.googleapis.com
-- servicemanagement.googleapis.com
-- servicenetworking.googleapis.com
-- serviceusage.googleapis.com
-- sqladmin.googleapis.com
-- storage-api.googleapis.com
-- trafficdirector.googleapis.com
+   To enable these APIs, execute the following commands, replacing `YOUR_PROJECT_ID` with your actual project ID:
 
-The entity used to deploy this examples must have the following roles at Project level:
+   ```bash
+   gcloud services enable \
+   accesscontextmanager.googleapis.com \
+   anthos.googleapis.com \
+   anthosconfigmanagement.googleapis.com \
+   apikeys.googleapis.com \
+   certificatemanager.googleapis.com \
+   cloudbilling.googleapis.com \
+   cloudbuild.googleapis.com \
+   clouddeploy.googleapis.com \
+   cloudfunctions.googleapis.com \
+   cloudresourcemanager.googleapis.com \
+   cloudtrace.googleapis.com \
+   compute.googleapis.com \
+   container.googleapis.com \
+   gkehub.googleapis.com \
+   --project=YOUR_PROJECT_ID
+   ```
+
+   ```bash
+   gcloud services enable \
+   iam.googleapis.com \
+   iap.googleapis.com \
+   mesh.googleapis.com \
+   monitoring.googleapis.com \
+   multiclusteringress.googleapis.com \
+   multiclusterservicediscovery.googleapis.com \
+   networkmanagement.googleapis.com \
+   secretmanager.googleapis.com \
+   servicemanagement.googleapis.com \
+   servicenetworking.googleapis.com \
+   serviceusage.googleapis.com \
+   sqladmin.googleapis.com \
+   storage-api.googleapis.com \
+   trafficdirector.googleapis.com \
+   --project=YOUR_PROJECT_ID
+   ```
+
+The entity used to deploy this example must have the following roles at Project level:
 
 - Artifact Registry Admin: `roles/artifactregistry.admin`
 - Certificate Manager Owner: `roles/certificatemanager.owner`
@@ -69,10 +80,20 @@ The entity used to deploy this examples must have the following roles at Project
 - Project AdminL `roles/resourcemanager.projectIamAdmin`
 - Viewer: `roles/viewer`
 
-The entity used to deploy this examples must have the following roles at Organization level:
+The entity used to deploy this example must have the following roles at Organization level:
 
 - Organization Administrator: `roles/resourcemanager.organizationAdmin`
 - Access Context Manager Policy Admin: `roles/accesscontextmanager.policyAdmin`
+
+This example requires a Single network configured:
+
+- One subnet for Cluster
+- One subnet for a NAT
+- DNS Policy With inbound fowarding enabled
+- A [VM Proxy machine configured for Private Worker Pool](https://cloud.google.com/build/docs/private-pools/access-external-resources-using-static-external-ip#access_external_resources_in_a_private_network)
+- [Private Service Connect Configured](https://cloud.google.com/build/docs/private-pools/using-vpc-service-controls)
+
+This example also requires a VPC-SC Perimeter created and [configured with project](https://cloud.google.com/vpc-service-controls/docs/set-up-service-perimeter).
 
 This example requires a Single network configured:
 
