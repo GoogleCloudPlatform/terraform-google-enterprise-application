@@ -37,7 +37,7 @@ spec:
     spec:
       priorityClassName: default-priority
       nodeSelector:
-        cloud.google.com/compute-class: spot-capacity
+        cloud.google.com/compute-class: : ${compute_class}
       restartPolicy: Never
       containers:
       - name: fio

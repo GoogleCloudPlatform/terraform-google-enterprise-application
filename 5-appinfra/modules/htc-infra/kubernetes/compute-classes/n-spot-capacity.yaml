@@ -23,7 +23,7 @@ spec:
   nodePoolAutoCreation:
     enabled: true
   priorities:
-  - nodepools: [spot-nodes-1]
+  # - nodepools: [spot-nodes-1]
   - machineFamily: "n2"
     minCores: 4
     minMemoryGb: 16

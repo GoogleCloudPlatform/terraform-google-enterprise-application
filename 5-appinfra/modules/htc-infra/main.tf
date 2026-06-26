@@ -61,6 +61,9 @@ module "agent" {
   repository_region = var.region
   repository_id     = var.service_name
 
+  app_cloudbuild_workspace_cloudbuild_sa_email = var.app_cloudbuild_workspace_cloudbuild_sa_email
+  workerpool_id                                = var.workerpool_id
+
   containers = {
     agent = {
       source = "${path.module}/agent/src"
@@ -77,10 +80,12 @@ module "agent" {
 module "keda" {
   source = "./modules/keda"
 
-  project_id        = var.admin_project
-  region            = var.region
-  repository_region = var.region
-  repository_id     = var.service_name
+  project_id                                   = var.admin_project
+  region                                       = var.region
+  repository_region                            = var.region
+  repository_id                                = var.service_name
+  app_cloudbuild_workspace_cloudbuild_sa_email = var.app_cloudbuild_workspace_cloudbuild_sa_email
+  workerpool_id                                = var.workerpool_id
 }
 
 #-----------------------------------------------------
@@ -92,7 +97,7 @@ module "gke" {
   gke_cluster_names  = var.gke_cluster_names
   project_id         = var.infra_project
   cluster_project_id = var.cluster_project_id
-  regions            = ["us-central1"]
+  regions            = var.regions
   agent_image        = module.agent.status["agent"].image_url
   namespace          = local.namespace
   env                = var.env
@@ -113,9 +118,12 @@ module "gke" {
   parallelstore_enabled   = var.storage_type == "PARALLELSTORE"
   parallelstore_instances = local.parallelstore_instances
   vpc_name                = var.network_name
+  compute_class           = var.compute_class
 
   keda_image           = module.keda.keda_images.keda
   keda_apiserver_image = module.keda.keda_images.keda-metrics-apiserver
+
+  app_cloud_deploy_sa_email = var.app_cloud_deploy_sa_email
 
   depends_on = [
     module.agent

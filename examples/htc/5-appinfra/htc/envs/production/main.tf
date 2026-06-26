@@ -15,52 +15,24 @@
 locals {
   env              = "production"
   application_name = "htc"
-  service_name     = "htc"
-  team_name        = "default"
-  repo_name        = "eab-${local.application_name}-${local.service_name}"
-  repo_branch      = "main"
-}
-
-module "app" {
-  source = "../../modules/cicd-pipeline"
-
-  project_id                 = local.app_admin_project
-  region                     = var.region
-  env_cluster_membership_ids = local.cluster_membership_ids
-  cluster_service_accounts   = { for i, sa in local.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
-
-  service_name           = local.service_name
-  team_name              = local.team_name
-  repo_name              = local.repo_name
-  repo_branch            = local.repo_branch
-  app_build_trigger_yaml = "cloudbuild.yaml"
-
-  buckets_force_destroy = var.buckets_force_destroy
-
-  cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
-  workerpool_id                  = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
-  access_level_name              = var.access_level_name
-  logging_bucket                 = var.logging_bucket
-  bucket_kms_key                 = var.bucket_kms_key
-
-  attestation_kms_key                = var.attestation_kms_key
-  attestor_id                        = contains(var.environment_names, "production") ? data.terraform_remote_state.fleetscope["production"].outputs.attestor_id : data.terraform_remote_state.fleetscope[var.environment_names[0]].outputs.attestor_id
-  binary_authorization_image         = data.terraform_remote_state.bootstrap.outputs.binary_authorization_image
-  binary_authorization_repository_id = data.terraform_remote_state.bootstrap.outputs.binary_authorization_repository_id
 }
 
 module "htc-infra" {
   source = "../../modules/htc-infra"
 
-  service_name           = local.service_name
-  gke_cluster_names      = local.gke_cluster_names
-  infra_project          = local.app_infra_project
-  region                 = var.region
-  network_self_link      = var.envs[local.env].network_self_link
-  network_name           = local.network_name
-  team                   = var.team
-  admin_project          = local.app_admin_project
-  cluster_project_id     = local.cluster_project_id
-  cluster_project_number = local.cluster_project_number
-  env                    = local.env
+  service_name                                 = local.application_name
+  gke_cluster_names                            = local.gke_cluster_names
+  infra_project                                = local.app_infra_project
+  region                                       = var.region
+  network_self_link                            = var.envs[local.env].network_self_link
+  network_name                                 = local.network_name
+  team                                         = var.team
+  admin_project                                = local.app_admin_project
+  cluster_project_id                           = local.cluster_project_id
+  cluster_project_number                       = local.cluster_project_number
+  env                                          = local.env
+  regions                                      = local.regions
+  app_cloudbuild_workspace_cloudbuild_sa_email = data.terraform_remote_state.appinfra.outputs.cloudbuild_service_account.id
+  workerpool_id                                = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
+  app_cloud_deploy_sa_email                    = data.terraform_remote_state.appinfra.outputs.clouddeploy_service_account.email
 }

@@ -39,7 +39,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       nodeSelector:
-        cloud.google.com/compute-class: spot-capacity
+        cloud.google.com/compute-class: : ${compute_class}
       priorityClassName: default-priority
       restartPolicy: Never
       containers:

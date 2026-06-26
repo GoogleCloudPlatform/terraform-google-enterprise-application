@@ -139,7 +139,7 @@ spec:
     spec:
       priorityClassName: higher-priority
       nodeSelector:
-        cloud.google.com/compute-class: spot-capacity
+        cloud.google.com/compute-class: : ${compute_class}
       containers:
       - name: file-generator
         image: us-docker.pkg.dev/fsi-research-1/research-images/fio:latest

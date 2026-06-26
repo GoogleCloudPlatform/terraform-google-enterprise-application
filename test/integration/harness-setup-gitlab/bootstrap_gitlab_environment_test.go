@@ -107,6 +107,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"hello-world-i-r",
 		"hpc-team-a-i-r",
 		"hpc-team-b-i-r",
+		"htc-i-r",
 		"capital-agent-i-r",
 		"llamma-model-i-r",
 		// 5-appinfra repositories
@@ -120,6 +121,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"eab-default-example-hello-world",
 		"eab-agent-capital-agent",
 		"eab-llm-model-llamma-model",
+		"eab-htc",
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
