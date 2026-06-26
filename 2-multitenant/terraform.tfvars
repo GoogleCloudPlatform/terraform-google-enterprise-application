@@ -45,4 +45,7 @@ apps = {
   "agent" : {
     "acronym" = "agt",
   }
+  "llm-model" : {
+    "acronym" = "llm",
+  }
 }

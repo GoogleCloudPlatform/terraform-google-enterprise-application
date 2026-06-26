@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v3
+apiVersion: skaffold/v4beta13
 kind: Config
 metadata:
   name: app
@@ -58,7 +58,9 @@ manifests:
     paths:
     - kubernetes-manifests
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl: {}
+  tolerateFailuresUntilDeadline: true
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
 # installed on the developer machine. However, note that
@@ -94,10 +96,19 @@ profiles:
     path: /manifests/kustomize/paths/1
     value: kustomize/components/network-policies
 - name: development
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-development
 - name: staging
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-nonproduction
 - name: production
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-production
 ---
-apiVersion: skaffold/v3
+apiVersion: skaffold/v4beta13
 kind: Config
 metadata:
   name: loadgenerator
@@ -128,11 +139,20 @@ profiles:
   manifests:
     rawYaml:
       - ./kubernetes-manifests/loadgenerator-development.yaml
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-development
 - name: staging
   manifests:
     rawYaml:
       - ./kubernetes-manifests/loadgenerator-staging.yaml
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-nonproduction
 - name: production
   manifests:
     rawYaml:
       - ./kubernetes-manifests/loadgenerator-production.yaml
+  deploy:
+    kubectl:
+      defaultNamespace: cymbalshops-production

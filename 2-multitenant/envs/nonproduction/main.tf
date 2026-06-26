@@ -28,6 +28,7 @@ module "env" {
   network_project_id               = var.envs[local.env].network_project_id
   billing_account                  = var.envs[local.env].billing_account
   cluster_subnetworks              = var.envs[local.env].subnets_self_links
+  cluster_type                     = "AUTOPILOT"
   service_perimeter_name           = var.service_perimeter_name
   service_perimeter_mode           = var.service_perimeter_mode
   access_level_name                = var.access_level_name

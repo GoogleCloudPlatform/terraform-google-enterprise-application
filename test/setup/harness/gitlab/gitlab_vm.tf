@@ -127,6 +127,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
+      size  = 50
       image = "ubuntu-os-cloud/ubuntu-2204-lts"
     }
   }
