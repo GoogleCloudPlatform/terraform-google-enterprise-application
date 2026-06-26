@@ -4,6 +4,12 @@ applications = {
       create_infra_project = false
       create_admin_project = true
     }
+  },
+  "llm-model" = {
+    "llamma-model" = {
+      create_infra_project = false
+      create_admin_project = true
+    }
   }
 }
 
@@ -13,6 +19,10 @@ cloudbuildv2_repository_config = {
     capital-agent = {
       repository_name = "capital-agent-i-r"
       repository_url  = "https://gitlab.com/user/capital-agent-i-r.git"
+    },
+    llamma-model = {
+      repository_name = "llamma-model-i-r"
+      repository_url  = "https://gitlab.example.com/root/llamma-model-i-r.git"
     },
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
