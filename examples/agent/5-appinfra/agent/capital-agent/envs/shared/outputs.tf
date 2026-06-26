@@ -29,11 +29,6 @@ output "service_repository_project_id" {
   value       = module.app.service_repository_project_id
 }
 
-output "model_armor" {
-  description = "Model armor template_id"
-  value       = { for env, model in module.model_armor_configuration : (env) => model.template.id }
-}
-
 output "cluster_sa" {
   description = "Model armor template_id"
   value       = local.cluster_service_accounts
