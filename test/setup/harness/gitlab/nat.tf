@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-
-
 resource "google_compute_network_peering_routes_config" "peering_routes" {
-  project              = module.private_workerpool_project.project_id
+  project              = module.gitlab_project.project_id
   peering              = google_service_networking_connection.gitlab_worker_pool_conn.peering
   network              = module.vpc.network_name
   import_custom_routes = true
@@ -25,14 +23,12 @@ resource "google_compute_network_peering_routes_config" "peering_routes" {
   // explicitly allow the peering for public ip address
   import_subnet_routes_with_public_ip = true
   export_subnet_routes_with_public_ip = true
-
-  depends_on = [time_sleep.wait_api_propagation]
 }
 
 module "firewall_rules" {
-  source       = "terraform-google-modules/network/google//modules/firewall-rules"
-  version      = "~> 18.0"
-  project_id   = module.private_workerpool_project.project_id
+  source  = "terraform-google-modules/network/google//modules/firewall-rules"
+  version = "~> 18.0"
+  project_id   = module.gitlab_project.project_id
   network_name = module.vpc.network_name
 
   rules = [{
@@ -72,18 +68,18 @@ module "firewall_rules" {
 }
 
 resource "google_compute_address" "cloud_build_nat" {
-  project      = module.private_workerpool_project.project_id
+  project      = module.gitlab_project.project_id
   address_type = "EXTERNAL"
   name         = "cloud-build-nat"
   network_tier = "PREMIUM"
-  region       = "us-central1"
+  region       = var.region
 }
 
 resource "google_compute_instance" "vm-proxy" {
-  project      = module.private_workerpool_project.project_id
+  project      = module.gitlab_project.project_id
   name         = "cloud-build-nat-vm"
   machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  zone         = data.google_compute_zones.available.names[0]
 
   tags = ["direct-gateway-access", "nat-gateway"]
 
@@ -95,8 +91,8 @@ resource "google_compute_instance" "vm-proxy" {
 
   network_interface {
     network            = module.vpc.network_name
-    subnetwork         = module.vpc.subnets_names[0]
-    subnetwork_project = module.private_workerpool_project.project_id
+    subnetwork         = module.vpc.subnets_names[1]
+    subnetwork_project = module.gitlab_project.project_id
 
     access_config {
       nat_ip = google_compute_address.cloud_build_nat.address
@@ -117,7 +113,7 @@ resource "google_compute_instance" "vm-proxy" {
 
 resource "google_compute_route" "through-nat" {
   name              = "through-nat-range1"
-  project           = module.private_workerpool_project.project_id
+  project           = module.gitlab_project.project_id
   dest_range        = "0.0.0.0/1"
   network           = module.vpc.network_name
   next_hop_instance = google_compute_instance.vm-proxy.id
@@ -126,7 +122,7 @@ resource "google_compute_route" "through-nat" {
 
 resource "google_compute_route" "through-nat2" {
   name              = "through-nat-range2"
-  project           = module.private_workerpool_project.project_id
+  project           = module.gitlab_project.project_id
   dest_range        = "128.0.0.0/1"
   network           = module.vpc.network_name
   next_hop_instance = google_compute_instance.vm-proxy.id
@@ -137,7 +133,7 @@ resource "google_compute_route" "through-nat2" {
 
 resource "google_compute_route" "direct-to-gateway" {
   name             = "direct-to-gateway-range1"
-  project          = module.private_workerpool_project.project_id
+  project          = module.gitlab_project.project_id
   dest_range       = "0.0.0.0/1"
   network          = module.vpc.network_name
   next_hop_gateway = "default-internet-gateway"
@@ -147,7 +143,7 @@ resource "google_compute_route" "direct-to-gateway" {
 
 resource "google_compute_route" "direct-to-gateway2" {
   name             = "direct-to-gateway-range2"
-  project          = module.private_workerpool_project.project_id
+  project          = module.gitlab_project.project_id
   dest_range       = "128.0.0.0/1"
   network          = module.vpc.network_name
   next_hop_gateway = "default-internet-gateway"

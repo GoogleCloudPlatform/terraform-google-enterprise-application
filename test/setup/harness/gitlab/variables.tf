@@ -23,26 +23,25 @@ variable "cloud_build_sa" {
   description = "Cloud Build Service Account email to be granted Encrypt/Decrypt role."
   type        = string
 }
+variable "seed_folder_id" {
+  description = "The folder to deploy in"
+  type        = string
+}
+
+variable "org_id" {
+  description = "The numeric organization id"
+  type        = string
+}
+
+variable "billing_account" {
+  description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
+  type        = string
+}
 
 variable "region" {
   description = "Region where KMS and Logging bucket will be deployed."
   type        = string
   default     = "us-central1"
-}
-
-variable "network_name" {
-  description = "The network name where Gitlab will run."
-  type        = string
-}
-
-variable "network_id" {
-  description = "The network id where Gitlab will run."
-  type        = string
-}
-
-variable "project_id" {
-  description = "The project id where Gitlab will run."
-  type        = string
 }
 
 variable "seed_project_id" {

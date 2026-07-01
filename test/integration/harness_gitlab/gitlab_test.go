@@ -24,20 +24,12 @@ import (
 
 func TestGitLab(t *testing.T) {
 	gitLabPath := "../../setup/harness/gitlab"
-	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
-	privateWorkerPool := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir(privateWorkerPoolPath),
-	)
-
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(loggingBucketPath),
 	)
 
 	vars := map[string]interface{}{
-		"network_name":              privateWorkerPool.GetStringOutput("workerpool_network_name"),
-		"network_id":                privateWorkerPool.GetStringOutput("workerpool_network_id"),
-		"project_id":                privateWorkerPool.GetStringOutput("workerpool_project_id"),
 		"logging_kms_crypto_id":     loggingBucket.GetStringOutput("bucket_kms_key"),
 		"logging_bucket_name":       loggingBucket.GetStringOutput("logging_bucket"),
 		"attestation_kms_crypto_id": loggingBucket.GetStringOutput("attestation_kms_key"),

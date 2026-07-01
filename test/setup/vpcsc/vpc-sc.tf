@@ -346,7 +346,7 @@ locals {
       }
     },
     {
-      title = "Allow Services from ${join(",", var.protected_projects)} to ${var.gitlab_project_number}"
+      title = "e-allow-services-perimeter-${join(",", var.protected_projects)}-to-gilab-project-${var.gitlab_project_number}"
       from = {
         identity_type = "ANY_IDENTITY"
         identities    = tolist([])
@@ -361,8 +361,8 @@ locals {
         operations = {
           "servicedirectory.googleapis.com" = { methods = ["*"] }
           "cloudbuild.googleapis.com"       = { methods = ["*"] }
+          "compute.googleapis.com"          = { methods = ["*"] }
           "clouddeploy.googleapis.com"      = { methods = ["*"] }
-          "compute.googleapis.com"          = { methods = ["SubnetworksService.Get"] }
         }
       }
     },
