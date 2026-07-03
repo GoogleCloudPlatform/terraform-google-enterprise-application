@@ -298,7 +298,7 @@ func TestSourceCymbalBank(t *testing.T) {
 								rolloutName := rolloutFullName[len(rolloutFullName)-1]
 								releaseNameParts := strings.Split(releaseName, "/")
 								releaseNameFinal := releaseNameParts[len(releaseNameParts)-1]
-								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job %s --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable --job-id=deploy", rolloutName, projectID, serviceName, region, releaseNameFinal))
+								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job %s --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable --job-id=deploy", rolloutName, projectID, servicesInfoMap[serviceName].ServiceName, region, releaseNameFinal))
 								return true, nil
 							}
 							return false, fmt.Errorf("Rollout %s.", latestRolloutState)
