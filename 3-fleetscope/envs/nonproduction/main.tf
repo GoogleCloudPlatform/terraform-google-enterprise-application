@@ -41,5 +41,7 @@ module "env" {
   attestation_kms_key         = var.attestation_kms_key
   attestation_evaluation_mode = var.attestation_evaluation_mode
 
+  binary_authz_admission_whitelist_patterns = ["gcr.io/cloud-sql-connectors/*"]
+
   disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

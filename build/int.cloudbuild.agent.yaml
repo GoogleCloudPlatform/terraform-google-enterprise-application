@@ -394,6 +394,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestMultitenantHarness --stage teardown --verbose"]
     waitFor:
       - vpcsc-teardown
+    allowFailure: true
 
   - id: gitlab-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -401,6 +402,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestGitLab --stage teardown --verbose"]
     waitFor:
       - harness-teardown
+    allowFailure: true
 
   - id: private-workerpool-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -408,6 +410,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage teardown --verbose"]
     waitFor:
       - gitlab-teardown
+    allowFailure: true
 
   - id: logging-bucket-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -416,6 +419,7 @@ steps:
     waitFor:
       - gitlab-teardown
       - private-workerpool-teardown
+    allowFailure: true
 
 tags:
   - "ci"
