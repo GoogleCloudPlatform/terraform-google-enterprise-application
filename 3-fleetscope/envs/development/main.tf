@@ -35,6 +35,8 @@ module "env" {
   config_sync_policy_dir     = var.config_sync_policy_dir
   attestation_kms_key        = var.attestation_kms_key
 
+  binary_authz_admission_whitelist_patterns = ["gcr.io/cloud-sql-connectors/*"]
+
   enable_kueue = var.enable_kueue
 
   enable_multicluster_discovery = var.enable_multicluster_discovery

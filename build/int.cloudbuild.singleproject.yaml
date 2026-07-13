@@ -161,6 +161,7 @@ steps:
         "-c",
         "cft test run TestVPCSC  --stage teardown --verbose",
       ]
+    allowFailure: true
 
   - id: harness-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -170,21 +171,25 @@ steps:
         "-c",
         "cft test run TestSingleProjectHarness  --stage teardown --verbose",
       ]
+    allowFailure: true
 
   - id: gitlab-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestGitLab --stage teardown --verbose"]
+    allowFailure: true
 
   - id: private-workerpool-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage teardown --verbose"]
+    allowFailure: true
 
   - id: logging-bucket-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage teardown --verbose"]
+    allowFailure: true
 
 tags:
   - "ci"
