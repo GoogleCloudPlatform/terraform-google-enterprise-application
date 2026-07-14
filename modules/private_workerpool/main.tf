@@ -19,7 +19,7 @@ data "google_project" "project" {
 }
 
 resource "google_compute_global_address" "worker_range" {
-  count = var.network_id == null ? 1 : 0
+  count         = var.network_id == null ? 1 : 0
   project       = local.network_project_id
   name          = "worker-pool-range"
   purpose       = "VPC_PEERING"
@@ -30,7 +30,7 @@ resource "google_compute_global_address" "worker_range" {
 }
 
 resource "google_service_networking_connection" "gitlab_worker_pool_conn" {
-  count = var.network_id == null ? 1 : 0
+  count                   = var.network_id == null ? 1 : 0
   network                 = local.network_id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.worker_range[0].name]
@@ -57,11 +57,23 @@ resource "google_cloudbuild_worker_pool" "pool" {
     peered_network_ip_range = "/24"
   }
 
-  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
+  depends_on = [
+    time_sleep.wait_service_network_peering,
+  ]
 }
 
 resource "time_sleep" "wait_service_network_peering" {
-  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
+  depends_on = [
+    google_service_networking_connection.gitlab_worker_pool_conn,
+    google_compute_network_peering_routes_config.peering_routes,
+    module.firewall_rules,
+    google_compute_address.cloud_build_nat,
+    google_compute_instance.vm_proxy,
+    google_compute_route.through_nat,
+    google_compute_route.through_nat2,
+    google_compute_route.direct_to_gateway,
+    google_compute_route.direct_to_gateway2,
+  ]
 
-  create_duration = "30s"
+  create_duration = "60s"
 }

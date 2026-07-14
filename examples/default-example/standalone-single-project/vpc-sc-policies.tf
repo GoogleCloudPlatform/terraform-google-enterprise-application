@@ -32,7 +32,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
   egress_to {
-    resources = [ "projects/${local.secret_project_number}"]
+    resources = ["projects/${local.secret_project_number}"]
     operations {
       service_name = "secretmanager.googleapis.com"
       method_selectors {
@@ -53,7 +53,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
   egress_to {
-    resources = [ "projects/${local.secret_project_number}"]
+    resources = ["projects/${local.secret_project_number}"]
     operations {
       service_name = "secretmanager.googleapis.com"
       method_selectors {

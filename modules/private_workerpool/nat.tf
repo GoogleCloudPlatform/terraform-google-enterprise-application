@@ -21,7 +21,7 @@ data "google_compute_zones" "available" {
 }
 
 resource "google_compute_network_peering_routes_config" "peering_routes" {
-  count                = var.create_nat == true ? 1 : 0
+  count                = var.create_nat ? 1 : 0
   project              = local.network_project_id
   peering              = google_service_networking_connection.gitlab_worker_pool_conn[0].peering
   network              = local.network_name
@@ -32,11 +32,23 @@ resource "google_compute_network_peering_routes_config" "peering_routes" {
   export_subnet_routes_with_public_ip = true
 }
 
+resource "google_compute_subnetwork" "nat_subnet" {
+  count         = var.create_nat ? 1 : 0
+  project       = local.network_project_id
+  name          = "nat-subnet"
+  ip_cidr_range = local.nat_proxy_vm_ip_range
+
+  private_ip_google_access = true
+
+  region  = var.region
+  network = local.network_id
+}
+
 module "firewall_rules" {
   source  = "terraform-google-modules/network/google//modules/firewall-rules"
   version = "~> 18.0"
 
-  count        = var.create_nat == true ? 1 : 0
+  count        = var.create_nat ? 1 : 0
   project_id   = local.network_project_id
   network_name = local.network_name
 
@@ -77,7 +89,7 @@ module "firewall_rules" {
 }
 
 resource "google_compute_address" "cloud_build_nat" {
-  count        = var.create_nat == true ? 1 : 0
+  count        = var.create_nat ? 1 : 0
   project      = local.network_project_id
   address_type = "EXTERNAL"
   name         = "cloud-build-nat"
@@ -85,8 +97,8 @@ resource "google_compute_address" "cloud_build_nat" {
   region       = var.region
 }
 
-resource "google_compute_instance" "vm-proxy" {
-  count        = var.create_nat == true ? 1 : 0
+resource "google_compute_instance" "vm_proxy" {
+  count        = var.create_nat ? 1 : 0
   project      = local.network_project_id
   name         = "cloud-build-nat-vm"
   machine_type = "e2-medium"
@@ -102,7 +114,7 @@ resource "google_compute_instance" "vm-proxy" {
 
   network_interface {
     network            = local.network_name
-    subnetwork         = var.network_id == null ? module.vpc.subnets_names[0] : google_compute_subnetwork.nat_subnet[0].name
+    subnetwork         = var.network_id == null ? module.vpc[0].subnets_names[0] : google_compute_subnetwork.nat_subnet[0].name
     subnetwork_project = local.network_project_id
 
     access_config {
@@ -122,31 +134,31 @@ resource "google_compute_instance" "vm-proxy" {
 
 #  This route will route packets to the NAT VM
 
-resource "google_compute_route" "through-nat" {
-  count             = var.create_nat == true ? 1 : 0
-  name              = "through-nat-range1"
+resource "google_compute_route" "through_nat" {
+  count             = var.create_nat ? 1 : 0
+  name              = "through-nat-range-1"
   project           = local.network_project_id
   dest_range        = "0.0.0.0/1"
   network           = local.network_name
-  next_hop_instance = google_compute_instance.vm-proxy[0].id
+  next_hop_instance = google_compute_instance.vm_proxy[0].id
   priority          = 10
 }
 
-resource "google_compute_route" "through-nat2" {
-  count             = var.create_nat == true ? 1 : 0
-  name              = "through-nat-range2"
+resource "google_compute_route" "through_nat2" {
+  count             = var.create_nat ? 1 : 0
+  name              = "through-nat-range-2"
   project           = local.network_project_id
   dest_range        = "128.0.0.0/1"
   network           = local.network_name
-  next_hop_instance = google_compute_instance.vm-proxy[0].id
+  next_hop_instance = google_compute_instance.vm_proxy[0].id
   priority          = 10
 }
 
 # This route allow the NAT VM to reach the internet with it's external IP address
 
-resource "google_compute_route" "direct-to-gateway" {
-  count            = var.create_nat == true ? 1 : 0
-  name             = "direct-to-gateway-range1"
+resource "google_compute_route" "direct_to_gateway" {
+  count            = var.create_nat ? 1 : 0
+  name             = "direct-to-gateway-range-1"
   project          = local.network_project_id
   dest_range       = "0.0.0.0/1"
   network          = local.network_name
@@ -155,9 +167,9 @@ resource "google_compute_route" "direct-to-gateway" {
   priority         = 5
 }
 
-resource "google_compute_route" "direct-to-gateway2" {
-  count            = var.create_nat == true ? 1 : 0
-  name             = "direct-to-gateway-range2"
+resource "google_compute_route" "direct_to_gateway2" {
+  count            = var.create_nat ? 1 : 0
+  name             = "direct-to-gateway-range-2"
   project          = local.network_project_id
   dest_range       = "128.0.0.0/1"
   network          = local.network_name

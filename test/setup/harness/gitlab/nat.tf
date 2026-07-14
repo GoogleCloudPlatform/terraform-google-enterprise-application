@@ -26,8 +26,8 @@ resource "google_compute_network_peering_routes_config" "peering_routes" {
 }
 
 module "firewall_rules" {
-  source  = "terraform-google-modules/network/google//modules/firewall-rules"
-  version = "~> 18.0"
+  source       = "terraform-google-modules/network/google//modules/firewall-rules"
+  version      = "~> 18.0"
   project_id   = module.gitlab_project.project_id
   network_name = module.vpc.network_name
 

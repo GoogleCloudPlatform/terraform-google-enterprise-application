@@ -15,8 +15,8 @@
  */
 
 locals {
-  workerpool_project_id = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : var.project_id
-  workerpool_id       = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
+  workerpool_project_id         = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : var.project_id
+  workerpool_id                 = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
   workerpool_network_project_id = var.network_id != null ? regex(local.projects_re, var.network_id)[0] : local.network_project_id
 
   services = [

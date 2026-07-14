@@ -19,7 +19,7 @@ locals {
   gitlab_network_id_without_location = replace(module.vpc.network_id, "locations/", "")
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${module.vpc.network_name}"
   gitlab_vm_ip_range                 = "10.2.2.0/24"
-  nat_proxy_vm_ip_range = "10.1.1.0/24"
+  nat_proxy_vm_ip_range              = "10.1.1.0/24"
 }
 
 module "gitlab_project" {
@@ -81,9 +81,9 @@ module "vpc" {
 
   subnets = [
     {
-      subnet_name   = "gitlab-vm-subnet"
-      subnet_ip     = "10.2.2.0/24"
-      subnet_region = var.region
+      subnet_name           = "gitlab-vm-subnet"
+      subnet_ip             = "10.2.2.0/24"
+      subnet_region         = var.region
       subnet_private_access = true
     },
     {
@@ -98,7 +98,7 @@ module "vpc" {
 resource "google_compute_shared_vpc_service_project" "add_seed_project" {
   host_project    = module.gitlab_project.project_id
   service_project = var.seed_project_id
-  depends_on = [ module.vpc ]
+  depends_on      = [module.vpc]
 }
 
 data "google_storage_project_service_account" "gitlab_gcs_account" {

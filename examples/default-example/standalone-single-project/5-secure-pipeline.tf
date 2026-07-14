@@ -21,9 +21,9 @@ locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
-  sa_cb                  = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
-  projects_re            = "projects/([^/]+)/"
-  secret_project_number =  try(regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0], null)
+  sa_cb                 = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
+  projects_re           = "projects/([^/]+)/"
+  secret_project_number = try(regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0], null)
 
   team_name    = "default"
   service_name = "hello-world"
@@ -59,9 +59,9 @@ resource "google_project_iam_member" "access_network" {
 
 resource "google_project_iam_member" "cloudbuid_builder" {
   for_each = module.cicd
-  project = local.workerpool_network_project_id
-  role    = "roles/cloudbuild.builds.builder"
-  member  = "serviceAccount:${each.value.cloudbuild_service_account}"
+  project  = local.workerpool_network_project_id
+  role     = "roles/cloudbuild.builds.builder"
+  member   = "serviceAccount:${each.value.cloudbuild_service_account}"
 }
 
 resource "time_sleep" "wait_propagation" {
