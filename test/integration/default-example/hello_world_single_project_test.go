@@ -15,7 +15,7 @@
 package defaul_example_standalone_single_project
 
 import (
-		"errors"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -62,12 +62,13 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 	region := "us-central1"
 	appName := "default-example"
 	serviceName := "hello-world"
+	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
-		
-		servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
-		t.Log(servicePath)
-		t.Run(servicePath, func(t *testing.T) {
-			appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
+
+	servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
+	t.Log(servicePath)
+	t.Run(servicePath, func(t *testing.T) {
+		appRepo := fmt.Sprintf("%s/%s", authenticatedUrl, repoName)
 		t.Logf("source-repo: %s", appRepo)
 
 		tmpDirApp := t.TempDir()
@@ -96,7 +97,6 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 				}
 			}
 
-
 			gitAppRun("init", tmpDirApp)
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
@@ -115,12 +115,12 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 			gitAppRun("push", "google", "main", "--force")
 
-				lastCommit := gitApp.GetLatestCommit()
-				// filter builds triggered based on pushed commit sha
-				buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, projectID)
-				retriesBuildTrigger := 1
-				// poll build until complete
-				pollCloudBuild := func(cmd string) func() (bool, error) {
+			lastCommit := gitApp.GetLatestCommit()
+			// filter builds triggered based on pushed commit sha
+			buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, projectID)
+			retriesBuildTrigger := 1
+			// poll build until complete
+			pollCloudBuild := func(cmd string) func() (bool, error) {
 				return func() (bool, error) {
 					build := gcloud.Runf(t, cmd).Array()
 					if len(build) < 1 {
@@ -192,7 +192,7 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 					}
 				}
 			}
-			for i, targetId := range deployTargets.Array() {
+			for i, targetId := range deployTargets.Get(repoName).Array() {
 				if i > 0 {
 					promoteCmd := fmt.Sprintf("deploy releases promote --project=%s --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", projectID, releaseName, serviceName, region, targetId)
 					t.Logf("Promoting release to next target: %s", targetId)
@@ -203,8 +203,7 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 				utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 60*time.Second)
 			}
 		})
-			appsource.Test()
-		})
+		appsource.Test()
+	})
 
-	
 }

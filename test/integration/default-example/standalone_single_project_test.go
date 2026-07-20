@@ -65,6 +65,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 		"attestation_kms_key":    loggingBucket.GetStringOutput("attestation_kms_key"),
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
+		"enables_network_connection_and_peering_routes": false,
 	}
 
 	// wire setup output project_id to example var.project_id

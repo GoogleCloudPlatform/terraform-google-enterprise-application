@@ -15,21 +15,31 @@
  */
 
 output "workerpool_project_id" {
-  value = var.project_id
-}
-
-output "workerpool_id" {
-  value = google_cloudbuild_worker_pool.pool.id
+  value       = var.project_id
+  description = "Project ID where worker pool is created."
+  depends_on = [ time_sleep.wait_service_network_peering, module.nat ]
 }
 
 output "workerpool_project_number" {
-  value = data.google_project.project.number
+  value       = data.google_project.project.number
+  description = "Project number where worker pool is created."
+  depends_on = [ time_sleep.wait_service_network_peering, module.nat, google_cloudbuild_worker_pool.pool ]
+}
+
+output "workerpool_id" {
+  value       = google_cloudbuild_worker_pool.pool.id
+  description = "Worker pool ID."
+  depends_on = [ time_sleep.wait_service_network_peering, module.nat, google_cloudbuild_worker_pool.pool ]
 }
 
 output "workerpool_network_name" {
-  value = local.network_name
+  value       = local.network_name
+  description = "Peered network name."
+  depends_on = [ time_sleep.wait_service_network_peering, module.nat, google_cloudbuild_worker_pool.pool ]
 }
 
 output "workerpool_network_id" {
-  value = local.network_id
+  value       = local.network_id
+  description = "Peered network ID."
+  depends_on = [ time_sleep.wait_service_network_peering, module.nat, google_cloudbuild_worker_pool.pool ]
 }

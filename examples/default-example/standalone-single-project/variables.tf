@@ -119,6 +119,11 @@ variable "create_nat" {
   default     = true
 }
 
+variable "enables_network_connection_and_peering_routes" {
+  description = "Enables Network connection and peering routes."
+  type        = bool
+  default     = true
+}
 
 variable "attestation_kms_key" {
   type        = string

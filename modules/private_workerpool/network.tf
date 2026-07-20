@@ -17,8 +17,8 @@
 locals {
   nat_proxy_vm_ip_range = "10.1.1.0/24"
   network_id            = var.network_id == null ? module.vpc[0].network_id : var.network_id
-  network_id_splited    = split("/", local.network_id)
   network_project_id    = regex("projects/([^/]*)/", local.network_id)[0]
+  network_id_splited    = split("/", local.network_id)
   network_name          = local.network_id_splited[length(local.network_id_splited) - 1]
 }
 
@@ -49,12 +49,5 @@ module "vpc" {
     },
   ]
 
-  subnets = [
-    {
-      subnet_name           = "sb-nat"
-      subnet_ip             = local.nat_proxy_vm_ip_range
-      subnet_region         = var.region
-      subnet_private_access = true
-    },
-  ]
+  subnets = []
 }

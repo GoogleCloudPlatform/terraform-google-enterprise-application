@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-module "nat" {
-  count                 = var.create_nat ? 1 : 0
-  source                = "../nat"
-  network_id            = local.network_id
-  region                = var.region
-  nat_proxy_vm_ip_range = local.nat_proxy_vm_ip_range
+variable "network_id" {
+  description = "The network id where NAT will be created."
+  type        = string
+}
+
+variable "region" {
+  description = "The region where NAT will be created."
+  type        = string
+}
+
+variable "nat_proxy_vm_ip_range" {
+  description = "IP Range for NAT proxy machine."
+  type        = string
 }

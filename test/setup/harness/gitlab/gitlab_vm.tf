@@ -19,7 +19,6 @@ locals {
   gitlab_network_id_without_location = replace(module.vpc.network_id, "locations/", "")
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${module.vpc.network_name}"
   gitlab_vm_ip_range                 = "10.2.2.0/24"
-  nat_proxy_vm_ip_range              = "10.1.1.0/24"
 }
 
 module "gitlab_project" {
@@ -53,47 +52,6 @@ module "gitlab_project" {
   ]
 }
 
-module "vpc" {
-  source  = "terraform-google-modules/network/google"
-  version = "~> 18.0"
-
-  project_id                             = module.gitlab_project.project_id
-  network_name                           = "eab-vpc-workerpool"
-  shared_vpc_host                        = true
-  delete_default_internet_gateway_routes = true
-
-  ingress_rules = [
-    {
-      name     = "allow-ssh"
-      priority = 500
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      source_ranges = ["0.0.0.0/0"]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["22"]
-        }
-      ]
-    },
-  ]
-
-  subnets = [
-    {
-      subnet_name           = "gitlab-vm-subnet"
-      subnet_ip             = "10.2.2.0/24"
-      subnet_region         = var.region
-      subnet_private_access = true
-    },
-    {
-      subnet_name           = "nat-subnet"
-      subnet_ip             = local.nat_proxy_vm_ip_range
-      subnet_region         = var.region
-      subnet_private_access = true
-    },
-  ]
-}
 
 resource "google_compute_shared_vpc_service_project" "add_seed_project" {
   host_project    = module.gitlab_project.project_id
@@ -248,78 +206,7 @@ resource "google_secret_manager_secret_version" "gitlab_webhook" {
   secret_data = random_uuid.random_webhook_secret.result
 }
 
-// ================================
-//          FIREWALL RULES
-// ================================
 
-resource "google_compute_firewall" "allow_iap_ssh" {
-  name    = "allow-iap-ssh"
-  network = module.vpc.network_name
-  project = module.gitlab_project.project_id
-
-  allow {
-    ports    = [22]
-    protocol = "tcp"
-  }
-
-  log_config {
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-
-  source_ranges = ["35.235.240.0/20"]
-}
-
-resource "google_compute_firewall" "allow_service_networking" {
-  name    = "allow-service-networking"
-  network = module.vpc.network_name
-  project = module.gitlab_project.project_id
-
-  allow {
-    protocol = "all"
-  }
-
-  log_config {
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-
-  source_ranges = ["35.199.192.0/19"]
-}
-
-resource "google_compute_firewall" "allow_http" {
-  name    = "allow-http"
-  network = module.vpc.network_name
-  project = module.gitlab_project.project_id
-
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
-  }
-
-  log_config {
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["git-vm"]
-}
-
-resource "google_compute_firewall" "allow_https" {
-  name    = "allow-https"
-  network = module.vpc.network_name
-  project = module.gitlab_project.project_id
-
-  allow {
-    protocol = "tcp"
-    ports    = ["443"]
-  }
-
-  log_config {
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["git-vm"]
-}
 
 // =======================================================
 //          GITLAB WORKER POOL AND PRIVATE DNS CONFIG
@@ -438,6 +325,17 @@ resource "google_service_networking_connection" "gitlab_worker_pool_conn" {
   network                 = module.vpc.network_id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.worker_range.name]
+}
+
+resource "google_compute_network_peering_routes_config" "peering_routes" {
+  project              = module.vpc.project_id
+  peering              = google_service_networking_connection.gitlab_worker_pool_conn.peering
+  network              = module.vpc.network_name
+  import_custom_routes = true
+  export_custom_routes = true
+  // explicitly allow the peering for public ip address
+  import_subnet_routes_with_public_ip = true
+  export_subnet_routes_with_public_ip = true
 }
 
 resource "google_service_networking_peered_dns_domain" "name" {
