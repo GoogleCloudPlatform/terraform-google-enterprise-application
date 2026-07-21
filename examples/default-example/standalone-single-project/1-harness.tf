@@ -67,6 +67,8 @@ module "private_workerpool" {
   create_nat = var.create_nat
 
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
+
+  depends_on = [ google_project_service.required_services ]
 }
 
 module "binary_autz" {
@@ -76,6 +78,7 @@ module "binary_autz" {
   binary_auth_image_version = "v1.0"
   workerpool_id             = local.workerpool_id
   bucket_logs_url           = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
+  depends_on = [ google_project_service.required_services ]
 }
 
 module "cluster_network" {
@@ -105,4 +108,5 @@ module "cluster_network" {
       },
     ],
   }
+  depends_on = [ google_project_service.required_services ]
 }
