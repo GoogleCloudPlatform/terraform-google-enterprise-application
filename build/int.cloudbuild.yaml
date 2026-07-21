@@ -168,6 +168,8 @@ steps:
       ]
     waitFor:
       - multitenant-init
+    env:
+     - 'TF_LOG="DEBUG"'
   - id: multitenant-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -191,6 +193,8 @@ steps:
       ["/bin/bash", "-c", "cft test run TestFleetscope --stage apply --verbose"]
     waitFor:
       - fleetscope-init
+    env:
+     - 'TF_LOG="DEBUG"'
   - id: fleetscope-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     entrypoint: "bash"
@@ -361,6 +365,8 @@ steps:
       ]
     waitFor:
       - appfactory-teardown
+    env:
+     - 'TF_LOG="DEBUG"'
 
   - id: multitenant-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
