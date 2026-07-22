@@ -97,8 +97,197 @@ The entity used to deploy this example must have the following roles at Organiza
 - Organization Administrator: `roles/resourcemanager.organizationAdmin`
 - Access Context Manager Policy Admin: `roles/accesscontextmanager.policyAdmin`
 
-This example also requires a VPC-SC Perimeter created and [configured with project](https://cloud.google.com/vpc-service-controls/docs/set-up-service-perimeter).
+####  KMS Key for Bucket Encryption
 
+A KMS key will be used to encrypt the contents of the created Cloud Storage buckets.
+
+####  KMS Key for Binary Authorization Attestation
+
+A KMS key will be used to sign images during building time.
+
+### Logging Bucket
+
+You can optionally specify an existing Cloud Storage bucket to store logs from:
+
+- Build logs
+- Terraform state bucket
+
+The bucket will use the KMS Key provided to encrypt the content. In this case, the code will grant the Storage Service Agent:
+
+   - Cloud KMS CryptoKey Encrypter: `roles/cloudkms.cryptoKeyEncrypter`
+   - Cloud KMS CryptoKey Decrypter: `roles/cloudkms.cryptoKeyDecrypter`
+
+If a Key is not provided, a new one will be created at the same project to encrypt the content.
+
+### VPC Service Controls (VPC-SC)
+
+This module supports deployment within a VPC-SC perimeter.
+
+This module does not create the Service Perimeter or Access Level. However, it can add projects to the Service Perimeter, create directional rules, and add identities to the Access Level.
+
+To enable VPC-SC integration, you must provide the following:
+
+- An existing Access Level name. Since the module will be adding access level conditions, your access level need to be configured with 'OR' as the combining function.
+- An existing Service Perimeter name.
+- The deployment mode (`DRY_RUN` or `ENFORCED`).
+
+The identity deploying the module must be a member of the specified Access Level.
+
+- __IAM Roles:__ The identity deploying the module requires the following IAM role at the organization level:
+
+   - __Access Context Manager Admin:__ `roles/accesscontextmanager.policyAdmin`
+
+   ```bash
+   export SERVICE_ACCOUNT_EMAIL='YOUR_SERVICE_ACCOUNT_EMAIL'
+   gcloud organizations add-iam-policy-binding YOUR_ORGANIZATION_ID \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+   --role="roles/accesscontextmanager.policyAdmin"
+   ```
+
+#### Cloud Build with Github Pre-requisites
+
+To proceed with GitHub as your git provider you will need:
+
+- An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
+- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
+  - eab-default-example-hello-world (`eab-default-example-hello-world`)
+
+   > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
+- [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+   - Grant `repo` and `read:user` (or if app is installed in org use `read:org`)
+   - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
+- Create a secret for the Github Cloud Build App ID:
+
+   ```bash
+   APP_ID_VALUE=<replace_with_app_id>
+   printf $APP_ID_VALUE | gcloud secrets create github-app-id --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe github-app-id --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Create a secret for the Github Personal Access Token:
+
+   ```bash
+   GITHUB_TOKEN=<replace_with_token>
+   printf $GITHUB_TOKEN | gcloud secrets create github-pat --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe github-pat --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Populate your `terraform.tfvars` file with the Cloud Build 2nd Gen configuration variable, here is an example:
+
+   ```hcl
+   cloudbuildv2_repository_config = {
+      repo_type = "GITHUBv2"
+
+      repositories = {
+         eab-default-example-hello-world = {
+            repository_name = "eab-default-example-hello-world"
+            repository_url  = "https://github.com/your-org/eab-default-example-hello-world.git"
+         }
+      }
+
+      github_secret_id                            = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_PAT_SECRET_NAME" # Personal Access Token Secret
+      github_app_id_secret_id                     = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_APP_ID_SECRET_NAME" # App ID value secret
+      secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+   }
+   ```
+
+#### Cloud Build with Gitlab Pre-requisites
+
+To proceed with Gitlab as your git provider you will need:
+
+- An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
+- A **private** GitLab repository for each one of the repositories below:
+  - Hello World (`eab-default-example-hello-world`)
+
+  > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+
+- An access token with the `api` scope to use for connecting and disconnecting repositories.
+
+- An access token with the `read_api` scope to ensure Cloud Build repositories can access source code in repositories.
+
+- Create a secret for the Gitlab API Access Token:
+
+   ```bash
+   GITLAB_API_TOKEN=<replace_with_app_id>
+   printf $GITLAB_API_TOKEN | gcloud secrets create gitlab-api-token --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe gitlab-api-token --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Create a secret for the Gitlab Read API Access Token:
+
+   ```bash
+   GITLAB_READ_API_TOKEN=<replace_with_token>
+   printf $GITLAB_READ_API_TOKEN | gcloud secrets create gitlab-read-api-token --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe gitlab-read-api-token --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Generate a random 36 character string that will be used as the Webhook Secret:
+
+   ```bash
+   GITLAB_WEBHOOK=<replace_with_webhook>
+   printf $GITLAB_WEBHOOK | gcloud secrets create gitlab-webhook --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+   > NOTE: for testing purposes, you may use the following command to generate the webhook in bash: `GITLAB_WEBHOOK=$(cat /dev/urandom | tr -dc "[:alnum:]" | head -c 36)`
+
+- Take note of the secret id, it will be used in `terraform.tfvars` later on:
+
+   ```bash
+   gcloud secrets describe gitlab-webhook --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Populate your `terraform.tfvars` file with the Cloud Build 2nd Gen configuration variable, here is an example:
+
+   ```hcl
+   cloudbuildv2_repository_config = {
+      repo_type = "GITLABv2"
+
+      repositories = {
+         eab-default-example-hello-world = {
+            repository_name = "eab-default-example-hello-world"
+            repository_url  = "https://gitlab.com/your-group/eab-default-example-hello-world.git"
+         }
+      }
+
+      gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
+      gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
+      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
+
+      secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+
+      # If you are using a self-hosted instance, you may change the URL below accordingly
+      gitlab_enterprise_host_uri = "https://gitlab.com"
+
+      gitlab_enterprise_service_directory = "projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE"
+
+      # .pem string
+      gitlab_enterprise_ca_certificate = <<EOF
+      REPLACE_WITH_SSL_CERT
+      EOF
+   }
+   ```
 
 ## Usage
 
@@ -124,10 +313,22 @@ the steps below assume that you are checked out on the same level as `terraform-
 
 1. Clone the source repository
 
-    1. Cloud Source Repository only
+    - Cloud Source Repository only
 
     ```bash
     gcloud source repos clone eab-default-example-hello-world --project=REPLACE_WITH_ADMIN_PROJECT
+    ```
+
+    - Github Repository only
+
+    ```bash
+    git clone https://github.com/your-org/eab-default-example-hello-world.git
+    ```
+
+    - Gitlab Repository only
+
+    ```bash
+    git clone https://gitlab.com/your-group/eab-default-example-hello-world.git
     ```
 
 1. Copy the contents of this directory to the repository:
