@@ -88,9 +88,9 @@ gcloud projects add-iam-policy-binding $PROJECT \
         - '--artifact-url'
         - 'gcr.io/$PROJECT_ID/helloworld:latest'
         - '--attestor'
-        - 'projects/$PROJECT_ID/attestors/ATTESTOR_NAME'
+        - '$_ATTESTOR_ID' # in the format projects/PROJECT_ID/attestors/ATTESTOR_NAME
         - '--keyversion'
-        - 'projects/$PROJECT_ID/locations/KEY_LOCATION/keyRings/KEYRING_NAME/cryptoKeys/KEY_NAME/cryptoKeyVersions/KEY_VERSION'
+        - '$_KMS_KEY_VERSION' # in the format projects/PROJECT_ID/locations/KEY_LOCATION/keyRings/KEYRING_NAME/cryptoKeys/KEY_NAME/cryptoKeyVersions/KEY_VERSION'
     ```
 
     The following is also valid:
