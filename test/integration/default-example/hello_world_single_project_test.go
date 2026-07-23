@@ -124,7 +124,7 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 				return func() (bool, error) {
 					build := gcloud.Runf(t, cmd).Array()
 					if len(build) < 1 {
-						if retriesBuildTrigger%3 == 0 {
+						if retriesBuildTrigger % 3 == 0 {
 							// force push to trigger build 1 more time
 							t.Logf("Force push again to try trigger build for commit %s", lastCommit)
 							gitAppRun("push", "google", "main", "--force")

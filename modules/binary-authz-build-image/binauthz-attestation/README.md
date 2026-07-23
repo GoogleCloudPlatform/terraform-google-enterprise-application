@@ -119,7 +119,7 @@ gcloud projects add-iam-policy-binding $PROJECT \
 
 ### PGP Key-based Signing
 
-1.  [Create a KMS encryption key](https://cloud.google.com/cloud-build/docs/securing-builds/use-encrypted-secrets-credentials#creating_a_cloud_kms_keyring_and_cryptokey).
+1.  Create a [KMS encryption key](https://cloud.google.com/cloud-build/docs/securing-builds/use-encrypted-secrets-credentials#creating_a_cloud_kms_keyring_and_cryptokey).
 2.  [Encrypt the ASCII-armored PGP private key that will be used to sign the
     attestation](https://cloud.google.com/cloud-build/docs/securing-builds/use-encrypted-secrets-credentials#encrypting_an_environment_variable_using_the_cryptokey).
 3.  OPTIONAL: If the PGP private key has a passphrase, the same instructions can

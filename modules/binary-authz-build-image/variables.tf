@@ -51,6 +51,7 @@ variable "bucket_logs_url" {
     error_message = "bucket_logs_url cannot be empty, only null or a valid value."
   }
 }
+
 variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.

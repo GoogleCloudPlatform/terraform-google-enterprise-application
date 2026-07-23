@@ -129,6 +129,7 @@ variable "attestation_kms_key" {
   type        = string
   description = "The KMS Key ID to be used by attestor."
 }
+
 variable "cloudbuildv2_repository_config" {
   description = <<-EOT
   Configuration for integrating repositories with Cloud Build v2:

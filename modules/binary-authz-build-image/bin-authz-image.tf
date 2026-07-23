@@ -15,7 +15,6 @@
  */
 
 locals {
-
   service_account_array = var.service_account_id != null ? split(var.service_account_id, "/") : null
   service_account_email = var.service_account_id != null ? local.service_account_array[length(local.service_account_array) - 1] : null
   bucket_logs_url       = var.bucket_logs_url != null ? "--gcs-log-dir=${var.bucket_logs_url}" : ""

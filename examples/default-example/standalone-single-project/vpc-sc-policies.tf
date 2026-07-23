@@ -19,13 +19,13 @@ data "google_project" "workerpool_network_project" {
   project_id = local.workerpool_network_project_id
 }
 
-
 ###############################################
 #              EGRESS POLICIES                #
 ###############################################
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  
   perimeter = var.service_perimeter_name
   title     = "e-projects/${local.secret_project_number}"
   egress_from {
@@ -46,7 +46,8 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_policy" {
-  count     = var.service_perimeter_name != null ? 1 : 0
+  count = var.service_perimeter_name != null ? 1 : 0
+  
   perimeter = var.service_perimeter_name
   title     = "e-projects/${local.secret_project_number}"
   egress_from {
@@ -70,7 +71,8 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 ###############################################
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
-  count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  
   perimeter = var.service_perimeter_name
   title     = "cb-access_level-to-${data.google_project.project.project_id}"
   ingress_from {

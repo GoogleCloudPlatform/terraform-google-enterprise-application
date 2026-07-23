@@ -59,8 +59,9 @@ resource "google_project_service" "required_services" {
 }
 
 module "private_workerpool" {
-  count      = var.workerpool_id == null ? 1 : 0
-  source     = "../../../modules/private_workerpool"
+  source = "../../../modules/private_workerpool"
+  count  = var.workerpool_id == null ? 1 : 0
+   
   project_id = var.project_id
   region     = var.region
   network_id = var.network_id
