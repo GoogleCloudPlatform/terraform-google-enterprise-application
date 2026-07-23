@@ -17,7 +17,7 @@
 module "nat" {
   source = "../nat"
   count  = var.create_nat ? 1 : 0
-  
+
   network_id            = local.network_id
   region                = var.region
   nat_proxy_vm_ip_range = local.nat_proxy_vm_ip_range

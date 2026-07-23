@@ -46,6 +46,6 @@ module "multitenant_infra" {
   deletion_protection    = false
 
   cb_private_workerpool_project_id = local.workerpool_project_id
-  
-  depends_on = [ google_project_service.required_services ]
+
+  depends_on = [google_project_service.required_services]
 }

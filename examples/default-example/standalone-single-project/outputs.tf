@@ -81,7 +81,7 @@ output "clouddeploy_targets_names" {
 
 output "service_repository_name" {
   description = "The Source Repository name."
-  value       =  {for k, cicd in module.cicd : k => cicd.service_repository_name }
+  value       = { for k, cicd in module.cicd : k => cicd.service_repository_name }
 }
 
 output "service_repository_project_id" {

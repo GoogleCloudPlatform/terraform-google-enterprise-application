@@ -65,12 +65,12 @@ variable "workerpool_id" {
   EOT
   type        = string
   default     = null
-  
+
   validation {
     condition     = var.workerpool_id != ""
     error_message = "workerpool_id cannot be empty, only null or a valid value."
-  } 
-  
+  }
+
   validation {
     condition     = var.workerpool_id == null ? true : can(regex("^projects/[a-z0-9-]+/locations/[a-z0-9-]+/workerPools/[a-z0-9-]+$", var.workerpool_id))
     error_message = "The workerpool_id must follow the exact format: 'projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME'."

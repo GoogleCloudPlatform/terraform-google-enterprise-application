@@ -61,7 +61,7 @@ resource "google_project_service" "required_services" {
 module "private_workerpool" {
   source = "../../../modules/private_workerpool"
   count  = var.workerpool_id == null ? 1 : 0
-   
+
   project_id = var.project_id
   region     = var.region
   network_id = var.network_id
@@ -69,7 +69,7 @@ module "private_workerpool" {
 
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
 
-  depends_on = [ google_project_service.required_services ]
+  depends_on = [google_project_service.required_services]
 }
 
 module "binary_autz" {
@@ -79,7 +79,7 @@ module "binary_autz" {
   binary_auth_image_version = "v1.0"
   workerpool_id             = local.workerpool_id
   bucket_logs_url           = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
-  depends_on = [ google_project_service.required_services ]
+  depends_on                = [google_project_service.required_services]
 }
 
 module "cluster_network" {
@@ -109,5 +109,5 @@ module "cluster_network" {
       },
     ],
   }
-  depends_on = [ google_project_service.required_services ]
+  depends_on = [google_project_service.required_services]
 }
