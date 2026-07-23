@@ -10,7 +10,7 @@ This example creates:
     - Cluster network
     - Private Worker Pool
         - Network + NAT
-    - Binary Authorization attestor image 
+    - Binary Authorization attestor image
 - 2-multitenant
     - GKE cluster(s)
     - Cloud Armor
@@ -337,7 +337,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 cp -r terraform-google-enterprise-application/examples/default-example/6-appsource/default-example/* eab-default-example-hello-world
 ```
 
-1. Commit changes 
+1. Commit changes
 
 ```bash
 cd eab-default-example-hello-world
@@ -392,5 +392,7 @@ git push origin main
 | env | Environment |
 | fleet\_project\_id | Fleet Project ID |
 | network\_project\_id | Network Project ID |
+| service\_repository\_name | The Source Repository name. |
+| service\_repository\_project\_id | The Source Repository project id. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
