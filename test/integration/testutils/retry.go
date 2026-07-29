@@ -14,6 +14,8 @@
 
 package testutils
 
+import "regexp"
+
 var (
 	RetryableTransientErrors = map[string]string{
 		// Error 409: unable to queue the operation
@@ -68,5 +70,29 @@ var (
 		".*Error 400.*Invalid value for field.*resource.networkInterfaces[0].subnetwork.*:.*projects/.*/regions/.*/subnetworks/.*. The referenced subnetwork resource cannot be found.*": "Network propagation",
 
 		".*Error: Error creating FeatureMembership: Resource already exists - apply blocked by lifecycle params.*": "Duplicated membership request",
+
+		".*502.*": "Bad Gateway",
+	}
+
+	RetryableDeploymentErrors = map[string]string{
+		".*context deadline exceeded.*": "Timeout connection.",
+		".*502.*":                       "Bad Gateway",
+		".*Waiting for deployments to stabilize.*":      "Waiting for deployments to stabilize.",
+		".*Insufficient memory.*":                       "Waiting cluster to scale up - memory.",
+		".*Insufficient CPU.*":                          "Waiting cluster to scale up - CPU.",
+		".*didn't match Pod's node affinity/selector.*": "Waiting cluster to scale up - machine/GPU type.",
+		".*FailedScaleUp.*":                             "Waiting cluster to scale up - Resources availability.",
 	}
 )
+
+func IsDeploymentRetryableError(errMessage string) (bool, string) {
+	for pattern, msg := range RetryableDeploymentErrors {
+		// Use regexp.MatchString to check if the error message matches the pattern
+		matched, err := regexp.MatchString(pattern, errMessage)
+		if err == nil && matched {
+			return true, msg
+		}
+	}
+
+	return false, ""
+}
