@@ -302,7 +302,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 							t.Logf("%s build-log: %s", serviceName, logs)
 							isRetryable, message := testutils.IsDeploymentRetryableError(logs)
 							if isRetryable {
-								t.Logf(message)
+								t.Log(message)
 								rolloutFullName := strings.Split(rollouts[0].Get("name").String(), "/")
 								rolloutName := rolloutFullName[len(rolloutFullName)-1]
 								releaseNameParts := strings.Split(releaseName, "/")
