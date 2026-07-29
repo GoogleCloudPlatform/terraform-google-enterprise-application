@@ -24,6 +24,9 @@ env:
   TFENV_VERSION: v3.0.0
   TF_DEFAULT_MIN: "1.3.10"
 
+permissions:
+  contents: read
+
 concurrency:
   group: '${{ github.workflow }}-${{ github.head_ref || github.ref }}'
   cancel-in-progress: true
