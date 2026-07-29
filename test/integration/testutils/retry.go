@@ -85,11 +85,21 @@ var (
 	}
 )
 
-func IsDeploymentRetryableError(errMessage string) (bool, string) {
+var compiledRetryableErrors = make(map[*regexp.Regexp]string)
+
+func init() {
+	// Compile all regex patterns once and store them
 	for pattern, msg := range RetryableDeploymentErrors {
-		// Use regexp.MatchString to check if the error message matches the pattern
-		matched, err := regexp.MatchString(pattern, errMessage)
-		if err == nil && matched {
+		compiledRegex := regexp.MustCompile(pattern)
+		compiledRetryableErrors[compiledRegex] = msg
+	}
+}
+
+// IsDeploymentRetryableError checks the error using pre-compiled regular expressions
+func IsDeploymentRetryableError(errMessage string) (bool, string) {
+	for regex, msg := range compiledRetryableErrors {
+		// MatchString on a compiled regex is much faster
+		if regex.MatchString(errMessage) {
 			return true, msg
 		}
 	}
