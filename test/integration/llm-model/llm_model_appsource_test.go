@@ -205,7 +205,7 @@ func TestSourceLLMModel(t *testing.T) {
 						logs := gcloud.RunCmd(t, logsCmd)
 						isRetryable, message := testutils.IsDeploymentRetryableError(logs)
 						if isRetryable {
-							t.Log(message)
+							t.Logf("Re-trying rollout: %s", message)
 							rolloutFullName := strings.Split(rollouts[0].Get("name").String(), "/")
 							rolloutName := rolloutFullName[len(rolloutFullName)-1]
 							releaseNameParts := strings.Split(releaseName, "/")

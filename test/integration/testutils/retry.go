@@ -72,6 +72,8 @@ var (
 		".*Error: Error creating FeatureMembership: Resource already exists - apply blocked by lifecycle params.*": "Duplicated membership request",
 
 		".*502.*": "Bad Gateway",
+
+		".*Error waiting for deleting GKE cluster.*": "Error waiting for deleting GKE cluster: Calling fleet operation service DeleteMembership, please ensure fleet service account has access to the project.",
 	}
 
 	RetryableDeploymentErrors = map[string]string{
