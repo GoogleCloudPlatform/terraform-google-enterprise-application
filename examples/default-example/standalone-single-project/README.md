@@ -65,6 +65,14 @@ This example requires a single project already created. The following APIs will 
 - `sqladmin.googleapis.com`
 - `storage-api.googleapis.com`
 - `trafficdirector.googleapis.com`
+ 
+But if you are using a service account to deploy this example, you must enable at least the `cloudresourcemanager.googleapis.com` API:
+
+ ```bash
+   gcloud services enable \
+   cloudresourcemanager.googleapis.com \
+   --project=YOUR_PROJECT_ID
+```
 
 The entity used to deploy this example must have the following roles at Project level:
 
@@ -352,6 +360,11 @@ git push origin main
 1. After the CI build successfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
 1. Once the CD pipeline successfully runs, you should be able to see a pod named `getting-started` on your cluster that prints the "Hello world!" message.
+
+
+## Troubleshooting
+
+You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 
 
 

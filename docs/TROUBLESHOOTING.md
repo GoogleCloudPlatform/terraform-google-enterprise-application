@@ -440,3 +440,34 @@ To resolve this, you need to manually remove the Shared VPC attachment resource 
     cd ../../../
     $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
     ```
+
+### Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link
+
+
+**Error message:**
+
+```text
+# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID]
+# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Still destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID, 00m10s elapsed]
+Error: Error waiting for Deleting Network: The network resource 'projects/VPC_DEVELOPMENT_PROJECT_ID/global/networks/vpc-eab-cluster' is already being used by 'projects/VPC_DEVELOPMENT_PROJECT_ID/global/firewalls/gke-csm-thc-RANDOM_HASH'
+```
+
+**Cause:**
+
+This error occurs during the destroy process (either via `$HOME/go/bin/eab-deployer -destroy` or `terraform destroy`) because there is a problem in the cleanup of a Autopilot GKE cluster. Some firewall rules created by GKE service are not correctly cleanup, even after the deletion on the Autopilot GKE cluster. This persistent link prevents the successful destruction of the Shared VPC attachment.
+
+**Solution:**
+
+To resolve this, you need to manually remove the firewall rules and then proceed with destroy. You can do it either in the Console or running a gcloud command.
+
+1. List all firewall rules that contains `csm` in the name:
+
+   ```bash
+   gcloud compute firewall-rules list  --project <NETWORK_PROJECT> --filter=\"csm\""
+   ```
+
+1. Delete the firewall rules:
+
+   ```bash
+		gcloud compute firewall-rules delete <FIREWALL_RULE_NAME> --project <NETWORK_PROJECT> -q		
+   ```
