@@ -84,6 +84,7 @@ var (
 		".*Insufficient CPU.*":                          "Waiting cluster to scale up - CPU.",
 		".*didn't match Pod's node affinity/selector.*": "Waiting cluster to scale up - machine/GPU type.",
 		".*FailedScaleUp.*":                             "Waiting cluster to scale up - Resources availability.",
+		".*Error from server (AlreadyExists).*":         "Resource already exists, waiting stabilize.",
 	}
 )
 
