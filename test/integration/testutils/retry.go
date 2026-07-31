@@ -73,6 +73,8 @@ var (
 
 		".*502.*": "Bad Gateway",
 
+		".*Error 400: Feature has associated resources that should be cleaned up before deletion.*": "Waiting Fleetscope service cleanup",
+
 		".*Error waiting for deleting GKE cluster.*": "Error waiting for deleting GKE cluster: Calling fleet operation service DeleteMembership, please ensure fleet service account has access to the project.",
 	}
 
