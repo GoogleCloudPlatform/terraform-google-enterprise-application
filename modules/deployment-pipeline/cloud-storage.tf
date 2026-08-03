@@ -44,7 +44,7 @@ module "build_cache" {
   #   member = google_service_account.cloud_build.member
   # }]
 
-  depends_on = [google_kms_crypto_key_iam_member.bucket_crypto_key]
+  depends_on = [time_sleep.wait_cmek_iam_propagation]
 }
 
 resource "google_storage_bucket_iam_member" "build_cache_storage_admin" {

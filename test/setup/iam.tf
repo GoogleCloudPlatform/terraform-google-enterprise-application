@@ -23,6 +23,7 @@ locals {
     "roles/clouddeploy.admin",
     "roles/clouddeploy.serviceAgent",
     "roles/cloudkms.admin",
+    "roles/cloudkms.viewer",
     "roles/compute.admin",
     "roles/compute.networkAdmin",
     "roles/compute.securityAdmin",

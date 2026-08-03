@@ -68,5 +68,7 @@ var (
 		".*Error 400.*Invalid value for field.*resource.networkInterfaces[0].subnetwork.*:.*projects/.*/regions/.*/subnetworks/.*. The referenced subnetwork resource cannot be found.*": "Network propagation",
 
 		".*Error: Error creating FeatureMembership: Resource already exists - apply blocked by lifecycle params.*": "Duplicated membership request",
+
+		".*Error 400: Feature has associated resources that should be cleaned up before deletion.*": "Waiting cleanup.",
 	}
 )

@@ -18,16 +18,20 @@ output "gitlab_webhook_secret_id" {
   value = google_secret_manager_secret.gitlab_webhook.id
 }
 
+output "network_id" {
+  value = module.vpc.network_id
+}
+
 output "gitlab_pat_secret_name" {
   value = "gitlab-pat-from-vm"
 }
 
 output "gitlab_project_id" {
-  value = var.project_id
+  value = module.gitlab_project.project_id
 }
 
 output "gitlab_project_number" {
-  value = data.google_project.gitlab_project.number
+  value = module.gitlab_project.project_number
 }
 
 output "gitlab_url" {
@@ -39,7 +43,7 @@ output "gitlab_internal_ip" {
 }
 
 output "gitlab_secret_project" {
-  value = var.project_id
+  value = module.gitlab_project.project_id
 }
 
 output "gitlab_instance_zone" {
