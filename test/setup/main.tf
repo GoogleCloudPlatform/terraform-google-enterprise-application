@@ -51,6 +51,8 @@ module "seed_project" {
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+  
+  disable_services_on_destroy = false
 
   disable_services_on_destroy = false
 
