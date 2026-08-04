@@ -21,6 +21,7 @@ locals {
 
   services = [
     "accesscontextmanager.googleapis.com",
+    "aiplatform.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
     "apikeys.googleapis.com",

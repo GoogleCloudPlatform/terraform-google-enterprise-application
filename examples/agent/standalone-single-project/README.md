@@ -38,6 +38,7 @@ This example creates:
 This example requires a single project already created. The following APIs will be enabled:
 
 - `accesscontextmanager.googleapis.com`
+- `aiplatform.googleapis.com`
 - `anthos.googleapis.com`
 - `anthosconfigmanagement.googleapis.com`
 - `apikeys.googleapis.com`
