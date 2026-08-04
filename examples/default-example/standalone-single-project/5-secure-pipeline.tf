@@ -106,6 +106,8 @@ module "cicd" {
   logging_bucket = var.logging_bucket
   bucket_kms_key = var.bucket_kms_key
 
+  access_level_name      = var.access_level_name
+
   attestation_kms_key = var.attestation_kms_key
   attestor_id         = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null
 
