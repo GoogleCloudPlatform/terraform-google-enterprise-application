@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package defaul_example_standalone_single_project
+package llm_model
 
 import (
 	"errors"

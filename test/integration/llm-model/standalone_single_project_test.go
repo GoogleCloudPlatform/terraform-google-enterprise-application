@@ -15,7 +15,7 @@
  */
 
 // define test package name
-package defaul_example_standalone_single_project
+package llm_model
 
 import (
 	"fmt"
