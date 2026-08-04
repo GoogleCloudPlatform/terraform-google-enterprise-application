@@ -75,6 +75,14 @@ But if you are using a service account to deploy this example, you must enable a
    --project=YOUR_PROJECT_ID
 ```
 
+If you are going to use Github or Gitlab, you must enable the `secretmanager.googleapis.com` API:
+
+ ```bash
+   gcloud services enable \
+   secretmanager.googleapis.com \
+   --project=YOUR_PROJECT_ID
+```
+
 The entity used to deploy this example must have the following roles at Project level:
 
 - Artifact Registry Admin: `roles/artifactregistry.admin`
@@ -95,6 +103,7 @@ The entity used to deploy this example must have the following roles at Project 
 - Service Account User: `roles/iam.serviceAccountUser`
 - Logging LogWriter: `roles/logging.logWriter`
 - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+- Secret Manager Editor: `roles/secretmanager.editor`
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
 - Source Repository Admin: `roles/source.admin` (if using CSR)
 - Storage Admin: `roles/storage.admin`
