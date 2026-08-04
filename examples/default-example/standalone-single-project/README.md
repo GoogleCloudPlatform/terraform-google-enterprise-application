@@ -58,7 +58,6 @@ This example requires a single project already created. The following APIs will 
 - `multiclusteringress.googleapis.com`
 - `multiclusterservicediscovery.googleapis.com`
 - `networkmanagement.googleapis.com`
-- `secretmanager.googleapis.com`
 - `servicemanagement.googleapis.com`
 - `servicenetworking.googleapis.com`
 - `serviceusage.googleapis.com`
@@ -104,6 +103,14 @@ The entity used to deploy this example must have the following roles at Organiza
 
 - Organization Administrator: `roles/resourcemanager.organizationAdmin`
 - Access Context Manager Policy Admin: `roles/accesscontextmanager.policyAdmin`
+
+If you are going to use Github or Gitlab, you must enable the `secretmanager.googleapis.com` API:
+
+ ```bash
+   gcloud services enable \
+   secretmanager.googleapis.com \
+   --project=YOUR_PROJECT_ID
+```
 
 ####  KMS Key for Bucket Encryption
 
