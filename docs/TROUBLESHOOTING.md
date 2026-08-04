@@ -468,6 +468,4 @@ To resolve this, you need to manually remove the firewall rules and then proceed
 
 1. Delete the firewall rules:
 
-   ```bash
-		gcloud compute firewall-rules delete <FIREWALL_RULE_NAME> --project <NETWORK_PROJECT> -q		
-   ```
+   

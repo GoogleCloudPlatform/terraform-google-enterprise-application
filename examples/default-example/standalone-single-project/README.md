@@ -83,9 +83,9 @@ The entity used to deploy this example must have the following roles at Project 
 - Cloud Deploy Service Agent: `roles/clouddeploy.serviceAgent`
 - Cloud Deploy Admin: `roles/clouddeploy.admin`
 - Compute Admin: `roles/compute.admin`
-- Network Admin: `roles/compute.networkAdmin `
+- Network Admin: `roles/compute.networkAdmin`
 - Security Admin: `roles/compute.securityAdmin`
-- Container Admin: `roles/container.admin  `
+- Container Admin: `roles/container.admin`
 - Cluster Admin: `roles/container.clusterAdmin`
 - DNS Admin: `roles/dns.admin`
 - GKE Hub Admin: `roles/gkehub.editor`
@@ -97,8 +97,8 @@ The entity used to deploy this example must have the following roles at Project 
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
 - Source Repository Admin: `roles/source.admin` (if using CSR)
 - Storage Admin: `roles/storage.admin`
-- Project AdminL `roles/resourcemanager.projectIamAdmin`
 - Viewer: `roles/viewer`
+- Secret Manager Editor: `roles/secretmanager.editor`
 
 The entity used to deploy this example must have the following roles at Organization level:
 
