@@ -49,10 +49,13 @@ func TestSingleProjectSourceCapitalAgent(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	appName := "agent"
+	serviceName := "capital-agent"
+
 	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
-	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir("../../../examples/agent/standalone-single-project"))
+	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir(fmt.Sprintf("../../../examples/%s/standalone-single-project", appName)))
 
 	envName := standaloneSingleProj.GetStringOutput("env")
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
@@ -60,8 +63,6 @@ func TestSingleProjectSourceCapitalAgent(t *testing.T) {
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
 	region := "us-central1"
-	appName := "agent"
-	serviceName := "capital-agent"
 	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/", appName)
 
