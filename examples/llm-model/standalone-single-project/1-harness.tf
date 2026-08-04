@@ -38,6 +38,7 @@ locals {
     "iam.googleapis.com",
     "iap.googleapis.com",
     "mesh.googleapis.com",
+    "modelarmor.googleapis.com",
     "monitoring.googleapis.com",
     "multiclusteringress.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",

@@ -1,5 +1,12 @@
-# Standalone Single-Project Example
-The Standalone Single Project Example deploys the core Enterprise Application Blueprint into a single project for the purposes of simplified demonstration.
+# Example: Getting started with a VLLM model
+
+This guide demonstrates how to deploy a Large Language Model (LLM) using the vLLM serving engine on a Google Kubernetes Engine (GKE) cluster. It is a modified version of the [GKE Inference Gateway tutorial](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/deploy-gke-inference-gateway#create-model-deployment) adapted for Scaffold and the Enterprise Application Blueprint.
+
+It integrates the following components:
+
+* __vLLM:__ For high-throughput model serving.
+* __GKE Inference Gateway:__ For managing model endpoints.
+* __Model Armor:__ For security and governance of LLM interactions.
 
 **Do not use this example for production deployments, as it lacks robust separation of duties and least-privileged permissions present in the standard multi-stage deployment.**
 
@@ -31,6 +38,7 @@ This example creates:
     - Cloud Build Service Account
     - Cloud Deploy Service Account
     - Cloud Storage
+    - Model Armor Template
 
 
 ## Pre-requisites
@@ -54,6 +62,7 @@ This example requires a single project already created. The following APIs will 
 - `iam.googleapis.com`
 - `iap.googleapis.com`
 - `mesh.googleapis.com`
+- `modelarmor.googleapis.com`
 - `monitoring.googleapis.com`
 - `multiclusteringress.googleapis.com`
 - `multiclusterservicediscovery.googleapis.com`
@@ -82,6 +91,7 @@ The entity used to deploy this example must have the following roles at Project 
 - Cloud Deploy Service Agent: `roles/clouddeploy.serviceAgent`
 - Cloud Deploy Admin: `roles/clouddeploy.admin`
 - Compute Admin: `roles/compute.admin`
+- Model Armor Admin: `roles/modelarmor.admin`
 - Network Admin: `roles/compute.networkAdmin`
 - Security Admin: `roles/compute.securityAdmin`
 - Container Admin: `roles/container.admin`
@@ -93,11 +103,11 @@ The entity used to deploy this example must have the following roles at Project 
 - Service Account User: `roles/iam.serviceAccountUser`
 - Logging LogWriter: `roles/logging.logWriter`
 - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+- Secret Manager Editor: `roles/secretmanager.editor`
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
 - Source Repository Admin: `roles/source.admin` (if using CSR)
 - Storage Admin: `roles/storage.admin`
 - Viewer: `roles/viewer`
-- Secret Manager Editor: `roles/secretmanager.editor`
 
 The entity used to deploy this example must have the following roles at Organization level:
 
