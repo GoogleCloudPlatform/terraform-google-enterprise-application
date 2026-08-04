@@ -215,7 +215,7 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {
 		// removes firewall rules created by the service but not being deleted.
-		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"gke\"", projectID).Array()
+		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"csm\"", projectID).Array()
 		for i := range firewallRules {
 			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
 		}

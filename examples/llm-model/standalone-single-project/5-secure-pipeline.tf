@@ -31,30 +31,78 @@ locals {
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
 
-  target_deploy_parameters = {
+  target_deploy_parameters = { (local.env) = {
     "cluster_project_id"      = var.project_id
     "model_armor_template_id" = module.model_armor_configuration.template.id
     "model_armor_location"    = var.region
     "env_namespace_id"        = "vllm-model-${local.env}"
+    }
   }
 }
 
-module "app" {
-  source = "../../modules/deployment-pipeline"
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
+resource "google_project_iam_member" "assign_permissions" {
+  project = local.workerpool_project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "assign_permissions_service_agent" {
+  project = local.workerpool_project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sd_viewer" {
+  project = local.workerpool_network_project_id
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "access_network" {
+  project = local.workerpool_network_project_id
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "cloudbuid_builder" {
+  for_each = module.cicd
+  project  = local.workerpool_network_project_id
+  role     = "roles/cloudbuild.builds.builder"
+  member   = "serviceAccount:${each.value.cloudbuild_service_account}"
+}
+
+resource "time_sleep" "wait_propagation" {
+  create_duration = "30s"
+
+  depends_on = [
+    google_project_iam_member.assign_permissions,
+    google_project_iam_member.assign_permissions_service_agent,
+    google_project_iam_member.sd_viewer,
+    google_project_iam_member.access_network,
+  ]
+}
+
+module "cicd" {
+  source = "../../../modules/deployment-pipeline"
+
+  for_each = var.cloudbuildv2_repository_config.repositories
 
   project_id                 = var.project_id
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
-  cluster_service_accounts   = { for i, sa in local.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
+  cluster_service_accounts   = { for i, sa in module.multitenant_infra.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
 
   service_name           = local.service_name
   team_name              = local.team_name
-  repo_name              = var.cloudbuildv2_repository_config.repositories[local.repo_name].repository_name
+  repo_name              = each.value.repository_name
   repo_branch            = local.repo_branch
   app_build_trigger_yaml = "cloudbuild.yaml"
 
-  buckets_force_destroy = var.buckets_force_destroy
-  bucket_prefix         = var.bucket_prefix
+  buckets_force_destroy = true
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
@@ -71,11 +119,17 @@ module "app" {
   binary_authorization_image         = module.binary_autz.binary_authorization_image
   binary_authorization_repository_id = module.binary_autz.binary_authorization_repository_id
 
+  depends_on = [
+    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment,
+    google_project_service.required_services
+  ]
 }
 
 module "model_armor_configuration" {
   source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 2.3"
+  version = "~> 7.3"
 
   template_id = "ma-${local.application_name}-${local.service_name}"
   location    = var.region
