@@ -106,6 +106,8 @@ module "cicd" {
   logging_bucket = var.logging_bucket
   bucket_kms_key = var.bucket_kms_key
 
+  access_level_name      = var.access_level_name
+
   attestation_kms_key = var.attestation_kms_key
   attestor_id         = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null
 
@@ -129,17 +131,17 @@ resource "google_service_account" "gsa_capital_agent" {
 }
 
 resource "google_project_iam_member" "gsa_vertex_user" {
-  project  = var.project_id
-  role     = "roles/aiplatform.user"
-  member   = google_service_account.gsa_capital_agent.member
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = google_service_account.gsa_capital_agent.member
 
   depends_on = [google_project_service.required_services]
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  project  = var.project_id
-  role     = "roles/cloudtrace.agent"
-  member   = google_service_account.gsa_capital_agent.member
+  project = var.project_id
+  role    = "roles/cloudtrace.agent"
+  member  = google_service_account.gsa_capital_agent.member
 
   depends_on = [google_project_service.required_services]
 }
