@@ -22,7 +22,7 @@ args = ["--project_id=${project_id}",
 limits={cpu="1000m", memory="1Gi"}
 node_selector={"cloud.google.com/gke-spot"="true"}
 job_annotations={"kueue.x-k8s.io/queue-name"="lq-hpc-team-b"}
-backoff_limit=50
+backoff_limit=60
 
 # Mounts, only GCS at this point
 
