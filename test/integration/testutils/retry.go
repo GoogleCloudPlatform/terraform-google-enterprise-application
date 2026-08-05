@@ -14,6 +14,8 @@
 
 package testutils
 
+import "regexp"
+
 var (
 	RetryableTransientErrors = map[string]string{
 		// Error 409: unable to queue the operation
@@ -68,5 +70,46 @@ var (
 		".*Error 400.*Invalid value for field.*resource.networkInterfaces[0].subnetwork.*:.*projects/.*/regions/.*/subnetworks/.*. The referenced subnetwork resource cannot be found.*": "Network propagation",
 
 		".*Error: Error creating FeatureMembership: Resource already exists - apply blocked by lifecycle params.*": "Duplicated membership request",
+
+		".*502.*": "Bad Gateway",
+
+		".*Error 400: Feature has associated resources that should be cleaned up before deletion.*": "Waiting Fleetscope service cleanup",
+
+		".*Error waiting for deleting GKE cluster.*": "Error waiting for deleting GKE cluster: Calling fleet operation service DeleteMembership, please ensure fleet service account has access to the project.",
+
+		".*Could not connect to server.*": "Network error.",
+	}
+
+	RetryableDeploymentErrors = map[string]string{
+		".*context deadline exceeded.*": "Timeout connection.",
+		".*502.*":                       "Bad Gateway",
+		".*Waiting for deployments to stabilize.*":      "Waiting for deployments to stabilize.",
+		".*Insufficient memory.*":                       "Waiting cluster to scale up - memory.",
+		".*Insufficient CPU.*":                          "Waiting cluster to scale up - CPU.",
+		".*didn't match Pod's node affinity/selector.*": "Waiting cluster to scale up - machine/GPU type.",
+		".*FailedScaleUp.*":                             "Waiting cluster to scale up - Resources availability.",
+		".*Error from server \\(AlreadyExists\\).*":     "Resource already exists, waiting stabilize.",
 	}
 )
+
+var compiledRetryableErrors = make(map[*regexp.Regexp]string)
+
+func init() {
+	// Compile all regex patterns once and store them
+	for pattern, msg := range RetryableDeploymentErrors {
+		compiledRegex := regexp.MustCompile(pattern)
+		compiledRetryableErrors[compiledRegex] = msg
+	}
+}
+
+// IsDeploymentRetryableError checks the error using pre-compiled regular expressions
+func IsDeploymentRetryableError(errMessage string) (bool, string) {
+	for regex, msg := range compiledRetryableErrors {
+		// MatchString on a compiled regex is much faster
+		if regex.MatchString(errMessage) {
+			return true, msg
+		}
+	}
+
+	return false, ""
+}

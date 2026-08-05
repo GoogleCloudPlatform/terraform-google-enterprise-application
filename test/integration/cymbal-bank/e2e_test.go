@@ -80,6 +80,8 @@ func TestCymbalBankE2E(t *testing.T) {
 			)
 		}
 
+		time.Sleep(60 * time.Second)
+
 		resp, err := login(ctx, client, ipAddress)
 
 		// check if the server replied with authentication cookie
