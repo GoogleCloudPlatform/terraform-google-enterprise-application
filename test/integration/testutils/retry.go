@@ -76,6 +76,7 @@ var (
 		".*Error 400: Feature has associated resources that should be cleaned up before deletion.*": "Waiting Fleetscope service cleanup",
 
 		".*Error waiting for deleting GKE cluster.*": "Error waiting for deleting GKE cluster: Calling fleet operation service DeleteMembership, please ensure fleet service account has access to the project.",
+
 		".*Could not connect to server.*": "Network error.",
 	}
 
@@ -87,7 +88,7 @@ var (
 		".*Insufficient CPU.*":                          "Waiting cluster to scale up - CPU.",
 		".*didn't match Pod's node affinity/selector.*": "Waiting cluster to scale up - machine/GPU type.",
 		".*FailedScaleUp.*":                             "Waiting cluster to scale up - Resources availability.",
-		".*Error from server \\(AlreadyExists\\).*":         "Resource already exists, waiting stabilize.",
+		".*Error from server \\(AlreadyExists\\).*":     "Resource already exists, waiting stabilize.",
 	}
 )
 
