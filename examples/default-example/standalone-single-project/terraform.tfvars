@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-# project_id = "<YOUR-PROJECT-ID>"
-# workerpool_network_id = "<YOUR-NETWORK-ID>"
+project_id = "<YOUR-PROJECT-ID>"
+# workerpool_id = "<YOUR-NETWORK-ID>"     // Optional
 # subnetwork_self_link = "<YOUR-CLUSTER-SUBNETWORK-SELF-LINK>"
-# teams = {
-#   "namespace" = "your-group@yourdomain.com",
-# }
+
+# Mandatory fleetscope namespace
+teams = {
+  "namespace" = "your-group@yourdomain.com",
+}
 # service_perimeter_name = "<YOUR-SERVICE-PERIMETER-NAME>"
 # service_perimeter_mode = "DRY_RUN"
 

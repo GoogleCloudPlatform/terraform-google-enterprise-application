@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-# 2-multitenantl
-
 locals {
   env = "development"
   apps = {

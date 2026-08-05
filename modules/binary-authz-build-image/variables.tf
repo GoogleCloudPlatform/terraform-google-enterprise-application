@@ -76,3 +76,10 @@ variable "workerpool_id" {
     error_message = "The workerpool_id must follow the exact format: 'projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME'."
   }
 }
+
+variable "module_dependencies" {
+  description = "A list of dependencies to wait for before running the gcloud script"
+  type        = list(any)
+  default     = []
+}
+

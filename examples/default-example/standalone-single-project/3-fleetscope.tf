@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-# 3-fleetscope
 locals {
   fleet_project_id   = module.multitenant_infra.fleet_project_id
   cluster_project_id = module.multitenant_infra.cluster_project_id

@@ -72,18 +72,21 @@ module "private_workerpool" {
   depends_on = [google_project_service.required_services]
 }
 
+
 module "binary_autz" {
   source                    = "../../../modules/binary-authz-build-image"
+  
   project_id                = var.project_id
   location                  = var.region
   binary_auth_image_version = "v1.0"
   workerpool_id             = local.workerpool_id
   bucket_logs_url           = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
-  depends_on                = [google_project_service.required_services]
+  module_dependencies       = [for s in google_project_service.required_services : s.id]
 }
 
 module "cluster_network" {
   source          = "../../../modules/cluster_network"
+
   vpc_name        = "eab-cluster"
   project_id      = var.project_id
   region          = var.region
