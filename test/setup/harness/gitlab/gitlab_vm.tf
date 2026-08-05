@@ -19,6 +19,12 @@ locals {
   gitlab_network_id_without_location = replace(module.vpc.network_id, "locations/", "")
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${module.vpc.network_name}"
   gitlab_vm_ip_range                 = "10.2.2.0/24"
+  machine_type                       = "n2-standard-8"
+  zones_with_machine_type = [
+    for zone_name, result in data.google_compute_machine_types.available : zone_name
+    if length(result.machine_types) > 0
+  ]
+  selected_zone = try(local.zones_with_machine_type[0], null)
 }
 
 module "gitlab_project" {
@@ -160,8 +166,8 @@ data "google_compute_zones" "available" {
 resource "google_compute_instance" "default" {
   name         = "gitlab"
   project      = module.gitlab_project.project_id
-  machine_type = "n2-standard-4"
-  zone         = data.google_compute_zones.available.names[0]
+  machine_type = local.machine_type
+  zone         = local.selected_zone
 
   tags = ["git-vm", "direct-gateway-access"]
 

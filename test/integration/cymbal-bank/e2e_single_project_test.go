@@ -21,6 +21,7 @@ import (
 	"net/http/cookiejar"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/gruntwork-io/terratest/modules/retry"
@@ -76,6 +77,8 @@ func TestAppE2ECymbalBankSingleProject(t *testing.T) {
 				statusCode,
 			)
 		}
+
+		time.Sleep(60 * time.Second)
 
 		resp, err := login(ctx, client, ipAddress)
 
