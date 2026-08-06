@@ -65,7 +65,7 @@ module "app" {
 
 module "model_armor_configuration" {
   source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 2.3"
+  version = "~> 7.0"
 
   for_each    = local.cluster_projects_id
   template_id = "ma-${local.application_name}-${local.service_name}"
