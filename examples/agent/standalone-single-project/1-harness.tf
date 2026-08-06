@@ -80,6 +80,8 @@ module "binary_autz" {
   binary_auth_image_version = "v1.0"
   workerpool_id             = local.workerpool_id
   bucket_logs_url           = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
+
+  module_dependencies       = [for s in google_project_service.required_services : s.id]
 }
 
 module "cluster_network" {
