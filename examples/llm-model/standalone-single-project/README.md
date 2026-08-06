@@ -175,9 +175,9 @@ To proceed with GitHub as your git provider you will need:
 
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
-  - eab-default-example-hello-world (`eab-default-example-hello-world`)
+  - eab-llm-model-llamma-model (`eab-llm-model-llamma-model`)
 
-   > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+   > Note: Default name for the repository is: `eab-llm-model-llamma-model`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
 - [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
@@ -216,9 +216,9 @@ To proceed with GitHub as your git provider you will need:
       repo_type = "GITHUBv2"
 
       repositories = {
-         eab-default-example-hello-world = {
-            repository_name = "eab-default-example-hello-world"
-            repository_url  = "https://github.com/your-org/eab-default-example-hello-world.git"
+         eab-llm-model-llamma-model = {
+            repository_name = "eab-llm-model-llamma-model"
+            repository_url  = "https://github.com/your-org/eab-llm-model-llamma-model.git"
          }
       }
 
@@ -234,9 +234,9 @@ To proceed with Gitlab as your git provider you will need:
 
 - An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** GitLab repository for each one of the repositories below:
-  - Hello World (`eab-default-example-hello-world`)
+  - LLM Model (`eab-llm-model-llamma-model`)
 
-  > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+  > Note: Default name for the repository is: `eab-llm-model-llamma-model`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - An access token with the `api` scope to use for connecting and disconnecting repositories.
 
@@ -290,15 +290,15 @@ To proceed with Gitlab as your git provider you will need:
       repo_type = "GITLABv2"
 
       repositories = {
-         eab-default-example-hello-world = {
-            repository_name = "eab-default-example-hello-world"
-            repository_url  = "https://gitlab.com/your-group/eab-default-example-hello-world.git"
+         eab-llm-model-llamma-model = {
+            repository_name = "eab-llm-model-llamma-model"
+            repository_url  = "https://gitlab.com/your-group/eab-llm-model-llamma-model.git"
          }
       }
 
       gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
       gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
-      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
+      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_WEBHOOK_SECRET_NAME"
 
       secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
 
@@ -327,7 +327,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 1. Enter at Single Project example folder:
 
     ```bash
-    cd terraform-google-enterprise-application/examples/default-example/standalone-single-project
+    cd terraform-google-enterprise-application/examples/llm-model/standalone-single-project
     ```
 
 1. Update `terraform.tfvars`.
@@ -341,42 +341,42 @@ the steps below assume that you are checked out on the same level as `terraform-
     - Cloud Source Repository only
 
     ```bash
-    gcloud source repos clone eab-default-example-hello-world --project=REPLACE_WITH_ADMIN_PROJECT
+    gcloud source repos clone eab-llm-model-llamma-model --project=REPLACE_WITH_ADMIN_PROJECT
     ```
 
     - Github Repository only
 
     ```bash
-    git clone https://github.com/your-org/eab-default-example-hello-world.git
+    git clone https://github.com/your-org/eab-llm-model-llamma-model.git
     ```
 
     - Gitlab Repository only
 
     ```bash
-    git clone https://gitlab.com/your-group/eab-default-example-hello-world.git
+    git clone https://gitlab.com/your-group/eab-llm-model-llamma-model.git
     ```
 
 1. Copy the contents of this directory to the repository:
 
 ```bash
-cp -r terraform-google-enterprise-application/examples/default-example/6-appsource/default-example/* eab-default-example-hello-world
+cp -r terraform-google-enterprise-application/examples/llm-model/6-appsource/* eab-llm-model-llamma-model
 ```
 
 1. Commit changes
 
 ```bash
-cd eab-default-example-hello-world
+cd eab-llm-model-llamma-model
 git checkout -b main
 git add .
 git commit -m "Add source code to the repository"
 git push origin main
 ```
 
-1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on the `hello-world-admin` project under the common folder. You can view the results on the Cloud Build Page.
+1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on your project. You can view the results on the Cloud Build Page.
 
 1. After the CI build successfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
-1. Once the CD pipeline successfully runs, you should be able to see a pod named `getting-started` on your cluster that prints the "Hello world!" message.
+1. Once the CD pipeline successfully runs, you should be able to see a deployment named `openai-app` on your cluster.
 
 
 ## Troubleshooting
