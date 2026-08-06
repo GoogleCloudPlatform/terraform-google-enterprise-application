@@ -256,7 +256,8 @@ func TestFleetscope(t *testing.T) {
 							// ensure config-sync resources are present in cluster
 							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 							if err != nil {
-								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") {
+								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") &&
+									!strings.Contains(err.Error(), "the server doesn't have a resource type \"rootsyncs\"") {
 									t.Logf("Config-Sync error '%s' \n.", err.Error())
 									return false, err
 								} else {
