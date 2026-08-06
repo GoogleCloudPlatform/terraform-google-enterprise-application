@@ -52,4 +52,6 @@ module "build_binary_authz_image" {
 
   create_cmd_entrypoint = "bash"
   create_cmd_body       = "${local.cmd_prompt} || ( sleep 45 && ${local.cmd_prompt})"
+
+  module_depends_on = var.module_dependencies
 }
