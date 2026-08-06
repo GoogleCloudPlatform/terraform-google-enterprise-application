@@ -62,7 +62,7 @@ resource "google_gke_hub_membership_binding" "membership-binding" {
 
 module "fleet_app_operator_permissions" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-app-operator-permissions"
-  version = "~> 40.0"
+  version = "~> 44.1"
 
   for_each = var.namespace_ids
 

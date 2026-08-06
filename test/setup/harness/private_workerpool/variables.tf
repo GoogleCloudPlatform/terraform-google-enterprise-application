@@ -43,6 +43,5 @@ variable "workpool_region" {
 variable "workerpool_machine_type" {
   description = "The project to deploy in"
   type        = string
-  default     = "e2-standard-4"
+  default     = "e2-highmem-8"
 }
-

@@ -39,8 +39,10 @@ import (
 func TestStandaloneSingleProjectExample(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupOutput.GetTFSetupStringOutput("seed_project_id")
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+
+	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
+	projectID := setupVPCSCOutput.GetTFSetupStringOutput("seed_project_id")
 
 	singleProjecPath := "../../setup/harness/single_project"
 	singleProject := tft.NewTFBlueprintTest(t, tft.WithTFDir(singleProjecPath))
@@ -51,13 +53,14 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
 	privateWorkerPool := tft.NewTFBlueprintTest(t, tft.WithTFDir(privateWorkerPoolPath))
 
-	service_perimeter_mode := setupOutput.GetStringOutput("service_perimeter_mode")
-	service_perimeter_name := setupOutput.GetStringOutput("service_perimeter_name")
-	access_level_name := setupOutput.GetStringOutput("access_level_name")
+	service_perimeter_mode := setupVPCSCOutput.GetStringOutput("service_perimeter_mode")
+	service_perimeter_name := setupVPCSCOutput.GetStringOutput("service_perimeter_name")
+	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
 	vars := map[string]interface{}{
 		"project_id":                         projectID,
 		"service_perimeter_mode":             service_perimeter_mode,
+		"teams":                              setupOutput.GetJsonOutput("teams").String(),
 		"service_perimeter_name":             service_perimeter_name,
 		"access_level_name":                  access_level_name,
 		"subnetwork_self_link":               singleProject.GetStringOutput("single_project_cluster_subnetwork_self_link"),

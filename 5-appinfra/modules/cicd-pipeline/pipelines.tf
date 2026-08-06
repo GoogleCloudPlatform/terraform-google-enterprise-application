@@ -49,6 +49,8 @@ resource "google_clouddeploy_target" "clouddeploy_targets" {
     ]
   }
 
+  deploy_parameters = lookup(var.target_deploy_parameters, regex(".*-(.+)$", each.value)[0], {})
+
   depends_on = [module.delivery_artifacts]
 }
 

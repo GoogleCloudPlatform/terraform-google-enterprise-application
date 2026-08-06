@@ -19,6 +19,12 @@ locals {
   gitlab_network_id_without_location = replace(var.network_id, "locations/", "")
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/global/networks/${var.network_name}"
   gitlab_vm_ip_range                 = "10.2.2.0/24"
+  machine_type                       = "n2-standard-8"
+  zones_with_machine_type = [
+    for zone_name, result in data.google_compute_machine_types.available : zone_name
+    if length(result.machine_types) > 0
+  ]
+  selected_zone = try(local.zones_with_machine_type[0], null)
 }
 
 data "google_project" "gitlab_project" {
@@ -117,16 +123,30 @@ resource "time_sleep" "waits_iam_propagation" {
   ]
 }
 
+data "google_compute_zones" "available" {
+  project = var.project_id
+  region  = var.region
+  status  = "UP"
+}
+
+data "google_compute_machine_types" "available" {
+  for_each = toset(data.google_compute_zones.available.names)
+  zone     = each.value
+  project  = var.project_id
+  filter   = "name = ${local.machine_type}"
+}
+
 resource "google_compute_instance" "default" {
   name         = "gitlab"
   project      = var.project_id
-  machine_type = "n2-standard-4"
-  zone         = "us-central1-a"
+  machine_type = local.machine_type
+  zone         = local.selected_zone
 
   tags = ["git-vm", "direct-gateway-access"]
 
   boot_disk {
     initialize_params {
+      size  = 50
       image = "ubuntu-os-cloud/ubuntu-2204-lts"
     }
   }

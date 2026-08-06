@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v4beta10
+apiVersion: skaffold/v4beta13
 kind: Config
 build:
   tagPolicy:
@@ -24,6 +24,10 @@ build:
     custom:
       buildCommand: |
         docker buildx build --platform=$PLATFORMS --tag=$IMAGE --push .
+deploy:
+  statusCheckDeadlineSeconds: 1200
+  kubectl: {}
+  tolerateFailuresUntilDeadline: true
 manifests:
   rawYaml:
   - k8s-pod.yaml

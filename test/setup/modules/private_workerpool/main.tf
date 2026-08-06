@@ -84,7 +84,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
   project  = module.private_workerpool_project.project_id
   location = var.workpool_region
   worker_config {
-    disk_size_gb   = 100
+    disk_size_gb   = 500
     machine_type   = var.workerpool_machine_type
     no_external_ip = true
   }
