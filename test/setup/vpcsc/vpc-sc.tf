@@ -440,7 +440,7 @@ resource "google_access_context_manager_access_policy" "policy_org" {
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version            = "~> 7.1"
+  version            = "~> 8.0"
   policy             = google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = concat(var.access_level_members, ["user:andrewpeabody@google.com"])
@@ -450,7 +450,7 @@ module "access_level_members" {
 
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version        = "~> 7.1"
+  version        = "~> 8.0"
   policy         = google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
