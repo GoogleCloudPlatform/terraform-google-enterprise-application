@@ -91,11 +91,13 @@ limitations under the License.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| app\_cloudbuild\_workspace\_cloudbuild\_sa\_email | Service Account to run Cloud Build Builds. | `string` | n/a | yes |
 | containers | Map of image name to configuration (source) | <pre>map(object({<br>    source      = string<br>    config_yaml = optional(string, "")<br>  }))</pre> | n/a | yes |
 | project\_id | The GCP project ID where resources will be created. | `string` | n/a | yes |
 | region | The region of the build | `string` | n/a | yes |
 | repository\_id | Artifact repository ID | `string` | n/a | yes |
 | repository\_region | Artifacte Repository region | `string` | n/a | yes |
+| workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | `string` | `null` | no |
 
 ## Outputs
 

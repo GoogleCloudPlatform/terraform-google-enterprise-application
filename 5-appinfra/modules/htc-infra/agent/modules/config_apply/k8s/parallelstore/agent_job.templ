@@ -34,7 +34,7 @@ spec:
     spec:
       priorityClassName: higher-priority
       nodeSelector:
-        cloud.google.com/compute-class: spot-capacity
+        cloud.google.com/compute-class: : ${compute_class}
       initContainers:
       - name: workload
         image: ${workload_image}
@@ -91,7 +91,7 @@ spec:
       volumes:
       - name: gcs-data
         persistentVolumeClaim:
-          claimName: data-pvc
+          claimName: data-pvc-${region}
           readOnly: false
 
   backoffLimit: 2

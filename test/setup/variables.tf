@@ -37,14 +37,23 @@ variable "cloud_build_sa" {
 variable "single_project" {
   description = "Single Project example being deployed."
   type        = bool
+  default     = false
 }
 
 variable "hpc" {
   description = "HPC Example being deployed."
   type        = bool
+  default     = false
+}
+
+variable "htc" {
+  description = "HTC Example being deployed."
+  type        = bool
+  default     = false
 }
 
 variable "agent" {
   description = "Agent Example being deployed."
   type        = bool
+  default     = false
 }

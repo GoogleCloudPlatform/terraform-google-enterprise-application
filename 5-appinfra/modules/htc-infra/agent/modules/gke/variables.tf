@@ -164,6 +164,12 @@ variable "parallelstore_instances" {
   }
 }
 
+variable "compute_class" {
+  type        = string
+  default     = "spot-capacity"
+  description = "The compute class annotation value. Default is 'spot-capacity'."
+}
+
 variable "vpc_name" {
   type        = string
   description = "Name of the VPC used by Parallelstore"
@@ -177,4 +183,9 @@ variable "env" {
 variable "namespace" {
   type        = string
   description = "The environment's fleet namespace'"
+}
+
+variable "app_cloud_deploy_sa_email" {
+  description = "Service Account to apply changes on fleetscope."
+  type        = string
 }

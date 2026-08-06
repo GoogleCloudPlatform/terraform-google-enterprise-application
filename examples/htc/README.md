@@ -209,6 +209,21 @@ The steps below assume that you are checked out on the same level as `terraform-
     git push --set-upstream origin production
     ```
 
+1. Merge plan to nonproduction branch:
+
+    ```bash
+    git checkout -b nonproduction
+    git push --set-upstream origin nonproduction
+    ```
+
+1. Merge plan to development branch:
+
+    ```bash
+    git checkout -b development
+    git push --set-upstream origin development
+    ```
+
+
 ##### Workspace group
 
 The HTC example requires the cloud build's service account created during the app infra stage to be added to the namespace's workspace group.

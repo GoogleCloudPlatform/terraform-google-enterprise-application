@@ -28,7 +28,7 @@ spec:
     spec:
       priorityClassName: placeholder-priority
       nodeSelector:
-        cloud.google.com/compute-class: spot-capacity
+        cloud.google.com/compute-class: : ${compute_class}
       containers:
       - name: balloon-container
         image: busybox

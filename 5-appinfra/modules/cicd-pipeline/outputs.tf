@@ -29,5 +29,10 @@ output "service_repository_project_id" {
 
 output "cloudbuild_service_account" {
   description = "Service Account created to run Cloud Build."
-  value       = google_service_account.cloud_build.email
+  value       = google_service_account.cloud_build
+}
+
+output "clouddeploy_service_account" {
+  description = "Service Account created to run Cloud Deploy."
+  value       = google_service_account.cloud_deploy
 }

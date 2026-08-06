@@ -60,7 +60,6 @@ func TestFleetscope(t *testing.T) {
 
 	attestation := map[string]interface{}{}
 
-	enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
 	forkRepository := os.Getenv("HEAD_REPO_URL")
 	branch := os.Getenv("HEAD_BRANCH")
 
@@ -99,12 +98,17 @@ func TestFleetscope(t *testing.T) {
 			splitClusterMembership := strings.Split(clusterMembership, "/")
 			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
+			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
+
+			enableInferenceGateway := strings.ToLower(os.Getenv("TF_VAR_agent")) == "true"
+			htcExample := strings.ToLower(os.Getenv("TF_VAR_htc")) == "true"
+
 			configSyncPath := fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 			if enableInferenceGateway {
 				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
-				forkRepository = "https://github.com/amandakarina/terraform-google-enterprise-application"
-				branch = "feat/adds-model-serving"
+			} else if htcExample {
+				configSyncPath = "examples/htc/3-fleetscope/config-sync"
 			}
 
 			if forkRepository == "" || branch == "" {

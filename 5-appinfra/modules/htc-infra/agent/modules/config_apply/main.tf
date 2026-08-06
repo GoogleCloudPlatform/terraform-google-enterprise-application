@@ -19,7 +19,7 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  get_credentials_cmd = "gcloud container fleet memberships get-credentials ${var.cluster_name} --project ${var.cluster_project_id} --location ${var.region}"
+  get_credentials_cmd = "gcloud container fleet memberships get-credentials ${var.cluster_name} --project ${var.cluster_project_id} --location ${var.region} --impersonate-service-account ${var.app_cloud_deploy_sa_email}"
 
   workload_init_args = {
     for idx, args in var.workload_init_args :
@@ -48,6 +48,8 @@ locals {
         pubsub_project_id = var.infra_project_id,
         agent_image       = var.agent_image,
         workload_endpoint = var.workload_grpc_endpoint,
+        compute_class     = var.compute_class
+        region            = var.region
         workload_request_sub = (cfg.parallel > 0 ?
           var.pubsub_job_request :
         var.pubsub_hpa_request)
@@ -66,6 +68,7 @@ locals {
         namespace         = var.namespace,
         image             = var.agent_image,
         pubsub_project_id = var.infra_project_id,
+        region            = var.region
         args = [
           "test", "pubsub",
           "--logJSON",
@@ -102,6 +105,7 @@ locals {
     { "volume_yaml" = templatefile(
       "${path.module}/k8s/volume.yaml.templ", {
         gcs_storage_data = var.gcs_bucket
+        region           = var.region
         namespace        = var.namespace
       }),
       "hpa_yaml" = templatefile(
@@ -115,40 +119,16 @@ locals {
           agent_image         = var.agent_image
           gke_hpa_request_sub = var.pubsub_hpa_request
           gke_hpa_response    = var.gke_hpa_response
+          compute_class       = var.compute_class
+          region              = var.region
       }),
       "volume_claim_yaml" = templatefile(
         "${path.module}/k8s/volume_claim.yaml.templ", {
           namespace = var.namespace
+          region    = var.region
       })
     }
   )
-}
-
-resource "local_file" "keda_rendered_manifest" {
-  content = templatefile("${path.module}/k8s/keda/keda-2.18.3-core.yaml.templ", {
-    namespace            = var.namespace
-    keda_image           = var.keda_image
-    keda_apiserver_image = var.keda_apiserver_image
-  })
-  filename = "${path.module}/k8s/keda/keda-rendered.yaml"
-}
-
-resource "null_resource" "keda_install" {
-  triggers = {
-    manifest_sha = sha256(local_file.keda_rendered_manifest.content)
-    auth_cmd     = local.get_credentials_cmd
-  }
-
-  provisioner "local-exec" {
-    command = <<EOT
-      ${local.get_credentials_cmd}
-      kubectl apply --server-side --force-conflicts -f "${local_file.keda_rendered_manifest.filename}"
-    EOT
-  }
-
-  depends_on = [
-    local_file.keda_rendered_manifest,
-  ]
 }
 
 resource "null_resource" "cluster_init" {
@@ -158,10 +138,6 @@ resource "null_resource" "cluster_init" {
     manifest = each.value
     auth_cmd = local.get_credentials_cmd
   }
-
-  depends_on = [
-    null_resource.keda_install
-  ]
 
   provisioner "local-exec" {
     command = <<-EOT
@@ -242,6 +218,7 @@ resource "null_resource" "job_init" {
       args              = cfg.args,
       namespace         = var.namespace,
       pubsub_project_id = var.infra_project_id
+      region            = var.region
     })
   }
 
