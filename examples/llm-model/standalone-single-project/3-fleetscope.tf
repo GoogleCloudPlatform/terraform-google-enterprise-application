@@ -15,19 +15,13 @@
  */
 
 # 3-fleetscope
-locals {
-  fleet_project_id   = module.multitenant_infra.fleet_project_id
-  cluster_project_id = module.multitenant_infra.cluster_project_id
-  network_project_id = module.multitenant_infra.network_project_id
-}
-
 module "fleetscope_infra" {
   source = "../../../modules/fleetscope"
 
   env                        = local.env
-  cluster_project_id         = local.cluster_project_id
-  network_project_id         = local.network_project_id
-  fleet_project_id           = local.fleet_project_id
+  cluster_project_id         = module.multitenant_infra.cluster_project_id
+  network_project_id         = module.multitenant_infra.network_project_id
+  fleet_project_id           = module.multitenant_infra.fleet_project_id
   namespace_ids              = var.teams
   cluster_membership_ids     = module.multitenant_infra.cluster_membership_ids
   config_sync_secret_type    = "none"
@@ -36,5 +30,5 @@ module "fleetscope_infra" {
   cluster_service_accounts   = values(module.multitenant_infra.cluster_service_accounts)
   attestation_kms_key        = var.attestation_kms_key
 
-  depends_on = [google_project_service.required_services]
+  depends_on = [module.standalone_harness]
 }

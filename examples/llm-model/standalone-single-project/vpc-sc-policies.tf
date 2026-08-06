@@ -16,7 +16,7 @@
 
 
 data "google_project" "workerpool_network_project" {
-  project_id = local.workerpool_network_project_id
+  project_id = module.standalone_harness.workerpool_network_project_id
 }
 
 ###############################################

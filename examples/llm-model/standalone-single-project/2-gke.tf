@@ -31,7 +31,7 @@ module "multitenant_infra" {
   source = "../../../modules/gke"
 
   apps                   = local.apps
-  cluster_subnetworks    = module.cluster_network.subnets_self_links
+  cluster_subnetworks    = module.standalone_harness.subnets_self_links
   network_project_id     = var.project_id
   env                    = local.env
   cluster_type           = "AUTOPILOT"
@@ -45,7 +45,7 @@ module "multitenant_infra" {
   access_level_name      = var.access_level_name
   deletion_protection    = false
 
-  cb_private_workerpool_project_id = local.workerpool_project_id
+  cb_private_workerpool_project_id = module.standalone_harness.workerpool_project_id
 
-  depends_on = [google_project_service.required_services]
+  depends_on = [module.standalone_harness]
 }
