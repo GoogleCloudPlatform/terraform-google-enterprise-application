@@ -21,6 +21,7 @@
 - [The user does not have permission to access Project or it may not exist](#the-user-does-not-have-permission-to-access-project-or-it-may-not-exist)
 - [Quota 'CPUS_ALL_REGIONS' exceeded](#quota-cpus_all_regions-exceeded)
 - [Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link](#shared-vpc-attachment-destruction-failure-due-to-network-endpoint-group-link)
+- [Network Destruction Failure due to Firewall still using it](#network-destruction-failure-due-to-firewall-still-using-it)
 - - -
 
 ### Project quota exceeded
@@ -441,15 +442,17 @@ To resolve this, you need to manually remove the Shared VPC attachment resource 
     $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
     ```
 
-### Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link
-
+### Network Destruction Failure due to Firewall still using it
 
 **Error message:**
 
 ```text
-# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID]
-# module.env.module.eab_cluster_project[0].module.project-factory.google_compute_shared_vpc_service_project.shared_vpc_attachment[0]: Still destroying... [id=VPC_DEVELOPMENT_PROJECT_ID/GKE_PROJECT_ID, 00m10s elapsed]
-Error: Error waiting for Deleting Network: The network resource 'projects/VPC_DEVELOPMENT_PROJECT_ID/global/networks/vpc-eab-cluster' is already being used by 'projects/VPC_DEVELOPMENT_PROJECT_ID/global/firewalls/gke-csm-thc-RANDOM_HASH'
+module.cluster_network.module.cluster_vpc.module.vpc.google_compute_network.network: Destroying... [id=projects/PROJECT_ID/global/networks/NETWORK_CLUSTER_NAME]
+module.cluster_network.module.cluster_vpc.module.vpc.google_compute_network.network: Still destroying... [id=projects/PROJECT_ID/global/networks/NETWORK_CLUSTER_NAME, 00m10s elapsed]
+╷
+│ Error: Error waiting for Deleting Network: The network resource 'projects/PROJECT_ID/global/networks/NETWORK_CLUSTER_NAME' is already being used by 'projects/PROJECT_ID/global/firewalls/gke-cluster-ZONE-development-RANDOM_HASH-mcsd'
+╷
+│ Error: Error waiting for Deleting Network: The network resource 'projects/PROJECT_ID/global/networks/vpc-eab-cluster' is already being used by 'projects/PROJECT_ID/global/firewalls/gke-csm-thc-RANDOM_HASH'
 ```
 
 **Cause:**
@@ -460,12 +463,10 @@ This error occurs during the destroy process (either via `$HOME/go/bin/eab-deplo
 
 To resolve this, you need to manually remove the firewall rules and then proceed with destroy. You can do it either in the Console or running a gcloud command.
 
-1. List all firewall rules that contains `csm` in the name:
+1. List all firewall rules that contains `csm` and `-mcsd` in the name:
 
-   ```bash
-   gcloud compute firewall-rules list  --project <NETWORK_PROJECT> --filter=\"csm\""
-   ```
+   
 
-1. Delete the firewall rules:
+1. Delete the listed firewall-rules:
 
    

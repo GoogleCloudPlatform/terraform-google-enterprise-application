@@ -15,8 +15,8 @@
  */
 
 project_id = "<YOUR-PROJECT-ID>"
-# workerpool_id = "<YOUR-NETWORK-ID>"     // Optional
-# subnetwork_self_link = "<YOUR-CLUSTER-SUBNETWORK-SELF-LINK>"
+# workerpool_id = "<YOUR-NETWORK-ID>"     // Optional: If you already have a private workerpool to use, if not, it will create one.
+# network_id = "<YOUR-PRIVATE-WORKERPOOL-NETWORK>" // Optional: if you already have a network to use in case of Private worker pool creation, if not it will create one
 
 # Mandatory fleetscope namespace
 teams = {
