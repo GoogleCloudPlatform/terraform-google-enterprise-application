@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-# 2-multitenantl
+# 2-multitenant
 
 locals {
   env = "development"
   apps = {
-    "default-example" : {
-      "acronym"          = "de",
+    "llm-model" : {
+      "acronym"          = "llm",
       "ip_address_names" = [],
       "certificates"     = {},
     }

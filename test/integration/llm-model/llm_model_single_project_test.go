@@ -45,7 +45,7 @@ func TestSingleProjectSourceLLMModel(t *testing.T) {
 	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
 
 	appName := "llm-model"
-	serviceName := "llama-model"
+	serviceName := "llamma-model"
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
