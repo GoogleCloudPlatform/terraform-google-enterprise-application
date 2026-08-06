@@ -209,7 +209,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
     rm -rf $agent_infra_repo/modules
     cp -R ./terraform-google-enterprise-application/examples/agent/5-appinfra/agent/capital-agent/envs $agent_infra_repo
     rm -rf $agent_infra_repo/modules
-    cp -R ./terraform-google-enterprise-application//5-appinfra/modules $agent_infra_repo
+    cp -R ./terraform-google-enterprise-application/modules $agent_infra_repo
     cp ./terraform-example-foundation/build/cloudbuild-tf-* $agent_infra_repo/
     cp ./terraform-example-foundation/build/tf-wrapper.sh $agent_infra_repo/
     chmod 755 $agent_infra_repo/tf-wrapper.sh

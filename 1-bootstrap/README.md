@@ -356,7 +356,7 @@ You need to pre-create the following folders:
    ```bash
    export SERVICE_ACCOUNT_EMAIL="YOUR_SERVICE_ACCOUNT_EMAIL"
    gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
-   --member="serviceAccount:${"serviceAccount:${SERVICE_ACCOUNT_EMAIL}"}" \
+   --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
    --role="roles/resourcemanager.folderAdmin"
 
    gcloud resource-manager folders add-iam-policy-binding YOUR_FOLDER_ID \
