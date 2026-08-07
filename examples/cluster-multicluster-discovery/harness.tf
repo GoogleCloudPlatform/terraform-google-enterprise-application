@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
- module "cluster_network" {
-  source          = "../../modules/cluster_network"
+module "cluster_network" {
+  source = "../../modules/cluster_network"
 
   vpc_name        = "vpc-eab-cluster"
   project_id      = var.project_id
   region          = var.regions[0]
   shared_vpc_host = false
-  subnets = [ for i, region in var.regions :
+  subnets = [for i, region in var.regions :
     {
       subnet_name           = "eab-cluster-net-${region}"
       subnet_ip             = cidrsubnet(var.base_cidr, 8, i)
@@ -30,12 +30,12 @@
     }
   ]
 
-  secondary_ranges = { 
+  secondary_ranges = {
     for i, region in var.regions :
     "eab-cluster-net-${region}" => [
       {
         range_name    = "eab-cluster-net-${region}-secondary-01"
-        ip_cidr_range = cidrsubnet(var.pods_base_cidr, 2, i)  
+        ip_cidr_range = cidrsubnet(var.pods_base_cidr, 2, i)
       },
       {
         range_name    = "eab-cluster-net-${region}-secondary-02"

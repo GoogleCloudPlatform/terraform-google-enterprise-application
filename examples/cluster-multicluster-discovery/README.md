@@ -333,28 +333,21 @@ the steps below assume that you are checked out on the same level as `terraform-
 |------|-------------|------|---------|:--------:|
 | access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | n/a | yes |
-| binary\_authorization\_image | The Binary Authorization image to be used to create attestation. | `string` | n/a | yes |
-| binary\_authorization\_repository\_id | The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`. | `string` | n/a | yes |
-| bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
-| logging\_bucket | Bucket to store logging. | `string` | `null` | no |
+| base\_cidr | Base CIDR for the VPC primary ranges | `string` | `"10.1.0.0/16"` | no |
+| pods\_base\_cidr | Base CIDR for Kubernetes Pods secondary ranges | `string` | `"10.2.0.0/16"` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |
-| region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
+| regions | Google Cloud regions for cluster | `list(string)` | n/a | yes |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
-| subnetwork\_self\_link | Sub-Network self-link | `string` | n/a | yes |
+| services\_base\_cidr | Base CIDR for Kubernetes Services secondary ranges | `string` | `"10.3.0.0/16"` | no |
 | teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | n/a | yes |
-| workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | `string` | `null` | no |
-| workerpool\_network\_id | Network id | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| acronyms | App Acronyms |
 | app\_certificates | App Certificates |
-| app\_infos | App infos (name, services, team). |
 | app\_ip\_addresses | App IP Addresses |
-| clouddeploy\_targets\_names | Cloud deploy targets names. |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
 | cluster\_project\_number | Cluster Project ID |
