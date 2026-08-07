@@ -54,6 +54,7 @@ steps:
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
+      - "_SKIP_GITLAB=true"
     waitFor:
       - logging-bucket-apply
 
@@ -123,7 +124,6 @@ steps:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage teardown --verbose"]
     waitFor:
       - gitlab-teardown
-      - private-workerpool-teardown
     allowFailure: true
 
 tags:

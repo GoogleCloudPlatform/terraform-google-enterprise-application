@@ -30,10 +30,15 @@ func TestVPCSC(t *testing.T) {
 	vpcPath := "../../setup/vpcsc"
 	temp := tft.NewTFBlueprintTest(t, tft.WithTFDir(vpcPath))
 
-	gitLabPath := "../../setup/harness/gitlab"
-	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+	skipGitlab := os.Getenv("_SKIP_GITLAB") == "true"
+	var gitLabProjectNumber string
 
-	gitLabProjectNumber := gitLab.GetStringOutput("gitlab_project_number")
+	if !skipGitlab {
+		gitLabPath := "../../setup/harness/gitlab"
+		gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+
+		gitLabProjectNumber = gitLab.GetStringOutput("gitlab_project_number")
+	}
 
 	isSingleProject, err := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
 	if err != nil {

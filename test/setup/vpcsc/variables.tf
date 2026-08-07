@@ -43,11 +43,13 @@ variable "service_perimeter_mode" {
 variable "logging_bucket_project_number" {
   description = "Project number where logging bucket is stored."
   type        = string
+  default = null
 }
 
 variable "gitlab_project_number" {
   description = "Project number where GitLab is running."
   type        = string
+  default = null
 }
 
 variable "access_level_members" {
