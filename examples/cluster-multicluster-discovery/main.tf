@@ -59,8 +59,12 @@ module "fleetscope_infra" {
   fleet_project_id              = module.multitenant_infra.fleet_project_id
   namespace_ids                 = var.teams
   cluster_membership_ids        = module.multitenant_infra.cluster_membership_ids
-  config_sync_secret_type       = "token"
-  config_sync_repository_url    = "https://gitlab.com/user/config-sync-${local.env}.git"
+  
+  config_sync_secret_type    = var.config_sync_secret_type
+  config_sync_repository_url = var.config_sync_repository_url
+  config_sync_branch         = var.config_sync_branch
+  config_sync_policy_dir     = var.config_sync_policy_dir
+
   cluster_service_accounts      = values(module.multitenant_infra.cluster_service_accounts)
   attestation_kms_key           = var.attestation_kms_key
   enable_multicluster_discovery = true

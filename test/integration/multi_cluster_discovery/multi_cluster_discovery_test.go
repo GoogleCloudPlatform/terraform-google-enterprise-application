@@ -16,6 +16,7 @@ package cluster_multitenant_discovery
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"slices"
 	"strings"
@@ -47,14 +48,26 @@ func TestMultiClusterDiscovery(t *testing.T) {
 	)
 
 	envName := "development"
+	forkRepository := os.Getenv("HEAD_REPO_URL")
+	branch := os.Getenv("HEAD_BRANCH")
+	configSyncPath := os.Getenv("CONFIG_SYNC_PATH")
+	if forkRepository == "" || branch == "" {
+		forkRepository = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
+		branch = "main"
+		configSyncPath = fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
+	}
 
 	vars := map[string]interface{}{
-		"service_perimeter_name": vpcsc.GetStringOutput("service_perimeter_name"),
-		"service_perimeter_mode": vpcsc.GetStringOutput("service_perimeter_mode"),
-		"access_level_name":      vpcsc.GetStringOutput("access_level_name"),
-		"attestation_kms_key":    loggingHarness.GetStringOutput("attestation_kms_key"),
-		"regions":                []string{"us-central1", "us-east4"},
-		"project_id":             setup.GetStringOutput("seed_project_id"),
+		"service_perimeter_name":     vpcsc.GetStringOutput("service_perimeter_name"),
+		"service_perimeter_mode":     vpcsc.GetStringOutput("service_perimeter_mode"),
+		"access_level_name":          vpcsc.GetStringOutput("access_level_name"),
+		"attestation_kms_key":        loggingHarness.GetStringOutput("attestation_kms_key"),
+		"regions":                    []string{"us-central1", "us-east4"},
+		"project_id":                 setup.GetStringOutput("seed_project_id"),
+		"config_sync_secret_type":    "none",
+		"config_sync_repository_url": forkRepository,
+		"config_sync_policy_dir":     configSyncPath,
+		"config_sync_branch":         branch,
 	}
 
 	setupNamespaces := setup.GetJsonOutput("teams")
