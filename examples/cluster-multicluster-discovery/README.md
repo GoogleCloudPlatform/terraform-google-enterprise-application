@@ -1,87 +1,79 @@
-# Standalone Single-Project Example
-The Standalone Single Project Example deploys the core Enterprise Application Blueprint into a single project for the purposes of simplified demonstration.
+# Multi-Cluster Discovery Example
 
-**Do not use this example for production deployments, as it lacks robust separation of duties and least-privileged permissions present in the standard multi-stage deployment.**
+This example deploys multi-region GKE Autopilot clusters with Multi-Cluster Service Discovery (MCSD), Multi-Cluster Ingress (MCI), Cloud Service Mesh (ASM), and Config Sync using the Enterprise Application Blueprint modules.
 
-This example creates:
+> **Note:** This example is designed for demonstration and testing purposes within a single Google Cloud project. For production deployments, follow the multi-project/multi-stage blueprint architecture.
 
-- 2-multitenant
-    - GKE cluster(s)
-    - Cloud Armor
-    - App IP addresses (see below for details)
-- 3-Fleetscope
-    - Fleet namespace
-    - Cloud Source Repo
-    - Config Management
-    - Service Mesh
-    - Multicluster Ingress
-    - Multicluster Service
-- 5-Appinfra
-    - Private Worker Pool
-    - Cloud Build Trigger
-    - Artifact Registry
-    - Cloud Deploy
-    - Cloud Deploy Pipelines
-    - Cloud Build Service Account
-    - Cloud Deploy Service Account
-    - Cloud Storage
+## Overview
+
+This example provisions:
+
+- **Network Infrastructure (`modules/cluster_network`)**:
+  - A custom VPC network (`vpc-eab-cluster`)
+  - Subnets across configured regions with primary IP ranges
+  - Secondary IP ranges dedicated for Kubernetes Pods and Services
+
+- **Multi-Tenant GKE Infrastructure (`modules/gke`)**:
+  - Multi-region GKE Autopilot clusters
+  - Cloud Armor security policy (`eab-cloud-armor`)
+  - Reserved external IP addresses and SSL certificates for hosted applications
+
+- **Fleet Scope Infrastructure (`modules/fleetscope`)**:
+  - GKE Fleet registration across cluster locations
+  - Fleet scopes and namespaces for tenant teams
+  - Config Sync setup with Git repository synchronization
+  - Managed Cloud Service Mesh (Anthos Service Mesh)
+  - Multi-Cluster Ingress (MCI) configuration
+  - Multi-Cluster Service Discovery (`enable_multicluster_discovery = true`) enabled across the Fleet
 
 ## Pre-requisites
 
-This example requires a single project already created with the following APIs enabled:
+### Required APIs
 
-   To enable these APIs, execute the following commands, replacing `YOUR_PROJECT_ID` with your actual project ID:
+This example requires a Google Cloud project with the following APIs enabled:
 
-   ```bash
-   gcloud services enable \
-   accesscontextmanager.googleapis.com \
-   anthos.googleapis.com \
-   anthosconfigmanagement.googleapis.com \
-   apikeys.googleapis.com \
-   certificatemanager.googleapis.com \
-   cloudbilling.googleapis.com \
-   cloudbuild.googleapis.com \
-   clouddeploy.googleapis.com \
-   cloudfunctions.googleapis.com \
-   cloudresourcemanager.googleapis.com \
-   cloudtrace.googleapis.com \
-   compute.googleapis.com \
-   container.googleapis.com \
-   gkehub.googleapis.com \
-   --project=YOUR_PROJECT_ID
-   ```
+```bash
+gcloud services enable \
+  accesscontextmanager.googleapis.com \
+  anthos.googleapis.com \
+  anthosconfigmanagement.googleapis.com \
+  apikeys.googleapis.com \
+  certificatemanager.googleapis.com \
+  cloudbilling.googleapis.com \
+  cloudresourcemanager.googleapis.com \
+  cloudtrace.googleapis.com \
+  compute.googleapis.com \
+  container.googleapis.com \
+  containeranalysis.googleapis.com \
+  containerscanning.googleapis.com \
+  dns.googleapis.com \
+  gkehub.googleapis.com \
+  iam.googleapis.com \
+  iap.googleapis.com \
+  mesh.googleapis.com \
+  monitoring.googleapis.com \
+  multiclusteringress.googleapis.com \
+  multiclusterservicediscovery.googleapis.com \
+  networkmanagement.googleapis.com \
+  secretmanager.googleapis.com \
+  servicemanagement.googleapis.com \
+  servicenetworking.googleapis.com \
+  serviceusage.googleapis.com \
+  sqladmin.googleapis.com \
+  storage-api.googleapis.com \
+  trafficdirector.googleapis.com \
+  --project=YOUR_PROJECT_ID
+```
 
-   ```bash
-   gcloud services enable \
-   iam.googleapis.com \
-   iap.googleapis.com \
-   mesh.googleapis.com \
-   monitoring.googleapis.com \
-   multiclusteringress.googleapis.com \
-   multiclusterservicediscovery.googleapis.com \
-   networkmanagement.googleapis.com \
-   secretmanager.googleapis.com \
-   servicemanagement.googleapis.com \
-   servicenetworking.googleapis.com \
-   serviceusage.googleapis.com \
-   sqladmin.googleapis.com \
-   storage-api.googleapis.com \
-   trafficdirector.googleapis.com \
-   --project=YOUR_PROJECT_ID
-   ```
+### Required IAM Roles
 
-The entity used to deploy this example must have the following roles at Project level:
+The deployment identity requires the following project-level IAM roles:
 
-- Artifact Registry Admin: `roles/artifactregistry.admin`
 - Certificate Manager Owner: `roles/certificatemanager.owner`
-- Cloud Build Builder: `roles/cloudbuild.builds.builder`
-- Cloud Build Worker Pool Owner: `roles/cloudbuild.workerPoolOwner`
-- Cloud Deploy Service Agent: `roles/clouddeploy.serviceAgent`
-- Cloud Deploy Admin: `roles/clouddeploy.admin`
 - Compute Admin: `roles/compute.admin`
-- Network Admin: `roles/compute.networkAdmin `
-- Security Admin: `roles/compute.securityAdmin`
-- Container Admin: `roles/container.admin  `
+- Compute Network Admin: `roles/compute.networkAdmin`
+- Compute Security Admin: `roles/compute.securityAdmin`
+- Container Admin: `roles/container.admin`
 - Cluster Admin: `roles/container.clusterAdmin`
 - DNS Admin: `roles/dns.admin`
 - GKE Hub Admin: `roles/gkehub.editor`
@@ -91,240 +83,49 @@ The entity used to deploy this example must have the following roles at Project 
 - Logging LogWriter: `roles/logging.logWriter`
 - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
-- Source Repository Admin: `roles/source.admin` (if using CSR)
 - Storage Admin: `roles/storage.admin`
-- Project AdminL `roles/resourcemanager.projectIamAdmin`
-- Viewer: `roles/viewer`
 
-The entity used to deploy this example must have the following roles at Organization level:
-
+If deploying within an enforced VPC Service Controls perimeter, additional access context manager permissions are required:
 - Organization Administrator: `roles/resourcemanager.organizationAdmin`
 - Access Context Manager Policy Admin: `roles/accesscontextmanager.policyAdmin`
 
-This example requires a Single network configured:
-
-- One subnet for Cluster
-- One subnet for a NAT
-- DNS Policy With inbound fowarding enabled
-- A [VM Proxy machine configured for Private Worker Pool](https://cloud.google.com/build/docs/private-pools/access-external-resources-using-static-external-ip#access_external_resources_in_a_private_network)
-- [Private Service Connect Configured](https://cloud.google.com/build/docs/private-pools/using-vpc-service-controls)
-
-This example also requires a VPC-SC Perimeter created and [configured with project](https://cloud.google.com/vpc-service-controls/docs/set-up-service-perimeter).
-
-This example requires a Single network configured:
-
-- One subnet for Cluster
-- One subnet for a NAT
-- DNS Policy With inbound fowarding enabled
-- A [VM Proxy machine configured for Private Worker Pool](https://cloud.google.com/build/docs/private-pools/access-external-resources-using-static-external-ip#access_external_resources_in_a_private_network)
-- [Private Service Connect Configured](https://cloud.google.com/build/docs/private-pools/using-vpc-service-controls)
-
-This examples also require a VPC-SC Perimeter created and [configured with project](https://cloud.google.com/vpc-service-controls/docs/set-up-service-perimeter).
-
 ## Usage
 
-the steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` directory:
+1. Navigate to the example directory:
 
-```txt
-.
-├── terraform-google-enterprise-application
-└── .
-```
+   ```bash
+   cd terraform-google-enterprise-application/examples/cluster-multicluster-discovery
+   ```
 
-1. Enter at Single Project example folder:
+2. Create a `terraform.tfvars` file with the required variables:
 
-    ```bash
-    cd terraform-google-enterprise-application/examples/standalone_single_project
-    ```
+   ```hcl
+   project_id          = "YOUR_PROJECT_ID"
+   regions             = ["us-central1", "us-east4"]
+   attestation_kms_key = "projects/YOUR_PROJECT_ID/locations/global/keyRings/YOUR_RING/cryptoKeys/YOUR_KEY"
+   teams = {
+     "frontend" = "frontend-team@example.com"
+     "backend"  = "backend-team@example.com"
+   }
+   ```
 
-1. Update `terraform.tfvars`.
+3. Initialize Terraform:
 
-1. Update `5-appinfra.tf` with your repositories info.
+   ```bash
+   terraform init
+   ```
 
-1. Run `terraform plan` and check the information
+4. Review the execution plan:
 
-1. Run `terraform apply`.
+   ```bash
+   terraform plan
+   ```
 
-1. Clone Bank of Anthos repository:
+5. Apply the infrastructure:
 
-    ```bash
-    git clone --branch v0.6.7 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
-    ```
-
-1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.
-
-    ```bash
-    cd bank-of-anthos
-    git checkout -b main
-    export BANK_OF_ANTHOS_PATH=$(pwd)
-    export APP_SOURCE_DIR_PATH=$(readlink -f ../terraform-google-enterprise-application/examples/cymbal-bank/6-appsource/cymbal-bank)
-    ```
-
-1. Run the commands below to update the `bank-of-anthos` codebase with the updated assets:
-
-- Remove components and frontend:
-
-        ```bash
-        rm -rf src/components
-        rm -rf src/frontend/k8s
-        ```
-
-  - Update database and components assets:
-
-        ```bash
-        cp -r $APP_SOURCE_DIR_PATH/ledger-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/ledger/ledger-db/k8s/overlays
-
-        cp -r $APP_SOURCE_DIR_PATH/accounts-db/k8s/overlays/* $BANK_OF_ANTHOS_PATH/src/accounts/accounts-db/k8s/overlays
-
-        cp -r $APP_SOURCE_DIR_PATH/components $BANK_OF_ANTHOS_PATH/src/
-        ```
-
-  - Override `skaffold.yaml` files:
-
-        ```bash
-        cp -r $APP_SOURCE_DIR_PATH/frontend/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/frontend
-
-        cp -r $APP_SOURCE_DIR_PATH/ledger-ledgerwriter/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/ledgerwriter
-        cp -r $APP_SOURCE_DIR_PATH/ledger-transactionhistory/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/transactionhistory
-        cp -r $APP_SOURCE_DIR_PATH/ledger-balancereader/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/ledger/balancereader
-
-        cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/userservice
-        cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/skaffold.yaml $BANK_OF_ANTHOS_PATH/src/accounts/contacts
-        ```
-
-  - Update `k8s` overlays:
-
-        ```bash
-        cp -r $APP_SOURCE_DIR_PATH/frontend/k8s $BANK_OF_ANTHOS_PATH/src/frontend
-
-        cp -r $APP_SOURCE_DIR_PATH/ledger-ledgerwriter/k8s/* $BANK_OF_ANTHOS_PATH/src/ledger/ledgerwriter/k8s
-        cp -r $APP_SOURCE_DIR_PATH/ledger-transactionhistory/k8s/* $BANK_OF_ANTHOS_PATH/src/ledger/transactionhistory/k8s
-        cp -r $APP_SOURCE_DIR_PATH/ledger-balancereader/k8s/* $BANK_OF_ANTHOS_PATH/src/ledger/balancereader/k8s
-
-        cp -r $APP_SOURCE_DIR_PATH/accounts-userservice/k8s/* $BANK_OF_ANTHOS_PATH/src/accounts/userservice/k8s
-        cp -r $APP_SOURCE_DIR_PATH/accounts-contacts/k8s/* $BANK_OF_ANTHOS_PATH/src/accounts/contacts/k8s
-        ```
-
-  - Create specific assets for `frontend`:
-
-        ```bash
-        cp $APP_SOURCE_DIR_PATH/../../../test/integration/appsource/assets/* $BANK_OF_ANTHOS_PATH/src/frontend/k8s/overlays/development
-        ```
-
-  - Add files and commit:
-
-        ``` bash
-        git add .
-        git commit -m "Override codebase with updated assets"
-        ```
-
-1. Retrieve Cymbal Bank repositories created on 5-appinfra.
-
-    - Balance Reader:
-
-        ```bash
-        terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" init
-        export balancereader_project=$(terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" output -raw service_repository_project_id )
-        echo balancereader_project=$balancereader_project
-        export balancereader_repository=$(terraform -chdir="../cymbal-bank/balancereader-i-r/envs/shared" output -raw  service_repository_name)
-        echo balancereader_repository=$balancereader_repository
-        ```
-
-    - Transaction History:
-
-        ```bash
-        terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" init
-        export transactionhistory_project=$(terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" output -raw service_repository_project_id )
-        echo transactionhistory_project=$transactionhistory_project
-        export transactionhistory_repository=$(terraform -chdir="../cymbal-bank/transactionhistory-i-r/envs/shared" output -raw  service_repository_name)
-        echo transactionhistory_repository=$transactionhistory_repository
-        ```
-
-    - Legderwriter:
-
-        ```bash
-        terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" init
-        export ledgerwriter_project=$(terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw service_repository_project_id )
-        echo ledgerwriter_project=$ledgerwriter_project
-        export ledgerwriter_repository=$(terraform -chdir="../cymbal-bank/ledgerwriter-i-r/envs/shared" output -raw  service_repository_name)
-        echo ledgerwriter_repository=$ledgerwriter_repository
-        ```
-
-    - Frontend:
-
-        ```bash
-        terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" init
-        export frontend_project=$(terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" output -raw service_repository_project_id )
-        echo frontend_project=$frontend_project
-        export frontend_repository=$(terraform -chdir="../cymbal-bank/frontend-i-r/envs/shared" output -raw  service_repository_name)
-        echo frontend_repository=$frontend_repository
-        ```
-
-    - Contacts:
-
-        ```bash
-        terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" init
-        export contacts_project=$(terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" output -raw service_repository_project_id )
-        echo contacts_project=$contacts_project
-        export contacts_repository=$(terraform -chdir="../cymbal-bank/contacts-i-r/envs/shared" output -raw  service_repository_name)
-        echo contacts_repository=$contacts_repository
-        ```
-
-    - User Service:
-
-        ```bash
-        terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" init
-        export userservice_project=$(terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" output -raw service_repository_project_id )
-        echo userservice_project=$userservice_project
-        export userservice_repository=$(terraform -chdir="../cymbal-bank/userservice-i-r/envs/shared" output -raw  service_repository_name)
-        echo userservice_repository=$userservice_repository
-        ```
-
-1. (CSR Only) Add remote source repositories.
-
-    ```bash
-    git remote add frontend https://source.developers.google.com/p/$frontend_project/r/eab-cymbal-bank-frontend
-    git remote add contacts https://source.developers.google.com/p/$contacts_project/r/eab-cymbal-bank-accounts-contacts
-    git remote add userservice https://source.developers.google.com/p/$userservice_project/r/eab-cymbal-bank-accounts-userservice
-    git remote add ledgerwriter https://source.developers.google.com/p/$ledgerwriter_project/r/eab-cymbal-bank-ledger-ledgerwriter
-    git remote add transactionhistory https://source.developers.google.com/p/$transactionhistory_project/r/eab-cymbal-bank-ledger-transactionhistory
-    git remote add balancereader https://source.developers.google.com/p/$balancereader_project/r/eab-cymbal-bank-ledger-balancereader
-    ```
-
-1. (GitHub Only) When using GitHub, add the remote source repositories with the following commands.
-
-    ```bash
-    git remote add frontend https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-frontend.git
-    git remote add contacts https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-accounts-contacts.git
-    git remote add userservice https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-accounts-userservice.git
-    git remote add ledgerwriter https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-ledgerwriter.git
-    git remote add transactionhistory https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-transactionhistory.git
-    git remote add balancereader https://github.com/<GITHUB-OWNER or ORGANIZATION>/eab-cymbal-bank-ledger-balancereader.git
-    ```
-
-    > NOTE: Make sure to replace `<GITHUB-OWNER or ORGANIZATION>` with your actual GitHub owner or organization name.
-
-1. (GitLab Only) When using GitLab, add the remote source repositories with the following commands.
-
-    ```bash
-    git remote add frontend https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-frontend.git
-    git remote add contacts https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-accounts-contacts.git
-    git remote add userservice https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-accounts-userservice.git
-    git remote add ledgerwriter https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-ledgerwriter.git
-    git remote add transactionhistory https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-transactionhistory.git
-    git remote add balancereader https://gitlab.com/<GITLAB-GROUP or ACCOUNT>/eab-cymbal-bank-ledger-balancereader.git
-    ```
-
-    > NOTE: Make sure to replace `<GITLAB-GROUP or ACCOUNT>` with your actual GitLab group or account name.
-
-1. Push `main` branch to each remote:
-
-    ```bash
-    for remote in frontend contacts userservice ledgerwriter transactionhistory balancereader; do
-        git push $remote main
-    done
-    ```
-
+   ```bash
+   terraform apply
+   ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
@@ -357,5 +158,4 @@ the steps below assume that you are checked out on the same level as `terraform-
 | env | Environment |
 | fleet\_project\_id | Fleet Project ID |
 | network\_project\_id | Network Project ID |
-
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
