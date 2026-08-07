@@ -58,7 +58,6 @@ module "gitlab_project" {
   ]
 }
 
-
 resource "google_compute_shared_vpc_service_project" "add_seed_project" {
   host_project    = module.gitlab_project.project_id
   service_project = var.seed_project_id
@@ -163,6 +162,12 @@ data "google_compute_zones" "available" {
   status  = "UP"
 }
 
+data "google_compute_machine_types" "available" {
+  for_each = toset(data.google_compute_zones.available.names)
+  zone     = each.value
+  project  = module.gitlab_project.project_id
+  filter   = "name = ${local.machine_type}"
+}
 resource "google_compute_instance" "default" {
   name         = "gitlab"
   project      = module.gitlab_project.project_id
