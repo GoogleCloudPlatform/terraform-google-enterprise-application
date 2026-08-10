@@ -39,7 +39,7 @@ An overview of the application factory pipeline is shown below.
 
 ![Enterprise Application application factory diagram](../assets/eab-app-factory.svg)
 
-The application factory creates the following resources as defined in the [`app-group-baseline`](./modules/app-group-baseline/) submodule:
+The application factory creates the following resources as defined in the [`secure-cicd-pipeline`](./modules/secure-cicd-pipeline/) submodule:
 
 - __Application Admin Project (Optional):__ A new Google Cloud project to host the application's CI/CD pipelines and related resources. This project is created if `create_admin_project` is set to `true`.
 - __Application Infrastructure Projects (Optional):__ Environment-specific Google Cloud projects to host the application's infrastructure resources (e.g., GKE clusters, databases). These projects are created if `create_infra_project` is set to `true`.
@@ -170,20 +170,6 @@ A previously created **private** GitLab repository for each one of the repositor
     gcloud projects add-iam-policy-binding $GIT_SECRET_PROJECT --role=roles/secretmanager.admin --member=serviceAccount:tf-cb-eab-applicationfactory@YOUR-CLOUDBUILD-PROJECT.iam.gserviceaccount.com
     ```
 
-### Worker Pool Requirements
-
-If you are not using Worker Pools you can skip this step. If you are using Worker Pools, an additional step must be taken before deploying.
-
-There is a terraform script that will assign required permissions on the Worker Pool Host Project and requires `var.workerpool_id` to be specified on the 4-appfactory `terraform.tfvars` file. The script is located at [./modules/app-group-baseline/additional_workerpool_permissions.tf.example](./modules/app-group-baseline/additional_workerpool_permissions.tf.example).
-
-1. Enable the permission assignment terraform script on `app-group-baseline` module.
-
-    ```bash
-    mv ./modules/app-group-baseline/additional_workerpool_permissions.tf.example ./modules/app-group-baseline/additional_workerpool_permissions.tf
-    ```
-
-After renaming the file to `additional_workerpool_permissions.tf`, when you run the pipeline, the required permissions will automatically be assigned on the Worker Pool Host Project.
-
 ### Deploying with Google Cloud Build
 
 The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` and `terraform-example-foundation` directories.
@@ -200,15 +186,15 @@ Please note that some steps in this documentation are specific to the selected G
 1. Retrieve Multi-tenant administration project variable value from 1-bootstrap:
 
     ```bash
-    export multitenant_admin_project=$(terraform -chdir=./terraform-google-enterprise-application/1-bootstrap output -raw project_id)
+    export appfactory_admin_project=$(terraform -chdir=./terraform-google-enterprise-application/1-bootstrap output -raw project_id)
 
-    echo multitenant_admin_project=$multitenant_admin_project
+    echo appfactory_admin_project=$appfactory_admin_project
     ```
 
 1. (CSR Only) Clone the infrastructure pipeline repository:
 
     ```bash
-    gcloud source repos clone eab-applicationfactory --project=$multitenant_admin_project
+    gcloud source repos clone eab-applicationfactory --project=$appfactory_admin_project
     ```
 
 1. (Github Only) When using Github with Cloud Build, clone the repository with the following command.
@@ -230,6 +216,8 @@ Please note that some steps in this documentation are specific to the selected G
     git checkout -b plan
 
     cp -r ../terraform-google-enterprise-application/4-appfactory/* .
+    rm modules
+    cp -r ../terraform-google-enterprise-application/modules/ .
     cp ../terraform-example-foundation/build/cloudbuild-tf-* .
     cp ../terraform-example-foundation/build/tf-wrapper.sh .
     chmod 755 ./tf-wrapper.sh
