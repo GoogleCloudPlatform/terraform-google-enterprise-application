@@ -53,13 +53,13 @@ module "multitenant_infra" {
 module "fleetscope_infra" {
   source = "../../modules/fleetscope"
 
-  env                           = local.env
-  cluster_project_id            = module.multitenant_infra.cluster_project_id
-  network_project_id            = module.multitenant_infra.network_project_id
-  fleet_project_id              = module.multitenant_infra.fleet_project_id
-  namespace_ids                 = var.teams
-  cluster_membership_ids        = module.multitenant_infra.cluster_membership_ids
-  
+  env                    = local.env
+  cluster_project_id     = module.multitenant_infra.cluster_project_id
+  network_project_id     = module.multitenant_infra.network_project_id
+  fleet_project_id       = module.multitenant_infra.fleet_project_id
+  namespace_ids          = var.teams
+  cluster_membership_ids = module.multitenant_infra.cluster_membership_ids
+
   config_sync_secret_type    = var.config_sync_secret_type
   config_sync_repository_url = var.config_sync_repository_url
   config_sync_branch         = var.config_sync_branch

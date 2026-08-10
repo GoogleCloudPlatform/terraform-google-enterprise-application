@@ -103,4 +103,4 @@ variable "config_sync_branch" {
   type        = string
   description = "The branch of the repository to sync from. Default: master"
   default     = "master"
-} 
+}

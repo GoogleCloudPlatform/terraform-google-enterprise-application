@@ -135,6 +135,11 @@ If deploying within an enforced VPC Service Controls perimeter, additional acces
 | access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | n/a | yes |
 | base\_cidr | Base CIDR for the VPC primary ranges | `string` | `"10.1.0.0/16"` | no |
+| config\_sync\_branch | The branch of the repository to sync from. Default: master | `string` | `"master"` | no |
+| config\_sync\_policy\_dir | The path within the Git repository that represents the top level of the repo to sync | `string` | `null` | no |
+| config\_sync\_repository\_url | The Git repository url for Config Sync. If `config_sync_secret_type` value is `gcpserviceaccount`, a Cloud Source Repository will automatically be created and this variable will be ignored. | `string` | `""` | no |
+| config\_sync\_secret\_type | The type of `Secret` configured for access to the Config Sync Git repo. Must be `ssh`, `cookiefile`, `gcenode`, `gcpserviceaccount`, `githubapp`, `token`, or `none`. Depending on the credential type, additional steps must be executed prior to this step. Refer to the following documentation for guidance: https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/installing-config-sync#git-creds-secret | `string` | `"gcpserviceaccount"` | no |
+| disable\_istio\_on\_namespaces | List the namespaces where you don't want the service mesh to be enabled (i.e. sidecar proxy injection). Ensure that the namespace names match exactly with those defined in 'var.namespace\_ids'. | `list(string)` | `[]` | no |
 | pods\_base\_cidr | Base CIDR for Kubernetes Pods secondary ranges | `string` | `"10.2.0.0/16"` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |
 | regions | Google Cloud regions for cluster | `list(string)` | n/a | yes |
@@ -158,4 +163,5 @@ If deploying within an enforced VPC Service Controls perimeter, additional acces
 | env | Environment |
 | fleet\_project\_id | Fleet Project ID |
 | network\_project\_id | Network Project ID |
+
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
