@@ -52,6 +52,8 @@ module "seed_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
+  disable_services_on_destroy = false
+
   activate_apis = [
     "accesscontextmanager.googleapis.com",
     "aiplatform.googleapis.com",

@@ -222,7 +222,7 @@ locals {
     "workstations.googleapis.com",
   ]
 
-  egress_rules = [
+  egress_rules = concat([
     {
       title = "Egress to service networking project"
       from = {
@@ -303,24 +303,6 @@ locals {
       }
     },
     {
-      title = "Egress to Logging bucket project"
-      from = {
-        identity_type = "ANY_IDENTITY"
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
-        }
-      }
-      to = {
-        resources = [
-          "projects/${var.logging_bucket_project_number}" // logging bucket
-        ]
-        operations = {
-          "storage.googleapis.com" = { methods = ["*"] }
-        }
-      }
-    },
-    {
       title = "Egress from ANY_IDENTITY to artifact-registry-docker-cache"
       from = {
         identity_type = "ANY_IDENTITY" // https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
@@ -346,6 +328,22 @@ locals {
       }
     },
     {
+      title = "Egress from gcp-admins@test.blueprints.joonix.net to all external resources"
+      from = {
+        identity_type = null
+        identities    = ["group:gcp-admins@test.blueprints.joonix.net"]
+        sources = {
+          resources = tolist([])
+        }
+      }
+      to = {
+        resources = ["*"]
+        operations = {
+          "*" = { methods = ["*"] }
+        }
+      }
+    }], var.gitlab_project_number != null ?
+    [{
       title = "e-allow-services-perimeter-${join(",", var.protected_projects)}-to-gilab-project-${var.gitlab_project_number}"
       from = {
         identity_type = "ANY_IDENTITY"
@@ -365,24 +363,27 @@ locals {
           "clouddeploy.googleapis.com"      = { methods = ["*"] }
         }
       }
-    },
-    {
-      title = "Egress from gcp-admins@test.blueprints.joonix.net to all external resources"
-      from = {
-        identity_type = null
-        identities    = ["group:gcp-admins@test.blueprints.joonix.net"]
-        sources = {
-          resources = tolist([])
+      }] : [], var.logging_bucket_project_number != null ? [
+      {
+        title = "Egress to Logging bucket project"
+        from = {
+          identity_type = "ANY_IDENTITY"
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
         }
-      }
-      to = {
-        resources = ["*"]
-        operations = {
-          "*" = { methods = ["*"] }
+        to = {
+          resources = [
+            "projects/${var.logging_bucket_project_number}" // logging bucket
+          ]
+          operations = {
+            "storage.googleapis.com" = { methods = ["*"] }
+          }
         }
-      }
-    }
-  ]
+  }] : [])
+
+
 
   ingress_rules = concat(
     [
@@ -403,7 +404,7 @@ locals {
         }
       }
     ],
-    contains(var.protected_projects, var.logging_bucket_project_number) ? [
+    contains(var.protected_projects, var.logging_bucket_project_number) && var.gitlab_project_number != null ? [
       {
         title = "Ingress from Gitlab to Single Project project - kms service"
         from = {
@@ -423,7 +424,6 @@ locals {
     ] : []
   )
 }
-
 
 resource "random_string" "prefix" {
   length  = 6

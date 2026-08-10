@@ -20,11 +20,7 @@ locals {
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${module.vpc.network_name}"
   gitlab_vm_ip_range                 = "10.2.2.0/24"
   machine_type                       = "n2-standard-8"
-  zones_with_machine_type = [
-    for zone_name, result in data.google_compute_machine_types.available : zone_name
-    if length(result.machine_types) > 0
-  ]
-  selected_zone = try(local.zones_with_machine_type[0], null)
+  selected_zone                      = try(data.google_compute_zones.available.names[0], null)
 }
 
 module "gitlab_project" {
@@ -57,7 +53,6 @@ module "gitlab_project" {
     "storage.googleapis.com",
   ]
 }
-
 
 resource "google_compute_shared_vpc_service_project" "add_seed_project" {
   host_project    = module.gitlab_project.project_id
@@ -161,13 +156,6 @@ data "google_compute_zones" "available" {
   project = module.gitlab_project.project_id
   region  = var.region
   status  = "UP"
-}
-
-data "google_compute_machine_types" "available" {
-  for_each = toset(data.google_compute_zones.available.names)
-  zone     = each.value
-  project  = module.gitlab_project.project_id
-  filter   = "name = ${local.machine_type}"
 }
 
 resource "google_compute_instance" "default" {
