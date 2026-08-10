@@ -22,4 +22,8 @@ terraform {
       version = ">= 6.6, < 8"
     }
   }
+
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-harness/v0.4.0"
+  }
 }
