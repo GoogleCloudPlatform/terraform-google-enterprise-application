@@ -1,5 +1,6 @@
 # Standalone Single-Project Example
 The Standalone Single Project Example deploys the core Enterprise Application Blueprint into a single project for the purposes of simplified demonstration.
+It will deploy the Capital Agent example, that uses AI Platform API.
 
 **Do not use this example for production deployments, as it lacks robust separation of duties and least-privileged permissions present in the standard multi-stage deployment.**
 
