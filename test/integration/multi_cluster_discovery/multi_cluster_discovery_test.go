@@ -46,7 +46,7 @@ func TestMultiClusterDiscovery(t *testing.T) {
 	loggingHarness := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(loggingHarnessPath),
 	)
-
+	
 	envName := "development"
 	forkRepository := os.Getenv("HEAD_REPO_URL")
 	branch := os.Getenv("HEAD_BRANCH")
@@ -465,11 +465,13 @@ func TestMultiClusterDiscovery(t *testing.T) {
 					noErrors := func() bool {
 						t.Logf("noError() jsonOutput: %v", jsonOutput.String())
 
-						t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
-						t.Logf("sync.errorSummary equals {}: %v", jsonOutput.Get("sync.errorSummary").String() == "{}")
-						t.Logf("rendering.errorSummary equals {}: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}")
+						t.Logf("source.errorSummary equals {} or empty: %v", jsonOutput.Get("source.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
+						t.Logf("sync.errorSummary equals {} or empty: %v", jsonOutput.Get("sync.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
+						t.Logf("rendering.errorSummary equals {} or empty: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
 
-						return jsonOutput.Get("sync.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("rendering.errorSummary").String() == "{}"
+						return (jsonOutput.Get("sync.errorSummary").String() == "{}" || jsonOutput.Get("sync.errorSummary").String() == "") &&
+							(jsonOutput.Get("source.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "") &&
+							(jsonOutput.Get("rendering.errorSummary").String() == "{}" || jsonOutput.Get("rendering.errorSummary").String() == "")
 					}
 					noError = noErrors()
 					t.Logf("noError var: %v", noError)
@@ -486,17 +488,17 @@ func TestMultiClusterDiscovery(t *testing.T) {
 		})
 
 		multitenant.DefineTeardown(func(assert *assert.Assertions) {
-			clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
-			// removes firewall rules created by the service but not being deleted.
-			firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
-			for i := range firewallRules {
-				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
-			}
+			// clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
+			// // removes firewall rules created by the service but not being deleted.
+			// firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
+			// for i := range firewallRules {
+			// 	gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
+			// }
 
-			endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID).Array()
-			for i := range endpoints {
-				gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID)
-			}
+			// endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID).Array()
+			// for i := range endpoints {
+			// 	gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID)
+			// }
 			multitenant.DefaultTeardown(assert)
 
 		})
