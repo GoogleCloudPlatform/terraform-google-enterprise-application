@@ -491,17 +491,12 @@ func TestMultiClusterDiscovery(t *testing.T) {
 		})
 
 		multitenant.DefineTeardown(func(assert *assert.Assertions) {
-			// clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
-			// // removes firewall rules created by the service but not being deleted.
-			// firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
-			// for i := range firewallRules {
-			// 	gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
-			// }
-
-			// endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID).Array()
-			// for i := range endpoints {
-			// 	gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID)
-			// }
+			clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
+			// removes firewall rules created by the service but not being deleted.
+			firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
+			for i := range firewallRules {
+				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
+			}
 			multitenant.DefaultTeardown(assert)
 
 		})
