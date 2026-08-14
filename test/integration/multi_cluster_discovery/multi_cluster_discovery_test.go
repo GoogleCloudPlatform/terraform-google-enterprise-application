@@ -46,7 +46,9 @@ func TestMultiClusterDiscovery(t *testing.T) {
 	loggingHarness := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(loggingHarnessPath),
 	)
-	
+
+	reLocation := regexp.MustCompile(`/locations/([^/]+)`)
+
 	envName := "development"
 	forkRepository := os.Getenv("HEAD_REPO_URL")
 	branch := os.Getenv("HEAD_BRANCH")
@@ -90,10 +92,6 @@ func TestMultiClusterDiscovery(t *testing.T) {
 			clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 			fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
 			clusterType := multitenant.GetStringOutput("cluster_type")
-			clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
-			splitClusterMembership := strings.Split(clusterMembership, "/")
-			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
-			clusterRegions := multitenant.GetJsonOutput("cluster_regions").Array()
 
 			// Projects creation
 			for _, projectOutput := range []struct {
@@ -249,8 +247,22 @@ func TestMultiClusterDiscovery(t *testing.T) {
 				currentEnvNamespaces = append(currentEnvNamespaces, fmt.Sprintf("%s-%s", namespace, envName))
 			}
 
+			clusterRegions := multitenant.GetJsonOutput("cluster_regions").Array()
+			clusterProjectNumber := multitenant.GetStringOutput("cluster_project_number")
+
+			membershipNames := []string{}
+			membershipNamesProjectNumber := []string{}
 			for _, region := range clusterRegions {
-				testutils.ConnectToFleet(t, clusterName, region.String(), clusterProjectID)
+				membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectID, region, envName)
+				membershipNames = append(membershipNames, membershipName)
+				membershipName = fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
+				membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
+			}
+			for _, clusterMembership := range multitenant.GetJsonOutput("cluster_membership_ids").Array() {
+				splitClusterMembership := strings.Split(clusterMembership.String(), "/")
+				clusterName := splitClusterMembership[len(splitClusterMembership)-1]
+				region := reLocation.FindStringSubmatch(clusterMembership.String())[1]
+				testutils.ConnectToFleet(t, clusterName, region, clusterProjectID)
 				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectID, region, clusterName), "", "")
 
 				pollNamespaces := func() (bool, error) {
@@ -295,15 +307,6 @@ func TestMultiClusterDiscovery(t *testing.T) {
 				// Multitenant Outputs
 
 				clusterMembershipIds := testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
-				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
-				clusterProjectNumber := multitenant.GetStringOutput("cluster_project_number")
-
-				membershipNames := []string{}
-				membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectID, region, envName)
-				membershipNames = append(membershipNames, membershipName)
-				membershipNamesProjectNumber := []string{}
-				membershipName = fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
-				membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
 				// GKE Feature
 				features := []string{
 					"configmanagement",

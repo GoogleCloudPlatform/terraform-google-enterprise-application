@@ -41,9 +41,9 @@ module "cluster_private_service_connect" {
 }
 
 resource "google_compute_router" "nat_router" {
-  for_each = var.shared_vpc_host ? { "create" : true } : {}
-  name     = "nat-router-${var.region}"
-  region   = var.region
+  for_each = { for subnet in var.subnets : subnet.subnet_region => subnet }
+  name     = "nat-router-${each.value.subnet_region}"
+  region   = each.value.subnet_region
   network  = module.cluster_vpc.network_self_link
   project  = module.cluster_vpc.project_id
 }

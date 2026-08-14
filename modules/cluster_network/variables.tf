@@ -24,11 +24,6 @@ variable "project_id" {
   type        = string
 }
 
-variable "region" {
-  description = "The region where NAT will be created"
-  type        = string
-}
-
 variable "shared_vpc_host" {
   description = "Makes this project a Shared VPC host if 'true' (default 'false')"
   type        = bool

@@ -90,7 +90,6 @@ module "cluster_network" {
   source          = "../cluster_network"
   vpc_name        = var.vpc_name
   project_id      = var.project_id
-  region          = var.region
   shared_vpc_host = false
   subnets = [
     {
