@@ -8,6 +8,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.5.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.4.0...v0.5.0) (2026-08-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* moves modules to root ([#705](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/705))
+
+### Features
+
+* moves modules to root ([#705](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/705)) ([9b56a65](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/9b56a65385679132c6fe52c89aef3e2d0d2e709a))
+
 ## [0.4.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.3.0...v0.4.0) (2026-08-05)
 
 
