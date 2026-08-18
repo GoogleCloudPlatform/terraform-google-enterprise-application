@@ -222,171 +222,188 @@ locals {
     "workstations.googleapis.com",
   ]
 
-  egress_rules = [
+  egress_rules = merge(
     {
-      title = "Egress to service networking project"
-      from = {
-        identity_type = "ANY_IDENTITY"
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
+      "Egress to service networking project" = {
+        title = "Egress to service networking project"
+        from = {
+          identity_type = "ANY_IDENTITY"
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
         }
-      }
-      to = {
-        resources = ["projects/213331819513"] // service networking project
-        operations = {
-          "compute.googleapis.com" = { methods = ["*"] }
+        to = {
+          resources = ["projects/213331819513"] // service networking project
+          operations = {
+            "compute.googleapis.com" = { methods = ["*"] }
+          }
         }
       }
     },
     {
-      title = "Egress to bank of anthos by AR, CA and BAuthz"
-      from = {
-        identity_type = "ANY_IDENTITY"
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
+      "Egress to bank of anthos by AR, CA and BAuthz" = {
+        title = "Egress to bank of anthos by AR, CA and BAuthz"
+        from = {
+          identity_type = "ANY_IDENTITY"
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
         }
-      }
-      to = {
-        resources = [
-          "projects/682719828243" // bank-of-anthos repo
-        ]
-        operations = {
-          "artifactregistry.googleapis.com"    = { methods = ["*"] }
-          "binaryauthorization.googleapis.com" = { methods = ["*"] }
-          "cloudkms.googleapis.com"            = { methods = ["*"] }
-          "container.googleapis.com"           = { methods = ["*"] }
-          "containerfilesystem.googleapis.com" = { methods = ["*"] }
-          "containeranalysis.googleapis.com"   = { methods = ["*"] }
-          "containerregistry.googleapis.com"   = { methods = ["*"] }
-          "storage.googleapis.com"             = { methods = ["*"] }
-          "iamcredentials.googleapis.com"      = { methods = ["*"] }
-          "compute.googleapis.com"             = { methods = ["*"] }
-        }
-      }
-    },
-    {
-      title = "Egress to Proxy Golang Storage project"
-      from = {
-        identity_type = "ANY_IDENTITY"
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
-        }
-      }
-      to = {
-        resources = [
-          "projects/912338787515" // proxy-golang-org-prod
-        ]
-        operations = {
-          "storage.googleapis.com" = { methods = ["*"] }
+        to = {
+          resources = [
+            "projects/682719828243" // bank-of-anthos repo
+          ]
+          operations = {
+            "artifactregistry.googleapis.com"    = { methods = ["*"] }
+            "binaryauthorization.googleapis.com" = { methods = ["*"] }
+            "cloudkms.googleapis.com"            = { methods = ["*"] }
+            "container.googleapis.com"           = { methods = ["*"] }
+            "containerfilesystem.googleapis.com" = { methods = ["*"] }
+            "containeranalysis.googleapis.com"   = { methods = ["*"] }
+            "containerregistry.googleapis.com"   = { methods = ["*"] }
+            "storage.googleapis.com"             = { methods = ["*"] }
+            "iamcredentials.googleapis.com"      = { methods = ["*"] }
+            "compute.googleapis.com"             = { methods = ["*"] }
+          }
         }
       }
     },
     {
-      title = "Egress to Storage project"
-      from = {
-        identity_type = "ANY_IDENTITY"
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
+      "Egress to Proxy Golang Storage project" = {
+        title = "Egress to Proxy Golang Storage project"
+        from = {
+          identity_type = "ANY_IDENTITY"
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
         }
-      }
-      to = {
-        resources = [
-          "projects/213358688945"
-        ]
-        operations = {
-          "storage.googleapis.com" = { methods = ["*"] }
-        }
-      }
-    },
-    {
-      title = "Egress to Logging bucket project"
-      from = {
-        identity_type = "ANY_IDENTITY"
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
-        }
-      }
-      to = {
-        resources = [
-          "projects/${var.logging_bucket_project_number}" // logging bucket
-        ]
-        operations = {
-          "storage.googleapis.com" = { methods = ["*"] }
+        to = {
+          resources = [
+            "projects/912338787515" // proxy-golang-org-prod
+          ]
+          operations = {
+            "storage.googleapis.com" = { methods = ["*"] }
+          }
         }
       }
     },
     {
-      title = "Egress from ANY_IDENTITY to artifact-registry-docker-cache"
-      from = {
-        identity_type = "ANY_IDENTITY" // https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
+      "Egress to Storage project" = {
+        title = "Egress to Storage project"
+        from = {
+          identity_type = "ANY_IDENTITY"
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
         }
-      }
-      to = {
-        resources = ["projects/342927644502"] // artifact-registry-docker-cache
-        operations = {
-          "artifactregistry.googleapis.com"    = { methods = ["*"] }
-          "binaryauthorization.googleapis.com" = { methods = ["*"] }
-          "cloudkms.googleapis.com"            = { methods = ["*"] }
-          "container.googleapis.com"           = { methods = ["*"] }
-          "containeranalysis.googleapis.com"   = { methods = ["*"] }
-          "containerfilesystem.googleapis.com" = { methods = ["*"] }
-          "containerregistry.googleapis.com"   = { methods = ["*"] }
-          "storage.googleapis.com"             = { methods = ["*"] }
-          "iamcredentials.googleapis.com"      = { methods = ["*"] }
-          "compute.googleapis.com"             = { methods = ["*"] }
+        to = {
+          resources = [
+            "projects/213358688945"
+          ]
+          operations = {
+            "storage.googleapis.com" = { methods = ["*"] }
+          }
         }
       }
     },
     {
-      title = "Allow Services from ${join(",", var.protected_projects)} to ${var.gitlab_project_number}"
-      from = {
-        identity_type = "ANY_IDENTITY"
-        identities    = tolist([])
-        sources = {
-          resources = [for i in var.protected_projects : "projects/${i}"]
+      "Egress from ANY_IDENTITY to artifact-registry-docker-cache" = {
+        title = "Egress from ANY_IDENTITY to artifact-registry-docker-cache"
+        from = {
+          identity_type = "ANY_IDENTITY" // https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
         }
-      }
-      to = {
-        resources = [
-          "projects/${var.gitlab_project_number}" // worker pool project
-        ]
-        operations = {
-          "servicedirectory.googleapis.com" = { methods = ["*"] }
-          "cloudbuild.googleapis.com"       = { methods = ["*"] }
-          "clouddeploy.googleapis.com"      = { methods = ["*"] }
-          "compute.googleapis.com"          = { methods = ["SubnetworksService.Get"] }
+        to = {
+          resources = ["projects/342927644502"] // artifact-registry-docker-cache
+          operations = {
+            "artifactregistry.googleapis.com"    = { methods = ["*"] }
+            "binaryauthorization.googleapis.com" = { methods = ["*"] }
+            "cloudkms.googleapis.com"            = { methods = ["*"] }
+            "container.googleapis.com"           = { methods = ["*"] }
+            "containeranalysis.googleapis.com"   = { methods = ["*"] }
+            "containerfilesystem.googleapis.com" = { methods = ["*"] }
+            "containerregistry.googleapis.com"   = { methods = ["*"] }
+            "storage.googleapis.com"             = { methods = ["*"] }
+            "iamcredentials.googleapis.com"      = { methods = ["*"] }
+            "compute.googleapis.com"             = { methods = ["*"] }
+          }
         }
       }
     },
     {
-      title = "Egress from gcp-admins@test.blueprints.joonix.net to all external resources"
-      from = {
-        identity_type = null
-        identities    = ["group:gcp-admins@test.blueprints.joonix.net"]
-        sources = {
-          resources = tolist([])
+      "Egress from gcp-admins@test.blueprints.joonix.net to all external resources" = {
+        title = "Egress from gcp-admins@test.blueprints.joonix.net to all external resources"
+        from = {
+          identity_type = null
+          identities    = ["group:gcp-admins@test.blueprints.joonix.net"]
+          sources = {
+            resources = tolist([])
+          }
+        }
+        to = {
+          resources = ["*"]
+          operations = {
+            "*" = { methods = ["*"] }
+          }
         }
       }
-      to = {
-        resources = ["*"]
-        operations = {
-          "*" = { methods = ["*"] }
+    },
+    var.gitlab_project_number != null ? {
+      "e-allow-services-perimeter-${join(",", var.protected_projects)}-to-gilab-project-${var.gitlab_project_number}" = {
+        title = "e-allow-services-perimeter-${join(",", var.protected_projects)}-to-gilab-project-${var.gitlab_project_number}"
+        from = {
+          identity_type = "ANY_IDENTITY"
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
+        }
+        to = {
+          resources = [
+            "projects/${var.gitlab_project_number}" // worker pool project
+          ]
+          operations = {
+            "servicedirectory.googleapis.com" = { methods = ["*"] }
+            "cloudbuild.googleapis.com"       = { methods = ["*"] }
+            "compute.googleapis.com"          = { methods = ["*"] }
+            "clouddeploy.googleapis.com"      = { methods = ["*"] }
+          }
         }
       }
-    }
-  ]
+    } : {},
+    var.logging_bucket_project_number != null ? {
+      "Egress to Logging bucket project" = {
+        title = "Egress to Logging bucket project"
+        from = {
+          identity_type = "ANY_IDENTITY"
+          identities    = tolist([])
+          sources = {
+            resources = [for i in var.protected_projects : "projects/${i}"]
+          }
+        }
+        to = {
+          resources = [
+            "projects/${var.logging_bucket_project_number}" // logging bucket
+          ]
+          operations = {
+            "storage.googleapis.com" = { methods = ["*"] }
+          }
+        }
+      }
+    } : {}
+  )
 
-  ingress_rules = concat(
-    [
-      {
+  # Use merge() instead of concat() for maps
+  ingress_rules = merge(
+    {
+      "Ingress from gcp-admins@test.blueprints.joonix.net to the perimeter" = {
         title = "Ingress from gcp-admins@test.blueprints.joonix.net to the perimeter"
         from = {
           sources = {
@@ -402,9 +419,9 @@ locals {
           }
         }
       }
-    ],
-    contains(var.protected_projects, var.logging_bucket_project_number) ? [
-      {
+    },
+    contains(var.protected_projects, var.logging_bucket_project_number) && var.gitlab_project_number != null ? {
+      "Ingress from Gitlab to Single Project project - kms service" = {
         title = "Ingress from Gitlab to Single Project project - kms service"
         from = {
           sources = {
@@ -420,10 +437,9 @@ locals {
           }
         }
       }
-    ] : []
+    } : {}
   )
 }
-
 
 resource "random_string" "prefix" {
   length  = 6
@@ -440,7 +456,7 @@ resource "google_access_context_manager_access_policy" "policy_org" {
 
 module "access_level_members" {
   source             = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version            = "~> 7.1"
+  version            = "~> 8.0"
   policy             = google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
   members            = concat(var.access_level_members, ["user:andrewpeabody@google.com"])
@@ -450,7 +466,7 @@ module "access_level_members" {
 
 module "regular_service_perimeter" {
   source         = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version        = "~> 7.1"
+  version        = "~> 8.0"
   policy         = google_access_context_manager_access_policy.policy_org.name
   perimeter_name = "sp_gke_enterprise_${random_string.prefix.result}"
   description    = "Perimeter shielding projects"
@@ -459,15 +475,15 @@ module "regular_service_perimeter" {
   vpc_accessible_services_dry_run = ["*"]
   restricted_services_dry_run     = local.supported_restricted_service
   resources_dry_run               = var.protected_projects
-  egress_policies_dry_run         = local.egress_rules
-  ingress_policies_dry_run        = local.ingress_rules
+  egress_policies_dry_run_map     = local.egress_rules
+  ingress_policies_dry_run_map    = local.ingress_rules
 
   access_levels           = var.service_perimeter_mode == "ENFORCE" ? [module.access_level_members.name] : []
   vpc_accessible_services = var.service_perimeter_mode == "ENFORCE" ? ["*"] : []
   restricted_services     = var.service_perimeter_mode == "ENFORCE" ? local.supported_restricted_service : []
   resources               = var.service_perimeter_mode == "ENFORCE" ? var.protected_projects : []
-  egress_policies         = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : []
-  ingress_policies        = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : []
+  egress_policies_map     = var.service_perimeter_mode == "ENFORCE" ? local.egress_rules : {}
+  ingress_policies_map    = var.service_perimeter_mode == "ENFORCE" ? local.ingress_rules : {}
   depends_on              = [time_sleep.destroy_wait_propagation]
 }
 

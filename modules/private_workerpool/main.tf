@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 6.6, < 8"
-    }
+data "google_project" "project" {
+  project_id = var.project_id
+}
 
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 6.6, < 8"
-    }
-
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
+resource "google_cloudbuild_worker_pool" "pool" {
+  name     = "private-cb-pool"
+  project  = var.project_id
+  location = var.region
+  worker_config {
+    disk_size_gb   = 100
+    machine_type   = var.workerpool_machine_type
+    no_external_ip = true
+  }
+  network_config {
+    peered_network          = local.network_id
+    peered_network_ip_range = "/24"
   }
 
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:secure-cicd-pipeline/v0.5.0"
-  }
+  depends_on = [
+    time_sleep.wait_service_network_peering,
+  ]
 }

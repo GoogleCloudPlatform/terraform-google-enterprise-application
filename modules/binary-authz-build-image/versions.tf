@@ -21,19 +21,9 @@ terraform {
       source  = "hashicorp/google"
       version = ">= 6.6, < 8"
     }
-
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 6.6, < 8"
-    }
-
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:secure-cicd-pipeline/v0.5.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:binary-authz-build-image/v0.5.0"
   }
 }

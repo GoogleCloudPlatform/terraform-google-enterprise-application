@@ -30,10 +30,7 @@ func TestVPCSC(t *testing.T) {
 	vpcPath := "../../setup/vpcsc"
 	temp := tft.NewTFBlueprintTest(t, tft.WithTFDir(vpcPath))
 
-	gitLabPath := "../../setup/harness/gitlab"
-	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
-
-	gitLabProjectNumber := gitLab.GetStringOutput("gitlab_project_number")
+	skipGitlab := os.Getenv("_SKIP_GITLAB") == "true"
 
 	isSingleProject, err := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
 	if err != nil {
@@ -80,13 +77,21 @@ func TestVPCSC(t *testing.T) {
 	} else {
 		protected_projects = append(protected_projects, networkProjectsNumber...)
 	}
-	accessLevelMembers = append(accessLevelMembers, addAccessLevelMembers...)
+	if len(addAccessLevelMembers) > 0 {
+		accessLevelMembers = append(accessLevelMembers, addAccessLevelMembers...)
+	}
 	t.Logf("accessLevelMembers: %v", accessLevelMembers)
 	vars := map[string]interface{}{
 		"access_level_members":          accessLevelMembers,
 		"protected_projects":            protected_projects,
 		"logging_bucket_project_number": projectNumber,
-		"gitlab_project_number":         gitLabProjectNumber,
+	}
+	if !skipGitlab {
+		gitLabPath := "../../setup/harness/gitlab"
+		gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
+
+		gitLabProjectNumber := gitLab.GetStringOutput("gitlab_project_number")
+		vars["gitlab_project_number"] = gitLabProjectNumber
 	}
 
 	vpcsc := tft.NewTFBlueprintTest(t,

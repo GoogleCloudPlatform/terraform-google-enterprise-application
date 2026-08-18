@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 6.6, < 8"
-    }
+output "network_id" {
+  value       = var.network_id
+  description = "Network ID where NAT is created."
+}
 
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 6.6, < 8"
-    }
-
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
-  }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:secure-cicd-pipeline/v0.5.0"
-  }
+output "nat_proxy_vm_ip_range" {
+  value       = var.nat_proxy_vm_ip_range
+  description = "IP range reserved for NAT."
 }

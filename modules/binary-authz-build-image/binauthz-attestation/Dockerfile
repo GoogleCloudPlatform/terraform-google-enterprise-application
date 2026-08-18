@@ -1,10 +1,10 @@
-# Copyright 2024 Google LLC
+# Copyright 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,19 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-timeout: 18000s
-steps:
-  - id: to-be-done
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      [
-        "/bin/bash",
-        "-c",
-        "echo 'TO BE DONE!'",
-      ]
-tags:
-  - "ci"
-  - "integration"
-substitutions:
-  _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
-  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.25"
+FROM gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
+
+RUN apk update && apk upgrade --no-cache
+
+RUN gcloud components install beta --quiet
+
+RUN apk add --no-cache docker gnupg bash python3
+
+WORKDIR /work
+ADD create_binauthz_attestation.sh /work
+ADD parse_arguments.py /work
+RUN chmod +x /work/create_binauthz_attestation.sh
+
+ENTRYPOINT [ "/work/create_binauthz_attestation.sh" ]

@@ -52,6 +52,8 @@ module "seed_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
+  disable_services_on_destroy = false
+
   activate_apis = [
     "accesscontextmanager.googleapis.com",
     "aiplatform.googleapis.com",
@@ -154,7 +156,7 @@ data "google_organization" "org" {
 module "group" {
   for_each = toset(local.teams)
   source   = "terraform-google-modules/group/google"
-  version  = "~> 0.7"
+  version  = "~> 0.8"
 
   id           = "${each.key}-${random_string.prefix.result}@${data.google_organization.org.domain}"
   display_name = "${each.key}-${random_string.prefix.result}"

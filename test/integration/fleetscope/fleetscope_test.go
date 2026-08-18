@@ -103,8 +103,6 @@ func TestFleetscope(t *testing.T) {
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 			if enableInferenceGateway {
 				configSyncPath = "examples/llm-model/3-fleetscope/config-sync"
-				forkRepository = "https://github.com/amandakarina/terraform-google-enterprise-application"
-				branch = "feat/adds-model-serving"
 			}
 
 			if forkRepository == "" || branch == "" {
