@@ -14,17 +14,174 @@
 
 timeout: 18000s
 steps:
-  - id: to-be-done
+  - id: prepare
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       [
         "/bin/bash",
         "-c",
-        "echo 'TO BE DONE!'",
+        "source /usr/local/bin/task_helper_functions.sh && prepare_environment",
       ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "TF_VAR_folder_id=$_FOLDER_ID"
+      - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+      - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
+
+  - id: private-workerpool-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage init --verbose"]
+    waitFor:
+      - prepare
+
+  - id: private-workerpool-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage apply --verbose"]
+    waitFor:
+      - private-workerpool-init
+
+  - id: logging-bucket-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
+    waitFor:
+      - prepare
+
+  - id: logging-bucket-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage apply --verbose"]
+    waitFor:
+      - logging-bucket-init
+
+  - id: gitlab-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage init --verbose"]
+    waitFor:
+      - private-workerpool-apply
+      - logging-bucket-apply
+
+  - id: gitlab-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage apply --verbose"]
+    waitFor:
+      - gitlab-init
+
+  - id: wait-startup-script
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestValidateStartupScript --stage verify --verbose"]
+    waitFor:
+      - gitlab-apply
+
+  - id: bootstrap-gitlab-vm
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |-
+       gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestBootstrapGitlabVM --stage verify --verbose || exit 1
+        else
+            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
+        fi
+    waitFor:
+      - wait-startup-script
+
+  - id: ssp-hello-world-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectDefaultExample --stage init --verbose"]
+    waitFor:
+      - vpc-sc
+
+  - id: ssp-hello-world-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectDefaultExample --stage apply --verbose"]
+    waitFor:
+      - ssp-hello-world-init
+
+  - id: ssp-hello-world-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "sleep 5m && cft test run TestStandaloneSingleProjectDefaultExample --stage verify --verbose"]
+    waitFor:
+      - ssp-hello-world-apply
+
+  - id: deploy-hello-world
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSingleProjectSourceHelloWorld --stage verify --verbose || exit 1
+        else
+            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
+        fi
+    waitFor:
+      - ssp-hello-world-apply
+      - ssp-hello-world-verify
+      
+  - id: ssp-hello-world-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectDefaultExample --stage teardown --verbose"]
+    waitFor:
+      - ssp-hello-world-verify
+
+  - id: vpcsc-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "sleep 3m && cft test run TestVPCSC  --stage teardown --verbose",
+      ]
+    waitFor:
+      - multicluster-discovery-example-teardown
+    allowFailure: true
+
+  - id: gitlab-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestGitLab --stage teardown --verbose"]
+    waitFor:
+      - vpcsc-teardown
+    allowFailure: true
+
+  - id: logging-bucket-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage teardown --verbose"]
+    waitFor:
+      - gitlab-teardown
+    allowFailure: true
+
 tags:
   - "ci"
   - "integration"
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
   _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.25"
+options:
+  machineType: E2_HIGHCPU_32
+  env:
+    - 'TF_PLUGIN_CACHE_DIR=""'
+    - 'TF_VAR_branch_name=$BRANCH_NAME'
+    - "TF_VAR_service_perimeter_mode=ENFORCE"
+    - "TF_VAR_deletion_protection=false"
+    - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
+    - "TF_VAR_single_project=true"
+    - "TF_VAR_hpc=false"
+    - "TF_VAR_agent=false"
+    - "HEAD_BRANCH=$_HEAD_BRANCH"
+    - "HEAD_REPO_URL=$_HEAD_REPO_URL"
