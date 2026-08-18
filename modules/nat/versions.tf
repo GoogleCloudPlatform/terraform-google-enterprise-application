@@ -1,9 +1,5 @@
 /**
-<<<<<<<< HEAD:modules/nat/versions.tf
- * Copyright 2025 Google LLC
-========
  * Copyright 2026 Google LLC
->>>>>>>> 405c3dc5 (feat!: refactor modules (#732)):modules/standalone-harness/versions.tf
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +19,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-<<<<<<<< HEAD:modules/nat/versions.tf
-      version = ">= 6.6 , < 8"
+      version = ">= 6.6, < 8"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
@@ -38,13 +33,9 @@ terraform {
       source  = "hashicorp/random"
       version = ">= 3.7.2"
     }
-========
-      version = ">= 6.6, < 8"
-    }
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-harness/v0.4.0"
->>>>>>>> 405c3dc5 (feat!: refactor modules (#732)):modules/standalone-harness/versions.tf
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:nat/v0.5.0"
   }
 }

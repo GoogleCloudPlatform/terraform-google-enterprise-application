@@ -158,12 +158,6 @@ data "google_compute_zones" "available" {
   status  = "UP"
 }
 
-data "google_compute_machine_types" "available" {
-  for_each = toset(data.google_compute_zones.available.names)
-  zone     = each.value
-  project  = module.gitlab_project.project_id
-  filter   = "name = ${local.machine_type}"
-}
 resource "google_compute_instance" "default" {
   name         = "gitlab"
   project      = module.gitlab_project.project_id

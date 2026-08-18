@@ -74,8 +74,8 @@ module "private_workerpool" {
 
 
 module "binary_autz" {
-  source                    = "../../../modules/binary-authz-build-image"
-  
+  source = "../../../modules/binary-authz-build-image"
+
   project_id                = var.project_id
   location                  = var.region
   binary_auth_image_version = "v1.0"
@@ -85,11 +85,10 @@ module "binary_autz" {
 }
 
 module "cluster_network" {
-  source          = "../../../modules/cluster_network"
+  source = "../../../modules/cluster_network"
 
   vpc_name        = "eab-cluster"
   project_id      = var.project_id
-  region          = var.region
   shared_vpc_host = false
   subnets = [
     {

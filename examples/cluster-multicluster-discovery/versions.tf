@@ -16,13 +16,7 @@
 
 terraform {
   required_version = ">= 1.3"
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 6.6, < 8"
-    }
-  }
-
+  
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -31,10 +25,6 @@ terraform {
   }
 
   provider_meta "google" {
-<<<<<<<< HEAD:modules/standalone-harness/versions.tf
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-harness/v0.5.0"
-========
     module_name = "blueprints/terraform/terraform-google-enterprise-application:cluster-multicluster-discovery/v0.5.0"
->>>>>>>> 405c3dc5 (feat!: refactor modules (#732)):examples/cluster-multicluster-discovery/versions.tf
   }
 }
