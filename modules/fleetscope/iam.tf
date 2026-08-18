@@ -20,32 +20,34 @@ locals {
 }
 
 # Allow Services Accounts to create trace
-resource "google_project_iam_binding" "acm_wi_trace_agent" {
-  project = var.fleet_project_id
-
-  role = "roles/cloudtrace.agent"
-  members = concat([
+resource "google_project_iam_member" "acm_wi_trace_agent" {
+  for_each = toset(concat([
     "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
     "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
     ],
     local.namespace_wide_access,
     var.additional_project_role_identities
-  )
+  ))
+
+  project = var.fleet_project_id
+  role    = "roles/cloudtrace.agent"
+  member  = each.value
 
   depends_on = [google_gke_hub_feature_membership.acm_feature_member]
 }
 
 # Allow Services Accounts to send metrics
-resource "google_project_iam_binding" "acm_wi_metricWriter" {
-  project = var.fleet_project_id
-
-  role = "roles/monitoring.metricWriter"
-  members = concat([
+resource "google_project_iam_member" "acm_wi_metricWriter" {
+  for_each = toset(concat([
     "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
     "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
     ],
     local.namespace_wide_access,
     var.additional_project_role_identities
-  )
+  ))
+
+  project    = var.fleet_project_id
+  role       = "roles/monitoring.metricWriter"
+  member     = each.value
   depends_on = [google_gke_hub_feature_membership.acm_feature_member]
 }

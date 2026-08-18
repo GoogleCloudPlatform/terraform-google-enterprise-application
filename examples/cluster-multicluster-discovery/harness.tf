@@ -19,7 +19,6 @@ module "cluster_network" {
 
   vpc_name        = "vpc-eab-cluster"
   project_id      = var.project_id
-  region          = var.regions[0]
   shared_vpc_host = false
   subnets = [for i, region in var.regions :
     {

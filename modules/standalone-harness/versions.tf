@@ -1,5 +1,13 @@
 /**
+<<<<<<< HEAD
  * Copyright 2026 Google LLC
+=======
+<<<<<<<< HEAD:modules/nat/versions.tf
+ * Copyright 2025 Google LLC
+========
+ * Copyright 2026 Google LLC
+>>>>>>>> 405c3dc5 (feat!: refactor modules (#732)):modules/standalone-harness/versions.tf
+>>>>>>> 405c3dc5 (feat!: refactor modules (#732))
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,5 +33,4 @@ terraform {
 
   provider_meta "google" {
     module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-harness/v0.5.0"
-  }
 }

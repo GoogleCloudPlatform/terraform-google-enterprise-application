@@ -81,13 +81,12 @@ steps:
   - id: multicluster-discovery-example-verify
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestMultiClusterDiscovery --stage verify --verbose"]
+      ["/bin/bash", "-c", "sleep 5m && cft test run TestMultiClusterDiscovery --stage verify --verbose"]
     waitFor:
       - multicluster-discovery-example-apply
     env:
       - "TF_VAR_org_id=$_ORG_ID"
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
-  
   - id: multicluster-discovery-example-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:

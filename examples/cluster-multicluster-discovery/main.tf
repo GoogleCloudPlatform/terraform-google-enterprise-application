@@ -68,4 +68,6 @@ module "fleetscope_infra" {
   cluster_service_accounts      = values(module.multitenant_infra.cluster_service_accounts)
   attestation_kms_key           = var.attestation_kms_key
   enable_multicluster_discovery = true
+
+  disable_istio_on_namespaces = var.disable_istio_on_namespaces
 }

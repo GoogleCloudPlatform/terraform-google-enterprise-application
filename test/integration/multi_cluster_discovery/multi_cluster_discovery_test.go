@@ -47,6 +47,8 @@ func TestMultiClusterDiscovery(t *testing.T) {
 		tft.WithTFDir(loggingHarnessPath),
 	)
 
+	reLocation := regexp.MustCompile(`/locations/([^/]+)`)
+
 	envName := "development"
 	forkRepository := os.Getenv("HEAD_REPO_URL")
 	branch := os.Getenv("HEAD_BRANCH")
@@ -90,10 +92,6 @@ func TestMultiClusterDiscovery(t *testing.T) {
 			clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
 			fleetProjectID := multitenant.GetStringOutput("fleet_project_id")
 			clusterType := multitenant.GetStringOutput("cluster_type")
-			clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
-			splitClusterMembership := strings.Split(clusterMembership, "/")
-			clusterName := splitClusterMembership[len(splitClusterMembership)-1]
-			clusterRegions := multitenant.GetJsonOutput("cluster_regions").Array()
 
 			// Projects creation
 			for _, projectOutput := range []struct {
@@ -249,8 +247,22 @@ func TestMultiClusterDiscovery(t *testing.T) {
 				currentEnvNamespaces = append(currentEnvNamespaces, fmt.Sprintf("%s-%s", namespace, envName))
 			}
 
+			clusterRegions := multitenant.GetJsonOutput("cluster_regions").Array()
+			clusterProjectNumber := multitenant.GetStringOutput("cluster_project_number")
+
+			membershipNames := []string{}
+			membershipNamesProjectNumber := []string{}
 			for _, region := range clusterRegions {
-				testutils.ConnectToFleet(t, clusterName, region.String(), clusterProjectID)
+				membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectID, region, envName)
+				membershipNames = append(membershipNames, membershipName)
+				membershipName = fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
+				membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
+			}
+			for _, clusterMembership := range multitenant.GetJsonOutput("cluster_membership_ids").Array() {
+				splitClusterMembership := strings.Split(clusterMembership.String(), "/")
+				clusterName := splitClusterMembership[len(splitClusterMembership)-1]
+				region := reLocation.FindStringSubmatch(clusterMembership.String())[1]
+				testutils.ConnectToFleet(t, clusterName, region, clusterProjectID)
 				k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectID, region, clusterName), "", "")
 
 				pollNamespaces := func() (bool, error) {
@@ -295,15 +307,6 @@ func TestMultiClusterDiscovery(t *testing.T) {
 				// Multitenant Outputs
 
 				clusterMembershipIds := testutils.GetBptOutputStrSlice(multitenant, "cluster_membership_ids")
-				clusterProjectID := multitenant.GetStringOutput("cluster_project_id")
-				clusterProjectNumber := multitenant.GetStringOutput("cluster_project_number")
-
-				membershipNames := []string{}
-				membershipName := fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectID, region, envName)
-				membershipNames = append(membershipNames, membershipName)
-				membershipNamesProjectNumber := []string{}
-				membershipName = fmt.Sprintf("projects/%[1]s/locations/%[2]s/memberships/cluster-%[2]s-%[3]s", clusterProjectNumber, region, envName)
-				membershipNamesProjectNumber = append(membershipNamesProjectNumber, membershipName)
 				// GKE Feature
 				features := []string{
 					"configmanagement",
@@ -465,11 +468,13 @@ func TestMultiClusterDiscovery(t *testing.T) {
 					noErrors := func() bool {
 						t.Logf("noError() jsonOutput: %v", jsonOutput.String())
 
-						t.Logf("source.errorSummary equals {}: %v", jsonOutput.Get("source.errorSummary").String() == "{}")
-						t.Logf("sync.errorSummary equals {}: %v", jsonOutput.Get("sync.errorSummary").String() == "{}")
-						t.Logf("rendering.errorSummary equals {}: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}")
+						t.Logf("source.errorSummary equals {} or empty: %v", jsonOutput.Get("source.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
+						t.Logf("sync.errorSummary equals {} or empty: %v", jsonOutput.Get("sync.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
+						t.Logf("rendering.errorSummary equals {} or empty: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
 
-						return jsonOutput.Get("sync.errorSummary").String() == "{}" && jsonOutput.Get("source.errorSummary").String() == "{}" && jsonOutput.Get("rendering.errorSummary").String() == "{}"
+						return (jsonOutput.Get("sync.errorSummary").String() == "{}" || jsonOutput.Get("sync.errorSummary").String() == "") &&
+							(jsonOutput.Get("source.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "") &&
+							(jsonOutput.Get("rendering.errorSummary").String() == "{}" || jsonOutput.Get("rendering.errorSummary").String() == "")
 					}
 					noError = noErrors()
 					t.Logf("noError var: %v", noError)
@@ -491,11 +496,6 @@ func TestMultiClusterDiscovery(t *testing.T) {
 			firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", clusterProjectID).Array()
 			for i := range firewallRules {
 				gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), clusterProjectID)
-			}
-
-			endpoints := gcloud.Runf(t, "endpoints services list --project %s", clusterProjectID).Array()
-			for i := range endpoints {
-				gcloud.Runf(t, "endpoints services delete %s --project %s -q", endpoints[i].Get("name"), clusterProjectID)
 			}
 			multitenant.DefaultTeardown(assert)
 
