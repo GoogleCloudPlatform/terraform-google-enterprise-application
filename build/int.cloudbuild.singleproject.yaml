@@ -145,7 +145,7 @@ steps:
     waitFor:
       - ssp-hello-world-apply
       - ssp-hello-world-verify
-      
+
   - id: ssp-hello-world-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:

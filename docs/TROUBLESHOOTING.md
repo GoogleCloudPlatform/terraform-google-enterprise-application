@@ -465,8 +465,12 @@ To resolve this, you need to manually remove the firewall rules and then proceed
 
 1. List all firewall rules that contains `csm` and `-mcsd` in the name:
 
-   
+   ```bash
+      gcloud compute firewall-rules list  --project <NETWORK_PROJECT> --filter=\"csm\"
+   ```
 
 1. Delete the listed firewall-rules:
 
-   
+   ```bash
+      gcloud compute firewall-rules delete <FIREWALL-RULE-NAME>  --project <NETWORK_PROJECT> 
+   ```
