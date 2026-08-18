@@ -94,6 +94,21 @@ steps:
     waitFor:
       - wait-startup-script
 
+  - id: vpc-sc
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      [
+        "/bin/bash",
+        "-c",
+        "cft test run TestVPCSC --stage init --verbose && cft test run TestVPCSC --stage apply --verbose",
+      ]
+    env:
+      - "TF_VAR_org_id=$_ORG_ID"
+      - "_SKIP_GITLAB=false"
+    waitFor:
+      - logging-bucket-apply
+      - bootstrap-gitlab-vm
+
   - id: ssp-hello-world-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -147,7 +162,7 @@ steps:
         "sleep 3m && cft test run TestVPCSC  --stage teardown --verbose",
       ]
     waitFor:
-      - multicluster-discovery-example-teardown
+      - ssp-hello-world-teardown
     allowFailure: true
 
   - id: gitlab-teardown
