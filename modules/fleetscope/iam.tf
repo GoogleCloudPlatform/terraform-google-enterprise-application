@@ -16,18 +16,16 @@
 
 locals {
   namespaces            = [for k, v in google_gke_hub_scope.fleet-scope : v.scope_id]
-  namespace_wide_access = [for namespace in local.namespaces : "principalSet://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/namespace/${namespace}"]
+  namespace_wide_access = { for i, namespace in local.namespaces : (i) => "principalSet://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/namespace/${namespace}" }
 }
 
 # Allow Services Accounts to create trace
 resource "google_project_iam_member" "acm_wi_trace_agent" {
-  for_each = toset(concat([
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
-    ],
-    local.namespace_wide_access,
-    var.additional_project_role_identities
-  ))
+  for_each = merge({
+    "config"     = "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
+    "gatekeeper" = "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
+  }, local.namespace_wide_access, var.additional_project_role_identities)
+
 
   project = var.fleet_project_id
   role    = "roles/cloudtrace.agent"
@@ -38,13 +36,11 @@ resource "google_project_iam_member" "acm_wi_trace_agent" {
 
 # Allow Services Accounts to send metrics
 resource "google_project_iam_member" "acm_wi_metricWriter" {
-  for_each = toset(concat([
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
-    "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
-    ],
-    local.namespace_wide_access,
-    var.additional_project_role_identities
-  ))
+  for_each = merge({
+    "config"     = "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
+    "gatekeeper" = "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
+  }, local.namespace_wide_access, var.additional_project_role_identities)
+
 
   project    = var.fleet_project_id
   role       = "roles/monitoring.metricWriter"
