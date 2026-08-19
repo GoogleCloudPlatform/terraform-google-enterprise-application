@@ -57,7 +57,9 @@ func TestSourceLLMModelSingleProject(t *testing.T) {
 
 	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
-		appRepo := fmt.Sprintf("%s/eab-%s-%s", authenticatedUrl, appName, serviceName)
+		repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
+
+		appRepo := fmt.Sprintf("%s/%s", authenticatedUrl, repoName)
 
 		tmpDirApp := t.TempDir()
 
@@ -193,7 +195,7 @@ func TestSourceLLMModelSingleProject(t *testing.T) {
 					}
 				}
 			}
-			for i, targetId := range deployTargets.Array() {
+			for i, targetId := range deployTargets.Get(repoName).Array() {
 				if i > 0 {
 					promoteCmd := fmt.Sprintf("deploy releases promote --project=%s --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", projectID, releaseName, serviceName, region, targetId)
 					t.Logf("Promoting release to next target: %s", targetId)

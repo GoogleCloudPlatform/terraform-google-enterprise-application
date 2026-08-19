@@ -27,6 +27,7 @@ module "fleetscope_infra" {
   config_sync_secret_type    = "none"
   config_sync_policy_dir     = "examples/llm-model/3-fleetscope/config-sync"
   config_sync_repository_url = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
+  config_sync_branch         = "main"
   cluster_service_accounts   = values(module.multitenant_infra.cluster_service_accounts)
   attestation_kms_key        = var.attestation_kms_key
 
