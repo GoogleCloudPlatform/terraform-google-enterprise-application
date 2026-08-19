@@ -21,6 +21,7 @@
 - [The user does not have permission to access Project or it may not exist](#the-user-does-not-have-permission-to-access-project-or-it-may-not-exist)
 - [Quota 'CPUS_ALL_REGIONS' exceeded](#quota-cpus_all_regions-exceeded)
 - [Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link](#shared-vpc-attachment-destruction-failure-due-to-network-endpoint-group-link)
+- [Network Destruction Failure due to Firewall still using it](#network-destruction-failure-due-to-firewall-still-using-it)
 - - -
 
 ### Project quota exceeded
@@ -440,3 +441,36 @@ To resolve this, you need to manually remove the Shared VPC attachment resource 
     cd ../../../
     $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
     ```
+
+### Network Destruction Failure due to Firewall still using it
+
+**Error message:**
+
+```text
+module.cluster_network.module.cluster_vpc.module.vpc.google_compute_network.network: Destroying... [id=projects/PROJECT_ID/global/networks/NETWORK_CLUSTER_NAME]
+module.cluster_network.module.cluster_vpc.module.vpc.google_compute_network.network: Still destroying... [id=projects/PROJECT_ID/global/networks/NETWORK_CLUSTER_NAME, 00m10s elapsed]
+╷
+│ Error: Error waiting for Deleting Network: The network resource 'projects/PROJECT_ID/global/networks/NETWORK_CLUSTER_NAME' is already being used by 'projects/PROJECT_ID/global/firewalls/gke-cluster-ZONE-development-RANDOM_HASH-mcsd'
+╷
+│ Error: Error waiting for Deleting Network: The network resource 'projects/PROJECT_ID/global/networks/vpc-eab-cluster' is already being used by 'projects/PROJECT_ID/global/firewalls/gke-csm-thc-RANDOM_HASH'
+```
+
+**Cause:**
+
+This error occurs during the destroy process (either via `$HOME/go/bin/eab-deployer -destroy` or `terraform destroy`) because there is a problem in the cleanup of a Autopilot GKE cluster. Some firewall rules created by GKE service are not correctly cleanup, even after the deletion on the Autopilot GKE cluster. This persistent link prevents the successful destruction of the Shared VPC attachment.
+
+**Solution:**
+
+To resolve this, you need to manually remove the firewall rules and then proceed with destroy. You can do it either in the Console or running a gcloud command.
+
+1. List all firewall rules that contains `csm` and `-mcsd` in the name:
+
+   ```bash
+      gcloud compute firewall-rules list  --project <NETWORK_PROJECT> --filter=\"csm\"
+   ```
+
+1. Delete the listed firewall-rules:
+
+   ```bash
+      gcloud compute firewall-rules delete <FIREWALL-RULE-NAME>  --project <NETWORK_PROJECT>
+   ```

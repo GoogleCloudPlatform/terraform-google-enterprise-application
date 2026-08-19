@@ -20,7 +20,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 6.6 , < 8"
+      version = ">= 6.6, < 8"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
@@ -35,7 +35,6 @@ terraform {
       version = ">= 3.7.2"
     }
   }
-
   provider_meta "google" {
     module_name = "blueprints/terraform/terraform-google-enterprise-application:cluster-network/v0.5.0"
   }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helloworld_e2e
+package default_example
 
 import (
 	"fmt"
@@ -36,15 +36,14 @@ func getLogs(t *testing.T) (string, error) {
 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
 }
 
-func TestHelloWorldE2E(t *testing.T) {
+func TestHelloWorldSingleProjectE2E(t *testing.T) {
 	for _, envName := range testutils.EnvNames(t) {
 		envName := envName
 		t.Run(envName, func(t *testing.T) {
-			multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(fmt.Sprintf("../../../2-multitenant/envs/%s", envName)))
-			// retrieve cluster location and fleet membership from 2-multitenant
-			clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
-			clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
-			clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
+			infraSingleProject := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/default-example/standalone-single-project"))
+			clusterProjectId := infraSingleProject.GetJsonOutput("cluster_project_id").String()
+			clusterLocation := infraSingleProject.GetJsonOutput("cluster_regions").Array()[0].String()
+			clusterMembership := infraSingleProject.GetJsonOutput("cluster_membership_ids").Array()[0].String()
 
 			// extract clusterName from fleet membership id
 			splitClusterMembership := strings.Split(clusterMembership, "/")

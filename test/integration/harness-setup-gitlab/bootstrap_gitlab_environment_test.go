@@ -198,7 +198,6 @@ func TestBootstrapGitlabVM(t *testing.T) {
 
 	// Print tfvars to output for debug
 	printFiles := []string{
-		"../../../1-bootstrap/terraform.tfvars",
 		"../../../examples/multitenant-applications/4-appfactory/terraform.tfvars",
 		"../../../examples/agent/4-appfactory/terraform.tfvars",
 		"../../../examples/agent/5-appinfra/agent/capital-agent/envs/shared/terraform.tfvars",

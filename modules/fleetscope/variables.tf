@@ -66,8 +66,8 @@ variable "additional_project_role_identities" {
   More details can be found here:
   https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity#principal-id-examples
   EOF
-  type        = list(string)
-  default     = []
+  type        = map(string)
+  default     = {}
 }
 
 variable "config_sync_secret_type" {
