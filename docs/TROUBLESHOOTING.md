@@ -472,5 +472,5 @@ To resolve this, you need to manually remove the firewall rules and then proceed
 1. Delete the listed firewall-rules:
 
    ```bash
-      gcloud compute firewall-rules delete <FIREWALL-RULE-NAME>  --project <NETWORK_PROJECT> 
+      gcloud compute firewall-rules delete <FIREWALL-RULE-NAME>  --project <NETWORK_PROJECT>
    ```
