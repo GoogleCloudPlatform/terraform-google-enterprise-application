@@ -73,7 +73,7 @@ This example requires a single project already created. The following APIs will 
 - `sqladmin.googleapis.com`
 - `storage-api.googleapis.com`
 - `trafficdirector.googleapis.com`
- 
+
 But if you are using a service account to deploy this example, you must enable at least the `cloudresourcemanager.googleapis.com` API:
 
  ```bash
@@ -415,7 +415,7 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
-| cluster\_project\_number | Cluster Project ID |
+| cluster\_project\_number | Cluster Project Number |
 | cluster\_regions | Regions with clusters |
 | cluster\_service\_accounts | The default service accounts used for nodes, if not overridden in node\_pools. |
 | cluster\_type | Cluster type |

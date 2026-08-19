@@ -20,7 +20,7 @@ output "cluster_project_id" {
 }
 
 output "cluster_project_number" {
-  description = "Cluster Project ID"
+  description = "Cluster Project Number"
   value       = module.multitenant_infra.cluster_project_number
 }
 
