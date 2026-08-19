@@ -21,9 +21,13 @@ locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
-  sa_cb                 = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
-  projects_re           = "projects/([^/]+)/"
-  secret_project_number = try(regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0], null)
+  sa_cb       = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
+  projects_re = "projects/([^/]+)/"
+  secret_project_number = try(
+    regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0],
+    regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.github_secret_id)[0],
+    null
+  )
 
   team_name    = "default"
   service_name = "hello-world"
@@ -68,10 +72,11 @@ resource "time_sleep" "wait_propagation" {
   create_duration = "30s"
 
   depends_on = [
-    google_project_iam_member.assign_permissions,
-    google_project_iam_member.assign_permissions_service_agent,
-    google_project_iam_member.sd_viewer,
-    google_project_iam_member.access_network,
+    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
+    google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment,
+    google_access_context_manager_service_perimeter_dry_run_ingress_policy.cymbal_bank_private_deployment,
+    google_project_service.required_services
   ]
 }
 
