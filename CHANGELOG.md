@@ -8,6 +8,18 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.6.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.5.0...v0.6.0) (2026-08-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* refactor modules ([#732](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/732))
+
+### Features
+
+* adds hello world single project example ([#737](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/737)) ([fe3c3ff](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/fe3c3ffeb30ebe5d671c24afaae4d465b7af1116))
+* refactor modules ([#732](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/732)) ([405c3dc](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/405c3dc50f27e7324862a718627e605510c7710f))
+
 ## [0.5.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.4.0...v0.5.0) (2026-08-10)
 
 
