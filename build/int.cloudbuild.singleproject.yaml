@@ -132,6 +132,7 @@ steps:
 
   - id: deploy-hello-world
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
     args:
       - "-c"
       - |-
