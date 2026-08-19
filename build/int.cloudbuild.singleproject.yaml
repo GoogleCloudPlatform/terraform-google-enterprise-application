@@ -147,12 +147,20 @@ steps:
       - ssp-hello-world-apply
       - ssp-hello-world-verify
 
+  - id: e2e-hello-world-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "sleep 5m && cft test run TestHelloWorldSingleProjectE2E --stage verify --verbose"]
+    waitFor:
+      - deploy-hello-world
+
   - id: ssp-hello-world-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectDefaultExample --stage teardown --verbose"]
     waitFor:
-      - ssp-hello-world-verify
+      - e2e-hello-world-verify
+    allowFailure: true
 
   - id: vpcsc-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"

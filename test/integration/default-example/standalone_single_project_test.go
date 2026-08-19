@@ -15,7 +15,7 @@
  */
 
 // define test package name
-package defaul_example_standalone_single_project
+package default_example
 
 import (
 	"fmt"
