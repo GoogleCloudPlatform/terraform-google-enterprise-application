@@ -30,7 +30,7 @@ locals {
 
   cluster_sa = [for i in merge(module.gke-standard, module.gke-autopilot) : i.service_account][0]
 
-  cluster_prefix = var.cluster_prefix != "" ? "${var.cluster-prefix}-" : ""
+  cluster_prefix = var.cluster_prefix != "" ? "${var.cluster_prefix}-" : ""
 
   arm_node_pool = { for k, v in local.subnets : k => (regex(local.regions_re, v)[0]) == "us-central1" ?
     [

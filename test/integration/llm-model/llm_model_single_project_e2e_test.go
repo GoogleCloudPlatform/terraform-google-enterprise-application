@@ -29,19 +29,8 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/retry"
-	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/tidwall/gjson"
 )
-
-func getLogs(t *testing.T) (string, error) {
-	cmd := "logs getting-started --pod-running-timeout=30s"
-	args := strings.Fields(cmd)
-	kubectlCmd := shell.Command{
-		Command: "kubectl",
-		Args:    args,
-	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
-}
 
 const (
 	sleepBetweenRetries time.Duration = time.Duration(60) * time.Second
