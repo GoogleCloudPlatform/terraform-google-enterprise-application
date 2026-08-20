@@ -33,6 +33,7 @@ module "multitenant_infra" {
   network_project_id     = var.project_id
   env                    = local.env
   cluster_type           = "AUTOPILOT"
+  cluster_prefix         = "de"
   create_cluster_project = false
   # ignore below vars because we are reusing an existing project
   org_id                 = null

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-locals{
+locals {
   regions = distinct([for subnet in var.subnets : subnet.subnet_region])
 }
 
