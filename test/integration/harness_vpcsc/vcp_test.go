@@ -51,9 +51,12 @@ func TestVPCSC(t *testing.T) {
 	addAccessLevelMembers := strings.Split(os.Getenv("TF_VAR_access_level_members"), ",")
 	protected_projects := []string{}
 
-	// orgID := temp.GetTFSetupStringOutput("org_id")
-	// testutils.CleanOrgACMPolicyID(t, orgID)
-	// testutils.CreateOrgACMPolicyID(t, orgID)
+	orgID := temp.GetTFSetupStringOutput("org_id")
+	testutils.CleanOrgACMPolicyID(t, orgID)
+	accessContextManagerExists := testutils.GetOrgACMPolicyID(t, orgID) != ""
+	if !accessContextManagerExists {
+		testutils.CreateOrgACMPolicyID(t, orgID)
+	}
 
 	HTC, err := strconv.ParseBool(strings.ToLower(os.Getenv("HTC_EXAMPLE")))
 	if err != nil {
