@@ -52,7 +52,7 @@ locals {
     "trafficdirector.googleapis.com",
   ]
 
-  proxy_subnet = {
+  proxy_subnet = var.enable_proxy_subnet ? {
     subnet_name   = "sb-proxy-only-${var.region}"
     subnet_ip     = "10.129.0.0/23"
     purpose       = "REGIONAL_MANAGED_PROXY"
@@ -60,7 +60,7 @@ locals {
     role          = "ACTIVE"
 
     subnet_private_access = false
-  }
+  } : {}
 
   services = distinct(concat(local.default_services, var.additional_services))
 }

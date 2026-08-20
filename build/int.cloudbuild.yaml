@@ -41,7 +41,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage apply --verbose"]
     waitFor:
       - logging-bucket-init
-      - prepare 
+      - prepare
     allowFailure: true
 
   - id: vpc-sc
