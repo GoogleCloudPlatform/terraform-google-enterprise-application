@@ -125,7 +125,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   }
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "cymbal_bank_private_deployment" {
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "private_workerpool_private_deployment" {
   count     = var.service_perimeter_name != null ? 1 : 0
   title     = "cicd-${data.google_project.workerpool_network_project.project_id}-private-gkehub-deployment"
   perimeter = var.service_perimeter_name
@@ -206,7 +206,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   }
 }
 
-resource "google_access_context_manager_service_perimeter_ingress_policy" "cymbal_bank_private_deployment" {
+resource "google_access_context_manager_service_perimeter_ingress_policy" "private_workerpool_private_deployment" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
   title     = "cicd-${data.google_project.workerpool_network_project.project_id}-private-gkehub-deployment"
   perimeter = var.service_perimeter_name
