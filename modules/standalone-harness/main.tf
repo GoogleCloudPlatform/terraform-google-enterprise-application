@@ -52,6 +52,16 @@ locals {
     "trafficdirector.googleapis.com",
   ]
 
+  proxy_subnet = {
+    subnet_name   = "sb-proxy-only-${var.region}"
+    subnet_ip     = "10.129.0.0/23"
+    purpose       = "REGIONAL_MANAGED_PROXY"
+    subnet_region = var.region
+    role          = "ACTIVE"
+
+    subnet_private_access = false
+  }
+
   services = distinct(concat(local.default_services, var.additional_services))
 }
 
@@ -92,12 +102,12 @@ module "cluster_network" {
   project_id      = var.project_id
   shared_vpc_host = false
   subnets = [
-    {
+    merge({
       subnet_name           = "${var.vpc_name}-net-${var.region}"
       subnet_ip             = var.subnet_ip
       subnet_region         = var.region
       subnet_private_access = true
-    }
+    }, local.proxy_subnet)
   ]
 
   secondary_ranges = {
@@ -112,5 +122,41 @@ module "cluster_network" {
       },
     ],
   }
+
+  ingress_rules = [
+    {
+      name     = "fw-allow-health-check"
+      priority = 1000
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
+      allow = [
+        {
+          protocol = "tcp"
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+    },
+    {
+      name     = "fw-allow-proxies"
+      priority = 1000
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["10.129.0.0/23"]
+      allow = [
+        {
+          protocol = "tcp"
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+    }
+  ]
+
   depends_on = [google_project_service.required_services]
 }

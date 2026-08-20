@@ -25,4 +25,5 @@ module "standalone_harness" {
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
   logging_bucket                                = var.logging_bucket
   additional_services                           = ["modelarmor.googleapis.com"]
+  enable_proxy_subnet                           = true
 }

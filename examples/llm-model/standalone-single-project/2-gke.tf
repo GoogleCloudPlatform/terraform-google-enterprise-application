@@ -31,7 +31,7 @@ module "multitenant_infra" {
   source = "../../../modules/gke"
 
   apps                   = local.apps
-  cluster_subnetworks    = module.standalone_harness.subnets_self_links
+  cluster_subnetworks    = [for i, j in module.standalone_harness.subnets_self_links : j if !strcontains(i, "proxy")]
   network_project_id     = var.project_id
   env                    = local.env
   cluster_type           = "AUTOPILOT"

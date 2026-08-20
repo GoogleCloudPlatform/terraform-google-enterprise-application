@@ -84,3 +84,9 @@ variable "secondary_ip_cidr_range_02" {
   description = "Secondary CIDR range 2 for pods/services."
   default     = "192.168.64.0/18"
 }
+
+variable "enable_proxy_subnet" {
+  type        = bool
+  description = "Enables proxy subnet"
+  default     = false
+}

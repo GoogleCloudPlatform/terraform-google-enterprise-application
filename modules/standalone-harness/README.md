@@ -30,6 +30,7 @@ module "standalone_harness" {
 |------|-------------|------|---------|:--------:|
 | additional\_services | Additional GCP services to enable in the project. | `list(string)` | `[]` | no |
 | create\_nat | Enables Cloud NAT creation for Private Worker Pool. | `bool` | `true` | no |
+| enable\_proxy\_subnet | Enables proxy subnet | `bool` | `false` | no |
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | network\_id | The network ID where the private worker pool is going to be peered. | `string` | `null` | no |
