@@ -1,4 +1,4 @@
-# Copyright 2026 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ steps:
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage init --verbose"]
-    waitFor:
-      - prepare
+    waitFor: ['-']
 
   - id: private-workerpool-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -41,13 +40,13 @@ steps:
       ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage apply --verbose"]
     waitFor:
       - private-workerpool-init
+      - prepare
 
   - id: logging-bucket-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
-    waitFor:
-      - prepare
+    waitFor: ['-']
 
   - id: logging-bucket-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -55,6 +54,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage apply --verbose"]
     waitFor:
       - logging-bucket-init
+      - prepare
 
   - id: gitlab-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
