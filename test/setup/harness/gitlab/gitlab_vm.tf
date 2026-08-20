@@ -207,8 +207,6 @@ resource "google_secret_manager_secret_version" "gitlab_webhook" {
   secret_data = random_uuid.random_webhook_secret.result
 }
 
-
-
 // =======================================================
 //          GITLAB WORKER POOL AND PRIVATE DNS CONFIG
 // =======================================================

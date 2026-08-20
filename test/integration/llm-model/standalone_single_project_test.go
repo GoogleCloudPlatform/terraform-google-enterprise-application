@@ -47,9 +47,6 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
 
-	privateWorkerpoolPath := "../../setup/harness/private_workerpool"
-	privateWorkerpool := tft.NewTFBlueprintTest(t, tft.WithTFDir(privateWorkerpoolPath))
-
 	gitlabPath := "../../setup/harness/gitlab"
 	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitlabPath))
 
@@ -60,8 +57,8 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 	vars := map[string]interface{}{
 		"project_id":             projectID,
 		"service_perimeter_mode": service_perimeter_mode,
-		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"service_perimeter_name": service_perimeter_name,
+		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"access_level_name":      access_level_name,
 		"logging_bucket":         loggingBucket.GetStringOutput("logging_bucket"),
 		"bucket_kms_key":         loggingBucket.GetStringOutput("bucket_kms_key"),
@@ -69,7 +66,6 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
-		"workerpool_id": privateWorkerpool.GetStringOutput("workerpool_id"),
 	}
 
 	// wire setup output project_id to example var.project_id

@@ -28,20 +28,6 @@ steps:
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
       - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
 
-  - id: private-workerpool-init
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage init --verbose"]
-    waitFor: ['-']
-
-  - id: private-workerpool-apply
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage apply --verbose"]
-    waitFor:
-      - private-workerpool-init
-      - prepare
-
   - id: logging-bucket-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -239,14 +225,6 @@ steps:
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage teardown --verbose"]
-    waitFor:
-      - gitlab-teardown
-    allowFailure: true
-
-  - id: private-workerpool-teardown
-    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
-    args:
-      ["/bin/bash", "-c", "cft test run TestPrivateWorkerPool --stage teardown --verbose"]
     waitFor:
       - gitlab-teardown
     allowFailure: true
