@@ -30,6 +30,7 @@ module "standalone_harness" {
 |------|-------------|------|---------|:--------:|
 | additional\_services | Additional GCP services to enable in the project. | `list(string)` | `[]` | no |
 | attestation\_repository\_name | The Artifact repository name to store the BinAuthz image. | `string` | n/a | yes |
+| build\_image\_module\_dependencies | A list of dependencies to wait for before running the gcloud script | `list(any)` | `[]` | no |
 | create\_nat | Enables Cloud NAT creation for Private Worker Pool. | `bool` | `true` | no |
 | enable\_proxy\_subnet | Enables proxy subnet | `bool` | `false` | no |
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
@@ -52,6 +53,7 @@ module "standalone_harness" {
 | binary\_authorization\_image | Binary Authorization attestor image. |
 | binary\_authorization\_repository\_id | Binary Authorization repository ID. |
 | required\_services | The required Google project service resources. |
+| subnets | Self links of the created subnets. |
 | subnets\_self\_links | Self links of the created subnets. |
 | workerpool\_id | The Cloud Build Worker Pool ID. |
 | workerpool\_network\_project\_id | The network project ID for the workerpool. |

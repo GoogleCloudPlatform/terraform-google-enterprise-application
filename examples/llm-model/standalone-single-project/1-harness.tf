@@ -18,7 +18,7 @@ module "standalone_harness" {
   source = "../../../modules/standalone-harness"
 
   project_id                                    = var.project_id
-  vpc_name                                      = "vpc-llm-model-cluster"
+  vpc_name                                      = "llm-model-cluster"
   region                                        = var.region
   workerpool_id                                 = var.workerpool_id
   network_id                                    = var.network_id
@@ -30,4 +30,9 @@ module "standalone_harness" {
   private_service_connect_ip                    = "10.3.1.5"
   attestation_repository_name                   = "ar-eab-llm-model-binauthz"
   private_workerpool_name                       = "wp-eab-llm-model"
+
+  build_image_module_dependencies = concat([
+    for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],
+    [for i in google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment : i.id],
+  )
 }

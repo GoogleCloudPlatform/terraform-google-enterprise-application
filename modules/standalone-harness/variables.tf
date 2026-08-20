@@ -106,3 +106,9 @@ variable "attestation_repository_name" {
   description = "The Artifact repository name to store the BinAuthz image."
   type        = string
 }
+
+variable "build_image_module_dependencies" {
+  description = "A list of dependencies to wait for before running the gcloud script"
+  type        = list(any)
+  default     = []
+}

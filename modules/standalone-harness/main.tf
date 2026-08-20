@@ -52,15 +52,14 @@ locals {
     "trafficdirector.googleapis.com",
   ]
 
-  proxy_subnet = var.enable_proxy_subnet ? {
-    subnet_name   = "sb-proxy-only-${var.region}"
-    subnet_ip     = "10.129.0.0/23"
-    purpose       = "REGIONAL_MANAGED_PROXY"
-    subnet_region = var.region
-    role          = "ACTIVE"
-
+  proxy_subnet = var.enable_proxy_subnet ? [{
+    subnet_name           = "sb-proxy-only-${var.region}"
+    subnet_ip             = "10.129.0.0/23"
+    purpose               = "REGIONAL_MANAGED_PROXY"
+    subnet_region         = var.region
+    role                  = "ACTIVE"
     subnet_private_access = false
-  } : {}
+  }] : []
 
   services = distinct(concat(local.default_services, var.additional_services))
 }
@@ -96,7 +95,7 @@ module "binary_autz" {
   attestation_repository_name = var.attestation_repository_name
   bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 
-  module_dependencies = [for s in google_project_service.required_services : s.id]
+  module_dependencies = concat([for s in google_project_service.required_services : s.id], var.build_image_module_dependencies)
 }
 
 module "cluster_network" {
@@ -105,14 +104,12 @@ module "cluster_network" {
   project_id                 = var.project_id
   shared_vpc_host            = false
   private_service_connect_ip = var.private_service_connect_ip
-  subnets = [
-    merge({
-      subnet_name           = "${var.vpc_name}-net-${var.region}"
-      subnet_ip             = var.subnet_ip
-      subnet_region         = var.region
-      subnet_private_access = true
-    }, local.proxy_subnet)
-  ]
+  subnets = concat([{
+    subnet_name           = "${var.vpc_name}-net-${var.region}"
+    subnet_ip             = var.subnet_ip
+    subnet_region         = var.region
+    subnet_private_access = true
+  }], local.proxy_subnet)
 
   secondary_ranges = {
     "${var.vpc_name}-net-${var.region}" = [
