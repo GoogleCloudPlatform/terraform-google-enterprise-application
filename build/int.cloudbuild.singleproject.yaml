@@ -61,7 +61,6 @@ steps:
     args:
       ["/bin/bash", "-c", "cft test run TestGitLab --stage init --verbose"]
     waitFor:
-      - private-workerpool-apply
       - logging-bucket-apply
 
   - id: gitlab-apply
