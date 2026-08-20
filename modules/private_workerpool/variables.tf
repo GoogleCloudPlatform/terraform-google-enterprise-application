@@ -19,6 +19,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "private_workerpool_name" {
+  description = "The private workerpool name"
+  type        = string
+}
+
 variable "network_id" {
   description = "The network ID where the private worker pool is going to be peered. If not provided, a new network is going to be created."
   type        = string

@@ -29,12 +29,14 @@ module "standalone_harness" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | additional\_services | Additional GCP services to enable in the project. | `list(string)` | `[]` | no |
+| attestation\_repository\_name | The Artifact repository name to store the BinAuthz image. | `string` | n/a | yes |
 | create\_nat | Enables Cloud NAT creation for Private Worker Pool. | `bool` | `true` | no |
 | enable\_proxy\_subnet | Enables proxy subnet | `bool` | `false` | no |
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | network\_id | The network ID where the private worker pool is going to be peered. | `string` | `null` | no |
 | private\_service\_connect\_ip | Private service IP | `string` | `"10.3.0.5"` | no |
+| private\_workerpool\_name | The private workerpool name | `string` | n/a | yes |
 | project\_id | Google Cloud project ID in which to deploy all harness resources. | `string` | n/a | yes |
 | region | Google Cloud region for deployments. | `string` | `"us-central1"` | no |
 | secondary\_ip\_cidr\_range\_01 | Secondary CIDR range 1 for pods/services. | `string` | `"192.168.0.0/18"` | no |

@@ -96,3 +96,13 @@ variable "private_service_connect_ip" {
   type        = string
   default     = "10.3.0.5"
 }
+
+variable "private_workerpool_name" {
+  description = "The private workerpool name"
+  type        = string
+}
+
+variable "attestation_repository_name" {
+  description = "The Artifact repository name to store the BinAuthz image."
+  type        = string
+}

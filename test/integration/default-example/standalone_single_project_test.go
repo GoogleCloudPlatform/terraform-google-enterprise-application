@@ -47,6 +47,9 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
 
+	privateWorkerpoolPath := "../../setup/harness/private_workerpool"
+	privateWorkerpool := tft.NewTFBlueprintTest(t, tft.WithTFDir(privateWorkerpoolPath))
+
 	gitlabPath := "../../setup/harness/gitlab"
 	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitlabPath))
 
@@ -66,6 +69,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
+		"workerpool_id": privateWorkerpool.GetStringOutput("workerpool_id"),
 	}
 
 	// wire setup output project_id to example var.project_id

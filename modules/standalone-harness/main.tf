@@ -80,18 +80,21 @@ module "private_workerpool" {
   network_id = var.network_id
   create_nat = var.create_nat
 
+  private_workerpool_name = var.private_workerpool_name
+
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
 
   depends_on = [google_project_service.required_services]
 }
 
 module "binary_autz" {
-  source                    = "../binary-authz-build-image"
-  project_id                = var.project_id
-  location                  = var.region
-  binary_auth_image_version = "v1.0"
-  workerpool_id             = local.workerpool_id
-  bucket_logs_url           = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
+  source                      = "../binary-authz-build-image"
+  project_id                  = var.project_id
+  location                    = var.region
+  binary_auth_image_version   = "v1.0"
+  workerpool_id               = local.workerpool_id
+  attestation_repository_name = var.attestation_repository_name
+  bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 
   module_dependencies = [for s in google_project_service.required_services : s.id]
 }

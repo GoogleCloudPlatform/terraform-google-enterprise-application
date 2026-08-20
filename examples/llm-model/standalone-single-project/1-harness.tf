@@ -28,4 +28,6 @@ module "standalone_harness" {
   additional_services                           = ["modelarmor.googleapis.com"]
   enable_proxy_subnet                           = true
   private_service_connect_ip                    = "10.3.1.5"
+  attestation_repository_name                   = "ar-eab-llm-model-binauthz"
+  private_workerpool_name                       = "wp-eab-llm-model"
 }

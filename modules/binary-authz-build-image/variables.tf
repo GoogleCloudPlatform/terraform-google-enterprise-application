@@ -19,6 +19,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "attestation_repository_name" {
+  description = "The Artifact repository name to store the BinAuthz image."
+  type        = string
+}
+
 variable "location" {
   description = "Location for artifact registry to store binary authz image."
   type        = string
