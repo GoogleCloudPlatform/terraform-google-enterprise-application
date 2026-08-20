@@ -18,6 +18,7 @@ module "standalone_harness" {
   source = "../../../modules/standalone-harness"
 
   project_id                                    = var.project_id
+  vpc_name                                      = "vpc-llm-model-cluster"
   region                                        = var.region
   workerpool_id                                 = var.workerpool_id
   network_id                                    = var.network_id
@@ -26,4 +27,5 @@ module "standalone_harness" {
   logging_bucket                                = var.logging_bucket
   additional_services                           = ["modelarmor.googleapis.com"]
   enable_proxy_subnet                           = true
+  private_service_connect_ip                    = "10.3.1.5"
 }

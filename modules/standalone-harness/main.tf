@@ -97,10 +97,11 @@ module "binary_autz" {
 }
 
 module "cluster_network" {
-  source          = "../cluster_network"
-  vpc_name        = var.vpc_name
-  project_id      = var.project_id
-  shared_vpc_host = false
+  source                     = "../cluster_network"
+  vpc_name                   = var.vpc_name
+  project_id                 = var.project_id
+  shared_vpc_host            = false
+  private_service_connect_ip = var.private_service_connect_ip
   subnets = [
     merge({
       subnet_name           = "${var.vpc_name}-net-${var.region}"

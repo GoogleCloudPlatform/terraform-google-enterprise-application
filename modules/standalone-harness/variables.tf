@@ -90,3 +90,9 @@ variable "enable_proxy_subnet" {
   description = "Enables proxy subnet"
   default     = false
 }
+
+variable "private_service_connect_ip" {
+  description = "Private service IP"
+  type        = string
+  default     = "10.3.0.5"
+}

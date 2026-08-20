@@ -34,6 +34,7 @@ module "standalone_harness" {
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | network\_id | The network ID where the private worker pool is going to be peered. | `string` | `null` | no |
+| private\_service\_connect\_ip | Private service IP | `string` | `"10.3.0.5"` | no |
 | project\_id | Google Cloud project ID in which to deploy all harness resources. | `string` | n/a | yes |
 | region | Google Cloud region for deployments. | `string` | `"us-central1"` | no |
 | secondary\_ip\_cidr\_range\_01 | Secondary CIDR range 1 for pods/services. | `string` | `"192.168.0.0/18"` | no |
