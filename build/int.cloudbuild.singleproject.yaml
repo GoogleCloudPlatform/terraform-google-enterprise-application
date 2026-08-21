@@ -247,3 +247,4 @@ options:
     - "TF_VAR_agent=false"
     - "HEAD_BRANCH=$_HEAD_BRANCH"
     - "HEAD_REPO_URL=$_HEAD_REPO_URL"
+    - "TF_VAR_region=us-east4"

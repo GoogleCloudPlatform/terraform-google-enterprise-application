@@ -18,18 +18,19 @@
 module "fleetscope_infra" {
   source = "../../../modules/fleetscope"
 
-  env                        = local.env
-  cluster_project_id         = module.multitenant_infra.cluster_project_id
-  network_project_id         = module.multitenant_infra.network_project_id
-  fleet_project_id           = module.multitenant_infra.fleet_project_id
-  namespace_ids              = var.teams
-  cluster_membership_ids     = module.multitenant_infra.cluster_membership_ids
-  config_sync_secret_type    = "none"
-  config_sync_policy_dir     = "examples/llm-model/3-fleetscope/config-sync"
-  config_sync_repository_url = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
-  config_sync_branch         = "main"
-  cluster_service_accounts   = values(module.multitenant_infra.cluster_service_accounts)
-  attestation_kms_key        = var.attestation_kms_key
+  env                         = local.env
+  cluster_project_id          = module.multitenant_infra.cluster_project_id
+  network_project_id          = module.multitenant_infra.network_project_id
+  fleet_project_id            = module.multitenant_infra.fleet_project_id
+  namespace_ids               = var.teams
+  cluster_membership_ids      = module.multitenant_infra.cluster_membership_ids
+  config_sync_secret_type     = "none"
+  config_sync_policy_dir      = "examples/llm-model/3-fleetscope/config-sync"
+  config_sync_repository_url  = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
+  config_sync_branch          = "main"
+  cluster_service_accounts    = values(module.multitenant_infra.cluster_service_accounts)
+  attestation_kms_key         = var.attestation_kms_key
+  disable_istio_on_namespaces = keys(var.teams)
 
   depends_on = [module.standalone_harness]
 }
