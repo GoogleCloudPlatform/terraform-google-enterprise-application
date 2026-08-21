@@ -27,9 +27,10 @@ module "standalone_harness" {
   logging_bucket                                = var.logging_bucket
   additional_services                           = ["modelarmor.googleapis.com"]
   enable_proxy_subnet                           = true
-  private_service_connect_ip                    = "10.3.1.5"
+  private_service_connect_ip                    = "10.2.1.5"
   attestation_repository_name                   = "ar-eab-llm-model-binauthz"
   private_workerpool_name                       = "wp-eab-llm-model"
+  worker_range_ip                               = "10.2.3.0"
 
   build_image_module_dependencies = concat([
     for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],

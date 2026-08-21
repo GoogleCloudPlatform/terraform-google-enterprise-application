@@ -112,3 +112,9 @@ variable "build_image_module_dependencies" {
   type        = list(any)
   default     = []
 }
+
+variable "worker_range_ip" {
+  description = "The global IP do be reserved for peering "
+  type        = string
+  default     = "10.3.3.0"
+}

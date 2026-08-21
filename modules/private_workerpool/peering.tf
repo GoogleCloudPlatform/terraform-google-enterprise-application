@@ -20,7 +20,7 @@ resource "google_compute_global_address" "worker_range" {
   name          = "worker-pool-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  address       = "10.3.3.0"
+  address       = var.worker_range_ip
   prefix_length = 24
   network       = local.network_name
 }

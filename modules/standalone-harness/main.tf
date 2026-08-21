@@ -81,6 +81,8 @@ module "private_workerpool" {
 
   private_workerpool_name = var.private_workerpool_name
 
+  worker_range_ip = var.worker_range_ip
+
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
 
   depends_on = [google_project_service.required_services]

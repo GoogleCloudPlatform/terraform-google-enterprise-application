@@ -58,3 +58,9 @@ variable "workerpool_machine_type" {
   type        = string
   default     = "e2-standard-4"
 }
+
+variable "worker_range_ip" {
+  description = "The global IP do be reserved for peering "
+  type        = string
+  default     = "10.3.3.0"
+}
