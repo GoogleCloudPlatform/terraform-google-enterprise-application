@@ -34,7 +34,7 @@ locals {
         repositories = {
           "eab-cymbal-bank-accounts-contacts" = {
             repository_name = "eab-cymbal-bank-accounts-contacts"
-            repository_url  = "https://gitlab.example.com/root/eab-cymbal-bank-accounts-contacts.git"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-contacts.git"
           }
         }
         gitlab_authorizer_credential_secret_id      = "projects/879050112661/secrets/gitlab-pat-from-vm"
@@ -93,7 +93,7 @@ EOF
         repositories = {
           "eab-cymbal-bank-accounts-userservice" = {
             repository_name = "eab-cymbal-bank-accounts-userservice"
-            repository_url  = "https://gitlab.example.com/root/eab-cymbal-bank-accounts-userservice.git"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-accounts-userservice.git"
           }
         }
         gitlab_authorizer_credential_secret_id      = "projects/879050112661/secrets/gitlab-pat-from-vm"
@@ -152,7 +152,7 @@ EOF
         repositories = {
           "eab-cymbal-bank-frontend" = {
             repository_name = "eab-cymbal-bank-frontend"
-            repository_url  = "https://gitlab.example.com/root/eab-cymbal-bank-frontend.git"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-frontend.git"
           }
         }
         gitlab_authorizer_credential_secret_id      = "projects/879050112661/secrets/gitlab-pat-from-vm"
@@ -211,7 +211,7 @@ EOF
         repositories = {
           "eab-cymbal-bank-ledger-balancereader" = {
             repository_name = "eab-cymbal-bank-ledger-balancereader"
-            repository_url  = "https://gitlab.example.com/root/eab-cymbal-bank-ledger-balancereader.git"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-balancereader.git"
           }
         }
         gitlab_authorizer_credential_secret_id      = "projects/879050112661/secrets/gitlab-pat-from-vm"
@@ -270,7 +270,7 @@ EOF
         repositories = {
           "eab-cymbal-bank-ledger-ledgerwriter" = {
             repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
-            repository_url  = "https://gitlab.example.com/root/eab-cymbal-bank-ledger-ledgerwriter.git"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-ledgerwriter.git"
           }
         }
         gitlab_authorizer_credential_secret_id      = "projects/879050112661/secrets/gitlab-pat-from-vm"
@@ -329,7 +329,7 @@ EOF
         repositories = {
           "eab-cymbal-bank-ledger-transactionhistory" = {
             repository_name = "eab-cymbal-bank-ledger-transactionhistory"
-            repository_url  = "https://gitlab.example.com/root/eab-cymbal-bank-ledger-transactionhistory.git"
+            repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-transactionhistory.git"
           }
         }
         gitlab_authorizer_credential_secret_id      = "projects/879050112661/secrets/gitlab-pat-from-vm"
