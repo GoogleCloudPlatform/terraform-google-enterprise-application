@@ -21,7 +21,7 @@ resource "google_compute_global_address" "worker_range" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   address       = var.worker_range_ip
-  prefix_length = 24
+  prefix_length = var.prefix_length
   network       = local.network_name
 }
 

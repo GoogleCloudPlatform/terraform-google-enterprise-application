@@ -60,7 +60,13 @@ variable "workerpool_machine_type" {
 }
 
 variable "worker_range_ip" {
-  description = "The global IP do be reserved for peering "
+  description = "The global IP do be reserved for peering."
   type        = string
   default     = "10.3.3.0"
+}
+
+variable "prefix_length" {
+  description = "The prefix length of the IP range. If not present, it means the address field is a single IP address."
+  type        = string
+  default     = "16"
 }
