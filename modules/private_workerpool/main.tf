@@ -29,7 +29,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
   }
   network_config {
     peered_network          = local.network_id
-    peered_network_ip_range = "/16"
+    peered_network_ip_range = "/24"
   }
 
   depends_on = [
