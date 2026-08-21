@@ -47,6 +47,7 @@ module "cloudbuild_repositories" {
   version = "~> 12.0"
 
   project_id = var.project_id
+  location   = var.region
 
   connection_config = {
     connection_type                             = var.cloudbuildv2_repository_config.repo_type
