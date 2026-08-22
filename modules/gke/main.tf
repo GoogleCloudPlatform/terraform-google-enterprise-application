@@ -139,7 +139,7 @@ module "cloud_armor" {
   version = "~> 8.0"
 
   project_id                           = local.cluster_project_id
-  name                                 = "eab-cloud-armor"
+  name                                 = "${local.cluster_prefix}eab-cloud-armor"
   description                          = "EAB Cloud Armor policy"
   default_rule_action                  = "allow"
   type                                 = "CLOUD_ARMOR"
