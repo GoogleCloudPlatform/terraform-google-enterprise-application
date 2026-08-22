@@ -30,6 +30,8 @@ locals {
 
   cluster_sa = [for i in merge(module.gke-standard, module.gke-autopilot) : i.service_account][0]
 
+  cluster_prefix = var.cluster_prefix != "" ? "${var.cluster_prefix}-" : ""
+
   arm_node_pool = { for k, v in local.subnets : k => (regex(local.regions_re, v)[0]) == "us-central1" ?
     [
       {
@@ -137,7 +139,7 @@ module "cloud_armor" {
   version = "~> 8.0"
 
   project_id                           = local.cluster_project_id
-  name                                 = "eab-cloud-armor"
+  name                                 = "${local.cluster_prefix}eab-cloud-armor"
   description                          = "EAB Cloud Armor policy"
   default_rule_action                  = "allow"
   type                                 = "CLOUD_ARMOR"
@@ -230,8 +232,6 @@ resource "google_project_iam_member" "artifactregistry_reader" {
   member  = each.value
 }
 
-
-
 resource "google_project_service_identity" "network_services_sa" {
   provider = google-beta
   project  = data.google_project.eab_cluster_project.project_id
@@ -251,7 +251,7 @@ module "gke-standard" {
   version = "~> 44.1"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
-  name                   = "cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
+  name                   = "${local.cluster_prefix}cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
   master_ipv4_cidr_block = local.subnets_to_cidr[each.key]
   project_id             = local.cluster_project_id
   regional               = true
@@ -344,7 +344,7 @@ module "gke-autopilot" {
   version = "~> 44.1"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
-  name     = "cluster-${each.value.region}-${var.env}"
+  name     = "${local.cluster_prefix}cluster-${each.value.region}-${var.env}"
 
   project_id          = local.cluster_project_id
   regional            = true

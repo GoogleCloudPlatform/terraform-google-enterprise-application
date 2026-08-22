@@ -84,3 +84,37 @@ variable "secondary_ip_cidr_range_02" {
   description = "Secondary CIDR range 2 for pods/services."
   default     = "192.168.64.0/18"
 }
+
+variable "enable_proxy_subnet" {
+  type        = bool
+  description = "Enables proxy subnet"
+  default     = false
+}
+
+variable "private_service_connect_ip" {
+  description = "Private service IP"
+  type        = string
+  default     = "10.3.0.5"
+}
+
+variable "private_workerpool_name" {
+  description = "The private workerpool name"
+  type        = string
+}
+
+variable "attestation_repository_name" {
+  description = "The Artifact repository name to store the BinAuthz image."
+  type        = string
+}
+
+variable "build_image_module_dependencies" {
+  description = "A list of dependencies to wait for before running the gcloud script"
+  type        = list(any)
+  default     = []
+}
+
+variable "worker_range_ip" {
+  description = "The global IP do be reserved for peering "
+  type        = string
+  default     = "10.3.0.0"
+}

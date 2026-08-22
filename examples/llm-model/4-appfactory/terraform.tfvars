@@ -12,7 +12,7 @@ cloudbuildv2_repository_config = {
   repositories = {
     llamma-model = {
       repository_name = "llamma-model-i-r"
-      repository_url  = "https://gitlab.example.com/root/llamma-model-i-r.git"
+      repository_url  = "https://gitlab.com/user/llamma-model-i-r.git"
     },
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME

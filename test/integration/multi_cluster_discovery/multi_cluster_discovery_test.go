@@ -56,6 +56,8 @@ func TestMultiClusterDiscovery(t *testing.T) {
 	if forkRepository == "" || branch == "" {
 		forkRepository = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
 		branch = "main"
+	}
+	if configSyncPath == "" {
 		configSyncPath = fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 	}
 

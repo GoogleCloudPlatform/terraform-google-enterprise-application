@@ -34,6 +34,11 @@ output "subnets_self_links" {
   value       = module.cluster_network.subnets_self_links
 }
 
+output "subnets" {
+  description = "Self links of the created subnets."
+  value       = module.cluster_network.subnets
+}
+
 output "binary_authorization_image" {
   description = "Binary Authorization attestor image."
   value       = module.binary_autz.binary_authorization_image

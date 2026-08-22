@@ -52,3 +52,9 @@ variable "egress_rules" {
   type        = any
   default     = []
 }
+
+variable "private_service_connect_ip" {
+  description = "Private service IP"
+  type        = string
+  default     = "10.3.0.5"
+}

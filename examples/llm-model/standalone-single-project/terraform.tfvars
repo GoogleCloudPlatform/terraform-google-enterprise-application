@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-remote_state_bucket = "REMOTE_STATE_BUCKET"
+project_id = "<YOUR-PROJECT-ID>"
+# workerpool_id = "<YOUR-NETWORK-ID>"     // Optional: If you already have a private workerpool to use, if not, it will create one.
+# network_id = "<YOUR-PRIVATE-WORKERPOOL-NETWORK>" // Optional: if you already have a network to use in case of Private worker pool creation, if not it will create one
 
-region = "us-central1"
-
-buckets_force_destroy = "true"
-
-environment_names = ["development", "nonproduction", "production"]
+# Mandatory fleetscope namespace
+teams = {
+  "namespace" = "your-group@yourdomain.com",
+}
+# service_perimeter_name = "<YOUR-SERVICE-PERIMETER-NAME>"
+# service_perimeter_mode = "DRY_RUN"
 
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"
   repositories = {
     "eab-llm-model-llamma-model" = {
       repository_name = "eab-llm-model-llamma-model"
-      repository_url  = "https://gitlab.com/root/eab-llm-model-llamma-model.git"
+      repository_url  = "https://gitlab.com/user/eab-llm-model-llamma-model.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME

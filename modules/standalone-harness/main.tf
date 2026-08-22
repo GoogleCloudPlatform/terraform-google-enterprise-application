@@ -52,6 +52,15 @@ locals {
     "trafficdirector.googleapis.com",
   ]
 
+  proxy_subnet = var.enable_proxy_subnet ? [{
+    subnet_name           = "sb-proxy-only-${var.region}"
+    subnet_ip             = "10.129.0.0/23"
+    purpose               = "REGIONAL_MANAGED_PROXY"
+    subnet_region         = var.region
+    role                  = "ACTIVE"
+    subnet_private_access = false
+  }] : []
+
   services = distinct(concat(local.default_services, var.additional_services))
 }
 
@@ -70,35 +79,39 @@ module "private_workerpool" {
   network_id = var.network_id
   create_nat = var.create_nat
 
+  private_workerpool_name = var.private_workerpool_name
+
+  worker_range_ip = var.worker_range_ip
+
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
 
   depends_on = [google_project_service.required_services]
 }
 
 module "binary_autz" {
-  source                    = "../binary-authz-build-image"
-  project_id                = var.project_id
-  location                  = var.region
-  binary_auth_image_version = "v1.0"
-  workerpool_id             = local.workerpool_id
-  bucket_logs_url           = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
+  source                      = "../binary-authz-build-image"
+  project_id                  = var.project_id
+  location                    = var.region
+  binary_auth_image_version   = "v1.0"
+  workerpool_id               = local.workerpool_id
+  attestation_repository_name = var.attestation_repository_name
+  bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 
-  module_dependencies = [for s in google_project_service.required_services : s.id]
+  module_dependencies = concat([for s in google_project_service.required_services : s.id], var.build_image_module_dependencies)
 }
 
 module "cluster_network" {
-  source          = "../cluster_network"
-  vpc_name        = var.vpc_name
-  project_id      = var.project_id
-  shared_vpc_host = false
-  subnets = [
-    {
-      subnet_name           = "${var.vpc_name}-net-${var.region}"
-      subnet_ip             = var.subnet_ip
-      subnet_region         = var.region
-      subnet_private_access = true
-    }
-  ]
+  source                     = "../cluster_network"
+  vpc_name                   = var.vpc_name
+  project_id                 = var.project_id
+  shared_vpc_host            = false
+  private_service_connect_ip = var.private_service_connect_ip
+  subnets = concat([{
+    subnet_name           = "${var.vpc_name}-net-${var.region}"
+    subnet_ip             = var.subnet_ip
+    subnet_region         = var.region
+    subnet_private_access = true
+  }], local.proxy_subnet)
 
   secondary_ranges = {
     "${var.vpc_name}-net-${var.region}" = [
@@ -112,5 +125,41 @@ module "cluster_network" {
       },
     ],
   }
+
+  ingress_rules = [
+    {
+      name     = "fw-allow-health-check"
+      priority = 1000
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
+      allow = [
+        {
+          protocol = "tcp"
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+    },
+    {
+      name     = "fw-allow-proxies"
+      priority = 1000
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      source_ranges = ["10.129.0.0/23"]
+      allow = [
+        {
+          protocol = "tcp"
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+    }
+  ]
+
   depends_on = [google_project_service.required_services]
 }

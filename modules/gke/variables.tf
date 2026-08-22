@@ -29,6 +29,17 @@ variable "folder_id" {
   type        = string
 }
 
+variable "cluster_prefix" {
+  description = "A prefix to group clusters, max 2 chars"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = length(var.cluster_prefix) <= 2
+    error_message = "The max length for cluster_prefix is 2 characters."
+  }
+}
+
 variable "create_cluster_project" {
   description = "Create Cluster Project ID, otherwise the Network Project ID is used"
   type        = bool

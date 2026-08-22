@@ -19,7 +19,7 @@ data "google_project" "project" {
 }
 
 resource "google_cloudbuild_worker_pool" "pool" {
-  name     = "private-cb-pool"
+  name     = var.private_workerpool_name
   project  = var.project_id
   location = var.region
   worker_config {

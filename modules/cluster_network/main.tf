@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+locals {
+  regions = distinct([for subnet in var.subnets : subnet.subnet_region])
+}
+
 module "cluster_vpc" {
   source  = "terraform-google-modules/network/google"
   version = "~> 18.1"
@@ -36,21 +40,21 @@ module "cluster_private_service_connect" {
 
   project_id                 = module.cluster_vpc.project_id
   network_self_link          = module.cluster_vpc.network_self_link
-  private_service_connect_ip = "10.3.0.5"
+  private_service_connect_ip = var.private_service_connect_ip
   forwarding_rule_target     = "vpc-sc"
 }
 
 resource "google_compute_router" "nat_router" {
-  for_each = { for subnet in var.subnets : subnet.subnet_region => subnet }
-  name     = "nat-router-${each.value.subnet_region}"
-  region   = each.value.subnet_region
+  for_each = toset(local.regions)
+  name     = "${var.vpc_name}-nat-router-${each.value}"
+  region   = each.value
   network  = module.cluster_vpc.network_self_link
   project  = module.cluster_vpc.project_id
 }
 
 resource "google_compute_router_nat" "cloud_nat" {
   for_each                           = google_compute_router.nat_router
-  name                               = "cloud-nat"
+  name                               = "${var.vpc_name}-cloud-nat"
   router                             = each.value.name
   region                             = each.value.region
   project                            = module.cluster_vpc.project_id

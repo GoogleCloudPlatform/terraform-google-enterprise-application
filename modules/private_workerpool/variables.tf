@@ -19,6 +19,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "private_workerpool_name" {
+  description = "The private workerpool name"
+  type        = string
+}
+
 variable "network_id" {
   description = "The network ID where the private worker pool is going to be peered. If not provided, a new network is going to be created."
   type        = string
@@ -52,4 +57,16 @@ variable "workerpool_machine_type" {
   description = "The project to deploy in"
   type        = string
   default     = "e2-standard-4"
+}
+
+variable "worker_range_ip" {
+  description = "The global IP do be reserved for peering."
+  type        = string
+  default     = "10.3.0.0"
+}
+
+variable "prefix_length" {
+  description = "The prefix length of the IP range. If not present, it means the address field is a single IP address."
+  type        = string
+  default     = "16"
 }

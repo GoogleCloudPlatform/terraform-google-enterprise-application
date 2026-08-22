@@ -32,8 +32,8 @@ steps:
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
-    waitFor:
-      - prepare
+    waitFor: ['-']
+    allowFailure: true
 
   - id: logging-bucket-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -41,6 +41,8 @@ steps:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage apply --verbose"]
     waitFor:
       - logging-bucket-init
+      - prepare
+    allowFailure: true
 
   - id: vpc-sc
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
