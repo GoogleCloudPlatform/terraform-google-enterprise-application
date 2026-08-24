@@ -25,11 +25,6 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "teams" {
-  type        = map(string)
-  description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
-}
-
 variable "service_perimeter_name" {
   description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
   type        = string

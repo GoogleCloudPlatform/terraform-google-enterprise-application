@@ -37,10 +37,6 @@ import (
 
 // name the function as Test*
 func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
-
-	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
 	projectID := setupVPCSCOutput.GetTFSetupStringOutput("seed_project_id")
 
@@ -56,7 +52,6 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 
 	vars := map[string]interface{}{
 		"project_id":             projectID,
-		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
 		"access_level_name":      access_level_name,
@@ -168,7 +163,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 		assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
 		// Cloud Armor
-		cloudArmorName := "eab-cloud-armor"
+		cloudArmorName := "de-eab-cloud-armor"
 		cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, projectID)).Array()[0]
 		assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
 

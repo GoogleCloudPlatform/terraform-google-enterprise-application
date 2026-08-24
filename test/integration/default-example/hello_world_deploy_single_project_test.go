@@ -61,7 +61,7 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
-	region := "us-central1"
+	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
 	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
 

@@ -18,10 +18,6 @@ project_id = "<YOUR-PROJECT-ID>"
 # workerpool_id = "<YOUR-NETWORK-ID>"     // Optional: If you already have a private workerpool to use, if not, it will create one.
 # network_id = "<YOUR-PRIVATE-WORKERPOOL-NETWORK>" // Optional: if you already have a network to use in case of Private worker pool creation, if not it will create one
 
-# Mandatory fleetscope namespace
-teams = {
-  "namespace" = "your-group@yourdomain.com",
-}
 # service_perimeter_name = "<YOUR-SERVICE-PERIMETER-NAME>"
 # service_perimeter_mode = "DRY_RUN"
 
@@ -37,6 +33,7 @@ cloudbuildv2_repository_config = {
   gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
   gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
   gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+  secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
   # If you are using a self-hosted instance, you may change the URL below accordingly
   gitlab_enterprise_host_uri = "https://gitlab.com"
   # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
