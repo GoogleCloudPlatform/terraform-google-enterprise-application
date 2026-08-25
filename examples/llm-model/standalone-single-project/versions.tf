@@ -34,6 +34,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:default-example/standalone-single-project/v0.3.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:llm-model/standalone-single-project/v0.3.0"
   }
 }

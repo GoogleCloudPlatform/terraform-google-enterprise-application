@@ -70,7 +70,7 @@ resource "google_project_iam_member" "access_network" {
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
-resource "google_project_iam_member" "cloudbuid_builder" {
+resource "google_project_iam_member" "cloudbuild_builder" {
   for_each = module.cicd
   project  = module.standalone_harness.workerpool_network_project_id
   role     = "roles/cloudbuild.builds.builder"
