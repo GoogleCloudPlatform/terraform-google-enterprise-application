@@ -34,32 +34,32 @@ data "google_project" "project" {
 }
 
 resource "google_project_iam_member" "assign_permissions" {
-  project = local.workerpool_project_id
+  project = module.standalone_harness.workerpool_project_id
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "assign_permissions_service_agent" {
-  project = local.workerpool_project_id
+  project = module.standalone_harness.workerpool_project_id
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "sd_viewer" {
-  project = local.workerpool_network_project_id
+  project = module.standalone_harness.workerpool_network_project_id
   role    = "roles/servicedirectory.viewer"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "access_network" {
-  project = local.workerpool_network_project_id
+  project = module.standalone_harness.workerpool_network_project_id
   role    = "roles/servicedirectory.pscAuthorizedService"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "cloudbuid_builder" {
   for_each = module.cicd
-  project  = local.workerpool_network_project_id
+  project  = module.standalone_harness.workerpool_network_project_id
   role     = "roles/cloudbuild.builds.builder"
   member   = "serviceAccount:${each.value.cloudbuild_service_account}"
 }
@@ -101,7 +101,7 @@ module "cicd" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  workerpool_id = local.workerpool_id
+  workerpool_id = module.standalone_harness.workerpool_id
 
   logging_bucket = var.logging_bucket
   bucket_kms_key = var.bucket_kms_key
@@ -117,8 +117,9 @@ module "cicd" {
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment,
-    google_project_service.required_services
+    google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment,
+    google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
+    module.standalone_harness,
   ]
 }
 
