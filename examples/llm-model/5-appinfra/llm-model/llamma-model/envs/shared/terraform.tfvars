@@ -27,7 +27,7 @@ cloudbuildv2_repository_config = {
   repositories = {
     "eab-llm-model-llamma-model" = {
       repository_name = "eab-llm-model-llamma-model"
-      repository_url  = "https://gitlab.example.com/root/eab-llm-model-llamma-model.git"
+      repository_url  = "https://gitlab.com/root/eab-llm-model-llamma-model.git"
     }
   }
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME

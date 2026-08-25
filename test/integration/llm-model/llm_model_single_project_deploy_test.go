@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package default_example
+package llm_model
 
 import (
 	"errors"
@@ -29,55 +29,43 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/stretchr/testify/assert"
 
+	"os"
+
 	cp "github.com/otiai10/copy"
 )
 
-func TestSingleProjectSourceHelloWorld(t *testing.T) {
-
-	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
-	// initialize Terraform test from the Blueprints test framework
+func TestSourceLLMModelSingleProject(t *testing.T) {
 	gitLabPath := "../../setup/harness/gitlab"
-	gitLab := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir(gitLabPath))
-	projectID := gitLab.GetTFSetupStringOutput("seed_project_id")
+	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitLabPath))
 	gitUrl := gitLab.GetStringOutput("gitlab_url")
 	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
 	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
-
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	appName := "default-example"
-	serviceName := "hello-world"
 	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
+	infraSingleProject := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/llm-model/standalone-single-project"))
+	projectID := infraSingleProject.GetJsonOutput("cluster_project_id").String()
+	region := infraSingleProject.GetJsonOutput("cluster_regions").Array()[0].String()
+	appName := "llm-model"
+	serviceName := "llamma-model"
+	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/", appName)
+	deployTargets := infraSingleProject.GetJsonOutput("clouddeploy_targets_names")
 
-	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir(fmt.Sprintf("../../../examples/%s/standalone-single-project", appName)))
+	t.Run("replace-repo-contents-and-push", func(t *testing.T) {
 
-	envName := standaloneSingleProj.GetStringOutput("env")
-	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
-	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
-	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
+		repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
 
-	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
-	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
-	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
-
-	servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
-	t.Log(servicePath)
-	t.Run(servicePath, func(t *testing.T) {
 		appRepo := fmt.Sprintf("%s/%s", authenticatedUrl, repoName)
-		t.Logf("source-repo: %s", appRepo)
 
 		tmpDirApp := t.TempDir()
 
 		vars := map[string]interface{}{
-			"project_id":                 projectID,
-			"region":                     region,
-			"env_cluster_membership_ids": env_cluster_membership_ids,
-			"buckets_force_destroy":      "true",
+			"project_id": projectID,
+			"region":     region,
 		}
 
 		appsource := tft.NewTFBlueprintTest(t,
@@ -88,7 +76,7 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 
 		appsource.DefineVerify(func(assert *assert.Assertions) {
 
-			// Push cymbal bank app source code
+			// Push agent app source code
 			gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
 			gitAppRun := func(args ...string) {
 				_, err := gitApp.RunCmdE(args...)
@@ -97,21 +85,36 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 				}
 			}
 
+			// copy contents from 6-appsource to the cloned repository
+			err = cp.Copy(appSourcePath, fmt.Sprintf("%s/", tmpDirApp))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			datefile, err := os.OpenFile(fmt.Sprintf("%s/date.txt", tmpDirApp), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() {
+				if err := datefile.Close(); err != nil {
+					t.Errorf("failed to close datefile: %v", err)
+				}
+			}()
+
+			_, err = datefile.WriteString(time.Now().String() + "\n")
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			gitAppRun("init", tmpDirApp)
+			// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
 			gitAppRun("config", "init.defaultBranch", "main")
 			gitAppRun("config", "http.postBuffer", "157286400")
 			gitAppRun("checkout", "-b", "main")
 			gitAppRun("remote", "add", "google", appRepo)
-
-			// copy contents from 6-appsource to the cloned repository
-			err := cp.Copy(appSourcePath, tmpDirApp)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			gitAppRun("add", ".")
+			gitApp.AddAll()
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
 			gitAppRun("push", "google", "main", "--force")
 
@@ -145,7 +148,7 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 					return true, nil
 				}
 			}
-			utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
+			utils.Poll(t, pollCloudBuild(buildListCmd), 80, 60*time.Second)
 
 			releaseName := ""
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
@@ -159,7 +162,7 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 					return false, nil
 				}
 			}
-			utils.Poll(t, pollRelease(releaseListCmd), 60, 60*time.Second)
+			utils.Poll(t, pollRelease(releaseListCmd), 80, 60*time.Second)
 
 			// Poll CD rollouts until rollout is successful
 			pollCloudDeploy := func(cmd string) func() (bool, error) {
@@ -178,9 +181,9 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 					} else {
 						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", rollouts[0].Get("deployingBuild").String(), projectID, region)
 						logs := gcloud.RunCmd(t, logsCmd)
-						t.Logf("%s build-log: %s", serviceName, logs)
-						if strings.Contains(logs, "Waiting for deployments to stabilize") || strings.Contains(logs, "Insufficient memory") || strings.Contains(logs, "Insufficient CPU") || strings.Contains(logs, "didn't match Pod's node affinity/selector") || strings.Contains(logs, "FailedScaleUp") {
-							t.Logf("Re-trying rollout due to Cluster scalling.")
+						isRetryable, message := testutils.IsDeploymentRetryableError(logs)
+						if isRetryable {
+							t.Logf("Re-trying rollout: %s", message)
 							rolloutFullName := strings.Split(rollouts[0].Get("name").String(), "/")
 							rolloutName := rolloutFullName[len(rolloutFullName)-1]
 							releaseNameParts := strings.Split(releaseName, "/")
@@ -205,5 +208,4 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 		})
 		appsource.Test()
 	})
-
 }

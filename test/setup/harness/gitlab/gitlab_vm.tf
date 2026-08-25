@@ -20,7 +20,7 @@ locals {
   gitlab_network_url                 = "https://www.googleapis.com/compute/v1/projects/${module.gitlab_project.project_id}/global/networks/${module.vpc.network_name}"
   gitlab_vm_ip_range                 = "10.2.2.0/24"
   machine_type                       = "n2-standard-8"
-  selected_zone                      = try(data.google_compute_zones.available.names[0], null)
+  selected_zone                      = try(data.google_compute_zones.available.names[1], data.google_compute_zones.available.names[0])
 }
 
 module "gitlab_project" {
@@ -207,8 +207,6 @@ resource "google_secret_manager_secret_version" "gitlab_webhook" {
   secret_data = random_uuid.random_webhook_secret.result
 }
 
-
-
 // =======================================================
 //          GITLAB WORKER POOL AND PRIVATE DNS CONFIG
 // =======================================================
@@ -317,8 +315,8 @@ resource "google_compute_global_address" "worker_range" {
   name          = "worker-pool-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  address       = "10.3.3.0"
-  prefix_length = 24
+  address       = "10.3.0.0"
+  prefix_length = 16
   network       = module.vpc.network_name
 }
 

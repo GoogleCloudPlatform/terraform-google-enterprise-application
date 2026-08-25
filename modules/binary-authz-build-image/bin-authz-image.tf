@@ -27,7 +27,7 @@ locals {
 resource "google_artifact_registry_repository" "attestation_image" {
   project       = var.project_id
   location      = var.location
-  repository_id = "binauthz-attestation"
+  repository_id = var.attestation_repository_name
   description   = "Binary Attestation Docker repository"
   format        = "DOCKER"
 }

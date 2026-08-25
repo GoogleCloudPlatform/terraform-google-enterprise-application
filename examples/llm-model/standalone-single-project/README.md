@@ -1,5 +1,12 @@
-# Standalone Single-Project Example
-The Standalone Single Project Example deploys the core Enterprise Application Blueprint into a single project for the purposes of simplified demonstration.
+# Example: Getting started with a VLLM model
+
+This guide demonstrates how to deploy a Large Language Model (LLM) using the vLLM serving engine on a Google Kubernetes Engine (GKE) cluster. It is a modified version of the [GKE Inference Gateway tutorial](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/deploy-gke-inference-gateway#create-model-deployment) adapted for Scaffold and the Enterprise Application Blueprint.
+
+It integrates the following components:
+
+* __vLLM:__ For high-throughput model serving.
+* __GKE Inference Gateway:__ For managing model endpoints.
+* __Model Armor:__ For security and governance of LLM interactions.
 
 **Do not use this example for production deployments, as it lacks robust separation of duties and least-privileged permissions present in the standard multi-stage deployment.**
 
@@ -31,6 +38,7 @@ This example creates:
     - Cloud Build Service Account
     - Cloud Deploy Service Account
     - Cloud Storage
+    - Model Armor Template
 
 
 ## Pre-requisites
@@ -54,6 +62,7 @@ This example requires a single project already created. The following APIs will 
 - `iam.googleapis.com`
 - `iap.googleapis.com`
 - `mesh.googleapis.com`
+- `modelarmor.googleapis.com`
 - `monitoring.googleapis.com`
 - `multiclusteringress.googleapis.com`
 - `multiclusterservicediscovery.googleapis.com`
@@ -82,6 +91,7 @@ The entity used to deploy this example must have the following roles at Project 
 - Cloud Deploy Service Agent: `roles/clouddeploy.serviceAgent`
 - Cloud Deploy Admin: `roles/clouddeploy.admin`
 - Compute Admin: `roles/compute.admin`
+- Model Armor Admin: `roles/modelarmor.admin`
 - Network Admin: `roles/compute.networkAdmin`
 - Security Admin: `roles/compute.securityAdmin`
 - Container Admin: `roles/container.admin`
@@ -93,11 +103,11 @@ The entity used to deploy this example must have the following roles at Project 
 - Service Account User: `roles/iam.serviceAccountUser`
 - Logging LogWriter: `roles/logging.logWriter`
 - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+- Secret Manager Editor: `roles/secretmanager.editor`
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
 - Source Repository Admin: `roles/source.admin` (if using CSR)
 - Storage Admin: `roles/storage.admin`
 - Viewer: `roles/viewer`
-- Secret Manager Editor: `roles/secretmanager.editor`
 
 The entity used to deploy this example must have the following roles at Organization level:
 
@@ -165,9 +175,9 @@ To proceed with GitHub as your git provider you will need:
 
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
-  - eab-default-example-hello-world (`eab-default-example-hello-world`)
+  - eab-llm-model-llamma-model (`eab-llm-model-llamma-model`)
 
-   > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+   > Note: Default name for the repository is: `eab-llm-model-llamma-model`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
 - [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
@@ -206,9 +216,9 @@ To proceed with GitHub as your git provider you will need:
       repo_type = "GITHUBv2"
 
       repositories = {
-         eab-default-example-hello-world = {
-            repository_name = "eab-default-example-hello-world"
-            repository_url  = "https://github.com/your-org/eab-default-example-hello-world.git"
+         eab-llm-model-llamma-model = {
+            repository_name = "eab-llm-model-llamma-model"
+            repository_url  = "https://github.com/your-org/eab-llm-model-llamma-model.git"
          }
       }
 
@@ -224,9 +234,9 @@ To proceed with Gitlab as your git provider you will need:
 
 - An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** GitLab repository for each one of the repositories below:
-  - Hello World (`eab-default-example-hello-world`)
+  - LLM Model (`eab-llm-model-llamma-model`)
 
-  > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+  > Note: Default name for the repository is: `eab-llm-model-llamma-model`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - An access token with the `api` scope to use for connecting and disconnecting repositories.
 
@@ -280,15 +290,15 @@ To proceed with Gitlab as your git provider you will need:
       repo_type = "GITLABv2"
 
       repositories = {
-         eab-default-example-hello-world = {
-            repository_name = "eab-default-example-hello-world"
-            repository_url  = "https://gitlab.com/your-group/eab-default-example-hello-world.git"
+         eab-llm-model-llamma-model = {
+            repository_name = "eab-llm-model-llamma-model"
+            repository_url  = "https://gitlab.com/your-group/eab-llm-model-llamma-model.git"
          }
       }
 
       gitlab_authorizer_credential_secret_id         = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
       gitlab_read_authorizer_credential_secret_id    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
-      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
+      gitlab_webhook_secret_id                       = "projects/REPLACE_WITH_WEBHOOK_SECRET_NAME"
 
       secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
 
@@ -317,7 +327,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 1. Enter at Single Project example folder:
 
     ```bash
-    cd terraform-google-enterprise-application/examples/default-example/standalone-single-project
+    cd terraform-google-enterprise-application/examples/llm-model/standalone-single-project
     ```
 
 1. Update `terraform.tfvars`.
@@ -331,42 +341,42 @@ the steps below assume that you are checked out on the same level as `terraform-
     - Cloud Source Repository only
 
     ```bash
-    gcloud source repos clone eab-default-example-hello-world --project=REPLACE_WITH_ADMIN_PROJECT
+    gcloud source repos clone eab-llm-model-llamma-model --project=REPLACE_WITH_ADMIN_PROJECT
     ```
 
     - Github Repository only
 
     ```bash
-    git clone https://github.com/your-org/eab-default-example-hello-world.git
+    git clone https://github.com/your-org/eab-llm-model-llamma-model.git
     ```
 
     - Gitlab Repository only
 
     ```bash
-    git clone https://gitlab.com/your-group/eab-default-example-hello-world.git
+    git clone https://gitlab.com/your-group/eab-llm-model-llamma-model.git
     ```
 
 1. Copy the contents of this directory to the repository:
 
 ```bash
-cp -r terraform-google-enterprise-application/examples/default-example/6-appsource/default-example/* eab-default-example-hello-world
+cp -r terraform-google-enterprise-application/examples/llm-model/6-appsource/* eab-llm-model-llamma-model
 ```
 
 1. Commit changes
 
 ```bash
-cd eab-default-example-hello-world
+cd eab-llm-model-llamma-model
 git checkout -b main
 git add .
 git commit -m "Add source code to the repository"
 git push origin main
 ```
 
-1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on the `hello-world-admin` project under the common folder. You can view the results on the Cloud Build Page.
+1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on your project. You can view the results on the Cloud Build Page.
 
 1. After the CI build successfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
-1. Once the CD pipeline successfully runs, you should be able to see a pod named `getting-started` on your cluster that prints the "Hello world!" message.
+1. Once the CD pipeline successfully runs, you should be able to see a deployment named `openai-app` on your cluster.
 
 
 ## Troubleshooting
@@ -383,7 +393,7 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
 | attestation\_kms\_key | The KMS Key ID to be used by attestor. | `string` | n/a | yes |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
-| cloudbuildv2\_repository\_config | Configuration for integrating repositories with Cloud Build v2:<br>  - repo\_type: Specifies the type of repository. Supported types are 'GITHUBv2', 'GITLABv2', and 'CSR'.<br>  - repositories: A map of repositories to be created. The key must match the exact name of the repository. Each repository is defined by:<br>      - repository\_name: The name of the repository.<br>      - repository\_url: The URL of the repository.<br>  - github\_secret\_id: (Optional) The personal access token for GitHub authentication.<br>  - github\_app\_id\_secret\_id: (Optional) The application ID for a GitHub App used for authentication.<br>  - gitlab\_read\_authorizer\_credential\_secret\_id: (Optional) The read authorizer credential for GitLab access.<br>  - gitlab\_authorizer\_credential\_secret\_id: (Optional) The authorizer credential for GitLab access.<br>  - gitlab\_webhook\_secret\_id: (Optional) The secret ID for the GitLab WebHook.<br>  - gitlab\_enterprise\_host\_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.<br>  - gitlab\_enterprise\_service\_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.<br>  - gitlab\_enterprise\_ca\_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.<br>Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.<br>Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.<br>Note: If 'cloudbuildv2\_repository\_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default. | <pre>object({<br>    repo_type = string # Supported values are: GITHUBv2, GITLABv2 and CSR<br>    # repositories to be created<br>    repositories = map(<br>      object({<br>        repository_name = string<br>        repository_url  = string<br>      })<br>    )<br>    # Credential Config for each repository type<br>    github_secret_id                            = optional(string)<br>    github_app_id_secret_id                     = optional(string)<br>    gitlab_read_authorizer_credential_secret_id = optional(string)<br>    gitlab_authorizer_credential_secret_id      = optional(string)<br>    gitlab_webhook_secret_id                    = optional(string)<br>    gitlab_enterprise_host_uri                  = optional(string)<br>    gitlab_enterprise_service_directory         = optional(string)<br>    gitlab_enterprise_ca_certificate            = optional(string)<br>  })</pre> | n/a | yes |
+| cloudbuildv2\_repository\_config | Configuration for integrating repositories with Cloud Build v2:<br>  - repo\_type: Specifies the type of repository. Supported types are 'GITHUBv2', 'GITLABv2', and 'CSR'.<br>  - repositories: A map of repositories to be created. The key must match the exact name of the repository. Each repository is defined by:<br>      - repository\_name: The name of the repository.<br>      - repository\_url: The URL of the repository.<br>  - github\_secret\_id: (Optional) The personal access token for GitHub authentication.<br>  - github\_app\_id\_secret\_id: (Optional) The application ID for a GitHub App used for authentication.<br>  - gitlab\_read\_authorizer\_credential\_secret\_id: (Optional) The read authorizer credential for GitLab access.<br>  - gitlab\_authorizer\_credential\_secret\_id: (Optional) The authorizer credential for GitLab access.<br>  - gitlab\_webhook\_secret\_id: (Optional) The secret ID for the GitLab WebHook.<br>  - gitlab\_enterprise\_host\_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.<br>  - gitlab\_enterprise\_service\_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.<br>  - gitlab\_enterprise\_ca\_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.<br>  - secret\_project\_id: (Optional) The project id where the secret is stored.<br>Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.<br>Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.<br>Note: If 'cloudbuildv2\_repository\_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default. | <pre>object({<br>    repo_type = string # Supported values are: GITHUBv2, GITLABv2 and CSR<br>    # repositories to be created<br>    repositories = map(<br>      object({<br>        repository_name = string<br>        repository_url  = string<br>      })<br>    )<br>    # Credential Config for each repository type<br>    github_secret_id                            = optional(string)<br>    github_app_id_secret_id                     = optional(string)<br>    gitlab_read_authorizer_credential_secret_id = optional(string)<br>    gitlab_authorizer_credential_secret_id      = optional(string)<br>    gitlab_webhook_secret_id                    = optional(string)<br>    gitlab_enterprise_host_uri                  = optional(string)<br>    gitlab_enterprise_service_directory         = optional(string)<br>    gitlab_enterprise_ca_certificate            = optional(string)<br>    secret_project_id                           = optional(string)<br>  })</pre> | n/a | yes |
 | create\_nat | Enables Cloud NAT creation for Private Worker Pool, disable if your network already has one created. | `bool` | `true` | no |
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
@@ -392,6 +402,7 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
+| teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | n/a | yes |
 | workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | `string` | `null` | no |
 
 ## Outputs

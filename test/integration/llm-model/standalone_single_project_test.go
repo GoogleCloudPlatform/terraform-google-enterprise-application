@@ -15,7 +15,7 @@
  */
 
 // define test package name
-package default_example
+package llm_model
 
 import (
 	"fmt"
@@ -36,7 +36,11 @@ import (
 )
 
 // name the function as Test*
-func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
+func TestStandaloneSingleProjectLLMModel(t *testing.T) {
+
+	// initialize Terraform test from the Blueprints test framework
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
 	projectID := setupVPCSCOutput.GetTFSetupStringOutput("seed_project_id")
 
@@ -54,6 +58,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 		"project_id":             projectID,
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
+		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"access_level_name":      access_level_name,
 		"logging_bucket":         loggingBucket.GetStringOutput("logging_bucket"),
 		"bucket_kms_key":         loggingBucket.GetStringOutput("bucket_kms_key"),
@@ -66,7 +71,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 	// wire setup output project_id to example var.project_id
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
 		tft.WithVars(vars),
-		tft.WithTFDir("../../../examples/default-example/standalone-single-project"),
+		tft.WithTFDir("../../../examples/llm-model/standalone-single-project"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
@@ -163,7 +168,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 		assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
 		// Cloud Armor
-		cloudArmorName := "de-eab-cloud-armor"
+		cloudArmorName := "ll-eab-cloud-armor"
 		cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, projectID)).Array()[0]
 		assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
 
@@ -210,7 +215,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {
 		// removes firewall rules created by the service but not being deleted.
-		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"gke\"", projectID).Array()
+		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"csm\"", projectID).Array()
 		for i := range firewallRules {
 			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
 		}

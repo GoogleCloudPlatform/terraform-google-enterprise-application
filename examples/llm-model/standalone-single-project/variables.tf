@@ -25,6 +25,11 @@ variable "region" {
   default     = "us-central1"
 }
 
+variable "teams" {
+  type        = map(string)
+  description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
+}
+
 variable "service_perimeter_name" {
   description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
   type        = string
@@ -144,6 +149,7 @@ variable "cloudbuildv2_repository_config" {
     - gitlab_enterprise_host_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.
     - gitlab_enterprise_service_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
     - gitlab_enterprise_ca_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.
+    - secret_project_id: (Optional) The project id where the secret is stored.
   Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.
   Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.
   Note: If 'cloudbuildv2_repository_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default.
@@ -166,6 +172,7 @@ variable "cloudbuildv2_repository_config" {
     gitlab_enterprise_host_uri                  = optional(string)
     gitlab_enterprise_service_directory         = optional(string)
     gitlab_enterprise_ca_certificate            = optional(string)
+    secret_project_id                           = optional(string)
   })
 
   validation {

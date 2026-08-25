@@ -16,7 +16,7 @@
 
 
 data "google_project" "workerpool_network_project" {
-  project_id = local.workerpool_network_project_id
+  project_id = module.standalone_harness.workerpool_network_project_id
 }
 
 ###############################################
@@ -24,10 +24,10 @@ data "google_project" "workerpool_network_project" {
 ###############################################
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
-  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && local.secret_project_number != null ? 1 : 0
 
   perimeter = var.service_perimeter_name
-  title     = "de-e-projects/${local.secret_project_number}"
+  title     = "llm-model-e-projects/${local.secret_project_number}"
   egress_from {
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
@@ -46,10 +46,10 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_policy" {
-  count = var.service_perimeter_name != null ? 1 : 0
+  count = var.service_perimeter_name != null && local.secret_project_number != null ? 1 : 0
 
   perimeter = var.service_perimeter_name
-  title     = "de-e-projects/${local.secret_project_number}"
+  title     = "llm-model-e-projects/${local.secret_project_number}"
   egress_from {
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
@@ -74,7 +74,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
   count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
 
   perimeter = var.service_perimeter_name
-  title     = "de-cb-access_level-to-${data.google_project.project.project_id}"
+  title     = "llm-model-cb-access_level-to-${data.google_project.project.project_id}"
   ingress_from {
     identities = local.sa_cb
     sources {
@@ -101,7 +101,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
 resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "ingress_policy" {
   count     = var.service_perimeter_name != null ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "de-cb-access_level-to-${data.google_project.project.project_id}"
+  title     = "llm-model-cb-access_level-to-${data.google_project.project.project_id}"
   ingress_from {
     identities = local.sa_cb
     sources {
@@ -125,9 +125,9 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   }
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "private_workerpool_private_deployment" {
+resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "private_workerpool_deployment" {
   count     = var.service_perimeter_name != null ? 1 : 0
-  title     = "de-cicd-${data.google_project.workerpool_network_project.project_id}-private-gkehub-deployment"
+  title     = "llm-model-cicd-${data.google_project.workerpool_network_project.project_id}-private-gkehub-deployment"
   perimeter = var.service_perimeter_name
   ingress_from {
     identity_type = "ANY_IDENTITY"
@@ -206,9 +206,9 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
   }
 }
 
-resource "google_access_context_manager_service_perimeter_ingress_policy" "private_workerpool_private_deployment" {
+resource "google_access_context_manager_service_perimeter_ingress_policy" "private_workerpool_deployment" {
   count     = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
-  title     = "de-cicd-${data.google_project.workerpool_network_project.project_id}-private-gkehub-deployment"
+  title     = "llm-model-cicd-${data.google_project.workerpool_network_project.project_id}-private-gkehub-deployment"
   perimeter = var.service_perimeter_name
   ingress_from {
     identity_type = "ANY_IDENTITY"
