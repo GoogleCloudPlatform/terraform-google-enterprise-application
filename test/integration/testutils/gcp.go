@@ -57,7 +57,7 @@ func CleanOrgACMPolicyID(t testing.TB, orgID string) {
 	if len(acmDs) >= 40 {
 		t.Log("Cleaning Scoped policies")
 		for _, acmD := range acmDs {
-			t.Log("Deleting Access Policy id %s", acmD.Get("name"))
+			t.Logf("Deleting Access Policy id %s", acmD.Get("name"))
 			_, err := DeleteOrgACMPolicyID(t, acmD.Get("name").String())
 			if err != nil {
 				t.Log(err)
