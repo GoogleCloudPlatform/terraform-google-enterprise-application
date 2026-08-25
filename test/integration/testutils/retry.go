@@ -30,6 +30,36 @@ var (
 		// Error 403: Kubernetes Engine API has not been used in project {} before or it is disabled.
 		".*Error 403.*Kubernetes Engine API is not enabled for this project*": "Kubernetes Engine API not enabled",
 
+		// General API enablement propagation
+		".*Error 403.*has not been used in project.*before or it is disabled.*": "API enablement propagation.",
+		".*Error 403.*Access Not Configured.*":                                  "API access configuration propagation.",
+
+		// IAM / Permission propagation errors
+		".*Error 403.*Permission.*denied.*":                                 "IAM permission denied / propagation.",
+		".*Error 403.*The caller does not have permission.*":                "IAM permission propagation.",
+		".*Error 403.*caller does not have required permission.*":            "IAM permission propagation.",
+		".*Error 403.*does not have.*permission.*":                           "IAM permission propagation.",
+		".*Error 403.*is not authorized to perform this operation.*":         "IAM permission propagation.",
+		".*Error code 7, message: Permission denied.*":                       "IAM permission denied.",
+		".*Error code 7, message: The caller does not have permission.*":     "IAM permission propagation.",
+		".*Permission iam.serviceAccounts.actAs denied on service account.*": "IAM actAs permission propagation.",
+		".*Permission 'resourcemanager.projects.get' denied on resource.*":   "Project IAM permission propagation.",
+		".*roles/iam.serviceAccountTokenCreator.*":                            "IAM service account token creator propagation.",
+		".*roles/iam.serviceAccountUser.*":                                    "IAM service account user propagation.",
+		".*does not have storage.objects.*":                                  "Storage IAM permission propagation.",
+		".*Permission 'cloudkms.cryptoKey.*":                                 "Cloud KMS IAM permission propagation.",
+		".*Permission 'artifactregistry.repositories.*":                      "Artifact Registry IAM permission propagation.",
+
+		// Rate limit / Quota / Internal server errors
+		".*rateLimitExceeded.*":               "Rate limit exceeded.",
+		".*Quota exceeded for quota metric.*": "Quota exceeded.",
+		".*Error 429.*":                       "Too Many Requests / Rate limit.",
+		".*Error 500.*":                       "Internal server error.",
+		".*Error 503.*":                       "Service unavailable.",
+		".*connection reset by peer.*":        "Connection reset.",
+		".*TLS handshake timeout.*":           "TLS handshake timeout.",
+		".*i/o timeout.*":                      "I/O timeout.",
+
 		// google_gke_hub_feature - Error: Error waiting to create Feature: Error waiting for Creating Feature: Error code 13, message: an internal error has occurred
 		".*Error waiting for Creating Feature: Error code 13, message: an internal error has occurred*.": "Error creating feature",
 
@@ -81,14 +111,22 @@ var (
 	}
 
 	RetryableDeploymentErrors = map[string]string{
-		".*context deadline exceeded.*": "Timeout connection.",
-		".*502.*":                       "Bad Gateway",
-		".*Waiting for deployments to stabilize.*":      "Waiting for deployments to stabilize.",
-		".*Insufficient memory.*":                       "Waiting cluster to scale up - memory.",
-		".*Insufficient CPU.*":                          "Waiting cluster to scale up - CPU.",
-		".*didn't match Pod's node affinity/selector.*": "Waiting cluster to scale up - machine/GPU type.",
-		".*FailedScaleUp.*":                             "Waiting cluster to scale up - Resources availability.",
-		".*Error from server \\(AlreadyExists\\).*":     "Resource already exists, waiting stabilize.",
+		".*context deadline exceeded.*":                                      "Timeout connection.",
+		".*502.*":                                                           "Bad Gateway",
+		".*Waiting for deployments to stabilize.*":                          "Waiting for deployments to stabilize.",
+		".*Insufficient memory.*":                                           "Waiting cluster to scale up - memory.",
+		".*Insufficient CPU.*":                                              "Waiting cluster to scale up - CPU.",
+		".*didn't match Pod's node affinity/selector.*":                     "Waiting cluster to scale up - machine/GPU type.",
+		".*FailedScaleUp.*":                                                 "Waiting cluster to scale up - Resources availability.",
+		".*Error from server \\(AlreadyExists\\).*":                         "Resource already exists, waiting stabilize.",
+		".*Client\\.Timeout exceeded while awaiting headers.*":              "Client timeout awaiting headers.",
+		".*connection refused.*":                                            "Connection refused, waiting stabilize.",
+		".*connection reset by peer.*":                                      "Connection reset by peer.",
+		".*broken pipe.*":                                                   "Broken pipe.",
+		".*TLS handshake timeout.*":                                         "TLS handshake timeout.",
+		".*i/o timeout.*":                                                   "I/O timeout.",
+		".*the server is currently unable to handle the request.*":          "Server currently unable to handle request.",
+		".*the server was unable to return a response in the time allotted.*": "Server timeout.",
 	}
 )
 

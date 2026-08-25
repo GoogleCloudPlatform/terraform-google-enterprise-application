@@ -32,18 +32,13 @@ module "logging_bucket" {
   versioning = true
   encryption = { default_kms_key_name = module.kms.keys["bucket"] }
 
-  # Module does not support values not know before apply (member and role are used to create the index in for_each)
-  # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
-  # iam_members = [
-  #   {
-  #     role   = "roles/storage.admin"
-  #     member = "serviceAccount:${google_service_account.gitlab_vm.email}"
-  #   },
-  #   {
-  #     role   = "roles/storage.admin"
-  #     member = "serviceAccount:${google_service_account.int_test.email}"
-  #   }
-  # ]
+  depends_on = [time_sleep.wait_cmek_iam_propagation]
+}
+
+resource "time_sleep" "wait_cmek_iam_propagation" {
+  create_duration = "60s"
+
+  depends_on = [module.kms]
 }
 
 resource "google_storage_bucket_iam_member" "logging_storage_admin" {
@@ -104,4 +99,14 @@ module "kms_attestor" {
     "${data.google_storage_project_service_account.ci_gcs_account.member},${"serviceAccount:${var.sa_email}"},serviceAccount:${var.cloud_build_sa}",
   ]
   prevent_destroy = false
+}
+
+resource "time_sleep" "wait_iam_propagation" {
+  create_duration = "30s"
+
+  depends_on = [
+    google_storage_bucket_iam_member.logging_storage_admin,
+    module.kms_attestor,
+    module.logging_bucket,
+  ]
 }

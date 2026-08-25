@@ -15,7 +15,7 @@
  */
 
 locals {
-  cmd_prompt = "gcloud builds submit ${path.module}/../../../../1-bootstrap/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.seed_project_id} --service-account=${var.sa_id} --gcs-log-dir=gs://${var.logging_bucket_name} --worker-pool=${var.workerpool_id} || ( sleep 45 && gcloud builds submit ${path.module}/../../1-bootstrap/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.seed_project_id} --service-account=${var.sa_id} --gcs-log-dir=gs://${var.logging_bucket_name} --worker-pool=${var.workerpool_id} )"
+  cmd_prompt = "gcloud builds submit ${path.module}/../../../../modules/binary-authz-build-image/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.seed_project_id} --service-account=${var.sa_id} --gcs-log-dir=gs://${var.logging_bucket_name} --worker-pool=${var.workerpool_id} || ( sleep 45 && gcloud builds submit ${path.module}/../../../../modules/binary-authz-build-image/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.seed_project_id} --service-account=${var.sa_id} --gcs-log-dir=gs://${var.logging_bucket_name} --worker-pool=${var.workerpool_id} )"
 
   binary_auth_image_version = "v1"
   binary_auth_image_tag     = "us-central1-docker.pkg.dev/${var.seed_project_id}/${google_artifact_registry_repository.attestation_image.name}/binauthz-attestation:${local.binary_auth_image_version}"
@@ -37,6 +37,15 @@ resource "google_artifact_registry_repository_iam_member" "builder_on_attestatio
   member     = "serviceAccount:${var.sa_email}"
 }
 
+resource "time_sleep" "wait_iam_propagation" {
+  create_duration = "45s"
+
+  depends_on = [
+    google_artifact_registry_repository_iam_member.builder_on_attestation_repo,
+    google_artifact_registry_repository.attestation_image,
+  ]
+}
+
 module "build_binary_authz_image" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 4.0"
@@ -49,4 +58,6 @@ module "build_binary_authz_image" {
 
   create_cmd_entrypoint = "bash"
   create_cmd_body       = "${local.cmd_prompt} || ( sleep 45 && ${local.cmd_prompt})"
+
+  module_depends_on = [time_sleep.wait_iam_propagation]
 }

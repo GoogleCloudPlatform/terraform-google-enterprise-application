@@ -15,7 +15,6 @@
 package default_example
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -55,15 +54,15 @@ func TestHelloWorldSingleProjectE2E(t *testing.T) {
 				return func() (bool, error) {
 					logs, err := getLogs(t)
 					if err != nil {
-						t.Fatal(err)
+						t.Logf("Pod logs not yet available (%v), will retry.", err)
+						return true, nil
 					}
 					if strings.Contains(logs, "Hello world!") {
+						t.Log("Application is running: 'Hello world!' found in logs.")
 						return false, nil
-					} else if strings.Contains(logs, "container creating") {
-						return true, nil
-					} else {
-						return false, fmt.Errorf("Unable to get hello world container running.")
 					}
+					t.Logf("Application starting up, current logs: %s", logs)
+					return true, nil
 				}
 			}
 			utils.Poll(t, pollApplication(), 40, 60*time.Second)

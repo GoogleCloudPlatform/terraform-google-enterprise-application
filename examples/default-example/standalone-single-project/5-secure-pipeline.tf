@@ -69,9 +69,13 @@ resource "google_project_iam_member" "cloudbuid_builder" {
 }
 
 resource "time_sleep" "wait_propagation" {
-  create_duration = "30s"
+  create_duration = "60s"
 
   depends_on = [
+    google_project_iam_member.assign_permissions,
+    google_project_iam_member.assign_permissions_service_agent,
+    google_project_iam_member.sd_viewer,
+    google_project_iam_member.access_network,
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment,
@@ -120,9 +124,6 @@ module "cicd" {
   binary_authorization_repository_id = module.binary_autz.binary_authorization_repository_id
 
   depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment,
-    google_project_service.required_services
+    time_sleep.wait_propagation
   ]
 }

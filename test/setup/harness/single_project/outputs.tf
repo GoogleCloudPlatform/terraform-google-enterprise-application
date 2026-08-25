@@ -31,7 +31,8 @@ output "single_project_cluster_subnetwork_self_link" {
 }
 
 output "binary_authorization_image" {
-  value = local.binary_auth_image_tag
+  value      = local.binary_auth_image_tag
+  depends_on = [module.build_binary_authz_image]
 }
 
 output "attestation_evaluation_mode" {
@@ -41,4 +42,5 @@ output "attestation_evaluation_mode" {
 output "binary_authorization_repository_id" {
   description = "The ID of the Repository where binary attestation image is stored."
   value       = google_artifact_registry_repository.attestation_image.id
+  depends_on  = [module.build_binary_authz_image]
 }
