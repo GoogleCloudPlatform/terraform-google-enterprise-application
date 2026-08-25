@@ -111,5 +111,8 @@ module "cluster_network" {
       },
     ],
   }
+
+  ncc_config = var.ncc_config
+
   depends_on = [google_project_service.required_services]
 }
