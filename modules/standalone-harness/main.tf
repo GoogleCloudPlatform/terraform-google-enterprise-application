@@ -139,9 +139,6 @@ module "cluster_network" {
           protocol = "tcp"
         }
       ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
     },
     {
       name     = "fw-allow-proxies"
@@ -155,9 +152,6 @@ module "cluster_network" {
           protocol = "tcp"
         }
       ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
     }
   ]
 

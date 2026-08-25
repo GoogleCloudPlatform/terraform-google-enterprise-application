@@ -114,7 +114,7 @@ variable "build_image_module_dependencies" {
 }
 
 variable "worker_range_ip" {
-  description = "The global IP do be reserved for peering "
+  description = "The global IP do be reserved for peering."
   type        = string
   default     = "10.3.0.0"
 }
