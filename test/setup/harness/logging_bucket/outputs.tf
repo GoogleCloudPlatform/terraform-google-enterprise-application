@@ -15,17 +15,21 @@
  */
 
 output "project_id" {
-  value = var.seed_project_id
+  value      = var.seed_project_id
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "logging_bucket" {
-  value = module.logging_bucket.name
+  value      = module.logging_bucket.name
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "bucket_kms_key" {
-  value = module.kms.keys["bucket"]
+  value      = module.kms.keys["bucket"]
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "attestation_kms_key" {
-  value = module.kms_attestor.keys["attestation"]
+  value      = module.kms_attestor.keys["attestation"]
+  depends_on = [time_sleep.wait_iam_propagation]
 }

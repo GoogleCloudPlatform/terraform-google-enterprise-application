@@ -15,28 +15,34 @@
  */
 
 output "seed_project_id" {
-  value = module.seed_project.project_id
+  value      = module.seed_project.project_id
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "seed_project_number" {
-  value = module.seed_project.project_number
+  value      = module.seed_project.project_number
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "seed_folder_id" {
-  value = module.folder_seed.id
+  value      = module.folder_seed.id
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "sa_email" {
-  value = google_service_account.int_test.email
+  value      = google_service_account.int_test.email
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "sa_id" {
-  value = google_service_account.int_test.id
+  value      = google_service_account.int_test.id
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "sa_key" {
-  value     = google_service_account_key.int_test.private_key
-  sensitive = true
+  value      = google_service_account_key.int_test.private_key
+  sensitive  = true
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "cloud_build_sa" {

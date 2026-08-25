@@ -230,7 +230,7 @@ resource "google_project_iam_member" "access_network" {
 }
 
 resource "time_sleep" "wait_propagation" {
-  create_duration = "30s"
+  create_duration = "60s"
 
   depends_on = [
     google_project_iam_member.assign_permissions,
@@ -277,9 +277,7 @@ module "cicd" {
   binary_authorization_repository_id = var.binary_authorization_repository_id
 
   depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_ingress_policy.cymbal_bank_private_deployment
+    time_sleep.wait_propagation
   ]
 }
 

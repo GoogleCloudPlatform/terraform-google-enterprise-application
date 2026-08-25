@@ -79,6 +79,12 @@ resource "google_project_service" "servicenetworking" {
   disable_on_destroy = false
 }
 
+resource "time_sleep" "wait_service_network_peering" {
+  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
+
+  create_duration = "60s"
+}
+
 resource "google_cloudbuild_worker_pool" "pool" {
   name     = "cb-pool"
   project  = module.private_workerpool_project.project_id
@@ -93,11 +99,5 @@ resource "google_cloudbuild_worker_pool" "pool" {
     peered_network_ip_range = "/24"
   }
 
-  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn, module.private_workerpool_project]
-}
-
-resource "time_sleep" "wait_service_network_peering" {
-  depends_on = [google_service_networking_connection.gitlab_worker_pool_conn]
-
-  create_duration = "30s"
+  depends_on = [time_sleep.wait_service_network_peering, module.private_workerpool_project]
 }

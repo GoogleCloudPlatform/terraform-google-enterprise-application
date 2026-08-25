@@ -56,6 +56,8 @@ func TestMultiClusterDiscovery(t *testing.T) {
 	if forkRepository == "" || branch == "" {
 		forkRepository = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application"
 		branch = "main"
+	}
+	if configSyncPath == "" {
 		configSyncPath = fmt.Sprintf("examples/cymbal-bank/3-fleetscope/config-sync/%s", envName)
 	}
 
@@ -269,10 +271,12 @@ func TestMultiClusterDiscovery(t *testing.T) {
 					// get kubectl namespaces and store them on currentClusterNamespaces slice
 					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
 					if err != nil {
-						t.Fatal(err)
+						t.Logf("Error getting namespaces: %v, will retry", err)
+						return true, nil
 					}
 					if !gjson.Valid(output) {
-						t.Fatalf("Error parsing output, invalid json: %s", output)
+						t.Logf("Error parsing output, invalid json: %s, will retry", output)
+						return true, nil
 					}
 					jsonOutput := gjson.Parse(output)
 					var currentClusterNamespaces []string
@@ -356,20 +360,13 @@ func TestMultiClusterDiscovery(t *testing.T) {
 						}
 
 						pollConfigSync := func() (bool, error) {
-							retry := false
 							// ensure config-sync resources are present in cluster
 							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 							if err != nil {
-								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") &&
-									!strings.Contains(err.Error(), "the server doesn't have a resource type \"rootsyncs\"") {
-									t.Logf("Config-Sync error '%s' \n.", err.Error())
-									return false, err
-								} else {
-									t.Log("Config-Sync not yet installed, will try polling again after sleeping.")
-									retry = true
-								}
+								t.Logf("Config-Sync not yet ready or error '%s', will retry polling.", err.Error())
+								return true, nil
 							}
-							return retry, nil
+							return false, nil
 						}
 
 						utils.Poll(t, pollConfigSync, 20, 40*time.Second)
@@ -469,8 +466,8 @@ func TestMultiClusterDiscovery(t *testing.T) {
 						t.Logf("noError() jsonOutput: %v", jsonOutput.String())
 
 						t.Logf("source.errorSummary equals {} or empty: %v", jsonOutput.Get("source.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
-						t.Logf("sync.errorSummary equals {} or empty: %v", jsonOutput.Get("sync.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
-						t.Logf("rendering.errorSummary equals {} or empty: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "")
+						t.Logf("sync.errorSummary equals {} or empty: %v", jsonOutput.Get("sync.errorSummary").String() == "{}" || jsonOutput.Get("sync.errorSummary").String() == "")
+						t.Logf("rendering.errorSummary equals {} or empty: %v", jsonOutput.Get("rendering.errorSummary").String() == "{}" || jsonOutput.Get("rendering.errorSummary").String() == "")
 
 						return (jsonOutput.Get("sync.errorSummary").String() == "{}" || jsonOutput.Get("sync.errorSummary").String() == "") &&
 							(jsonOutput.Get("source.errorSummary").String() == "{}" || jsonOutput.Get("source.errorSummary").String() == "") &&
