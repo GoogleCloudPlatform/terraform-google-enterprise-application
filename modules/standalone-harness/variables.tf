@@ -26,6 +26,12 @@ variable "create_project" {
   default     = true
 }
 
+variable "project_name" {
+  type        = string
+  description = "A project name to be used."
+  default     = null
+}
+
 variable "billing_account" {
   type        = string
   description = "Billing to be used by a new project. (Required if `create_project` is `true`)."

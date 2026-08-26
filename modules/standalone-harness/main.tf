@@ -63,14 +63,16 @@ locals {
 
   services = distinct(concat(local.default_services, var.additional_services))
 
-  project_id = var.create_project ? module.harness_project.project_id : var.project_id
+  project_id = var.create_project ? module.harness_project[0].project_id : var.project_id
 }
 
 module "harness_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 18.0"
 
-  name                     = "ci-eab-seed"
+  count = var.create_project ? 1 : 0
+
+  name                     = var.project_name
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id

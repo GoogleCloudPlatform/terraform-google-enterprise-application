@@ -43,6 +43,7 @@ module "standalone_harness" {
 | private\_service\_connect\_ip | Private service IP | `string` | `"10.3.0.5"` | no |
 | private\_workerpool\_name | The private workerpool name | `string` | n/a | yes |
 | project\_id | An already Google Cloud project ID in which to deploy all harness resources. | `string` | `null` | no |
+| project\_name | A project name to be used. | `string` | `null` | no |
 | region | Google Cloud region for deployments. | `string` | `"us-central1"` | no |
 | secondary\_ip\_cidr\_range\_01 | Secondary CIDR range 1 for pods/services. | `string` | `"192.168.0.0/18"` | no |
 | secondary\_ip\_cidr\_range\_02 | Secondary CIDR range 2 for pods/services. | `string` | `"192.168.64.0/18"` | no |

@@ -55,7 +55,6 @@ func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
 	vars := map[string]interface{}{
-		"project_id":             projectID,
 		"create_project":         true,
 		"folder_id":              setupOutput.GetStringOutput("seed_folder_id"),
 		"org_id":                 setupOutput.GetStringOutput("org_id"),

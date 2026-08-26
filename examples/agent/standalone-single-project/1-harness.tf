@@ -20,6 +20,7 @@ module "standalone_harness" {
 
   project_id                                    = var.project_id
   billing_account                               = var.billing_account
+  project_name                                  = "eab-cap-agent"
   org_id                                        = var.org_id
   folder_id                                     = var.folder_id
   create_project                                = var.create_project

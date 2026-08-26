@@ -21,6 +21,7 @@ module "standalone_harness" {
   billing_account                               = var.billing_account
   org_id                                        = var.org_id
   folder_id                                     = var.folder_id
+  project_name                                  = "eab-llm-model"
   create_project                                = var.create_project
   vpc_name                                      = "llm-model-cluster"
   region                                        = var.region
