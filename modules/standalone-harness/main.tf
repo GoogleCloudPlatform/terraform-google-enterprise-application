@@ -24,6 +24,7 @@ locals {
     "accesscontextmanager.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
+    "artifactregistry.googleapis.com",
     "apikeys.googleapis.com",
     "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
@@ -85,6 +86,8 @@ module "harness_project" {
   vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
   vpc_service_control_perimeter_name = var.service_perimeter_name
 
+  svpc_host_project_id = try(regex(local.projects_re, var.network_id)[0], null)
+
   disable_services_on_destroy = false
 
   activate_apis = [
@@ -92,10 +95,37 @@ module "harness_project" {
   ]
 }
 
+resource "google_storage_bucket_iam_member" "logging_storage_admin" {
+  for_each   = var.logging_bucket != null && var.create_project ? { "compute_sa" : "serviceAccount:${module.harness_project[0].project_number}-compute@developer.gserviceaccount.com" } : {}
+  bucket     = var.logging_bucket
+  role       = "roles/storage.admin"
+  member     = each.value
+  depends_on = [google_project_service.required_services]
+}
+
+data "google_project" "workerpool_project" {
+  count      = var.create_project ? 0 : 1
+  project_id = var.project_id
+}
+
 resource "google_project_service" "required_services" {
   for_each = toset(local.services)
   project  = local.project_id
   service  = each.value
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+  project = local.project_id
+}
+
+resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
+  for_each = var.bucket_kms_key != null ? {
+    "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
+    "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
+  } : {}
+  crypto_key_id = var.bucket_kms_key
+  role          = each.value
+  member        = data.google_storage_project_service_account.gcs_account.member
 }
 
 module "private_workerpool" {
@@ -125,7 +155,8 @@ module "binary_autz" {
   attestation_repository_name = var.attestation_repository_name
   bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 
-  module_dependencies = concat([for s in google_project_service.required_services : s.id], var.build_image_module_dependencies)
+  module_dependencies = concat([for s in google_project_service.required_services : s.id],
+  var.build_image_module_dependencies)
 }
 
 module "cluster_network" {

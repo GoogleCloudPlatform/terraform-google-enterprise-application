@@ -230,7 +230,8 @@ locals {
           identity_type = "ANY_IDENTITY"
           identities    = tolist([])
           sources = {
-            resources = [for i in var.protected_projects : "projects/${i}"]
+            resources     = [for i in var.protected_projects : "projects/${i}"]
+            access_levels = []
           }
         }
         to = {
@@ -248,7 +249,8 @@ locals {
           identity_type = "ANY_IDENTITY"
           identities    = tolist([])
           sources = {
-            resources = [for i in var.protected_projects : "projects/${i}"]
+            resources     = [for i in var.protected_projects : "projects/${i}"]
+            access_levels = []
           }
         }
         to = {
@@ -277,7 +279,8 @@ locals {
           identity_type = "ANY_IDENTITY"
           identities    = tolist([])
           sources = {
-            resources = [for i in var.protected_projects : "projects/${i}"]
+            resources     = [for i in var.protected_projects : "projects/${i}"]
+            access_levels = []
           }
         }
         to = {
@@ -297,7 +300,8 @@ locals {
           identity_type = "ANY_IDENTITY"
           identities    = tolist([])
           sources = {
-            resources = [for i in var.protected_projects : "projects/${i}"]
+            resources     = [for i in var.protected_projects : "projects/${i}"]
+            access_levels = []
           }
         }
         to = {
@@ -317,7 +321,8 @@ locals {
           identity_type = "ANY_IDENTITY" // https://cloud.google.com/artifact-registry/docs/securing-with-vpc-sc
           identities    = tolist([])
           sources = {
-            resources = [for i in var.protected_projects : "projects/${i}"]
+            resources     = [for i in var.protected_projects : "projects/${i}"]
+            access_levels = []
           }
         }
         to = {
@@ -344,7 +349,8 @@ locals {
           identity_type = null
           identities    = ["group:gcp-admins@test.blueprints.joonix.net"]
           sources = {
-            resources = tolist([])
+            resources     = tolist([])
+            access_levels = []
           }
         }
         to = {
@@ -362,8 +368,10 @@ locals {
           identity_type = "ANY_IDENTITY"
           identities    = tolist([])
           sources = {
-            resources = [for i in var.protected_projects : "projects/${i}"]
+            resources     = tolist([]) // [for i in var.protected_projects : "projects/${i}"]
+            access_levels = ["*"]
           }
+
         }
         to = {
           resources = [
@@ -374,6 +382,7 @@ locals {
             "cloudbuild.googleapis.com"       = { methods = ["*"] }
             "compute.googleapis.com"          = { methods = ["*"] }
             "clouddeploy.googleapis.com"      = { methods = ["*"] }
+            "secretmanager.googleapis.com"    = { methods = ["*"] }
           }
         }
       }
@@ -385,7 +394,8 @@ locals {
           identity_type = "ANY_IDENTITY"
           identities    = tolist([])
           sources = {
-            resources = [for i in var.protected_projects : "projects/${i}"]
+            resources     = tolist([]) // [for i in var.protected_projects : "projects/${i}"]
+            access_levels = ["*"]
           }
         }
         to = {
@@ -407,8 +417,8 @@ locals {
         title = "Ingress from gcp-admins@test.blueprints.joonix.net to the perimeter"
         from = {
           sources = {
-            access_level = "*"
-            resources    = tolist([])
+            access_levels = ["*"]
+            resources     = tolist([])
           }
           identities = ["group:gcp-admins@test.blueprints.joonix.net"]
         }
@@ -425,8 +435,8 @@ locals {
         title = "Ingress from Gitlab to Single Project project - kms service"
         from = {
           sources = {
-            access_level = null
-            resources    = ["projects/${var.gitlab_project_number}"]
+            access_levels = []
+            resources     = ["projects/${var.gitlab_project_number}"]
           }
           identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"]
         }

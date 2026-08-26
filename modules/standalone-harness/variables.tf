@@ -86,6 +86,16 @@ variable "logging_bucket" {
   default     = null
 }
 
+variable "bucket_kms_key" {
+  description = "KMS Key id to be used to encrypt bucket."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.bucket_kms_key != ""
+    error_message = "bucket_kms_key cannot be empty, only null or a valid value."
+  }
+}
+
 variable "additional_services" {
   type        = list(string)
   description = "Additional GCP services to enable in the project."

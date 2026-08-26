@@ -29,6 +29,11 @@ output "workerpool_project_id" {
   value       = local.workerpool_project_id
 }
 
+output "workerpool_project_number" {
+  description = "The Cloud Build Worker Pool Project ID."
+  value       = var.create_project ? module.harness_project[0].project_number : data.google_project.workerpool_project[0].number
+}
+
 output "workerpool_network_project_id" {
   description = "The network project ID for the workerpool."
   value       = local.workerpool_network_project_id

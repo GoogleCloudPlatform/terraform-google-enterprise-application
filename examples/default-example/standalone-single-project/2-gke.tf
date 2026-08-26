@@ -44,7 +44,5 @@ module "multitenant_infra" {
   access_level_name      = var.access_level_name
   deletion_protection    = false
 
-  cb_private_workerpool_project_id = module.standalone_harness.workerpool_project_id
-
   depends_on = [module.standalone_harness]
 }

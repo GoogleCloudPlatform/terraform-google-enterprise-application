@@ -31,6 +31,7 @@ module "standalone_harness" {
   create_nat                                    = var.create_nat
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
   logging_bucket                                = var.logging_bucket
+  bucket_kms_key                                = var.bucket_kms_key
   additional_services                           = ["aiplatform.googleapis.com"]
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-cap-agent-binauthz"

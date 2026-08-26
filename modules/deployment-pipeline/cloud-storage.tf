@@ -116,4 +116,6 @@ resource "google_storage_bucket_object" "cache" {
       detect_md5hash
     ]
   }
+
+  depends_on = [time_sleep.wait_cmek_iam_propagation]
 }

@@ -101,10 +101,18 @@ module "cicd" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  workerpool_id     = module.standalone_harness.workerpool_id
+  private_workerpool = {
+    use_private_workerpool = true
+    private_workerpool_id  = module.standalone_harness.workerpool_id
+  }
+
   access_level_name = var.access_level_name
-  logging_bucket    = var.logging_bucket
-  bucket_kms_key    = var.bucket_kms_key
+
+  service_perimeter_name = var.service_perimeter_name
+  service_perimeter_mode = var.service_perimeter_mode
+
+  logging_bucket = var.logging_bucket
+  bucket_kms_key = var.bucket_kms_key
 
   target_deploy_parameters = local.target_deploy_parameters
 
@@ -159,6 +167,8 @@ module "model_armor_configuration" {
   labels = {
     "model" = "llamma-model"
   }
+
+  depends_on = [module.standalone_harness]
 }
 
 resource "google_service_account" "gsa_llamma_model" {
@@ -169,13 +179,15 @@ resource "google_service_account" "gsa_llamma_model" {
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  project = module.standalone_harness.project_id
-  role    = "roles/cloudtrace.agent"
-  member  = google_service_account.gsa_llamma_model.member
+  project    = module.standalone_harness.project_id
+  role       = "roles/cloudtrace.agent"
+  member     = google_service_account.gsa_llamma_model.member
+  depends_on = [module.fleetscope_infra]
 }
 
 resource "google_service_account_iam_member" "wi_binding" {
   service_account_id = google_service_account.gsa_llamma_model.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${module.standalone_harness.project_id}.svc.id.goog[vllm-model-${local.env}/llamma-model-ksa]"
+  depends_on         = [module.fleetscope_infra]
 }

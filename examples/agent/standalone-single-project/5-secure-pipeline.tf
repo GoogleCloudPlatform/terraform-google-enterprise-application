@@ -100,12 +100,18 @@ module "cicd" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  workerpool_id = module.standalone_harness.workerpool_id
+  private_workerpool = {
+    use_private_workerpool = true
+    private_workerpool_id  = module.standalone_harness.workerpool_id
+  }
 
   logging_bucket = var.logging_bucket
   bucket_kms_key = var.bucket_kms_key
 
   access_level_name = var.access_level_name
+
+  service_perimeter_name = var.service_perimeter_name
+  service_perimeter_mode = var.service_perimeter_mode
 
   attestation_kms_key = var.attestation_kms_key
   attestor_id         = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null

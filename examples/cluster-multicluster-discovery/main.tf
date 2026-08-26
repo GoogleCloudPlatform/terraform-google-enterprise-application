@@ -46,8 +46,6 @@ module "multitenant_infra" {
   service_perimeter_mode = var.service_perimeter_mode
   access_level_name      = var.access_level_name
   deletion_protection    = false
-
-  cb_private_workerpool_project_id = var.project_id
 }
 
 module "fleetscope_infra" {

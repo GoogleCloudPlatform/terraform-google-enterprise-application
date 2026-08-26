@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  projects = distinct([var.cluster_project_id, var.network_project_id])
-}
-
 resource "google_gke_hub_feature" "mesh_feature" {
   name     = "servicemesh"
   location = "global"
@@ -65,9 +61,16 @@ data "google_project" "fleet_project" {
 
 // Grant service mesh service identity permission to access the cluster and network project
 resource "google_project_iam_member" "cluster_service_agent_mesh" {
-  count = length(local.projects)
+  project = var.cluster_project_id
+  role    = "roles/anthosservicemesh.serviceAgent"
+  member  = "serviceAccount:service-${data.google_project.fleet_project.number}@gcp-sa-servicemesh.iam.gserviceaccount.com"
+  depends_on = [
+    google_project_service_identity.fleet_meshconfig_sa
+  ]
+}
 
-  project = local.projects[count.index]
+resource "google_project_iam_member" "net_cluster_service_agent_mesh" {
+  project = var.network_project_id
   role    = "roles/anthosservicemesh.serviceAgent"
   member  = "serviceAccount:service-${data.google_project.fleet_project.number}@gcp-sa-servicemesh.iam.gserviceaccount.com"
   depends_on = [

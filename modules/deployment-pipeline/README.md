@@ -20,14 +20,16 @@
 | cluster\_service\_accounts | Cluster services accounts to be granted the Artifact Registry reader role. | `map(string)` | n/a | yes |
 | env\_cluster\_membership\_ids | Env Cluster Membership IDs | <pre>map(object({<br>    cluster_membership_ids = list(string)<br>  }))</pre> | n/a | yes |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
+| private\_workerpool | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>use\_private\_workerpool = true<br>private\_workerpool\_id = `projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are not using a private workerpool, just set:<br><br>use\_private\_workerpool = false<br>private\_workerpool\_id = null<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | <pre>object({<br>    use_private_workerpool = bool,<br>    private_workerpool_id  = optional(string),<br>  })</pre> | n/a | yes |
 | project\_id | CI/CD project ID | `string` | n/a | yes |
 | region | CI/CD Region (e.g. us-central1) | `string` | n/a | yes |
 | repo\_branch | Branch to sync ACM configs from & trigger CICD if pushed to. | `string` | n/a | yes |
 | repo\_name | Short version of repository to sync ACM configs from & use source for CI (e.g. 'bank-of-anthos' for https://www.github.com/GoogleCloudPlatform/bank-of-anthos) | `string` | n/a | yes |
 | service\_name | service name (e.g. 'transactionhistory') | `string` | n/a | yes |
+| service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `null` | no |
+| service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 | target\_deploy\_parameters | Optional. The deploy parameters to use for this target. The key must be the environment name. | `map(map(string))` | `{}` | no |
 | team\_name | Team name (e.g. 'ledger'). This will be the prefix to the service CI Build Trigger Name. | `string` | n/a | yes |
-| workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | `string` | `null` | no |
 
 ## Outputs
 

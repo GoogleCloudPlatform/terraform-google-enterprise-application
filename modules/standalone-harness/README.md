@@ -31,6 +31,7 @@ module "standalone_harness" {
 | additional\_services | Additional GCP services to enable in the project. | `list(string)` | `[]` | no |
 | attestation\_repository\_name | The Artifact repository name to store the BinAuthz image. | `string` | n/a | yes |
 | billing\_account | Billing to be used by a new project. (Required if `create_project` is `true`). | `string` | `null` | no |
+| bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
 | build\_image\_module\_dependencies | A list of dependencies to wait for before running the gcloud script | `list(any)` | `[]` | no |
 | create\_nat | Enables Cloud NAT creation for Private Worker Pool. | `bool` | `true` | no |
 | create\_project | Enables creation of a new project to deploy all harness resources. | `bool` | `true` | no |
@@ -67,5 +68,6 @@ module "standalone_harness" {
 | workerpool\_id | The Cloud Build Worker Pool ID. |
 | workerpool\_network\_project\_id | The network project ID for the workerpool. |
 | workerpool\_project\_id | The Cloud Build Worker Pool Project ID. |
+| workerpool\_project\_number | The Cloud Build Worker Pool Project ID. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
