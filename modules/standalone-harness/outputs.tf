@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+output "project_id"{
+  description = "The Project ID to be created the resources."
+  value       = local.project_id
+}
+
+
 output "workerpool_id" {
   description = "The Cloud Build Worker Pool ID."
   value       = local.workerpool_id

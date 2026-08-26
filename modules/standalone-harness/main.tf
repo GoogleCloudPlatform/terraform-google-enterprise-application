@@ -16,9 +16,9 @@
 
 locals {
   projects_re                   = "projects/([^/]+)/"
-  workerpool_project_id         = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : var.project_id
+  workerpool_project_id         = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : local.project_id
   workerpool_id                 = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
-  workerpool_network_project_id = var.network_id != null ? regex(local.projects_re, var.network_id)[0] : var.project_id
+  workerpool_network_project_id = var.network_id != null ? regex(local.projects_re, var.network_id)[0] : local.project_id
 
   default_services = [
     "accesscontextmanager.googleapis.com",
@@ -62,11 +62,33 @@ locals {
   }] : []
 
   services = distinct(concat(local.default_services, var.additional_services))
+
+  project_id = var.create_project ? module.harness_project.project_id : var.project_id
+}
+
+module "harness_project" {
+  source  = "terraform-google-modules/project-factory/google"
+  version = "~> 18.0"
+
+  name                     = "ci-eab-seed"
+  random_project_id        = "true"
+  random_project_id_length = 4
+  org_id                   = var.org_id
+  folder_id                = var.folder_id
+  billing_account          = var.billing_account
+  deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
+
+  disable_services_on_destroy = false
+
+  activate_apis = [
+    "cloudresourcemanager.googleapis.com",
+  ]
 }
 
 resource "google_project_service" "required_services" {
   for_each = toset(local.services)
-  project  = var.project_id
+  project  = local.project_id
   service  = each.value
 }
 
@@ -74,7 +96,7 @@ module "private_workerpool" {
   source = "../private_workerpool"
   count  = var.workerpool_id == null ? 1 : 0
 
-  project_id = var.project_id
+  project_id = local.project_id
   region     = var.region
   network_id = var.network_id
   create_nat = var.create_nat
@@ -90,7 +112,7 @@ module "private_workerpool" {
 
 module "binary_autz" {
   source                      = "../binary-authz-build-image"
-  project_id                  = var.project_id
+  project_id                  = local.project_id
   location                    = var.region
   binary_auth_image_version   = "v1.0"
   workerpool_id               = local.workerpool_id
@@ -103,7 +125,7 @@ module "binary_autz" {
 module "cluster_network" {
   source                     = "../cluster_network"
   vpc_name                   = var.vpc_name
-  project_id                 = var.project_id
+  project_id                 = local.project_id
   shared_vpc_host            = false
   private_service_connect_ip = var.private_service_connect_ip
   subnets = concat([{

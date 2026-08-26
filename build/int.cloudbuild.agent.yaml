@@ -146,6 +146,53 @@ steps:
       - e2e-llm-model-verify
     allowFailure: true
 
+  
+  - id: ssp-agent-init
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectAgentExample --stage init --verbose"]
+    waitFor:
+      - vpc-sc
+
+  - id: ssp-agent-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectAgentExample --stage apply --verbose"]
+    waitFor:
+      - ssp-agent-init
+
+  - id: ssp-agent-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "sleep 5m && cft test run TestStandaloneSingleProjectAgentExample --stage verify --verbose"]
+    waitFor:
+      - ssp-agent-apply
+
+  - id: deploy-agent
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestSingleProjectSourceCapitalAgent --stage verify --verbose || exit 1
+        else
+            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
+        fi
+    waitFor:
+      - ssp-agent-apply
+      - ssp-agent-verify
+
+  - id: ssp-agent-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectLLMModel --stage teardown --verbose"]
+    waitFor:
+      - deploy-agent
+    allowFailure: true
+
   - id: vpcsc-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -156,6 +203,7 @@ steps:
       ]
     waitFor:
       - ssp-llm-model-teardown
+      - ssp-agent-teardown
     allowFailure: true
 
   - id: gitlab-teardown

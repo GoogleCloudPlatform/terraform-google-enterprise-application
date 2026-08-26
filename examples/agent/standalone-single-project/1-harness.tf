@@ -19,6 +19,10 @@ module "standalone_harness" {
   source = "../../../modules/standalone-harness"
 
   project_id                                    = var.project_id
+  billing_account                               = var.billing_account
+  org_id                                        = var.org_id
+  folder_id                                     = var.folder_id
+  create_project = var.create_project
   vpc_name                                      = "cap-agent-cluster"
   region                                        = var.region
   workerpool_id                                 = var.workerpool_id
