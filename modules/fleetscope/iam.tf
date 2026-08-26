@@ -26,7 +26,6 @@ resource "google_project_iam_member" "acm_wi_trace_agent" {
     "gatekeeper" = "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
   }, local.namespace_wide_access, var.additional_project_role_identities)
 
-
   project = var.fleet_project_id
   role    = "roles/cloudtrace.agent"
   member  = each.value
@@ -40,7 +39,6 @@ resource "google_project_iam_member" "acm_wi_metricWriter" {
     "config"     = "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/config-management-monitoring/sa/default",
     "gatekeeper" = "principal://iam.googleapis.com/projects/${data.google_project.cluster_project.number}/locations/global/workloadIdentityPools/${var.fleet_project_id}.svc.id.goog/subject/ns/gatekeeper-system/sa/gatekeeper-admin",
   }, local.namespace_wide_access, var.additional_project_role_identities)
-
 
   project    = var.fleet_project_id
   role       = "roles/monitoring.metricWriter"

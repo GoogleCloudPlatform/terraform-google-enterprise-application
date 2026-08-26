@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package default_example
+package llm_model
 
 import (
 	"errors"
@@ -32,7 +32,7 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-func TestSingleProjectSourceHelloWorld(t *testing.T) {
+func TestSingleProjectSourceLLMModel(t *testing.T) {
 
 	env_cluster_membership_ids := make(map[string]map[string][]string, 0)
 	// initialize Terraform test from the Blueprints test framework
@@ -44,13 +44,13 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
 	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
 
+	appName := "llm-model"
+	serviceName := "llamma-model"
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	appName := "default-example"
-	serviceName := "hello-world"
 	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
@@ -61,9 +61,9 @@ func TestSingleProjectSourceHelloWorld(t *testing.T) {
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
-	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
+	region := "us-central1"
 	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
-	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
+	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource", appName)
 
 	servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 	t.Log(servicePath)

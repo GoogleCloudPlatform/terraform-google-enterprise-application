@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-module "private_workerpool" {
-  source                  = "../../modules/private_workerpool"
-  network_name            = "priv-workerpool"
-  workerpool_machine_type = var.workerpool_machine_type
-  workpool_region         = var.workpool_region
-  seed_project_number     = var.seed_project_number
-  org_id                  = var.org_id
-  billing_account         = var.billing_account
-  seed_folder_id          = var.seed_folder_id
+terraform {
+  required_version = ">= 1.5"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5, < 8"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12.0"
+    }
+
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.2.0"
+    }
+  }
+
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:llm-model/standalone-single-project/v0.3.0"
+  }
 }

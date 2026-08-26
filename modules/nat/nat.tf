@@ -27,7 +27,7 @@ data "google_compute_zones" "available" {
 
 resource "google_compute_subnetwork" "nat_subnet" {
   project       = local.network_project_id
-  name          = "sb-${var.region}-nat"
+  name          = "sb-${local.network_name}-${var.region}-nat"
   ip_cidr_range = var.nat_proxy_vm_ip_range
 
   private_ip_google_access = true
@@ -63,14 +63,14 @@ module "firewall_rules" {
 resource "google_compute_address" "cloud_build_nat" {
   project      = local.network_project_id
   address_type = "EXTERNAL"
-  name         = "cloud-build-nat"
+  name         = "${local.network_name}-cloud-build-nat"
   network_tier = "PREMIUM"
   region       = var.region
 }
 
 resource "google_compute_instance" "vm_proxy" {
   project      = local.network_project_id
-  name         = "cloud-build-nat-vm"
+  name         = "${local.network_name}-cloud-build-nat-vm"
   machine_type = "e2-medium"
   zone         = data.google_compute_zones.available.names[0]
 
@@ -105,7 +105,7 @@ resource "google_compute_instance" "vm_proxy" {
 #  This route will route packets to the NAT VM
 
 resource "google_compute_route" "through_nat" {
-  name              = "through-nat-range-1"
+  name              = "${local.network_name}-through-nat-range-1"
   project           = local.network_project_id
   dest_range        = "0.0.0.0/1"
   network           = local.network_name
@@ -114,7 +114,7 @@ resource "google_compute_route" "through_nat" {
 }
 
 resource "google_compute_route" "through_nat2" {
-  name              = "through-nat-range-2"
+  name              = "${local.network_name}-through-nat-range-2"
   project           = local.network_project_id
   dest_range        = "128.0.0.0/1"
   network           = local.network_name
@@ -125,7 +125,7 @@ resource "google_compute_route" "through_nat2" {
 # This route allow the NAT VM to reach the internet with it's external IP address
 
 resource "google_compute_route" "direct_to_gateway" {
-  name             = "direct-to-gateway-range-1"
+  name             = "${local.network_name}-direct-to-gateway-range-1"
   project          = local.network_project_id
   dest_range       = "0.0.0.0/1"
   network          = local.network_name
@@ -135,7 +135,7 @@ resource "google_compute_route" "direct_to_gateway" {
 }
 
 resource "google_compute_route" "direct_to_gateway2" {
-  name             = "direct-to-gateway-range-2"
+  name             = "${local.network_name}-direct-to-gateway-range-2"
   project          = local.network_project_id
   dest_range       = "128.0.0.0/1"
   network          = local.network_name

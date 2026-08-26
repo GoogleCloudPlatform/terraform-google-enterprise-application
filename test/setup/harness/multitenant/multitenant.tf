@@ -136,7 +136,7 @@ module "vpc_project" {
 
 module "cluster_vpc" {
   for_each = module.vpc_project
-  source   = "../../modules/cluster_network"
+  source   = "../../../../modules/cluster_network"
 
   project_id      = each.value.project_id
   vpc_name        = "eab-vpc-${each.key}"

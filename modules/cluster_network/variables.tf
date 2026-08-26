@@ -84,3 +84,9 @@ variable "ncc_config" {
     error_message = "Invalid NCC configuration. If create_hub is TRUE: hub_uri is required."
   }
 }
+
+variable "private_service_connect_ip" {
+  description = "Private service IP"
+  type        = string
+  default     = "10.3.0.5"
+}

@@ -62,10 +62,11 @@ module "private_workerpool" {
   source = "../../../modules/private_workerpool"
   count  = var.workerpool_id == null ? 1 : 0
 
-  project_id = var.project_id
-  region     = var.region
-  network_id = var.network_id
-  create_nat = var.create_nat
+  project_id              = var.project_id
+  region                  = var.region
+  network_id              = var.network_id
+  create_nat              = var.create_nat
+  private_workerpool_name = "wp-eab-default-example"
 
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
 
@@ -76,12 +77,13 @@ module "private_workerpool" {
 module "binary_autz" {
   source = "../../../modules/binary-authz-build-image"
 
-  project_id                = var.project_id
-  location                  = var.region
-  binary_auth_image_version = "v1.0"
-  workerpool_id             = local.workerpool_id
-  bucket_logs_url           = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
-  module_dependencies       = [for s in google_project_service.required_services : s.id]
+  project_id                  = var.project_id
+  location                    = var.region
+  binary_auth_image_version   = "v1.0"
+  workerpool_id               = local.workerpool_id
+  bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
+  module_dependencies         = [for s in google_project_service.required_services : s.id]
+  attestation_repository_name = "ar-eab-hello-world-binauthz"
 }
 
 module "cluster_network" {
