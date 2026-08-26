@@ -22,7 +22,7 @@ module "standalone_harness" {
   billing_account                               = var.billing_account
   org_id                                        = var.org_id
   folder_id                                     = var.folder_id
-  create_project = var.create_project
+  create_project                                = var.create_project
   vpc_name                                      = "cap-agent-cluster"
   region                                        = var.region
   workerpool_id                                 = var.workerpool_id
@@ -34,6 +34,9 @@ module "standalone_harness" {
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-cap-agent-binauthz"
   private_workerpool_name                       = "wp-eab-cap-agent"
+
+  service_perimeter_name = var.service_perimeter_name
+  service_perimeter_mode = var.service_perimeter_mode
 
   build_image_module_dependencies = concat([
     for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],

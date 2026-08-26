@@ -56,6 +56,10 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 
 	vars := map[string]interface{}{
 		"project_id":             projectID,
+		"create_project":         true,
+		"folder_id":              setupOutput.GetStringOutput("seed_folder_id"),
+		"org_id":                 setupOutput.GetStringOutput("org_id"),
+		"billing_account":        setupOutput.GetStringOutput("billing_account"),
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
 		"teams":                  setupOutput.GetJsonOutput("teams").String(),

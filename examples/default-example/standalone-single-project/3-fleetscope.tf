@@ -34,5 +34,5 @@ module "fleetscope_infra" {
   cluster_service_accounts   = values(module.multitenant_infra.cluster_service_accounts)
   attestation_kms_key        = var.attestation_kms_key
 
-  depends_on = [google_project_service.required_services]
+  depends_on = [module.standalone_harness]
 }

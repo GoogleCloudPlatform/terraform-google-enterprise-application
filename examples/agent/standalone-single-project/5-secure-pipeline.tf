@@ -32,10 +32,12 @@ data "google_project" "project" {
   project_id = module.standalone_harness.project_id
 }
 
+
 resource "google_project_iam_member" "assign_permissions" {
-  project = module.standalone_harness.workerpool_project_id
-  role    = "roles/cloudbuild.workerPoolUser"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  for_each = toset(["roles/cloudbuild.workerPoolUser", "roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
+  project  = module.standalone_harness.workerpool_project_id
+  role     = each.value
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "assign_permissions_service_agent" {
@@ -44,19 +46,7 @@ resource "google_project_iam_member" "assign_permissions_service_agent" {
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
-resource "google_project_iam_member" "sd_viewer" {
-  project = module.standalone_harness.workerpool_network_project_id
-  role    = "roles/servicedirectory.viewer"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "access_network" {
-  project = module.standalone_harness.workerpool_network_project_id
-  role    = "roles/servicedirectory.pscAuthorizedService"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "cloudbuid_builder" {
+resource "google_project_iam_member" "cloudbuild_builder" {
   for_each = module.cicd
   project  = module.standalone_harness.workerpool_network_project_id
   role     = "roles/cloudbuild.builds.builder"
@@ -69,8 +59,7 @@ resource "time_sleep" "wait_propagation" {
   depends_on = [
     google_project_iam_member.assign_permissions,
     google_project_iam_member.assign_permissions_service_agent,
-    google_project_iam_member.sd_viewer,
-    google_project_iam_member.access_network,
+    google_project_iam_member.cloudbuild_builder,
   ]
 }
 

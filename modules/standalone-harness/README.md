@@ -46,6 +46,8 @@ module "standalone_harness" {
 | region | Google Cloud region for deployments. | `string` | `"us-central1"` | no |
 | secondary\_ip\_cidr\_range\_01 | Secondary CIDR range 1 for pods/services. | `string` | `"192.168.0.0/18"` | no |
 | secondary\_ip\_cidr\_range\_02 | Secondary CIDR range 2 for pods/services. | `string` | `"192.168.64.0/18"` | no |
+| service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
+| service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 | subnet\_ip | Primary subnet CIDR block. | `string` | `"10.1.20.0/24"` | no |
 | vpc\_name | Name of the VPC to create. | `string` | `"eab-cluster"` | no |
 | worker\_range\_ip | The global IP do be reserved for peering. | `string` | `"10.3.0.0"` | no |

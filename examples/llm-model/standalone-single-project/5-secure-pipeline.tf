@@ -34,7 +34,7 @@ locals {
   repo_branch      = "main"
 
   target_deploy_parameters = { (local.env) = {
-    "cluster_project_id"      = var.project_id
+    "cluster_project_id"      = module.standalone_harness.project_id
     "model_armor_template_id" = module.model_armor_configuration.template.id
     "model_armor_location"    = var.region
     "env_namespace_id"        = "vllm-model-${local.env}"
@@ -43,14 +43,14 @@ locals {
 }
 
 data "google_project" "project" {
-  project_id = var.project_id
+  project_id = module.standalone_harness.project_id
 }
 
 resource "google_project_iam_member" "assign_permissions" {
   for_each = toset(["roles/cloudbuild.workerPoolUser", "roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
-  project = module.standalone_harness.workerpool_project_id
-  role    = each.value
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  project  = module.standalone_harness.workerpool_project_id
+  role     = each.value
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "assign_permissions_service_agent" {
@@ -80,7 +80,7 @@ module "cicd" {
 
   for_each = var.cloudbuildv2_repository_config.repositories
 
-  project_id                 = var.project_id
+  project_id                 = module.standalone_harness.project_id
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
   cluster_service_accounts   = { for i, sa in module.multitenant_infra.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
@@ -123,7 +123,7 @@ module "model_armor_configuration" {
 
   template_id = "ma-${local.application_name}-${local.service_name}"
   location    = var.region
-  project_id  = var.project_id
+  project_id  = module.standalone_harness.project_id
 
   rai_filters = {
     dangerous         = "LOW_AND_ABOVE"
@@ -156,14 +156,14 @@ module "model_armor_configuration" {
 }
 
 resource "google_service_account" "gsa_llamma_model" {
-  project                      = var.project_id
+  project                      = module.standalone_harness.project_id
   account_id                   = "gsa-llamma-model"
   display_name                 = "GSA for llamma-model"
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  project = var.project_id
+  project = module.standalone_harness.project_id
   role    = "roles/cloudtrace.agent"
   member  = google_service_account.gsa_llamma_model.member
 }
@@ -171,5 +171,5 @@ resource "google_project_iam_member" "gsa_trace_agent" {
 resource "google_service_account_iam_member" "wi_binding" {
   service_account_id = google_service_account.gsa_llamma_model.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[vllm-model-${local.env}/llamma-model-ksa]"
+  member             = "serviceAccount:${module.standalone_harness.project_id}.svc.id.goog[vllm-model-${local.env}/llamma-model-ksa]"
 }

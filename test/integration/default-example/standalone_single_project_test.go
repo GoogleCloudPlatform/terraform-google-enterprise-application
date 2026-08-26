@@ -52,6 +52,7 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 
 	vars := map[string]interface{}{
 		"project_id":             projectID,
+		"create_project":         false,
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
 		"access_level_name":      access_level_name,

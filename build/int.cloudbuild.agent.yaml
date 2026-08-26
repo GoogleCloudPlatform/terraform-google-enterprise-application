@@ -146,7 +146,6 @@ steps:
       - e2e-llm-model-verify
     allowFailure: true
 
-  
   - id: ssp-agent-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
