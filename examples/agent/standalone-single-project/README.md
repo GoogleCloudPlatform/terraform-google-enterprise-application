@@ -67,7 +67,7 @@ This example requires a single project already created. The following APIs will 
 - `sqladmin.googleapis.com`
 - `storage-api.googleapis.com`
 - `trafficdirector.googleapis.com`
- 
+
 But if you are using a service account to deploy this example, you must enable at least the `cloudresourcemanager.googleapis.com` API:
 
  ```bash

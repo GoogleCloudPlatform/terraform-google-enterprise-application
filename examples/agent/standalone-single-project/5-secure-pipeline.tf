@@ -22,7 +22,6 @@ locals {
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
   sa_cb                 = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
-  projects_re           = "projects/([^/]+)/"
   secret_project_number = try(regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0], null)
 
   team_name    = "agent"
@@ -111,8 +110,8 @@ module "cicd" {
   attestation_kms_key = var.attestation_kms_key
   attestor_id         = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null
 
-  binary_authorization_image         = module.binary_autz.binary_authorization_image
-  binary_authorization_repository_id = module.binary_autz.binary_authorization_repository_id
+  binary_authorization_image         = module.standalone_harness.binary_authorization_image
+  binary_authorization_repository_id = module.standalone_harness.binary_authorization_repository_id
 
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
@@ -128,7 +127,7 @@ resource "google_service_account" "gsa_capital_agent" {
   account_id   = "gsa-capital-agent"
   display_name = "GSA for capital-agent"
 
-  depends_on = [google_project_service.required_services]
+  depends_on = [module.standalone_harness]
 }
 
 resource "google_project_iam_member" "gsa_vertex_user" {
@@ -136,7 +135,7 @@ resource "google_project_iam_member" "gsa_vertex_user" {
   role    = "roles/aiplatform.user"
   member  = google_service_account.gsa_capital_agent.member
 
-  depends_on = [google_project_service.required_services]
+  depends_on = [module.standalone_harness]
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
@@ -144,7 +143,7 @@ resource "google_project_iam_member" "gsa_trace_agent" {
   role    = "roles/cloudtrace.agent"
   member  = google_service_account.gsa_capital_agent.member
 
-  depends_on = [google_project_service.required_services]
+  depends_on = [module.standalone_harness]
 }
 
 resource "google_service_account_iam_member" "wi_binding" {
