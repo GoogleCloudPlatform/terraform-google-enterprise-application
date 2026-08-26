@@ -21,8 +21,12 @@ locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
-  sa_cb                 = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
-  secret_project_number = try(regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0], null)
+  sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
+  secret_project_number = try(
+    regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0],
+    regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.github_secret_id)[0],
+    null
+  )
 
   team_name    = "agent"
   service_name = "capital-agent"
@@ -34,8 +38,14 @@ data "google_project" "project" {
 
 
 resource "google_project_iam_member" "assign_permissions" {
-  for_each = toset(["roles/cloudbuild.workerPoolUser", "roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
-  project  = module.standalone_harness.workerpool_project_id
+  project = module.standalone_harness.workerpool_project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "assign_network_permissions" {
+  for_each = toset(["roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
+  project  = module.standalone_harness.workerpool_network_project_id
   role     = each.value
   member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
@@ -58,6 +68,7 @@ resource "time_sleep" "wait_propagation" {
 
   depends_on = [
     google_project_iam_member.assign_permissions,
+    google_project_iam_member.assign_network_permissions,
     google_project_iam_member.assign_permissions_service_agent,
     google_project_iam_member.cloudbuild_builder,
   ]
