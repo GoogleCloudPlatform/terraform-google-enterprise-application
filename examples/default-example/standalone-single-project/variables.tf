@@ -204,11 +204,11 @@ variable "ncc_config" {
   type = object({
     enable_ncc                  = optional(bool, false)
     hub_uri                     = optional(string)
+    spoke_group                 = optional(string, "default")
+    spoke_name                  = optional(string, "vpc-spoke")
+    spoke_description           = optional(string)
     spoke_labels                = optional(map(string))
     spoke_exclude_export_ranges = optional(set(string), [])
     spoke_include_export_ranges = optional(set(string), [])
-    spoke_name                  = optional(string, "vpc-spoke")
-    spoke_description           = optional(string)
-    spoke_group                 = optional(string, "default")
   })
 }
