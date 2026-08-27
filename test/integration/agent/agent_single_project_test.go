@@ -39,7 +39,7 @@ func TestSingleProjectSourceCapitalAgent(t *testing.T) {
 	gitLabPath := "../../setup/harness/gitlab"
 	gitLab := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(gitLabPath))
-	projectID := gitLab.GetTFSetupStringOutput("seed_project_id")
+	projectID := gitLab.GetTFSetupJsonOutput("harness_project_ids").Get("agent").String()
 	gitUrl := gitLab.GetStringOutput("gitlab_url")
 	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
 	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
@@ -62,7 +62,7 @@ func TestSingleProjectSourceCapitalAgent(t *testing.T) {
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
-	region := "us-central1"
+	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
 	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/", appName)
 
@@ -76,7 +76,6 @@ func TestSingleProjectSourceCapitalAgent(t *testing.T) {
 
 		vars := map[string]interface{}{
 			"project_id":                 projectID,
-			"region":                     region,
 			"env_cluster_membership_ids": env_cluster_membership_ids,
 			"buckets_force_destroy":      "true",
 		}

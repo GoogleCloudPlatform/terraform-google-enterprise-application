@@ -20,6 +20,7 @@ package agent
 import (
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"slices"
 	"strings"
@@ -42,8 +43,7 @@ func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
 
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupVPCSCOutput.GetTFSetupStringOutput("seed_project_id")
-
+	projectID := setupOutput.GetJsonOutput("harness_project_ids").Get("agent").String()
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
 
@@ -54,18 +54,21 @@ func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 	service_perimeter_name := setupVPCSCOutput.GetStringOutput("service_perimeter_name")
 	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
+	serviceAccount := setupOutput.GetJsonOutput("sa_email").Get("agent").String()
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
+
 	vars := map[string]interface{}{
-		"create_project":         true,
-		"folder_id":              setupOutput.GetStringOutput("seed_folder_id"),
-		"org_id":                 setupOutput.GetStringOutput("org_id"),
-		"billing_account":        setupOutput.GetStringOutput("billing_account"),
+		"project_id":             projectID,
 		"service_perimeter_mode": service_perimeter_mode,
-		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"service_perimeter_name": service_perimeter_name,
+		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"access_level_name":      access_level_name,
-		"logging_bucket":         loggingBucket.GetStringOutput("logging_bucket"),
-		"bucket_kms_key":         loggingBucket.GetStringOutput("bucket_kms_key"),
-		"attestation_kms_key":    loggingBucket.GetStringOutput("attestation_kms_key"),
+		"logging_bucket":         loggingBucket.GetJsonOutput("logging_bucket").Get("agent").String(),
+		"bucket_kms_key":         loggingBucket.GetJsonOutput("bucket_kms_key").Get("agent").String(),
+		"attestation_kms_key":    loggingBucket.GetJsonOutput("attestation_kms_key").Get("agent").String(),
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
@@ -171,7 +174,7 @@ func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 		assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
 		// Cloud Armor
-		cloudArmorName := "eab-cloud-armor"
+		cloudArmorName := "ag-eab-cloud-armor"
 		cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, projectID)).Array()[0]
 		assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
 

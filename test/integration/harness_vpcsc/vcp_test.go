@@ -16,8 +16,9 @@ package harness_vpcsc
 
 import (
 	"fmt"
+	"maps"
 	"os"
-	"strconv"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -32,22 +33,8 @@ func TestVPCSC(t *testing.T) {
 
 	skipGitlab := os.Getenv("_SKIP_GITLAB") == "true"
 
-	isSingleProject, err := strconv.ParseBool(temp.GetTFSetupStringOutput("single_project"))
-	if err != nil {
-		isSingleProject = false
-	}
-	networkProjectsNumber := []string{}
-
-	if !isSingleProject {
-		multitenantPath := "../../setup/harness/multitenant"
-		multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir(multitenantPath))
-		for _, number := range multitenant.GetJsonOutput("network_project_number").Array() {
-			networkProjectsNumber = append(networkProjectsNumber, number.String())
-		}
-	}
-
-	projectNumber := temp.GetTFSetupStringOutput("seed_project_number")
-	serviceAccount := temp.GetTFSetupStringOutput("sa_email")
+	projectNumbers := temp.GetTFSetupJsonOutput("harness_project_numbers").Map()
+	serviceAccounts := temp.GetTFSetupJsonOutput("sa_email").Map()
 	addAccessLevelMembers := strings.Split(os.Getenv("TF_VAR_access_level_members"), ",")
 	protected_projects := []string{}
 
@@ -62,36 +49,26 @@ func TestVPCSC(t *testing.T) {
 		t.Log(ret)
 	}
 
-	HTC, err := strconv.ParseBool(strings.ToLower(os.Getenv("HTC_EXAMPLE")))
-	if err != nil {
-		HTC = false
-	}
-
-	accessLevelMembers := []string{
-		fmt.Sprintf("serviceAccount:%s@cloudbuild.gserviceaccount.com", projectNumber),
-		fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber),
-		fmt.Sprintf("serviceAccount:%s@cloudservices.gserviceaccount.com", projectNumber),
-		fmt.Sprintf("serviceAccount:%s", serviceAccount),
-		"serviceAccount:cloud-build@system.gserviceaccount.com",
-	}
-	if isSingleProject {
-		protected_projects = append(protected_projects, projectNumber)
+	accessLevelMembers := []string{"serviceAccount:cloud-build@system.gserviceaccount.com"}
+	for i, projectNumber := range projectNumbers {
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s@cloudbuild.gserviceaccount.com", projectNumber))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s@cloudservices.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gcp-sa-artifactregistry.iam.gserviceaccount.com", projectNumber))
-	} else if HTC {
-		protected_projects = append(protected_projects, projectNumber)
-	} else {
-		protected_projects = append(protected_projects, networkProjectsNumber...)
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s", serviceAccounts[i]))
+
 	}
+
 	if len(addAccessLevelMembers) > 0 {
 		accessLevelMembers = append(accessLevelMembers, addAccessLevelMembers...)
 	}
 	t.Logf("accessLevelMembers: %v", accessLevelMembers)
 	vars := map[string]interface{}{
-		"access_level_members":          accessLevelMembers,
-		"protected_projects":            protected_projects,
-		"logging_bucket_project_number": projectNumber,
+		"access_level_members":           accessLevelMembers,
+		"protected_projects":             protected_projects,
+		"logging_bucket_project_numbers": slices.Collect(maps.Values(projectNumbers)),
 	}
 	if !skipGitlab {
 		gitLabPath := "../../setup/harness/gitlab"

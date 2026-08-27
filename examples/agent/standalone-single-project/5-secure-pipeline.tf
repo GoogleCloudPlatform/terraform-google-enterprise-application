@@ -33,7 +33,7 @@ locals {
 }
 
 data "google_project" "project" {
-  project_id = module.standalone_harness.project_id
+  project_id = var.project_id
 }
 
 
@@ -78,7 +78,7 @@ module "cicd" {
   source   = "../../../modules/deployment-pipeline"
   for_each = var.cloudbuildv2_repository_config.repositories
 
-  project_id                 = module.standalone_harness.project_id
+  project_id                 = var.project_id
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
   cluster_service_accounts   = { for i, sa in module.multitenant_infra.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
@@ -129,7 +129,7 @@ module "cicd" {
 }
 
 resource "google_service_account" "gsa_capital_agent" {
-  project      = module.standalone_harness.project_id
+  project      = var.project_id
   account_id   = "gsa-capital-agent"
   display_name = "GSA for capital-agent"
 
@@ -137,7 +137,7 @@ resource "google_service_account" "gsa_capital_agent" {
 }
 
 resource "google_project_iam_member" "gsa_vertex_user" {
-  project = module.standalone_harness.project_id
+  project = var.project_id
   role    = "roles/aiplatform.user"
   member  = google_service_account.gsa_capital_agent.member
 
@@ -145,7 +145,7 @@ resource "google_project_iam_member" "gsa_vertex_user" {
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  project = module.standalone_harness.project_id
+  project = var.project_id
   role    = "roles/cloudtrace.agent"
   member  = google_service_account.gsa_capital_agent.member
 
@@ -155,7 +155,7 @@ resource "google_project_iam_member" "gsa_trace_agent" {
 resource "google_service_account_iam_member" "wi_binding" {
   service_account_id = google_service_account.gsa_capital_agent.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${module.standalone_harness.project_id}.svc.id.goog[capital-agent-${local.env}/capital-agent-ksa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[capital-agent-${local.env}/capital-agent-ksa]"
 
   depends_on = [module.fleetscope_infra]
 }

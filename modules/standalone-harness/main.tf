@@ -15,8 +15,11 @@
  */
 
 locals {
-  projects_re   = "projects/([^/]+)/"
-  workerpool_id = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
+  projects_re                   = "projects/([^/]+)/"
+  workerpool_project_id         = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : var.project_id
+  workerpool_id                 = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
+  workerpool_network_project_id = var.network_id != null ? regex(local.projects_re, var.network_id)[0] : var.project_id
+
 
   default_services = [
     "accesscontextmanager.googleapis.com",
@@ -64,6 +67,12 @@ locals {
   services = distinct(concat(local.default_services, var.additional_services))
 }
 
+resource "google_project_service" "required_services" {
+  for_each = toset(local.services)
+  project  = var.project_id
+  service  = each.value
+}
+
 module "private_workerpool" {
   source = "../private_workerpool"
   count  = var.workerpool_id == null ? 1 : 0
@@ -79,7 +88,7 @@ module "private_workerpool" {
 
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
 
-  depends_on = [google_project_service.required_services, google_kms_crypto_key_iam_member.bucket_crypto_key, time_sleep.wait_access_level_propagation]
+  depends_on = [google_project_service.required_services]
 }
 
 module "binary_autz" {

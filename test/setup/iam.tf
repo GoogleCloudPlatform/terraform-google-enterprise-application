@@ -74,7 +74,7 @@ locals {
 }
 
 resource "google_service_account" "int_test" {
-  for_each                     = module.seed_project
+  for_each                     = merge(module.harness_project, { "seed" : module.seed_project })
   project                      = each.value.project_id
   account_id                   = "ci-account"
   display_name                 = "ci-account"
@@ -163,35 +163,35 @@ resource "google_billing_account_iam_member" "tf_billing_admin" {
 }
 
 resource "google_project_iam_member" "cb_service_agent_role" {
-  for_each = module.seed_project
+  for_each = module.harness_project
   project  = each.value.project_id
   role     = "roles/cloudbuild.serviceAgent"
   member   = "serviceAccount:service-${each.value.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "google_services_usage_consumer" {
-  for_each = module.seed_project
+  for_each = module.harness_project
   project  = each.value.project_id
   role     = "roles/compute.serviceAgent"
   member   = "serviceAccount:${each.value.project_number}@cloudservices.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "compute_engine_service_agent_role" {
-  for_each = module.seed_project
+  for_each = module.harness_project
   project  = each.value.project_id
   role     = "roles/serviceusage.serviceUsageConsumer"
   member   = "serviceAccount:service-${each.value.project_number}@compute-system.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "compute_engine_service_usage_role" {
-  for_each = module.seed_project
+  for_each = module.harness_project
   project  = each.value.project_id
   role     = "roles/serviceusage.serviceUsageConsumer"
   member   = "serviceAccount:service-${each.value.project_number}@compute-system.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "compute_engine_default_service_agent_role" {
-  for_each = module.seed_project
+  for_each = module.harness_project
   project  = each.value.project_id
   role     = "roles/compute.serviceAgent"
   member   = "serviceAccount:${each.value.project_number}-compute@developer.gserviceaccount.com"

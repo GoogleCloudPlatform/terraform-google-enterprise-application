@@ -13,6 +13,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | agent | Agent Example being deployed. | `bool` | n/a | yes |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cloud\_build\_sa | Cloud Build Service Account email to be granted Encrypt/Decrypt role. | `string` | n/a | yes |
+| examples\_tested | List of examples to create projects. | `list(string)` | `[]` | no |
 | folder\_id | The folder to deploy in | `string` | n/a | yes |
 | hpc | HPC Example being deployed. | `bool` | n/a | yes |
 | org\_id | The numeric organization id | `string` | n/a | yes |
@@ -24,6 +25,8 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 |------|-------------|
 | billing\_account | n/a |
 | cloud\_build\_sa | n/a |
+| harness\_project\_ids | n/a |
+| harness\_project\_numbers | n/a |
 | hpc | n/a |
 | org\_id | n/a |
 | sa\_email | n/a |

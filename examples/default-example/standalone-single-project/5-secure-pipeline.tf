@@ -33,7 +33,7 @@ locals {
 }
 
 data "google_project" "project" {
-  project_id = module.standalone_harness.project_id
+  project_id = var.project_id
 }
 
 resource "google_project_iam_member" "assign_permissions" {
@@ -61,23 +61,11 @@ resource "google_project_iam_member" "cloudbuild_builder" {
   member   = "serviceAccount:${each.value.cloudbuild_service_account}"
 }
 
-resource "time_sleep" "wait_propagation" {
-  create_duration = "30s"
-
-  depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
-    google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment,
-    module.standalone_harness
-  ]
-}
-
 module "cicd" {
   source   = "../../../modules/deployment-pipeline"
   for_each = var.cloudbuildv2_repository_config.repositories
 
-  project_id                 = module.standalone_harness.project_id
+  project_id                 = var.project_id
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
   cluster_service_accounts   = { for i, sa in module.multitenant_infra.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
@@ -121,8 +109,8 @@ module "cicd" {
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
     google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment,
-    module.standalone_harness
+    google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
+    module.standalone_harness,
   ]
 }

@@ -387,7 +387,7 @@ locals {
         }
       }
     } : {},
-    var.logging_bucket_project_number != null ? {
+    length(var.logging_bucket_project_numbers) > 0 ? {
       "Egress to Logging bucket project" = {
         title = "Egress to Logging bucket project"
         from = {
@@ -400,7 +400,7 @@ locals {
         }
         to = {
           resources = [
-            "projects/${var.logging_bucket_project_number}" // logging bucket
+            for i in var.logging_bucket_project_numbers : "projects/${i}"
           ]
           operations = {
             "storage.googleapis.com" = { methods = ["*"] }
@@ -430,7 +430,7 @@ locals {
         }
       }
     },
-    contains(var.protected_projects, var.logging_bucket_project_number) && var.gitlab_project_number != null ? {
+    length(setintersection(var.protected_projects, var.logging_bucket_project_numbers)) > 0 && var.gitlab_project_number != null ? {
       "Ingress from Gitlab to Single Project project - kms service" = {
         title = "Ingress from Gitlab to Single Project project - kms service"
         from = {
@@ -441,7 +441,7 @@ locals {
           identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"]
         }
         to = {
-          resources = ["projects/${var.logging_bucket_project_number}"]
+          resources = [for i in setintersection(var.protected_projects, var.logging_bucket_project_numbers) : "projects/${i.value}"]
           operations = {
             "cloudkms.googleapis.com" = { methods = ["*"] }
           }
@@ -498,7 +498,7 @@ module "regular_service_perimeter" {
 }
 
 resource "time_sleep" "apply_wait_propagation" {
-  create_duration = "5m"
+  create_duration = "3m"
 
   depends_on = [
     google_access_context_manager_access_policy.policy_org,
@@ -508,5 +508,5 @@ resource "time_sleep" "apply_wait_propagation" {
 }
 
 resource "time_sleep" "destroy_wait_propagation" {
-  destroy_duration = "5m"
+  destroy_duration = "3m"
 }

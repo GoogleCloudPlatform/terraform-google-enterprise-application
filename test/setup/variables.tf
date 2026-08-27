@@ -42,7 +42,7 @@ variable "single_project" {
 variable "examples_tested" {
   description = "List of examples to create projects."
   type        = list(string)
-  default     = ["seed"]
+  default     = []
 }
 
 variable "hpc" {

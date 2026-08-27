@@ -34,7 +34,7 @@ locals {
   repo_branch      = "main"
 
   target_deploy_parameters = { (local.env) = {
-    "cluster_project_id"      = module.standalone_harness.project_id
+    "cluster_project_id"      = var.project_id
     "model_armor_template_id" = module.model_armor_configuration.template.id
     "model_armor_location"    = var.region
     "env_namespace_id"        = "vllm-model-${local.env}"
@@ -43,7 +43,7 @@ locals {
 }
 
 data "google_project" "project" {
-  project_id = module.standalone_harness.project_id
+  project_id = var.project_id
 }
 
 resource "google_project_iam_member" "assign_permissions" {
@@ -86,7 +86,7 @@ module "cicd" {
 
   for_each = var.cloudbuildv2_repository_config.repositories
 
-  project_id                 = module.standalone_harness.project_id
+  project_id                 = var.project_id
   region                     = var.region
   env_cluster_membership_ids = local.cluster_membership_ids
   cluster_service_accounts   = { for i, sa in module.multitenant_infra.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
@@ -137,7 +137,7 @@ module "model_armor_configuration" {
 
   template_id = "ma-${local.application_name}-${local.service_name}"
   location    = var.region
-  project_id  = module.standalone_harness.project_id
+  project_id  = var.project_id
 
   rai_filters = {
     dangerous         = "LOW_AND_ABOVE"
@@ -172,14 +172,14 @@ module "model_armor_configuration" {
 }
 
 resource "google_service_account" "gsa_llamma_model" {
-  project                      = module.standalone_harness.project_id
+  project                      = var.project_id
   account_id                   = "gsa-llamma-model"
   display_name                 = "GSA for llamma-model"
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  project    = module.standalone_harness.project_id
+  project    = var.project_id
   role       = "roles/cloudtrace.agent"
   member     = google_service_account.gsa_llamma_model.member
   depends_on = [module.fleetscope_infra]
@@ -188,6 +188,6 @@ resource "google_project_iam_member" "gsa_trace_agent" {
 resource "google_service_account_iam_member" "wi_binding" {
   service_account_id = google_service_account.gsa_llamma_model.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${module.standalone_harness.project_id}.svc.id.goog[vllm-model-${local.env}/llamma-model-ksa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[vllm-model-${local.env}/llamma-model-ksa]"
   depends_on         = [module.fleetscope_infra]
 }

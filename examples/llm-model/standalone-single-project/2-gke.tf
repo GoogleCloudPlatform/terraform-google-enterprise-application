@@ -32,7 +32,7 @@ module "multitenant_infra" {
 
   apps                   = local.apps
   cluster_subnetworks    = [for i, j in module.standalone_harness.subnets : j.self_link if !strcontains(i, "proxy")]
-  network_project_id     = module.standalone_harness.project_id
+  network_project_id     = var.project_id
   env                    = local.env
   cluster_type           = "AUTOPILOT"
   cluster_prefix         = "ll"

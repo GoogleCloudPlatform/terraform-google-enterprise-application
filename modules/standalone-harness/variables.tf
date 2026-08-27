@@ -55,16 +55,6 @@ variable "logging_bucket" {
   default     = null
 }
 
-variable "bucket_kms_key" {
-  description = "KMS Key id to be used to encrypt bucket."
-  type        = string
-  default     = null
-  validation {
-    condition     = var.bucket_kms_key != ""
-    error_message = "bucket_kms_key cannot be empty, only null or a valid value."
-  }
-}
-
 variable "additional_services" {
   type        = list(string)
   description = "Additional GCP services to enable in the project."
@@ -127,26 +117,4 @@ variable "worker_range_ip" {
   description = "The global IP do be reserved for peering."
   type        = string
   default     = "10.3.0.0"
-}
-
-variable "service_perimeter_name" {
-  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.service_perimeter_name != ""
-    error_message = "service_perimeter_name cannot be empty, only null or a valid value."
-  }
-}
-
-variable "service_perimeter_mode" {
-  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
-  type        = string
-  default     = "ENFORCE"
-
-  validation {
-    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
-    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
-  }
 }

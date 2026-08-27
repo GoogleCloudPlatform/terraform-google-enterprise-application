@@ -20,6 +20,7 @@ package default_example
 import (
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"slices"
 	"strings"
@@ -38,7 +39,7 @@ import (
 // name the function as Test*
 func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupVPCSCOutput.GetTFSetupStringOutput("seed_project_id")
+	projectID := setupVPCSCOutput.GetTFSetupJsonOutput("harness_project_ids").Get("default-example").String()
 
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
@@ -50,15 +51,20 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 	service_perimeter_name := setupVPCSCOutput.GetStringOutput("service_perimeter_name")
 	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
+	serviceAccount := setupVPCSCOutput.GetTFSetupJsonOutput("sa_email").Get("default-example").String()
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
+
 	vars := map[string]interface{}{
 		"project_id":             projectID,
-		"create_project":         false,
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
 		"access_level_name":      access_level_name,
-		"logging_bucket":         loggingBucket.GetStringOutput("logging_bucket"),
-		"bucket_kms_key":         loggingBucket.GetStringOutput("bucket_kms_key"),
-		"attestation_kms_key":    loggingBucket.GetStringOutput("attestation_kms_key"),
+		"logging_bucket":         loggingBucket.GetJsonOutput("logging_bucket").Get("default-example").String(),
+		"bucket_kms_key":         loggingBucket.GetJsonOutput("bucket_kms_key").Get("default-example").String(),
+		"attestation_kms_key":    loggingBucket.GetJsonOutput("attestation_kms_key").Get("default-example").String(),
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
