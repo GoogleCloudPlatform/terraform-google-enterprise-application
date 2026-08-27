@@ -17,37 +17,6 @@
 variable "project_id" {
   type        = string
   description = "An already Google Cloud project ID in which to deploy all harness resources."
-  default     = null
-}
-
-variable "create_project" {
-  type        = bool
-  description = "Enables creation of a new project to deploy all harness resources."
-  default     = true
-}
-
-variable "project_name" {
-  type        = string
-  description = "A project name to be used."
-  default     = null
-}
-
-variable "billing_account" {
-  type        = string
-  description = "Billing to be used by a new project. (Required if `create_project` is `true`)."
-  default     = null
-}
-
-variable "org_id" {
-  description = "The numeric organization id"
-  type        = string
-  default     = null
-}
-
-variable "folder_id" {
-  description = "The folder to deploy create the new project"
-  type        = string
-  default     = null
 }
 
 variable "region" {

@@ -43,7 +43,9 @@ module "seed_project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 18.0"
 
-  name                     = "ci-eab-seed"
+  for_each = toset(var.examples_tested)
+
+  name                     = "ci-eab-${each.value}"
   random_project_id        = "true"
   random_project_id_length = 4
   org_id                   = var.org_id

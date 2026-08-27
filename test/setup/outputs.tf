@@ -15,11 +15,11 @@
  */
 
 output "seed_project_id" {
-  value = module.seed_project.project_id
+  value = { for i, v in module.seed_project : (i) => v.project_id }
 }
 
 output "seed_project_number" {
-  value = module.seed_project.project_number
+  value = { for i, v in module.seed_project : (i) => v.project_number }
 }
 
 output "seed_folder_id" {
@@ -27,15 +27,15 @@ output "seed_folder_id" {
 }
 
 output "sa_email" {
-  value = google_service_account.int_test.email
+  value = { for i, v in google_service_account.int_test : (i) => v.email }
 }
 
 output "sa_id" {
-  value = google_service_account.int_test.id
+  value = { for i, v in google_service_account.int_test : (i) => v.id }
 }
 
 output "sa_key" {
-  value     = google_service_account_key.int_test.private_key
+  value     = { for i, v in google_service_account_key.int_test : (i) => v.private_key }
   sensitive = true
 }
 

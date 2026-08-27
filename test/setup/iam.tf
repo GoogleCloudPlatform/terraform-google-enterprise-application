@@ -41,108 +41,158 @@ locals {
     "roles/storage.admin",
     "roles/viewer",
   ]
+
+  folder_roles = [
+    "roles/resourcemanager.projectCreator",
+    "roles/resourcemanager.folderCreator",
+    "roles/owner",
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/iam.serviceAccountUser",
+  ]
+
+  # Creates a flattened list containing all combinations of Service Accounts and roles
+  sa_folder_role_bindings = flatten([
+    for sa_key, sa in google_service_account.int_test : [
+      for role in local.folder_roles : {
+        key   = "${sa_key}-${replace(role, "/", "-")}" # Creates a unique key for the for_each
+        email = sa.email
+        role  = role
+      }
+    ]
+  ])
+
+  sa_project_role_bindings = flatten([
+    for sa_key, sa in google_service_account.int_test : [
+      for role in local.int_required_roles : {
+        key        = "${sa_key}-${replace(role, "/", "-")}" # Creates a unique key for the for_each
+        email      = sa.email
+        project_id = sa.project
+        role       = role
+      }
+    ]
+  ])
 }
 
 resource "google_service_account" "int_test" {
-  project                      = module.seed_project.project_id
+  for_each                     = module.seed_project
+  project                      = each.value.project_id
   account_id                   = "ci-account"
   display_name                 = "ci-account"
   create_ignore_already_exists = true
 }
 
 resource "google_project_iam_member" "int_test_connection_admin" {
-  project = module.seed_project.project_id
-  role    = "roles/cloudbuild.connectionAdmin"
-  member  = "serviceAccount:${google_service_account.int_test.email}"
+  for_each = google_service_account.int_test
+  project  = each.value.project
+  role     = "roles/cloudbuild.connectionAdmin"
+  member   = "serviceAccount:${each.value.email}"
 }
 
-resource "google_folder_iam_member" "int_test_connection_admin" {
-  for_each = toset(["roles/resourcemanager.projectCreator", "roles/resourcemanager.folderCreator", "roles/owner", "roles/iam.serviceAccountTokenCreator", "roles/iam.serviceAccountUser", ])
-  folder   = module.folder_seed.id
-  role     = each.value
-  member   = "serviceAccount:${google_service_account.int_test.email}"
+resource "google_folder_iam_member" "int_test_roles" {
+  for_each = {
+    for binding in local.sa_folder_role_bindings : binding.key => binding
+  }
+
+  folder = module.folder_seed.id
+  role   = each.value.role
+  member = "serviceAccount:${each.value.email}"
 }
 
 resource "google_project_iam_member" "int_test" {
-  for_each = toset(local.int_required_roles)
+  for_each = {
+    for binding in local.sa_project_role_bindings : binding.key => binding
+  }
 
-  project = module.seed_project.project_id
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.int_test.email}"
+  project = each.value.project_id
+  role    = each.value.role
+  member  = "serviceAccount:${each.value.email}"
 }
 
 resource "google_organization_iam_member" "organizationServiceAgent_role" {
-  org_id = var.org_id
-  role   = "roles/resourcemanager.organizationAdmin"
-  member = "serviceAccount:${google_service_account.int_test.email}"
+  for_each = google_service_account.int_test
+  org_id   = var.org_id
+  role     = "roles/resourcemanager.organizationAdmin"
+  member   = "serviceAccount:${each.value.email}"
 }
 
 resource "google_organization_iam_member" "organization_xpn_role" {
-  org_id = var.org_id
-  role   = "roles/compute.xpnAdmin"
-  member = "serviceAccount:${google_service_account.int_test.email}"
+  for_each = google_service_account.int_test
+  org_id   = var.org_id
+  role     = "roles/compute.xpnAdmin"
+  member   = "serviceAccount:${each.value.email}"
 }
 
 resource "google_organization_iam_member" "orgPolicyAdmin_role" {
-  org_id = var.org_id
-  role   = "roles/orgpolicy.policyAdmin"
-  member = "serviceAccount:${google_service_account.int_test.email}"
+  for_each = google_service_account.int_test
+  org_id   = var.org_id
+  role     = "roles/orgpolicy.policyAdmin"
+  member   = "serviceAccount:${each.value.email}"
 }
 
 resource "google_organization_iam_member" "policyAdmin_role" {
-  org_id = var.org_id
-  role   = "roles/accesscontextmanager.policyAdmin"
-  member = "serviceAccount:${google_service_account.int_test.email}"
+  for_each = google_service_account.int_test
+  org_id   = var.org_id
+  role     = "roles/accesscontextmanager.policyAdmin"
+  member   = "serviceAccount:${each.value.email}"
 }
 
 resource "google_service_account_key" "int_test" {
-  service_account_id = google_service_account.int_test.id
+  for_each           = google_service_account.int_test
+  service_account_id = each.value.id
 }
 
 resource "google_service_account_iam_member" "service_account_token_creator" {
-  service_account_id = google_service_account.int_test.name
+  for_each           = google_service_account.int_test
+  service_account_id = each.value.name
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:${var.cloud_build_sa}"
 }
 
 resource "google_service_account_iam_member" "service_account_user" {
-  service_account_id = google_service_account.int_test.name
+  for_each           = google_service_account.int_test
+  service_account_id = each.value.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${var.cloud_build_sa}"
 }
 
 resource "google_billing_account_iam_member" "tf_billing_admin" {
+  for_each           = google_service_account.int_test
   billing_account_id = var.billing_account
   role               = "roles/billing.admin"
-  member             = "serviceAccount:${google_service_account.int_test.email}"
+  member             = "serviceAccount:${each.value.email}"
 }
 
 resource "google_project_iam_member" "cb_service_agent_role" {
-  project = module.seed_project.project_id
-  role    = "roles/cloudbuild.serviceAgent"
-  member  = "serviceAccount:service-${module.seed_project.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  for_each = module.seed_project
+  project  = each.value.project_id
+  role     = "roles/cloudbuild.serviceAgent"
+  member   = "serviceAccount:service-${each.value.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "google_services_usage_consumer" {
-  project = module.seed_project.project_id
-  role    = "roles/compute.serviceAgent"
-  member  = "serviceAccount:${module.seed_project.project_number}@cloudservices.gserviceaccount.com"
+  for_each = module.seed_project
+  project  = each.value.project_id
+  role     = "roles/compute.serviceAgent"
+  member   = "serviceAccount:${each.value.project_number}@cloudservices.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "compute_engine_service_agent_role" {
-  project = module.seed_project.project_id
-  role    = "roles/serviceusage.serviceUsageConsumer"
-  member  = "serviceAccount:service-${module.seed_project.project_number}@compute-system.iam.gserviceaccount.com"
+  for_each = module.seed_project
+  project  = each.value.project_id
+  role     = "roles/serviceusage.serviceUsageConsumer"
+  member   = "serviceAccount:service-${each.value.project_number}@compute-system.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "compute_engine_service_usage_role" {
-  project = module.seed_project.project_id
-  role    = "roles/serviceusage.serviceUsageConsumer"
-  member  = "serviceAccount:service-${module.seed_project.project_number}@compute-system.iam.gserviceaccount.com"
+  for_each = module.seed_project
+  project  = each.value.project_id
+  role     = "roles/serviceusage.serviceUsageConsumer"
+  member   = "serviceAccount:service-${each.value.project_number}@compute-system.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "compute_engine_default_service_agent_role" {
-  project = module.seed_project.project_id
-  role    = "roles/compute.serviceAgent"
-  member  = "serviceAccount:${module.seed_project.project_number}-compute@developer.gserviceaccount.com"
+  for_each = module.seed_project
+  project  = each.value.project_id
+  role     = "roles/compute.serviceAgent"
+  member   = "serviceAccount:${each.value.project_number}-compute@developer.gserviceaccount.com"
 }

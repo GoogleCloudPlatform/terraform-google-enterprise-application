@@ -16,27 +16,12 @@
 
 output "project_id" {
   description = "The Project ID to be created the resources."
-  value       = local.project_id
+  value       = var.project_id
 }
 
 output "workerpool_id" {
   description = "The Cloud Build Worker Pool ID."
   value       = local.workerpool_id
-}
-
-output "workerpool_project_id" {
-  description = "The Cloud Build Worker Pool Project ID."
-  value       = local.workerpool_project_id
-}
-
-output "workerpool_project_number" {
-  description = "The Cloud Build Worker Pool Project ID."
-  value       = local.workerpool_project_number
-}
-
-output "workerpool_network_project_id" {
-  description = "The network project ID for the workerpool."
-  value       = local.workerpool_network_project_id
 }
 
 output "subnets_self_links" {

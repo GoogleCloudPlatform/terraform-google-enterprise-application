@@ -15,10 +15,8 @@
  */
 
 locals {
-  projects_re                   = "projects/([^/]+)/"
-  workerpool_project_id         = var.workerpool_id != null ? regex(local.projects_re, var.workerpool_id)[0] : local.project_id
-  workerpool_id                 = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
-  workerpool_network_project_id = var.network_id != null ? regex(local.projects_re, var.network_id)[0] : local.project_id
+  projects_re   = "projects/([^/]+)/"
+  workerpool_id = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
 
   default_services = [
     "accesscontextmanager.googleapis.com",
@@ -64,89 +62,13 @@ locals {
   }] : []
 
   services = distinct(concat(local.default_services, var.additional_services))
-
-  project_id                = var.create_project ? module.harness_project[0].project_id : var.project_id
-  workerpool_project_number = var.create_project ? module.harness_project[0].project_number : data.google_project.workerpool_project[0].number
-
-  kms_project_id = var.bucket_kms_key != null ? regex(local.projects_re, var.bucket_kms_key)[0] : local.project_id
-}
-
-module "harness_project" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "~> 18.0"
-
-  count = var.create_project ? 1 : 0
-
-  name                     = var.project_name
-  random_project_id        = "true"
-  random_project_id_length = 4
-  org_id                   = var.org_id
-  folder_id                = var.folder_id
-  billing_account          = var.billing_account
-  deletion_policy          = "DELETE"
-  default_service_account  = "KEEP"
-
-  vpc_service_control_attach_dry_run = var.service_perimeter_name != null
-  vpc_service_control_attach_enabled = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE"
-  vpc_service_control_perimeter_name = var.service_perimeter_name
-
-  svpc_host_project_id = try(regex(local.projects_re, var.network_id)[0], null)
-
-  disable_services_on_destroy = false
-
-  activate_apis = [
-    "cloudresourcemanager.googleapis.com",
-  ]
-}
-
-resource "google_storage_bucket_iam_member" "logging_storage_admin" {
-  for_each   = var.logging_bucket != null && var.create_project ? { "compute_sa" : "serviceAccount:${module.harness_project[0].project_number}-compute@developer.gserviceaccount.com" } : {}
-  bucket     = var.logging_bucket
-  role       = "roles/storage.admin"
-  member     = each.value
-  depends_on = [google_project_service.required_services]
-}
-
-data "google_project" "workerpool_project" {
-  count      = var.create_project ? 0 : 1
-  project_id = var.project_id
-}
-
-data "google_project" "workerpool_network_project" {
-  count      = var.network_id != null ? 1 : 0
-  project_id = local.workerpool_network_project_id
-}
-
-data "google_project" "kms_project" {
-  count      = var.bucket_kms_key != null ? 1 : 0
-  project_id = local.kms_project_id
-}
-
-resource "google_project_service" "required_services" {
-  for_each = toset(local.services)
-  project  = local.project_id
-  service  = each.value
-}
-
-data "google_storage_project_service_account" "gcs_account" {
-  project = local.project_id
-}
-
-resource "google_kms_crypto_key_iam_member" "bucket_crypto_key" {
-  for_each = var.bucket_kms_key != null ? {
-    "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
-    "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
-  } : {}
-  crypto_key_id = var.bucket_kms_key
-  role          = each.value
-  member        = data.google_storage_project_service_account.gcs_account.member
 }
 
 module "private_workerpool" {
   source = "../private_workerpool"
   count  = var.workerpool_id == null ? 1 : 0
 
-  project_id = local.project_id
+  project_id = var.project_id
   region     = var.region
   network_id = var.network_id
   create_nat = var.create_nat
@@ -162,7 +84,7 @@ module "private_workerpool" {
 
 module "binary_autz" {
   source                      = "../binary-authz-build-image"
-  project_id                  = local.project_id
+  project_id                  = var.project_id
   location                    = var.region
   binary_auth_image_version   = "v1.0"
   workerpool_id               = local.workerpool_id
@@ -176,7 +98,7 @@ module "binary_autz" {
 module "cluster_network" {
   source                     = "../cluster_network"
   vpc_name                   = var.vpc_name
-  project_id                 = local.project_id
+  project_id                 = var.project_id
   shared_vpc_host            = false
   private_service_connect_ip = var.private_service_connect_ip
   subnets = concat([{

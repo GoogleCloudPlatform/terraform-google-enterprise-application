@@ -39,6 +39,12 @@ variable "single_project" {
   type        = bool
 }
 
+variable "examples_tested" {
+  description = "List of examples to create projects."
+  type        = list(string)
+  default     = ["seed"]
+}
+
 variable "hpc" {
   description = "HPC Example being deployed."
   type        = bool
