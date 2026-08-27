@@ -31,7 +31,7 @@ module "standalone_harness" {
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
   logging_bucket                                = var.logging_bucket
   bucket_kms_key                                = var.bucket_kms_key
-  additional_services                           = ["modelarmor.googleapis.com"]
+  additional_services                           = ["modelarmor.googleapis.com", "aiplatform.googleapis.com"]
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-llm-model-binauthz"
   private_workerpool_name                       = "wp-eab-llm-model"

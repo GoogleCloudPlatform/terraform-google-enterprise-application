@@ -24,6 +24,7 @@ locals {
     "accesscontextmanager.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
+    "anthospolicycontroller.googleapis.com",
     "artifactregistry.googleapis.com",
     "apikeys.googleapis.com",
     "binaryauthorization.googleapis.com",
@@ -64,7 +65,10 @@ locals {
 
   services = distinct(concat(local.default_services, var.additional_services))
 
-  project_id = var.create_project ? module.harness_project[0].project_id : var.project_id
+  project_id                = var.create_project ? module.harness_project[0].project_id : var.project_id
+  workerpool_project_number = var.create_project ? module.harness_project[0].project_number : data.google_project.workerpool_project[0].number
+
+  kms_project_id = var.bucket_kms_key != null ? regex(local.projects_re, var.bucket_kms_key)[0] : local.project_id
 }
 
 module "harness_project" {
@@ -108,6 +112,16 @@ data "google_project" "workerpool_project" {
   project_id = var.project_id
 }
 
+data "google_project" "workerpool_network_project" {
+  count      = var.network_id != null ? 1 : 0
+  project_id = local.workerpool_network_project_id
+}
+
+data "google_project" "kms_project" {
+  count      = var.bucket_kms_key != null ? 1 : 0
+  project_id = local.kms_project_id
+}
+
 resource "google_project_service" "required_services" {
   for_each = toset(local.services)
   project  = local.project_id
@@ -143,7 +157,7 @@ module "private_workerpool" {
 
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
 
-  depends_on = [google_project_service.required_services]
+  depends_on = [google_project_service.required_services, google_kms_crypto_key_iam_member.bucket_crypto_key, time_sleep.wait_access_level_propagation]
 }
 
 module "binary_autz" {
