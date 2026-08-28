@@ -362,8 +362,8 @@ locals {
       }
     },
     var.gitlab_project_number != null ? {
-      "e-allow-services-perimeter-${join(",", var.protected_projects)}-to-gilab-project-${var.gitlab_project_number}" = {
-        title = "e-allow-services-perimeter-${join(",", var.protected_projects)}-to-gilab-project-${var.gitlab_project_number}"
+      "e-allow-services-perimeter-to-gilab-project-${var.gitlab_project_number}" = {
+        title = "e-allow-services-perimeter-to-gilab-project-${var.gitlab_project_number}"
         from = {
           identity_type = "ANY_IDENTITY"
           identities    = tolist([])
@@ -469,7 +469,7 @@ module "access_level_members" {
   version            = "~> 8.0"
   policy             = google_access_context_manager_access_policy.policy_org.name
   name               = "ac_gke_enterprise_${random_string.prefix.result}"
-  members            = concat(var.access_level_members, ["user:andrewpeabody@google.com"])
+  members            = compact(concat(var.access_level_members, ["user:andrewpeabody@google.com"]))
   combining_function = "OR"
   depends_on         = [time_sleep.destroy_wait_propagation]
 }

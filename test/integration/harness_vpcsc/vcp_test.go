@@ -16,9 +16,7 @@ package harness_vpcsc
 
 import (
 	"fmt"
-	"maps"
 	"os"
-	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -51,14 +49,14 @@ func TestVPCSC(t *testing.T) {
 
 	accessLevelMembers := []string{"serviceAccount:cloud-build@system.gserviceaccount.com"}
 	for i, projectNumber := range projectNumbers {
-		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s@cloudbuild.gserviceaccount.com", projectNumber))
-		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber))
-		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s@cloudservices.gserviceaccount.com", projectNumber))
-		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber))
-		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber))
-		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gcp-sa-artifactregistry.iam.gserviceaccount.com", projectNumber))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s@cloudbuild.gserviceaccount.com", projectNumber.String()))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s-compute@developer.gserviceaccount.com", projectNumber.String()))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s@cloudservices.gserviceaccount.com", projectNumber.String()))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@container-engine-robot.iam.gserviceaccount.com", projectNumber.String()))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@compute-system.iam.gserviceaccount.com", projectNumber.String()))
+		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:service-%s@gcp-sa-artifactregistry.iam.gserviceaccount.com", projectNumber.String()))
 		accessLevelMembers = append(accessLevelMembers, fmt.Sprintf("serviceAccount:%s", serviceAccounts[i]))
-
+		protected_projects = append(protected_projects, projectNumber.String())
 	}
 
 	if len(addAccessLevelMembers) > 0 {
@@ -68,7 +66,7 @@ func TestVPCSC(t *testing.T) {
 	vars := map[string]interface{}{
 		"access_level_members":           accessLevelMembers,
 		"protected_projects":             protected_projects,
-		"logging_bucket_project_numbers": slices.Collect(maps.Values(projectNumbers)),
+		"logging_bucket_project_numbers": protected_projects,
 	}
 	if !skipGitlab {
 		gitLabPath := "../../setup/harness/gitlab"

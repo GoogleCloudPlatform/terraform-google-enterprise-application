@@ -15,8 +15,6 @@
 package harness_gitlab
 
 import (
-	"maps"
-	"slices"
 	"testing"
 	"time"
 
@@ -30,12 +28,16 @@ func TestGitLab(t *testing.T) {
 	loggingBucket := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(loggingBucketPath),
 	)
+	var harnessProjectIds []string
+	for _, v := range loggingBucket.GetTFSetupJsonOutput("harness_project_ids").Map() {
+		harnessProjectIds = append(harnessProjectIds, v.String())
+	}
 
 	vars := map[string]interface{}{
 		"logging_kms_crypto_id":     loggingBucket.GetJsonOutput("bucket_kms_key").Get("seed").String(),
 		"logging_bucket_name":       loggingBucket.GetJsonOutput("logging_bucket").Get("seed").String(),
 		"attestation_kms_crypto_id": loggingBucket.GetJsonOutput("attestation_kms_key").Get("seed").String(),
-		"harness_project_ids":       slices.Collect(maps.Values(loggingBucket.GetTFSetupJsonOutput("harness_project_ids").Map())),
+		"harness_project_ids":       harnessProjectIds,
 	}
 
 	gitLab := tft.NewTFBlueprintTest(t,
