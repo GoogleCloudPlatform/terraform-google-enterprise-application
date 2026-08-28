@@ -294,7 +294,7 @@ options:
     - "TF_VAR_agent=true"
     - "HEAD_BRANCH=$_HEAD_BRANCH"
     - "HEAD_REPO_URL=$_HEAD_REPO_URL"
-    - "TF_VAR_region=us-east4"
-    - "TF_VAR_location=us-east4"
+    - "TF_VAR_region=us-central1"
+    - "TF_VAR_location=us-central1"
     - "_SKIP_GITLAB=false"
     - 'TF_VAR_examples_tested=["llm-model","agent","default-example"]'
