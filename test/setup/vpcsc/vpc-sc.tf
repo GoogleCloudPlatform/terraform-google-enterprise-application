@@ -441,7 +441,7 @@ locals {
           identities = ["serviceAccount:service-${var.gitlab_project_number}@gs-project-accounts.iam.gserviceaccount.com"]
         }
         to = {
-          resources = [for i in setintersection(var.protected_projects, var.logging_bucket_project_numbers) : "projects/${i.value}"]
+          resources = [for i in setintersection(var.protected_projects, var.logging_bucket_project_numbers) : "projects/${i}"]
           operations = {
             "cloudkms.googleapis.com" = { methods = ["*"] }
           }

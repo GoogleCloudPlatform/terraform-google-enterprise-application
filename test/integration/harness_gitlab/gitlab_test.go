@@ -35,7 +35,7 @@ func TestGitLab(t *testing.T) {
 		"logging_kms_crypto_id":     loggingBucket.GetJsonOutput("bucket_kms_key").Get("seed").String(),
 		"logging_bucket_name":       loggingBucket.GetJsonOutput("logging_bucket").Get("seed").String(),
 		"attestation_kms_crypto_id": loggingBucket.GetJsonOutput("attestation_kms_key").Get("seed").String(),
-		"harness_project_ids":       slices.Collect(maps.Values(loggingBucket.GetTFSetupJsonOutput("harness_project_numbers").Map())),
+		"harness_project_ids":       slices.Collect(maps.Values(loggingBucket.GetTFSetupJsonOutput("harness_project_ids").Map())),
 	}
 
 	gitLab := tft.NewTFBlueprintTest(t,
