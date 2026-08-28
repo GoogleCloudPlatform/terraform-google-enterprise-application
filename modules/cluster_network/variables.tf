@@ -76,6 +76,8 @@ variable "ncc_config" {
     spoke_include_export_ranges = optional(set(string), [])
   })
 
+  default = {}
+
   validation {
     condition = (var.ncc_config.enable_ncc == false || (
       var.ncc_config.enable_ncc == true &&

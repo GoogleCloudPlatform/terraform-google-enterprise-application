@@ -48,9 +48,9 @@ data "google_project" "project" {
 
 resource "google_project_iam_member" "assign_permissions" {
   for_each = toset(["roles/cloudbuild.workerPoolUser", "roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
-  project = module.standalone_harness.workerpool_project_id
-  role    = each.value
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  project  = module.standalone_harness.workerpool_project_id
+  role     = each.value
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "assign_permissions_service_agent" {

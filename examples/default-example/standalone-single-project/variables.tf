@@ -211,4 +211,6 @@ variable "ncc_config" {
     spoke_exclude_export_ranges = optional(set(string), [])
     spoke_include_export_ranges = optional(set(string), [])
   })
+
+  default = {}
 }
