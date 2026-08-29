@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
+
 module "standalone_harness" {
   source = "../../../modules/standalone-harness"
 
   project_id                                    = var.project_id
-  vpc_name                                      = "eab-hello-world-cluster"
+  vpc_name                                      = "cap-agent-cluster"
   region                                        = var.region
   workerpool_id                                 = var.workerpool_id
   network_id                                    = var.network_id
   create_nat                                    = var.create_nat
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
   logging_bucket                                = var.logging_bucket
-  additional_services                           = []
+  additional_services                           = ["modelarmor.googleapis.com", "aiplatform.googleapis.com"]
   enable_proxy_subnet                           = true
-  attestation_repository_name                   = "ar-eab-hello-world-binauthz"
-  private_workerpool_name                       = "wp-eab-default-example"
+  attestation_repository_name                   = "ar-eab-cap-agent-binauthz"
+  private_workerpool_name                       = "wp-eab-cap-agent"
 
   build_image_module_dependencies = concat([
     for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],

@@ -1,5 +1,6 @@
 # Standalone Single-Project Example
 The Standalone Single Project Example deploys the core Enterprise Application Blueprint into a single project for the purposes of simplified demonstration.
+It will deploy the Capital Agent example, that uses AI Platform API.
 
 **Do not use this example for production deployments, as it lacks robust separation of duties and least-privileged permissions present in the standard multi-stage deployment.**
 
@@ -38,6 +39,7 @@ This example creates:
 This example requires a single project already created. The following APIs will be enabled:
 
 - `accesscontextmanager.googleapis.com`
+- `aiplatform.googleapis.com`
 - `anthos.googleapis.com`
 - `anthosconfigmanagement.googleapis.com`
 - `apikeys.googleapis.com`
@@ -58,6 +60,7 @@ This example requires a single project already created. The following APIs will 
 - `multiclusteringress.googleapis.com`
 - `multiclusterservicediscovery.googleapis.com`
 - `networkmanagement.googleapis.com`
+- `secretmanager.googleapis.com`
 - `servicemanagement.googleapis.com`
 - `servicenetworking.googleapis.com`
 - `serviceusage.googleapis.com`
@@ -73,6 +76,14 @@ But if you are using a service account to deploy this example, you must enable a
    --project=YOUR_PROJECT_ID
 ```
 
+If you are going to use Github or Gitlab, you must enable the `secretmanager.googleapis.com` API:
+
+ ```bash
+   gcloud services enable \
+   secretmanager.googleapis.com \
+   --project=YOUR_PROJECT_ID
+```
+
 The entity used to deploy this example must have the following roles at Project level:
 
 - Artifact Registry Admin: `roles/artifactregistry.admin`
@@ -82,9 +93,9 @@ The entity used to deploy this example must have the following roles at Project 
 - Cloud Deploy Service Agent: `roles/clouddeploy.serviceAgent`
 - Cloud Deploy Admin: `roles/clouddeploy.admin`
 - Compute Admin: `roles/compute.admin`
-- Network Admin: `roles/compute.networkAdmin`
+- Network Admin: `roles/compute.networkAdmin `
 - Security Admin: `roles/compute.securityAdmin`
-- Container Admin: `roles/container.admin`
+- Container Admin: `roles/container.admin  `
 - Cluster Admin: `roles/container.clusterAdmin`
 - DNS Admin: `roles/dns.admin`
 - GKE Hub Admin: `roles/gkehub.editor`
@@ -93,24 +104,17 @@ The entity used to deploy this example must have the following roles at Project 
 - Service Account User: `roles/iam.serviceAccountUser`
 - Logging LogWriter: `roles/logging.logWriter`
 - Project IAM Admin: `roles/resourcemanager.projectIamAdmin`
+- Secret Manager Editor: `roles/secretmanager.editor`
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
 - Source Repository Admin: `roles/source.admin` (if using CSR)
 - Storage Admin: `roles/storage.admin`
+- Project AdminL `roles/resourcemanager.projectIamAdmin`
 - Viewer: `roles/viewer`
-- Secret Manager Editor: `roles/secretmanager.editor`
 
 The entity used to deploy this example must have the following roles at Organization level:
 
 - Organization Administrator: `roles/resourcemanager.organizationAdmin`
 - Access Context Manager Policy Admin: `roles/accesscontextmanager.policyAdmin`
-
-If you are going to use Github or Gitlab, you must enable the `secretmanager.googleapis.com` API:
-
- ```bash
-   gcloud services enable \
-   secretmanager.googleapis.com \
-   --project=YOUR_PROJECT_ID
-```
 
 ####  KMS Key for Bucket Encryption
 
@@ -165,9 +169,9 @@ To proceed with GitHub as your git provider you will need:
 
 - An authenticated GitHub account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the repositories below:
-  - eab-default-example-hello-world (`eab-default-example-hello-world`)
+  - eab-agent-capital-agent (`eab-agent-capital-agent`)
 
-   > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+   > Note: Default name for the repository is: `eab-agent-capital-agent`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
 - [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
@@ -206,9 +210,9 @@ To proceed with GitHub as your git provider you will need:
       repo_type = "GITHUBv2"
 
       repositories = {
-         eab-default-example-hello-world = {
-            repository_name = "eab-default-example-hello-world"
-            repository_url  = "https://github.com/your-org/eab-default-example-hello-world.git"
+         "eab-agent-capital-agent" = {
+            repository_name = "eab-agent-capital-agent"
+            repository_url  = "https://gitlab.com/user/eab-agent-capital-agent.git"
          }
       }
 
@@ -224,9 +228,9 @@ To proceed with Gitlab as your git provider you will need:
 
 - An authenticated Gitlab account. The steps in this documentation assumes you have a configured SSH key for cloning and modifying repositories.
 - A **private** GitLab repository for each one of the repositories below:
-  - Hello World (`eab-default-example-hello-world`)
+  - Capital Agent (`eab-agent-capital-agent`)
 
-  > Note: Default name for the repository is: `eab-default-example-hello-world`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
+  > Note: Default name for the repository is: `eab-agent-capital-agent`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
 - An access token with the `api` scope to use for connecting and disconnecting repositories.
 
@@ -280,9 +284,9 @@ To proceed with Gitlab as your git provider you will need:
       repo_type = "GITLABv2"
 
       repositories = {
-         eab-default-example-hello-world = {
-            repository_name = "eab-default-example-hello-world"
-            repository_url  = "https://gitlab.com/your-group/eab-default-example-hello-world.git"
+         "eab-agent-capital-agent" = {
+            repository_name = "eab-agent-capital-agent"
+            repository_url  = "https://gitlab.com/user/eab-agent-capital-agent.git"
          }
       }
 
@@ -317,7 +321,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 1. Enter at Single Project example folder:
 
     ```bash
-    cd terraform-google-enterprise-application/examples/default-example/standalone-single-project
+    cd terraform-google-enterprise-application/examples/agent/standalone-single-project
     ```
 
 1. Update `terraform.tfvars`.
@@ -331,42 +335,44 @@ the steps below assume that you are checked out on the same level as `terraform-
     - Cloud Source Repository only
 
     ```bash
-    gcloud source repos clone eab-default-example-hello-world --project=REPLACE_WITH_ADMIN_PROJECT
+    gcloud source repos clone eab-agent-capital-agent --project=REPLACE_WITH_ADMIN_PROJECT
     ```
 
     - Github Repository only
 
     ```bash
-    git clone https://github.com/your-org/eab-default-example-hello-world.git
+    git clone https://github.com/your-org/eab-agent-capital-agent.git
     ```
 
     - Gitlab Repository only
 
     ```bash
-    git clone https://gitlab.com/your-group/eab-default-example-hello-world.git
+    git clone https://gitlab.com/your-group/eab-agent-capital-agent.git
     ```
 
 1. Copy the contents of this directory to the repository:
 
 ```bash
-cp -r terraform-google-enterprise-application/examples/default-example/6-appsource/default-example/* eab-default-example-hello-world
+cp -r terraform-google-enterprise-application/examples/agent/6-appsource/capital-agent/* eab-agent-capital-agent
 ```
 
 1. Commit changes
 
 ```bash
-cd eab-default-example-hello-world
+cd eab-agent-capital-agent
 git checkout -b main
 git add .
 git commit -m "Add source code to the repository"
 git push origin main
 ```
 
-1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on the `hello-world-admin` project under the common folder. You can view the results on the Cloud Build Page.
+1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on the provided project. You can view the results on the Cloud Build Page.
 
 1. After the CI build successfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
-1. Once the CD pipeline successfully runs, you should be able to see a pod named `getting-started` on your cluster that prints the "Hello world!" message.
+1. Once the CD pipeline successfully runs, you should be able to see a pod named `capital-agent` on your cluster.
+
+1. You can check the public IP to start a chat in your browser.
 
 
 ## Troubleshooting
@@ -392,6 +398,7 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
+| teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | n/a | yes |
 | workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.<br><br>The expected format is:<br>`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.<br><br>If you are using worker pools from a different project, ensure that you grant the<br>`roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:<br>`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com` | `string` | `null` | no |
 
 ## Outputs
@@ -404,7 +411,7 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |
-| cluster\_project\_number | Cluster Project Number |
+| cluster\_project\_number | Cluster Project ID |
 | cluster\_regions | Regions with clusters |
 | cluster\_service\_accounts | The default service accounts used for nodes, if not overridden in node\_pools. |
 | cluster\_type | Cluster type |

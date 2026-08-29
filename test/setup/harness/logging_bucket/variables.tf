@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-variable "seed_project_id" {
-  description = "The seed project."
-  type        = string
+variable "harness_project_ids" {
+  description = "The projects ids."
+  type        = map(string)
 }
 
 variable "sa_email" {
   description = "The ci service account email created by setup to run the tests."
-  type        = string
+  type        = map(string)
 }
 
 variable "cloud_build_sa" {

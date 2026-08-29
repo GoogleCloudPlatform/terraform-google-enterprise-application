@@ -36,3 +36,27 @@ resource "google_cloudbuild_worker_pool" "pool" {
     time_sleep.wait_service_network_peering,
   ]
 }
+
+resource "google_project_iam_member" "assign_permissions" {
+  project = local.network_project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "assign_permissions_service_agent" {
+  project = local.network_project_id
+  role    = "roles/cloudbuild.workerPoolUser"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sd_viewer" {
+  project = local.network_project_id
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "access_network" {
+  project = local.network_project_id
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}

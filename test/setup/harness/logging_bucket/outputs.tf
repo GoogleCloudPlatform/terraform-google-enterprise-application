@@ -15,17 +15,17 @@
  */
 
 output "project_id" {
-  value = var.seed_project_id
+  value = var.harness_project_ids
 }
 
 output "logging_bucket" {
-  value = module.logging_bucket.name
+  value = { for i, v in module.logging_bucket : (i) => v.name }
 }
 
 output "bucket_kms_key" {
-  value = module.kms.keys["bucket"]
+  value = { for i, v in module.kms : (i) => v.keys["bucket"] }
 }
 
 output "attestation_kms_key" {
-  value = module.kms_attestor.keys["attestation"]
+  value = { for i, v in module.kms_attestor : (i) => v.keys["attestation"] }
 }

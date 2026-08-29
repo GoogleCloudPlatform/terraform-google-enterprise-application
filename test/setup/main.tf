@@ -149,6 +149,118 @@ module "seed_project" {
   ]
 }
 
+module "harness_project" {
+  source  = "terraform-google-modules/project-factory/google"
+  version = "~> 18.0"
+
+  for_each = toset(var.examples_tested)
+
+  name                     = "ci-eab-${each.value}"
+  random_project_id        = "true"
+  random_project_id_length = 4
+  org_id                   = var.org_id
+  folder_id                = module.folder_seed.id
+  billing_account          = var.billing_account
+  deletion_policy          = "DELETE"
+  default_service_account  = "KEEP"
+
+  disable_services_on_destroy = false
+
+  activate_apis = [
+    "accesscontextmanager.googleapis.com",
+    "aiplatform.googleapis.com",
+    "anthos.googleapis.com",
+    "anthosconfigmanagement.googleapis.com",
+    "anthospolicycontroller.googleapis.com",
+    "apikeys.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "binaryauthorization.googleapis.com",
+    "certificatemanager.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "clouddeploy.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudkms.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "containeranalysis.googleapis.com",
+    "containerscanning.googleapis.com",
+    "gkehub.googleapis.com",
+    "iam.googleapis.com",
+    "iap.googleapis.com",
+    "mesh.googleapis.com",
+    "modelarmor.googleapis.com",
+    "monitoring.googleapis.com",
+    "multiclusteringress.googleapis.com",
+    "multiclusterservicediscovery.googleapis.com",
+    "networkmanagement.googleapis.com",
+    "networkservices.googleapis.com",
+    "notebooks.googleapis.com",
+    "orgpolicy.googleapis.com",
+    "secretmanager.googleapis.com",
+    "servicedirectory.googleapis.com",
+    "servicemanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com",
+    "sqladmin.googleapis.com",
+    "storage.googleapis.com",
+    "trafficdirector.googleapis.com",
+  ]
+
+  activate_api_identities = [
+    {
+      api = "compute.googleapis.com",
+      roles = [
+        "roles/compute.networkAdmin",
+        "roles/compute.admin"
+      ]
+    },
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/cloudbuild.builds.builder",
+        "roles/cloudbuild.connectionAdmin",
+        "roles/cloudbuild.serviceAgent",
+      ]
+    },
+    {
+      api   = "workflows.googleapis.com",
+      roles = ["roles/workflows.serviceAgent"]
+    },
+    {
+      api   = "config.googleapis.com",
+      roles = ["roles/cloudconfig.serviceAgent"]
+    },
+    {
+      api   = "container.googleapis.com",
+      roles = ["roles/compute.networkAdmin", "roles/container.serviceAgent"]
+    },
+    {
+      api   = "gkehub.googleapis.com",
+      roles = ["roles/compute.networkAdmin", "roles/gkehub.serviceAgent"]
+    },
+    {
+      api   = "artifactregistry.googleapis.com",
+      roles = ["roles/artifactregistry.serviceAgent"]
+    },
+    {
+      api   = "storage.googleapis.com",
+      roles = []
+    },
+    {
+      api   = "networkservices.googleapis.com",
+      roles = []
+    },
+    {
+      api   = "aiplatform.googleapis.com",
+      roles = ["roles/aiplatform.serviceAgent"]
+    }
+  ]
+}
+
 data "google_organization" "org" {
   organization = var.org_id
 }

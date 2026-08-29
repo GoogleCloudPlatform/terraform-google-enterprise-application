@@ -15,7 +15,7 @@
  */
 
 // define test package name
-package llm_model
+package agent
 
 import (
 	"fmt"
@@ -37,14 +37,13 @@ import (
 )
 
 // name the function as Test*
-func TestStandaloneSingleProjectLLMModel(t *testing.T) {
+func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
 
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupOutput.GetJsonOutput("harness_project_ids").Get("llm-model").String()
-
+	projectID := setupOutput.GetJsonOutput("harness_project_ids").Get("agent").String()
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
 
@@ -55,7 +54,7 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 	service_perimeter_name := setupVPCSCOutput.GetStringOutput("service_perimeter_name")
 	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
-	serviceAccount := setupOutput.GetJsonOutput("sa_email").Get("llm-model").String()
+	serviceAccount := setupOutput.GetJsonOutput("sa_email").Get("agent").String()
 	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
 	if err != nil {
 		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
@@ -67,9 +66,9 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 		"service_perimeter_name": service_perimeter_name,
 		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"access_level_name":      access_level_name,
-		"logging_bucket":         loggingBucket.GetJsonOutput("logging_bucket").Get("llm-model").String(),
-		"bucket_kms_key":         loggingBucket.GetJsonOutput("bucket_kms_key").Get("llm-model").String(),
-		"attestation_kms_key":    loggingBucket.GetJsonOutput("attestation_kms_key").Get("llm-model").String(),
+		"logging_bucket":         loggingBucket.GetJsonOutput("logging_bucket").Get("agent").String(),
+		"bucket_kms_key":         loggingBucket.GetJsonOutput("bucket_kms_key").Get("agent").String(),
+		"attestation_kms_key":    loggingBucket.GetJsonOutput("attestation_kms_key").Get("agent").String(),
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
@@ -78,7 +77,7 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 	// wire setup output project_id to example var.project_id
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
 		tft.WithVars(vars),
-		tft.WithTFDir("../../../examples/llm-model/standalone-single-project"),
+		tft.WithTFDir("../../../examples/agent/standalone-single-project"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
@@ -175,7 +174,7 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 		assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
 		// Cloud Armor
-		cloudArmorName := "ll-eab-cloud-armor"
+		cloudArmorName := "ag-eab-cloud-armor"
 		cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, projectID)).Array()[0]
 		assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
 
@@ -222,7 +221,12 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {
 		// removes firewall rules created by the service but not being deleted.
-		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"csm\"", projectID).Array()
+		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"gke\"", projectID).Array()
+		for i := range firewallRules {
+			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
+		}
+
+		firewallRules = gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"csm\"", projectID).Array()
 		for i := range firewallRules {
 			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
 		}

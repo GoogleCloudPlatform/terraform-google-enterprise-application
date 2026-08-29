@@ -20,10 +20,13 @@ locals {
   workerpool_id                 = var.workerpool_id == null ? module.private_workerpool[0].workerpool_id : var.workerpool_id
   workerpool_network_project_id = var.network_id != null ? regex(local.projects_re, var.network_id)[0] : var.project_id
 
+
   default_services = [
     "accesscontextmanager.googleapis.com",
     "anthos.googleapis.com",
     "anthosconfigmanagement.googleapis.com",
+    "anthospolicycontroller.googleapis.com",
+    "artifactregistry.googleapis.com",
     "apikeys.googleapis.com",
     "binaryauthorization.googleapis.com",
     "certificatemanager.googleapis.com",
@@ -97,7 +100,8 @@ module "binary_autz" {
   attestation_repository_name = var.attestation_repository_name
   bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 
-  module_dependencies = concat([for s in google_project_service.required_services : s.id], var.build_image_module_dependencies)
+  module_dependencies = concat([for s in google_project_service.required_services : s.id],
+  var.build_image_module_dependencies)
 }
 
 module "cluster_network" {

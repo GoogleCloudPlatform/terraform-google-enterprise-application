@@ -16,7 +16,7 @@
 
 variable "sa_email" {
   description = "The ci service account email created by setup to run the tests."
-  type        = string
+  type        = map(string)
 }
 
 variable "cloud_build_sa" {
@@ -44,9 +44,9 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "seed_project_id" {
-  description = "The seed project id."
-  type        = string
+variable "harness_project_ids" {
+  description = "The project ids to be added as service project."
+  type        = list(string)
 }
 
 variable "seed_project_number" {

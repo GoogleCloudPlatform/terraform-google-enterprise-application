@@ -55,8 +55,9 @@ module "gitlab_project" {
 }
 
 resource "google_compute_shared_vpc_service_project" "add_seed_project" {
+  for_each        = toset(var.harness_project_ids)
   host_project    = module.gitlab_project.project_id
-  service_project = var.seed_project_id
+  service_project = each.value
   depends_on      = [module.vpc]
 }
 

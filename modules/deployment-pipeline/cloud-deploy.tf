@@ -28,3 +28,69 @@ resource "google_clouddeploy_delivery_pipeline" "delivery-pipeline" {
     }
   }
 }
+
+data "google_project" "eab_cluster_project" {
+  for_each   = local.gke_projects
+  project_id = each.value
+}
+
+data "google_project" "eab_workerpool_project" {
+  count      = var.private_workerpool.use_private_workerpool ? 1 : 0
+  project_id = local.worker_pool_project
+}
+
+resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
+  count     = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE" && var.private_workerpool.use_private_workerpool ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "deploy-${join(",", values(local.gke_projects))}-${local.worker_pool_project}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.eab_cluster_project
+      content {
+        resource = "projects/${sources.value.number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.eab_workerpool_project[0].number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
+  count     = var.service_perimeter_name != null && var.private_workerpool.use_private_workerpool ? 1 : 0
+  perimeter = var.service_perimeter_name
+  title     = "deploy-${join(",", values(local.gke_projects))}-${local.worker_pool_project}"
+  egress_from {
+    identity_type = "ANY_IDENTITY"
+    dynamic "sources" {
+      for_each = data.google_project.eab_cluster_project
+      content {
+        resource = "projects/${sources.value.number}"
+      }
+    }
+    source_restriction = "SOURCE_RESTRICTION_ENABLED"
+  }
+  egress_to {
+    resources = ["projects/${data.google_project.eab_workerpool_project[0].number}"]
+    operations {
+      service_name = "clouddeploy.googleapis.com"
+      method_selectors {
+        method = "*"
+      }
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}

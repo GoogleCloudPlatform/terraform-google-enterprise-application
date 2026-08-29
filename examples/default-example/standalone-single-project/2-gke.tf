@@ -29,7 +29,7 @@ module "multitenant_infra" {
   source = "../../../modules/gke"
 
   apps                   = local.apps
-  cluster_subnetworks    = module.cluster_network.subnets_self_links
+  cluster_subnetworks    = [for i, j in module.standalone_harness.subnets : j.self_link if !strcontains(i, "proxy")]
   network_project_id     = var.project_id
   env                    = local.env
   cluster_type           = "AUTOPILOT"
@@ -44,7 +44,5 @@ module "multitenant_infra" {
   access_level_name      = var.access_level_name
   deletion_protection    = false
 
-  cb_private_workerpool_project_id = local.workerpool_project_id
-
-  depends_on = [google_project_service.required_services]
+  depends_on = [module.standalone_harness]
 }
