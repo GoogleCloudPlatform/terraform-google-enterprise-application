@@ -143,23 +143,51 @@ variable "cloudbuildv2_repository_config" {
 
 }
 
-variable "workerpool_id" {
+variable "private_workerpool" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.
 
     The expected format is:
-    `projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.
+    use_private_workerpool = true
+    private_workerpool_id = `projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`.
+
+    If you are not using a private workerpool, just set:
+
+    use_private_workerpool = false
+    private_workerpool_id = null
 
     If you are using worker pools from a different project, ensure that you grant the
     `roles/cloudbuild.workerPoolUser` role on the workerpool project to the Cloud Build Service Agent and the Cloud Build Service Account of the trigger project:
     `service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, `PROJECT_NUMBER@cloudbuild.gserviceaccount.com`
   EOT
-  type        = string
-  default     = null
+
+  type = object({
+    use_private_workerpool = bool,
+    private_workerpool_id  = optional(string),
+  })
+
+  validation {
+    condition = (
+      (var.private_workerpool.use_private_workerpool && var.private_workerpool.private_workerpool_id != null) || !var.private_workerpool.use_private_workerpool
+    )
+    error_message = "You must provide the private_workerpool_id if use_private_workerpool is true."
+  }
 }
 
 variable "access_level_name" {
   description = "(VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_name" {
+  description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
+  type        = string
+  default     = null
+}
+
+variable "service_perimeter_mode" {
+  description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string
   default     = null
 }

@@ -65,7 +65,7 @@ func TestMultiClusterDiscovery(t *testing.T) {
 		"service_perimeter_name":     vpcsc.GetStringOutput("service_perimeter_name"),
 		"service_perimeter_mode":     vpcsc.GetStringOutput("service_perimeter_mode"),
 		"access_level_name":          vpcsc.GetStringOutput("access_level_name"),
-		"attestation_kms_key":        loggingHarness.GetStringOutput("attestation_kms_key"),
+		"attestation_kms_key":        loggingHarness.GetJsonOutput("attestation_kms_key").Get("seed").String(),
 		"regions":                    []string{"us-central1", "us-east4"},
 		"project_id":                 setup.GetStringOutput("seed_project_id"),
 		"config_sync_secret_type":    "none",

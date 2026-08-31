@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-output "seed_project_id" {
-  value = module.seed_project.project_id
+output "harness_project_ids" {
+  value = merge({ for i, v in module.harness_project : (i) => v.project_id }, { "seed" : module.seed_project.project_id })
+}
+
+output "harness_project_numbers" {
+  value = merge({ for i, v in module.harness_project : (i) => v.project_number }, { "seed" : module.seed_project.project_number })
 }
 
 output "seed_project_number" {
   value = module.seed_project.project_number
+}
+
+output "seed_project_id" {
+  value = module.seed_project.project_id
 }
 
 output "seed_folder_id" {
@@ -27,15 +35,15 @@ output "seed_folder_id" {
 }
 
 output "sa_email" {
-  value = google_service_account.int_test.email
+  value = { for i, v in google_service_account.int_test : (i) => v.email }
 }
 
 output "sa_id" {
-  value = google_service_account.int_test.id
+  value = { for i, v in google_service_account.int_test : (i) => v.id }
 }
 
 output "sa_key" {
-  value     = google_service_account_key.int_test.private_key
+  value     = google_service_account_key.int_test["seed"].private_key
   sensitive = true
 }
 

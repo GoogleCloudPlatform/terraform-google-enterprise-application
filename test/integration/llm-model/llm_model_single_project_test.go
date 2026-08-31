@@ -39,7 +39,7 @@ func TestSingleProjectSourceLLMModel(t *testing.T) {
 	gitLabPath := "../../setup/harness/gitlab"
 	gitLab := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(gitLabPath))
-	projectID := gitLab.GetTFSetupStringOutput("seed_project_id")
+	projectID := gitLab.GetTFSetupJsonOutput("harness_project_ids").Get("llm-model").String()
 	gitUrl := gitLab.GetStringOutput("gitlab_url")
 	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
 	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
@@ -61,10 +61,9 @@ func TestSingleProjectSourceLLMModel(t *testing.T) {
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
-	region := "us-central1"
 	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource", appName)
-
+	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
 	servicePath := fmt.Sprintf("%s/%s", appSourcePath, serviceName)
 	t.Log(servicePath)
 	t.Run(servicePath, func(t *testing.T) {
@@ -75,7 +74,6 @@ func TestSingleProjectSourceLLMModel(t *testing.T) {
 
 		vars := map[string]interface{}{
 			"project_id":                 projectID,
-			"region":                     region,
 			"env_cluster_membership_ids": env_cluster_membership_ids,
 			"buckets_force_destroy":      "true",
 		}

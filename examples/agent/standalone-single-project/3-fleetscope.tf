@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+# 3-fleetscope
 locals {
   fleet_project_id   = module.multitenant_infra.fleet_project_id
   cluster_project_id = module.multitenant_infra.cluster_project_id
@@ -27,7 +28,7 @@ module "fleetscope_infra" {
   cluster_project_id         = local.cluster_project_id
   network_project_id         = local.network_project_id
   fleet_project_id           = local.fleet_project_id
-  namespace_ids              = {}
+  namespace_ids              = var.teams
   cluster_membership_ids     = module.multitenant_infra.cluster_membership_ids
   config_sync_secret_type    = "token"
   config_sync_repository_url = "https://gitlab.com/user/config-sync-${local.env}.git"

@@ -26,6 +26,11 @@ variable "region" {
   default     = "us-central1"
 }
 
+variable "teams" {
+  type        = map(string)
+  description = "A map of string at the format {\"namespace\" = \"groupEmail\"}"
+}
+
 variable "service_perimeter_name" {
   description = "(VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter."
   type        = string
@@ -188,30 +193,4 @@ variable "cloudbuildv2_repository_config" {
     error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
   }
 
-}
-
-variable "ncc_config" {
-  description = <<-EOT
-    Configuration block for Google Cloud Network Connectivity Center (NCC) Spokes.
-    - enable_ncc: (bool) Toggles whether to create a new NCC spoke.
-    - hub_uri: (string) The URI of an existing Hub. [Required if enable_ncc is TRUE]
-    - spoke_group: (string) The NCC group the spoke belongs to (default: "default").
-    - spoke_name: (string) Name for the main VPC spoke.
-    - spoke_description: (string) Description for the main VPC spoke.
-    - spoke_labels: (map) Labels for the main VPC spoke.
-    - spoke_exclude_export_ranges: (set of strings) IP ranges to exclude from route export.
-    - spoke_include_export_ranges: (set of strings) IP ranges to explicitly include in route export.
-  EOT
-  type = object({
-    enable_ncc                  = optional(bool, false)
-    hub_uri                     = optional(string)
-    spoke_group                 = optional(string, "default")
-    spoke_name                  = optional(string, "vpc-spoke")
-    spoke_description           = optional(string)
-    spoke_labels                = optional(map(string))
-    spoke_exclude_export_ranges = optional(set(string), [])
-    spoke_include_export_ranges = optional(set(string), [])
-  })
-
-  default = {}
 }

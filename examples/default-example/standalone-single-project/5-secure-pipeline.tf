@@ -21,8 +21,7 @@ locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
-  sa_cb       = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
-  projects_re = "projects/([^/]+)/"
+  sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
   secret_project_number = try(
     regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0],
     regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.github_secret_id)[0],
@@ -38,46 +37,28 @@ data "google_project" "project" {
 }
 
 resource "google_project_iam_member" "assign_permissions" {
-  project = local.workerpool_project_id
+  project = module.standalone_harness.workerpool_project_id
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
+resource "google_project_iam_member" "assign_network_permissions" {
+  for_each = toset(["roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
+  project  = module.standalone_harness.workerpool_network_project_id
+  role     = each.value
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
 resource "google_project_iam_member" "assign_permissions_service_agent" {
-  project = local.workerpool_project_id
+  project = module.standalone_harness.workerpool_project_id
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
-resource "google_project_iam_member" "sd_viewer" {
-  project = local.workerpool_network_project_id
-  role    = "roles/servicedirectory.viewer"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "access_network" {
-  project = local.workerpool_network_project_id
-  role    = "roles/servicedirectory.pscAuthorizedService"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "cloudbuid_builder" {
+resource "google_project_iam_member" "cloudbuild_builder" {
   for_each = module.cicd
-  project  = local.workerpool_network_project_id
+  project  = module.standalone_harness.workerpool_network_project_id
   role     = "roles/cloudbuild.builds.builder"
   member   = "serviceAccount:${each.value.cloudbuild_service_account}"
-}
-
-resource "time_sleep" "wait_propagation" {
-  create_duration = "30s"
-
-  depends_on = [
-    google_access_context_manager_service_perimeter_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_private_deployment,
-    google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_private_deployment,
-    google_project_service.required_services
-  ]
 }
 
 module "cicd" {
@@ -106,24 +87,30 @@ module "cicd" {
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  workerpool_id = local.workerpool_id
+  private_workerpool = {
+    use_private_workerpool = true
+    private_workerpool_id  = module.standalone_harness.workerpool_id
+  }
 
   logging_bucket = var.logging_bucket
   bucket_kms_key = var.bucket_kms_key
 
   access_level_name = var.access_level_name
 
+  service_perimeter_name = var.service_perimeter_name
+  service_perimeter_mode = var.service_perimeter_mode
+
   attestation_kms_key = var.attestation_kms_key
   attestor_id         = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null
 
-  binary_authorization_image         = module.binary_autz.binary_authorization_image
-  binary_authorization_repository_id = module.binary_autz.binary_authorization_repository_id
+  binary_authorization_image         = module.standalone_harness.binary_authorization_image
+  binary_authorization_repository_id = module.standalone_harness.binary_authorization_repository_id
 
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
     google_access_context_manager_service_perimeter_dry_run_egress_policy.egress_policy,
-    google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_private_deployment,
-    google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_private_deployment,
-    google_project_service.required_services
+    google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment,
+    google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
+    module.standalone_harness,
   ]
 }

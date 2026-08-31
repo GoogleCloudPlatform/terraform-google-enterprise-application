@@ -28,23 +28,14 @@ locals {
     null
   )
 
-  application_name = "llm-model"
-  service_name     = "llamma-model"
-  team_name        = "default"
-  repo_branch      = "main"
-
-  target_deploy_parameters = { (local.env) = {
-    "cluster_project_id"      = var.project_id
-    "model_armor_template_id" = module.model_armor_configuration.template.id
-    "model_armor_location"    = var.region
-    "env_namespace_id"        = "vllm-model-${local.env}"
-    }
-  }
+  team_name    = "agent"
+  service_name = "capital-agent"
 }
 
 data "google_project" "project" {
   project_id = var.project_id
 }
+
 
 resource "google_project_iam_member" "assign_permissions" {
   project = module.standalone_harness.workerpool_project_id
@@ -77,13 +68,14 @@ resource "time_sleep" "wait_propagation" {
 
   depends_on = [
     google_project_iam_member.assign_permissions,
+    google_project_iam_member.assign_network_permissions,
     google_project_iam_member.assign_permissions_service_agent,
+    google_project_iam_member.cloudbuild_builder,
   ]
 }
 
 module "cicd" {
-  source = "../../../modules/deployment-pipeline"
-
+  source   = "../../../modules/deployment-pipeline"
   for_each = var.cloudbuildv2_repository_config.repositories
 
   project_id                 = var.project_id
@@ -94,8 +86,15 @@ module "cicd" {
   service_name           = local.service_name
   team_name              = local.team_name
   repo_name              = each.value.repository_name
-  repo_branch            = local.repo_branch
+  repo_branch            = "main"
   app_build_trigger_yaml = "cloudbuild.yaml"
+
+  additional_substitutions = {
+    _SERVICE = local.service_name
+    _TEAM    = local.team_name
+  }
+
+  ci_build_included_files = ["*"]
 
   buckets_force_destroy = true
 
@@ -106,15 +105,13 @@ module "cicd" {
     private_workerpool_id  = module.standalone_harness.workerpool_id
   }
 
+  logging_bucket = var.logging_bucket
+  bucket_kms_key = var.bucket_kms_key
+
   access_level_name = var.access_level_name
 
   service_perimeter_name = var.service_perimeter_name
   service_perimeter_mode = var.service_perimeter_mode
-
-  logging_bucket = var.logging_bucket
-  bucket_kms_key = var.bucket_kms_key
-
-  target_deploy_parameters = local.target_deploy_parameters
 
   attestation_kms_key = var.attestation_kms_key
   attestor_id         = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null
@@ -131,63 +128,34 @@ module "cicd" {
   ]
 }
 
-module "model_armor_configuration" {
-  source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 7.3"
-
-  template_id = "ma-${local.application_name}-${local.service_name}"
-  location    = var.region
-  project_id  = var.project_id
-
-  rai_filters = {
-    dangerous         = "LOW_AND_ABOVE"
-    sexually_explicit = "MEDIUM_AND_ABOVE"
-  }
-
-  enable_malicious_uri_filter_settings = true
-
-  pi_and_jailbreak_filter_settings = "MEDIUM_AND_ABOVE"
-
-  sdp_settings = {
-    basic_config_filter_enforcement = true
-  }
-
-  metadata_configs = {
-    enforcement_type                         = "INSPECT_AND_BLOCK"
-    enable_multi_language_detection          = true
-    log_sanitize_operations                  = true
-    log_template_operations                  = true
-    ignore_partial_invocation_failures       = false
-    custom_prompt_safety_error_code          = "799"
-    custom_prompt_safety_error_message       = "error 799"
-    custom_llm_response_safety_error_message = "error 798"
-    custom_llm_response_safety_error_code    = "798"
-  }
-
-  labels = {
-    "model" = "llamma-model"
-  }
+resource "google_service_account" "gsa_capital_agent" {
+  project      = var.project_id
+  account_id   = "gsa-capital-agent"
+  display_name = "GSA for capital-agent"
 
   depends_on = [module.standalone_harness]
 }
 
-resource "google_service_account" "gsa_llamma_model" {
-  project                      = var.project_id
-  account_id                   = "gsa-llamma-model"
-  display_name                 = "GSA for llamma-model"
-  create_ignore_already_exists = true
+resource "google_project_iam_member" "gsa_vertex_user" {
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = google_service_account.gsa_capital_agent.member
+
+  depends_on = [module.standalone_harness]
 }
 
 resource "google_project_iam_member" "gsa_trace_agent" {
-  project    = var.project_id
-  role       = "roles/cloudtrace.agent"
-  member     = google_service_account.gsa_llamma_model.member
-  depends_on = [module.fleetscope_infra]
+  project = var.project_id
+  role    = "roles/cloudtrace.agent"
+  member  = google_service_account.gsa_capital_agent.member
+
+  depends_on = [module.standalone_harness]
 }
 
 resource "google_service_account_iam_member" "wi_binding" {
-  service_account_id = google_service_account.gsa_llamma_model.name
+  service_account_id = google_service_account.gsa_capital_agent.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[vllm-model-${local.env}/llamma-model-ksa]"
-  depends_on         = [module.fleetscope_infra]
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[capital-agent-${local.env}/capital-agent-ksa]"
+
+  depends_on = [module.fleetscope_infra]
 }

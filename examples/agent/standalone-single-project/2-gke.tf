@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,23 @@
 locals {
   env = "development"
   apps = {
-    "cymbal-bank" : {
-      "ip_address_names" : [
-        "frontend-ip",
-      ]
-      "certificates" : {
-        "frontend-example-com" : ["frontend.example.com"]
-      }
-      "acronym" = "cb",
+    "capital-agent" : {
+      "acronym"          = "ag",
+      "ip_address_names" = [],
+      "certificates"     = {},
     }
   }
 }
 
 module "multitenant_infra" {
-  source = "../../modules/gke"
+  source = "../../../modules/gke"
 
   apps                   = local.apps
-  cluster_subnetworks    = [var.subnetwork_self_link]
+  cluster_subnetworks    = [for i, j in module.standalone_harness.subnets : j.self_link if !strcontains(i, "proxy")]
   network_project_id     = var.project_id
   env                    = local.env
   cluster_type           = "AUTOPILOT"
+  cluster_prefix         = "ag"
   create_cluster_project = false
   # ignore below vars because we are reusing an existing project
   org_id                 = null
@@ -48,4 +45,6 @@ module "multitenant_infra" {
   service_perimeter_mode = var.service_perimeter_mode
   access_level_name      = var.access_level_name
   deletion_protection    = false
+
+  depends_on = [module.standalone_harness]
 }

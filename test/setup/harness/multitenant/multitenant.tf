@@ -119,6 +119,8 @@ module "vpc_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
+  disable_services_on_destroy = false
+
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",

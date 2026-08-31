@@ -14,7 +14,7 @@
 
 locals {
   # If the user specify a Cloud Build Worker Pool, utilize it in the trigger
-  optional_worker_pool = var.workerpool_id != null ? { "_PRIVATE_POOL" = var.workerpool_id } : {}
+  optional_worker_pool = var.private_workerpool.use_private_workerpool ? { "_PRIVATE_POOL" = var.private_workerpool.private_workerpool_id } : {}
 }
 # CI trigger configuration
 resource "google_cloudbuild_trigger" "ci" {
@@ -51,7 +51,7 @@ resource "google_cloudbuild_trigger" "ci" {
       _SOURCE_STAGING_BUCKET     = "gs://${module.release_source_development.name}"
       _CACHE                     = local.cache_filename
       _CLOUDDEPLOY_PIPELINE_NAME = google_clouddeploy_delivery_pipeline.delivery-pipeline.name
-      _WORKER_POOL               = var.workerpool_id
+      _WORKER_POOL               = var.private_workerpool.private_workerpool_id
       _ATTESTOR_ID               = var.attestor_id
       _KMS_KEY_VERSION           = var.attestation_kms_key != null ? data.google_kms_crypto_key_version.version[0].name : null
       _BINARY_AUTH_IMAGE         = var.binary_authorization_image

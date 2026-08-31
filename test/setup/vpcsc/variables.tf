@@ -40,10 +40,10 @@ variable "service_perimeter_mode" {
   }
 }
 
-variable "logging_bucket_project_number" {
+variable "logging_bucket_project_numbers" {
   description = "Project number where logging bucket is stored."
-  type        = string
-  default     = null
+  type        = list(string)
+  default     = []
 }
 
 variable "gitlab_project_number" {

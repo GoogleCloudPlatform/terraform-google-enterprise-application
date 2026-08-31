@@ -28,11 +28,16 @@ func TestGitLab(t *testing.T) {
 	loggingBucket := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(loggingBucketPath),
 	)
+	var harnessProjectIds []string
+	for _, v := range loggingBucket.GetTFSetupJsonOutput("harness_project_ids").Map() {
+		harnessProjectIds = append(harnessProjectIds, v.String())
+	}
 
 	vars := map[string]interface{}{
-		"logging_kms_crypto_id":     loggingBucket.GetStringOutput("bucket_kms_key"),
-		"logging_bucket_name":       loggingBucket.GetStringOutput("logging_bucket"),
-		"attestation_kms_crypto_id": loggingBucket.GetStringOutput("attestation_kms_key"),
+		"logging_kms_crypto_id":     loggingBucket.GetJsonOutput("bucket_kms_key").Get("seed").String(),
+		"logging_bucket_name":       loggingBucket.GetJsonOutput("logging_bucket").Get("seed").String(),
+		"attestation_kms_crypto_id": loggingBucket.GetJsonOutput("attestation_kms_key").Get("seed").String(),
+		"harness_project_ids":       harnessProjectIds,
 	}
 
 	gitLab := tft.NewTFBlueprintTest(t,

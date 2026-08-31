@@ -38,10 +38,14 @@ module "app" {
   buckets_force_destroy = var.buckets_force_destroy
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
-  workerpool_id                  = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
   access_level_name              = var.access_level_name
   logging_bucket                 = var.logging_bucket
   bucket_kms_key                 = var.bucket_kms_key
+
+  private_workerpool = {
+    use_private_workerpool = true
+    private_workerpool_id  = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
+  }
 
   attestation_kms_key                = var.attestation_kms_key
   attestor_id                        = contains(var.environment_names, "production") ? data.terraform_remote_state.fleetscope["production"].outputs.attestor_id : data.terraform_remote_state.fleetscope[var.environment_names[0]].outputs.attestor_id

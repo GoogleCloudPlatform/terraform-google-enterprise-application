@@ -24,13 +24,15 @@ module "logging_bucket" {
   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
   version = "~> 12.3"
 
-  name          = "bkt-logging-${random_string.prefix.result}"
-  project_id    = var.seed_project_id
+  for_each = var.harness_project_ids
+
+  name          = "bkt-logging-${each.value}-${random_string.prefix.result}"
+  project_id    = each.value
   location      = var.region
   force_destroy = true
 
   versioning = true
-  encryption = { default_kms_key_name = module.kms.keys["bucket"] }
+  encryption = { default_kms_key_name = module.kms[each.key].keys["bucket"] }
 
   # Module does not support values not know before apply (member and role are used to create the index in for_each)
   # https://github.com/terraform-google-modules/terraform-google-cloud-storage/blob/v10.0.2/modules/simple_bucket/main.tf#L122
@@ -47,35 +49,38 @@ module "logging_bucket" {
 }
 
 resource "google_storage_bucket_iam_member" "logging_storage_admin" {
-  for_each = { "admin_ci" : "serviceAccount:${var.sa_email}" }
-  bucket   = module.logging_bucket.name
+  for_each = var.harness_project_ids
+  bucket   = module.logging_bucket[each.key].name
   role     = "roles/storage.admin"
-  member   = each.value
+  member   = "serviceAccount:${var.sa_email[each.key]}"
 }
 
 data "google_storage_project_service_account" "ci_gcs_account" {
-  project = var.seed_project_id
+  for_each = var.harness_project_ids
+  project  = each.value
 }
 
 module "kms" {
   source  = "terraform-google-modules/kms/google"
   version = "~> 4.0"
 
-  project_id     = var.seed_project_id
+  for_each = var.harness_project_ids
+
+  project_id     = each.value
   location       = var.region
-  keyring        = "kms-bucket-encryption"
+  keyring        = "kms-bucket-encryption-${random_string.prefix.result}"
   keys           = ["bucket"]
   set_owners_for = ["bucket"]
   owners = [
-    "serviceAccount:${var.sa_email}",
+    "serviceAccount:${var.sa_email[each.key]}",
   ]
   set_encrypters_for = ["bucket"]
   encrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},${"serviceAccount:${var.sa_email}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
   ]
   set_decrypters_for = ["bucket"]
   decrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},${"serviceAccount:${var.sa_email}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
   ]
   prevent_destroy = false
 }
@@ -84,24 +89,26 @@ module "kms_attestor" {
   source  = "terraform-google-modules/kms/google"
   version = "~> 4.1"
 
-  project_id          = var.seed_project_id
+  for_each = var.harness_project_ids
+
+  project_id          = each.value
   location            = var.region
-  keyring             = "kms-attestation-sign"
+  keyring             = "kms-attestation-sign-${random_string.prefix.result}"
   keys                = ["attestation"]
   set_owners_for      = ["attestation"]
   purpose             = "ASYMMETRIC_SIGN"
   key_algorithm       = "RSA_SIGN_PKCS1_4096_SHA512"
   key_rotation_period = null
   owners = [
-    "serviceAccount:${var.sa_email}",
+    "serviceAccount:${var.sa_email[each.key]}",
   ]
   set_encrypters_for = ["attestation"]
   encrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},${"serviceAccount:${var.sa_email}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
   ]
   set_decrypters_for = ["attestation"]
   decrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account.member},${"serviceAccount:${var.sa_email}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
   ]
   prevent_destroy = false
 }

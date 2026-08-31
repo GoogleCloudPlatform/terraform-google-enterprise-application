@@ -15,19 +15,25 @@
  */
 
 terraform {
-  required_version = ">= 1.3"
+  required_version = ">= 1.5"
+
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 6.6, < 8"
+      version = ">= 5, < 8"
     }
     time = {
       source  = "hashicorp/time"
       version = ">= 0.12.0"
     }
+
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.2.0"
+    }
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-harness/v0.5.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:agent/standalone-single-project/v0.3.0"
   }
 }
