@@ -214,4 +214,12 @@ variable "ncc_config" {
   })
 
   default = {}
+
+  validation {
+    condition = (var.ncc_config.enable_ncc == false || (
+      var.ncc_config.enable_ncc == true &&
+      var.ncc_config.hub_uri != null
+    ))
+    error_message = "Invalid NCC configuration. If enable_ncc is TRUE: hub_uri is required."
+  }
 }

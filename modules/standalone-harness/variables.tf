@@ -149,6 +149,6 @@ variable "ncc_config" {
       var.ncc_config.enable_ncc == true &&
       var.ncc_config.hub_uri != null
     ))
-    error_message = "Invalid NCC configuration. If create_hub is TRUE: hub_uri is required."
+    error_message = "Invalid NCC configuration. If enable_ncc is TRUE: hub_uri is required."
   }
 }

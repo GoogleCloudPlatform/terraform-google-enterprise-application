@@ -70,7 +70,7 @@ resource "google_compute_router_nat" "cloud_nat" {
 resource "google_network_connectivity_spoke" "vpc_spoke" {
   count = var.ncc_config.enable_ncc ? 1 : 0
 
-  project     = regex("projects/([^/]+)/", module.cluster_vpc.network_id)[0]
+  project     = module.cluster_vpc.project_id
   name        = var.ncc_config.spoke_name
   location    = "global"
   description = var.ncc_config.spoke_description
