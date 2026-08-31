@@ -30,6 +30,18 @@ output "seed_project_id" {
   value = module.seed_project.project_id
 }
 
+output "hub_network" {
+  value = module.hub_network.network
+}
+
+output "ncc_group" {
+  value = "edge"
+}
+
+output "ncc_hub_uri" {
+  value = module.network_connectivity_center_star.ncc_hub.id
+}
+
 output "seed_folder_id" {
   value = module.folder_seed.id
 }

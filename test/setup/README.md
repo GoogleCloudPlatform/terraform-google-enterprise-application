@@ -17,6 +17,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | folder\_id | The folder to deploy in | `string` | n/a | yes |
 | hpc | HPC Example being deployed. | `bool` | n/a | yes |
 | org\_id | The numeric organization id | `string` | n/a | yes |
+| region | Region for hub network. | `string` | `"us-central1"` | no |
 | single\_project | Single Project example being deployed. | `bool` | n/a | yes |
 
 ## Outputs
@@ -28,6 +29,9 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | harness\_project\_ids | n/a |
 | harness\_project\_numbers | n/a |
 | hpc | n/a |
+| hub\_network | n/a |
+| ncc\_group | n/a |
+| ncc\_hub\_uri | n/a |
 | org\_id | n/a |
 | sa\_email | n/a |
 | sa\_id | n/a |
