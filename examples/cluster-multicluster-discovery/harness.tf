@@ -15,7 +15,7 @@
  */
 
 module "cluster_network" {
-  source = "daniel-cit/enterprise-application/google//modules/cluster_network"
+  source = "../../modules/cluster_network"
 
   vpc_name        = "vpc-eab-cluster"
   project_id      = var.project_id

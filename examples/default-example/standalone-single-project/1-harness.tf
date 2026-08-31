@@ -15,7 +15,7 @@
  */
 
 module "standalone_harness" {
-  source = "daniel-cit/enterprise-application/google//modules/standalone-harness"
+  source = "../../../modules/standalone-harness"
 
   project_id                                    = var.project_id
   vpc_name                                      = "eab-hello-world-cluster"

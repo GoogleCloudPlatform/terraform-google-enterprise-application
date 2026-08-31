@@ -22,7 +22,7 @@ locals {
 }
 
 module "fleetscope_infra" {
-  source = "daniel-cit/enterprise-application/google//modules/fleetscope"
+  source = "../../modules/fleetscope"
 
   env                        = local.env
   cluster_project_id         = local.cluster_project_id
