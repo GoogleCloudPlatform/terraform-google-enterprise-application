@@ -59,7 +59,7 @@ func GetLastSplitElement(value string, sep string) string {
 
 func EnvNames(t *testing.T) []string {
 	branchName := utils.ValFromEnv(t, "TF_VAR_branch_name")
-	if os.Getenv("single_project") == "true" {
+	if os.Getenv("TF_VAR_single_project") == "true" {
 		return []string{
 			"development",
 		}
