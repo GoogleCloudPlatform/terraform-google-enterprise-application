@@ -118,3 +118,37 @@ variable "worker_range_ip" {
   type        = string
   default     = "10.3.0.0"
 }
+
+variable "ncc_config" {
+  description = <<-EOT
+    Configuration block for Google Cloud Network Connectivity Center (NCC) Spokes.
+    - enable_ncc: (bool) Toggles whether to create a new NCC spoke.
+    - hub_uri: (string) The URI of an existing Hub. [Required if enable_ncc is TRUE]
+    - spoke_group: (string) The NCC group the spoke belongs to (default: "default").
+    - spoke_name: (string) Name for the main VPC spoke.
+    - spoke_description: (string) Description for the main VPC spoke.
+    - spoke_labels: (map) Labels for the main VPC spoke.
+    - spoke_exclude_export_ranges: (set of strings) IP ranges to exclude from route export.
+    - spoke_include_export_ranges: (set of strings) IP ranges to explicitly include in route export.
+  EOT
+  type = object({
+    enable_ncc                  = optional(bool, false)
+    hub_uri                     = optional(string)
+    spoke_group                 = optional(string, "default")
+    spoke_name                  = optional(string, "vpc-spoke")
+    spoke_description           = optional(string)
+    spoke_labels                = optional(map(string))
+    spoke_exclude_export_ranges = optional(set(string), [])
+    spoke_include_export_ranges = optional(set(string), [])
+  })
+
+  default = {}
+
+  validation {
+    condition = (var.ncc_config.enable_ncc == false || (
+      var.ncc_config.enable_ncc == true &&
+      var.ncc_config.hub_uri != null
+    ))
+    error_message = "Invalid NCC configuration. If create_hub is TRUE: hub_uri is required."
+  }
+}

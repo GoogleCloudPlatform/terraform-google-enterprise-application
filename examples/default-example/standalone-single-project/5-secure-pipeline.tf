@@ -62,7 +62,7 @@ resource "google_project_iam_member" "cloudbuild_builder" {
 }
 
 module "cicd" {
-  source   = "../../../modules/deployment-pipeline"
+  source   = "daniel-cit/enterprise-application/google//modules/deployment-pipeline"
   for_each = var.cloudbuildv2_repository_config.repositories
 
   project_id                 = var.project_id

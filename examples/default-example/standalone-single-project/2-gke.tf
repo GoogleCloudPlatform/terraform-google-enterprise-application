@@ -26,7 +26,7 @@ locals {
 }
 
 module "multitenant_infra" {
-  source = "../../../modules/gke"
+  source = "daniel-cit/enterprise-application/google//modules/gke"
 
   apps                   = local.apps
   cluster_subnetworks    = [for i, j in module.standalone_harness.subnets : j.self_link if !strcontains(i, "proxy")]

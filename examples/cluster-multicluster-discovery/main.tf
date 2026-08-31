@@ -30,7 +30,7 @@ locals {
 }
 
 module "multitenant_infra" {
-  source = "../../modules/gke"
+  source = "daniel-cit/enterprise-application/google//modules/gke"
 
   apps                   = local.apps
   cluster_subnetworks    = module.cluster_network.subnets_self_links
@@ -49,7 +49,7 @@ module "multitenant_infra" {
 }
 
 module "fleetscope_infra" {
-  source = "../../modules/fleetscope"
+  source = "daniel-cit/enterprise-application/google//modules/fleetscope"
 
   env                    = local.env
   cluster_project_id     = module.multitenant_infra.cluster_project_id

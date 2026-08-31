@@ -15,11 +15,12 @@
  */
 
 module "cluster_network" {
-  source = "../../modules/cluster_network"
+  source = "daniel-cit/enterprise-application/google//modules/cluster_network"
 
   vpc_name        = "vpc-eab-cluster"
   project_id      = var.project_id
   shared_vpc_host = false
+  ncc_config      = var.ncc_config
   subnets = [for i, region in var.regions :
     {
       subnet_name           = "eab-cluster-net-${region}"

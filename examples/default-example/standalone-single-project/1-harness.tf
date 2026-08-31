@@ -15,7 +15,7 @@
  */
 
 module "standalone_harness" {
-  source = "../../../modules/standalone-harness"
+  source = "daniel-cit/enterprise-application/google//modules/standalone-harness"
 
   project_id                                    = var.project_id
   vpc_name                                      = "eab-hello-world-cluster"
@@ -29,6 +29,7 @@ module "standalone_harness" {
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-hello-world-binauthz"
   private_workerpool_name                       = "wp-eab-default-example"
+  ncc_config                                    = var.ncc_config
 
   build_image_module_dependencies = concat([
     for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],

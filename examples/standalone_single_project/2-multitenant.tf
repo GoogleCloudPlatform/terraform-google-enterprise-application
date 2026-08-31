@@ -32,7 +32,7 @@ locals {
 }
 
 module "multitenant_infra" {
-  source = "../../modules/gke"
+  source = "daniel-cit/enterprise-application/google//modules/gke"
 
   apps                   = local.apps
   cluster_subnetworks    = [var.subnetwork_self_link]

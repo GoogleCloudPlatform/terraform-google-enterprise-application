@@ -82,7 +82,7 @@ resource "time_sleep" "wait_propagation" {
 }
 
 module "cicd" {
-  source = "../../../modules/deployment-pipeline"
+  source = "daniel-cit/enterprise-application/google//modules/deployment-pipeline"
 
   for_each = var.cloudbuildv2_repository_config.repositories
 
