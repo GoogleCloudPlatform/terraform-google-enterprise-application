@@ -66,3 +66,21 @@ resource "google_compute_router_nat" "cloud_nat" {
     filter = "ERRORS_ONLY"
   }
 }
+
+resource "google_network_connectivity_spoke" "vpc_spoke" {
+  count = var.ncc_config.enable_ncc ? 1 : 0
+
+  project     = module.cluster_vpc.project_id
+  name        = var.ncc_config.spoke_name
+  location    = "global"
+  description = var.ncc_config.spoke_description
+  hub         = var.ncc_config.hub_uri
+  labels      = var.ncc_config.spoke_labels
+  group       = var.ncc_config.spoke_group
+
+  linked_vpc_network {
+    uri                   = module.cluster_vpc.network_id
+    exclude_export_ranges = var.ncc_config.spoke_exclude_export_ranges
+    include_export_ranges = var.ncc_config.spoke_include_export_ranges
+  }
+}

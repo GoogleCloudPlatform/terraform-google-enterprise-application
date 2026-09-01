@@ -117,6 +117,7 @@ module "cluster_network" {
     subnet_private_access = true
   }], local.proxy_subnet)
 
+  ncc_config = var.ncc_config
   secondary_ranges = {
     "${var.vpc_name}-net-${var.region}" = [
       {
