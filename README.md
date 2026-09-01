@@ -22,7 +22,7 @@ The `modules/` directory contains the primary infrastructure components of the E
 *   **[`modules/fleetscope`](/modules/fleetscope/)**: Configures GKE clusters as a unified fleet. It manages team scopes, namespaces, ACM (Anthos Config Management) with Config Sync, Service Mesh (ASM), and Policy Controller.
 *   **[`modules/secure-cicd-pipeline`](/modules/secure-cicd-pipeline/)**: Creates secure, isolated, and VPC-SC-compliant application CI/CD pipelines with Cloud Build private worker pools.
 *   **[`modules/deployment-pipeline`](/modules/deployment-pipeline/)**: Defines secure application delivery and deployment configurations using Cloud Build and Cloud Deploy pipelines.
-*   **[`modules/standalone-harness`](/modules/standalone-harness/)**: Provisions the required baseline harness infrastructure for standalone and sandbox sandboxed single-project setups.
+*   **[`modules/standalone-harness`](/modules/standalone-harness/)**: Provisions the required baseline harness infrastructure for standalone and sandboxed single-project setups.
 *   **[`modules/alloydb-psc-setup`](/modules/alloydb-psc-setup/)**: Establishes secure AlloyDB instances with Private Service Connect (PSC).
 *   **[`modules/cluster_network`](/modules/cluster_network/)**, **[`modules/nat`](/modules/nat/)**, and **[`modules/private_workerpool`](/modules/private_workerpool/)**: Submodules and automation for advanced networking, worker-pool isolation, and routing.
 
@@ -106,7 +106,7 @@ This use case showcases the process of training AI models using Google Kubernete
 
 ## Team Structure
 
-Each team, namely **hpc-team-a** and **hpc-team-b**, operates within their own dedicated tenants, infrastructure projects, and environments for executing their applications. The shared resource between the two teams is the cluster created in `2-multitenant` (managed by GKE modules) and the kueue's [ClusterQueue](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/):
+Each team, namely **hpc-team-a** and **hpc-team-b**, operates within their own dedicated tenants, infrastructure projects, and environments for executing their applications. The shared resources between the two teams are the cluster created in `2-multitenant` (managed by GKE modules) and Kueue's [ClusterQueue](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/):
 
 For a more detailed guide on how to set up and deploy these use cases, refer to the code and instructions provided in the `examples/hpc` directory.
 
