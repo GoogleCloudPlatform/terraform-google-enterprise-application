@@ -153,6 +153,30 @@ Change the two locals **before** starting the deployment to deploy in other regi
     $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE>
     ```
 
+### Choosing Which Example to Deploy
+
+By default, the helper will deploy the **`default-example`** (located in `examples/default-example/standalone-single-project`).
+
+You can specify a different example to deploy using the `-example` flag:
+
+- **To deploy the `standalone_single_project` example:**
+
+    ```bash
+    $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -example standalone_single_project
+    ```
+
+- **To deploy the `standalone_single_project_confidential_nodes` example:**
+
+    ```bash
+    $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -example standalone_single_project_confidential_nodes
+    ```
+
+- **To deploy any other example (e.g. `cymbal-bank`, `llm-model`):**
+
+    ```bash
+    $HOME/go/bin/eab-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -example cymbal-bank
+    ```
+
 - To Suppress additional output use:
 
     ```bash

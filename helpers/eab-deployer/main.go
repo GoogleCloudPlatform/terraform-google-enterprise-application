@@ -1,10 +1,10 @@
-// Copyright 2023 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.Multitenant/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,13 +29,6 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/utils"
 )
 
-var (
-	validatorApis = []string{
-		"securitycenter.googleapis.com",
-		"accesscontextmanager.googleapis.com",
-	}
-)
-
 type cfg struct {
 	tfvarsFile    string
 	stepsFile     string
@@ -46,6 +39,7 @@ type cfg struct {
 	disablePrompt bool
 	validate      bool
 	destroy       bool
+	exampleName   string
 }
 
 func parseFlags() cfg {
@@ -60,6 +54,7 @@ func parseFlags() cfg {
 	flag.BoolVar(&c.disablePrompt, "disable_prompt", false, "Disable interactive prompt.")
 	flag.BoolVar(&c.validate, "validate", false, "Validate tfvars file inputs.")
 	flag.BoolVar(&c.destroy, "destroy", false, "Destroy the deployment.")
+	flag.StringVar(&c.exampleName, "example", "default-example", "Name of the example to deploy (e.g., standalone_single_project, default-example).")
 
 	flag.Parse()
 	return c
@@ -69,7 +64,7 @@ func main() {
 
 	cfg := parseFlags()
 	if cfg.help {
-		fmt.Println("Deploys the Enterprise Application Blueprint")
+		fmt.Println("Deploys the Enterprise Application Blueprint Standalone Single Project")
 		flag.PrintDefaults()
 		return
 	}
@@ -78,13 +73,6 @@ func main() {
 	globalTFVars, err := stages.ReadGlobalTFVars(cfg.tfvarsFile)
 	if err != nil {
 		fmt.Printf("# Failed to read GlobalTFVars file. Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	// validate Directories
-	err = stages.ValidateDirectories(globalTFVars)
-	if err != nil {
-		fmt.Printf("# Failed validating directories. Error: %s\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -97,43 +85,34 @@ func main() {
 		PolicyPath:    filepath.Join(globalTFVars.EABCodePath, "policy-library"),
 		DisablePrompt: cfg.disablePrompt,
 		Logger:        utils.GetLogger(cfg.quiet),
+		ExampleName:   cfg.exampleName,
 	}
 
 	// validate inputs
 	if cfg.validate {
 		stages.ValidateComponents(t)
 		stages.ValidateBasicFields(t, globalTFVars)
-		stages.ValidateDestroyFlags(t, globalTFVars)
 		stages.ValidatePermissions(t, globalTFVars)
-		stages.ValidateRequiredAPIs(t, globalTFVars)
-		stages.ValidateRepositories(t, globalTFVars)
-		stages.ValidateNetworkRequirementes(t, globalTFVars)
-		stages.ValidatePrivateWorkerPoolRequirementes(t, globalTFVars)
-		stages.ValidateVPCSCRequirements(t, globalTFVars)
 		return
 	}
 
+	// init steps
 	s, err := steps.LoadSteps(cfg.stepsFile)
 	if err != nil {
-		fmt.Printf("# failed to load state file %s. Error: %s\n", cfg.stepsFile, err.Error())
+		fmt.Printf("# Failed to init state manager. Error: %s\n", err.Error())
 		os.Exit(2)
 	}
 
+	// list steps
 	if cfg.listSteps {
-		fmt.Println("# Executed steps:")
-		e := s.ListSteps()
-		if len(e) == 0 {
-			fmt.Println("# No steps executed")
-			return
-		}
-		for _, step := range e {
-			fmt.Println(step)
-		}
+		s.ListSteps()
 		return
 	}
 
+	// reset step
 	if cfg.resetStep != "" {
-		if err := s.ResetStep(cfg.resetStep); err != nil {
+		err = s.ResetStep(cfg.resetStep)
+		if err != nil {
 			fmt.Printf("# Reset step failed. Error: %s\n", err.Error())
 			os.Exit(3)
 		}
@@ -143,57 +122,10 @@ func main() {
 	// destroy stages
 	if cfg.destroy {
 		// Note: destroy is only terraform destroy, local directories are not deleted.
-		// 5-appinfra
-		msg.PrintStageMsg("Destroying 5-appinfra stage")
-		err = s.RunDestroyStep("appinfra-hello-world", func() error {
-			io := stages.GetAppFactoryStepOutputs(t, filepath.Join(conf.CheckoutPath, globalTFVars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName))
-			return stages.DestroyAppInfraStage(t, s, globalTFVars, io, conf)
-		})
+		msg.PrintStageMsg("Destroying Single Project Infrastructure")
+		err = stages.DestroyInfraStage(t, s, globalTFVars, conf)
 		if err != nil {
-			fmt.Printf("# App Infra hello world step destroy failed. Error: %s\n", err.Error())
-			os.Exit(3)
-		}
-
-		// 4-appfactory
-		msg.PrintStageMsg("Destroying 4-appfactory stage")
-		err = s.RunDestroyStep("gcp-appfactory", func() error {
-			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyAppFactoryStage(t, s, globalTFVars, bo, conf)
-		})
-		if err != nil {
-			fmt.Printf("# AppFactory step destroy failed. Error: %s\n", err.Error())
-			os.Exit(3)
-		}
-
-		// 3-fleetscope
-		msg.PrintStageMsg("Destroying 3-fleetscope stage")
-		err = s.RunDestroyStep("gcp-fleetscope", func() error {
-			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyFleetscopeStage(t, s, globalTFVars, bo, conf)
-		})
-		if err != nil {
-			fmt.Printf("# Fleetscope step destroy failed. Error: %s\n", err.Error())
-			os.Exit(3)
-		}
-
-		// 2-multitenant
-		msg.PrintStageMsg("Destroying 2-multitenant stage")
-		err = s.RunDestroyStep("gcp-multitenant", func() error {
-			bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-			return stages.DestroyMultitenantStage(t, s, globalTFVars, bo, conf)
-		})
-		if err != nil {
-			fmt.Printf("# Multitenant step destroy failed. Error: %s\n", err.Error())
-			os.Exit(3)
-		}
-
-		// 1-bootstrap
-		msg.PrintStageMsg("Destroying 1-bootstrap stage")
-		err = s.RunDestroyStep("gcp-bootstrap", func() error {
-			return stages.DestroyBootstrapStage(t, s, globalTFVars, conf)
-		})
-		if err != nil {
-			fmt.Printf("# Bootstrap step destroy failed. Error: %s\n", err.Error())
+			fmt.Printf("# Standalone Infrastructure destroy failed. Error: %s\n", err.Error())
 			os.Exit(3)
 		}
 
@@ -208,69 +140,19 @@ func main() {
 
 	// deploy stages
 
-	// 1-bootstrap
-	msg.PrintStageMsg("Deploying 1-bootstrap stage")
-	err = s.RunStep("gcp-bootstrap", func() error {
-		return stages.DeployBootstrapStage(t, s, globalTFVars, conf)
-	})
+	// 1-infra
+	msg.PrintStageMsg("Deploying Standalone Single Project Infrastructure")
+	err = stages.DeployInfraStage(t, s, globalTFVars, conf)
 	if err != nil {
-		fmt.Printf("# Bootstrap step failed. Error: %s\n", err.Error())
+		fmt.Printf("# Standalone Infrastructure deploy failed. Error: %s\n", err.Error())
 		os.Exit(3)
 	}
 
-	bo := stages.GetBootstrapStepOutputs(t, conf.EABPath)
-
-	// 2-Multitenant
-	msg.PrintStageMsg("Deploying 2-Multitenant stage")
-	err = s.RunStep("gcp-multitenant", func() error {
-		return stages.DeployMultitenantStage(t, s, globalTFVars, bo, conf)
-	})
+	// 2-appsource
+	msg.PrintStageMsg("Deploying Application Source Code and Triggering Pipeline")
+	err = stages.DeployAppSourceStage(t, s, globalTFVars, conf)
 	if err != nil {
-		fmt.Printf("# Multitenant step failed. Error: %s\n", err.Error())
-		os.Exit(3)
-	}
-
-	// 3-fleetscope
-	msg.PrintStageMsg("Deploying 3-fleetscope stage")
-	err = s.RunStep("gcp-fleetscope", func() error {
-		return stages.DeployFleetscopeStage(t, s, globalTFVars, bo, conf)
-	})
-	if err != nil {
-		fmt.Printf("# Fleetscope step failed. Error: %s\n", err.Error())
-		os.Exit(3)
-	}
-
-	err = s.RunStep("gcp-appfactory", func() error {
-		// 4-appfactory
-		msg.PrintStageMsg("Deploying 4-appfactory stage")
-		msg.ConfirmQuota(bo.CBServiceAccountsEmails["applicationfactory"], conf.DisablePrompt)
-		return stages.DeployAppFactoryStage(t, s, globalTFVars, bo, conf)
-	})
-	if err != nil {
-		fmt.Printf("# Projects step failed. Error: %s\n", err.Error())
-		os.Exit(3)
-	}
-
-	// 5-appinfra
-	msg.PrintStageMsg("Deploying 5-appinfra stage")
-	io := stages.GetAppFactoryStepOutputs(t, filepath.Join(conf.CheckoutPath, globalTFVars.InfraCloudbuildV2RepositoryConfig.Repositories["applicationfactory"].RepositoryName))
-
-	err = s.RunStep("appinfra-hello-world", func() error {
-		return stages.DeployAppInfraStage(t, s, globalTFVars, bo, io, conf)
-	})
-	if err != nil {
-		fmt.Printf("# Example app infra step failed. Error: %s\n", err.Error())
-		os.Exit(3)
-	}
-
-	// // 6-appsource
-	msg.PrintStageMsg("Deploying 6-appsource stage")
-	appInfraOutputs := stages.GetAppInfraStepOutputs(t, filepath.Join(conf.CheckoutPath, globalTFVars.InfraCloudbuildV2RepositoryConfig.Repositories["hello-world"].RepositoryName))
-	err = s.RunStep("gcp-appsource-hello-world", func() error {
-		return stages.DeployAppSourceStage(t, s, globalTFVars, appInfraOutputs, conf)
-	})
-	if err != nil {
-		fmt.Printf("# Appsource step failed. Error: %s\n", err.Error())
+		fmt.Printf("# Application source trigger failed. Error: %s\n", err.Error())
 		os.Exit(3)
 	}
 

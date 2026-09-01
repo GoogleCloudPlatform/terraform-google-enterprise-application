@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,50 @@
  * limitations under the License.
  */
 
-// General inputs
+// =============================================================================
+// GLOBAL SINGLE PROJECT / STANDALONE EXAMPLE DEPLOYMENT VARIABLES
+// =============================================================================
 
-// The directory where the helper will git clone the Google Source Repositories that will
-// host the code for each one of the stages
-code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITORIES"
+// Helper Tool Configurations (Required by the eab-deployer CLI)
 
 // The directory where the user has created a fresh git clone of the Enterprise Application Blueprint repository
 eab_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EAB_CODE_WAS_CHECKED_OUT"
 
-bucket_force_destroy  = true
-deletion_protection   = false
+// The directory where the helper will copy files and run commands
+code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITORIES"
 
-// :TODO comments explaining variables.
-infra_cloudbuildv2_repository_config = {
+
+// Standalone Example Configurations
+
+project_id                         = "YOUR_EXISTING_PROJECT_ID" // Google Cloud project ID in which to deploy all example resources
+region                             = "us-central1" // Google Cloud region for deployments
+network_id                         = "https://www.googleapis.com/compute/v1/projects/YOUR_EXISTING_PROJECT_ID/global/networks/YOUR_VPC_NAME" // Network ID/self link (or workerpool_network_id)
+subnetwork_self_link               = "https://www.googleapis.com/compute/v1/projects/YOUR_EXISTING_PROJECT_ID/regions/us-central1/subnetworks/YOUR_SUBNETWORK_NAME" // Subnetwork self-link
+workerpool_id                      = "projects/YOUR_EXISTING_PROJECT_ID/locations/us-central1/workerPools/YOUR_POOL_NAME" // Cloud Build Worker Pool ID to use
+logging_bucket                     = null // Optional logging bucket
+bucket_kms_key                     = null // Optional KMS Key ID
+
+// Optional Network Configurations (Only applicable to certain examples like default-example, llm-model, agent)
+// create_nat                         = true // Optional: Enables Cloud NAT creation for Private Worker Pool
+// enables_network_connection_and_peering_routes = true // Optional: Enables Network connection and peering routes
+
+// VPC Service Controls (Optional)
+service_perimeter_name             = null // Service perimeter name (e.g. accessPolicies/.../servicePerimeters/...)
+service_perimeter_mode             = "DRY_RUN" // Service perimeter mode: ENFORCE, DRY_RUN
+access_level_name                  = null // Access Level full name
+
+// Binary Authorization & Attestation
+attestation_kms_key                = "projects/YOUR_EXISTING_PROJECT_ID/locations/us-central1/keyRings/YOUR_KEYRING/cryptoKeys/YOUR_KEY_NAME" // The KMS Key ID to be used by attestor
+binary_authorization_image         = "us-central1-docker.pkg.dev/YOUR_EXISTING_PROJECT_ID/YOUR_REPO/YOUR_IMAGE" // The Binary Authorization image to be used to create attestation
+binary_authorization_repository_id = "projects/YOUR_EXISTING_PROJECT_ID/locations/us-central1/repositories/YOUR_REPOSITORY_NAME" // The Artifact Registry location with format projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+
+// Namespace/Teams (For namespace/group email configuration)
+teams = {
+  "namespace" = "your-group@yourdomain.com"
+}
+
+// Integration of repositories with Cloud Build v2
+cloudbuildv2_repository_config = {
   github_app_id_secret_id                     = null
   github_secret_id                            = null
   gitlab_authorizer_credential_secret_id      = null
@@ -38,159 +68,10 @@ infra_cloudbuildv2_repository_config = {
   gitlab_webhook_secret_id                    = null
   repo_type                                   = "CSR"
   repositories = {
-    applicationfactory = {
-      repository_name = "eab-appfactory"
-      repository_url = ""
-    }
-    fleetscope = {
-      repository_name = "eab-fleetscope"
-      repository_url = ""
-    }
-    hello-world = {
-      repository_name = "hello-world-admin"
-      repository_url = ""
-    }
-    multitenant = {
-      repository_name = "eab-multitenant"
-      repository_url = ""
-    }
-  }
-  secret_project_id = null
-}
-
-app_services_cloudbuildv2_repository_config = {
-  github_app_id_secret_id                     = null
-  github_secret_id                            = null
-  gitlab_authorizer_credential_secret_id      = null
-  gitlab_enterprise_ca_certificate            = null
-  gitlab_enterprise_host_uri                  = null
-  gitlab_enterprise_service_directory         = null
-  gitlab_read_authorizer_credential_secret_id = null
-  gitlab_webhook_secret_id                    = null
-  repo_type                                   = "CSR"
-  repositories = {
-    eab-default-example-hello-world = {
-      repository_name = "hello-world-i-r"
-      repository_url = ""
-    }
-  }
-  secret_project_id = null
-}
-
-
-// An existing project configured as the default project in the local Cloud SDK configuration
-// See https://cloud.google.com/sdk/gcloud/reference/config/set#EXAMPLES
-
-
-// 1-bootstrap inputs
-// https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/tree/main/1-bootstrap#inputs
-
-
-common_folder_id = "folders/REPLACE_ME" //folder where the admin project for application will be created - MANDATORY
-project_id       = "REPLACE_ME" // project where the cici pipelines will be created for infra deployment - MANDATORY
-workerpool_id    = "projects/REPLACE_ME/locations/REPLACE_ME/workerPools/REPLACE_ME" //workerpool to be used by cicd pipeline - MANDATORY
-bucket_kms_key   = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/KEYRING_NAME/cryptoKeys/REPLACE_ME" //KMS Key to encrypt buckets - OPTIONAL - use `null` is not configuring it
-logging_bucket   = "REPLACE_ME" // Logging bucket - OPTIONAL - use `null` is not configuring it or comment this line
-
-// 2-multitenant inputs
-apps = {
-  "default-example" : {
-    "acronym"        = "de",
-    ip_address_names = [],
-    certificates     = {}
-  }
-}
-
-enable_multicluster_discovery = true
-
-// List all the enviroments to be deployed:
-// At least one of the enviroments MUST be production
-envs = {
-  "development" = { //enviroment name
-    "billing_account"    = "REPLACE_ME" // billing to be used to create enviroment projects
-    "folder_id"          = "folders/REPLACE_ME" //folder where the enviroment projects will be creatd
-    "network_project_id" = "REPLACE_ME" // the network project id for the enviroment
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/REPLACE_ME" // the network self link for the enviroment
-    "org_id"             = "REPLACE_ME" // the org id
-    "subnets_self_links" = [ // the subnetwork self link for the enviroment, each subnet provided will be used to create cluster in the same region.
-      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-development-REPLACE_ME",
-      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-development-REPLACE_ME",
-    ]
-  }
-  "nonproduction" = {
-    "billing_account"    = "REPLACE_ME"
-    "folder_id"          = "folders/REPLACE_ME"
-    "network_project_id" = "REPLACE_ME"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/REPLACE_ME"
-    "org_id"             = "REPLACE_ME"
-    "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-nonproduction-REPLACE_ME",
-      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-nonproduction-REPLACE_ME",
-    ]
-  }
-  "production" = {
-    "billing_account"    = "REPLACE_ME"
-    "folder_id"          = "folders/REPLACE_ME"
-    "network_project_id" = "REPLACE_ME"
-    "network_self_link"  = "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/global/networks/REPLACE_ME"
-    "org_id"             = "REPLACE_ME"
-    "subnets_self_links" = [
-      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-production-REPLACE_ME",
-      "https://www.googleapis.com/compute/v1/projects/REPLACE_ME/regions/REPLACE_ME/subnetworks/eab-production-REPLACE_ME",
-    ]
-  }
-}
-
-// 3-fleetscope inputs
-
-namespace_ids = {
-  "hw-example" = "hw-example@example.com"
-}
-
-attestation_evaluation_mode = "ALWAYS_ALLOW"
-attestation_kms_key         = "projects/REPLACE_ME/locations/REPLACE_ME/keyRings/REPLACE_ME/cryptoKeys/REPLACE_ME" // KMS Attestation key ID to be used by binary authorization - OPTIONAL - use `null` is not configuring it
-enable_kueue                = false
-
-//Config sync configuration
-config_sync_branch          = null // Config sync branch - OPTIONAL
-config_sync_repository_url  = null //  Config sync repository url - OPTIONAL
-config_sync_secret_type     = null // Config sync secret type - Valid values: `ssh`, `cookiefile`, `gcenode`, `gcpserviceaccount`, `githubapp`, `token`, or `none`.
-config_sync_policy_dir      = null // Config sync policy directory - OPTIONAL
-
-disable_istio_on_namespaces = []
-
-// 4-appfactory
-
-billing_account = "REPLACE_ME" // billing to be used to create projects - MANDATORY
-org_id          = "REPLACE_ME" // org where is going to be deployed - MANDATORY
-
-// APIs to be enabled on infra projects
-infra_project_apis = [
-  "iam.googleapis.com",
-  "cloudresourcemanager.googleapis.com",
-  "serviceusage.googleapis.com",
-  "cloudbilling.googleapis.com"
-]
-
-service_perimeter_name = "accessPolicies/REPLACE_ME/servicePerimeters/REPLACE_ME" // The service perimeter name - OPTIONAL - use `null` is not configuring it
-service_perimeter_mode = "DRY_RUN"
-access_level_name      = "accessPolicies/REPLACE_ME/accessLevels/REPLACE_ME" // The access level name associated to the perimeter - OPTIONAL - use `null` is not configuring it
-
-
-// Applications to be created infra - admin and infra project, cicd pipelines
-applications = {
-  "default-example" = {
     "hello-world" = {
-      create_infra_project = false
-      create_admin_project = true
-      admin_project_id     = null
+      repository_name = "hello-world-admin"
+      repository_url  = ""
     }
   }
+  secret_project_id = null
 }
-
-location          = "REPLACE_ME" //Location for build buckets
-trigger_location  = "REPLACE_ME" // Trigger location
-bucket_prefix     = "bkt"
-
-// 5-appinfra
-region            = "REPLACE_ME" // CICD region

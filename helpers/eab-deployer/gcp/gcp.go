@@ -15,11 +15,14 @@
 package gcp
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"maps"
+	"net/http"
 	"regexp"
 	"slices"
 	"strings"
@@ -374,4 +377,53 @@ func (g GCP) GetAuthToken(t testing.TB) string {
 	result := g.Runf(t, "auth print-access-token")
 
 	return result.Get("token").String()
+}
+
+// TestIamPermissions checks a set of permissions against a parent (projects/PROJECT_ID) using the cloudresourcemanager:testIamPermissions V3 API
+func (g GCP) TestIamPermissions(t testing.TB, parent string, permissions []string) ([]string, error) {
+	client := &http.Client{}
+	identityPermissions := []string{}
+	chunkSize := 100
+
+	// avoid "The number of permissions (xxx) is greater than the maximum allowed (100).
+	for i := 0; i < len(permissions); i += chunkSize {
+		// Calculate the end index for the current chunk
+		end := i + chunkSize
+		if end > len(permissions) {
+			end = len(permissions)
+		}
+
+		// Extract the current chunk
+		chunk := permissions[i:end]
+
+		requestBody := map[string][]string{"permissions": chunk}
+		jsonBody, _ := json.Marshal(requestBody)
+		req, err := http.NewRequest("POST", fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/%s:testIamPermissions", parent), bytes.NewBuffer(jsonBody))
+		if err != nil {
+			return nil, fmt.Errorf("failed to create request: %w", err)
+		}
+		req.Header.Add("Authorization", "Bearer "+g.GetAuthToken(t))
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("error making request: %w", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			bodyBytes, _ := io.ReadAll(resp.Body) // Read error body
+			return nil, fmt.Errorf("request failed with status code: %d, body: %s", resp.StatusCode, string(bodyBytes))
+		} else {
+			bodyBytes, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read response body: %w", err)
+			}
+			bodyJson := map[string][]string{}
+			err = json.Unmarshal(bodyBytes, &bodyJson)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+			}
+			identityPermissions = append(identityPermissions, bodyJson["permissions"]...)
+		}
+	}
+	return identityPermissions, nil
 }
