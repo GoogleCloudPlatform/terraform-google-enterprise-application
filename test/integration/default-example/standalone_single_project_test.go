@@ -58,8 +58,8 @@ func TestStandaloneSingleProjectDefaultExample(t *testing.T) {
 	}
 	ncc_config := map[string]interface{}{
 		"enable_ncc":        true,
-		"hub_uri":           loggingBucket.GetTFSetupStringOutput("ncc_hub_uri"),
-		"spoke_group":       loggingBucket.GetTFSetupStringOutput("ncc_group"),
+		"hub_uri":           setupVPCSCOutput.GetTFSetupStringOutput("ncc_hub_uri"),
+		"spoke_group":       setupVPCSCOutput.GetTFSetupStringOutput("ncc_group"),
 		"spoke_name":        "vpc-spoke-agent",
 		"spoke_description": "Spoke for agent single project example",
 	}
