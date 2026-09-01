@@ -24,7 +24,7 @@ data "google_project" "workerpool_network_project" {
 ###############################################
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
-  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null ? 1 : 0
+  count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && local.secret_project_number != null ? 1 : 0
 
   perimeter = var.service_perimeter_name
   title     = "e-projects/${local.secret_project_number}"
@@ -46,7 +46,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
 }
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "egress_policy" {
-  count = var.service_perimeter_name != null ? 1 : 0
+  count = var.service_perimeter_name != null && local.secret_project_number != null ? 1 : 0
 
   perimeter = var.service_perimeter_name
   title     = "e-projects/${local.secret_project_number}"
