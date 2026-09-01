@@ -12,7 +12,34 @@ For a complete description of the architecture deployed by this repository, refe
 
 ## Overview
 
-This repository contains several distinct deployment stages, each contained in a directory. Each stage subdirectory represents the contents of a customer-owned repo that will trigger a distinct Terraform deployment pipeline.
+This repository is designed with a highly modular and example-driven structure. To facilitate reuse, clean separation of duties, and ease of deployment, all foundational infrastructure components are implemented as reusable Terraform **Modules**, while end-to-end reference deployments, pipelines, and workloads are contained in the **Examples** directory.
+
+### Core Modules (`/modules`)
+
+The `modules/` directory contains the primary infrastructure components of the Enterprise Application blueprint:
+
+*   **[`modules/gke`](/modules/gke/)**: Provisions the per-environment multi-tenant GKE clusters, database instances (Cloud SQL PostgreSQL), endpoints, and Cloud Armor security policies.
+*   **[`modules/fleetscope`](/modules/fleetscope/)**: Configures GKE clusters as a unified fleet. It manages team scopes, namespaces, ACM (Anthos Config Management) with Config Sync, Service Mesh (ASM), and Policy Controller.
+*   **[`modules/secure-cicd-pipeline`](/modules/secure-cicd-pipeline/)**: Creates secure, isolated, and VPC-SC-compliant application CI/CD pipelines with Cloud Build private worker pools.
+*   **[`modules/deployment-pipeline`](/modules/deployment-pipeline/)**: Defines secure application delivery and deployment configurations using Cloud Build and Cloud Deploy pipelines.
+*   **[`modules/standalone-harness`](/modules/standalone-harness/)**: Provisions the required baseline harness infrastructure for standalone and sandbox sandboxed single-project setups.
+*   **[`modules/alloydb-psc-setup`](/modules/alloydb-psc-setup/)**: Establishes secure AlloyDB instances with Private Service Connect (PSC).
+*   **[`modules/cluster_network`](/modules/cluster_network/)**, **[`modules/nat`](/modules/nat/)**, and **[`modules/private_workerpool`](/modules/private_workerpool/)**: Submodules and automation for advanced networking, worker-pool isolation, and routing.
+
+### Deployment Examples (`/examples`)
+
+The `examples/` directory contains end-to-end architectures demonstrating various use cases, deployment topologies, and workload types:
+
+*   **[`examples/default-example`](/examples/default-example/)**: The primary multi-project reference deployment containing stages for App Factory (`4-appfactory`), Application Infrastructure (`5-appinfra`), and the sample Hello World source code (`6-appsource`).
+*   **[`examples/standalone_single_project`](/examples/standalone_single_project/)** and **[`examples/standalone_single_project_confidential_nodes`](/examples/standalone_single_project_confidential_nodes/)**: Simplified, rapid-evaluation sandbox environments deploying multitenant, fleetscope, and appinfra in a single project (with confidential nodes support for increased security).
+*   **[`examples/cymbal-bank`](/examples/cymbal-bank/)**: Deployment configurations for the microservices-based Cymbal Bank reference application on the internal developer platform.
+*   **[`examples/cymbal-shop`](/examples/cymbal-shop/)**: Deployment configurations for the web-based e-commerce Cymbal Shop reference application.
+*   **[`examples/multitenant-applications`](/examples/multitenant-applications/)**: Shows how to configure multi-tenant GKE clusters to safely co-host both Cymbal Bank and Cymbal Shop with strict team namespace and scope isolation.
+*   **[`examples/agent`](/examples/agent/)**: Deploys an LLM-based agent application utilizing the platform infrastructure.
+*   **[`examples/llm-model`](/examples/llm-model/)**: Demonstrates secure machine learning and LLM model deployment pipelines.
+*   **[`examples/hpc`](/examples/hpc/)**: High-Performance Computing (HPC) setups showcasing financial Monte Carlo simulation and AI/TensorFlow training on GPUs.
+*   **[`examples/htc`](/examples/htc/)**: High-Throughput Computing (HTC) configurations utilizing GKE and Kueue to orchestrate batch and queue jobs.
+*   **[`examples/cluster-multicluster-discovery`](/examples/cluster-multicluster-discovery/)**: Explains multi-cluster service discovery setups for decentralized GKE Fleets.
 
 ### Pre-requisites
 
@@ -20,100 +47,36 @@ This repository contains several distinct deployment stages, each contained in a
 - Terraform version greater than 1.6
 - A project already created with a linked billing account
 
-### [1. bootstrap](/1-bootstrap/)
+For sandbox and testing purposes, you can use the prerequisite harness located in **[`test/setup`](/test/setup/)**, which deploys a sandbox project, a test service account, a Hub VPC with regional proxies, and Network Connectivity Center (NCC) configured in STAR topology.
 
-The bootstrap phase establishes the 3 initial pipelines of the Enterprise Application blueprint. These pipelines are:
-
-- the Multitenant Infrastructure pipeline
-- the Application Factory
-- the Fleet-Scope pipeline
-
-These 3 pipelines will be contained in a single project. When deploying on the Enterprise Foundation blueprint, create this project as part of the [projects](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/4-projects) stage in the common folder, and create these resources via the [app-infra](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/5-app-infra) stage.
-
-```
-example-organization
-└── fldr-common
-    └── prj-c-eab-bootstrap
-```
-
-### [2. multitenant](/2-multitenant/)
-
-The purpose of this stage is to deploy the per-environment multitenant resources via the multitenant infrastructure pipeline. The resulting project hierarchy is as follows:
-
-```
-example-organization
-└── fldr-development
-    └── prj-d-eab-multitenant
-└── fldr-nonproduction
-    └── prj-n-eab-multitenant
-└── fldr-production
-    └── prj-p-eab-multitenant
-```
-
-### [3. fleet-scope](/3-fleet-scope/)
-
-The purpose of this stage is to deploy the per-environment fleet resources via the fleetscope infrastructure pipeline. This stage does not create any new projects, but creates resources within the existing multitenant infrastructure projects.
-
-The fleet-scope pipeline manages configuration and resources related to [GKE Fleets](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). This stage manages the creation of namespaces in the GKE clusters via [team scopes and fleet namespaces](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management#fleet_team_management_overview). This pipeline also enables the [Config Sync](https://cloud.google.com/anthos-config-management/docs/config-sync-overview), [Service Mesh](https://cloud.google.com/service-mesh/docs), and [Policy Controller](https://cloud.google.com/kubernetes-engine/enterprise/policy-controller/docs/overview) features for the fleet and thus the member clusters.
-
-[Fleet team management](https://cloud.google.com/kubernetes-engine/fleet-management/docs/team-management-overview) makes it easier for platform admins to provision and manage the necessary infrastructure resources that application and service teams might need to run their workloads, with the appropriate access control. Each team acts as a separate "tenant" on your fleet. In this repository, for demonstration purposes, the `ADMIN` permission is assigned on the fleet scope for each Group/Namespace.
-
-Based on the open source [Open Policy Agent Gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/docs/) project, [Policy Controller](https://cloud.google.com/kubernetes-engine/enterprise/policy-controller/docs/overview) is fully integrated with Google Cloud, includes a built-in dashboard, for observability, and comes with a full library of pre-built policies for common security and compliance controls.
-
-### [4. app-factory](/4-app-factory/)
-
-The purpose of this stage is to set up the application-specific projects. This includes a single project in the common folder, and a project in each of the environment folders. The app-infra pipeline creates the application CI/CD pipeline, responsible for deploying applications to the multitenant infrastructure. The app-infra pipeline also creates any application-specific infrastructure, such as databases or other managed services. The resulting project hierarchy is as follows:
-
-```
-example-organization
-└── fldr-common
-    ├── prj-c-eab-app1
-    └── prj-c-eab-app2
-└── fldr-development
-    ├── prj-d-eab-app1
-    └── prj-d-eab-app2
-└── fldr-nonproduction
-    ├── prj-n-eab-app1
-    └── prj-n-eab-app2
-└── fldr-production
-    ├── prj-p-eab-app1
-    └── prj-p-eab-app2
-```
-
-### [5. appinfra](/5-appinfra/)
-
-The purpose of this stage is to create application-specific infrastructure. This stage deploys the application-specific resources, including service-related infrastructure components such as databases, cloud build triggers, storage buckets, BigQuery datasets, and others. This stage also defines the CI/CD pipeline for each application, targeting the clusters in the multitenant infrastructure stage.
-
-### [6. appsource](/6-appsource/)
-
-The purpose of this stage is to set up application source code repositories, which also includes application-specific configurations. The code within this stage serves as a sample for setting up and deploying the sample applications, including necessary configuration for gateways, services, and deployments. These configurations are deployed via the application CI/CD pipeline deployed at stage 5-appinfra.
+---
 
 ## Applications (Apps)
 
-This repo demostrates setting up the developer platform for one or more *Apps* which is a high level of grouping of releated service or workloads. Apps are created infrequently and may include multiple namespaces, team scopes, and dedicated IP address. A multi-tenant cluster can contain multiple Apps.
+This repository demonstrates how to set up the developer platform for one or more *Apps* (a high-level grouping of related services or workloads). Platform teams create Apps infrequently. Apps can include multiple namespaces, team scopes, and dedicated IP addresses. A multi-tenant cluster can host multiple Apps.
 
-App-specific resources such as application CI/CD pipelines specification and kubernetes manifests are configured on 5-appinfra and 6-appsource. The table below indicates where you can find the app-specific directories for the examples contained in this repository:
+Define app-specific resources, such as application CI/CD pipeline specifications and Kubernetes manifests, in the `5-appinfra` and `6-appsource` directories. The table below indicates where you can find the app-specific directories for the examples contained in this repository:
 
 | Application               | 5-appinfra directory                | 6-appsource directory                |
 |---------------------------|-------------------------------------|-------------------------------------|
-| Hello World               | [./5-appinfra](./5-appinfra)                        | [./6-appsource](./6-appsource)                        |
-| Cymbal Bank               | [./examples/cymbal-bank/5-appinfra](./examples/cymbal-bank/5-appinfra)   | [./examples/cymbal-bank/6-appsource](./examples/cymbal-bank/6-appsource)   |
-| Cymbal Shop               | [./examples/cymbal-shop/5-appinfra](./examples/cymbal-shop/5-appinfra)   | [./examples/cymbal-shop/6-appsource](./examples/cymbal-shop/6-appsource)   |
-| Cymbal Bank + Cymbal Shop | [./examples/multitenant-applications/5-appinfra](./examples/multitenant-applications/5-appinfra) | [./examples/multitenant-applications/6-appsource](./examples/multitenant-applications/6-appsource) |
+| Hello World               | [examples/default-example/5-appinfra](/examples/default-example/5-appinfra) | [examples/default-example/6-appsource](/examples/default-example/6-appsource) |
+| Cymbal Bank               | [examples/cymbal-bank/5-appinfra](/examples/cymbal-bank/5-appinfra)   | [examples/cymbal-bank/6-appsource](/examples/cymbal-bank/6-appsource)   |
+| Cymbal Shop               | [examples/cymbal-shop/5-appinfra](/examples/cymbal-shop/5-appinfra)   | [examples/cymbal-shop/6-appsource](/examples/cymbal-shop/6-appsource)   |
+| Cymbal Bank + Cymbal Shop | [examples/multitenant-applications/5-appinfra](/examples/multitenant-applications/5-appinfra) | [examples/multitenant-applications/6-appsource](/examples/multitenant-applications/6-appsource) |
 
 ### Hello World Example
 
-This [hello-world](https://github.com/GoogleContainerTools/skaffold/tree/v2.13.2/examples/getting-started) example is a very simple Go application that is deployed along with the codebase as a placeholder, it uses basic skaffold features:
+This [hello-world](https://github.com/GoogleContainerTools/skaffold/tree/v2.13.2/examples/getting-started) example is a very simple Go application that is deployed along with the codebase as a placeholder, using basic skaffold features:
 
-- **building** a single Go file app and with a multistage `Dockerfile` using local docker to build
+- **building** a single Go file app with a multistage `Dockerfile` using local docker to build
 - **tagging** using the default tagPolicy (`gitCommit`)
 - **deploying** a single container pod using `kubectl`
 
-The example is extracted from the skaffold repository and the source code is stored in `6-appsource/hello-world`.
+You can find the source code and skaffold configurations in [`examples/default-example/6-appsource/default-example`](/examples/default-example/6-appsource/default-example/).
 
 ### [Cymbal Bank Example](./examples/cymbal-bank/)
 
-The [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) (`cymbal-bank`) sample App is included in the repository. Within each stage there are specific configurations needed for deploying the sample application. For custom applications, be sure to replace the existing Cymbal Bank content with your own applications and configurations.
+The repository includes the [Cymbal Bank](https://github.com/GoogleCloudPlatform/bank-of-anthos) (`cymbal-bank`) sample App. Each stage requires specific configurations for deploying the sample application. For custom applications, replace the existing Cymbal Bank content with your own applications and configurations.
 
 ### [Cymbal Shop Example](./examples/cymbal-shop/)
 
@@ -125,32 +88,31 @@ For more information about the Cymbal Shop application, please visit [microservi
 
 ### [Multitenant Applications Example](./examples/multitenant-applications)
 
-This example demonstrates modifications necessary to deploy two separate application in the cluster, the applications are named `cymbal-bank` and `cymbal-shop`. `cymbal-bank` microservices will be deployed across differente namespaces, to represent different teams, and each microservice will have its own `admin` project, which hosts the CI/CD pipeline for the microservice. `cymbal-shop` microservices will be deployed into a single namespace and all pipelines into a single `admin` project. See the 4-appfactory [terraform.tfvars](./examples/multitenant-applications/4-appfactory/terraform.tfvars) for more information on how these projects are specified.
+This example demonstrates the modifications necessary to deploy two separate applications in the cluster: `cymbal-bank` and `cymbal-shop`. `cymbal-bank` microservices are deployed across different namespaces to represent different teams, and each microservice has its own `admin` project hosting its CI/CD pipeline. `cymbal-shop` microservices are deployed into a single namespace, with all pipelines in a single `admin` project. See the 4-appfactory [terraform.tfvars](./examples/multitenant-applications/4-appfactory/terraform.tfvars) for more details.
 
 ## HPC Use Cases
 
 In the `examples/hpc` directory, you will find code samples and detailed instructions for provisioning two distinct use cases utilizing `Kueue` to efficiently manage batch jobs across multiple teams within the developer platform.
 
-## Use Cases
+### Use Cases
 
-### 1. Monte Carlo Financial Analysis
+#### 1. Monte Carlo Financial Analysis
 
-This use case demonstrates how to implement simulation for financial analysis. The example includes setup instructions to get started with running high-performance calculations batch jobs.
+This use case demonstrates how to implement simulation for financial analysis. The example includes setup instructions to get started with running high-performance calculation batch jobs.
 
-### 2. AI Training on GKE Using GPU and TensorFlow
+#### 2. AI Training on GKE Using GPU and TensorFlow
 
 This use case showcases the process of training AI models using Google Kubernetes Engine (GKE) with GPU support and TensorFlow. The documentation provides guidance on configuring the environment and creating machine learning training jobs.
 
 ## Team Structure
 
-Each team, namely **hpc-team-a** and **hpc-team-b**, will operate within their own dedicated tenants, infrastructure projects, and environments for executing their applications. The shared resources between the two teams is the cluster created in `2-multitenant` and the kueue's [ClusterQueue](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/):
+Each team, namely **hpc-team-a** and **hpc-team-b**, operates within their own dedicated tenants, infrastructure projects, and environments for executing their applications. The shared resource between the two teams is the cluster created in `2-multitenant` (managed by GKE modules) and the kueue's [ClusterQueue](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/):
 
-For a more detailed guide on how to set up and deploy these use cases, please refer to the code and instructions provided in the `examples/hpc` directory.
+For a more detailed guide on how to set up and deploy these use cases, refer to the code and instructions provided in the `examples/hpc` directory.
 
 ## Contributing
 
-Refer to the [contribution guidelines](./CONTRIBUTING.md) for
-information on contributing to this module.
+Refer to the [contribution guidelines](./CONTRIBUTING.md) for information on contributing to this module.
 
 ## Security Disclosures
 
