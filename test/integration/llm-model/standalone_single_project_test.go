@@ -64,8 +64,8 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 		"enable_ncc":        true,
 		"hub_uri":           setupOutput.GetStringOutput("ncc_hub_uri"),
 		"spoke_group":       setupOutput.GetStringOutput("ncc_group"),
-		"spoke_name":        "vpc-spoke-agent",
-		"spoke_description": "Spoke for agent single project example",
+		"spoke_name":        "vpc-spoke-llm-model",
+		"spoke_description": "Spoke for llm model single project example",
 	}
 	vars := map[string]interface{}{
 		"project_id":             projectID,

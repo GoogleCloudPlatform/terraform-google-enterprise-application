@@ -24,22 +24,21 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 
 | Name | Description |
 |------|-------------|
-| billing\_account | n/a |
-| cloud\_build\_sa | n/a |
-| harness\_project\_ids | n/a |
-| harness\_project\_numbers | n/a |
-| hpc | n/a |
-| hub\_network | n/a |
-| ncc\_group | n/a |
-| ncc\_hub\_uri | n/a |
-| org\_id | n/a |
-| sa\_email | n/a |
-| sa\_id | n/a |
-| sa\_key | n/a |
-| seed\_folder\_id | n/a |
-| seed\_project\_id | n/a |
-| seed\_project\_number | n/a |
-| single\_project | n/a |
-| teams | n/a |
+| billing\_account | Billing account used to be linked at projects. |
+| cloud\_build\_sa | The cloud build service account (when using Cloud build). |
+| harness\_project\_ids | A list of the projects ids created including seed. |
+| harness\_project\_numbers | A list of the projects numbers created including seed. |
+| hpc | If is a HPC example being deployed. |
+| ncc\_group | The NCC group name. |
+| ncc\_hub\_uri | NCC Hub id. |
+| org\_id | Organization ID used to create projects. |
+| sa\_email | All service accounts email created for examples, including in seed project. |
+| sa\_id | All service accounts id created for examples, including in seed project. |
+| sa\_key | The seed private key. |
+| seed\_folder\_id | Seed folder id. |
+| seed\_project\_id | Seed project id. |
+| seed\_project\_number | Seed project number. |
+| single\_project | If single project examples are being deployed. |
+| teams | Workspace groups id. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
