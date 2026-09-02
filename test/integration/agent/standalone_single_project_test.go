@@ -60,6 +60,14 @@ func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
 	}
 
+	ncc_config := map[string]interface{}{
+		"enable_ncc":        true,
+		"hub_uri":           setupOutput.GetStringOutput("ncc_hub_uri"),
+		"spoke_group":       setupOutput.GetStringOutput("ncc_group"),
+		"spoke_name":        "vpc-spoke-agent",
+		"spoke_description": "Spoke for agent single project example",
+	}
+
 	vars := map[string]interface{}{
 		"project_id":             projectID,
 		"service_perimeter_mode": service_perimeter_mode,
@@ -72,6 +80,7 @@ func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
+		"ncc_config": ncc_config,
 	}
 
 	// wire setup output project_id to example var.project_id

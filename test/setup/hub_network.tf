@@ -44,7 +44,7 @@ module "hub_network" {
 
 module "network_connectivity_center_star" {
   source  = "terraform-google-modules/network/google//modules/network-connectivity-center"
-  version = "~> 18.0"
+  version = "~> 18.1"
 
   project_id   = module.seed_project.project_id
   ncc_hub_name = "eab-hub-star"
