@@ -169,6 +169,34 @@ The identity deploying the module must be a member of the specified Access Level
    --role="roles/accesscontextmanager.policyAdmin"
    ```
 
+### Network Connectivity Center (NCC) Connection (Optional)
+
+This module supports connecting the created standalone cluster VPC network as a spoke to an existing Google Cloud Network Connectivity Center (NCC) Hub.
+
+To enable this connection:
+1. Ensure you have an existing NCC Hub (configured with STAR topology, for example).
+2. Configure the `ncc_config` block in your `terraform.tfvars` file, passing `enable_ncc = true` and the URI of your NCC Hub.
+3. If your hub uses a custom NCC group (like `edge` created by the test setup), specify that in `spoke_group`.
+
+> **IAM Note:** The Service Account or identity connecting a spoke to a Hub requires the following roles on the Hub's project or at the Organization level:
+> - Network Connectivity Center Hub User: `roles/networkconnectivity.hubUser`
+> - Network Connectivity Center Group User: `roles/networkconnectivity.groupUser`
+
+Here is an example `ncc_config` block:
+
+```hcl
+ncc_config = {
+  enable_ncc                  = true
+  hub_uri                     = "projects/YOUR_HUB_PROJECT_ID/locations/global/hubs/YOUR_HUB_NAME"
+  spoke_group                 = "edge"
+  spoke_name                  = "vpc-spoke"
+  spoke_description           = "NCC Spoke for standalone cluster network"
+  spoke_labels                = { env = "dev" }
+  spoke_exclude_export_ranges = []
+  spoke_include_export_ranges = []
+}
+```
+
 #### Cloud Build with Github Pre-requisites
 
 To proceed with GitHub as your git provider you will need:
