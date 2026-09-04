@@ -11,11 +11,11 @@ It integrates the following components:
 
 ## Pre-Requisites
 
-This example is a component of the __Enterprise Application Blueprint__. It assumes you have already provisioned the foundational infrastructure. You must have successfully executed the following phases:
+This example is a component of the __Enterprise Application Blueprint__. It assumes you have already provisioned the foundational infrastructure. You must have successfully executed the following baseline phases:
 
-1. __1-bootstrap__ (CI/CD foundations, Binary Authorization image.)
-1. __2-multitenant__ (Cluster setup)
-1. __3-fleetscope__ (GKE Fleet management, Binary Authorization policy setup)
+1. **Baseline CI/CD foundation** (such as [`modules/secure-cicd-pipeline`](/modules/secure-cicd-pipeline/)) deployed successfully.
+2. **Multi-tenant GKE clusters** (such as [`modules/gke`](/modules/gke/)) deployed successfully.
+3. **Fleet-scope configuration** (such as [`modules/fleetscope`](/modules/fleetscope/)) deployed successfully.
 
 
 ## Usage
@@ -226,11 +226,11 @@ This stage will create the CI/CD pipeline for the service, and application speci
     cd ../../../
     ```
 
-1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+1. Retrieve the `remote_state_bucket` value from your foundational bootstrap output, and export it:
 
    ```bash
-   terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" init
-   export remote_state_bucket=$(terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
+   # Retrieve the GCS state bucket name from your bootstrap/foundation deployment
+   export remote_state_bucket="YOUR_BOOTSTRAP_STATE_BUCKET_NAME"
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
@@ -465,11 +465,11 @@ This stage will setup the application admin project, and infrastructure specific
 
 1. Adjust the `terraform.tfvars` file with values from your environment. Follow the steps below to retrieve the state bucket and replace the placeholder:
 
-    - Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+    - Retrieve the `remote_state_bucket` value from your foundational bootstrap output, and replace the placeholder in `terraform.tfvars`:
 
         ```bash
-        terraform -chdir="../1-bootstrap/" init
-        export remote_state_bucket=$(terraform -chdir="../1-bootstrap/" output -raw state_bucket)
+        # Retrieve the GCS state bucket name from your bootstrap/foundation deployment
+        export remote_state_bucket="YOUR_BOOTSTRAP_STATE_BUCKET_NAME"
         echo "remote_state_bucket = ${remote_state_bucket}"
 
         sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $APP_INFRA_REPO/apps/llm-model/llamma-model/envs/shared/terraform.tfvars

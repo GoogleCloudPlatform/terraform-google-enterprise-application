@@ -12,6 +12,7 @@ This example provisions:
   - A custom VPC network (`vpc-eab-cluster`)
   - Subnets across configured regions with primary IP ranges
   - Secondary IP ranges dedicated for Kubernetes Pods and Services
+  - Optional Network Connectivity Center (NCC) connection support via the `ncc_config` variable
 
 - **Multi-Tenant GKE Infrastructure (`modules/gke`)**:
   - Multi-region GKE Autopilot clusters
@@ -89,6 +90,10 @@ If deploying within an enforced VPC Service Controls perimeter, additional acces
 - Organization Administrator: `roles/resourcemanager.organizationAdmin`
 - Access Context Manager Policy Admin: `roles/accesscontextmanager.policyAdmin`
 
+If connecting the cluster VPC network to an existing central Network Connectivity Center (NCC) Hub, the deploying service account or identity requires the following roles on the Hub's project or at the Organization level:
+- Network Connectivity Center Hub User: `roles/networkconnectivity.hubUser`
+- Network Connectivity Center Group User: `roles/networkconnectivity.groupUser`
+
 ## Usage
 
 1. Navigate to the example directory:
@@ -107,6 +112,18 @@ If deploying within an enforced VPC Service Controls perimeter, additional acces
      "frontend" = "frontend-team@example.com"
      "backend"  = "backend-team@example.com"
    }
+
+   # Optional: Network Connectivity Center (NCC) connection configuration
+   # ncc_config = {
+   #   enable_ncc                  = true
+   #   hub_uri                     = "projects/YOUR_HUB_PROJECT_ID/locations/global/hubs/YOUR_HUB_NAME"
+   #   spoke_group                 = "edge"
+   #   spoke_name                  = "vpc-spoke"
+   #   spoke_description           = "NCC Spoke for multi-cluster discovery network"
+   #   spoke_labels                = { env = "dev" }
+   #   spoke_exclude_export_ranges = []
+   #   spoke_include_export_ranges = []
+   # }
    ```
 
 3. Initialize Terraform:

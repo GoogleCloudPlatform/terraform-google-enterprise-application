@@ -4,6 +4,8 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 - an initial Google Cloud Project
 - a service account to execute the tests, with required IAM roles for creating the blueprint resources
 - activates required APIs
+- a Hub VPC network (`vpc-eab-hub`) including main subnets and regional managed proxies
+- a Network Connectivity Center (NCC) configured with STAR topology, including custom center and edge groups
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
