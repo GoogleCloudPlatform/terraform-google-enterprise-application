@@ -119,7 +119,7 @@ If connecting the cluster VPC network to an existing central Network Connectivit
    #   hub_uri                     = "projects/YOUR_HUB_PROJECT_ID/locations/global/hubs/YOUR_HUB_NAME"
    #   spoke_group                 = "edge"
    #   spoke_name                  = "vpc-spoke"
-   #   spoke_description           = "NCC Spoke for standalone cluster network"
+   #   spoke_description           = "NCC Spoke for multi-cluster discovery network"
    #   spoke_labels                = { env = "dev" }
    #   spoke_exclude_export_ranges = []
    #   spoke_include_export_ranges = []

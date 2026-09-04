@@ -5,7 +5,7 @@ This module defines the per-environment multitenant GKE resources deployed via t
 This module creates the following resources:
 - GCP Project (cluster project) (optional, if `create_cluster_project` is true)
 - GKE Autopilot or Standard cluster(s) with multi-tenancy configurations
-- Cloud Endpoint DNS configuration
+- Google-managed SSL certificates for applications
 - Cloud Armor security policies for application protection
 - Reserved static external IP addresses (frontend-ips) for deployed applications
 
