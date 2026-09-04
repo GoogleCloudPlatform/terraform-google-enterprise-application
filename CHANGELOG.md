@@ -8,6 +8,32 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.6.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.5.0...v0.6.0) (2026-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* adds single project agent ([#742](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/742))
+* refactor modules ([#732](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/732))
+
+### Features
+
+* add Network Connectivity Center connection support in the examples ([#746](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/746)) ([e938003](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/e938003d231513a3734fb7559bac01a49fc94c24))
+* adds hello world single project example ([#737](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/737)) ([fe3c3ff](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/fe3c3ffeb30ebe5d671c24afaae4d465b7af1116))
+* adds hub network and star ncc ([#745](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/745)) ([28341d2](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/28341d216e3f527d34d3008685f746c78092ddc9))
+* adds ncc on single project examples ([#750](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/750)) ([476433a](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/476433afdcd3f37c92f94b6bd2cb85b98eb82213))
+* adds single project agent ([#742](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/742)) ([4c7bddc](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/4c7bddcc0266d83bcbd8784df986cf3e0e63b899))
+* adds single project llm model ([#738](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/738)) ([3914c06](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/3914c06a88b597bc39d6b79add1b4f5403e88a1b))
+* refactor modules ([#732](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/732)) ([405c3dc](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/405c3dc50f27e7324862a718627e605510c7710f))
+
+
+### Bug Fixes
+
+* adds variables comments ([#754](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/754)) ([7969ff6](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/7969ff66cf2e893b7ccbddf137cda532fc893e96))
+* **deps:** bump dependencies in helpers/eab-deployer ([#749](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/749)) ([7bdd2c5](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/7bdd2c5eb9a3bcf32d7afbc93504a74a460f0646))
+* fix environments to be tested in single project examples ([#743](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/743)) ([113b90e](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/113b90e09e5e4803b2ac9a43c30434b02879257f))
+* updates readmes ([#747](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/747)) ([2b5d249](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/2b5d2498886737ec2872b4c322d1e96b2012222b))
+
 ## [0.5.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.4.0...v0.5.0) (2026-08-10)
 
 
