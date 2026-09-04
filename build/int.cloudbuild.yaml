@@ -131,7 +131,7 @@ tags:
   - "integration"
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
-  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.25"
+  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.28"
 options:
   machineType: E2_HIGHCPU_32
   env:
@@ -145,3 +145,4 @@ options:
     - "TF_VAR_agent=false"
     - "HEAD_BRANCH=$_HEAD_BRANCH"
     - "HEAD_REPO_URL=$_HEAD_REPO_URL"
+    - "CLOUDSDK_CONTAINER_USE_APPLICATION_DEFAULT_CREDENTIALS=true"
