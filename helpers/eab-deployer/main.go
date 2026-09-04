@@ -69,6 +69,17 @@ func main() {
 		return
 	}
 
+	// list steps if requested (does not require loading tfvars)
+	if cfg.listSteps {
+		s, err := steps.LoadSteps(cfg.stepsFile)
+		if err != nil {
+			fmt.Printf("# Failed to init state manager. Error: %s\n", err.Error())
+			os.Exit(2)
+		}
+		s.ListSteps()
+		return
+	}
+
 	// load tfvars
 	globalTFVars, err := stages.ReadGlobalTFVars(cfg.tfvarsFile)
 	if err != nil {
@@ -90,9 +101,14 @@ func main() {
 
 	// validate inputs
 	if cfg.validate {
-		stages.ValidateComponents(t)
-		stages.ValidateBasicFields(t, globalTFVars)
-		stages.ValidatePermissions(t, globalTFVars)
+		okComp := stages.ValidateComponents(t)
+		okFields := stages.ValidateBasicFields(t, globalTFVars)
+		okPerms := stages.ValidatePermissions(t, globalTFVars)
+		if !okComp || !okFields || !okPerms {
+			fmt.Println("\n# Validation failed. Please fix the issues above before deploying.")
+			os.Exit(1)
+		}
+		fmt.Println("\n# All validations passed successfully.")
 		return
 	}
 
@@ -101,12 +117,6 @@ func main() {
 	if err != nil {
 		fmt.Printf("# Failed to init state manager. Error: %s\n", err.Error())
 		os.Exit(2)
-	}
-
-	// list steps
-	if cfg.listSteps {
-		s.ListSteps()
-		return
 	}
 
 	// reset step

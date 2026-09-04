@@ -22,9 +22,12 @@ import (
 )
 
 func DestroyInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
-	_, destPath := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
+	_, destPath, err := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
+	if err != nil {
+		return err
+	}
 
-	err := s.RunDestroyStep("gcp-infra.destroy", func() error {
+	return s.RunDestroyStep("gcp-infra.destroy", func() error {
 		options := &terraform.Options{
 			TerraformDir:             destPath,
 			Logger:                   c.Logger,
@@ -40,5 +43,4 @@ func DestroyInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Commo
 		_, err = terraform.DestroyE(t, options)
 		return err
 	})
-	return err
 }

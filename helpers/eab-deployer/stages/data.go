@@ -15,6 +15,7 @@
 package stages
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -78,9 +79,9 @@ type Repository struct {
 }
 
 type AppInfraOutputs struct {
-	ServiceRepositoryName      string   `hcl:"service_repository_name"`
-	ServiceRepositoryProjectID string   `hcl:"service_repository_project_id"`
-	CloudDeployTargetsNames    []string `hcl:"clouddeploy_targets_names"`
+	ServiceRepositoryName      map[string]string   `hcl:"service_repository_name"`
+	ServiceRepositoryProjectID map[string]string   `hcl:"service_repository_project_id"`
+	CloudDeployTargetsNames    map[string][]string `hcl:"clouddeploy_targets_names"`
 }
 
 func GetAppInfraStepOutputs(t testing.TB, standalonePath string) AppInfraOutputs {
@@ -90,10 +91,26 @@ func GetAppInfraStepOutputs(t testing.TB, standalonePath string) AppInfraOutputs
 		NoColor:      true,
 	}
 	t.Logf("Getting outputs from %s", options.TerraformDir)
+
+	repoNames := make(map[string]string)
+	if out, err := terraform.OutputMapE(t, options, "service_repository_name"); err == nil {
+		repoNames = out
+	}
+
+	repoProjects := make(map[string]string)
+	if out, err := terraform.OutputMapE(t, options, "service_repository_project_id"); err == nil {
+		repoProjects = out
+	}
+
+	deployTargets := make(map[string][]string)
+	if outJSON, err := terraform.OutputJsonE(t, options, "clouddeploy_targets_names"); err == nil && outJSON != "" {
+		_ = json.Unmarshal([]byte(outJSON), &deployTargets)
+	}
+
 	return AppInfraOutputs{
-		ServiceRepositoryName:      terraform.Output(t, options, "service_repository_name"),
-		ServiceRepositoryProjectID: terraform.Output(t, options, "service_repository_project_id"),
-		CloudDeployTargetsNames:    terraform.OutputList(t, options, "clouddeploy_targets_names"),
+		ServiceRepositoryName:      repoNames,
+		ServiceRepositoryProjectID: repoProjects,
+		CloudDeployTargetsNames:    deployTargets,
 	}
 }
 
@@ -105,11 +122,11 @@ func ReadGlobalTFVars(file string) (GlobalTFVars, error) {
 	}
 	_, err := os.Stat(file)
 	if os.IsNotExist(err) {
-		return globalTfvars, fmt.Errorf("tfvars file '%s' does not exits\n", file)
+		return globalTfvars, fmt.Errorf("tfvars file '%s' does not exist\n", file)
 	}
 	err = utils.ReadTfvars(file, &globalTfvars)
 	if err != nil {
-		return globalTfvars, fmt.Errorf("Failed to load tfvars file %s. Error: %s\n", file, err.Error())
+		return globalTfvars, fmt.Errorf("failed to load tfvars file %s. Error: %s\n", file, err.Error())
 	}
 	return globalTfvars, nil
 }

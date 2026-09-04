@@ -281,10 +281,24 @@ func (g GCP) GetBuildLogs(t testing.TB, projectID, region, buildID string) strin
 
 // WaitReleaseSuccess waits for the current release in a repo to finish.
 func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, commitSha, failureMsg string, maxRetry int) error {
-
 	releaseFullName := fmt.Sprintf("projects/%s/locations/%s/deliveryPipelines/%s/releases/%s-%s", project, region, serviceName, serviceName, commitSha)
 
-	releaseTargets := slices.Collect(maps.Keys(g.GetRelease(t, releaseFullName).Get("targetArtifacts").Map()))
+	// Wait for release creation by Cloud Build
+	fmt.Printf("waiting for release %s to be created.\n", releaseFullName)
+	var release gjson.Result
+	for i := 0; i < maxRetry; i++ {
+		release = g.GetRelease(t, releaseFullName)
+		if release.Exists() && release.Get("name").Exists() {
+			break
+		}
+		time.Sleep(g.sleepTime * time.Second)
+	}
+
+	if !release.Exists() || !release.Get("name").Exists() {
+		return fmt.Errorf("%s: release %s not found after waiting", failureMsg, releaseFullName)
+	}
+
+	releaseTargets := slices.Collect(maps.Keys(release.Get("targetArtifacts").Map()))
 	if len(releaseTargets) > 0 {
 		for i, targetID := range releaseTargets {
 			status, err := g.GetFinalRolloutState(t, project, region, serviceName, releaseFullName, targetID, maxRetry)
@@ -304,7 +318,7 @@ func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, comm
 
 // GetRelease waits for the current release.
 func (g GCP) GetRelease(t testing.TB, releaseFullName string) gjson.Result {
-	return g.Runf(t, "deploy releases describe %s", releaseFullName).Array()[0]
+	return g.Runf(t, "deploy releases describe %s", releaseFullName)
 }
 
 // PromoteRelease promote for the current release.

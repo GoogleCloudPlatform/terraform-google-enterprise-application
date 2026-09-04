@@ -34,24 +34,30 @@ const (
 	TimeBetweenErrorRetries = 10 * time.Second
 )
 
-func getStandalonePaths(EABPath, checkoutPath, exampleName string) (string, string) {
-	var relPath string
-	if exampleName == "standalone_single_project" || exampleName == "standalone_single_project_confidential_nodes" {
-		relPath = filepath.Join("examples", exampleName)
-	} else {
-		relPath = filepath.Join("examples", exampleName, "standalone-single-project")
+func getStandalonePaths(EABPath, checkoutPath, exampleName string) (string, string, error) {
+	candidates := []string{
+		filepath.Join("examples", exampleName, "standalone-single-project"),
+		filepath.Join("examples", exampleName),
 	}
 
-	srcPath := filepath.Join(EABPath, relPath)
-	destPath := filepath.Join(checkoutPath, relPath)
-	return srcPath, destPath
+	for _, relPath := range candidates {
+		fullSrc := filepath.Join(EABPath, relPath)
+		if fi, err := os.Stat(fullSrc); err == nil && fi.IsDir() {
+			return fullSrc, filepath.Join(checkoutPath, relPath), nil
+		}
+	}
+
+	return "", "", fmt.Errorf("could not find example directory for '%s' in %s", exampleName, EABPath)
 }
 
 func DeployInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
-	srcPath, destPath := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
+	srcPath, destPath, err := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
+	if err != nil {
+		return err
+	}
 
 	// Copy Standalone Code
-	err := s.RunStep("gcp-infra.copy-code", func() error {
+	err = s.RunStep("gcp-infra.copy-code", func() error {
 		err := utils.CopyDirectory(srcPath, destPath)
 		if err != nil {
 			return err
@@ -102,7 +108,7 @@ func getAppSourcePath(c CommonConf, exampleName, serviceName string) string {
 		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource"),
 	}
 	for _, p := range pathsToCheck {
-		if _, err := os.Stat(p); err == nil {
+		if fi, err := os.Stat(p); err == nil && fi.IsDir() {
 			return p
 		}
 	}
@@ -114,14 +120,30 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		return fmt.Errorf("cloudbuildv2_repository_config is required for DeployAppSourceStage")
 	}
 
-	_, standaloneDestPath := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
+	_, standaloneDestPath, err := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
+	if err != nil {
+		return err
+	}
 	outputs := GetAppInfraStepOutputs(t, standaloneDestPath)
 
-	var err error
-	for serviceName, repository := range tfvars.CloudbuildV2RepositoryConfig.Repositories {
-		err = s.RunStep(fmt.Sprintf("gcp-appsource.%s", serviceName), func() error {
-			gitPath := filepath.Join(c.CheckoutPath, outputs.ServiceRepositoryName)
-			conf := utils.GitClone(t, tfvars.CloudbuildV2RepositoryConfig.RepoType, repository.RepositoryName, repository.RepositoryURL, gitPath, outputs.ServiceRepositoryProjectID, c.Logger)
+	for serviceKey, repository := range tfvars.CloudbuildV2RepositoryConfig.Repositories {
+		err = s.RunStep(fmt.Sprintf("gcp-appsource.%s", serviceKey), func() error {
+			repoName := repository.RepositoryName
+			if repoName == "" {
+				if rName, ok := outputs.ServiceRepositoryName[serviceKey]; ok && rName != "" {
+					repoName = rName
+				} else {
+					repoName = serviceKey
+				}
+			}
+
+			repoProjectID := tfvars.ProjectID
+			if pID, ok := outputs.ServiceRepositoryProjectID[serviceKey]; ok && pID != "" {
+				repoProjectID = pID
+			}
+
+			gitPath := filepath.Join(c.CheckoutPath, repoName)
+			conf := utils.GitClone(t, tfvars.CloudbuildV2RepositoryConfig.RepoType, repoName, repository.RepositoryURL, gitPath, repoProjectID, c.Logger)
 
 			err := conf.CheckoutBranch("main")
 			if err != nil {
@@ -129,9 +151,9 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 			}
 
 			// Copy App Source code to target repo
-			appSrcDir := getAppSourcePath(c, c.ExampleName, serviceName)
+			appSrcDir := getAppSourcePath(c, c.ExampleName, serviceKey)
 			if appSrcDir == "" {
-				return fmt.Errorf("could not find app source path for example %s, service %s", c.ExampleName, serviceName)
+				return fmt.Errorf("could not find app source path for example %s, service %s", c.ExampleName, serviceKey)
 			}
 
 			err = utils.CopyDirectory(appSrcDir, gitPath)
@@ -140,7 +162,7 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 			}
 
 			// Commit and push changes to trigger Cloud Build pipeline
-			err = conf.CommitFiles(fmt.Sprintf("Initialize %s repo for %s", repository.RepositoryName, serviceName))
+			err = conf.CommitFiles(fmt.Sprintf("Initialize %s repo for %s", repoName, serviceKey))
 			if err != nil {
 				return err
 			}
@@ -156,9 +178,21 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 			}
 
 			// Monitor build success
-			err = gcp.NewGCP().WaitBuildSuccess(t, outputs.ServiceRepositoryProjectID, tfvars.Region, outputs.ServiceRepositoryName, commitSha, fmt.Sprintf("Build for %s failed", serviceName), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
+			err = gcp.NewGCP().WaitBuildSuccess(t, repoProjectID, tfvars.Region, repoName, commitSha, fmt.Sprintf("Build for %s failed", serviceKey), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
 			if err != nil {
 				return err
+			}
+
+			// Monitor Cloud Deploy release success if targets are configured
+			if targets, ok := outputs.CloudDeployTargetsNames[serviceKey]; ok && len(targets) > 0 {
+				shortSha := commitSha
+				if len(shortSha) > 7 {
+					shortSha = shortSha[:7]
+				}
+				err = gcp.NewGCP().WaitReleaseSuccess(t, repoProjectID, tfvars.Region, serviceKey, shortSha, fmt.Sprintf("Cloud Deploy release for %s failed", serviceKey), MaxBuildRetries)
+				if err != nil {
+					return err
+				}
 			}
 
 			return nil

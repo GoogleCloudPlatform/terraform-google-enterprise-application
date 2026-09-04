@@ -27,42 +27,52 @@ const (
 	replaceME = "REPLACE_ME"
 )
 
-func ValidateBasicFields(t testing.TB, g GlobalTFVars) {
+func ValidateBasicFields(t testing.TB, g GlobalTFVars) bool {
 	fmt.Println("")
 	fmt.Println("# Validating tfvar file.")
+	valid := true
 
 	if g.ProjectID == "" || strings.Contains(g.ProjectID, replaceME) {
 		fmt.Println("# Replace value 'REPLACE_ME' for input 'project_id'")
+		valid = false
 	}
 	if g.Region == "" || strings.Contains(g.Region, replaceME) {
 		fmt.Println("# Replace value 'REPLACE_ME' for input 'region'")
+		valid = false
 	}
 	if g.EABCodePath == "" || strings.Contains(g.EABCodePath, replaceME) {
 		fmt.Println("# Replace value 'REPLACE_ME' for input 'eab_code_path'")
+		valid = false
 	}
 	if g.CodeCheckoutPath == "" || strings.Contains(g.CodeCheckoutPath, replaceME) {
 		fmt.Println("# Replace value 'REPLACE_ME' for input 'code_checkout_path'")
+		valid = false
 	}
 
 	if g.CloudbuildV2RepositoryConfig == nil {
 		fmt.Println("# Error: You must provide `cloudbuildv2_repository_config` in your tfvars file.")
-		return
+		return false
 	}
 
 	if g.CloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" &&
 		(g.CloudbuildV2RepositoryConfig.GithubAppIDSecretID == nil || g.CloudbuildV2RepositoryConfig.GithubSecretID == nil) {
 		fmt.Println("# You must provide `github_app_id_secret_id` and `github_secret_id` for cloudbuildv2_repository_config")
+		valid = false
 	}
 
 	if g.CloudbuildV2RepositoryConfig.RepoType == "GITLABv2" &&
 		(g.CloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == nil || g.CloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == nil || g.CloudbuildV2RepositoryConfig.GitlabWebhookSecretID == nil) {
 		fmt.Println("# You must provide `gitlab_authorizer_credential_secret_id`, `gitlab_webhook_secret_id` and `gitlab_read_authorizer_credential_secret_id` for cloudbuildv2_repository_config")
+		valid = false
 	}
+
+	return valid
 }
 
-func ValidatePermissions(t testing.TB, g GlobalTFVars) {
+func ValidatePermissions(t testing.TB, g GlobalTFVars) bool {
 	fmt.Println("")
 	fmt.Println("# Validating if identity has required roles on project.")
+	valid := true
 
 	projectRoles := map[string][]string{
 		fmt.Sprintf("seedProject:%s", g.ProjectID): {
@@ -80,7 +90,7 @@ func ValidatePermissions(t testing.TB, g GlobalTFVars) {
 			rolePermissions, err := gcp.NewGCP().GetRolePermissions(t, role)
 			if err != nil {
 				fmt.Printf("# Error getting roles: %v\n", err)
-				return
+				return false
 			}
 
 			cleanPermission := []string{}
@@ -96,15 +106,17 @@ func ValidatePermissions(t testing.TB, g GlobalTFVars) {
 			identityPermissions, err := gcp.NewGCP().TestIamPermissions(t, fmt.Sprintf("projects/%s", project), cleanPermission)
 			if err != nil {
 				fmt.Printf("# Error testing permissions: %v\n", err)
-				return
+				return false
 			}
 
 			intersectionPerms := intersection(cleanPermission, identityPermissions)
 			if len(intersectionPerms) != len(cleanPermission) {
 				fmt.Printf("# Missing required role: %s \n", role)
+				valid = false
 			}
 		}
 	}
+	return valid
 }
 
 func intersection(a, b []string) []string {
@@ -121,9 +133,10 @@ func intersection(a, b []string) []string {
 	return res
 }
 
-func ValidateComponents(t testing.TB) {
+func ValidateComponents(t testing.TB) bool {
 	fmt.Println("")
 	fmt.Println("# Validating local workspace dependencies.")
+	valid := true
 
 	components := []string{"terraform", "git", "gcloud"}
 	for _, component := range components {
@@ -132,6 +145,8 @@ func ValidateComponents(t testing.TB) {
 			fmt.Printf("# Local dependency '%s' is present.\n", component)
 		} else {
 			fmt.Printf("# Local dependency '%s' is missing!\n", component)
+			valid = false
 		}
 	}
+	return valid
 }
