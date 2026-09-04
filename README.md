@@ -18,7 +18,7 @@ This repository is designed with a highly modular and example-driven structure. 
 
 The `modules/` directory contains the primary infrastructure components of the Enterprise Application blueprint:
 
-*   **[`modules/gke`](./modules/gke/)**: Provisions per-environment multi-tenant GKE clusters, reserved external IP addresses, Google-managed SSL certificates, and Cloud Armor security policies. 
+*   **[`modules/gke`](./modules/gke/)**: Provisions per-environment multi-tenant GKE clusters, reserved external IP addresses, Google-managed SSL certificates, and Cloud Armor security policies.
 *   **[`modules/fleetscope`](/modules/fleetscope/)**: Configures GKE clusters as a unified fleet. It manages team scopes, namespaces, ACM (Anthos Config Management) with Config Sync, Service Mesh (ASM), and Policy Controller.
 *   **[`modules/secure-cicd-pipeline`](/modules/secure-cicd-pipeline/)**: Creates secure, isolated, and VPC-SC-compliant application CI/CD pipelines with Cloud Build private worker pools.
 *   **[`modules/deployment-pipeline`](/modules/deployment-pipeline/)**: Defines secure application delivery and deployment configurations using Cloud Build and Cloud Deploy pipelines.
