@@ -16,6 +16,7 @@ package stages
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -23,29 +24,54 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 )
 
-const (
-	replaceME = "REPLACE_ME"
-)
+var placeholderPatterns = []string{
+	"REPLACE_ME",
+	"YOUR_",
+	"FULL_PATH_",
+	"your-group@yourdomain.com",
+}
+
+func isPlaceholder(val string) bool {
+	if val == "" {
+		return false
+	}
+	for _, p := range placeholderPatterns {
+		if strings.Contains(val, p) {
+			return true
+		}
+	}
+	return false
+}
+
+func isBlankOrPlaceholder(val string) bool {
+	return strings.TrimSpace(val) == "" || isPlaceholder(val)
+}
 
 func ValidateBasicFields(t testing.TB, g GlobalTFVars) bool {
 	fmt.Println("")
 	fmt.Println("# Validating tfvar file.")
 	valid := true
 
-	if g.ProjectID == "" || strings.Contains(g.ProjectID, replaceME) {
-		fmt.Println("# Replace value 'REPLACE_ME' for input 'project_id'")
+	if isBlankOrPlaceholder(g.ProjectID) {
+		fmt.Println("# Invalid or placeholder value for required input 'project_id'")
 		valid = false
 	}
-	if g.Region == "" || strings.Contains(g.Region, replaceME) {
-		fmt.Println("# Replace value 'REPLACE_ME' for input 'region'")
+	if isBlankOrPlaceholder(g.Region) {
+		fmt.Println("# Invalid or placeholder value for required input 'region'")
 		valid = false
 	}
-	if g.EABCodePath == "" || strings.Contains(g.EABCodePath, replaceME) {
-		fmt.Println("# Replace value 'REPLACE_ME' for input 'eab_code_path'")
+	if isBlankOrPlaceholder(g.EABCodePath) {
+		fmt.Println("# Invalid or placeholder value for required input 'eab_code_path'")
 		valid = false
+	} else {
+		fi, err := os.Stat(g.EABCodePath)
+		if err != nil || !fi.IsDir() {
+			fmt.Printf("# The directory specified in 'eab_code_path' (%s) does not exist or is not a directory.\n", g.EABCodePath)
+			valid = false
+		}
 	}
-	if g.CodeCheckoutPath == "" || strings.Contains(g.CodeCheckoutPath, replaceME) {
-		fmt.Println("# Replace value 'REPLACE_ME' for input 'code_checkout_path'")
+	if isBlankOrPlaceholder(g.CodeCheckoutPath) {
+		fmt.Println("# Invalid or placeholder value for required input 'code_checkout_path'")
 		valid = false
 	}
 
@@ -54,16 +80,87 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) bool {
 		return false
 	}
 
-	if g.CloudbuildV2RepositoryConfig.RepoType == "GITHUBv2" &&
-		(g.CloudbuildV2RepositoryConfig.GithubAppIDSecretID == nil || g.CloudbuildV2RepositoryConfig.GithubSecretID == nil) {
-		fmt.Println("# You must provide `github_app_id_secret_id` and `github_secret_id` for cloudbuildv2_repository_config")
+	repoType := g.CloudbuildV2RepositoryConfig.RepoType
+	if repoType != "CSR" && repoType != "GITHUBv2" && repoType != "GITLABv2" {
+		fmt.Printf("# Invalid 'repo_type' (%s). Supported types are 'CSR', 'GITHUBv2', and 'GITLABv2'.\n", repoType)
 		valid = false
 	}
 
-	if g.CloudbuildV2RepositoryConfig.RepoType == "GITLABv2" &&
-		(g.CloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == nil || g.CloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == nil || g.CloudbuildV2RepositoryConfig.GitlabWebhookSecretID == nil) {
-		fmt.Println("# You must provide `gitlab_authorizer_credential_secret_id`, `gitlab_webhook_secret_id` and `gitlab_read_authorizer_credential_secret_id` for cloudbuildv2_repository_config")
+	if repoType == "GITHUBv2" {
+		if g.CloudbuildV2RepositoryConfig.GithubAppIDSecretID == nil || isBlankOrPlaceholder(*g.CloudbuildV2RepositoryConfig.GithubAppIDSecretID) ||
+			g.CloudbuildV2RepositoryConfig.GithubSecretID == nil || isBlankOrPlaceholder(*g.CloudbuildV2RepositoryConfig.GithubSecretID) {
+			fmt.Println("# You must provide valid 'github_app_id_secret_id' and 'github_secret_id' for GITHUBv2 repo_type.")
+			valid = false
+		}
+	}
+
+	if repoType == "GITLABv2" {
+		if g.CloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID == nil || isBlankOrPlaceholder(*g.CloudbuildV2RepositoryConfig.GitlabAuthorizerCredentialSecretID) ||
+			g.CloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID == nil || isBlankOrPlaceholder(*g.CloudbuildV2RepositoryConfig.GitlabReadAuthorizerCredentialSecretID) ||
+			g.CloudbuildV2RepositoryConfig.GitlabWebhookSecretID == nil || isBlankOrPlaceholder(*g.CloudbuildV2RepositoryConfig.GitlabWebhookSecretID) {
+			fmt.Println("# You must provide valid 'gitlab_authorizer_credential_secret_id', 'gitlab_webhook_secret_id' and 'gitlab_read_authorizer_credential_secret_id' for GITLABv2 repo_type.")
+			valid = false
+		}
+	}
+
+	if len(g.CloudbuildV2RepositoryConfig.Repositories) == 0 {
+		fmt.Println("# You must provide at least one repository in 'cloudbuildv2_repository_config.repositories'.")
 		valid = false
+	} else {
+		for key, repo := range g.CloudbuildV2RepositoryConfig.Repositories {
+			if repoType == "GITHUBv2" || repoType == "GITLABv2" {
+				if isBlankOrPlaceholder(repo.RepositoryURL) {
+					fmt.Printf("# Repository '%s' must have a valid 'repository_url' for %s.\n", key, repoType)
+					valid = false
+				}
+			}
+		}
+	}
+
+	// Optional fields placeholder check
+	if g.NetworkID != nil && isPlaceholder(*g.NetworkID) {
+		fmt.Println("# Replace placeholder value in optional input 'network_id'")
+		valid = false
+	}
+	if g.SubnetworkSelfLink != nil && isPlaceholder(*g.SubnetworkSelfLink) {
+		fmt.Println("# Replace placeholder value in optional input 'subnetwork_self_link'")
+		valid = false
+	}
+	if g.WorkerPoolID != nil && isPlaceholder(*g.WorkerPoolID) {
+		fmt.Println("# Replace placeholder value in optional input 'workerpool_id'")
+		valid = false
+	}
+	if g.AttestationKMSKey != nil && isPlaceholder(*g.AttestationKMSKey) {
+		fmt.Println("# Replace placeholder value in optional input 'attestation_kms_key'")
+		valid = false
+	}
+	if g.BinaryAuthorizationImage != nil && isPlaceholder(*g.BinaryAuthorizationImage) {
+		fmt.Println("# Replace placeholder value in optional input 'binary_authorization_image'")
+		valid = false
+	}
+	if g.BinaryAuthorizationRepositoryID != nil && isPlaceholder(*g.BinaryAuthorizationRepositoryID) {
+		fmt.Println("# Replace placeholder value in optional input 'binary_authorization_repository_id'")
+		valid = false
+	}
+	if g.BucketKMSKey != nil && isPlaceholder(*g.BucketKMSKey) {
+		fmt.Println("# Replace placeholder value in optional input 'bucket_kms_key'")
+		valid = false
+	}
+	if g.LoggingBucket != nil && isPlaceholder(*g.LoggingBucket) {
+		fmt.Println("# Replace placeholder value in optional input 'logging_bucket'")
+		valid = false
+	}
+
+	// VPC Service Controls consistency
+	if g.ServicePerimeterName != nil && *g.ServicePerimeterName != "" && !isPlaceholder(*g.ServicePerimeterName) {
+		if g.AccessLevelName == nil || isBlankOrPlaceholder(*g.AccessLevelName) {
+			fmt.Println("# You must provide a valid 'access_level_name' when 'service_perimeter_name' is configured.")
+			valid = false
+		}
+		if g.ServicePerimeterMode != nil && *g.ServicePerimeterMode != "ENFORCE" && *g.ServicePerimeterMode != "DRY_RUN" {
+			fmt.Printf("# Invalid 'service_perimeter_mode' (%s). Supported modes are 'ENFORCE' and 'DRY_RUN'.\n", *g.ServicePerimeterMode)
+			valid = false
+		}
 	}
 
 	return valid
@@ -73,6 +170,11 @@ func ValidatePermissions(t testing.TB, g GlobalTFVars) bool {
 	fmt.Println("")
 	fmt.Println("# Validating if identity has required roles on project.")
 	valid := true
+
+	if isBlankOrPlaceholder(g.ProjectID) {
+		fmt.Println("# Skipping IAM permissions check due to invalid or placeholder 'project_id'.")
+		return false
+	}
 
 	projectRoles := map[string][]string{
 		fmt.Sprintf("seedProject:%s", g.ProjectID): {

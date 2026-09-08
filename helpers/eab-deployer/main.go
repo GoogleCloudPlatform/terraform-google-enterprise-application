@@ -103,7 +103,10 @@ func main() {
 	if cfg.validate {
 		okComp := stages.ValidateComponents(t)
 		okFields := stages.ValidateBasicFields(t, globalTFVars)
-		okPerms := stages.ValidatePermissions(t, globalTFVars)
+		okPerms := false
+		if okComp && okFields {
+			okPerms = stages.ValidatePermissions(t, globalTFVars)
+		}
 		if !okComp || !okFields || !okPerms {
 			fmt.Println("\n# Validation failed. Please fix the issues above before deploying.")
 			os.Exit(1)
