@@ -4,7 +4,7 @@ Helper tool to deploy Enterprise Application Blueprint examples (including `stan
 
 ## Requirements
 
-- [Go](https://go.dev/doc/install) 1.23 or later
+- [Go](https://go.dev/doc/install) 1.25 or later
 - [Google Cloud SDK](https://cloud.google.com/sdk/install) version 393.0.0 or later
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) version 2.28.0 or later
 - [Terraform](https://www.terraform.io/downloads.html) version 1.5.7 or later
