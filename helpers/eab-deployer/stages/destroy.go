@@ -27,7 +27,7 @@ func DestroyInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Commo
 		return err
 	}
 
-	return s.RunDestroyStep("gcp-infra.destroy", func() error {
+	return s.RunDestroyStep("gcp-infra.apply", func() error {
 		options := &terraform.Options{
 			TerraformDir:             destPath,
 			Logger:                   c.Logger,
