@@ -1,9 +1,12 @@
-# App Infrastructure: environment baseline module
+# AlloyDB PSC Setup Module
 
-This module defines the per-environment app resources deployed via the app infrastructure pipeline.
+This module provisions an AlloyDB cluster and instance configured with Private Service Connect (PSC), registers a compute forwarding rule on the consumer VPC network, and grants Workload Identity access to the AlloyDB instance.
 
-The following resources are created:
-- Cloud SQL PostgreSQL (accounts-db, ledger-db)
+This module creates the following resources:
+- AlloyDB Cluster and primary instance with PSC enabled
+- AlloyDB read-pool instance (optional)
+- Compute Forwarding Rule (PSC endpoint forwarding rule) on the consumer VPC
+- IAM binding granting the Workload Identity service account the `roles/alloydb.admin` role
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs

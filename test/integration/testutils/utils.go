@@ -33,6 +33,12 @@ const (
 	credsMutexFilename = "creds.lock"
 )
 
+func init() {
+	if err := os.Setenv("CLOUDSDK_CONTAINER_USE_APPLICATION_DEFAULT_CREDENTIALS", "true"); err != nil {
+		panic(fmt.Sprintf("failed to set CLOUDSDK_CONTAINER_USE_APPLICATION_DEFAULT_CREDENTIALS: %v", err))
+	}
+}
+
 // fileExists check if a give file exists
 func FileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)

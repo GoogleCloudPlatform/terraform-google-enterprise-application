@@ -45,6 +45,12 @@ variable "examples_tested" {
   default     = []
 }
 
+variable "region" {
+  description = "Region for hub network."
+  type        = string
+  default     = "us-central1"
+}
+
 variable "hpc" {
   description = "HPC Example being deployed."
   type        = bool

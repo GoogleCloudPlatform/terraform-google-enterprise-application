@@ -11,9 +11,9 @@ It also requires a newer version of Kubernetes installed in your cluster. You ca
 This example requires:
 
 1. `jq` installed.
-1. [1-bootstrap](../../1-bootstrap/README.md) phase executed successfully.
-1. [2-multitenant](../../2-multitenant/README.md) phase executed successfully.
-1. [3-fleetscope](../../3-fleetscope/README.md) phase executed successfully.
+1. Baseline CI/CD foundation (such as [`modules/secure-cicd-pipeline`](/modules/secure-cicd-pipeline/)) deployed successfully.
+1. Multi-tenant GKE clusters (such as [`modules/gke`](/modules/gke/)) deployed successfully.
+1. Fleet-scope configuration (such as [`modules/fleetscope`](/modules/fleetscope/)) deployed successfully.
 
 ## Usage
 
@@ -173,11 +173,11 @@ This stage will create the CI/CD pipeline for the service, and application speci
     cd ../../../
     ```
 
-1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+1. Retrieve the `remote_state_bucket` value from your foundational bootstrap output, and export it:
 
    ```bash
-   terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" init
-   export remote_state_bucket=$(terraform -chdir="./terraform-google-enterprise-application/1-bootstrap/" output -raw state_bucket)
+   # Retrieve the GCS state bucket name from your bootstrap/foundation deployment
+   export remote_state_bucket="YOUR_BOOTSTRAP_STATE_BUCKET_NAME"
    echo "remote_state_bucket = ${remote_state_bucket}"
    ```
 
@@ -384,11 +384,11 @@ The specified values above will create a sigle `admin` project for Capital Agent
 
 1. Adjust the `terraform.tfvars` file with values from your environment. Follow the steps below to retrieve the state bucket and replace the placeholder:
 
-    - Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
+    - Retrieve the `remote_state_bucket` value from your foundational bootstrap output, and replace the placeholder in `terraform.tfvars`:
 
         ```bash
-        terraform -chdir="../1-bootstrap/" init
-        export remote_state_bucket=$(terraform -chdir="../1-bootstrap/" output -raw state_bucket)
+        # Retrieve the GCS state bucket name from your bootstrap/foundation deployment
+        export remote_state_bucket="YOUR_BOOTSTRAP_STATE_BUCKET_NAME"
         echo "remote_state_bucket = ${remote_state_bucket}"
 
         sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $APP_INFRA_REPO/apps/agent/capital-agent/envs/shared//terraform.tfvars

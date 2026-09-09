@@ -1,3 +1,15 @@
+# Secure CI/CD Pipeline Module
+
+This module provisions a secure, isolated, and VPC Service Controls (VPC-SC) compliant CI/CD pipeline for enterprise applications.
+
+This module creates the following resources:
+- A dedicated CI/CD project for each application or microservice (optional, if `create_admin_project` is true)
+- Cloud Build v2 repository connection (supporting GitHub, GitLab, and CSR)
+- Cloud Build triggers for plan and apply operations
+- Custom, least-privilege Cloud Build service accounts with configurable project and environment-level roles
+- Secure Google Cloud Storage buckets for build logs, artifacts, and Terraform state
+- Configuration of VPC Service Controls perimeters and private worker pools support for isolated builds
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 

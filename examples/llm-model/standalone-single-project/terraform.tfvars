@@ -15,15 +15,45 @@
  */
 
 project_id = "<YOUR-PROJECT-ID>"
-# workerpool_id = "<YOUR-NETWORK-ID>"     // Optional: If you already have a private workerpool to use, if not, it will create one.
-# network_id = "<YOUR-PRIVATE-WORKERPOOL-NETWORK>" // Optional: if you already have a network to use in case of Private worker pool creation, if not it will create one
 
-# Mandatory fleetscope namespace
+# Mandatory fleetscope namespace, it can be {} if there is no namespaces to provide
 teams = {
   "namespace" = "your-group@yourdomain.com",
 }
+
+# region     = "us-central1"
+
+# Optional: If you already have a private worker pool, specify its ID. If not, a new one will be created.  
+# workerpool_id = "projects/PROJECT_ID/locations/LOCATION/workerPools/POOL_NAME"  
+
+# Optional: If a private worker pool is not provided, and you already have a VPC network to use for the private worker pool, specify its ID. If not, a new network will be created.  
+# network_id = "projects/PROJECT_ID/global/networks/NETWORK_NAME"
+
+# Optional: Set to false if you do not want to create a NAT gateway (e.g. if your existing network already has one).
+# create_nat = true
+
+# Optional: Cloud Storage bucket to store logs
+# logging_bucket = "your-gcs-logging-bucket"
+
+# Optional: KMS Key to encrypt Cloud Storage buckets
+# bucket_kms_key = "projects/PROJECT_ID/locations/LOCATION/keyRings/KEYRING/cryptoKeys/KEY"
+
+# Optional: VPC Service Controls configuration
 # service_perimeter_name = "<YOUR-SERVICE-PERIMETER-NAME>"
 # service_perimeter_mode = "DRY_RUN"
+# access_level_name      = "<YOUR-ACCESS-LEVEL-NAME>"
+
+# Optional: Network Connectivity Center (NCC) connection configuration
+# ncc_config = {
+#   enable_ncc                  = true
+#   hub_uri                     = "projects/YOUR_HUB_PROJECT_ID/locations/global/hubs/YOUR_HUB_NAME"
+#   spoke_group                 = "edge"
+#   spoke_name                  = "vpc-spoke"
+#   spoke_description           = "NCC Spoke for standalone cluster network"
+#   spoke_labels                = { env = "dev" }
+#   spoke_exclude_export_ranges = []
+#   spoke_include_export_ranges = []
+# }
 
 cloudbuildv2_repository_config = {
   repo_type = "GITLABv2"

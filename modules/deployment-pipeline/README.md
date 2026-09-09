@@ -1,4 +1,14 @@
-# Cymbal Bank deployment example
+# Application Deployment Pipeline Module
+
+This module provisions the deployment delivery pipelines for application-specific code and configurations on Google Cloud, utilizing Cloud Build triggers and Cloud Deploy pipelines targeting GKE cluster environments.
+
+This module creates the following resources:
+- A dedicated Cloud Source Repository (CSR) or integration with external repositories (GitHub, GitLab)
+- Cloud Build triggers to initiate application continuous integration (CI) builds
+- Artifact Registry repository to host container images
+- Cloud Deploy pipelines and target environments for promoting builds through stages (e.g. development, nonproduction, production)
+- Least-privilege IAM service accounts with access to Artifact Registry, Cloud Deploy, and GKE cluster permissions
+- Isolation and encryption features, including GCS buckets and custom KMS keys support
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
@@ -41,4 +51,3 @@
 | service\_repository\_project\_id | The Source Repository project id. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-

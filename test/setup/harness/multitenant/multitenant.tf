@@ -143,6 +143,7 @@ module "cluster_vpc" {
   project_id      = each.value.project_id
   vpc_name        = "eab-vpc-${each.key}"
   shared_vpc_host = true
+  ncc_config      = var.ncc_config
 
   ingress_rules = [
     {

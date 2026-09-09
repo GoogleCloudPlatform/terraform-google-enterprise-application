@@ -1,14 +1,13 @@
-# Multitenant Infrastructure: environment baseline module
+# GKE Multitenant Infrastructure Module
 
-This module defines the per-environment multitenant resources deployed via the multitenant infrastructure pipeline.
+This module defines the per-environment multitenant GKE resources deployed via the multitenant infrastructure pipeline.
 
-The following resources are created:
-- GCP Project (cluster project)
-- GKE cluster(s)
-- Cloud SQL PostgreSQL (accounts-db, ledger-db)
-- Cloud Endpoint
-- Cloud Armor
-- IP addresses (frontend-ip)
+This module creates the following resources:
+- GCP Project (cluster project) (optional, if `create_cluster_project` is true)
+- GKE Autopilot or Standard cluster(s) with multi-tenancy configurations
+- Google-managed SSL certificates for applications
+- Cloud Armor security policies for application protection
+- Reserved static external IP addresses (frontend-ips) for deployed applications
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
