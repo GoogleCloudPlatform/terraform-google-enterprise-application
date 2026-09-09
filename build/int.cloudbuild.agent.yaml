@@ -27,7 +27,7 @@ tags:
   - "integration"
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: "cft/developer-tools"
-  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.25"
+  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: "1.28"
 options:
   machineType: E2_HIGHCPU_32
   env:
@@ -44,3 +44,4 @@ options:
     - "TF_VAR_region=us-central1"
     - "TF_VAR_location=us-central1"
     - "_SKIP_GITLAB=false"
+    - "CLOUDSDK_CONTAINER_USE_APPLICATION_DEFAULT_CREDENTIALS=true"
