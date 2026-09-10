@@ -426,18 +426,19 @@ func (g GCP) TestIamPermissions(t testing.TB, parent string, permissions []strin
 		if resp.StatusCode != http.StatusOK {
 			bodyBytes, _ := io.ReadAll(resp.Body) // Read error body
 			return nil, fmt.Errorf("request failed with status code: %d, body: %s", resp.StatusCode, string(bodyBytes))
-		} else {
-			bodyBytes, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, fmt.Errorf("failed to read response body: %w", err)
-			}
-			bodyJson := map[string][]string{}
-			err = json.Unmarshal(bodyBytes, &bodyJson)
-			if err != nil {
-				return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
-			}
-			identityPermissions = append(identityPermissions, bodyJson["permissions"]...)
 		}
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+		bodyJson := map[string][]string{}
+		err = json.Unmarshal(bodyBytes, &bodyJson)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		}
+		identityPermissions = append(identityPermissions, bodyJson["permissions"]...)
+
 	}
 	return identityPermissions, nil
 }
