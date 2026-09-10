@@ -29,9 +29,9 @@ import (
 )
 
 const (
-	MaxBuildRetries         = 20
+	MaxBuildRetries         = 50
 	MaxErrorRetries         = 3
-	TimeBetweenErrorRetries = 10 * time.Second
+	TimeBetweenErrorRetries = 2 * time.Minute
 )
 
 func getStandalonePaths(EABPath, checkoutPath, exampleName string) (string, string, error) {

@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-provider "google-beta" {
-  user_project_override = true
-  billing_project       = var.project_id
-}
-
 provider "google" {
   user_project_override = true
   billing_project       = var.project_id
