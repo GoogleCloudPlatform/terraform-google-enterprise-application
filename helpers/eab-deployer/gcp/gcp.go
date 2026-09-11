@@ -115,7 +115,7 @@ func NewGCP() GCP {
 		Runf:            gcloud.Runf,
 		RunCmd:          runCmd,
 		TriggerNewBuild: triggerNewBuild,
-		sleepTime:       20,
+		sleepTime:       60,
 	}
 }
 
