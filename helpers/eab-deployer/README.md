@@ -46,6 +46,33 @@ gcloud components list --filter="id=beta OR id=terraform-tools"
    - `code_checkout_path`: The full path to your working `deploy-directory`.
    - `project_id`: Your Google Cloud project ID.
    - `region`: Google Cloud region for deployment.
+   - `ncc_config` (optional): Configuration block for connecting the cluster network to a Network Connectivity Center (NCC) Hub.
+
+#### Network Connectivity Center (NCC) Configuration
+
+To connect the cluster VPC to an existing Network Connectivity Center Hub via a VPC spoke, configure the `ncc_config` object in `global.tfvars`:
+
+```hcl
+ncc_config = {
+  enable_ncc                  = true
+  hub_uri                     = "projects/YOUR_HUB_PROJECT/locations/global/hubs/YOUR_HUB_NAME"
+  spoke_group                 = "default"
+  spoke_name                  = "vpc-spoke"
+  spoke_description           = "NCC Spoke for standalone cluster network"
+  spoke_labels                = { env = "dev" }
+  spoke_exclude_export_ranges = []
+  spoke_include_export_ranges = []
+}
+```
+
+* `enable_ncc`: (bool) Toggles whether to create the NCC spoke.
+* `hub_uri`: (string) The full resource URI of the target NCC Hub. Required when `enable_ncc` is `true`.
+* `spoke_group`: (string) The NCC group the spoke belongs to (defaults to `"default"`).
+* `spoke_name`: (string) The name for the VPC spoke (defaults to `"vpc-spoke"`).
+* `spoke_description`: (string, optional) Description for the spoke.
+* `spoke_labels`: (map, optional) Key-value pairs for spoke labels.
+* `spoke_exclude_export_ranges`: (list of strings, optional) IP CIDR ranges to exclude from route export.
+* `spoke_include_export_ranges`: (list of strings, optional) IP CIDR ranges to explicitly export.
 
 ### Application default credentials
 

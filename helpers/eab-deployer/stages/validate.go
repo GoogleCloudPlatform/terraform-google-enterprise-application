@@ -163,6 +163,32 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) bool {
 		}
 	}
 
+	// Network Connectivity Center (NCC) validation
+	if g.NCCConfig != nil {
+		if g.NCCConfig.EnableNCC != nil && *g.NCCConfig.EnableNCC {
+			if g.NCCConfig.HubURI == nil || isBlankOrPlaceholder(*g.NCCConfig.HubURI) {
+				fmt.Println("# Invalid NCC configuration. If enable_ncc is TRUE: hub_uri is required.")
+				valid = false
+			}
+		}
+		if g.NCCConfig.HubURI != nil && isPlaceholder(*g.NCCConfig.HubURI) {
+			fmt.Println("# Replace placeholder value in optional input 'ncc_config.hub_uri'")
+			valid = false
+		}
+		if g.NCCConfig.SpokeGroup != nil && isPlaceholder(*g.NCCConfig.SpokeGroup) {
+			fmt.Println("# Replace placeholder value in optional input 'ncc_config.spoke_group'")
+			valid = false
+		}
+		if g.NCCConfig.SpokeName != nil && isPlaceholder(*g.NCCConfig.SpokeName) {
+			fmt.Println("# Replace placeholder value in optional input 'ncc_config.spoke_name'")
+			valid = false
+		}
+		if g.NCCConfig.SpokeDescription != nil && isPlaceholder(*g.NCCConfig.SpokeDescription) {
+			fmt.Println("# Replace placeholder value in optional input 'ncc_config.spoke_description'")
+			valid = false
+		}
+	}
+
 	return valid
 }
 

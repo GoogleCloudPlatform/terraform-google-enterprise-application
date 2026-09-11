@@ -53,10 +53,22 @@ type GlobalTFVars struct {
 	BinaryAuthorizationRepositoryID  *string                       `hcl:"binary_authorization_repository_id"`
 	CreateNat                        *bool                         `hcl:"create_nat"`
 	EnablesNetworkConnection         *bool                         `hcl:"enables_network_connection_and_peering_routes"`
+	NCCConfig                        *NCCConfig                    `hcl:"ncc_config"`
 	Teams                            map[string]string             `hcl:"teams"`
 	CloudbuildV2RepositoryConfig     *CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
 	EABCodePath                      string                        `hcl:"eab_code_path"`
 	CodeCheckoutPath                 string                        `hcl:"code_checkout_path"`
+}
+
+type NCCConfig struct {
+	EnableNCC                *bool             `hcl:"enable_ncc" cty:"enable_ncc"`
+	HubURI                   *string           `hcl:"hub_uri" cty:"hub_uri"`
+	SpokeGroup               *string           `hcl:"spoke_group" cty:"spoke_group"`
+	SpokeName                *string           `hcl:"spoke_name" cty:"spoke_name"`
+	SpokeDescription         *string           `hcl:"spoke_description" cty:"spoke_description"`
+	SpokeLabels              map[string]string `hcl:"spoke_labels" cty:"spoke_labels"`
+	SpokeExcludeExportRanges []string          `hcl:"spoke_exclude_export_ranges" cty:"spoke_exclude_export_ranges"`
+	SpokeIncludeExportRanges []string          `hcl:"spoke_include_export_ranges" cty:"spoke_include_export_ranges"`
 }
 
 type CloudbuildV2RepositoryConfig struct {

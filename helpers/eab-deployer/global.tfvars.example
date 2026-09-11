@@ -41,6 +41,19 @@ bucket_kms_key                     = null // Optional KMS Key ID
 // create_nat                         = true // Optional: Enables Cloud NAT creation for Private Worker Pool
 // enables_network_connection_and_peering_routes = true // Optional: Enables Network connection and peering routes
 
+// Network Connectivity Center (NCC) Configuration (Optional)
+// Enables connection of cluster VPC to a Network Connectivity Center Hub via a VPC Spoke.
+// ncc_config = {
+//   enable_ncc                  = true
+//   hub_uri                     = "projects/YOUR_HUB_PROJECT/locations/global/hubs/YOUR_HUB_NAME"
+//   spoke_group                 = "default"
+//   spoke_name                  = "vpc-spoke"
+//   spoke_description           = "NCC Spoke for standalone cluster network"
+//   spoke_labels                = { env = "dev" }
+//   spoke_exclude_export_ranges = []
+//   spoke_include_export_ranges = []
+// }
+
 // VPC Service Controls (Optional)
 service_perimeter_name             = null // Service perimeter name (e.g. accessPolicies/.../servicePerimeters/...)
 service_perimeter_mode             = "DRY_RUN" // Service perimeter mode: ENFORCE, DRY_RUN

@@ -183,29 +183,59 @@ func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string,
 }
 
 // GetRollouts gets all Cloud Deploy Rollouts form a project and region that satisfy the given filter.
+func (g GCP) GetRollouts(t testing.TB, projectID, region, service, releaseFullName, targetID string) []gjson.Result {
+	return g.Runf(t, "deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, service, region, releaseFullName, targetID).Array()
+}
+
+// GetRolloutsStatus gets the state of the first rollout.
 func (g GCP) GetRolloutsStatus(t testing.TB, projectID, region, service, releaseFullName, targetID string) string {
-	rollout := g.Runf(t, "deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, service, region, releaseFullName, targetID).Array()
-	if len(rollout) > 0 {
-		return rollout[0].Get("state").String()
+	rollouts := g.GetRollouts(t, projectID, region, service, releaseFullName, targetID)
+	if len(rollouts) > 0 {
+		return rollouts[0].Get("state").String()
 	}
 	return ""
 }
 
-// GetFinalRolloutState gets the terminal status of the given rollout. It will wait if build is not finished.
+// GetFinalRolloutState gets the terminal status of the given rollout. It will wait if build is not finished and retry if deploy fails.
 func (g GCP) GetFinalRolloutState(t testing.TB, projectID, region, serviceName, releaseFullName, targetID string, maxRetry int) (string, error) {
 	var status string
 	count := 0
+	retries := 0
+	maxRolloutRetries := 3
 	fmt.Printf("waiting for rollout %s execution.\n", releaseFullName)
-	status = g.GetRolloutsStatus(t, projectID, region, serviceName, releaseFullName, targetID)
-	fmt.Printf("rollout status is %s\n", status)
-	for status != ReleaseStatusSuccess && status != ReleaseStatusFailure && status != ReleaseStatusCancelled {
-		fmt.Printf("release status is %s\n", status)
+	for {
+		rollouts := g.GetRollouts(t, projectID, region, serviceName, releaseFullName, targetID)
+		if len(rollouts) > 0 {
+			status = rollouts[0].Get("state").String()
+		} else {
+			status = ""
+		}
+		fmt.Printf("rollout status is %s\n", status)
+
+		if status == ReleaseStatusSuccess {
+			break
+		}
+		if status == ReleaseStatusFailure {
+			if retries < maxRolloutRetries && len(rollouts) > 0 {
+				retries++
+				rolloutName := testutils.GetLastSplitElement(rollouts[0].Get("name").String(), "/")
+				releaseShortName := testutils.GetLastSplitElement(releaseFullName, "/")
+				fmt.Printf("rollout failed, retrying deploy job (attempt %d/%d)...\n", retries, maxRolloutRetries)
+				g.Runf(t, "deploy rollouts retry-job %s --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable --job-id=deploy", rolloutName, projectID, serviceName, region, releaseShortName)
+				time.Sleep(g.sleepTime * time.Second)
+				continue
+			}
+			break
+		}
+		if status == ReleaseStatusCancelled {
+			break
+		}
+
 		if count >= maxRetry {
 			return "", fmt.Errorf("timeout waiting for release '%s' execution", releaseFullName)
 		}
-		count = count + 1
+		count++
 		time.Sleep(g.sleepTime * time.Second)
-		status = g.GetRolloutsStatus(t, projectID, region, serviceName, releaseFullName, targetID)
 	}
 	fmt.Printf("final rollout status is %s\n", status)
 	return status, nil
@@ -281,27 +311,44 @@ func (g GCP) GetBuildLogs(t testing.TB, projectID, region, buildID string) strin
 
 // WaitReleaseSuccess waits for the current release in a repo to finish.
 func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, commitSha, failureMsg string, maxRetry int) error {
-	releaseFullName := fmt.Sprintf("projects/%s/locations/%s/deliveryPipelines/%s/releases/%s-%s", project, region, serviceName, serviceName, commitSha)
+	// Find the actual delivery pipeline name
+	pipelineName := serviceName
+	pipelines := g.Runf(t, "deploy delivery-pipelines list --project=%s --region=%s", project, region).Array()
+	foundPipeline := false
+	for _, p := range pipelines {
+		pName := testutils.GetLastSplitElement(p.Get("name").String(), "/")
+		if pName == serviceName || strings.HasSuffix(serviceName, "-"+pName) || strings.Contains(serviceName, pName) {
+			pipelineName = pName
+			foundPipeline = true
+			break
+		}
+	}
+	if !foundPipeline && len(pipelines) == 1 {
+		pipelineName = testutils.GetLastSplitElement(pipelines[0].Get("name").String(), "/")
+	}
 
-	// Wait for release creation by Cloud Build
-	fmt.Printf("waiting for release %s to be created.\n", releaseFullName)
+	fmt.Printf("waiting for release matching %s in delivery pipeline %s to be created.\n", commitSha, pipelineName)
 	var release gjson.Result
 	for i := 0; i < maxRetry; i++ {
-		release = g.GetRelease(t, releaseFullName)
-		if release.Exists() && release.Get("name").Exists() {
+		releases := g.Runf(t, "deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", project, pipelineName, region, commitSha).Array()
+		if len(releases) > 0 {
+			release = releases[0]
 			break
 		}
 		time.Sleep(g.sleepTime * time.Second)
 	}
 
 	if !release.Exists() || !release.Get("name").Exists() {
-		return fmt.Errorf("%s: release %s not found after waiting", failureMsg, releaseFullName)
+		return fmt.Errorf("%s: release for commit %s in pipeline %s not found after waiting", failureMsg, commitSha, pipelineName)
 	}
+
+	releaseFullName := release.Get("name").String()
+	fmt.Printf("found release %s\n", releaseFullName)
 
 	releaseTargets := slices.Collect(maps.Keys(release.Get("targetArtifacts").Map()))
 	if len(releaseTargets) > 0 {
 		for i, targetID := range releaseTargets {
-			status, err := g.GetFinalRolloutState(t, project, region, serviceName, releaseFullName, targetID, maxRetry)
+			status, err := g.GetFinalRolloutState(t, project, region, pipelineName, releaseFullName, targetID, maxRetry)
 			if err != nil {
 				return err
 			}
@@ -309,7 +356,7 @@ func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, comm
 				return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/deploy/delivery-pipelines?project=%s\nfor details.\n", failureMsg, project)
 			}
 			if status == ReleaseStatusSuccess && i+1 < len(releaseTargets) {
-				g.PromoteRelease(t, releaseFullName, serviceName, region, releaseTargets[i+1])
+				g.PromoteRelease(t, releaseFullName, pipelineName, region, releaseTargets[i+1])
 			}
 		}
 	}

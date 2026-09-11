@@ -33,7 +33,7 @@ func TestVPCSC(t *testing.T) {
 
 	projectNumbers := temp.GetTFSetupJsonOutput("harness_project_numbers").Map()
 	serviceAccounts := temp.GetTFSetupJsonOutput("sa_email").Map()
-	addAccessLevelMembers := strings.Split(os.Getenv("TF_VAR_access_level_members"), ",")
+	addAccessLevelMembers := strings.Split(os.Getenv("_EXTRA_ACCESS_LEVEL_MEMBERS"), ",")
 	protected_projects := []string{}
 
 	orgID := temp.GetTFSetupStringOutput("org_id")

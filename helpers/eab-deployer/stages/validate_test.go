@@ -139,4 +139,54 @@ func TestValidateBasicFields(t *testing.T) {
 		cfg.WorkerPoolID = &wp
 		assert.False(t, ValidateBasicFields(t, cfg))
 	})
+
+	t.Run("valid ncc_config passes", func(t *testing.T) {
+		cfg := validConfig
+		enableNCC := true
+		hubURI := "projects/test-proj/locations/global/hubs/test-hub"
+		spokeGroup := "edge"
+		spokeName := "vpc-spoke"
+		spokeDesc := "Test spoke"
+		cfg.NCCConfig = &NCCConfig{
+			EnableNCC:        &enableNCC,
+			HubURI:           &hubURI,
+			SpokeGroup:       &spokeGroup,
+			SpokeName:        &spokeName,
+			SpokeDescription: &spokeDesc,
+			SpokeLabels:      map[string]string{"env": "dev"},
+		}
+		assert.True(t, ValidateBasicFields(t, cfg))
+	})
+
+	t.Run("enable_ncc true without hub_uri fails", func(t *testing.T) {
+		cfg := validConfig
+		enableNCC := true
+		cfg.NCCConfig = &NCCConfig{
+			EnableNCC: &enableNCC,
+			HubURI:    nil,
+		}
+		assert.False(t, ValidateBasicFields(t, cfg))
+	})
+
+	t.Run("enable_ncc true with placeholder hub_uri fails", func(t *testing.T) {
+		cfg := validConfig
+		enableNCC := true
+		hubURI := "projects/YOUR_HUB_PROJECT/locations/global/hubs/YOUR_HUB_NAME"
+		cfg.NCCConfig = &NCCConfig{
+			EnableNCC: &enableNCC,
+			HubURI:    &hubURI,
+		}
+		assert.False(t, ValidateBasicFields(t, cfg))
+	})
+
+	t.Run("ncc_config with placeholder spoke_group fails", func(t *testing.T) {
+		cfg := validConfig
+		enableNCC := false
+		spokeGroup := "YOUR_SPOKE_GROUP"
+		cfg.NCCConfig = &NCCConfig{
+			EnableNCC:  &enableNCC,
+			SpokeGroup: &spokeGroup,
+		}
+		assert.False(t, ValidateBasicFields(t, cfg))
+	})
 }
