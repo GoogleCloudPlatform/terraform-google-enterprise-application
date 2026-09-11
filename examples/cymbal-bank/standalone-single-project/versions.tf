@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,26 @@
  * limitations under the License.
  */
 
-project_id = "<YOUR-PROJECT-ID>"
-network_id = "<YOUR-NETWORK-ID>"
-subnetwork_self_link = "<YOUR-CLUSTER-SUBNETWORK-SELF-LINK>"
-teams = {
-  "namespace" = "your-group@yourdomain.com",
+terraform {
+  required_version = ">= 1.5"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5, < 8"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12.0"
+    }
+
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.2.0"
+    }
+  }
+
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:cymbal-bank/standalone-single-project/v0.7.0"
+  }
 }
-service_perimeter_name = "<YOUR-SERVICE-PERIMETER-NAME>"
-service_perimeter_mode = "DRY_RUN"

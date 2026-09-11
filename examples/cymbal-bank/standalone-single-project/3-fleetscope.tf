@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-# 3-fleetscope
 locals {
   fleet_project_id   = module.multitenant_infra.fleet_project_id
   cluster_project_id = module.multitenant_infra.cluster_project_id
@@ -22,7 +21,7 @@ locals {
 }
 
 module "fleetscope_infra" {
-  source = "../../modules/fleetscope"
+  source = "../../../modules/fleetscope"
 
   env                        = local.env
   cluster_project_id         = local.cluster_project_id
@@ -34,4 +33,6 @@ module "fleetscope_infra" {
   config_sync_repository_url = "https://gitlab.example.com/user/config-sync-${local.env}.git"
   cluster_service_accounts   = values(module.multitenant_infra.cluster_service_accounts)
   attestation_kms_key        = var.attestation_kms_key
+
+  depends_on = [module.standalone_harness]
 }
