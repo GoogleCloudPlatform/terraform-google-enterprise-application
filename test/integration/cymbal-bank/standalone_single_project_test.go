@@ -40,6 +40,8 @@ import (
 func TestStandaloneSingleProjectCymbalBank(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
 	projectID := setupVPCSCOutput.GetTFSetupJsonOutput("harness_project_ids").Get("cymbal-bank").String()
 
@@ -70,6 +72,7 @@ func TestStandaloneSingleProjectCymbalBank(t *testing.T) {
 		"project_id":             projectID,
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
+		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"access_level_name":      access_level_name,
 		"logging_bucket":         loggingBucket.GetJsonOutput("logging_bucket").Get("cymbal-bank").String(),
 		"bucket_kms_key":         loggingBucket.GetJsonOutput("bucket_kms_key").Get("cymbal-bank").String(),
@@ -77,7 +80,7 @@ func TestStandaloneSingleProjectCymbalBank(t *testing.T) {
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
-		"ncc_config": ncc_config,
+		"ncc_config":             ncc_config,
 	}
 
 	// wire setup output project_id to example var.project_id
