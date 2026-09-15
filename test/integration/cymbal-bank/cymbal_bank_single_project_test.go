@@ -73,7 +73,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 		suffixServiceName string
 		splitServiceName  []string
 	)
-	region := "us-central1"
+	region := "us-east4"
 	servicesInfoMap := make(map[string]ServiceInfos)
 	appName := "cymbal-bank"
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
