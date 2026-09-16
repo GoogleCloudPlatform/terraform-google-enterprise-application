@@ -17,6 +17,7 @@
 variable "project_id" {
   type        = string
   description = "Google Cloud project ID in which to deploy all example resources"
+  default     = null
 }
 
 variable "region" {
@@ -149,7 +150,6 @@ variable "cloudbuildv2_repository_config" {
     - gitlab_enterprise_host_uri: (Optional) The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.
     - gitlab_enterprise_service_directory: (Optional) Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
     - gitlab_enterprise_ca_certificate: (Optional) SSL certificate to use for requests to GitLab Enterprise.
-    - secret_project_id: (Optional) The project id where the secret is stored.
   Note: When using GITLABv2, specify `gitlab_read_authorizer_credential` and `gitlab_authorizer_credential` and `gitlab_webhook_secret_id`.
   Note: When using GITHUBv2, specify `github_pat` and `github_app_id`.
   Note: If 'cloudbuildv2_repository_config' variable is not configured, CSR (Cloud Source Repositories) will be used by default.
@@ -172,7 +172,6 @@ variable "cloudbuildv2_repository_config" {
     gitlab_enterprise_host_uri                  = optional(string)
     gitlab_enterprise_service_directory         = optional(string)
     gitlab_enterprise_ca_certificate            = optional(string)
-    secret_project_id                           = optional(string)
   })
 
   validation {
@@ -194,4 +193,38 @@ variable "cloudbuildv2_repository_config" {
     error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
   }
 
+}
+
+variable "ncc_config" {
+  description = <<-EOT
+    Configuration block for Google Cloud Network Connectivity Center (NCC) Spokes.
+    - enable_ncc: (bool) Toggles whether to create a new NCC spoke.
+    - hub_uri: (string) The URI of an existing Hub. [Required if enable_ncc is TRUE]
+    - spoke_group: (string) The NCC group the spoke belongs to (default: "default").
+    - spoke_name: (string) Name for the main VPC spoke.
+    - spoke_description: (string) Description for the main VPC spoke.
+    - spoke_labels: (map) Labels for the main VPC spoke.
+    - spoke_exclude_export_ranges: (set of strings) IP ranges to exclude from route export.
+    - spoke_include_export_ranges: (set of strings) IP ranges to explicitly include in route export.
+  EOT
+  type = object({
+    enable_ncc                  = optional(bool, false)
+    hub_uri                     = optional(string)
+    spoke_group                 = optional(string, "default")
+    spoke_name                  = optional(string, "vpc-spoke")
+    spoke_description           = optional(string)
+    spoke_labels                = optional(map(string))
+    spoke_exclude_export_ranges = optional(set(string), [])
+    spoke_include_export_ranges = optional(set(string), [])
+  })
+
+  default = {}
+
+  validation {
+    condition = (var.ncc_config.enable_ncc == false || (
+      var.ncc_config.enable_ncc == true &&
+      var.ncc_config.hub_uri != null
+    ))
+    error_message = "Invalid NCC configuration. If enable_ncc is TRUE: hub_uri is required."
+  }
 }

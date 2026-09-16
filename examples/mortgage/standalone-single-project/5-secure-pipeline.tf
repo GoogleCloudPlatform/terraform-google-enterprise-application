@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-# 5-appinfra
-
-# app_01
 locals {
 
   cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
@@ -28,18 +25,8 @@ locals {
     null
   )
 
-  application_name = "mortgage"
-  service_name     = "llamma-model"
-  team_name        = "agent"
-  repo_branch      = "main"
-
-  target_deploy_parameters = { (local.env) = {
-    "cluster_project_id"      = var.project_id
-    "model_armor_template_id" = module.model_armor_configuration.template.id
-    "model_armor_location"    = var.region
-    "env_namespace_id"        = "mortgage-${local.env}"
-    }
-  }
+  team_name    = "default"
+  service_name = "hello-world"
 }
 
 data "google_project" "project" {
@@ -47,12 +34,17 @@ data "google_project" "project" {
 }
 
 resource "google_project_iam_member" "assign_permissions" {
-  for_each = toset(["roles/cloudbuild.workerPoolUser", "roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
   project = module.standalone_harness.workerpool_project_id
-  role    = each.value
+  role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
 }
 
+resource "google_project_iam_member" "assign_network_permissions" {
+  for_each = toset(["roles/servicedirectory.viewer", "roles/servicedirectory.pscAuthorizedService"])
+  project  = module.standalone_harness.workerpool_network_project_id
+  role     = each.value
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
 resource "google_project_iam_member" "assign_permissions_service_agent" {
   project = module.standalone_harness.workerpool_project_id
   role    = "roles/cloudbuild.workerPoolUser"
@@ -66,18 +58,8 @@ resource "google_project_iam_member" "cloudbuild_builder" {
   member   = "serviceAccount:${each.value.cloudbuild_service_account}"
 }
 
-resource "time_sleep" "wait_propagation" {
-  create_duration = "30s"
-
-  depends_on = [
-    google_project_iam_member.assign_permissions,
-    google_project_iam_member.assign_permissions_service_agent,
-  ]
-}
-
 module "cicd" {
-  source = "../../../modules/deployment-pipeline"
-
+  source   = "../../../modules/deployment-pipeline"
   for_each = var.cloudbuildv2_repository_config.repositories
 
   project_id                 = var.project_id
@@ -88,19 +70,32 @@ module "cicd" {
   service_name           = local.service_name
   team_name              = local.team_name
   repo_name              = each.value.repository_name
-  repo_branch            = local.repo_branch
+  repo_branch            = "main"
   app_build_trigger_yaml = "cloudbuild.yaml"
+
+  additional_substitutions = {
+    _SERVICE = local.service_name
+    _TEAM    = local.team_name
+  }
+
+  ci_build_included_files = ["*"]
 
   buckets_force_destroy = true
 
   cloudbuildv2_repository_config = var.cloudbuildv2_repository_config
 
-  workerpool_id     = module.standalone_harness.workerpool_id
-  access_level_name = var.access_level_name
-  logging_bucket    = var.logging_bucket
-  bucket_kms_key    = var.bucket_kms_key
+  private_workerpool = {
+    use_private_workerpool = true
+    private_workerpool_id  = module.standalone_harness.workerpool_id
+  }
 
-  target_deploy_parameters = local.target_deploy_parameters
+  logging_bucket = var.logging_bucket
+  bucket_kms_key = var.bucket_kms_key
+
+  access_level_name = var.access_level_name
+
+  service_perimeter_name = var.service_perimeter_name
+  service_perimeter_mode = var.service_perimeter_mode
 
   attestation_kms_key = var.attestation_kms_key
   attestor_id         = var.attestation_kms_key != null ? module.fleetscope_infra.attestor_id : null
@@ -115,61 +110,4 @@ module "cicd" {
     google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
     module.standalone_harness,
   ]
-}
-
-module "model_armor_configuration" {
-  source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 7.3"
-
-  template_id = "ma-${local.application_name}-${local.service_name}"
-  location    = var.region
-  project_id  = var.project_id
-
-  rai_filters = {
-    dangerous         = "LOW_AND_ABOVE"
-    sexually_explicit = "MEDIUM_AND_ABOVE"
-  }
-
-  enable_malicious_uri_filter_settings = true
-
-  pi_and_jailbreak_filter_settings = "MEDIUM_AND_ABOVE"
-
-  sdp_settings = {
-    basic_config_filter_enforcement = true
-  }
-
-  metadata_configs = {
-    enforcement_type                         = "INSPECT_AND_BLOCK"
-    enable_multi_language_detection          = true
-    log_sanitize_operations                  = true
-    log_template_operations                  = true
-    ignore_partial_invocation_failures       = false
-    custom_prompt_safety_error_code          = "799"
-    custom_prompt_safety_error_message       = "error 799"
-    custom_llm_response_safety_error_message = "error 798"
-    custom_llm_response_safety_error_code    = "798"
-  }
-
-  labels = {
-    "model" = "llamma-model"
-  }
-}
-
-resource "google_service_account" "gsa_llamma_model" {
-  project                      = var.project_id
-  account_id                   = "gsa-llamma-model"
-  display_name                 = "GSA for llamma-model"
-  create_ignore_already_exists = true
-}
-
-resource "google_project_iam_member" "gsa_trace_agent" {
-  project = var.project_id
-  role    = "roles/cloudtrace.agent"
-  member  = google_service_account.gsa_llamma_model.member
-}
-
-resource "google_service_account_iam_member" "wi_binding" {
-  service_account_id = google_service_account.gsa_llamma_model.name
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[vmortgage-${local.env}/llamma-model-ksa]"
 }
