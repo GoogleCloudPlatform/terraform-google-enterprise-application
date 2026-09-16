@@ -6,7 +6,7 @@ This guide is designed for **AI coding assistants, LLMs, and autonomous agents**
 
 ## 1. Repository Identity & Mission
 
-This repository implements the official Google Cloud Platform (GCP) **Enterprise Application blueprint** (`terraform-google-enterprise-application`). It provides a secure, modular, and multi-tenant Internal Developer Platform (IDP) on Google Cloud.
+This repository implements the Google Cloud Platform (GCP) **Enterprise Application blueprint** (`terraform-google-enterprise-application`). It provides an opinionated, production-ready, and secure internal developer platform (IDP) on Google Cloud.
 
 The blueprint extends the foundational security practices of the [Enterprise Foundation blueprint](https://cloud.google.com/architecture/security-foundations) (`terraform-example-foundation`).
 
