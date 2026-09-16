@@ -97,7 +97,7 @@ When generating or updating code, AI agents MUST strictly adhere to the followin
 ### 4.2. Security & IAM Guardrails (Strict Enforcement)
 *   **Principle of Least Privilege**: Never assign broad administrative roles (e.g., `roles/owner`, `roles/editor`, `roles/resourcemanager.organizationAdmin`, `roles/accesscontextmanager.policyAdmin`). Always prefer granular or read-only roles (e.g., `roles/resourcemanager.organizationViewer`, `roles/accesscontextmanager.policyReader`).
 *   **No Plaintext Secrets**: Store all sensitive tokens, passwords, and private keys in Secret Manager. Reference secrets via secret accessors or Secret Store CSI drivers.
-*   **Private Connectivity**: 
+*   **Private Connectivity**:
     *   GKE clusters must have private nodes and private control plane endpoints.
     *   Managed databases (AlloyDB, Cloud SQL) must communicate exclusively over Private Service Connect (PSC) or private IP.
 *   **VPC Service Controls (VPC-SC)**: Infrastructure modules and CI/CD pipelines must support execution inside VPC-SC perimeters.
