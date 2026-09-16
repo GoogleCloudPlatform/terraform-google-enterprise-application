@@ -107,7 +107,6 @@ When generating or updating code, AI agents MUST strictly adhere to the followin
 *   **Framework**: Integration tests are written in Go using [Terratest](https://terratest.gruntwork.io/).
 *   **Formatting**: Format all Go files with `gofmt -s -w <file.go>`.
 *   **Test Isolation**: Tests must create unique resource names or utilize prefixes to prevent collision during concurrent CI test runs.
-*   **Idempotency & Cleanup**: Every test must include proper `defer terraform.Destroy(t, terraformOptions)` teardown logic.
 
 ### 4.4. Kubernetes & Deployment Pipeline Conventions (`6-appsource`)
 *   **Kustomize Structure**: Structure manifests with a shared `base/` directory and environment overlays (`overlays/development/`, `overlays/nonproduction/`, `overlays/production/`).
