@@ -17,6 +17,7 @@ package utils
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -25,6 +26,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func setMockGitConfig(dir string) {
+	cmdEmail := exec.Command("git", "config", "user.email", "test@example.com")
+	cmdEmail.Dir = dir
+	_ = cmdEmail.Run()
+	cmdName := exec.Command("git", "config", "user.name", "Test User")
+	cmdName.Dir = dir
+	_ = cmdName.Run()
+}
+
 func createLocalRepo(t *testing.T, repo string) string {
 	dir := t.TempDir()
 	local := filepath.Join(dir, repo)
@@ -32,6 +42,7 @@ func createLocalRepo(t *testing.T, repo string) string {
 	assert.NoError(t, err)
 	conf := git.NewCmdConfig(t, git.WithDir(local))
 	conf.Init()
+	setMockGitConfig(local)
 	f := filepath.Join(local, "README.md")
 	err = os.WriteFile(f, []byte("# Testing\n"), 0644)
 	assert.NoError(t, err)
@@ -50,6 +61,7 @@ func TestGitCSR(t *testing.T) {
 	// Test GitClone with CSR
 	localCSR := GitClone(t, "CSR", "my-csr-git-repo", repo, repo, "", logger.Discard)
 	assert.NotNil(t, localCSR)
+	setMockGitConfig(repo)
 	err = localCSR.AddRemote(remote, originPath)
 	assert.NoError(t, err)
 
@@ -107,6 +119,7 @@ func TestGitClone_NonCSR(t *testing.T) {
 
 	local := GitClone(t, "GITHUB", "blueprint-test", repoURL, originPath, "", logger.Discard)
 	assert.NotNil(t, local)
+	setMockGitConfig(repo)
 
 	// Check if the directory is created
 	if _, err := os.Stat(originPath); errors.Is(err, os.ErrNotExist) {

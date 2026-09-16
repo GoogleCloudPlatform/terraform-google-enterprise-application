@@ -15,11 +15,14 @@
 package gcp
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"maps"
+	"net/http"
 	"regexp"
 	"slices"
 	"strings"
@@ -112,7 +115,7 @@ func NewGCP() GCP {
 		Runf:            gcloud.Runf,
 		RunCmd:          runCmd,
 		TriggerNewBuild: triggerNewBuild,
-		sleepTime:       20,
+		sleepTime:       60,
 	}
 }
 
@@ -180,29 +183,59 @@ func (g GCP) GetFinalBuildState(t testing.TB, projectID, region, buildID string,
 }
 
 // GetRollouts gets all Cloud Deploy Rollouts form a project and region that satisfy the given filter.
+func (g GCP) GetRollouts(t testing.TB, projectID, region, service, releaseFullName, targetID string) []gjson.Result {
+	return g.Runf(t, "deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, service, region, releaseFullName, targetID).Array()
+}
+
+// GetRolloutsStatus gets the state of the first rollout.
 func (g GCP) GetRolloutsStatus(t testing.TB, projectID, region, service, releaseFullName, targetID string) string {
-	rollout := g.Runf(t, "deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", projectID, service, region, releaseFullName, targetID).Array()
-	if len(rollout) > 0 {
-		return rollout[0].Get("state").String()
+	rollouts := g.GetRollouts(t, projectID, region, service, releaseFullName, targetID)
+	if len(rollouts) > 0 {
+		return rollouts[0].Get("state").String()
 	}
 	return ""
 }
 
-// GetFinalRolloutState gets the terminal status of the given rollout. It will wait if build is not finished.
+// GetFinalRolloutState gets the terminal status of the given rollout. It will wait if build is not finished and retry if deploy fails.
 func (g GCP) GetFinalRolloutState(t testing.TB, projectID, region, serviceName, releaseFullName, targetID string, maxRetry int) (string, error) {
 	var status string
 	count := 0
+	retries := 0
+	maxRolloutRetries := 3
 	fmt.Printf("waiting for rollout %s execution.\n", releaseFullName)
-	status = g.GetRolloutsStatus(t, projectID, region, serviceName, releaseFullName, targetID)
-	fmt.Printf("rollout status is %s\n", status)
-	for status != ReleaseStatusSuccess && status != ReleaseStatusFailure && status != ReleaseStatusCancelled {
-		fmt.Printf("release status is %s\n", status)
+	for {
+		rollouts := g.GetRollouts(t, projectID, region, serviceName, releaseFullName, targetID)
+		if len(rollouts) > 0 {
+			status = rollouts[0].Get("state").String()
+		} else {
+			status = ""
+		}
+		fmt.Printf("rollout status is %s\n", status)
+
+		if status == ReleaseStatusSuccess {
+			break
+		}
+		if status == ReleaseStatusFailure {
+			if retries < maxRolloutRetries && len(rollouts) > 0 {
+				retries++
+				rolloutName := testutils.GetLastSplitElement(rollouts[0].Get("name").String(), "/")
+				releaseShortName := testutils.GetLastSplitElement(releaseFullName, "/")
+				fmt.Printf("rollout failed, retrying deploy job (attempt %d/%d)...\n", retries, maxRolloutRetries)
+				g.Runf(t, "deploy rollouts retry-job %s --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable --job-id=deploy", rolloutName, projectID, serviceName, region, releaseShortName)
+				time.Sleep(g.sleepTime * time.Second)
+				continue
+			}
+			break
+		}
+		if status == ReleaseStatusCancelled {
+			break
+		}
+
 		if count >= maxRetry {
 			return "", fmt.Errorf("timeout waiting for release '%s' execution", releaseFullName)
 		}
-		count = count + 1
+		count++
 		time.Sleep(g.sleepTime * time.Second)
-		status = g.GetRolloutsStatus(t, projectID, region, serviceName, releaseFullName, targetID)
 	}
 	fmt.Printf("final rollout status is %s\n", status)
 	return status, nil
@@ -278,13 +311,44 @@ func (g GCP) GetBuildLogs(t testing.TB, projectID, region, buildID string) strin
 
 // WaitReleaseSuccess waits for the current release in a repo to finish.
 func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, commitSha, failureMsg string, maxRetry int) error {
+	// Find the actual delivery pipeline name
+	pipelineName := serviceName
+	pipelines := g.Runf(t, "deploy delivery-pipelines list --project=%s --region=%s", project, region).Array()
+	foundPipeline := false
+	for _, p := range pipelines {
+		pName := testutils.GetLastSplitElement(p.Get("name").String(), "/")
+		if pName == serviceName || strings.HasSuffix(serviceName, "-"+pName) || strings.Contains(serviceName, pName) {
+			pipelineName = pName
+			foundPipeline = true
+			break
+		}
+	}
+	if !foundPipeline && len(pipelines) == 1 {
+		pipelineName = testutils.GetLastSplitElement(pipelines[0].Get("name").String(), "/")
+	}
 
-	releaseFullName := fmt.Sprintf("projects/%s/locations/%s/deliveryPipelines/%s/releases/%s-%s", project, region, serviceName, serviceName, commitSha)
+	fmt.Printf("waiting for release matching %s in delivery pipeline %s to be created.\n", commitSha, pipelineName)
+	var release gjson.Result
+	for i := 0; i < maxRetry; i++ {
+		releases := g.Runf(t, "deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", project, pipelineName, region, commitSha).Array()
+		if len(releases) > 0 {
+			release = releases[0]
+			break
+		}
+		time.Sleep(g.sleepTime * time.Second)
+	}
 
-	releaseTargets := slices.Collect(maps.Keys(g.GetRelease(t, releaseFullName).Get("targetArtifacts").Map()))
+	if !release.Exists() || !release.Get("name").Exists() {
+		return fmt.Errorf("%s: release for commit %s in pipeline %s not found after waiting", failureMsg, commitSha, pipelineName)
+	}
+
+	releaseFullName := release.Get("name").String()
+	fmt.Printf("found release %s\n", releaseFullName)
+
+	releaseTargets := slices.Collect(maps.Keys(release.Get("targetArtifacts").Map()))
 	if len(releaseTargets) > 0 {
 		for i, targetID := range releaseTargets {
-			status, err := g.GetFinalRolloutState(t, project, region, serviceName, releaseFullName, targetID, maxRetry)
+			status, err := g.GetFinalRolloutState(t, project, region, pipelineName, releaseFullName, targetID, maxRetry)
 			if err != nil {
 				return err
 			}
@@ -292,7 +356,7 @@ func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, comm
 				return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/deploy/delivery-pipelines?project=%s\nfor details.\n", failureMsg, project)
 			}
 			if status == ReleaseStatusSuccess && i+1 < len(releaseTargets) {
-				g.PromoteRelease(t, releaseFullName, serviceName, region, releaseTargets[i+1])
+				g.PromoteRelease(t, releaseFullName, pipelineName, region, releaseTargets[i+1])
 			}
 		}
 	}
@@ -301,7 +365,7 @@ func (g GCP) WaitReleaseSuccess(t testing.TB, project, region, serviceName, comm
 
 // GetRelease waits for the current release.
 func (g GCP) GetRelease(t testing.TB, releaseFullName string) gjson.Result {
-	return g.Runf(t, "deploy releases describe %s", releaseFullName).Array()[0]
+	return g.Runf(t, "deploy releases describe %s", releaseFullName)
 }
 
 // PromoteRelease promote for the current release.
@@ -374,4 +438,54 @@ func (g GCP) GetAuthToken(t testing.TB) string {
 	result := g.Runf(t, "auth print-access-token")
 
 	return result.Get("token").String()
+}
+
+// TestIamPermissions checks a set of permissions against a parent (projects/PROJECT_ID) using the cloudresourcemanager:testIamPermissions V3 API
+func (g GCP) TestIamPermissions(t testing.TB, parent string, permissions []string) ([]string, error) {
+	client := &http.Client{}
+	identityPermissions := []string{}
+	chunkSize := 100
+
+	// avoid "The number of permissions (xxx) is greater than the maximum allowed (100).
+	for i := 0; i < len(permissions); i += chunkSize {
+		// Calculate the end index for the current chunk
+		end := i + chunkSize
+		if end > len(permissions) {
+			end = len(permissions)
+		}
+
+		// Extract the current chunk
+		chunk := permissions[i:end]
+
+		requestBody := map[string][]string{"permissions": chunk}
+		jsonBody, _ := json.Marshal(requestBody)
+		req, err := http.NewRequest("POST", fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/%s:testIamPermissions", parent), bytes.NewBuffer(jsonBody))
+		if err != nil {
+			return nil, fmt.Errorf("failed to create request: %w", err)
+		}
+		req.Header.Add("Authorization", "Bearer "+g.GetAuthToken(t))
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("error making request: %w", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			bodyBytes, _ := io.ReadAll(resp.Body) // Read error body
+			return nil, fmt.Errorf("request failed with status code: %d, body: %s", resp.StatusCode, string(bodyBytes))
+		}
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+		bodyJson := map[string][]string{}
+		err = json.Unmarshal(bodyBytes, &bodyJson)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		}
+		identityPermissions = append(identityPermissions, bodyJson["permissions"]...)
+
+	}
+	return identityPermissions, nil
 }

@@ -18,7 +18,7 @@ project_id = "<YOUR-PROJECT-ID>"
 
 # Mandatory fleetscope namespace, it can be {} if there is no namespaces to provide
 teams = {
-  "namespace" = "your-group@yourdomain.com",
+  "vllm-model" = "llm-model@yourdomain.com",
 }
 
 # region     = "us-central1"

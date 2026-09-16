@@ -87,3 +87,60 @@ func TestWriteReadTfvars(t *testing.T) {
 		})
 	}
 }
+
+func TestWriteReadNCCConfig(t *testing.T) {
+	type nccConfig struct {
+		EnableNCC                *bool             `hcl:"enable_ncc" cty:"enable_ncc"`
+		HubURI                   *string           `hcl:"hub_uri" cty:"hub_uri"`
+		SpokeGroup               *string           `hcl:"spoke_group" cty:"spoke_group"`
+		SpokeName                *string           `hcl:"spoke_name" cty:"spoke_name"`
+		SpokeDescription         *string           `hcl:"spoke_description" cty:"spoke_description"`
+		SpokeLabels              map[string]string `hcl:"spoke_labels" cty:"spoke_labels"`
+		SpokeExcludeExportRanges []string          `hcl:"spoke_exclude_export_ranges" cty:"spoke_exclude_export_ranges"`
+		SpokeIncludeExportRanges []string          `hcl:"spoke_include_export_ranges" cty:"spoke_include_export_ranges"`
+	}
+
+	type rootTfvars struct {
+		ProjectID string     `hcl:"project_id"`
+		NCCConfig *nccConfig `hcl:"ncc_config"`
+	}
+
+	enableNCC := true
+	hubURI := "projects/test-project/locations/global/hubs/test-hub"
+	spokeGroup := "edge"
+	spokeName := "vpc-spoke"
+	spokeDesc := "NCC spoke for testing"
+
+	input := rootTfvars{
+		ProjectID: "my-project",
+		NCCConfig: &nccConfig{
+			EnableNCC:                &enableNCC,
+			HubURI:                   &hubURI,
+			SpokeGroup:               &spokeGroup,
+			SpokeName:                &spokeName,
+			SpokeDescription:         &spokeDesc,
+			SpokeLabels:              map[string]string{"env": "test"},
+			SpokeExcludeExportRanges: []string{"10.0.0.0/16"},
+			SpokeIncludeExportRanges: []string{"192.168.0.0/24"},
+		},
+	}
+
+	dir := t.TempDir()
+	file := filepath.Join(dir, "ncc_test.tfvars")
+	err := WriteTfvars(file, input)
+	assert.NoError(t, err)
+
+	var read rootTfvars
+	err = ReadTfvars(file, &read)
+	assert.NoError(t, err)
+	assert.Equal(t, input.ProjectID, read.ProjectID)
+	assert.NotNil(t, read.NCCConfig)
+	assert.Equal(t, *input.NCCConfig.EnableNCC, *read.NCCConfig.EnableNCC)
+	assert.Equal(t, *input.NCCConfig.HubURI, *read.NCCConfig.HubURI)
+	assert.Equal(t, *input.NCCConfig.SpokeGroup, *read.NCCConfig.SpokeGroup)
+	assert.Equal(t, *input.NCCConfig.SpokeName, *read.NCCConfig.SpokeName)
+	assert.Equal(t, *input.NCCConfig.SpokeDescription, *read.NCCConfig.SpokeDescription)
+	assert.Equal(t, input.NCCConfig.SpokeLabels, read.NCCConfig.SpokeLabels)
+	assert.Equal(t, input.NCCConfig.SpokeExcludeExportRanges, read.NCCConfig.SpokeExcludeExportRanges)
+	assert.Equal(t, input.NCCConfig.SpokeIncludeExportRanges, read.NCCConfig.SpokeIncludeExportRanges)
+}

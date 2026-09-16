@@ -14,30 +14,12 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.5"
+provider "google" {
+  user_project_override = true
+  billing_project       = var.project_id
+}
 
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5, < 8"
-    }
-    google-beta = {
-      source  = "hashicorp/google"
-      version = ">= 5, < 8"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
-
-    null = {
-      source  = "hashicorp/null"
-      version = ">= 3.2.0"
-    }
-  }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:default-example/standalone-single-project/v0.6.0"
-  }
+provider "google-beta" {
+  user_project_override = true
+  billing_project       = var.project_id
 }
