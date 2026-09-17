@@ -74,7 +74,7 @@ variable "storage_bucket_labels" {
 variable "tfstate_bucket_force_destroy" {
   description = "If true, the state bucket will be deleted even if it contains objects."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "encrypt_gcs_bucket_tfstate" {
@@ -86,11 +86,11 @@ variable "encrypt_gcs_bucket_tfstate" {
 variable "kms_prevent_destroy" {
   description = "If set to false, allow deleting KMS keyring and keys when destroying the module."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "project_deletion_policy" {
   description = "Project deletion policy. Use 'DELETE' for sandbox/test environments."
   type        = string
-  default     = "DELETE"
+  default     = "PREVENT"
 }

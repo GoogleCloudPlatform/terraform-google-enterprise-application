@@ -91,6 +91,6 @@ output "workerpool_id" {
 }
 
 output "network_id" {
-  value       = var.create_workerpool ? module.private_workerpool[0].network_id : null
+  value       = var.create_workerpool ? module.private_workerpool[0].workerpool_network_self_link : null
   description = "The network ID/self-link of the pre-provisioned VPC (if create_workerpool is enabled)."
 }

@@ -21,8 +21,7 @@ data "google_storage_project_service_account" "ci_gcs_account" {
 locals {
   cb_service_accounts = compact(concat(
     [
-      "serviceAccount:service-${module.seed_project.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com",
-      "serviceAccount:${module.seed_project.project_number}@cloudbuild.gserviceaccount.com"
+      "serviceAccount:service-${module.seed_project.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
     ],
     var.cloud_build_sa != null && var.cloud_build_sa != "" ? ["serviceAccount:${var.cloud_build_sa}"] : []
   ))

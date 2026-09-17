@@ -12,12 +12,12 @@ This harness setup provisions the required prerequisite resources in Google Clou
 | create\_workerpool | Whether to pre-provision a dedicated Cloud Build Private Worker Pool with NAT VM. If false, single-project examples provision their own worker pools via standalone-harness. | `bool` | `false` | no |
 | encrypt\_gcs\_bucket\_tfstate | Whether to encrypt the Terraform state GCS bucket with CMEK using KMS. | `bool` | `false` | no |
 | folder\_id | The folder ID where the harness seed folder and project will be created. | `string` | n/a | yes |
-| kms\_prevent\_destroy | If set to false, allow deleting KMS keyring and keys when destroying the module. | `bool` | `false` | no |
+| kms\_prevent\_destroy | If set to false, allow deleting KMS keyring and keys when destroying the module. | `bool` | `true` | no |
 | org\_id | The numeric Google Cloud Organization ID. | `string` | n/a | yes |
-| project\_deletion\_policy | Project deletion policy. Use 'DELETE' for sandbox/test environments. | `string` | `"DELETE"` | no |
+| project\_deletion\_policy | Project deletion policy. Use 'DELETE' for sandbox/test environments. | `string` | `"PREVENT"` | no |
 | region | The Google Cloud region for KMS, Logging bucket, tfstate bucket, and worker pools. | `string` | `"us-central1"` | no |
 | storage\_bucket\_labels | Labels to apply to the storage buckets. | `map(string)` | `{}` | no |
-| tfstate\_bucket\_force\_destroy | If true, the state bucket will be deleted even if it contains objects. | `bool` | `true` | no |
+| tfstate\_bucket\_force\_destroy | If true, the state bucket will be deleted even if it contains objects. | `bool` | `false` | no |
 | workerpool\_machine\_type | The machine type for the Cloud Build Private Worker Pool. | `string` | `"e2-standard-4"` | no |
 | workerpool\_nat\_subnet\_ip | The CIDR block for the worker pool NAT proxy subnet (e.g., 10.1.1.0/24). | `string` | `"10.1.1.0/24"` | no |
 | workerpool\_peering\_address | The internal IP address for the Cloud Build Private Worker Pool VPC peering range (e.g., 10.3.3.0). | `string` | `"10.3.3.0"` | no |

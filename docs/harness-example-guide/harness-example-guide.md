@@ -227,7 +227,7 @@ go install
 Return to your root working directory and copy the sample configuration:
 
 ```bash
-cd ../../
+cd ../../../
 cp terraform-google-enterprise-application/helpers/eab-deployer/global.tfvars.example global.tfvars
 ```
 
@@ -244,6 +244,10 @@ Populate `global.tfvars` using the outputs from the harness setup:
 | `attestation_kms_key` | `attestation_kms_key` | KMS Key ID for Binary Authorization attestation signing. |
 | `workerpool_id` | `workerpool_id` | Private Worker Pool ID (or `null` to let example create one). |
 | `network_id` | `network_id` | Peered network self-link (or `null` to let example create one). |
+| `subnetwork_self_link` | *N/A* | Subnetwork self-link (or `null` if using default harness network). |
+| `binary_authorization_image` | *N/A* | Pre-built Binary Authorization image (or `null` to build dynamically). |
+| `binary_authorization_repository_id` | *N/A* | Artifact Registry repository ID for attestation images (or `null`). |
+| `cloudbuildv2_repository_config` | *N/A* | Cloud Build v2 repository configuration block (default: CSR). |
 | `eab_code_path` | *N/A (Local path)* | Absolute path to cloned `terraform-google-enterprise-application`. |
 | `code_checkout_path` | *N/A (Local path)* | Absolute path to your working directory (e.g., `eab-workspace`). |
 | `teams` | *N/A (User group)* | Map of namespace to team group email (e.g., `{"namespace": "team@example.com"}`). |
@@ -260,11 +264,24 @@ logging_bucket      = "bkt-logging-abcd"
 bucket_kms_key      = "projects/ci-eab-seed-abcd/locations/us-central1/keyRings/kms-bucket-encryption/cryptoKeys/bucket"
 attestation_kms_key = "projects/ci-eab-seed-abcd/locations/us-central1/keyRings/kms-attestation-sign/cryptoKeys/attestation"
 
-network_id    = null
-workerpool_id = null
+network_id                         = null
+subnetwork_self_link               = null
+workerpool_id                      = null
+binary_authorization_image         = null
+binary_authorization_repository_id = null
 
 teams = {
   "hello-world" = "team-dev@yourdomain.com"
+}
+
+cloudbuildv2_repository_config = {
+  repo_type = "CSR"
+  repositories = {
+    "hello-world" = {
+      repository_name = "hello-world-admin"
+      repository_url  = ""
+    }
+  }
 }
 ```
 
@@ -319,6 +336,16 @@ If you prefer deploying directly with Terraform without using the CLI helper:
    logging_bucket      = "bkt-logging-abcd"
    bucket_kms_key      = "projects/ci-eab-seed-abcd/locations/us-central1/keyRings/kms-bucket-encryption/cryptoKeys/bucket"
    attestation_kms_key = "projects/ci-eab-seed-abcd/locations/us-central1/keyRings/kms-attestation-sign/cryptoKeys/attestation"
+
+   cloudbuildv2_repository_config = {
+     repo_type = "CSR"
+     repositories = {
+       "hello-world" = {
+         repository_name = "hello-world-admin"
+         repository_url  = ""
+       }
+     }
+   }
    ```
 
 3. Initialize and apply:
@@ -373,27 +400,7 @@ kubectl get pods --all-namespaces
 
 Follow these steps to destroy the environment without leaving orphaned resources.
 
-### Step 1: Clean Up Dynamic GKE & MCSD Firewall Rules
-
-GKE and Multi-Cluster Service Discovery (MCSD) dynamically generate firewall rules that are not recorded in Terraform state. Delete them before running `terraform destroy`:
-
-```bash
-PROJECT_ID="<YOUR_PROJECT_ID>"
-
-# Delete dynamic GKE firewall rules
-for fw_rule in $(gcloud compute firewall-rules list --project="${PROJECT_ID}" --filter="name~'^(gke-|k8s-)'" --format="value(name)"); do
-  echo "Deleting GKE firewall rule: ${fw_rule}"
-  gcloud compute firewall-rules delete "${fw_rule}" --project="${PROJECT_ID}" --quiet
-done
-
-# Delete dynamic MCSD firewall rules
-for fw_rule in $(gcloud compute firewall-rules list --project="${PROJECT_ID}" --filter="name~'-mcsd$'" --format="value(name)"); do
-  echo "Deleting MCSD firewall rule: ${fw_rule}"
-  gcloud compute firewall-rules delete "${fw_rule}" --project="${PROJECT_ID}" --quiet
-done
-```
-
-### Step 2: Destroy the Example Deployment
+### Step 1: Destroy the Example Deployment
 
 If you deployed using `eab-deployer`:
 
@@ -406,6 +413,27 @@ If you deployed directly with Terraform:
 ```bash
 cd terraform-google-enterprise-application/examples/default-example/standalone-single-project
 terraform destroy
+```
+
+### Step 2: Clean Up Orphaned Dynamic GKE & MCSD Firewall Rules
+
+GKE and Multi-Cluster Service Discovery (MCSD) dynamically generate firewall rules that are not recorded in Terraform state. After destroying the example/cluster deployment, delete any leftover dynamic firewall rules before destroying the harness VPC network:
+
+```bash
+PROJECT_ID="<YOUR_PROJECT_ID>"
+
+# Find and delete leftover dynamic GKE & MCSD firewall rules
+for fw_rule in $(gcloud compute firewall-rules list --project="${PROJECT_ID}" --filter="name~'^(gke-|k8s-)' OR name~'-mcsd$'" --format="value(name)"); do
+  echo "Found dynamic firewall rule: ${fw_rule} in project ${PROJECT_ID}"
+  read -p "Do you want to delete this firewall rule? (y/n): " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    gcloud compute firewall-rules delete "${fw_rule}" --project="${PROJECT_ID}" --quiet
+    echo "Deleted ${fw_rule}."
+  else
+    echo "Skipped ${fw_rule}."
+  fi
+done
 ```
 
 ### Step 3: Migrate State Locally Before Destroying Harness
@@ -433,32 +461,9 @@ terraform destroy
 
 ### 7.1. CSR Git Authentication Failure (`400 Invalid authentication credentials`)
 
-**Error message:**
-```text
-fatal: unable to access 'https://source.developers.google.com/p/<PROJECT_ID>/r/<REPO_NAME>/': The requested URL returned error: 400 Invalid authentication credentials.
-Please generate a new identifier: https://source.developers.google.com/new-password
-```
+When using `repo_type = "CSR"`, cloning Cloud Source Repositories locally requires explicit Git cookie credentials or direct build submission.
 
-**Cause:**
-Google Cloud Source Repositories (CSR) requires manually configured Git credentials or cookies when cloning from local environments without an active CSR git credential helper.
-
-**Solutions:**
-- **Option 1 (Generate Git Cookie)**:
-  1. Navigate to [https://source.developers.google.com/new-password](https://source.developers.google.com/new-password).
-  2. Authenticate with your Google Cloud deployment account.
-  3. Copy and execute the generated script to append credentials to your `~/.gitcookies` file.
-  4. Re-run `eab-deployer`.
-
-- **Option 2 (Submit Directly via Cloud Build)**:
-  If the infrastructure was already created by `eab-deployer` or Terraform, submit the application build directly into the Private Worker Pool:
-  ```bash
-  gcloud builds submit examples/default-example/6-appsource/default-example \
-    --project=<PROJECT_ID> \
-    --region=<REGION> \
-    --config=examples/default-example/6-appsource/default-example/cloudbuild.yaml \
-    --service-account=projects/<PROJECT_ID>/serviceAccounts/ci-<SERVICE_NAME>@<PROJECT_ID>.iam.gserviceaccount.com \
-    --substitutions=_ATTESTOR_ID="projects/<PROJECT_ID>/attestors/gke-attestor",_BINARY_AUTH_IMAGE="<REGION>-docker.pkg.dev/<PROJECT_ID>/ar-eab-<SERVICE_NAME>-binauthz/binauthz-attestation:v1.0",_CLOUDDEPLOY_PIPELINE_NAME="<SERVICE_NAME>",_CONTAINER_REGISTRY="<REGION>-docker.pkg.dev/<PROJECT_ID>/<SERVICE_NAME>",_KMS_KEY_VERSION="projects/<PROJECT_ID>/locations/<REGION>/keyRings/kms-attestation-sign/cryptoKeys/attestation/cryptoKeyVersions/1",_PRIVATE_POOL="projects/<PROJECT_ID>/locations/<REGION>/workerPools/wp-eab-default-example",_SOURCE_STAGING_BUCKET="gs://bkt-release-source-development-<SERVICE_NAME>-<PROJECT_NUMBER>",COMMIT_SHA="main",SHORT_SHA="main"
-  ```
+For detailed root cause analysis and resolution options (generating Git cookies, submitting directly via Cloud Build, or switching to GitHub/GitLab), see [Cloud Source Repositories (CSR) Git Authentication Failure in TROUBLESHOOTING.md](../TROUBLESHOOTING.md#cloud-source-repositories-csr-git-authentication-failure).
 
 ### 7.2. Cloud Build Attestation Step Fails (`manifest unknown: Failed to fetch tag`)
 
