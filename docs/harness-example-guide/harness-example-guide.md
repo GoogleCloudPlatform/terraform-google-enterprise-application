@@ -96,6 +96,18 @@ Set your quota project:
 gcloud config set billing/quota_project <YOUR_PROJECT_ID>
 ```
 
+### 2.4. Cloud Source Repositories (CSR) Git Authentication Requirement
+
+If deploying with `repo_type = "CSR"` in `cloudbuildv2_repository_config`, Google Cloud requires manual Git cookie authentication for `source.developers.google.com`:
+
+1. Open [https://source.developers.google.com/new-password](https://source.developers.google.com/new-password) in your browser.
+2. Sign in with your Google Cloud deployment identity.
+3. Follow the instructions to copy and run the provided authentication script in your terminal, which configures Git cookies in your local `~/.gitcookies` file.
+
+> [!TIP]
+> Alternatively, you can configure GitHub (`repo_type = "GITHUBv2"`) or GitLab (`repo_type = "GITLABv2"`) in `cloudbuildv2_repository_config`, or submit application builds directly to Cloud Build via `gcloud builds submit`.
+
+
 ---
 
 ## 3. Step-by-Step: Provisioning Prerequisites with the Harness Setup Module
@@ -414,3 +426,53 @@ Destroy the harness project and foundational resources:
 ```bash
 terraform destroy
 ```
+
+---
+
+## 7. Troubleshooting
+
+### 7.1. CSR Git Authentication Failure (`400 Invalid authentication credentials`)
+
+**Error message:**
+```text
+fatal: unable to access 'https://source.developers.google.com/p/<PROJECT_ID>/r/<REPO_NAME>/': The requested URL returned error: 400 Invalid authentication credentials.
+Please generate a new identifier: https://source.developers.google.com/new-password
+```
+
+**Cause:**
+Google Cloud Source Repositories (CSR) requires manually configured Git credentials or cookies when cloning from local environments without an active CSR git credential helper.
+
+**Solutions:**
+- **Option 1 (Generate Git Cookie)**:
+  1. Navigate to [https://source.developers.google.com/new-password](https://source.developers.google.com/new-password).
+  2. Authenticate with your Google Cloud deployment account.
+  3. Copy and execute the generated script to append credentials to your `~/.gitcookies` file.
+  4. Re-run `eab-deployer`.
+
+- **Option 2 (Submit Directly via Cloud Build)**:
+  If the infrastructure was already created by `eab-deployer` or Terraform, submit the application build directly into the Private Worker Pool:
+  ```bash
+  gcloud builds submit examples/default-example/6-appsource/default-example \
+    --project=<PROJECT_ID> \
+    --region=<REGION> \
+    --config=examples/default-example/6-appsource/default-example/cloudbuild.yaml \
+    --service-account=projects/<PROJECT_ID>/serviceAccounts/ci-<SERVICE_NAME>@<PROJECT_ID>.iam.gserviceaccount.com \
+    --substitutions=_ATTESTOR_ID="projects/<PROJECT_ID>/attestors/gke-attestor",_BINARY_AUTH_IMAGE="<REGION>-docker.pkg.dev/<PROJECT_ID>/ar-eab-<SERVICE_NAME>-binauthz/binauthz-attestation:v1.0",_CLOUDDEPLOY_PIPELINE_NAME="<SERVICE_NAME>",_CONTAINER_REGISTRY="<REGION>-docker.pkg.dev/<PROJECT_ID>/<SERVICE_NAME>",_KMS_KEY_VERSION="projects/<PROJECT_ID>/locations/<REGION>/keyRings/kms-attestation-sign/cryptoKeys/attestation/cryptoKeyVersions/1",_PRIVATE_POOL="projects/<PROJECT_ID>/locations/<REGION>/workerPools/wp-eab-default-example",_SOURCE_STAGING_BUCKET="gs://bkt-release-source-development-<SERVICE_NAME>-<PROJECT_NUMBER>",COMMIT_SHA="main",SHORT_SHA="main"
+  ```
+
+### 7.2. Cloud Build Attestation Step Fails (`manifest unknown: Failed to fetch tag`)
+
+**Error message:**
+```text
+Error response from daemon: manifest for <REGION>-docker.pkg.dev/<PROJECT_ID>/<SERVICE>/skaffold-example:<COMMIT_SHA>-dirty not found: manifest unknown
+```
+
+**Cause:**
+When building via `skaffold` in non-git directories or custom contexts, `skaffold build` may default to tag `:latest` instead of `:$COMMIT_SHA-dirty`.
+
+**Solution:**
+Ensure `--tag=$COMMIT_SHA-dirty` is passed to the `skaffold build` command inside `cloudbuild.yaml`:
+```bash
+skaffold build --file-output=/workspace/artifacts.json --default-repo=$_CONTAINER_REGISTRY --cache-artifacts=false --tag=$COMMIT_SHA-dirty
+```
+
