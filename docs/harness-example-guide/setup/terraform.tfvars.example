@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
-org_id          = "REPLACE_ME" // Organization ID where the environment will be created
-folder_id       = "REPLACE_ME" // New folders and projects will be created inside the folder id below
-billing_account = "REPLACE_ME" // Billing account for the new resources
-cloud_build_sa  = "REPLACE_ME" // Cloud build service account, as described on pre-requisite
+// =============================================================================
+// HARNESS PREREQUISITE CONFIGURATION (FOR SINGLE-PROJECT EXAMPLES)
+// =============================================================================
 
-region = "REPLACE_ME" // Region where KMS and Logging bucket will be deployed - example "us-central1"
+org_id          = "123456789012"             // Google Cloud Organization ID
+folder_id       = "123456789012"             // Parent Folder ID where the seed folder/project will be created
+billing_account = "XXXXXX-YYYYYY-ZZZZZZ"     // Google Cloud Billing Account ID
 
-workpool_region            = "REPLACE_ME" // Private workpool region - example "us-central1"
-workerpool_machine_type    = "REPLACE_ME" // Workerpool machine type - example "e2-standard-4"
-workerpool_peering_address = "REPLACE_ME" // Workerpool peering address - example "10.3.3.0"
-workerpool_nat_subnet_ip   = "REPLACE_ME" // Workerpoool nat subnet ip - example "10.1.1.0/24"
+// Optional: Cloud Build Service Account email. If empty, the project default Cloud Build SA is used.
+cloud_build_sa = ""
 
-// Enable to deploy environments harness
-enabled_environments = {
-  "development"   = false
-  "nonproduction" = true
-  "production"    = false
-}
+// Google Cloud region for KMS, Logging bucket, and Worker Pool resources
+region = "us-central1"
 
-// A list of GCP regions where VPC subnets should be created - example "us-central1", "us-east4"
-network_regions_to_deploy = [
-  "REPLACE_ME"
-]
+// Set to true if you want this harness to pre-provision a dedicated Cloud Build Private Worker Pool with NAT VM.
+// If false (default), the single-project example will provision its own worker pool and VPC network via standalone-harness.
+create_workerpool = false
 
-// A list of IP CIDR ranges for proxies that need access to the VPCs - example ["10.129.0.0/23"]
-proxy_source_ranges = [
-  "REPLACE_ME"
-]
+// Private Worker Pool network parameters (only used when create_workerpool = true)
+workerpool_machine_type    = "e2-standard-4"
+workerpool_peering_address = "10.3.3.0"
+workerpool_nat_subnet_ip   = "10.1.1.0/24"
 
-// Harness protection flags, all of then are set to be able to destroy entirely. Change it according to the use case.
-project_deletion_policy      = "DELETE" // When "DELETE", it enable project destruction
-tfstate_bucket_force_destroy = true     // When true, the state bucket will be deleted even while containing objects.
-kms_prevent_destroy          = false    // If set to false, delete KMS keyring and keys when destroying the module
+// Sandbox and Teardown protection flags (configured for easy teardown in test/demo environments)
+project_deletion_policy      = "DELETE" // Options: "DELETE" or "PREVENT"
+tfstate_bucket_force_destroy = true     // Allows deleting state bucket containing objects during destroy
+kms_prevent_destroy          = false    // Set to false to allow destroying KMS keyrings/keys in test environments
+encrypt_gcs_bucket_tfstate   = false    // Set to true to encrypt the remote state bucket with CMEK

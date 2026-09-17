@@ -16,7 +16,17 @@
 
 output "project_id" {
   value       = module.seed_project.project_id
-  description = "The ID of the seed project."
+  description = "The Google Cloud project ID for deploying single-project examples."
+}
+
+output "project_number" {
+  value       = module.seed_project.project_number
+  description = "The Google Cloud project number."
+}
+
+output "region" {
+  value       = var.region
+  description = "The Google Cloud region for deployments."
 }
 
 output "billing_account" {
@@ -29,62 +39,37 @@ output "org_id" {
   description = "The organization ID."
 }
 
+output "seed_folder_id" {
+  value       = module.folder_seed.id
+  description = "The folder ID created for the seed/harness project."
+}
+
 // **********************************************************************
 // Logging bucket
 // **********************************************************************
 
 output "logging_bucket" {
   value       = module.logging_bucket.name
-  description = "The name of the logging bucket."
+  description = "The GCS logging bucket name for Cloud Build and deployment logs."
 }
 
 // **********************************************************************
-// KMS
+// KMS Keys
 // **********************************************************************
 
 output "bucket_kms_key" {
   value       = module.kms.keys["bucket"]
-  description = "The KMS key for the bucket."
+  description = "The KMS key ID for Cloud Storage bucket CMEK encryption."
 }
 
 output "attestation_kms_key" {
   value       = module.kms_attestor.keys["attestation"]
-  description = "The KMS key for attestation."
+  description = "The KMS key ID for Binary Authorization asymmetric attestation signing."
 }
 
-// **********************************************************************
-// Workerpool
-// **********************************************************************
-
-output "workerpool_id" {
-  value       = module.private_workerpool.workerpool_id
-  description = "The ID of the private worker pool."
-}
-
-// **********************************************************************
-// VPC
-// **********************************************************************
-
-output "envs" {
-  value = { for env, vpc in module.cluster_vpc : env => {
-    org_id             = var.org_id
-    folder_id          = module.folders_envs.ids[env]
-    billing_account    = var.billing_account
-    network_project_id = vpc.project_id
-    network_self_link  = vpc.network_self_link,
-    subnets_self_links = [for sub in vpc.subnets_self_links : sub if strcontains(sub, "subnetworks/eab")],
-  } }
-  description = "A map of environments to their respective VPC information."
-}
-
-output "common_folder_id" {
-  value       = module.folder_common.ids["common"]
-  description = "The ID of the common folder."
-}
-
-output "attestation_evaluation_mode" {
-  value       = length(local.envs) == 1 ? "REQUIRE_ATTESTATION" : "ALWAYS_ALLOW"
-  description = "The attestation evaluation mode, which is set to 'REQUIRE_ATTESTATION' if there is only one environment, and 'ALWAYS_ALLOW' otherwise."
+output "state_kms_key" {
+  value       = module.kms_tfstate.keys["state-key"]
+  description = "The KMS key ID for Terraform state bucket CMEK encryption."
 }
 
 // **********************************************************************
@@ -93,5 +78,19 @@ output "attestation_evaluation_mode" {
 
 output "state_bucket" {
   value       = google_storage_bucket.terraform_state.name
-  description = "The tfstate bucket"
+  description = "The Cloud Storage bucket for Terraform remote state backend."
+}
+
+// **********************************************************************
+// Workerpool & Network (Optional)
+// **********************************************************************
+
+output "workerpool_id" {
+  value       = var.create_workerpool ? module.private_workerpool[0].workerpool_id : null
+  description = "The ID of the pre-provisioned Cloud Build private worker pool (if create_workerpool is enabled)."
+}
+
+output "network_id" {
+  value       = var.create_workerpool ? module.private_workerpool[0].network_id : null
+  description = "The network ID/self-link of the pre-provisioned VPC (if create_workerpool is enabled)."
 }

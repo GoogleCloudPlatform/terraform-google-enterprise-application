@@ -15,9 +15,10 @@
  */
 
 module "private_workerpool" {
+  count                      = var.create_workerpool ? 1 : 0
   source                     = "./modules/private_workerpool"
   workerpool_machine_type    = var.workerpool_machine_type
-  workpool_region            = var.workpool_region
+  workpool_region            = var.region
   org_id                     = var.org_id
   billing_account            = var.billing_account
   seed_folder_id             = module.folder_seed.id

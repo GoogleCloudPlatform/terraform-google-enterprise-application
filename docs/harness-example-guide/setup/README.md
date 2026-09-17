@@ -1,44 +1,43 @@
-# Harness Setup
+# Harness Setup for Single-Project Examples
 
-This harness setup creates the required prerequisite resources to deploy the harness for the EAB deployment.
+This harness setup provisions the required prerequisite resources in Google Cloud to test and deploy the Single-Project Standalone reference examples (`default-example`, `agent`, `llm-model`, `cymbal-bank`, etc.) of the Enterprise Application Blueprint (EAB).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
-| cloud\_build\_sa | Cloud Build Service Account email to be granted Encrypt/Decrypt role. | `string` | n/a | yes |
-| enabled\_environments | A map of environments to deploy. Set the value to 'true' for each environment you want to create. | `map(bool)` | n/a | yes |
-| encrypt\_gcs\_bucket\_tfstate | value | `bool` | `false` | no |
-| folder\_id | The folder to deploy in | `string` | n/a | yes |
-| kms\_prevent\_destroy | If set to false, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
-| network\_regions\_to\_deploy | List of regions where the network resources should be deployed. | `list(string)` | n/a | yes |
-| org\_id | The numeric organization id | `string` | n/a | yes |
-| project\_deletion\_policy | Project deletion policy. | `string` | `"PREVENT"` | no |
-| proxy\_source\_ranges | A list of IP CIDR ranges for proxies that need access to the VPCs. Change this to match your corporate proxy network. | `list(string)` | n/a | yes |
-| region | Region where KMS, Logging bucket and tfstate bucket will be deployed. | `string` | n/a | yes |
-| storage\_bucket\_labels | Labels to apply to the storage bucket. | `map(string)` | `{}` | no |
-| tfstate\_bucket\_force\_destroy | If supplied, the state bucket will be deleted even while containing objects. | `bool` | `false` | no |
-| workerpool\_machine\_type | The workerpool machine type. | `string` | n/a | yes |
-| workerpool\_nat\_subnet\_ip | The IP CIDR range for the worker pool NAT proxy subnet (e.g., 10.1.1.0/24). Change this if it conflicts with your corporate network. | `string` | n/a | yes |
-| workerpool\_peering\_address | The IP address for the Cloud Build private worker pool peering range (e.g., 10.3.3.0). Change this if it conflicts with your corporate network. | `string` | n/a | yes |
-| workpool\_region | The region to deploy in. | `string` | n/a | yes |
+| billing\_account | The Google Cloud Billing Account ID (e.g., XXXXXX-YYYYYY-ZZZZZZ). | `string` | n/a | yes |
+| cloud\_build\_sa | Optional Cloud Build Service Account email to be granted KMS Encrypt/Decrypt and Attestation roles. If empty, the project default Cloud Build service account will be used. | `string` | `""` | no |
+| create\_workerpool | Whether to pre-provision a dedicated Cloud Build Private Worker Pool with NAT VM. If false, single-project examples provision their own worker pools via standalone-harness. | `bool` | `false` | no |
+| encrypt\_gcs\_bucket\_tfstate | Whether to encrypt the Terraform state GCS bucket with CMEK using KMS. | `bool` | `false` | no |
+| folder\_id | The folder ID where the harness seed folder and project will be created. | `string` | n/a | yes |
+| kms\_prevent\_destroy | If set to false, allow deleting KMS keyring and keys when destroying the module. | `bool` | `false` | no |
+| org\_id | The numeric Google Cloud Organization ID. | `string` | n/a | yes |
+| project\_deletion\_policy | Project deletion policy. Use 'DELETE' for sandbox/test environments. | `string` | `"DELETE"` | no |
+| region | The Google Cloud region for KMS, Logging bucket, tfstate bucket, and worker pools. | `string` | `"us-central1"` | no |
+| storage\_bucket\_labels | Labels to apply to the storage buckets. | `map(string)` | `{}` | no |
+| tfstate\_bucket\_force\_destroy | If true, the state bucket will be deleted even if it contains objects. | `bool` | `true` | no |
+| workerpool\_machine\_type | The machine type for the Cloud Build Private Worker Pool. | `string` | `"e2-standard-4"` | no |
+| workerpool\_nat\_subnet\_ip | The CIDR block for the worker pool NAT proxy subnet (e.g., 10.1.1.0/24). | `string` | `"10.1.1.0/24"` | no |
+| workerpool\_peering\_address | The internal IP address for the Cloud Build Private Worker Pool VPC peering range (e.g., 10.3.3.0). | `string` | `"10.3.3.0"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| attestation\_evaluation\_mode | The attestation evaluation mode, which is set to 'REQUIRE\_ATTESTATION' if there is only one environment, and 'ALWAYS\_ALLOW' otherwise. |
-| attestation\_kms\_key | The KMS key for attestation. |
+| attestation\_kms\_key | The KMS key ID for Binary Authorization asymmetric attestation signing. |
 | billing\_account | The billing account ID. |
-| bucket\_kms\_key | The KMS key for the bucket. |
-| common\_folder\_id | The ID of the common folder. |
-| envs | A map of environments to their respective VPC information. |
-| logging\_bucket | The name of the logging bucket. |
+| bucket\_kms\_key | The KMS key ID for Cloud Storage bucket CMEK encryption. |
+| logging\_bucket | The GCS logging bucket name for Cloud Build and deployment logs. |
+| network\_id | The network ID/self-link of the pre-provisioned VPC (if create\_workerpool is enabled). |
 | org\_id | The organization ID. |
-| project\_id | The ID of the seed project. |
-| state\_bucket | The tfstate bucket |
-| workerpool\_id | The ID of the private worker pool. |
+| project\_id | The Google Cloud project ID for deploying single-project examples. |
+| project\_number | The Google Cloud project number. |
+| region | The Google Cloud region for deployments. |
+| seed\_folder\_id | The folder ID created for the seed/harness project. |
+| state\_bucket | The Cloud Storage bucket for Terraform remote state backend. |
+| state\_kms\_key | The KMS key ID for Terraform state bucket CMEK encryption. |
+| workerpool\_id | The ID of the pre-provisioned Cloud Build private worker pool (if create\_workerpool is enabled). |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
