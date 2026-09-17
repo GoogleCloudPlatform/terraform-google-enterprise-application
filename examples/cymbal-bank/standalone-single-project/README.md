@@ -202,7 +202,7 @@ Refer to the secret configuration parameters (`gitlab_authorizer_credential_secr
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
-| teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | <pre>{\n  "accounts": "accounts-team@example.com",\n  "frontend": "frontend-team@example.com",\n  "ledger": "ledger-team@example.com"\n}</pre> | no |
+| teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | <pre>{<br> "cb-accounts": "accounts-team@example.com", <br>"cb-frontend": "frontend-team@example.com", <br>"cb-ledger": "ledger-team@example.com"<br>}</pre> | no |
 | workerpool\_id | Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step. | `string` | `null` | no |
 
 ## Outputs

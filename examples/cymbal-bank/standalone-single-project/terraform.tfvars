@@ -85,7 +85,7 @@ cloudbuildv2_repository_config = {
       repository_url  = "https://gitlab.com/user/eab-cymbal-bank-ledger-transactionhistory.git"
     }
   }
-  
+
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
   gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
   gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
