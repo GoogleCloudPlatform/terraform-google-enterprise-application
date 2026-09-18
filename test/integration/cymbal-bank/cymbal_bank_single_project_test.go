@@ -73,7 +73,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 		suffixServiceName string
 		splitServiceName  []string
 	)
-	region := "us-east4"
+	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
 	servicesInfoMap := make(map[string]ServiceInfos)
 	appName := "cymbal-bank"
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource/%s", appName, appName)
