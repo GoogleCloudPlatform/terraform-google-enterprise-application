@@ -22,6 +22,7 @@
 - [Quota 'CPUS_ALL_REGIONS' exceeded](#quota-cpus_all_regions-exceeded)
 - [Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link](#shared-vpc-attachment-destruction-failure-due-to-network-endpoint-group-link)
 - [Network Destruction Failure due to Firewall still using it](#network-destruction-failure-due-to-firewall-still-using-it)
+- [Cloud Source Repositories (CSR) Git Authentication Failure](#cloud-source-repositories-csr-git-authentication-failure)
 - - -
 
 ### Project quota exceeded
@@ -474,3 +475,41 @@ To resolve this, you need to manually remove the firewall rules and then proceed
    ```bash
       gcloud compute firewall-rules delete <FIREWALL-RULE-NAME>  --project <NETWORK_PROJECT>
    ```
+
+### Cloud Source Repositories (CSR) Git Authentication Failure
+
+**Error message:**
+
+```text
+fatal: unable to access 'https://source.developers.google.com/p/<PROJECT_ID>/r/<REPO_NAME>/': The requested URL returned error: 400 Invalid authentication credentials.
+Please generate a new identifier: https://source.developers.google.com/new-password
+```
+
+**Cause:**
+
+When using `repo_type = "CSR"` in `global.tfvars`, `eab-deployer` attempts to clone the Cloud Source Repository using the local Git client. Google Cloud requires explicit Git credentials or cookies when cloning from local environments without an active CSR git credential helper.
+
+**Solution:**
+
+Choose one of the following approaches:
+
+1. **Configure Git Cookie Credentials**:
+   - Open [https://source.developers.google.com/new-password](https://source.developers.google.com/new-password) in your browser.
+   - Authenticate with your Google Cloud deployment account.
+   - Follow the instructions to run the generated shell command, which configures your `~/.gitcookies` file.
+   - Re-run `$HOME/go/bin/eab-deployer -tfvars_file global.tfvars`.
+
+2. **Trigger Build Directly via Cloud Build**:
+   If the infrastructure was already provisioned, submit the application build directly to Cloud Build using the Private Worker Pool:
+   ```bash
+   gcloud builds submit examples/default-example/6-appsource/default-example \
+     --project=<PROJECT_ID> \
+     --region=<REGION> \
+     --config=examples/default-example/6-appsource/default-example/cloudbuild.yaml \
+     --service-account=projects/<PROJECT_ID>/serviceAccounts/ci-<SERVICE_NAME>@<PROJECT_ID>.iam.gserviceaccount.com \
+     --substitutions=_ATTESTOR_ID="projects/<PROJECT_ID>/attestors/gke-attestor",_BINARY_AUTH_IMAGE="<REGION>-docker.pkg.dev/<PROJECT_ID>/ar-eab-<SERVICE_NAME>-binauthz/binauthz-attestation:v1.0",_CLOUDDEPLOY_PIPELINE_NAME="<SERVICE_NAME>",_CONTAINER_REGISTRY="<REGION>-docker.pkg.dev/<PROJECT_ID>/<SERVICE_NAME>",_KMS_KEY_VERSION="projects/<PROJECT_ID>/locations/<REGION>/keyRings/kms-attestation-sign/cryptoKeys/attestation/cryptoKeyVersions/1",_PRIVATE_POOL="projects/<PROJECT_ID>/locations/<REGION>/workerPools/wp-eab-default-example",_SOURCE_STAGING_BUCKET="gs://bkt-release-source-development-<SERVICE_NAME>-<PROJECT_NUMBER>",COMMIT_SHA="main",SHORT_SHA="main"
+   ```
+
+3. **Use 2nd-gen Repositories (GitHub / GitLab)**:
+   In `global.tfvars`, configure `cloudbuildv2_repository_config` to use GitHub (`repo_type = "GITHUBv2"`) or GitLab (`repo_type = "GITLABv2"`).
+

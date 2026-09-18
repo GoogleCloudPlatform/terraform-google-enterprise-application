@@ -15,95 +15,82 @@
  */
 
 variable "org_id" {
-  description = "The numeric organization id"
+  description = "The numeric Google Cloud Organization ID."
   type        = string
 }
 
 variable "folder_id" {
-  description = "The folder to deploy in"
+  description = "The folder ID where the harness seed folder and project will be created."
   type        = string
 }
 
 variable "billing_account" {
-  description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
+  description = "The Google Cloud Billing Account ID (e.g., XXXXXX-YYYYYY-ZZZZZZ)."
   type        = string
 }
 
 variable "cloud_build_sa" {
-  description = "Cloud Build Service Account email to be granted Encrypt/Decrypt role."
+  description = "Optional Cloud Build Service Account email to be granted KMS Encrypt/Decrypt and Attestation roles. If empty, the project default Cloud Build service account will be used."
   type        = string
+  default     = ""
 }
 
 variable "region" {
-  description = "Region where KMS, Logging bucket and tfstate bucket will be deployed."
+  description = "The Google Cloud region for KMS, Logging bucket, tfstate bucket, and worker pools."
   type        = string
+  default     = "us-central1"
 }
 
-variable "workpool_region" {
-  description = "The region to deploy in."
-  type        = string
+variable "create_workerpool" {
+  description = "Whether to pre-provision a dedicated Cloud Build Private Worker Pool with NAT VM. If false, single-project examples provision their own worker pools via standalone-harness."
+  type        = bool
+  default     = false
 }
 
 variable "workerpool_machine_type" {
-  description = "The workerpool machine type."
+  description = "The machine type for the Cloud Build Private Worker Pool."
   type        = string
+  default     = "e2-standard-4"
 }
 
 variable "workerpool_peering_address" {
-  description = "The IP address for the Cloud Build private worker pool peering range (e.g., 10.3.3.0). Change this if it conflicts with your corporate network."
+  description = "The internal IP address for the Cloud Build Private Worker Pool VPC peering range (e.g., 10.3.3.0)."
   type        = string
+  default     = "10.3.3.0"
 }
 
 variable "workerpool_nat_subnet_ip" {
-  description = "The IP CIDR range for the worker pool NAT proxy subnet (e.g., 10.1.1.0/24). Change this if it conflicts with your corporate network."
+  description = "The CIDR block for the worker pool NAT proxy subnet (e.g., 10.1.1.0/24)."
   type        = string
-}
-
-variable "enabled_environments" {
-  description = "A map of environments to deploy. Set the value to 'true' for each environment you want to create."
-  type        = map(bool)
-}
-
-variable "network_regions_to_deploy" {
-  description = "List of regions where the network resources should be deployed."
-  type        = list(string)
-  validation {
-    condition     = alltrue([for r in var.network_regions_to_deploy : contains(["us-central1", "us-east4"], r)])
-    error_message = "For this harness guide, only 'us-central1' and 'us-east4' are supported."
-  }
-}
-
-variable "proxy_source_ranges" {
-  description = "A list of IP CIDR ranges for proxies that need access to the VPCs. Change this to match your corporate proxy network."
-  type        = list(string)
+  default     = "10.1.1.0/24"
 }
 
 variable "storage_bucket_labels" {
-  description = "Labels to apply to the storage bucket."
+  description = "Labels to apply to the storage buckets."
   type        = map(string)
   default     = {}
 }
 
 variable "tfstate_bucket_force_destroy" {
-  description = "If supplied, the state bucket will be deleted even while containing objects."
+  description = "If true, the state bucket will be deleted even if it contains objects."
   type        = bool
   default     = false
 }
 
 variable "encrypt_gcs_bucket_tfstate" {
-  description = "value"
+  description = "Whether to encrypt the Terraform state GCS bucket with CMEK using KMS."
   type        = bool
   default     = false
 }
 
 variable "kms_prevent_destroy" {
-  description = "If set to false, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  description = "If set to false, allow deleting KMS keyring and keys when destroying the module."
   type        = bool
   default     = true
 }
 
 variable "project_deletion_policy" {
-  description = "Project deletion policy."
+  description = "Project deletion policy. Use 'DELETE' for sandbox/test environments."
   type        = string
   default     = "PREVENT"
 }

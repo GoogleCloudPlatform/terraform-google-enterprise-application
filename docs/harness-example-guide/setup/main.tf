@@ -24,7 +24,7 @@ module "folder_seed" {
   source              = "terraform-google-modules/folders/google"
   version             = "~> 5.0"
   prefix              = random_string.prefix.result
-  parent              = "folders/${var.folder_id}"
+  parent              = var.folder_id != "" ? (startswith(var.folder_id, "folders/") ? var.folder_id : "folders/${var.folder_id}") : "organizations/${var.org_id}"
   names               = ["seed"]
   deletion_protection = false
 }
