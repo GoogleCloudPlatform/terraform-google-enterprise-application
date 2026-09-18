@@ -17,10 +17,10 @@
 project_id = "<YOUR-PROJECT-ID>"
 # region     = "us-central1"
 
-# Optional: If you already have a private worker pool, specify its ID. If not, a new one will be created.  
-# workerpool_id = "projects/PROJECT_ID/locations/LOCATION/workerPools/POOL_NAME"  
+# Optional: If you already have a private worker pool, specify its ID. If not, a new one will be created.
+# workerpool_id = "projects/PROJECT_ID/locations/LOCATION/workerPools/POOL_NAME"
 
-# Optional: If a private worker pool is not provided, and you already have a VPC network to use for the private worker pool, specify its ID. If not, a new network will be created.  
+# Optional: If a private worker pool is not provided, and you already have a VPC network to use for the private worker pool, specify its ID. If not, a new network will be created.
 # network_id = "projects/PROJECT_ID/global/networks/NETWORK_NAME"
 
 # Optional: Set to false if you do not want to create a NAT gateway (e.g. if your existing network already has one).
@@ -50,22 +50,31 @@ project_id = "<YOUR-PROJECT-ID>"
 # }
 
 cloudbuildv2_repository_config = {
-  repo_type = "GITLABv2"
+  github_secret_id                            = null
+  gitlab_authorizer_credential_secret_id      = null
+  gitlab_enterprise_ca_certificate            = null
+  gitlab_enterprise_host_uri                  = null
+  gitlab_enterprise_service_directory         = null
+  gitlab_read_authorizer_credential_secret_id = null
+  gitlab_webhook_secret_id                    = null
+  repo_type                                   = "CSR"
   repositories = {
     "eab-mortgage-agent" = {
       repository_name = "eab-mortgage-agent"
-      repository_url  = "https://gitlab.com/user/eab-mortgage-agent.git"
+      repository_url  = ""
+      # repository_url  = "https://gitlab.com/user/eab-mortgage-agent.git"
     }
   }
+  secret_project_id = null
   # The Secret ID format is: projects/PROJECT_NUMBER/secrets/SECRET_NAME
-  gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
-  gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
-  gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
-  secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+  # gitlab_authorizer_credential_secret_id      = "REPLACE_WITH_READ_API_SECRET_ID"
+  # gitlab_read_authorizer_credential_secret_id = "REPLACE_WITH_READ_USER_SECRET_ID"
+  # gitlab_webhook_secret_id                    = "REPLACE_WITH_WEBHOOK_SECRET_ID"
+  # secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
   # If you are using a self-hosted instance, you may change the URL below accordingly
-  gitlab_enterprise_host_uri = "https://gitlab.com"
+  # gitlab_enterprise_host_uri = "https://gitlab.com"
   # Format is projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE
-  gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
+  # gitlab_enterprise_service_directory = "REPLACE_WITH_SERVICE_DIRECTORY"
   # .pem string
   gitlab_enterprise_ca_certificate = <<EOF
 REPLACE_WITH_SSL_CERT

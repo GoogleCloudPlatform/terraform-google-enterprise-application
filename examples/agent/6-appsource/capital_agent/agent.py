@@ -17,7 +17,6 @@ from google.adk.agents import LlmAgent
 
 MODEL_ID = os.getenv("MODEL_ID", "gemini-3.1-flash-lite")
 
-
 # Define a tool function
 def get_capital_city(country: str) -> str:
     """Retrieves the capital city for a given country."""

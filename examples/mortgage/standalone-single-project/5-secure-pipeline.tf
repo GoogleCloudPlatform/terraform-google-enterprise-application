@@ -25,8 +25,9 @@ locals {
     null
   )
 
+  // review
   team_name    = "default"
-  service_name = "hello-world"
+  service_name = "mortgage-agent"
 }
 
 data "google_project" "project" {
@@ -78,7 +79,7 @@ module "cicd" {
     _TEAM    = local.team_name
   }
 
-  ci_build_included_files = ["*"]
+  ci_build_included_files = ["**"]
 
   buckets_force_destroy = true
 
@@ -110,4 +111,30 @@ module "cicd" {
     google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
     module.standalone_harness,
   ]
+}
+
+resource "google_service_account" "gsa_mortgage_agent" {
+  project      = var.project_id
+  account_id   = "gsa-mortgage-agent"
+  display_name = "GSA for mortgage-agent"
+}
+
+resource "google_project_iam_member" "gsa_mortgage_vertex_user" {
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = google_service_account.gsa_mortgage_agent.member
+}
+
+resource "google_project_iam_member" "gsa_mortgage_trace_agent" {
+  project = var.project_id
+  role    = "roles/cloudtrace.agent"
+  member  = google_service_account.gsa_mortgage_agent.member
+}
+
+resource "google_service_account_iam_member" "mortgage_wi_binding" {
+  service_account_id = google_service_account.gsa_mortgage_agent.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[mortgage-agent-${local.env}/mortgage-agent-ksa]"
+
+  depends_on = [module.fleetscope_infra]
 }
