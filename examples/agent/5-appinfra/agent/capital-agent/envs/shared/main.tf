@@ -20,6 +20,12 @@ locals {
   team_name        = "default"
   repo_name        = "eab-${local.application_name}-${local.service_name}"
   repo_branch      = "main"
+
+  target_deploy_parameters = { for i, p in local.cluster_projects_id : (i) => {
+    "PROJECT_ID"      = p
+    "MODEL_ID"        = "gemini-3.1-flash-lite"
+    "SERVICE_ACCOUNT" = google_service_account.gsa_capital_agent[i].email
+  } }
 }
 
 module "app" {
@@ -45,6 +51,8 @@ module "app" {
     use_private_workerpool = true
     private_workerpool_id  = data.terraform_remote_state.bootstrap.outputs.cb_private_workerpool_id
   }
+
+  target_deploy_parameters = local.target_deploy_parameters
 
   access_level_name = var.access_level_name
   logging_bucket    = var.logging_bucket

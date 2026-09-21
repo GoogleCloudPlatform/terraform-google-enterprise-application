@@ -39,5 +39,5 @@ spec:
       target:
         # The target average value for the metric. The autoscaler adjusts the number
         # of replicas to maintain an average capacity fullness of 70% across all Pods.
-        averageValue: 70
+        averageValue: "70"
         type: AverageValue

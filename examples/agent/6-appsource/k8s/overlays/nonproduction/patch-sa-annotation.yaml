@@ -17,4 +17,4 @@ kind: ServiceAccount
 metadata:
   name: capital-agent-ksa
   annotations:
-    iam.gke.io/gcp-service-account: gsa-capital-agent@${PROJECT_ID}.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: PLACEHOLDER # from-param: ${SERVICE_ACCOUNT}
