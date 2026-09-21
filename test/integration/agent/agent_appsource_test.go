@@ -126,7 +126,7 @@ func TestSourceAgent(t *testing.T) {
 
 				// Convert content to string and perform replacement
 				modifiedContent := strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
-				modifiedContent = strings.ReplaceAll(modifiedContent, "${MODEL_ID}", "gemini-2.0-flash")
+				modifiedContent = strings.ReplaceAll(modifiedContent, "${MODEL_ID}", "gemini-3.1-flash-lite")
 				// Write the modified content back to the file
 				err = os.WriteFile(kustomization, []byte(modifiedContent), 0644)
 				if err != nil {

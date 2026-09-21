@@ -15,7 +15,7 @@
 import os
 from google.adk.agents import LlmAgent
 
-MODEL_ID = os.getenv("MODEL_ID", "gemini-2.0-flash")
+MODEL_ID = os.getenv("MODEL_ID", "gemini-3.1-flash-lite")
 
 
 # Define a tool function
