@@ -38,11 +38,13 @@ const (
 )
 
 func getServiceIpAddress(t *testing.T, serviceName string, namespace string) (string, error) {
-	cmd := fmt.Sprintf("get service %s -n %s -o jsonpath='{.status.loadBalancer.ingress[0].ip}'", serviceName, namespace)
-	args := strings.Fields(cmd)
 	kubectlCmd := shell.Command{
 		Command: "kubectl",
-		Args:    args,
+		Args: []string{
+			"get", "service", serviceName,
+			"-n", namespace,
+			"-o", "jsonpath={.status.loadBalancer.ingress[0].ip}",
+		},
 	}
 	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
 }
