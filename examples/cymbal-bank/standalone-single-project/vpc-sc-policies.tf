@@ -26,12 +26,12 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "egress
   count = var.service_perimeter_mode == "ENFORCE" && var.service_perimeter_name != null && local.secret_project_number != null ? 1 : 0
 
   perimeter = var.service_perimeter_name
-  title     = local.secret_project_number != null ? "cb-projects/${local.secret_project_number}" : null
+  title     = "cb-projects/${local.secret_project_number}"
   egress_from {
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
   egress_to {
-    resources = local.secret_project_number != null ? ["projects/${local.secret_project_number}"] : null
+    resources = ["projects/${local.secret_project_number}"]
     operations {
       service_name = "secretmanager.googleapis.com"
       method_selectors {
@@ -48,12 +48,12 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   count = var.service_perimeter_name != null && local.secret_project_number != null ? 1 : 0
 
   perimeter = var.service_perimeter_name
-  title     = local.secret_project_number != null ? "cb-projects/${local.secret_project_number}" : null
+  title     = "cb-projects/${local.secret_project_number}"
   egress_from {
     identities = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   }
   egress_to {
-    resources = local.secret_project_number != null ? ["projects/${local.secret_project_number}"] : null
+    resources = ["projects/${local.secret_project_number}"]
     operations {
       service_name = "secretmanager.googleapis.com"
       method_selectors {
