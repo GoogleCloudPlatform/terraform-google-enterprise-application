@@ -20,7 +20,6 @@ package cymbal_bank
 import (
 	"fmt"
 	"net"
-	"os"
 	"regexp"
 	"slices"
 	"strings"
@@ -56,10 +55,7 @@ func TestStandaloneSingleProjectCymbalBank(t *testing.T) {
 	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
 	serviceAccount := setupVPCSCOutput.GetTFSetupJsonOutput("sa_email").Get("cymbal-bank").String()
-	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
-	if err != nil {
-		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-	}
+	t.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
 	ncc_config := map[string]interface{}{
 		"enable_ncc":        true,
 		"hub_uri":           setupVPCSCOutput.GetTFSetupStringOutput("ncc_hub_uri"),
