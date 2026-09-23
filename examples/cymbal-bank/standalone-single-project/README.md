@@ -135,27 +135,27 @@ Configure `cloudbuildv2_repository_config` in `terraform.tfvars` for your reposi
 cloudbuildv2_repository_config = {
   repo_type = "CSR"
   repositories = {
-    cb-frontend = {
+    "eab-cymbal-bank-frontend" = {
       repository_name = "eab-cymbal-bank-frontend"
       repository_url  = ""
     }
-    cb-accounts-contacts = {
+    "eab-cymbal-bank-accounts-contacts" = {
       repository_name = "eab-cymbal-bank-accounts-contacts"
       repository_url  = ""
     }
-    cb-accounts-userservice = {
+    "eab-cymbal-bank-accounts-userservice" = {
       repository_name = "eab-cymbal-bank-accounts-userservice"
       repository_url  = ""
     }
-    cb-ledger-balancereader = {
+    "eab-cymbal-bank-ledger-balancereader" = {
       repository_name = "eab-cymbal-bank-ledger-balancereader"
       repository_url  = ""
     }
-    cb-ledger-ledgerwriter = {
+    "eab-cymbal-bank-ledger-ledgerwriter" = {
       repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
       repository_url  = ""
     }
-    cb-ledger-transactionhistory = {
+    "eab-cymbal-bank-ledger-transactionhistory" = {
       repository_name = "eab-cymbal-bank-ledger-transactionhistory"
       repository_url  = ""
     }
