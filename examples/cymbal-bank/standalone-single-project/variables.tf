@@ -198,6 +198,19 @@ variable "cloudbuildv2_repository_config" {
     error_message = "You must specify a valid repo_type ('GITHUBv2', 'GITLABv2', or 'CSR'). For 'GITHUBv2', all 'github_' prefixed variables must be defined and no 'gitlab_' prefixed variables should be defined. For 'GITLABv2', all 'gitlab_' prefixed variables must be defined and no 'github_' prefixed variables should be defined."
   }
 
+  validation {
+    condition = alltrue([
+      for k, v in var.cloudbuildv2_repository_config.repositories : contains([
+        "eab-cymbal-bank-frontend",
+        "eab-cymbal-bank-accounts-contacts",
+        "eab-cymbal-bank-accounts-userservice",
+        "eab-cymbal-bank-ledger-balancereader",
+        "eab-cymbal-bank-ledger-ledgerwriter",
+        "eab-cymbal-bank-ledger-transactionhistory"
+      ], v.repository_name)
+    ])
+    error_message = "All repositories in cloudbuildv2_repository_config must have repository_name matching one of the 6 Cymbal Bank services: eab-cymbal-bank-frontend, eab-cymbal-bank-accounts-contacts, eab-cymbal-bank-accounts-userservice, eab-cymbal-bank-ledger-balancereader, eab-cymbal-bank-ledger-ledgerwriter, eab-cymbal-bank-ledger-transactionhistory."
+  }
 }
 
 variable "ncc_config" {
