@@ -17,7 +17,6 @@
 variable "project_id" {
   type        = string
   description = "Google Cloud project ID in which to deploy all example resources"
-  default     = null
 }
 
 variable "region" {
