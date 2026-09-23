@@ -21,9 +21,13 @@ configMapGenerator:
   - name: mortgage-agent-config
     behavior: replace
     literals:
-      - GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
+      - GOOGLE_CLOUD_PROJECT=ci-eab-seed-XXXXXXX
       - GOOGLE_CLOUD_LOCATION=global
-      - MODEL_ID=${MODEL_ID}
+      - MODEL_ID=gemini-3.1-flash-lite
+      - MCP_INVOKER_SA_EMAIL=agent-mcp-invoker@XXXXXXXXXX.iam.gserviceaccount.com
+      - MCP_REGISTRY_FILTER=displayName="legacy-dms" OR displayName="corporate-email" OR displayName="income-verification"
+    files:
+      - MCP_DISCOVERED_SERVERS_JSON=mcp-discovered-servers.json
 patches:
   - path: patch-sa-annotation.yaml
   - path: patch-http-route.yaml

@@ -87,3 +87,9 @@ spec:
                   name: mortgage-agent-config
                   key: MCP_INTERNAL_DNS_DOMAIN
                   optional: true
+            - name: MCP_DISCOVERED_SERVERS_JSON
+              valueFrom:
+                configMapKeyRef:
+                  name: mortgage-agent-config
+                  key: MCP_DISCOVERED_SERVERS_JSON
+                  optional: true

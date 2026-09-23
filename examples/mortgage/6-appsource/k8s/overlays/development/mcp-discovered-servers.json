@@ -1,0 +1,20 @@
+[
+    {
+      "name": "legacy-dms",
+      "resolved_url": "https://legacy-dms-XXXXXXXx.a.run.app/mcp",
+      "tool_name_prefix": "legacy_dms",
+      "tools": ["search_documents", "get_document"]
+    },
+    {
+      "name": "corporate-email",
+      "resolved_url": "https://corporate-email-XXXXXXXx.a.run.app/mcp",
+      "tool_name_prefix": "corporate_email",
+      "tools": ["send_email", "read_email"]
+    },
+    {
+      "name": "income-verification",
+      "resolved_url": "https://income-verification-XXXXXXXx.a.run.app/mcp",
+      "tool_name_prefix": "income_verification",
+      "tools": ["verify_applicant"]
+    }
+]
