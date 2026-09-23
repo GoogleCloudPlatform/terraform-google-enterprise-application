@@ -101,18 +101,18 @@ module "cicd" {
   env_cluster_membership_ids = local.cluster_membership_ids
   cluster_service_accounts   = { for i, sa in module.multitenant_infra.cluster_service_accounts : (i) => "serviceAccount:${sa}" }
 
-  service_name           = local.services_config[each.key].service_name
-  team_name              = local.services_config[each.key].team_name
+  service_name           = local.services_config[each.value.repository_name].service_name
+  team_name              = local.services_config[each.value.repository_name].team_name
   repo_name              = each.value.repository_name
   repo_branch            = "main"
-  app_build_trigger_yaml = "src/${local.services_config[each.key].team_name}/cloudbuild.yaml"
+  app_build_trigger_yaml = "src/${local.services_config[each.value.repository_name].team_name}/cloudbuild.yaml"
 
   additional_substitutions = {
-    _SERVICE = local.services_config[each.key].service_name
-    _TEAM    = local.services_config[each.key].team_name
+    _SERVICE = local.services_config[each.value.repository_name].service_name
+    _TEAM    = local.services_config[each.value.repository_name].team_name
   }
 
-  ci_build_included_files = ["src/${local.services_config[each.key].team_name}/**", "src/components/**"]
+  ci_build_included_files = ["src/${local.services_config[each.value.repository_name].team_name}/**", "src/components/**"]
 
   buckets_force_destroy = true
 
