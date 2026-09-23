@@ -222,4 +222,48 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		b, err := io.ReadAll(file)
 		t.Log(string(b))
 	}
+
+	// single project confidential nodes repository replacement
+	confidentialNodesRoot := "../../../examples/standalone_single_project_confidential_nodes"
+
+	// Replace gitlab.com/user with custom self hosted URL using the root namespace
+	err = testutils.ReplacePatternInFile("https://gitlab.com/user", replacement, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace https://gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("https://gitlab.com", url, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace webhook secret id
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace gitlab token secret ids
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_API_SECRET_ID", gitlabTokenSecretId, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace SSL Cert
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_SSL_CERT\n", string(caCert), confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace Service Directory
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_SERVICE_DIRECTORY", serviceDirectory, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
