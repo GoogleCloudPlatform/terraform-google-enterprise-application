@@ -42,7 +42,7 @@ data "google_project" "eab_workerpool_project" {
 resource "google_access_context_manager_service_perimeter_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
   count     = var.service_perimeter_name != null && var.service_perimeter_mode == "ENFORCE" && var.private_workerpool.use_private_workerpool ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "deploy-${var.service_name}-${join(",", values(local.gke_projects))}-${local.worker_pool_project}"
+  title     = substr("dep-${var.service_name}-${join(",", values(local.gke_projects))}-${local.worker_pool_project}", 0, 99)
   egress_from {
     identity_type = "ANY_IDENTITY"
     dynamic "sources" {
@@ -70,7 +70,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "cloudd
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "clouddeploy_egress_cluster_to_workerpool_policy" {
   count     = var.service_perimeter_name != null && var.private_workerpool.use_private_workerpool ? 1 : 0
   perimeter = var.service_perimeter_name
-  title     = "deploy-${var.service_name}-${join(",", values(local.gke_projects))}-${local.worker_pool_project}"
+  title     = substr("dep-${var.service_name}-${join(",", values(local.gke_projects))}-${local.worker_pool_project}", 0, 99)
   egress_from {
     identity_type = "ANY_IDENTITY"
     dynamic "sources" {
