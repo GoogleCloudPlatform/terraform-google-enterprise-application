@@ -20,6 +20,7 @@ package mortgage
 import (
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"slices"
 	"strings"
@@ -42,7 +43,7 @@ func TestStandaloneSingleProjectMortgage(t *testing.T) {
 	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
 
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupVPCSCOutput.GetTFSetupStringOutput("seed_project_id")
+	projectID := setupOutput.GetJsonOutput("harness_project_ids").Get("mortgage").String()
 
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
@@ -50,9 +51,15 @@ func TestStandaloneSingleProjectMortgage(t *testing.T) {
 	gitlabPath := "../../setup/harness/gitlab"
 	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitlabPath))
 
-	service_perimeter_mode := setupVPCSCOutput.GetStringOutput("service_perimeter_mode")
-	service_perimeter_name := setupVPCSCOutput.GetStringOutput("service_perimeter_name")
-	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
+	service_perimeter_mode := setupVPCSCOutput.GetJsonOutput("service_perimeter_mode").String()
+	service_perimeter_name := setupVPCSCOutput.GetJsonOutput("service_perimeter_name").String()
+	access_level_name := setupVPCSCOutput.GetJsonOutput("access_level_name").String()
+
+	serviceAccount := setupOutput.GetJsonOutput("sa_email").Get("mortgage").String()
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
 
 	vars := map[string]interface{}{
 		"project_id":             projectID,
@@ -60,9 +67,9 @@ func TestStandaloneSingleProjectMortgage(t *testing.T) {
 		"service_perimeter_name": service_perimeter_name,
 		"teams":                  setupOutput.GetJsonOutput("teams").String(),
 		"access_level_name":      access_level_name,
-		"logging_bucket":         loggingBucket.GetStringOutput("logging_bucket"),
-		"bucket_kms_key":         loggingBucket.GetStringOutput("bucket_kms_key"),
-		"attestation_kms_key":    loggingBucket.GetStringOutput("attestation_kms_key"),
+		"logging_bucket":         loggingBucket.GetJsonOutput("logging_bucket").Get("mortgage").String(),
+		"bucket_kms_key":         loggingBucket.GetJsonOutput("bucket_kms_key").Get("mortgage").String(),
+		"attestation_kms_key":    loggingBucket.GetJsonOutput("attestation_kms_key").Get("mortgage").String(),
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
