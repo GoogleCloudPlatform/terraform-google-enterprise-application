@@ -18,10 +18,12 @@ locals {
 
   examples_namespaces = {
     "llm-model"       = ["vllm-model"],
-    "agent"           = ["capital-agent"],
+    "agent"           = ["capital-agent", "vllm-model"],
     "cymbal-bank"     = ["cb-frontend", "cb-accounts", "cb-ledger"],
     "default-example" = [],
     "cymbal-shop"     = ["cymbalshops"],
+    "hpc"             = ["hpc-team-a", "hpc-team-b"],
+    "htc"             = ["hpc-team-a", "hpc-team-b"],
   }
 
   teams = distinct(flatten([for i in var.examples_tested : lookup(local.examples_namespaces, i, [])]))

@@ -34,11 +34,6 @@ variable "cloud_build_sa" {
   type        = string
 }
 
-variable "single_project" {
-  description = "Single Project example being deployed."
-  type        = bool
-}
-
 variable "examples_tested" {
   description = "List of examples to create projects."
   type        = list(string)
@@ -49,14 +44,4 @@ variable "region" {
   description = "Region for hub network."
   type        = string
   default     = "us-central1"
-}
-
-variable "hpc" {
-  description = "HPC Example being deployed."
-  type        = bool
-}
-
-variable "agent" {
-  description = "Agent Example being deployed."
-  type        = bool
 }
