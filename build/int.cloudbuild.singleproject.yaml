@@ -280,7 +280,6 @@ steps:
             echo ERROR: Was not able to download certificate and update system bundle. && exit 1
         fi
     waitFor:
-      - ssp-cymbal-bank-apply
       - ssp-cymbal-bank-verify
 
   - id: e2e-cymbal-bank-verify
