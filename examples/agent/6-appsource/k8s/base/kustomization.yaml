@@ -22,9 +22,3 @@ resources:
   - gateway.yaml
   - healthcheck.yaml
   - hpa-capital-agent.yaml
-configMapGenerator:
-  - name: capital-agent-config
-    literals:
-      - GOOGLE_CLOUD_PROJECT=DUMMY
-      - GOOGLE_CLOUD_LOCATION=DUMMY
-      - MODEL_ID=${MODEL_ID}

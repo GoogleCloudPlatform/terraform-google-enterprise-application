@@ -17,7 +17,6 @@ package agent
 import (
 	"errors"
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 	"testing"
@@ -29,8 +28,6 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
 	"github.com/stretchr/testify/assert"
-
-	"os"
 
 	cp "github.com/otiai10/copy"
 )
@@ -116,38 +113,6 @@ func TestSourceAgent(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			for _, envName := range testutils.EnvNames(t) {
-				kustomization := fmt.Sprintf("%s/k8s/overlays/%s/kustomization.yaml", tmpDirApp, envName)
-				// Read the file content
-				content, err := os.ReadFile(kustomization)
-				if err != nil {
-					log.Fatalf("Error reading file: %v", err)
-				}
-
-				// Convert content to string and perform replacement
-				modifiedContent := strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
-				modifiedContent = strings.ReplaceAll(modifiedContent, "${MODEL_ID}", "gemini-3.1-flash-lite")
-				// Write the modified content back to the file
-				err = os.WriteFile(kustomization, []byte(modifiedContent), 0644)
-				if err != nil {
-					log.Fatalf("Error writing file: %v", err)
-				}
-
-				patchFile := fmt.Sprintf("%s/k8s/overlays/%s/patch-sa-annotation.yaml", tmpDirApp, envName)
-				// Read the file content
-				content, err = os.ReadFile(patchFile)
-				if err != nil {
-					log.Fatalf("Error reading file: %v", err)
-				}
-
-				// Convert content to string and perform replacement
-				modifiedContent = strings.ReplaceAll(string(content), "${PROJECT_ID}", clusterProjectID[envName])
-				// Write the modified content back to the file
-				err = os.WriteFile(patchFile, []byte(modifiedContent), 0644)
-				if err != nil {
-					log.Fatalf("Error writing file: %v", err)
-				}
-			}
 
 			gitApp.AddAll()
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
@@ -207,6 +172,10 @@ func TestSourceAgent(t *testing.T) {
 						return true, nil
 					}
 					latestRolloutState := rollouts[0].Get("state").String()
+					rolloutFullName := strings.Split(rollouts[0].Get("name").String(), "/")
+					rolloutName := rolloutFullName[len(rolloutFullName)-1]
+					releaseNameParts := strings.Split(releaseName, "/")
+					releaseNameFinal := releaseNameParts[len(releaseNameParts)-1]
 					if latestRolloutState == "SUCCEEDED" {
 						t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
 						return false, nil
@@ -214,16 +183,18 @@ func TestSourceAgent(t *testing.T) {
 						t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
 						return true, nil
 					} else {
-						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", rollouts[0].Get("deployingBuild").String(), projectID, region)
+						buildID := rollouts[0].Get("deployingBuild").String()
+						if buildID == "" {
+							buildsCmd := fmt.Sprintf("builds list --project=%s --region=%s --filter='status=FAILURE AND tags:%s'", projectID, region, releaseNameFinal)
+							builds := gcloud.Run(t, buildsCmd)
+							buildID = builds.Get("id").String()
+						}
+						logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", buildID, projectID, region)
 						logs := gcloud.RunCmd(t, logsCmd)
 						t.Logf("%s build-log: %s", serviceName, logs)
 						isRetryable, message := testutils.IsDeploymentRetryableError(logs)
 						if isRetryable {
 							t.Logf("Re-trying rollout: %s", message)
-							rolloutFullName := strings.Split(rollouts[0].Get("name").String(), "/")
-							rolloutName := rolloutFullName[len(rolloutFullName)-1]
-							releaseNameParts := strings.Split(releaseName, "/")
-							releaseNameFinal := releaseNameParts[len(releaseNameParts)-1]
 							gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job %s --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable --job-id=deploy", rolloutName, projectID, serviceName, region, releaseNameFinal))
 							return true, nil
 						}

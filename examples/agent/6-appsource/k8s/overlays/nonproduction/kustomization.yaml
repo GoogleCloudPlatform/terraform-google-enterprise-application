@@ -17,13 +17,7 @@ kind: Kustomization
 namespace: capital-agent-nonproduction
 resources:
   - ../../base
-configMapGenerator:
-  - name: capital-agent-config
-    behavior: replace
-    literals:
-      - GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
-      - GOOGLE_CLOUD_LOCATION=global
-      - MODEL_ID=${MODEL_ID}
+  - config-map.yaml
 patches:
   - path: patch-sa-annotation.yaml
   - path: patch-http-route.yaml
