@@ -49,6 +49,11 @@ output "cluster_membership_ids" {
   value       = module.multitenant_infra.cluster_membership_ids
 }
 
+output "gke_agent_sa_email" {
+  description = "GSA for mortgage-agent."
+  value       = google_service_account.gsa_mortgage_agent.member
+}
+
 output "app_ip_addresses" {
   description = "App IP Addresses"
   value       = module.multitenant_infra.app_ip_addresses
