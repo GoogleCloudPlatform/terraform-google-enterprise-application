@@ -16,11 +16,6 @@ package agent
 
 import (
 	"fmt"
-<<<<<<< HEAD
-	"slices"
-=======
-	"log"
->>>>>>> 6057ee7c (chore: extracts poolCloudBuild and poolCloudDeploy to testutils)
 	"strings"
 	"testing"
 	"time"
