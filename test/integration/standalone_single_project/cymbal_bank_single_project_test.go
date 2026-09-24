@@ -243,7 +243,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
 				utils.Poll(t, testutils.PollCloudDeployRelease(t, releaseListCmd, &releaseName), 10, 60*time.Second)
 
-				testutils.PromoteAndPollCloudDeploy(t, projectID, serviceName, region, releaseName, deployTargets.Get(serviceName).Array(), 90*time.Second)
+				testutils.PromoteAndPollCloudDeploy(t, servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, deployTargets.Get(serviceName).Array(), 90*time.Second)
 			})
 			appsource.Test()
 		})

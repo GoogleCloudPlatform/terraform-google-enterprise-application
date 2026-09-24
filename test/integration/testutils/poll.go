@@ -153,6 +153,6 @@ func extractTargetStrings(targets any) []string {
 		}
 		return res
 	default:
-		return nil
+		return []string{}
 	}
 }
