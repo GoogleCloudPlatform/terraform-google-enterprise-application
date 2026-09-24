@@ -73,7 +73,7 @@ resource "time_sleep" "wait_invoker_sa_propagation" {
 resource "google_service_account_iam_member" "gke_token_creator" {
   service_account_id = google_service_account.invoker.name
   role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:${var.gke_agent_sa_email}"
+  member             = var.gke_agent_sa_email
 
   depends_on = [time_sleep.wait_invoker_sa_propagation]
 }
