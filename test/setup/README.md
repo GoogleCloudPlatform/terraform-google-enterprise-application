@@ -18,6 +18,7 @@ The Setup module creates the required prerequisite resources to deploy the bluep
 | folder\_id | The folder to deploy in | `string` | n/a | yes |
 | org\_id | The numeric organization id | `string` | n/a | yes |
 | region | Region for hub network. | `string` | `"us-central1"` | no |
+| single\_project | Single Project example being deployed. | `bool` | `false` | no |
 
 ## Outputs
 

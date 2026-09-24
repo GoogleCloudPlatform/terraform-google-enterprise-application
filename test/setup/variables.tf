@@ -40,6 +40,12 @@ variable "examples_tested" {
   default     = []
 }
 
+variable "single_project" {
+  description = "Single Project example being deployed."
+  type        = bool
+  default     = false
+}
+
 variable "region" {
   description = "Region for hub network."
   type        = string
