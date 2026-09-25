@@ -38,6 +38,6 @@ terraform {
     }
   }
   provider_meta "google" {
-    module_name = "cloud-solutions/fsi-rdp-loadtest-v0.6.0"
+    module_name = "cloud-solutions/fsi-rdp-loadtest-v0.7.0"
   }
 }
