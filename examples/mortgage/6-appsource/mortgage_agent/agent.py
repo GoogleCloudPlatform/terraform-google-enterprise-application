@@ -22,7 +22,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import httpx
-from google.adk.agents.llm_agent import Agent, LlmAgent
+from google.adk.agents.llm_agent import LlmAgent
 from google.adk.tools.base_tool import BaseTool
 from google.adk.tools.tool_context import ToolContext
 

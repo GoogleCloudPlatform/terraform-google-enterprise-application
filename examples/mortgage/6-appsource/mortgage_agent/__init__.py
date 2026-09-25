@@ -15,28 +15,34 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
 
-# Prevent urllib3 from using PyOpenSSL, which contains a bug causing
-# "ValueError: Context has already been used to create a Connection"
-# when OTEL span exporter attempts to push telemetry after an HTTP error.
-try:
-    import urllib3.contrib.pyopenssl
+def _init_env() -> None:
+    current_dir = os.path.dirname(__file__)
+    if current_dir not in sys.path:
+        sys.path.insert(0, current_dir)
 
-    urllib3.contrib.pyopenssl.extract_from_urllib3()
-except Exception:
-    pass
+    try:
+        import urllib3.contrib.pyopenssl
 
-import google.auth
+        urllib3.contrib.pyopenssl.extract_from_urllib3()
+    except Exception:
+        pass
 
-from . import agent  # noqa: F401
+    try:
+        import google.auth
 
-try:
-    _, project_id = google.auth.default()
-    if project_id:
-        os.environ.setdefault("GOOGLE_CLOUD_PROJECT", project_id)
-except Exception:
-    pass
+        _, project_id = google.auth.default()
+        if project_id:
+            os.environ.setdefault("GOOGLE_CLOUD_PROJECT", project_id)
+    except Exception:
+        pass
 
-os.environ.setdefault("GOOGLE_CLOUD_LOCATION", "global")
-os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
+    os.environ.setdefault("GOOGLE_CLOUD_LOCATION", "global")
+    os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
+
+
+_init_env()
+
+from . import agent  # noqa: E402, F401  # fmt: skip  # isort: skip
+
+__all__ = ["agent"]

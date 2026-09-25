@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +26,6 @@ def setup_telemetry():
     try:
         from opentelemetry import trace
         from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
         provider = TracerProvider()
         trace.set_tracer_provider(provider)
