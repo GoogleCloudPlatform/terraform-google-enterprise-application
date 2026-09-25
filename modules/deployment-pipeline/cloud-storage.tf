@@ -32,6 +32,8 @@ module "build_cache" {
     default_kms_key_name = var.bucket_kms_key
   }
 
+  labels = { "eab-deployment" : var.service_name }
+
   internal_encryption_config = var.bucket_kms_key == null ? {
     create_encryption_key = true
     prevent_destroy       = !var.buckets_force_destroy
@@ -65,6 +67,8 @@ module "release_source_development" {
   force_destroy     = var.buckets_force_destroy
 
   public_access_prevention = "enforced"
+
+  labels = { "eab-deployment" : var.service_name }
 
   versioning = true
   encryption = var.bucket_kms_key == null ? null : {

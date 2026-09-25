@@ -45,11 +45,11 @@ module "firewall_rules" {
 
   rules = [
     {
-      name          = "allow-icmp"
-      description   = "Allow ICMP from anywhere"
-      direction     = "INGRESS"
-      priority      = 65534
-      source_ranges = ["0.0.0.0/0"]
+      name        = "allow-icmp"
+      description = "Allow ICMP from anywhere"
+      direction   = "INGRESS"
+      priority    = 65534
+      ranges      = ["0.0.0.0/0"]
       log_config = {
         metadata = "INCLUDE_ALL_METADATA"
       }
