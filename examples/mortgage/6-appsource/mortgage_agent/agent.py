@@ -203,7 +203,10 @@ def _find_http_status_error(exc: BaseException, status_code: int) -> bool:
         if id(current) in seen:
             continue
         seen.add(id(current))
-        if isinstance(current, httpx.HTTPStatusError) and current.response.status_code == status_code:
+        if (
+            isinstance(current, httpx.HTTPStatusError)
+            and current.response.status_code == status_code
+        ):
             return True
         if current.__cause__ is not None:
             queue.append(current.__cause__)
@@ -264,7 +267,11 @@ def _interface_url(server: dict[str, Any]) -> str | None:
 
 
 def _tool_names(server: dict[str, Any]) -> list[str]:
-    names = [t.get("name") for t in server.get("tools") or [] if isinstance(t, dict) and t.get("name")]
+    names = [
+        t.get("name")
+        for t in server.get("tools") or []
+        if isinstance(t, dict) and t.get("name")
+    ]
     if names:
         return names
     return [t for t in server.get("tools") or [] if isinstance(t, str)]
@@ -273,7 +280,12 @@ def _tool_names(server: dict[str, Any]) -> list[str]:
 def _attach_invoker_auth(toolset, invoker_sa_email: str | None) -> None:
     conn_params = getattr(toolset, "_connection_params", None)
     resolved_url = getattr(conn_params, "url", None)
-    if invoker_sa_email and conn_params is not None and resolved_url and hasattr(conn_params, "httpx_client_factory"):
+    if (
+        invoker_sa_email
+        and conn_params is not None
+        and resolved_url
+        and hasattr(conn_params, "httpx_client_factory")
+    ):
         conn_params.httpx_client_factory = _build_impersonation_factory(
             target_url=resolved_url,
             target_sa_email=invoker_sa_email,
@@ -281,7 +293,9 @@ def _attach_invoker_auth(toolset, invoker_sa_email: str | None) -> None:
 
 
 def _toolset_from_http_url(url: str, prefix: str, invoker_sa_email: str | None):
-    from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
+    from google.adk.tools.mcp_tool.mcp_session_manager import (
+        StreamableHTTPConnectionParams,
+    )
     from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 
     toolset = McpToolset(
@@ -315,9 +329,19 @@ def _fallback_server_descriptors() -> list[dict[str, Any]]:
     ]
 
 
-def _append_discovered(server: dict[str, Any], toolset, *, resource_name: str | None, resolved_url: str | None) -> None:
+def _append_discovered(
+    server: dict[str, Any],
+    toolset,
+    *,
+    resource_name: str | None,
+    resolved_url: str | None,
+) -> None:
     display = server.get("displayName") or server.get("name") or resource_name or "?"
-    prefix = getattr(toolset, "tool_name_prefix", None) or server.get("tool_name_prefix") or _prefix_for(str(display))
+    prefix = (
+        getattr(toolset, "tool_name_prefix", None)
+        or server.get("tool_name_prefix")
+        or _prefix_for(str(display))
+    )
     DISCOVERED_MCP_SERVERS.append(
         {
             "name": display,
@@ -340,7 +364,9 @@ def _discover_mcp_toolsets() -> list:
 
     DISCOVERED_MCP_SERVERS.clear()
 
-    project = os.environ.get("MCP_REGISTRY_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
+    project = os.environ.get("MCP_REGISTRY_PROJECT") or os.environ.get(
+        "GOOGLE_CLOUD_PROJECT"
+    )
     location = os.environ.get("MCP_REGISTRY_LOCATION")
     if not location:
         env_location = os.environ.get("GOOGLE_CLOUD_LOCATION")
@@ -387,10 +413,16 @@ def _discover_mcp_toolsets() -> list:
     for server in raw_servers:
         resource_name = server.get("resource_name") or server.get("name")
         display = server.get("displayName") or server.get("name") or resource_name
-        prefix = server.get("tool_name_prefix") or _prefix_for(str(display).split("/")[-1])
+        prefix = server.get("tool_name_prefix") or _prefix_for(
+            str(display).split("/")[-1]
+        )
         url = _interface_url(server)
         toolset = None
-        if registry is not None and resource_name and "mcpServers/" in str(resource_name):
+        if (
+            registry is not None
+            and resource_name
+            and "mcpServers/" in str(resource_name)
+        ):
             try:
                 toolset = registry.get_mcp_toolset(mcp_server_name=resource_name)
                 _attach_invoker_auth(toolset, invoker_sa_email)
@@ -406,7 +438,9 @@ def _discover_mcp_toolsets() -> list:
         conn_params = getattr(toolset, "_connection_params", None)
         resolved_url = getattr(conn_params, "url", None) or url
         toolsets.append(toolset)
-        _append_discovered(server, toolset, resource_name=resource_name, resolved_url=resolved_url)
+        _append_discovered(
+            server, toolset, resource_name=resource_name, resolved_url=resolved_url
+        )
 
     _CACHED_TOOLSETS = toolsets
     _CACHED_DISCOVERED = list(DISCOVERED_MCP_SERVERS)
@@ -421,8 +455,12 @@ def _build_agent():
     ]
     _tools.extend(_discover_mcp_toolsets())
 
-    instruction = _INSTRUCTION_TEMPLATE.format(mcp_services_doc=_render_mcp_services_doc())
-    model_name = os.environ.get("MODEL_NAME", os.environ.get("MODEL_ID", "gemini-3.1-flash-lite"))
+    instruction = _INSTRUCTION_TEMPLATE.format(
+        mcp_services_doc=_render_mcp_services_doc()
+    )
+    model_name = os.environ.get(
+        "MODEL_NAME", os.environ.get("MODEL_ID", "gemini-3.1-flash-lite")
+    )
 
     return LlmAgent(
         model=model_name,
