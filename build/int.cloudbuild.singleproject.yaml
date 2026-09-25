@@ -237,12 +237,33 @@ steps:
       - ssp-agent-apply
       - ssp-agent-verify
 
-  - id: ssp-agent-teardown
+  - id: ssp-mortgage-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
-      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectAgentExample --stage teardown --verbose"]
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectMortgage --stage init --verbose"]
     waitFor:
-      - deploy-agent
+      - vpc-sc
+
+  - id: ssp-mortgage-apply
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectMortgage --stage apply --verbose"]
+    waitFor:
+      - ssp-mortgage-init
+
+  - id: ssp-mortgage-verify
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "sleep 5m && cft test run TestStandaloneSingleProjectMortgage --stage verify --verbose"]
+    waitFor:
+      - ssp-mortgage-apply
+
+  - id: ssp-mortgage-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestSingleProjectSourceMortgage --stage teardown --verbose"]
+    waitFor:
+      - deploy-mortgage
     allowFailure: true
 
   - id: vpcsc-teardown
@@ -256,6 +277,7 @@ steps:
     waitFor:
       - ssp-hello-world-teardown
       - ssp-agent-teardown
+      - ssp-mortgage-teardown
       - ssp-llm-model-teardown
     allowFailure: true
 
@@ -297,5 +319,5 @@ options:
     - "TF_VAR_region=us-central1"
     - "TF_VAR_location=us-central1"
     - "_SKIP_GITLAB=false"
-    - 'TF_VAR_examples_tested=["llm-model","agent","default-example"]'
+    - 'TF_VAR_examples_tested=["llm-model","agent","default-example","mortgage"]'
     - "CLOUDSDK_CONTAINER_USE_APPLICATION_DEFAULT_CREDENTIALS=true"
