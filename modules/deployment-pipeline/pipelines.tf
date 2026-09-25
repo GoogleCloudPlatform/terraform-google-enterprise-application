@@ -70,6 +70,8 @@ module "delivery_artifacts" {
 
   public_access_prevention = "enforced"
 
+  labels = { "eab-deployment" : var.service_name }
+
   versioning = true
   encryption = var.bucket_kms_key == null ? null : {
     default_kms_key_name = var.bucket_kms_key
