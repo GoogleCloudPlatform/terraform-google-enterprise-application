@@ -237,6 +237,15 @@ steps:
       - ssp-agent-apply
       - ssp-agent-verify
 
+  - id: ssp-agent-teardown
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    args:
+      ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectAgentExample --stage teardown --verbose"]
+    waitFor:
+      - ssp-agent-verify
+      - deploy-agent
+    allowFailure: true
+
   - id: ssp-mortgage-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -258,12 +267,29 @@ steps:
     waitFor:
       - ssp-mortgage-apply
 
+  - id: deploy-mortgage"
+    name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"    
+    args:
+      - "-c"
+      - |-
+        gcloud storage cp gs://$(terraform -chdir=/workspace/test/setup/harness/gitlab output -raw gitlab_ssl_bucket_name)/gitlab.crt /usr/local/share/ca-certificates
+        update-ca-certificates
+        if (ls /etc/ssl/certs | grep gitlab.pem); then
+            cft test run TestStandaloneSingleProjectMortgage --stage verify --verbose || exit 1
+        else
+            echo ERROR: Was not able to download certificate and update system bundle. && exit 1
+        fi
+    waitFor:
+      - ssp-mortgage-apply
+      - ssp-agent-verify
+
   - id: ssp-mortgage-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestSingleProjectSourceMortgage --stage teardown --verbose"]
     waitFor:
-      - deploy-mortgage
+      - ssp-mortgage-verify
+      - deploy-mortgage"
     allowFailure: true
 
   - id: vpcsc-teardown
