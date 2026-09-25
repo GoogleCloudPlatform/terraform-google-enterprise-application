@@ -58,7 +58,6 @@ terraform-google-enterprise-application/
 │   └── htc-infra/                  # HTC batch orchestration with Kueue & Parallelstore
 ├── examples/                       # End-to-end reference implementations
 │   ├── default-example/            # Baseline 3-tier multi-project app deployment (stages 4-6)
-│   ├── standalone_single_project/  # All-in-one single GCP project sandbox
 │   ├── standalone_single_project_confidential_nodes/ # Single project with Confidential VMs
 │   ├── cymbal-bank/                # Full banking microservices architecture (Bank of Anthos)
 │   ├── cymbal-shop/                # E-commerce microservices demo (11 services)

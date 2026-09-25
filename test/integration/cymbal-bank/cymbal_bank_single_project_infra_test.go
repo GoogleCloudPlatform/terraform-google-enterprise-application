@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2024-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 // define test package name
-package standalone_single_project
+package cymbal_bank
 
 import (
 	"fmt"
@@ -36,54 +36,59 @@ import (
 )
 
 // name the function as Test*
-func TestStandaloneSingleProjectExample(t *testing.T) {
+func TestStandaloneSingleProjectCymbalBank(t *testing.T) {
 
 	// initialize Terraform test from the Blueprints test framework
 	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
 
 	setupVPCSCOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup/vpcsc"))
-	projectID := setupVPCSCOutput.GetTFSetupStringOutput("seed_project_id")
-
-	singleProjecPath := "../../setup/harness/single_project"
-	singleProject := tft.NewTFBlueprintTest(t, tft.WithTFDir(singleProjecPath))
+	projectID := setupVPCSCOutput.GetTFSetupJsonOutput("harness_project_ids").Get("cymbal-bank").String()
 
 	loggingBucketPath := "../../setup/harness/logging_bucket"
 	loggingBucket := tft.NewTFBlueprintTest(t, tft.WithTFDir(loggingBucketPath))
 
-	privateWorkerPoolPath := "../../setup/harness/private_workerpool"
-	privateWorkerPool := tft.NewTFBlueprintTest(t, tft.WithTFDir(privateWorkerPoolPath))
+	gitlabPath := "../../setup/harness/gitlab"
+	gitLab := tft.NewTFBlueprintTest(t, tft.WithTFDir(gitlabPath))
 
 	service_perimeter_mode := setupVPCSCOutput.GetStringOutput("service_perimeter_mode")
 	service_perimeter_name := setupVPCSCOutput.GetStringOutput("service_perimeter_name")
 	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
+	serviceAccount := setupVPCSCOutput.GetTFSetupJsonOutput("sa_email").Get("cymbal-bank").String()
+	t.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
+	ncc_config := map[string]interface{}{
+		"enable_ncc":        true,
+		"hub_uri":           setupVPCSCOutput.GetTFSetupStringOutput("ncc_hub_uri"),
+		"spoke_group":       setupVPCSCOutput.GetTFSetupStringOutput("ncc_group"),
+		"spoke_name":        "vpc-spoke-cymbal-bank",
+		"spoke_description": "Spoke for cymbal bank single project example",
+	}
+
 	vars := map[string]interface{}{
-		"project_id":                         projectID,
-		"service_perimeter_mode":             service_perimeter_mode,
-		"teams":                              setupOutput.GetJsonOutput("teams").String(),
-		"service_perimeter_name":             service_perimeter_name,
-		"access_level_name":                  access_level_name,
-		"subnetwork_self_link":               singleProject.GetStringOutput("single_project_cluster_subnetwork_self_link"),
-		"binary_authorization_repository_id": singleProject.GetStringOutput("binary_authorization_repository_id"),
-		"binary_authorization_image":         singleProject.GetStringOutput("binary_authorization_image"),
-		"workerpool_network_id":              privateWorkerPool.GetStringOutput("workerpool_network_id"),
-		"workerpool_id":                      privateWorkerPool.GetStringOutput("workerpool_id"),
-		"logging_bucket":                     loggingBucket.GetStringOutput("logging_bucket"),
-		"bucket_kms_key":                     loggingBucket.GetStringOutput("bucket_kms_key"),
-		"attestation_kms_key":                loggingBucket.GetStringOutput("attestation_kms_key"),
+		"project_id":             projectID,
+		"service_perimeter_mode": service_perimeter_mode,
+		"service_perimeter_name": service_perimeter_name,
+		"teams":                  setupOutput.GetJsonOutput("teams").String(),
+		"access_level_name":      access_level_name,
+		"logging_bucket":         loggingBucket.GetJsonOutput("logging_bucket").Get("cymbal-bank").String(),
+		"bucket_kms_key":         loggingBucket.GetJsonOutput("bucket_kms_key").Get("cymbal-bank").String(),
+		"attestation_kms_key":    loggingBucket.GetJsonOutput("attestation_kms_key").Get("cymbal-bank").String(),
+		"network_id":             gitLab.GetStringOutput("network_id"),
+		"create_nat":             false,
+		"enables_network_connection_and_peering_routes": false,
+		"ncc_config": ncc_config,
 	}
 
 	// wire setup output project_id to example var.project_id
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
 		tft.WithVars(vars),
-		tft.WithTFDir("../../../examples/standalone_single_project"),
+		tft.WithTFDir("../../../examples/cymbal-bank/standalone-single-project"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes
 	standaloneSingleProjT.DefineVerify(func(assert *assert.Assertions) {
-		// perform default verification ensuring Terraform reports no additional changes on an applied blueprint
-		// standaloneSingleProjT.DefaultVerify(assert)
+		standaloneSingleProjT.DefaultVerify(assert)
 		clusterMembershipIds := testutils.GetBptOutputStrSlice(standaloneSingleProjT, "cluster_membership_ids")
 		clusterType := standaloneSingleProjT.GetStringOutput("cluster_type")
 		clusterProjectNumber := standaloneSingleProjT.GetStringOutput("cluster_project_number")
@@ -173,7 +178,7 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 		assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
 		// Cloud Armor
-		cloudArmorName := "eab-cloud-armor"
+		cloudArmorName := "cb-eab-cloud-armor"
 		cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, projectID)).Array()[0]
 		assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
 
@@ -220,7 +225,7 @@ func TestStandaloneSingleProjectExample(t *testing.T) {
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {
 		// removes firewall rules created by the service but not being deleted.
-		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", projectID).Array()
+		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"gke\"", projectID).Array()
 		for i := range firewallRules {
 			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
 		}

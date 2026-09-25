@@ -84,13 +84,3 @@ output "teams" {
   description = "Workspace groups id."
   value       = { for team, group in module.group : team => module.group[team].id }
 }
-
-output "single_project" {
-  description = "If single project examples are being deployed."
-  value       = var.single_project
-}
-
-output "hpc" {
-  description = "If is a HPC example being deployed."
-  value       = var.hpc
-}

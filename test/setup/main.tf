@@ -15,12 +15,18 @@
  */
 
 locals {
-  teams = var.hpc ? ["hpc-team-a", "hpc-team-b"] : var.agent ? ["capital-agent", "vllm-model"] : setunion([
-    "cb-frontend",
-    "cb-accounts",
-    "cb-ledger"],
-    !var.single_project ? ["cymbalshops"] : []
-  )
+
+  examples_namespaces = {
+    "llm-model"       = ["vllm-model"],
+    "agent"           = ["capital-agent", "vllm-model"],
+    "cymbal-bank"     = ["cb-frontend", "cb-accounts", "cb-ledger"],
+    "default-example" = [],
+    "cymbal-shop"     = ["cymbalshops"],
+    "hpc"             = ["hpc-team-a", "hpc-team-b"],
+    "htc"             = ["hpc-team-a", "hpc-team-b"],
+  }
+
+  teams = distinct(flatten([for i in var.examples_tested : lookup(local.examples_namespaces, i, [])]))
 }
 
 resource "random_string" "prefix" {

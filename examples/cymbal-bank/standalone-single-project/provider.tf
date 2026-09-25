@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
+provider "google" {
+  user_project_override = true
+  billing_project       = var.project_id
+}
 
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5, < 8"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.0"
-    }
-
-    null = {
-      source  = "hashicorp/null"
-      version = ">= 3.2.0"
-    }
-  }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:standalone-example/v0.6.0"
-  }
+provider "google-beta" {
+  user_project_override = true
+  billing_project       = var.project_id
 }

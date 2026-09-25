@@ -205,6 +205,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"../../../examples/llm-model/5-appinfra/llm-model/llamma-model/envs/shared/terraform.tfvars",
 		"../../../examples/multitenant-applications/5-appinfra/cymbal-bank/accounts-contacts/envs/shared/terraform.tfvars",
 		"../../../examples/multitenant-applications/5-appinfra/cymbal-shop/cymbalshop/envs/shared/terraform.tfvars",
+		"../../../examples/cymbal-bank/standalone-single-project/terraform.tfvars",
 	}
 
 	for _, filePath := range printFiles {
@@ -222,63 +223,47 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		t.Log(string(b))
 	}
 
-	// single project repository replacement
+	// single project confidential nodes repository replacement
+	confidentialNodesRoot := "../../../examples/standalone_single_project_confidential_nodes"
 
-	single_project_roots := []string{"../../../examples/standalone_single_project", "../../../examples/standalone_single_project_confidential_nodes"}
+	// Replace gitlab.com/user with custom self hosted URL using the root namespace
+	err = testutils.ReplacePatternInFile("https://gitlab.com/user", replacement, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	for _, single_project_root := range single_project_roots {
+	// Replace https://gitlab.com with custom self hosted URL
+	err = testutils.ReplacePatternInFile("https://gitlab.com", url, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		// Replace gitlab.com/user with custom self hosted URL using the root namespace
-		err = testutils.ReplacePatternInFile("https://gitlab.com/user", replacement, single_project_root, "5-appinfra.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
+	// Replace webhook secret id
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		// Replace https://gitlab.com with custom self hosted URL
-		err = testutils.ReplacePatternInFile("https://gitlab.com", url, single_project_root, "5-appinfra.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
+	// Replace gitlab token secret ids
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_API_SECRET_ID", gitlabTokenSecretId, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		// Replace https://gitlab.com with custom self hosted URL
-		err = testutils.ReplacePatternInFile("https://gitlab.com", url, single_project_root, "3-fleetscope.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		// Replace gitlab.com with custom self hosted URL
-		err = testutils.ReplacePatternInFile("gitlab.com", strings.TrimPrefix(url, "https://"), single_project_root, "0-setup.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
+	// Replace SSL Cert
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_SSL_CERT\n", string(caCert), confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		// Replace webhook secret id
-		err = testutils.ReplacePatternInFile("REPLACE_WITH_WEBHOOK_SECRET_ID", gitlabWebhookSecretId, single_project_root, "5-appinfra.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// Replace gitlab token secret ids
-		err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_API_SECRET_ID", gitlabTokenSecretId, single_project_root, "5-appinfra.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		err = testutils.ReplacePatternInFile("REPLACE_WITH_READ_USER_SECRET_ID", gitlabTokenSecretId, single_project_root, "5-appinfra.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// Replace SSL Cert
-		err = testutils.ReplacePatternInFile("REPLACE_WITH_SSL_CERT\n", string(caCert), single_project_root, "5-appinfra.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// Replace Service Directory
-		err = testutils.ReplacePatternInFile("REPLACE_WITH_SERVICE_DIRECTORY", serviceDirectory, single_project_root, "5-appinfra.tf")
-		if err != nil {
-			t.Fatal(err)
-		}
+	// Replace Service Directory
+	err = testutils.ReplacePatternInFile("REPLACE_WITH_SERVICE_DIRECTORY", serviceDirectory, confidentialNodesRoot, "5-appinfra.tf")
+	if err != nil {
+		t.Fatal(err)
 	}
 }
