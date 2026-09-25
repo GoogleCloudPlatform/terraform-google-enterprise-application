@@ -14,38 +14,42 @@
  * limitations under the License.
  */
 
+locals {
+  mcp_tools = {
+    "legacy-dms"          = ["search_documents", "get_document"]
+    "corporate-email"     = ["send_email", "read_email"]
+    "income-verification" = ["verify_applicant"]
+  }
+  mcp_prefixes = {
+    "legacy-dms"          = "legacy_dms"
+    "corporate-email"     = "corporate_email"
+    "income-verification" = "income_verification"
+  }
+}
+
 output "artifact_registry_url" {
-  value = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.mcp.repository_id}"
+  description = "The Artifact Registry repository URL for docker push/pull"
+  value       = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.mcp.repository_id}"
 }
 
 output "cloudbuild_bucket" {
-  value = google_storage_bucket.cloudbuild.name
+  description = "Cloud Build MCPs bucket name."
+  value       = google_storage_bucket.cloudbuild.name
 }
 
 output "agent_mcp_invoker_email" {
-  value = google_service_account.invoker.email
+  description = "Email of the SA agents impersonate when invoking MCP Cloud Run services."
+  value       = google_service_account.invoker.email
 }
 
 output "mcp_runtime_sa_emails" {
-  value = { for k, sa in google_service_account.mcp_runtime : k => sa.email }
+  description = "Emails of the service accounts used for MCP runtime."
+  value       = { for k, sa in google_service_account.mcp_runtime : k => sa.email }
 }
 
 output "mcp_service_urls" {
   description = "Cloud Run service base URLs"
   value       = { for k, svc in google_cloud_run_v2_service.mcp : k => svc.uri }
-}
-
-locals {
-  mcp_tools = {
-    "legacy-dms"            = ["search_documents", "get_document"]
-    "corporate-email"       = ["send_email", "read_email"]
-    "income-verification"   = ["verify_applicant"]
-  }
-  mcp_prefixes = {
-    "legacy-dms"            = "legacy_dms"
-    "corporate-email"       = "corporate_email"
-    "income-verification"   = "income_verification"
-  }
 }
 
 output "mcp_discovered_servers_json" {

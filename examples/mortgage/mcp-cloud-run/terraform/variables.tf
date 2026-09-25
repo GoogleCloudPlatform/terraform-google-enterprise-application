@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 variable "project_id" { type = string }
 
 variable "region" {
@@ -47,8 +47,8 @@ variable "mcp_services" {
     memory             = optional(string, "512Mi")
   }))
   default = {
-    "legacy-dms"            = { account_id = "mcp-legacy-dms" }
-    "corporate-email"       = { account_id = "mcp-corporate-email" }
-    "income-verification"   = { account_id = "mcp-income-verification" }
+    "legacy-dms"          = { account_id = "mcp-legacy-dms" }
+    "corporate-email"     = { account_id = "mcp-corporate-email" }
+    "income-verification" = { account_id = "mcp-income-verification" }
   }
 }
