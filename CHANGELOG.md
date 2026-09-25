@@ -8,6 +8,21 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.7.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.6.0...v0.7.0) (2026-09-25)
+
+
+### Features
+
+* adds agent.md file ([#773](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/773)) ([2f41a31](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/2f41a3123872f8c3ea9826f130a1e57e038579dd))
+* updates helper deployer ([#760](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/760)) ([7df26e5](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/7df26e5606d3ba0d1aa1d6870dded62582353040))
+
+
+### Bug Fixes
+
+* adds variables on cloud deploy for config map ([#778](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/778)) ([94f9b8a](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/94f9b8abad97351c8839e6884b4f106dc5c6a993))
+* bumps gemini model since 2.0 is deprecated ([#777](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/777)) ([e203f62](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/e203f62e5b8218f31784b1fcfa8bb6eb92f78457))
+* updates harness documentation ([#774](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/774)) ([5d4f760](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/5d4f760c6ea93c2446a34696af8032b7c7709a95))
+
 ## [0.6.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.5.0...v0.6.0) (2026-09-11)
 
 
