@@ -26,17 +26,12 @@ resource "google_project_service" "apis" {
   disable_on_destroy = false
 }
 
-resource "time_sleep" "wait_apis_and_default_sas" {
-  create_duration = "30s"
-  depends_on      = [google_project_service.apis]
-}
-
 resource "google_artifact_registry_repository" "mcp" {
   project       = var.project_id
   location      = var.region
   repository_id = var.artifact_registry_id
   format        = "DOCKER"
-  depends_on    = [time_sleep.wait_apis_and_default_sas]
+  depends_on    = [google_project_service.apis]
 }
 
 resource "google_storage_bucket" "cloudbuild" {
@@ -45,10 +40,9 @@ resource "google_storage_bucket" "cloudbuild" {
   location                    = var.region
   uniform_bucket_level_access = true
   force_destroy               = true
-  depends_on                  = [time_sleep.wait_apis_and_default_sas]
+  depends_on                  = [google_project_service.apis]
 }
 
-# SAs MCP Runtime
 resource "google_service_account" "mcp_runtime" {
   for_each     = var.mcp_services
   project      = var.project_id
@@ -57,7 +51,6 @@ resource "google_service_account" "mcp_runtime" {
   depends_on   = [google_project_service.apis]
 }
 
-# SA Invoker
 resource "google_service_account" "invoker" {
   project      = var.project_id
   account_id   = "agent-mcp-invoker"
@@ -65,28 +58,82 @@ resource "google_service_account" "invoker" {
   depends_on   = [google_project_service.apis]
 }
 
-resource "time_sleep" "wait_invoker_sa_propagation" {
-  create_duration = "30s"
-  depends_on      = [google_service_account.invoker]
-}
-
 resource "google_service_account_iam_member" "gke_token_creator" {
   service_account_id = google_service_account.invoker.name
   role               = "roles/iam.serviceAccountTokenCreator"
-  member             = var.gke_agent_sa_email
+  member             = "serviceAccount:${var.gke_agent_sa_email}"
+}
 
-  depends_on = [time_sleep.wait_invoker_sa_propagation]
+resource "google_cloud_run_v2_service" "mcp" {
+  for_each = var.mcp_services
+
+  project             = var.project_id
+  name                = each.key
+  location            = var.region
+  ingress             = "INGRESS_TRAFFIC_ALL"
+  deletion_protection = false
+
+  template {
+    service_account = google_service_account.mcp_runtime[each.key].email
+
+    scaling {
+      min_instance_count = each.value.min_instance_count
+      max_instance_count = each.value.max_instance_count
+    }
+
+    containers {
+      image = coalesce(each.value.image, var.mcp_placeholder_image)
+
+      ports {
+        container_port = each.value.container_port
+      }
+
+      env {
+        name  = "GOOGLE_CLOUD_PROJECT"
+        value = var.project_id
+      }
+
+      env {
+        name  = "OTEL_SERVICE_NAME"
+        value = each.key
+      }
+
+      resources {
+        limits = {
+          cpu    = each.value.cpu
+          memory = each.value.memory
+        }
+        cpu_idle          = true
+        startup_cpu_boost = true
+      }
+    }
+  }
+
+  traffic {
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
+  }
+
+  depends_on = [google_project_service.apis]
+
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers[0].image,
+      template[0].labels,
+      template[0].annotations,
+    ]
+  }
 }
 
 resource "google_cloud_run_v2_service_iam_member" "invoker" {
   for_each = var.mcp_services
   project  = var.project_id
   location = var.region
-  name     = each.key
+  name     = google_cloud_run_v2_service.mcp[each.key].name
   role     = "roles/run.invoker"
   member   = "serviceAccount:${google_service_account.invoker.email}"
-
-  depends_on = [time_sleep.wait_invoker_sa_propagation]
 }
 
 data "google_project" "this" {
@@ -107,8 +154,6 @@ resource "google_artifact_registry_repository_iam_member" "cloudbuild_writer" {
   repository = google_artifact_registry_repository.mcp.name
   role       = "roles/artifactregistry.writer"
   member     = each.value
-
-  depends_on = [time_sleep.wait_apis_and_default_sas]
 }
 
 resource "google_storage_bucket_iam_member" "cloudbuild_object" {
@@ -116,6 +161,4 @@ resource "google_storage_bucket_iam_member" "cloudbuild_object" {
   bucket   = google_storage_bucket.cloudbuild.name
   role     = "roles/storage.objectAdmin"
   member   = each.value
-
-  depends_on = [time_sleep.wait_apis_and_default_sas]
 }

@@ -24,8 +24,6 @@ terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
-*Note: In the first run, the `roles/run.invoker` role bindings will fail because the Cloud Run services don't exist yet. It will be necessary to run this again after step 2 to assign them. This first run is necessary because Terraform creates the bucket required for Cloud Build.*
-
 ## 2) Deploy MCP Images
 
 ```bash
@@ -42,12 +40,6 @@ for f in cloud_run/*.yaml.tmpl; do
 done
 
 skaffold run
-```
-
-- To assign the roles, run:
-
-```bash
-terraform -chdir="/terraform-google-enterprise-application/examples/mortgage/mcp-cloud-run/terraform" apply
 ```
 
 ## 3) Pointing to 6-appsource
