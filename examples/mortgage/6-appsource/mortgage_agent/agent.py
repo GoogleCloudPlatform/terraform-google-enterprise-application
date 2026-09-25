@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""ADK agent definition for the mortgage assistant with MCP tool connections."""
+"""ADK agent definition for the mortgage assistant with MCP tool connections.
+"""
 
 import json
 import logging
@@ -32,7 +33,8 @@ logger = logging.getLogger(__name__)
 
 
 def _build_impersonation_factory(target_url: str, target_sa_email: str):
-    """Return an httpx_client_factory that signs requests as `target_sa_email`."""
+    """Return an httpx_client_factory that signs requests as `target_sa_email`.
+    """
     import google.auth
     import google.auth.transport.requests as gar
     from google.auth import impersonated_credentials
@@ -168,9 +170,12 @@ You also have utility tools:
 
 
 def _render_mcp_services_doc() -> str:
-    """Render the per-service block from the live DISCOVERED_MCP_SERVERS list."""
+    """Render the per-service block from the live DISCOVERED_MCP_SERVERS list.
+    """
     if not DISCOVERED_MCP_SERVERS:
-        return "_(no MCP services discovered — only utility tools are available)_"
+        return (
+            "_(no MCP services discovered — only utility tools are available)_"
+        )
     lines: list[str] = []
     for entry in DISCOVERED_MCP_SERVERS:
         prefix = entry.get("tool_name_prefix")
@@ -222,9 +227,13 @@ _MAX_403_ATTEMPTS = 1
 
 
 def _handle_tool_error(
-    tool: BaseTool, args: dict[str, Any], tool_context: ToolContext, error: Exception
+    tool: BaseTool,
+    args: dict[str, Any],
+    tool_context: ToolContext,
+    error: Exception,
 ) -> dict | None:
-    """Handle tool errors, returning a friendly message for 403 policy denials."""
+    """Handle tool errors, returning a friendly message for 403 policy denials.
+    """
     if not _find_http_status_error(error, 403):
         return None
     denied = dict(tool_context.state.get(_DENIED_TOOLS_STATE_KEY, {}))
@@ -292,7 +301,9 @@ def _attach_invoker_auth(toolset, invoker_sa_email: str | None) -> None:
         )
 
 
-def _toolset_from_http_url(url: str, prefix: str, invoker_sa_email: str | None):
+def _toolset_from_http_url(
+    url: str, prefix: str, invoker_sa_email: str | None
+):
     from google.adk.tools.mcp_tool.mcp_session_manager import (
         StreamableHTTPConnectionParams,
     )
@@ -314,8 +325,12 @@ def _fallback_server_descriptors() -> list[dict[str, Any]]:
             if isinstance(parsed, list) and parsed:
                 return parsed
         except json.JSONDecodeError:
-            logger.warning("MCP_DISCOVERED_SERVERS_JSON is not valid JSON; ignoring.")
-    domain = (os.environ.get("MCP_INTERNAL_DNS_DOMAIN") or "").strip().rstrip(".")
+            logger.warning(
+                "MCP_DISCOVERED_SERVERS_JSON is not valid JSON; ignoring."
+            )
+    domain = (
+        (os.environ.get("MCP_INTERNAL_DNS_DOMAIN") or "").strip().rstrip(".")
+    )
     if not domain:
         return []
     return [
@@ -336,7 +351,9 @@ def _append_discovered(
     resource_name: str | None,
     resolved_url: str | None,
 ) -> None:
-    display = server.get("displayName") or server.get("name") or resource_name or "?"
+    display = (
+        server.get("displayName") or server.get("name") or resource_name or "?"
+    )
     prefix = (
         getattr(toolset, "tool_name_prefix", None)
         or server.get("tool_name_prefix")
@@ -387,13 +404,17 @@ def _discover_mcp_toolsets() -> list:
         except ImportError as e:
             logger.warning("MCP registry discovery skipped: %s", e)
         else:
-            attempts = max(1, int(os.environ.get("MCP_REGISTRY_LIST_ATTEMPTS", "3")))
+            attempts = max(
+                1, int(os.environ.get("MCP_REGISTRY_LIST_ATTEMPTS", "3"))
+            )
             last_exc: Exception | None = None
             for attempt in range(attempts):
                 try:
                     if endpoint:
                         _ar_module.AGENT_REGISTRY_BASE_URL = endpoint
-                    registry = AgentRegistry(project_id=project, location=location)
+                    registry = AgentRegistry(
+                        project_id=project, location=location
+                    )
                     response = registry.list_mcp_servers(filter_str=filter_str)
                     raw_servers = response.get("mcpServers") or []
                     last_exc = None
@@ -412,7 +433,9 @@ def _discover_mcp_toolsets() -> list:
     toolsets = []
     for server in raw_servers:
         resource_name = server.get("resource_name") or server.get("name")
-        display = server.get("displayName") or server.get("name") or resource_name
+        display = (
+            server.get("displayName") or server.get("name") or resource_name
+        )
         prefix = server.get("tool_name_prefix") or _prefix_for(
             str(display).split("/")[-1]
         )
@@ -424,7 +447,9 @@ def _discover_mcp_toolsets() -> list:
             and "mcpServers/" in str(resource_name)
         ):
             try:
-                toolset = registry.get_mcp_toolset(mcp_server_name=resource_name)
+                toolset = registry.get_mcp_toolset(
+                    mcp_server_name=resource_name
+                )
                 _attach_invoker_auth(toolset, invoker_sa_email)
             except Exception:
                 toolset = None
@@ -439,7 +464,10 @@ def _discover_mcp_toolsets() -> list:
         resolved_url = getattr(conn_params, "url", None) or url
         toolsets.append(toolset)
         _append_discovered(
-            server, toolset, resource_name=resource_name, resolved_url=resolved_url
+            server,
+            toolset,
+            resource_name=resource_name,
+            resolved_url=resolved_url,
         )
 
     _CACHED_TOOLSETS = toolsets

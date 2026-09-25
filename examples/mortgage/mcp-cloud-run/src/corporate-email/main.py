@@ -37,8 +37,10 @@ SAMPLE_EMAILS = [
         "to": "loan-officers@megabank.com",
         "subject": "Mortgage Application #2024-7891 - Documents Received",
         "body": (
-            "All required documents for application #2024-7891 (Johnson, Sarah) have been received. "
-            "Tax returns, pay stubs, and bank statements are now in the document management system. "
+            "All required documents for application #2024-7891 (Johnson, "
+            "Sarah) have been received."
+            "Tax returns, pay stubs, and bank statements are now in the "
+            "document management system."
             "Please proceed with income verification."
         ),
         "timestamp": "2025-06-15T09:30:00Z",
@@ -50,10 +52,10 @@ SAMPLE_EMAILS = [
         "to": "loan-officers@megabank.com",
         "subject": "Updated DTI Ratio Guidelines - Effective July 1",
         "body": (
-            "Please note that maximum debt-to-income ratio thresholds have been updated for conforming loans. "
-            "The new maximum DTI is 45% (previously 43%). Refer to compliance bulletin CB-2025-12 for details."
+            "Please note that maximum debt-to-income ratio thresholds have "
+            "been updated for conforming loans."
         ),
-        "timestamp": "2025-06-14T14:15:00Z",
+        "timestamp": "2025-06-16T14:15:00Z",
         "read": False,
     },
     {
@@ -62,8 +64,14 @@ SAMPLE_EMAILS = [
         "to": "loan-officers@megabank.com",
         "subject": "Appraisal Complete - 742 Evergreen Terrace",
         "body": (
-            "The appraisal for 742 Evergreen Terrace has been completed. Appraised value: $485,000. "
-            "This supports the requested loan amount of $388,000 (80% LTV). Full report attached to the loan file."
+            (
+                "The appraisal for 742 Evergreen Terrace has been completed. "
+                "Appraised value: $485,000."
+            )
+            (
+                "This supports the requested loan amount of $388,000 (80% "
+                "LTV). Full report attached to the loan file."
+            )
         ),
         "timestamp": "2025-06-13T11:45:00Z",
         "read": True,
@@ -83,7 +91,11 @@ def _send(to: str, subject: str, body: str) -> dict:
 
 
 def _read(email_id: str | None = None) -> dict:
-    """Read emails from the inbox. Optionally filter by email ID."""
+    """
+    Read emails from the inbox.
+
+    Optionally filter by email ID.
+    """
     if email_id:
         for email in SAMPLE_EMAILS:
             if email["id"] == email_id:
@@ -101,7 +113,8 @@ mcp = FastMCP(name="corporate-email")
 
 @mcp.tool()
 def send_email(to: str, subject: str, body: str) -> ToolResult:
-    """Send an email through the corporate email system.
+    """
+    Send an email through the corporate email system.
 
     Args:
         to: Recipient email address.
@@ -109,22 +122,27 @@ def send_email(to: str, subject: str, body: str) -> ToolResult:
         body: Email body content.
 
     Returns:
-        ToolResult with send status, message ID, and timestamp in structured_content.
+        ToolResult with send status, message ID, and timestamp in
+        structured_content.
     """
-    # content=[] suppresses the duplicate raw-text representation; Model Armor's
-    # CONTENT_AUTHZ only redacts structuredContent, so leaving content[] populated
-    # leaks sensitive fields around the redactor.
+    # content=[] suppresses the duplicate raw-text representation; Model
+    # Armor's CONTENT_AUTHZ only redacts structuredContent, so leaving
+    # content[] populated leaks sensitive fields around the redactor.
     with trace_tool(tracer, "send_email"):
-        return ToolResult(content=[], structured_content=_send(to, subject, body))
+        return ToolResult(
+            content=[], structured_content=_send(to, subject, body)
+        )
 
 
 @mcp.tool()
 def read_email(email_id: str | None = None) -> ToolResult:
-    """Read emails from the corporate inbox. This is a read-only operation.
+    """Read emails from the corporate inbox.
+
+    This is a read-only operation.
 
     Args:
-        email_id: Optional email ID to fetch a specific email. If not provided,
-                  returns all emails in the inbox.
+        email_id: Optional email ID to fetch a specific email. If not
+            provided, returns all emails in the inbox.
 
     Returns:
         ToolResult with a list of email messages in structured_content.

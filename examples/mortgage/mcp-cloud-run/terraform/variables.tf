@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-variable "project_id" { type = string }
+variable "project_id" {
+  description = "The GCP project ID"
+  type        = string
+}
 
 variable "region" {
-  type    = string
-  default = "us-central1"
+  description = "The GCP region for resources"
+  type        = string
+  default     = "us-central1"
 }
 
 variable "artifact_registry_id" {
-  type    = string
-  default = "mcp-docker"
+  description = "The Artifact Registry repository ID"
+  type        = string
+  default     = "mcp-docker"
 }
 
 variable "gke_agent_sa_email" {
@@ -32,11 +37,13 @@ variable "gke_agent_sa_email" {
 }
 
 variable "mcp_placeholder_image" {
-  type    = string
-  default = "us-docker.pkg.dev/cloudrun/container/placeholder"
+  description = "The placeholder image to use for MCP services."
+  type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/placeholder"
 }
 
 variable "mcp_services" {
+  description = "Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name AND the URL-mask token (e.g. legacy-dms.<mcp_internal_dns_zone.domain> -> Cloud Run service 'legacy-dms')."
   type = map(object({
     account_id         = string
     image              = optional(string)

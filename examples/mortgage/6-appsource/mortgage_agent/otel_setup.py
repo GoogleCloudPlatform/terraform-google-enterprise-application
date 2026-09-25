@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 def setup_telemetry():
-    """Setup OpenTelemetry instrumentation when running outside Agent Engine."""
+    """Setup OpenTelemetry instrumentation when running outside Agent Engine.
+    """
     try:
         from opentelemetry import trace
         from opentelemetry.sdk.trace import TracerProvider

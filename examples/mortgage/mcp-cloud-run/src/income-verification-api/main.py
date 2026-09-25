@@ -80,12 +80,14 @@ def _verify(first_name: str, last_name: str) -> dict | None:
 # FastMCP server
 # ---------------------------------------------------------------------------
 
+
 mcp = FastMCP(name="income-verification")
 
 
 @mcp.tool()
 def verify_applicant(first_name: str, last_name: str) -> ToolResult:
-    """Verify applicant income through third-party income verification service.
+    """Verify applicant income through third-party income verification
+    service.
 
     Args:
         first_name: Applicant's first name.
@@ -94,13 +96,16 @@ def verify_applicant(first_name: str, last_name: str) -> ToolResult:
     Returns:
         ToolResult with verified income data in structured_content.
     """
-    # content=[] suppresses the duplicate raw-text representation; Model Armor's
-    # CONTENT_AUTHZ only redacts structuredContent, so leaving content[] populated
-    # leaks SSNs around the redactor.
+    # content=[] suppresses the duplicate raw-text representation; Model
+    # Armor's CONTENT_AUTHZ only redacts structuredContent, so leaving
+    # content[] populated leaks SSNs around the redactor.
     with trace_tool(tracer, "verify_applicant"):
         result = _verify(first_name, last_name) or {
             "status": "error",
-            "error": f"No verification records found for {first_name} {last_name}.",
+            "error": (
+                f"No verification records found for {first_name} "
+                f"{last_name}."
+            ),
         }
         return ToolResult(content=[], structured_content=result)
 
@@ -119,9 +124,11 @@ PREFIX = "/income-verification"
 
 rest_app = FastAPI(
     title="Income Verification API",
-    description="Verify applicant income through third-party income verification service.",
-    version="1.0.0",
-)
+    description=(
+        "Verify applicant income through third-party income verification "
+        "service."
+    ),
+    version="1.0.0",)
 
 
 @rest_app.get(f"{PREFIX}/health")
@@ -139,10 +146,12 @@ async def verify(req: VerifyRequest):
             status_code=404,
             content={
                 "status": "error",
-                "error": f"No verification records found for {req.first_name} {req.last_name}.",
+                "error": (
+                    f"No verification records found for {req.first_name} "
+                    f"{req.last_name}."
+                ),
             },
         )
-
 
 # ---------------------------------------------------------------------------
 # Starlette app combining health, MCP, and REST
