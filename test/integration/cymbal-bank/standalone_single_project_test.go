@@ -88,7 +88,6 @@ func TestStandaloneSingleProjectCymbalBank(t *testing.T) {
 
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes
 	standaloneSingleProjT.DefineVerify(func(assert *assert.Assertions) {
-		// perform default verification ensuring Terraform reports no additional changes on an applied blueprint
 		standaloneSingleProjT.DefaultVerify(assert)
 		clusterMembershipIds := testutils.GetBptOutputStrSlice(standaloneSingleProjT, "cluster_membership_ids")
 		clusterType := standaloneSingleProjT.GetStringOutput("cluster_type")
