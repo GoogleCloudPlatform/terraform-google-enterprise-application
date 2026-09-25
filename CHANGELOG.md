@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.7.1](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.7.0...v0.7.1) (2026-09-25)
+
+
+### Bug Fixes
+
+* enables default verify ([#780](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/780)) ([3c34242](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/3c342421dfe44c360da1d67ef059eb10d3108744))
+
 ## [0.7.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.6.0...v0.7.0) (2026-09-25)
 
 
