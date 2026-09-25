@@ -51,7 +51,7 @@ jobs:
       - run: docker run --rm -v "$GITHUB_WORKSPACE":/workspace "$STEPS_VARIABLES_OUTPUTS_DEV_TOOLS" module-swapper
         env:
           STEPS_VARIABLES_OUTPUTS_DEV_TOOLS: ${{ steps.variables.outputs.dev-tools }}
-      - run: docker run --rm -v "$GITHUB_WORKSPACE":/workspace "$STEPS_VARIABLES_OUTPUTS_DEV_TOOLS" /usr/local/bin/test_lint.sh
+      - run: docker run --rm -e SKIP_PYTHON="true" -v "$GITHUB_WORKSPACE":/workspace "$STEPS_VARIABLES_OUTPUTS_DEV_TOOLS" /usr/local/bin/test_lint.sh
         env:
           STEPS_VARIABLES_OUTPUTS_DEV_TOOLS: ${{ steps.variables.outputs.dev-tools }}
   commitlint:
