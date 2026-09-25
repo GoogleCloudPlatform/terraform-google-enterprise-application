@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/git"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
@@ -215,116 +214,36 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 				lastCommit := gitApp.GetLatestCommit()
 				// filter builds triggered based on pushed commit sha
 				buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
-				retriesBuildTrigger := 1
-				// poll build until complete
-				pollCloudBuild := func(cmd string) func() (bool, error) {
-					return func() (bool, error) {
-						build := gcloud.Runf(t, cmd).Array()
-						if len(build) < 1 {
-							if retriesBuildTrigger%3 == 0 {
-								// force push to trigger build again
-								t.Logf("Try trigger build again for service %s", serviceName)
-								datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-								if err != nil {
-									t.Fatal(err)
-								}
-								defer func() {
-									if err := datefile.Close(); err != nil {
-										t.Errorf("Error closing datefile: %v", err)
-									}
-								}()
-
-								_, err = datefile.WriteString(time.Now().String() + "\n")
-								if err != nil {
-									t.Fatal(err)
-								}
-								gitAppRun("add", ".")
-								gitApp.CommitWithMsg("retries build", []string{"--allow-empty"})
-								gitAppRun("push", "google", "main", "--force")
-								lastCommit = gitApp.GetLatestCommit()
-								t.Logf("New commit for %s is: %s", serviceName, lastCommit)
-								buildListCmd = fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
-							}
-							retriesBuildTrigger++
-							return true, nil
-						}
-						latestWorkflowRunStatus := build[0].Get("status").String()
-						t.Logf("Build found for commit %s: %s", lastCommit, build[0].Get("buildTriggerId"))
-						switch latestWorkflowRunStatus {
-						case "SUCCESS":
-							t.Logf("Build finished successfully %s. \n", build[0].Get("buildTriggerId"))
-							return false, nil
-						case "FAILURE":
-							logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", build[0].Get("id").String(), build[0].Get("projectId").String(), region)
-							logs := gcloud.RunCmd(t, logsCmd)
-							t.Logf("%s ci-build-log: %s", servicesInfoMap[serviceName].ServiceName, logs)
-							return false, fmt.Errorf("Build failed %s. \n", build[0].Get("buildTriggerId"))
-						}
-						return true, nil
+				onRetryBuild := func() string {
+					// force push to trigger build again
+					t.Logf("Try trigger build again for service %s", serviceName)
+					datefile, err := os.OpenFile(fmt.Sprintf("%s/src/%s/date.txt", tmpDirApp, mapPath), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+					if err != nil {
+						t.Fatal(err)
 					}
+					defer func() {
+						if err := datefile.Close(); err != nil {
+							t.Errorf("Error closing datefile: %v", err)
+						}
+					}()
+
+					_, err = datefile.WriteString(time.Now().String() + "\n")
+					if err != nil {
+						t.Fatal(err)
+					}
+					gitAppRun("add", ".")
+					gitApp.CommitWithMsg("retries build", []string{"--allow-empty"})
+					gitAppRun("push", "google", "main", "--force")
+					lastCommit = gitApp.GetLatestCommit()
+					t.Logf("New commit for %s is: %s", serviceName, lastCommit)
+					return fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, servicesInfoMap[serviceName].ProjectID)
 				}
-				utils.Poll(t, pollCloudBuild(buildListCmd), 40, 60*time.Second)
+				utils.Poll(t, testutils.PollCloudBuild(t, buildListCmd, region, servicesInfoMap[serviceName].ServiceName, onRetryBuild), 40, 60*time.Second)
 				releaseName := ""
 				releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, lastCommit[0:7])
-				pollRelease := func(cmd string) func() (bool, error) {
-					return func() (bool, error) {
-						t.Logf("Polling Release Name for %s", serviceName)
-						releases := gcloud.Runf(t, cmd).Array()
-						if len(releases) == 0 {
-							t.Logf("Release not found for %s", serviceName)
-							return true, nil
-						}
-						releaseName = releases[0].Get("name").String()
-						return false, nil
-					}
-				}
-				utils.Poll(t, pollRelease(releaseListCmd), 10, 60*time.Second)
+				utils.Poll(t, testutils.PollCloudDeployRelease(t, releaseListCmd, &releaseName), 10, 60*time.Second)
 
-				// Poll CD rollouts until rollout is successful
-				pollCloudDeploy := func(cmd string) func() (bool, error) {
-					return func() (bool, error) {
-						t.Logf("Polling rollout Name for %s-%s", serviceName, releaseName)
-						rollouts := gcloud.Runf(t, cmd).Array()
-						if len(rollouts) == 0 {
-							t.Logf("Rollout not found for %s-%s", serviceName, releaseName)
-							return true, nil
-						}
-						latestRolloutState := rollouts[0].Get("state").String()
-						if latestRolloutState == "SUCCEEDED" {
-							t.Logf("Rollout finished successfully %s. \n", rollouts[0].Get("targetId"))
-							return false, nil
-						} else if slices.Contains([]string{"IN_PROGRESS", "PENDING_RELEASE"}, latestRolloutState) {
-							t.Logf("Rollout in progress %s. \n", rollouts[0].Get("targetId"))
-							return true, nil
-						} else {
-							logsCmd := fmt.Sprintf("builds log %s --project=%s --region=%s", rollouts[0].Get("deployingBuild").String(), projectID, region)
-							logs := gcloud.RunCmd(t, logsCmd)
-							t.Logf("%s build-log: %s", serviceName, logs)
-							isRetryable, message := testutils.IsDeploymentRetryableError(logs)
-							if isRetryable {
-								t.Logf("Re-trying rollout: %s", message)
-								rolloutFullName := strings.Split(rollouts[0].Get("name").String(), "/")
-								rolloutName := rolloutFullName[len(rolloutFullName)-1]
-								releaseNameParts := strings.Split(releaseName, "/")
-								releaseNameFinal := releaseNameParts[len(releaseNameParts)-1]
-								gcloud.Run(t, fmt.Sprintf("deploy rollouts retry-job %s --project=%s --delivery-pipeline=%s --region=%s --release=%s --phase-id=stable --job-id=deploy", rolloutName, projectID, serviceName, region, releaseNameFinal))
-								return true, nil
-							}
-							return false, fmt.Errorf("Rollout %s.", latestRolloutState)
-						}
-					}
-				}
-				for i, targetId := range deployTargets.Get(serviceName).Array() {
-					if i > 0 {
-						promoteCmd := fmt.Sprintf("deploy releases promote --release=%s --delivery-pipeline=%s --region=%s --to-target=%s -q", releaseName, serviceName, region, targetId)
-						t.Logf("Promoting release to next target: %s", targetId)
-						// Execute the promote command
-						gcloud.Runf(t, promoteCmd)
-					}
-					t.Logf("Getting rollout for target %s", targetId)
-					rolloutListCmd := fmt.Sprintf("deploy rollouts list --project=%s --delivery-pipeline=%s --region=%s --release=%s --filter targetId=%s", servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, targetId)
-					utils.Poll(t, pollCloudDeploy(rolloutListCmd), 100, 90*time.Second)
-				}
+				testutils.PromoteAndPollCloudDeploy(t, servicesInfoMap[serviceName].ProjectID, servicesInfoMap[serviceName].ServiceName, region, releaseName, deployTargets.Get(serviceName).Array(), 90*time.Second)
 			})
 			appsource.Test()
 		})

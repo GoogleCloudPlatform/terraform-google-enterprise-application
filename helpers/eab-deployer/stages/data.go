@@ -38,26 +38,26 @@ type CommonConf struct {
 
 // GlobalTFVars contains all the configuration for the deploy
 type GlobalTFVars struct {
-	ProjectID                        string                        `hcl:"project_id"`
-	Region                           string                        `hcl:"region"`
-	NetworkID                        *string                       `hcl:"network_id"`
-	SubnetworkSelfLink               *string                       `hcl:"subnetwork_self_link"`
-	WorkerPoolID                     *string                       `hcl:"workerpool_id"`
-	LoggingBucket                    *string                       `hcl:"logging_bucket"`
-	BucketKMSKey                     *string                       `hcl:"bucket_kms_key"`
-	ServicePerimeterName             *string                       `hcl:"service_perimeter_name"`
-	ServicePerimeterMode             *string                       `hcl:"service_perimeter_mode"`
-	AccessLevelName                  *string                       `hcl:"access_level_name"`
-	AttestationKMSKey                *string                       `hcl:"attestation_kms_key"`
-	BinaryAuthorizationImage         *string                       `hcl:"binary_authorization_image"`
-	BinaryAuthorizationRepositoryID  *string                       `hcl:"binary_authorization_repository_id"`
-	CreateNat                        *bool                         `hcl:"create_nat"`
-	EnablesNetworkConnection         *bool                         `hcl:"enables_network_connection_and_peering_routes"`
-	NCCConfig                        *NCCConfig                    `hcl:"ncc_config"`
-	Teams                            map[string]string             `hcl:"teams"`
-	CloudbuildV2RepositoryConfig     *CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
-	EABCodePath                      string                        `hcl:"eab_code_path"`
-	CodeCheckoutPath                 string                        `hcl:"code_checkout_path"`
+	ProjectID                       string                        `hcl:"project_id"`
+	Region                          string                        `hcl:"region"`
+	NetworkID                       *string                       `hcl:"network_id"`
+	SubnetworkSelfLink              *string                       `hcl:"subnetwork_self_link"`
+	WorkerPoolID                    *string                       `hcl:"workerpool_id"`
+	LoggingBucket                   *string                       `hcl:"logging_bucket"`
+	BucketKMSKey                    *string                       `hcl:"bucket_kms_key"`
+	ServicePerimeterName            *string                       `hcl:"service_perimeter_name"`
+	ServicePerimeterMode            *string                       `hcl:"service_perimeter_mode"`
+	AccessLevelName                 *string                       `hcl:"access_level_name"`
+	AttestationKMSKey               *string                       `hcl:"attestation_kms_key"`
+	BinaryAuthorizationImage        *string                       `hcl:"binary_authorization_image"`
+	BinaryAuthorizationRepositoryID *string                       `hcl:"binary_authorization_repository_id"`
+	CreateNat                       *bool                         `hcl:"create_nat"`
+	EnablesNetworkConnection        *bool                         `hcl:"enables_network_connection_and_peering_routes"`
+	NCCConfig                       *NCCConfig                    `hcl:"ncc_config"`
+	Teams                           map[string]string             `hcl:"teams"`
+	CloudbuildV2RepositoryConfig    *CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
+	EABCodePath                     string                        `hcl:"eab_code_path"`
+	CodeCheckoutPath                string                        `hcl:"code_checkout_path"`
 }
 
 type NCCConfig struct {
