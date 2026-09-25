@@ -170,57 +170,264 @@ ncc_config = {
 }
 ```
 
+#### Cloud Build with GitHub Pre-requisites
+
+To proceed with GitHub as your git provider you will need:
+
+- An authenticated GitHub account. The steps in this documentation assume you have a configured SSH key for cloning and modifying repositories.
+- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) named `eab-cymbal-shop-cymbalshop`.
+
+   > Note: Default name for the repository is: `eab-cymbal-shop-cymbalshop`; If you choose another name for your repository make sure you update the repository names under `cloudbuildv2_repository_config` in `terraform.tfvars`.
+
+- [Install Cloud Build App on GitHub](https://github.com/apps/google-cloud-build). After the installation, take note of the application ID. Your installation ID can be found at [https://github.com/settings/installations](https://github.com/settings/installations).
+- [Create Personal Access Token (classic) on GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic):
+   - Grant `repo` and `read:user` (or `read:org` if the app is installed in an organization).
+   - Store the token in Secret Manager.
+- Create a secret for the GitHub Cloud Build App ID:
+
+   ```bash
+   APP_ID_VALUE=<replace_with_app_id>
+   printf $APP_ID_VALUE | gcloud secrets create github-app-id --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret ID:
+
+   ```bash
+   gcloud secrets describe github-app-id --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Create a secret for the GitHub Personal Access Token:
+
+   ```bash
+   GITHUB_TOKEN=<replace_with_token>
+   printf $GITHUB_TOKEN | gcloud secrets create github-pat --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret ID:
+
+   ```bash
+   gcloud secrets describe github-pat --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Populate your `terraform.tfvars` file with the Cloud Build 2nd Gen configuration:
+
+   ```hcl
+   cloudbuildv2_repository_config = {
+     repo_type = "GITHUBv2"
+
+     repositories = {
+       "eab-cymbal-shop-cymbalshop" = {
+         repository_name = "eab-cymbal-shop-cymbalshop"
+         repository_url  = "https://github.com/your-org/eab-cymbal-shop-cymbalshop.git"
+       }
+     }
+
+     github_secret_id        = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_PAT_SECRET_NAME"
+     github_app_id_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_APP_ID_SECRET_NAME"
+     secret_project_id       = "REPLACE_WITH_SECRET_PROJECT_ID"
+   }
+   ```
+
 #### Cloud Build with GitLab Pre-requisites
 
 To proceed with GitLab as your git provider you will need:
 
-- An authenticated GitLab account.
-- A **private** GitLab repository: `eab-cymbal-shop-cymbalshop`.
-- An access token with the `api` scope.
-- An access token with the `read_api` scope.
-- A Webhook Secret.
+- An authenticated GitLab account. The steps in this documentation assume you have a configured SSH key for cloning and modifying repositories.
+- A **private** GitLab repository named `eab-cymbal-shop-cymbalshop`.
 
-Populate your `terraform.tfvars` file with the Cloud Build 2nd Gen configuration variable:
+  > Note: Default name for the repository is: `eab-cymbal-shop-cymbalshop`; If you choose another name for your repository make sure you update the repository names under `cloudbuildv2_repository_config` in `terraform.tfvars`.
 
-```hcl
-cloudbuildv2_repository_config = {
-  repo_type = "GITLABv2"
+- An access token with the `api` scope to connect and disconnect repositories.
+- An access token with the `read_api` scope to ensure Cloud Build can access repository source code.
+- Create a secret for the GitLab API Access Token:
 
-  repositories = {
-    eab-cymbal-shop-cymbalshop = {
-      repository_name = "eab-cymbal-shop-cymbalshop"
-      repository_url  = "https://gitlab.com/your-group/eab-cymbal-shop-cymbalshop.git"
-    }
-  }
+   ```bash
+   GITLAB_API_TOKEN=<replace_with_token>
+   printf $GITLAB_API_TOKEN | gcloud secrets create gitlab-api-token --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
 
-  gitlab_authorizer_credential_secret_id      = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
-  gitlab_read_authorizer_credential_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
-  gitlab_webhook_secret_id                    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
+- Take note of the secret ID:
 
-  secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
-  gitlab_enterprise_host_uri                  = "https://gitlab.com"
-  gitlab_enterprise_service_directory         = "projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE"
-  gitlab_enterprise_ca_certificate            = <<EOF
-REPLACE_WITH_SSL_CERT
-EOF
-}
-```
+   ```bash
+   gcloud secrets describe gitlab-api-token --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Create a secret for the GitLab Read API Access Token:
+
+   ```bash
+   GITLAB_READ_API_TOKEN=<replace_with_token>
+   printf $GITLAB_READ_API_TOKEN | gcloud secrets create gitlab-read-api-token --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret ID:
+
+   ```bash
+   gcloud secrets describe gitlab-read-api-token --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Generate a random 36-character string for the Webhook Secret:
+
+   ```bash
+   GITLAB_WEBHOOK=$(cat /dev/urandom | tr -dc "[:alnum:]" | head -c 36)
+   printf $GITLAB_WEBHOOK | gcloud secrets create gitlab-webhook --project=$GIT_SECRET_PROJECT --data-file=-
+   ```
+
+- Take note of the secret ID:
+
+   ```bash
+   gcloud secrets describe gitlab-webhook --project=$GIT_SECRET_PROJECT --format="value(name)"
+   ```
+
+- Populate your `terraform.tfvars` file with the Cloud Build 2nd Gen configuration:
+
+   ```hcl
+   cloudbuildv2_repository_config = {
+     repo_type = "GITLABv2"
+
+     repositories = {
+       "eab-cymbal-shop-cymbalshop" = {
+         repository_name = "eab-cymbal-shop-cymbalshop"
+         repository_url  = "https://gitlab.com/your-group/eab-cymbal-shop-cymbalshop.git"
+       }
+     }
+
+     gitlab_authorizer_credential_secret_id      = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_API_TOKEN_SECRET_NAME"
+     gitlab_read_authorizer_credential_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
+     gitlab_webhook_secret_id                    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
+
+     secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
+     gitlab_enterprise_host_uri                  = "https://gitlab.com"
+     gitlab_enterprise_service_directory         = "projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE"
+     gitlab_enterprise_ca_certificate            = <<EOF
+   REPLACE_WITH_SSL_CERT
+   EOF
+   }
+   ```
+
+#### Cloud Build with Cloud Source Repositories (CSR) Pre-requisites
+
+When using Google Cloud Source Repositories (`repo_type = "CSR"`):
+- No third-party tokens, Webhook secrets, or Secret Manager configurations are required.
+- Authentication is handled natively through Google Cloud IAM using active `gcloud` credentials.
+- Ensure the `gcloud` Git credential helper is configured in your local environment:
+
+   ```bash
+   git config --global credential.'https://source.developers.google.com'.helper gcloud.sh
+   ```
+
+- Set `cloudbuildv2_repository_config` in `terraform.tfvars`:
+
+   ```hcl
+   cloudbuildv2_repository_config = {
+     repo_type = "CSR"
+     repositories = {
+       "eab-cymbal-shop-cymbalshop" = {
+         repository_name = "eab-cymbal-shop-cymbalshop"
+         repository_url  = ""
+       }
+     }
+   }
+   ```
+
 
 ## Usage
 
-1. Enter the single project example folder:
+The steps below assume that you are checked out on the same level as `terraform-google-enterprise-application` directory:
+
+```txt
+.
+├── terraform-google-enterprise-application
+└── .
+```
+
+1. Enter at Single Project example folder:
 
     ```bash
-    cd examples/cymbal-shop/standalone-single-project
+    cd terraform-google-enterprise-application/examples/cymbal-shop/standalone-single-project
     ```
 
-2. Update `terraform.tfvars`.
+1. Update `terraform.tfvars`.
 
-3. Run `terraform init`.
+1. Run `terraform init`.
 
-4. Run `terraform plan`.
+1. Run `terraform plan` and check the information.
 
-5. Run `terraform apply`.
+1. Run `terraform apply`.
+
+1. Clone the application repository:
+
+    - Cloud Source Repository only:
+
+    ```bash
+    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
+    cd eab-cymbal-shop-cymbalshop
+    git checkout -b main
+    git remote set-url origin https://source.developers.google.com/p/REPLACE_WITH_PROJECT_ID/r/eab-cymbal-shop-cymbalshop
+    ```
+
+    - GitHub Repository only:
+
+    ```bash
+    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
+    cd eab-cymbal-shop-cymbalshop
+    git checkout -b main
+    git remote set-url origin https://github.com/your-org/eab-cymbal-shop-cymbalshop.git
+    ```
+
+    - GitLab Repository only:
+
+    ```bash
+    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
+    cd eab-cymbal-shop-cymbalshop
+    git checkout -b main
+    git remote set-url origin https://gitlab.com/your-group/eab-cymbal-shop-cymbalshop.git
+    ```
+
+1. Copy the contents of 6-appsource to the repository:
+
+    ```bash
+    cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .
+    ```
+
+1. Commit changes:
+
+    ```bash
+    git add .
+    git commit -m "feat(cymbal-shop): deploy microservices via enterprise blueprint pipeline"
+    git push -u origin main
+    ```
+
+1. After pushing the code to the main branch, the CI (build) pipeline will be triggered on the provided project. You can view the build results in the Cloud Console or via CLI:
+
+    ```bash
+    gcloud builds list --project=REPLACE_WITH_PROJECT_ID --region=us-central1 --limit=3
+    ```
+
+1. After the CI build successfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project. You can view the release status via CLI:
+
+    ```bash
+    gcloud deploy releases list \
+      --delivery-pipeline=cymbalshop \
+      --region=us-central1 \
+      --project=REPLACE_WITH_PROJECT_ID
+    ```
+
+1. Once the CD pipeline successfully runs, verify the 11 microservices running in the `cymbalshops-development` namespace on your GKE cluster:
+
+    ```bash
+    gcloud container clusters get-credentials cs-cluster-us-central1-development \
+      --region=us-central1 \
+      --project=REPLACE_WITH_PROJECT_ID
+
+    kubectl get pods -n cymbalshops-development
+    ```
+
+
+## Troubleshooting
+
+You can refer to the [Troubleshooting doc](../../../docs/TROUBLESHOOTING.md).
+
+
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
