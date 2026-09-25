@@ -64,7 +64,7 @@ func TestMortgageSingleProjectE2E(t *testing.T) {
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
-			ipAddress, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "gateway/llamma-model-gw", "-o", "jsonpath={.status.addresses[0].value}", "-n", namespace)
+			ipAddress, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "gateway/mortgage-agent-gw", "-o", "jsonpath={.status.addresses[0].value}", "-n", namespace)
 			if err != nil {
 				t.Fatal(err)
 			}

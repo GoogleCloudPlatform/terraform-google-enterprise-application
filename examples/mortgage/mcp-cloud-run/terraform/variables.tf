@@ -15,24 +15,28 @@
  */
 
 variable "project_id" {
-  type = string
+  description = "Google Cloud project ID in which to deploy all MCPs servers."
+  type        = string
 }
 
 variable "region" {
-  type    = string
-  default = "us-central1"
+  description = "The GCP region for resources."
+  type        = string
+  default     = "us-central1"
 }
 variable "artifact_registry_id" {
-  type    = string
-  default = "mcp-docker"
+  description = "The Artifact Registry repository ID"
+  type        = string
+  default     = "mcp-docker"
 }
 
 variable "gke_agent_sa_email" {
-  type        = string
   description = "e.g. gsa-mortgage-agent@PROJECT.iam.gserviceaccount.com"
+  type        = string
 }
 
 variable "mcp_services" {
+  description = "Map of MCP services to create service accounts for MCPs deployment. Each key is the MCP service name, and the value is an object with the account_id for the service account."
   type = map(object({
     account_id = string
   }))

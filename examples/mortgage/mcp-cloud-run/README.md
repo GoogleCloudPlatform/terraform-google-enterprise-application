@@ -33,7 +33,7 @@ cd /terraform-google-enterprise-application/examples/mortgage/mcp-cloud-run
 
 export PROJECT_ID=XXXXXXXXXX
 export REGION=us-central1
-export BUCKET_NAME=$(terraform -chdir=terraform output -raw cloudbuild_bucket) 
+export BUCKET_NAME=$(terraform -chdir=terraform output -raw cloudbuild_bucket)
 export MCP_INGRESS=all
 
 envsubst '${PROJECT_ID} ${REGION} ${BUCKET_NAME}' < skaffold.yaml.tmpl > skaffold.yaml

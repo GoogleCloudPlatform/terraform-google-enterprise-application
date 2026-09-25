@@ -425,6 +425,7 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | cluster\_type | Cluster type |
 | env | Environment |
 | fleet\_project\_id | Fleet Project ID |
+| gke\_agent\_sa\_email | GSA for mortgage-agent. |
 | network\_project\_id | Network Project ID |
 | service\_repository\_name | The Source Repository name. |
 | service\_repository\_project\_id | The Source Repository project id. |

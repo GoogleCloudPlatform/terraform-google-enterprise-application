@@ -15,19 +15,23 @@
  */
 
 output "artifact_registry_url" {
-  value = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.mcp.repository_id}"
+  description = "The Artifact Registry repository URL for docker push/pull"
+  value       = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.mcp.repository_id}"
 }
 
 output "cloudbuild_bucket" {
-  value = google_storage_bucket.cloudbuild.name
+  description = "Cloud Build MCPs bucket name."
+  value       = google_storage_bucket.cloudbuild.name
 }
 
 output "agent_mcp_invoker_email" {
-  value = google_service_account.invoker.email
+  description = "Email of the SA agents impersonate when invoking MCP Cloud Run services."
+  value       = google_service_account.invoker.email
 }
 
 output "mcp_runtime_sa_emails" {
-  value = { for k, sa in google_service_account.mcp_runtime : k => sa.email }
+  description = "Map of MCP runtime service account emails."
+  value       = { for k, sa in google_service_account.mcp_runtime : k => sa.email }
 }
 
 output "mcp_discovered_servers_json" {

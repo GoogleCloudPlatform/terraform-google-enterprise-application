@@ -174,7 +174,7 @@ func TestStandaloneSingleProjectMortgage(t *testing.T) {
 		assert.Subset(gkeSaListRoles, gkeSaRoles, fmt.Sprintf("service account %s should have project level roles", gkeServiceAgent))
 
 		// Cloud Armor
-		cloudArmorName := "ll-eab-cloud-armor"
+		cloudArmorName := "mt-eab-cloud-armor"
 		cloudArmorOp := gcloud.Run(t, fmt.Sprintf("compute security-policies describe %s --project %s --format json", cloudArmorName, projectID)).Array()[0]
 		assert.Equal(cloudArmorOp.Get("description").String(), "EAB Cloud Armor policy", "Cloud Armor description should be EAB Cloud Armor policy.")
 
