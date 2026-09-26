@@ -47,7 +47,11 @@ def _build_impersonation_factory(target_url: str, target_sa_email: str):
             scopes=["https://www.googleapis.com/auth/cloud-platform"]
         )
         logger.info(
-            "Impersonation factory ready: target_sa=%s audience=%s source_creds=%s source_project=%s",
+            "Impersonation factory ready: \
+                target_sa=%s \
+                audience=%s \
+                source_creds=%s \
+                source_project=%s",
             target_sa_email,
             audience,
             type(source_creds).__name__,
@@ -65,7 +69,8 @@ def _build_impersonation_factory(target_url: str, target_sa_email: str):
         )
     except Exception:
         logger.exception(
-            "Failed to build impersonated credentials for target_sa=%s audience=%s — "
+            "Failed to build impersonated credentials for \
+                target_sa=%s audience=%s — "
             "MCP calls to %s will fail.",
             target_sa_email,
             audience,
@@ -89,8 +94,10 @@ def _build_impersonation_factory(target_url: str, target_sa_email: str):
                     self._creds.refresh(self._req)
             except Exception:
                 logger.exception(
-                    "OIDC token refresh failed for target_url=%s (impersonation chain "
-                    "agent-identity → %s). Subsequent MCP request will be unauthenticated.",
+                    "OIDC token refresh failed for target_url=%s \
+                        (impersonation chain "
+                    "agent-identity → %s). Subsequent MCP request \
+                        will be unauthenticated.",
                     self._target_url,
                     target_sa_email,
                 )
@@ -121,28 +128,35 @@ _CACHED_DISCOVERED: list[dict[str, Any]] | None = None
 
 _SERVICE_DESCRIPTIONS: dict[str, str] = {
     "legacy-dms": (
-        "the legacy document management system. Use to fetch tax returns, pay stubs, "
+        "the legacy document management system. \
+            Use to fetch tax returns, pay stubs, "
         "bank statements, and other applicant documents."
     ),
     "corporate-email": (
-        "the corporate communications system. Use to read the corporate inbox. "
+        "the corporate communications system. \
+            Use to read the corporate inbox. "
         "Write operations like sending emails may be restricted by the "
         "authorization gateway."
     ),
     "income-verification": (
-        "a third-party income verification vendor. Use to verify reported income "
+        "a third-party income verification vendor. \
+            Use to verify reported income "
         "against employer records and tax filings."
     ),
 }
 
-_INSTRUCTION_TEMPLATE = """You are a mortgage underwriting assistant. You help loan officers process
-mortgage applications by retrieving documents, verifying income, and communicating results.
+_INSTRUCTION_TEMPLATE = """
+You are a mortgage underwriting assistant.
+You help loan officers process mortgage applications by retrieving documents, \
+    verifying income, and communicating results.
 
-You connect to backend systems through an Agent Gateway. The set of available tools is
-discovered from the Agent Registry at startup and may change between deployments.
-**Only call tools by the exact names listed below.** Tool names use underscores as
-separators (e.g. `legacy_dms_search_documents`); never use a colon (`:`), slash, dot,
-or any other separator.
+You connect to backend systems through an Agent Gateway. \
+    The set of available tools is discovered from the Agent Registry at \
+    startup and may change between deployments.
+
+**Only call tools by the exact names listed below.** Tool names use \
+    underscores as separators (e.g. `legacy_dms_search_documents`); \
+    never use a colon (`:`), slash, dot, or any other separator.
 
 **MCP services discovered from the registry:**
 {mcp_services_doc}
@@ -154,19 +168,24 @@ or any other separator.
 4. Summarize your findings clearly for the loan officer.
 
 **Rules:**
-- NEVER fabricate or estimate financial figures. Only report data returned by tools.
+- NEVER fabricate or estimate financial figures. Only report data \
+    returned by tools.
 - Always cite which tool/system provided each piece of data.
-- If a tool call fails or returns an error, report the error honestly to the user.
-- **Never invent tool names.** Only call tools whose exact names appear in the MCP
-services list above or in the utility tools list below. If no listed tool matches your
-need, tell the user you cannot perform that operation rather than guessing at a name.
+- If a tool call fails or returns an error, report the error honestly \
+    to the user.
+- **Never invent tool names.** Only call tools whose exact names appear \
+    in the MCP services list above or in the utility tools list below. \
+    If no listed tool matches your need, tell the user you cannot perform \
+    that operation rather than guessing at a name.
 - Be concise and professional in all responses.
-- When presenting tax return or applicant data, ALWAYS include the SSN field and display its value
-exactly as returned by the tool (e.g. "[US_SOCIAL_SECURITY_NUMBER]"). Never omit SSN fields.
+- When presenting tax return or applicant data, ALWAYS include the SSN \
+    field and display its value exactly as returned by the tool \
+    (e.g. "[US_SOCIAL_SECURITY_NUMBER]"). Never omit SSN fields.
 
 You also have utility tools:
 - get_current_time: Returns the current time in any timezone.
-- list_mcp_connections: Shows which MCP servers were discovered from the registry."""
+- list_mcp_connections: Shows which MCP servers were discovered from \
+    the registry."""
 
 
 def _render_mcp_services_doc() -> str:
@@ -248,10 +267,14 @@ def _handle_tool_error(
     )
     return {
         "error": (
-            f"The '{tool.name}' tool call was blocked due to authorization policies. "
-            f"The agent is facing authorization issues / being blocked due to authz policies. "
-            f"Do not call this tool again in this session — report to the user that you are "
-            f"facing authorization issues or being blocked due to authorization policies, and proceed with other tools."
+            f"The '{tool.name}' tool call was blocked due to authorization \
+                policies. "
+            f"The agent is facing authorization issues / being blocked due \
+                to authz policies. "
+            f"Do not call this tool again in this session — report to the \
+                user that you are "
+            f"facing authorization issues or being blocked due to \
+                authorization policies, and proceed with other tools."
         ),
     }
 
@@ -494,8 +517,10 @@ def _build_agent():
         model=model_name,
         name="mortgage_assistant_agent",
         description=(
-            "A mortgage underwriting assistant that connects to legacy document management, "
-            "income verification, and corporate email systems through an Agent Gateway."
+            "A mortgage underwriting assistant that connects to legacy \
+                document management, "
+            "income verification, and corporate email systems through an \
+                Agent Gateway."
         ),
         instruction=instruction,
         tools=_tools,
