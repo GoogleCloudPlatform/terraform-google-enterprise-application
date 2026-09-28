@@ -138,3 +138,9 @@ variable "enable_csi_gcs_fuse" {
   type        = bool
   default     = false
 }
+
+variable "enable_csi_filestore" {
+  description = "Enable the Filestore CSI Driver"
+  type        = bool
+  default     = true
+}
