@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ output "cluster_project_id" {
 }
 
 output "cluster_project_number" {
-  description = "Cluster Project ID"
+  description = "Cluster Project Number"
   value       = module.multitenant_infra.cluster_project_number
 }
 
@@ -74,12 +74,17 @@ output "cluster_service_accounts" {
   value       = module.multitenant_infra.cluster_service_accounts
 }
 
-output "app_infos" {
-  description = "App infos (name, services, team)."
-  value       = local.cicd_apps
-}
-
 output "clouddeploy_targets_names" {
   description = "Cloud deploy targets names."
   value       = { for k, cicd in module.cicd : k => cicd.clouddeploy_targets_names }
+}
+
+output "service_repository_name" {
+  description = "The Source Repository name."
+  value       = { for k, cicd in module.cicd : k => cicd.service_repository_name }
+}
+
+output "service_repository_project_id" {
+  description = "The Source Repository project id."
+  value       = { for k, cicd in module.cicd : k => cicd.service_repository_project_id }
 }
