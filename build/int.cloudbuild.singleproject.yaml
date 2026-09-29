@@ -267,8 +267,9 @@ steps:
     waitFor:
       - ssp-mortgage-apply
 
-  - id: deploy-mortgage"
+  - id: deploy-mortgage
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
     args:
       - "-c"
       - |-
@@ -281,7 +282,7 @@ steps:
         fi
     waitFor:
       - ssp-mortgage-apply
-      - ssp-agent-verify
+      - ssp-mortgage-verify
 
   - id: ssp-mortgage-teardown
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -289,7 +290,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestSingleProjectSourceMortgage --stage teardown --verbose"]
     waitFor:
       - ssp-mortgage-verify
-      - deploy-mortgage"
+      - deploy-mortgage
     allowFailure: true
 
   - id: vpcsc-teardown
