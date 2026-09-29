@@ -36,7 +36,7 @@ func TestSingleProjectSourceMortgage(t *testing.T) {
 	gitLabPath := "../../setup/harness/gitlab"
 	gitLab := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(gitLabPath))
-	projectID := gitLab.GetTFSetupStringOutput("seed_project_id")
+	projectID := gitLab.GetStringOutput("gitlab_project_id")
 	gitUrl := gitLab.GetStringOutput("gitlab_url")
 	gitlabPersonalTokenSecretName := gitLab.GetStringOutput("gitlab_pat_secret_name")
 	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
