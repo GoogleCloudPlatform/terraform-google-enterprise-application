@@ -51,14 +51,17 @@ func TestSingleProjectSourceMortgage(t *testing.T) {
 	hostNameWithPath := strings.Split(gitUrl, "https://")[1]
 	authenticatedUrl := fmt.Sprintf("https://oauth2:%s@%s/root", token, hostNameWithPath)
 
-	standaloneSingleProj := tft.NewTFBlueprintTest(t, tft.WithVars(map[string]interface{}{"project_id": projectID}), tft.WithTFDir(fmt.Sprintf("../../../examples/%s/standalone-single-project", appName)))
+	standaloneSingleProj := tft.NewTFBlueprintTest(t,
+		tft.WithVars(map[string]interface{}{"project_id": projectID}),
+		tft.WithTFDir(fmt.Sprintf("../../../examples/%s/standalone-single-project", appName)),
+	)
 
 	envName := standaloneSingleProj.GetStringOutput("env")
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
 
-	region := "us-central1"
+	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
 	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
 	appSourcePath := fmt.Sprintf("../../../examples/%s/6-appsource", appName)
 
