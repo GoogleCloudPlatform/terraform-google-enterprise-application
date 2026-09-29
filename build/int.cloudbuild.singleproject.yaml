@@ -267,8 +267,9 @@ steps:
     waitFor:
       - ssp-mortgage-apply
 
-  - id: deploy-mortgage"
+  - id: deploy-mortgage
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
+    entrypoint: "bash"
     args:
       - "-c"
       - |-
