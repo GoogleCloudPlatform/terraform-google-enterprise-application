@@ -32,5 +32,5 @@ spec:
       metric:
         name: "autoscaling.googleapis.com|gclb-capacity-fullness"
       target:
-        averageValue: 70
+        averageValue: "70"
         type: AverageValue

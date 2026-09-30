@@ -22,9 +22,3 @@ resources:
   - gateway.yaml
   - healthcheck.yaml
   - hpa-mortgage-agent.yaml
-configMapGenerator:
-  - name: mortgage-agent-config
-    literals:
-      - GOOGLE_CLOUD_PROJECT=DUMMY
-      - GOOGLE_CLOUD_LOCATION=DUMMY
-      - MODEL_ID=gemini-3.1-flash-lite

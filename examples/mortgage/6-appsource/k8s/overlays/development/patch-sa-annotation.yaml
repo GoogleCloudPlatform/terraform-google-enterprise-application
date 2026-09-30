@@ -17,4 +17,4 @@ kind: ServiceAccount
 metadata:
   name: mortgage-agent-ksa
   annotations:
-    iam.gke.io/gcp-service-account: gsa-mortgage-agent@XXXXXXXXXX.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: PLACEHOLDER # from-param: ${SERVICE_ACCOUNT}

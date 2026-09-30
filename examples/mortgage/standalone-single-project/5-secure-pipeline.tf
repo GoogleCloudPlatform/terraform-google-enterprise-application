@@ -28,6 +28,13 @@ locals {
   // review
   team_name    = "default"
   service_name = "mortgage-agent"
+
+  target_deploy_parameters = { (local.env) : {
+    "PROJECT_ID"      = var.project_id
+    "MODEL_ID"        = "gemini-3.1-flash-lite"
+    "SERVICE_ACCOUNT" = google_service_account.gsa_mortgage_agent.email
+    }
+  }
 }
 
 data "google_project" "project" {
@@ -103,6 +110,8 @@ module "cicd" {
 
   binary_authorization_image         = module.standalone_harness.binary_authorization_image
   binary_authorization_repository_id = module.standalone_harness.binary_authorization_repository_id
+
+  target_deploy_parameters = local.target_deploy_parameters
 
   depends_on = [
     google_access_context_manager_service_perimeter_egress_policy.egress_policy,
