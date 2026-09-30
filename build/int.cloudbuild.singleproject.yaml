@@ -292,7 +292,7 @@ steps:
       - ssp-mortgage-verify
       - deploy-mortgage
     allowFailure: true
-    
+
   - id: ssp-cymbal-bank-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
