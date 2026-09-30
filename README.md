@@ -31,7 +31,7 @@ The `modules/` directory contains the primary infrastructure components of the E
 The `examples/` directory contains end-to-end architectures demonstrating various use cases, deployment topologies, and workload types:
 
 *   **[`examples/default-example`](/examples/default-example/)**: The primary multi-project reference deployment containing stages for App Factory (`4-appfactory`), Application Infrastructure (`5-appinfra`), and the sample Hello World source code (`6-appsource`).
-*   **[`examples/standalone_single_project`](/examples/standalone_single_project/)** and **[`examples/standalone_single_project_confidential_nodes`](/examples/standalone_single_project_confidential_nodes/)**: Simplified, rapid-evaluation sandbox environments deploying multitenant, fleetscope, and appinfra in a single project (with confidential nodes support for increased security).
+*   **[`examples/standalone_single_project_confidential_nodes`](/examples/standalone_single_project_confidential_nodes/)**: Simplified, rapid-evaluation sandbox environment deploying harness, GKE, fleetscope, and secure deployment pipelines in a single project with confidential nodes support for increased security.
 *   **[`examples/cymbal-bank`](/examples/cymbal-bank/)**: Deployment configurations for the microservices-based Cymbal Bank reference application on the internal developer platform.
 *   **[`examples/cymbal-shop`](/examples/cymbal-shop/)**: Deployment configurations for the web-based e-commerce Cymbal Shop reference application.
 *   **[`examples/multitenant-applications`](/examples/multitenant-applications/)**: Shows how to configure multi-tenant GKE clusters to safely co-host both Cymbal Bank and Cymbal Shop with strict team namespace and scope isolation.

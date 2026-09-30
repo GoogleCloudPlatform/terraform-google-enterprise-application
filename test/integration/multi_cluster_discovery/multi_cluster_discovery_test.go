@@ -68,6 +68,7 @@ func TestMultiClusterDiscovery(t *testing.T) {
 		"attestation_kms_key":        loggingHarness.GetJsonOutput("attestation_kms_key").Get("seed").String(),
 		"regions":                    []string{"us-central1", "us-east4"},
 		"project_id":                 setup.GetStringOutput("seed_project_id"),
+		"teams":                      setup.GetJsonOutput("teams").Value(),
 		"config_sync_secret_type":    "none",
 		"config_sync_repository_url": forkRepository,
 		"config_sync_policy_dir":     configSyncPath,

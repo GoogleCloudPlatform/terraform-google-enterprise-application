@@ -36,9 +36,7 @@ options:
     - "TF_VAR_service_perimeter_mode=ENFORCE"
     - "TF_VAR_deletion_protection=false"
     - "TF_VAR_cloud_build_sa=$SERVICE_ACCOUNT_EMAIL"
-    - "TF_VAR_single_project=false"
-    - "TF_VAR_hpc=false"
-    - "TF_VAR_agent=true"
+    - 'TF_VAR_examples_tested=["agent"]'
     - "HEAD_BRANCH=$_HEAD_BRANCH"
     - "HEAD_REPO_URL=$_HEAD_REPO_URL"
     - "TF_VAR_region=us-central1"
