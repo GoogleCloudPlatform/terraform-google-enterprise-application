@@ -14,47 +14,98 @@
  * limitations under the License.
  */
 
-// define test package name
 package mortgage
 
 import (
-	"os"
+	"fmt"
+	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
-
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
-// name the function as Test*
 func TestMortgageMCPs(t *testing.T) {
+	standalone := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../examples/mortgage/standalone-single-project"),
+	)
 
-	// initialize Terraform test from the Blueprints test framework
-	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
-	projectID := setupOutput.GetJsonOutput("harness_project_ids").Get("mortgage").String()
+	projectID := standalone.GetStringOutput("cluster_project_id")
+	regions := testutils.GetBptOutputStrSlice(standalone, "cluster_regions")
+	region := regions[0]
 
-	standaloneSingleProject := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/mortgage/standalone-single-project"))
-	gke_agent_sa_email := standaloneSingleProject.GetJsonOutput("gke_agent_sa_email").String()
-
-	serviceAccount := setupOutput.GetJsonOutput("sa_email").Get("mortgage").String()
-	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
+	mcpSourcePath, err := filepath.Abs("../../../examples/mortgage/mcp-cloud-run")
 	if err != nil {
-		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+		t.Fatal(err)
 	}
 
-	vars := map[string]interface{}{
-		"project_id":         projectID,
-		"gke_agent_sa_email": gke_agent_sa_email,
-	}
-
-	// wire setup output project_id to example var.project_id
-	standaloneSingleProjTMCPs := tft.NewTFBlueprintTest(t,
-		tft.WithVars(vars),
-		tft.WithTFDir("../../../examples/mortgage/mcp-cloud-run/terraform"),
+	mcpServers := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir(mcpSourcePath),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
-	// call the test function to execute the integration test
-	standaloneSingleProjTMCPs.Test()
+	mcpServers.DefineVerify(func(assert *assert.Assertions) {
+		mcpServices := []struct {
+			ServiceName string
+			SourceDir   string
+			ImageName   string
+			SAName      string
+		}{
+			{
+				ServiceName: "legacy-dms",
+				SourceDir:   "src/legacy-dms",
+				ImageName:   "legacy-dms",
+				SAName:      "mcp-legacy-dms",
+			},
+			{
+				ServiceName: "corporate-email",
+				SourceDir:   "src/corporate-email",
+				ImageName:   "corporate-email",
+				SAName:      "mcp-corporate-email",
+			},
+			{
+				ServiceName: "income-verification",
+				SourceDir:   "src/income-verification-api",
+				ImageName:   "income-verification-api",
+				SAName:      "mcp-income-verification",
+			},
+		}
+
+		for _, svc := range mcpServices {
+			imageTag := fmt.Sprintf("%s-docker.pkg.dev/%s/mcp-docker/%s", region, projectID, svc.ImageName)
+			srcPath := filepath.Join(mcpSourcePath, svc.SourceDir)
+
+			t.Logf("Building image for MCP service %s...", svc.ServiceName)
+			buildCmd := fmt.Sprintf("builds submit %s --tag=%s --project=%s", srcPath, imageTag, projectID)
+			gcloud.RunCmd(t, buildCmd)
+
+			t.Logf("Updating Cloud Run service image for %s...", svc.ServiceName)
+			deployCmd := fmt.Sprintf("run deploy %s "+
+				"--image=%s "+
+				"--project=%s "+
+				"--region=%s "+
+				"--service-account=%s@%s.iam.gserviceaccount.com "+
+				"--ingress=all "+
+				"--set-env-vars=GOOGLE_CLOUD_PROJECT=%s,OTEL_SERVICE_NAME=%s",
+				svc.ServiceName,
+				imageTag,
+				projectID,
+				region,
+				svc.SAName,
+				projectID,
+				projectID,
+				svc.ServiceName,
+			)
+			gcloud.RunCmd(t, deployCmd)
+
+			svcOp := gcloud.Runf(t, "run services describe %s --project %s --region %s", svc.ServiceName, projectID, region)
+			readyCond := svcOp.Get("status.conditions.#(type==\"Ready\").status").String()
+			assert.Equal("True", readyCond, fmt.Sprintf("Cloud Run service %s should be in Ready status", svc.ServiceName))
+		}
+	})
+
+	mcpServers.Test()
 }
