@@ -357,7 +357,7 @@ The steps below assume that you are checked out on the same level as `terraform-
     - Cloud Source Repository only:
 
     ```bash
-    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
+    git clone --branch v0.10.5 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
     cd eab-cymbal-shop-cymbalshop
     git checkout -b main
     git remote set-url origin https://source.developers.google.com/p/REPLACE_WITH_PROJECT_ID/r/eab-cymbal-shop-cymbalshop
@@ -366,7 +366,7 @@ The steps below assume that you are checked out on the same level as `terraform-
     - GitHub Repository only:
 
     ```bash
-    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
+    git clone --branch v0.10.5 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
     cd eab-cymbal-shop-cymbalshop
     git checkout -b main
     git remote set-url origin https://github.com/your-org/eab-cymbal-shop-cymbalshop.git
@@ -375,7 +375,7 @@ The steps below assume that you are checked out on the same level as `terraform-
     - GitLab Repository only:
 
     ```bash
-    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
+    git clone --branch v0.10.5 https://github.com/GoogleCloudPlatform/microservices-demo.git eab-cymbal-shop-cymbalshop
     cd eab-cymbal-shop-cymbalshop
     git checkout -b main
     git remote set-url origin https://gitlab.com/your-group/eab-cymbal-shop-cymbalshop.git
@@ -384,7 +384,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Copy the contents of 6-appsource to the repository:
 
     ```bash
-    cp -r ../terraform-google-enterprise-application/examples/cymbal-shop/6-appsource/cymbal-shop/* .
+    cp -r ../../6-appsource/cymbal-shop/* .
     ```
 
 1. Commit changes:
