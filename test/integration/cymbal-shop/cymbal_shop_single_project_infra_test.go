@@ -20,7 +20,6 @@ package cymbal_shop
 import (
 	"fmt"
 	"net"
-	"os"
 	"regexp"
 	"slices"
 	"strings"
@@ -56,10 +55,7 @@ func TestStandaloneSingleProjectCymbalShop(t *testing.T) {
 	access_level_name := setupVPCSCOutput.GetStringOutput("access_level_name")
 
 	serviceAccount := setupOutput.GetJsonOutput("sa_email").Get("cymbal-shop").String()
-	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
-	if err != nil {
-		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
-	}
+	t.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
 	ncc_config := map[string]interface{}{
 		"enable_ncc":        true,
 		"hub_uri":           setupOutput.GetStringOutput("ncc_hub_uri"),
@@ -91,6 +87,7 @@ func TestStandaloneSingleProjectCymbalShop(t *testing.T) {
 
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes
 	standaloneSingleProjT.DefineVerify(func(assert *assert.Assertions) {
+		standaloneSingleProjT.DefaultVerify(assert)
 		clusterMembershipIds := testutils.GetBptOutputStrSlice(standaloneSingleProjT, "cluster_membership_ids")
 		clusterType := standaloneSingleProjT.GetStringOutput("cluster_type")
 		clusterProjectNumber := standaloneSingleProjT.GetStringOutput("cluster_project_number")
