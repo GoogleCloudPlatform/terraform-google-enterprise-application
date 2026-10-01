@@ -117,7 +117,6 @@ _DOCUMENTS = {
 # MCP tools
 # ---------------------------------------------------------------------------
 
-
 def _search_documents(
     applicant_last_name: str, document_type: str, years: int = 2
 ) -> dict:
@@ -209,6 +208,21 @@ def search_documents(
             ),
         )
 
+@mcp.tool()
+def get_document(document_id: str) -> ToolResult:
+    """Retrieve a full document from the document management system by ID.
+
+    Args:
+        document_id: The unique document identifier (e.g. 'DOC-2024-SM-1040').
+
+    Returns:
+        ToolResult with the full document content in structured_content.
+    """
+    with trace_tool(tracer, "get_document"):
+        return ToolResult(
+            content=[],
+            structured_content=_get_document(document_id),
+        )
 
 # ---------------------------------------------------------------------------
 # Starlette app with health endpoint + FastMCP mount

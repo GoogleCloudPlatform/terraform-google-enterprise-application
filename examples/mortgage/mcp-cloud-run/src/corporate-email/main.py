@@ -64,14 +64,10 @@ SAMPLE_EMAILS = [
         "to": "loan-officers@megabank.com",
         "subject": "Appraisal Complete - 742 Evergreen Terrace",
         "body": (
-            (
-                "The appraisal for 742 Evergreen Terrace has been completed. "
-                "Appraised value: $485,000."
-            )
-            (
-                "This supports the requested loan amount of $388,000 (80% "
-                "LTV). Full report attached to the loan file."
-            )
+            "The appraisal for 742 Evergreen Terrace has been completed. "
+            "Appraised value: $485,000. "
+            "This supports the requested loan amount of $388,000 (80% "
+            "LTV). Full report attached to the loan file."
         ),
         "timestamp": "2025-06-13T11:45:00Z",
         "read": True,
