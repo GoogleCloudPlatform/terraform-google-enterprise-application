@@ -148,17 +148,17 @@ locals {
 }
 
 resource "google_artifact_registry_repository_iam_member" "cloudbuild_writer" {
-  for_each   = toset(local.cloudbuild_sas)
+  count      = length(local.cloudbuild_sas)
   project    = var.project_id
   location   = var.region
   repository = google_artifact_registry_repository.mcp.name
   role       = "roles/artifactregistry.writer"
-  member     = each.value
+  member     = local.cloudbuild_sas[count.index]
 }
 
 resource "google_storage_bucket_iam_member" "cloudbuild_object" {
-  for_each = toset(local.cloudbuild_sas)
-  bucket   = google_storage_bucket.cloudbuild.name
-  role     = "roles/storage.objectAdmin"
-  member   = each.value
+  count  = length(local.cloudbuild_sas)
+  bucket = google_storage_bucket.cloudbuild.name
+  role   = "roles/storage.objectAdmin"
+  member = local.cloudbuild_sas[count.index]
 }
