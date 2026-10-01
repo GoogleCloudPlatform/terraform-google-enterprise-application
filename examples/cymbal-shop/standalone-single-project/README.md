@@ -224,7 +224,6 @@ To proceed with GitHub as your git provider you will need:
 
      github_secret_id        = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_PAT_SECRET_NAME"
      github_app_id_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITHUB_APP_ID_SECRET_NAME"
-     secret_project_id       = "REPLACE_WITH_SECRET_PROJECT_ID"
    }
    ```
 
@@ -295,7 +294,6 @@ To proceed with GitLab as your git provider you will need:
      gitlab_read_authorizer_credential_secret_id = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_GITLAB_READ_API_TOKEN_SECRET_NAME"
      gitlab_webhook_secret_id                    = "projects/REPLACE_WITH_SECRET_PRJ_NUMBER/secrets/REPLACE_WITH_WEBHOOK_SECRET_NAME"
 
-     secret_project_id                           = "REPLACE_WITH_SECRET_PROJECT_ID"
      gitlab_enterprise_host_uri                  = "https://gitlab.com"
      gitlab_enterprise_service_directory         = "projects/PROJECT/locations/LOCATION/namespaces/NAMESPACE/services/SERVICE"
      gitlab_enterprise_ca_certificate            = <<EOF
