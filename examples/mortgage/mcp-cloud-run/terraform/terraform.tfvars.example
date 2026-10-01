@@ -1,3 +1,0 @@
-project_id         = "XXXXXXXXXXXX"
-region             = "us-central1"
-gke_agent_sa_email = "gsa-mortgage-agent@XXXXXXX.iam.gserviceaccount.com"

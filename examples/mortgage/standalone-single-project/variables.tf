@@ -228,3 +228,34 @@ variable "ncc_config" {
     error_message = "Invalid NCC configuration. If enable_ncc is TRUE: hub_uri is required."
   }
 }
+
+// MCP Variables
+variable "artifact_registry_id" {
+  description = "The Artifact Registry repository ID"
+  type        = string
+  default     = "mcp-docker"
+}
+
+variable "mcp_placeholder_image" {
+  description = "The placeholder image to use for MCP services."
+  type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/placeholder"
+}
+
+variable "mcp_services" {
+  description = "Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name AND the URL-mask token (e.g. legacy-dms.<mcp_internal_dns_zone.domain> -> Cloud Run service 'legacy-dms')."
+  type = map(object({
+    account_id         = string
+    image              = optional(string)
+    container_port     = optional(number, 8080)
+    min_instance_count = optional(number, 0)
+    max_instance_count = optional(number, 3)
+    cpu                = optional(string, "1")
+    memory             = optional(string, "512Mi")
+  }))
+  default = {
+    "legacy-dms"          = { account_id = "mcp-legacy-dms" }
+    "corporate-email"     = { account_id = "mcp-corporate-email" }
+    "income-verification" = { account_id = "mcp-income-verification" }
+  }
+}

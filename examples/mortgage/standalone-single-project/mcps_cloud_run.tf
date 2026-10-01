@@ -61,7 +61,7 @@ resource "google_service_account" "invoker" {
 resource "google_service_account_iam_member" "gke_token_creator" {
   service_account_id = google_service_account.invoker.name
   role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:${var.gke_agent_sa_email}"
+  member             = google_service_account.gsa_mortgage_agent.member
 }
 
 resource "google_cloud_run_v2_service" "mcp" {
@@ -133,7 +133,7 @@ resource "google_cloud_run_v2_service_iam_member" "invoker" {
   location = var.region
   name     = google_cloud_run_v2_service.mcp[each.key].name
   role     = "roles/run.invoker"
-  member   = "serviceAccount:${google_service_account.invoker.email}"
+  member   = google_service_account.invoker.member
 }
 
 data "google_project" "this" {
@@ -142,8 +142,8 @@ data "google_project" "this" {
 
 locals {
   cloudbuild_sas = [
-    "serviceAccount:${data.google_project.this.number}@cloudbuild.gserviceaccount.com",
-    "serviceAccount:${data.google_project.this.number}-compute@developer.gserviceaccount.com",
+    "serviceAccount:${module.multitenant_infra.cluster_project_number}@cloudbuild.gserviceaccount.com",
+    "serviceAccount:${module.multitenant_infra.cluster_project_number}-compute@developer.gserviceaccount.com",
   ]
 }
 
