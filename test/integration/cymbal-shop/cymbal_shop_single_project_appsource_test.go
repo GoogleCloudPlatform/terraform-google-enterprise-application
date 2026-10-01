@@ -115,7 +115,12 @@ func TestSingleProjectSourceCymbalShop(t *testing.T) {
 			lastCommit := gitApp.GetLatestCommit()
 			// filter builds triggered based on pushed commit sha
 			buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, projectID)
-			utils.Poll(t, testutils.PollCloudBuild(t, buildListCmd, region, serviceName), 40, 60*time.Second)
+			onRetryBuild := func() string {
+				t.Logf("Force push again to try trigger build for commit %s", lastCommit)
+				gitAppRun("push", "google", "main", "--force")
+				return ""
+			}
+			utils.Poll(t, testutils.PollCloudBuild(t, buildListCmd, region, serviceName, onRetryBuild), 60, 60*time.Second)
 
 			releaseName := ""
 			releaseListCmd := fmt.Sprintf("deploy releases list --project=%s --delivery-pipeline=%s --region=%s --filter=name:%s", projectID, serviceName, region, lastCommit[0:7])
