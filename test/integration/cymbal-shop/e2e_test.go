@@ -76,7 +76,7 @@ func TestCymbalShopE2E(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		// Test webserver is avaliable
+		// Test webserver is available
 		heartbeat := func() (string, error) {
 			req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("http://%s", ipAddress), nil)
 			if err != nil {
@@ -86,13 +86,14 @@ func TestCymbalShopE2E(t *testing.T) {
 			if err != nil {
 				return "", err
 			}
-			if resp.StatusCode != 200 {
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
 				fmt.Println(resp)
-				return "", err
+				return fmt.Sprint(resp.StatusCode), fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 			}
-			return fmt.Sprint(resp.StatusCode), err
+			return fmt.Sprint(resp.StatusCode), nil
 		}
-		statusCode, _ := retry.DoWithRetryE(
+		statusCode, err := retry.DoWithRetryE(
 			t,
 			fmt.Sprintf("Checking: %s", ipAddress),
 			maxRetries,
@@ -100,7 +101,7 @@ func TestCymbalShopE2E(t *testing.T) {
 			heartbeat,
 		)
 		if err != nil {
-			t.Fatalf("Error: webserver (%s) not ready after %d attemps, status code: %q",
+			t.Fatalf("Error: webserver (%s) not ready after %d attempts, status code: %q",
 				ipAddress,
 				maxRetries,
 				statusCode,

@@ -63,11 +63,12 @@ func TestAppE2ECymbalShopSingleProject(t *testing.T) {
 			if err != nil {
 				return "", err
 			}
-			if resp.StatusCode != 200 {
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
 				fmt.Println(resp)
-				return "", err
+				return fmt.Sprint(resp.StatusCode), fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 			}
-			return fmt.Sprint(resp.StatusCode), err
+			return fmt.Sprint(resp.StatusCode), nil
 		}
 		statusCode, err := retry.DoWithRetryE(
 			t,
