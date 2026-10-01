@@ -117,6 +117,7 @@ _DOCUMENTS = {
 # MCP tools
 # ---------------------------------------------------------------------------
 
+
 def _search_documents(
     applicant_last_name: str, document_type: str, years: int = 2
 ) -> dict:
@@ -207,6 +208,7 @@ def search_documents(
                 applicant_last_name, document_type, years
             ),
         )
+
 
 @mcp.tool()
 def get_document(document_id: str) -> ToolResult:
