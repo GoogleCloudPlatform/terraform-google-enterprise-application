@@ -136,10 +136,6 @@ resource "google_cloud_run_v2_service_iam_member" "invoker" {
   member   = google_service_account.invoker.member
 }
 
-data "google_project" "this" {
-  project_id = var.project_id
-}
-
 locals {
   cloudbuild_sas = [
     "serviceAccount:${module.multitenant_infra.cluster_project_number}@cloudbuild.gserviceaccount.com",
