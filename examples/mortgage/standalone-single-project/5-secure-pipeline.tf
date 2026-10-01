@@ -87,7 +87,7 @@ module "cicd" {
     _TEAM    = local.team_name
   }
 
-  ci_build_included_files = ["**"]
+  ci_build_included_files = ["*"]
 
   buckets_force_destroy = true
 
