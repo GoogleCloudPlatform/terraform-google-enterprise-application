@@ -16,6 +16,8 @@ package mortgage
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -87,8 +89,8 @@ func TestSingleProjectSourceMortgage(t *testing.T) {
 		)
 
 		appsource.DefineVerify(func(assert *assert.Assertions) {
+			mcpDiscoveredJSON := standaloneSingleProj.GetStringOutput("mcp_discovered_servers_json")
 
-			// Push cymbal bank app source code
 			gitApp := git.NewCmdConfig(t, git.WithDir(tmpDirApp))
 			gitAppRun := func(args ...string) {
 				_, err := gitApp.RunCmdE(args...)
@@ -110,6 +112,20 @@ func TestSingleProjectSourceMortgage(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			configMapPath := filepath.Join(tmpDirApp, "k8s", "overlays", envName, "config-map.yaml")
+			content, err := os.ReadFile(configMapPath)
+			if err != nil {
+				t.Fatalf("Failed to read %s: %v", configMapPath, err)
+			}
+
+			// replace the placeholder in config-map.yaml before committing
+			newContent := strings.Replace(string(content), "'MCP_SERVERS_PLACEHOLDER'", fmt.Sprintf("%q", mcpDiscoveredJSON), 1)
+			err = os.WriteFile(configMapPath, []byte(newContent), 0644)
+			if err != nil {
+				t.Fatalf("Failed to update %s: %v", configMapPath, err)
+			}
+			t.Logf("Placeholder MCP_SERVERS_PLACEHOLDER successfully replaced in %s", configMapPath)
 
 			gitAppRun("add", ".")
 			gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
