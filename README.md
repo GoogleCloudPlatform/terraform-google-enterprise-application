@@ -33,7 +33,7 @@ The `examples/` directory contains end-to-end architectures demonstrating variou
 *   **[`examples/default-example`](/examples/default-example/)**: The primary multi-project reference deployment containing stages for App Factory (`4-appfactory`), Application Infrastructure (`5-appinfra`), and the sample Hello World source code (`6-appsource`).
 *   **[`examples/standalone_single_project_confidential_nodes`](/examples/standalone_single_project_confidential_nodes/)**: Simplified, rapid-evaluation sandbox environment deploying harness, GKE, fleetscope, and secure deployment pipelines in a single project with confidential nodes support for increased security.
 *   **[`examples/cymbal-bank`](/examples/cymbal-bank/)**: Deployment configurations for the microservices-based Cymbal Bank reference application on the internal developer platform.
-*   **[`examples/cymbal-shop`](/examples/cymbal-shop/)**: Deployment configurations for the web-based e-commerce Cymbal Shop reference application.
+*   **[`examples/cymbal-shop`](/examples/cymbal-shop/)**: Deployment configurations for the web-based e-commerce Cymbal Shop reference application (including multi-tenant setup and [standalone single-project sandbox](/examples/cymbal-shop/standalone-single-project/)).
 *   **[`examples/multitenant-applications`](/examples/multitenant-applications/)**: Shows how to configure multi-tenant GKE clusters to safely co-host both Cymbal Bank and Cymbal Shop with strict team namespace and scope isolation.
 *   **[`examples/agent`](/examples/agent/)**: Deploys an LLM-based agent application utilizing the platform infrastructure.
 *   **[`examples/llm-model`](/examples/llm-model/)**: Demonstrates secure machine learning and LLM model deployment pipelines.
@@ -84,7 +84,7 @@ The application is a web-based e-commerce app where users can browse items, add 
 
 In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
 
-For more information about the Cymbal Shop application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
+For more information about the Cymbal Shop application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1). For a standalone single-project sandbox environment, see [`examples/cymbal-shop/standalone-single-project`](/examples/cymbal-shop/standalone-single-project/).
 
 ### [Multitenant Applications Example](./examples/multitenant-applications)
 

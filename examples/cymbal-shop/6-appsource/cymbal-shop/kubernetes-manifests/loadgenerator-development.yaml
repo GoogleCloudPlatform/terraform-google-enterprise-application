@@ -43,16 +43,15 @@ spec:
         - /bin/sh
         - -exc
         - |
-          MAX_RETRIES=15
-          RETRY_INTERVAL=15
+          MAX_RETRIES=30
+          RETRY_INTERVAL=10
           for i in $(seq 1 $MAX_RETRIES); do
             echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
-            STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
-            if [ $STATUSCODE -eq 200 ]; then
+            if wget -q --spider -T 5 "http://${FRONTEND_ADDR}"; then
                 echo "Frontend is reachable."
                 exit 0
             fi
-            echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
+            echo "Could not reach frontend yet. Retrying in ${RETRY_INTERVAL}s..."
             sleep $RETRY_INTERVAL
           done
           echo "Failed to reach frontend after $MAX_RETRIES attempts."

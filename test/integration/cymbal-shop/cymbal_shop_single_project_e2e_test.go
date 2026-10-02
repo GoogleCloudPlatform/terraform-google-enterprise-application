@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,47 +21,24 @@ import (
 	"net/http/cookiejar"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
-	"github.com/gruntwork-io/terratest/modules/shell"
-
 	"github.com/gruntwork-io/terratest/modules/retry"
 )
 
-const (
-	sleepBetweenRetries time.Duration = time.Duration(60) * time.Second
-	maxRetries          int           = 30
-	namespace                         = "cymbalshops-development"
-	service                           = "frontend-external"
-)
-
-func getServiceIpAddress(t *testing.T, serviceName string, namespace string) (string, error) {
-	kubectlCmd := shell.Command{
-		Command: "kubectl",
-		Args: []string{
-			"get", "service", serviceName,
-			"-n", namespace,
-			"-o", "jsonpath={.status.loadBalancer.ingress[0].ip}",
-		},
-	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
-}
-
-func TestCymbalShopE2E(t *testing.T) {
-	multitenant := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../2-multitenant/envs/development"))
-	// retrieve cluster location and fleet membership from 2-multitenant
-	clusterProjectId := multitenant.GetJsonOutput("cluster_project_id").String()
-	clusterLocation := multitenant.GetJsonOutput("cluster_regions").Array()[0].String()
-	clusterMembership := multitenant.GetJsonOutput("cluster_membership_ids").Array()[0].String()
+func TestAppE2ECymbalShopSingleProject(t *testing.T) {
+	infraSingleProject := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../../examples/cymbal-shop/standalone-single-project"))
+	clusterProjectId := infraSingleProject.GetJsonOutput("cluster_project_id").String()
+	clusterLocation := infraSingleProject.GetJsonOutput("cluster_regions").Array()[0].String()
+	clusterMembership := infraSingleProject.GetJsonOutput("cluster_membership_ids").Array()[0].String()
 
 	// extract clusterName from fleet membership id
 	splitClusterMembership := strings.Split(clusterMembership, "/")
 	clusterName := splitClusterMembership[len(splitClusterMembership)-1]
 
 	testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
-	t.Run("Cymbal-Shop End-to-End Test", func(t *testing.T) {
+	t.Run("Cymbal-Shop Single Project End-to-End Test", func(t *testing.T) {
 		jar, err := cookiejar.New(nil)
 		if err != nil {
 			t.Fatal(err)

@@ -60,7 +60,7 @@ terraform-google-enterprise-application/
 │   ├── default-example/            # Baseline 3-tier multi-project app deployment (stages 4-6)
 │   ├── standalone_single_project_confidential_nodes/ # Single project with Confidential VMs
 │   ├── cymbal-bank/                # Full banking microservices architecture (Bank of Anthos)
-│   ├── cymbal-shop/                # E-commerce microservices demo (11 services)
+│   ├── cymbal-shop/                # E-commerce microservices demo (multi-tenant & standalone single-project)
 │   ├── multitenant-applications/   # Multi-tenancy co-hosting Cymbal Bank & Cymbal Shop
 │   ├── agent/                      # GenAI / LLM agent with HPA and Gateway API
 │   ├── llm-model/                  # Secure ML/LLM model serving pipeline
