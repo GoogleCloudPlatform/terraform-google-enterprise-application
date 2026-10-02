@@ -325,7 +325,8 @@ module "gke-standard" {
     data.google_compute_default_service_account.compute_sa,
   ]
 
-  gcs_fuse_csi_driver = var.enable_csi_gcs_fuse
+  gcs_fuse_csi_driver  = var.enable_csi_gcs_fuse
+  filestore_csi_driver = var.enable_csi_filestore
 
   // Private Cluster Configuration
   enable_private_nodes    = true
@@ -380,6 +381,8 @@ module "gke-autopilot" {
   fleet_project_grant_service_agent = true
 
   deletion_protection = var.deletion_protection
+
+  filestore_csi_driver = var.enable_csi_filestore
 
   depends_on = [
     module.eab_cluster_project,
