@@ -24,7 +24,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "source /usr/local/bin/task_helper_functions.sh && prepare_environment",
+        "for i in 1 2 3; do bash -c 'source /usr/local/bin/task_helper_functions.sh && prepare_environment' && break; [ \"$i\" -eq 3 ] && exit 1; sleep 60; done",
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
@@ -32,6 +32,7 @@ steps:
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
       - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
       - 'TF_VAR_examples_tested=["cymbal-bank"]'
+      - "TF_CLI_ARGS_apply=-parallelism=5"
     waitFor:
       - swap-module-refs
 
@@ -40,7 +41,7 @@ steps:
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
     waitFor:
-      - swap-module-refs
+      - prepare
 
   - id: logging-bucket-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
@@ -141,7 +142,7 @@ substitutions:
 options:
   machineType: E2_HIGHCPU_32
   env:
-    - 'TF_PLUGIN_CACHE_DIR=""'
+    - "TF_PLUGIN_CACHE_DIR="
     - 'TF_VAR_branch_name=$BRANCH_NAME'
     - "TF_VAR_service_perimeter_mode=ENFORCE"
     - "TF_VAR_deletion_protection=false"

@@ -128,7 +128,7 @@ func TestFleetscope(t *testing.T) {
 			fleetscope := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../3-fleetscope/envs/%s", envName)),
 				tft.WithVars(vars),
-				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 6, testutils.RetryInterval()),
 				tft.WithBackendConfig(backendConfig),
 				tft.WithParallelism(3),
 			)
@@ -140,10 +140,12 @@ func TestFleetscope(t *testing.T) {
 					// get kubectl namespaces and store them on currentClusterNamespaces slice
 					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
 					if err != nil {
-						t.Fatal(err)
+						t.Logf("Error getting namespaces: %v, will retry", err)
+						return true, nil
 					}
 					if !gjson.Valid(output) {
-						t.Fatalf("Error parsing output, invalid json: %s", output)
+						t.Logf("Error parsing output, invalid json: %s, will retry", output)
+						return true, nil
 					}
 					jsonOutput := gjson.Parse(output)
 					var currentClusterNamespaces []string
@@ -246,20 +248,13 @@ func TestFleetscope(t *testing.T) {
 						}
 
 						pollConfigSync := func() (bool, error) {
-							retry := false
 							// ensure config-sync resources are present in cluster
 							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 							if err != nil {
-								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") &&
-									!strings.Contains(err.Error(), "the server doesn't have a resource type \"rootsyncs\"") {
-									t.Logf("Config-Sync error '%s' \n.", err.Error())
-									return false, err
-								} else {
-									t.Log("Config-Sync not yet installed, will try polling again after sleeping.")
-									retry = true
-								}
+								t.Logf("Config-Sync not yet ready or error '%s', will retry polling.", err.Error())
+								return true, nil
 							}
-							return retry, nil
+							return false, nil
 						}
 
 						utils.Poll(t, pollConfigSync, 20, 40*time.Second)
@@ -287,7 +282,11 @@ func TestFleetscope(t *testing.T) {
 				pollMeshProvisioning := func(cmd string) func() (bool, error) {
 					return func() (bool, error) {
 						retry := false
-						result := gcloud.Runf(t, cmd)
+						result, err := testutils.RunGcloudJSONE(t, "%s", cmd)
+						if err != nil {
+							t.Logf("Mesh describe failed (%v), will retry", err)
+							return true, nil
+						}
 						if len(result.Array()) < 1 {
 							return true, nil
 						}
@@ -310,7 +309,11 @@ func TestFleetscope(t *testing.T) {
 				pollPolicyControllerState := func() (bool, error) {
 					booleans := make([]bool, len(membershipNamesProjectNumber))
 					for i, membershipName := range membershipNamesProjectNumber {
-						gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						gcloudCmdOutput, err := testutils.RunGcloudJSONE(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						if err != nil {
+							t.Logf("Policy Controller describe failed for %s (%v), will retry", membershipName, err)
+							return true, nil
+						}
 						if len(gcloudCmdOutput.Array()) < 1 {
 							return true, nil
 						}
@@ -325,7 +328,11 @@ func TestFleetscope(t *testing.T) {
 				pollPoliciesInstallationState := func() (bool, error) {
 					booleans := make([]bool, len(membershipNamesProjectNumber))
 					for i, membershipName := range membershipNamesProjectNumber {
-						gcloudCmdOutput := gcloud.Runf(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						gcloudCmdOutput, err := testutils.RunGcloudJSONE(t, "container fleet policycontroller describe --memberships=%s --project=%s", membershipName, clusterProjectID)
+						if err != nil {
+							t.Logf("Policy Controller describe failed for %s (%v), will retry", membershipName, err)
+							return true, nil
+						}
 						if len(gcloudCmdOutput.Array()) < 1 {
 							return true, nil
 						}
@@ -349,11 +356,17 @@ func TestFleetscope(t *testing.T) {
 					// validate no errors in config sync
 					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 					if err != nil {
-						t.Fatal(err)
+						t.Logf("Error querying rootsyncs (%v), will retry in 60s", err)
+						time.Sleep(60 * time.Second)
+						continue
 					}
 					// jsonpath adds ' character to string, that need to be removed for a valid json
 					output = strings.ReplaceAll(output, "'", "")
-					assert.True(gjson.Valid(output), "kubectl rootsyncs command output must be a valid gjson.")
+					if !gjson.Valid(output) {
+						t.Logf("rootsyncs output is not valid json (%s), will retry in 60s", output)
+						time.Sleep(60 * time.Second)
+						continue
+					}
 					jsonOutput := gjson.Parse(output)
 					noErrors := func() bool {
 						t.Logf("noError() jsonOutput: %v", jsonOutput.String())
