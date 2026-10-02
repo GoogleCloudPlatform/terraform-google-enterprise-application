@@ -17,21 +17,25 @@
 output "harness_project_ids" {
   description = "A list of the projects ids created including seed."
   value       = merge({ for i, v in module.harness_project : (i) => v.project_id }, { "seed" : module.seed_project.project_id })
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "harness_project_numbers" {
   description = "A list of the projects numbers created including seed."
   value       = merge({ for i, v in module.harness_project : (i) => v.project_number }, { "seed" : module.seed_project.project_number })
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "seed_project_number" {
   description = "Seed project number."
   value       = module.seed_project.project_number
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "seed_project_id" {
   description = "Seed project id."
   value       = module.seed_project.project_id
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "ncc_group" {
@@ -47,22 +51,26 @@ output "ncc_hub_uri" {
 output "seed_folder_id" {
   description = "Seed folder id."
   value       = module.folder_seed.id
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "sa_email" {
   description = "All service accounts email created for examples, including in seed project."
   value       = { for i, v in google_service_account.int_test : (i) => v.email }
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "sa_id" {
   description = "All service accounts id created for examples, including in seed project."
   value       = { for i, v in google_service_account.int_test : (i) => v.id }
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "sa_key" {
   description = "The seed private key."
   value       = google_service_account_key.int_test["seed"].private_key
   sensitive   = true
+  depends_on  = [time_sleep.wait_iam_propagation]
 }
 
 output "cloud_build_sa" {

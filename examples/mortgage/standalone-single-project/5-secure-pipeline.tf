@@ -82,6 +82,16 @@ resource "google_project_iam_member" "assign_permissions_service_agent" {
   member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
+resource "time_sleep" "wait_propagation" {
+  create_duration = "60s"
+
+  depends_on = [
+    google_project_iam_member.assign_permissions,
+    google_project_iam_member.assign_network_permissions,
+    google_project_iam_member.assign_permissions_service_agent,
+  ]
+}
+
 resource "google_project_iam_member" "cloudbuild_builder" {
   for_each = module.cicd
   project  = module.standalone_harness.workerpool_network_project_id
@@ -151,6 +161,7 @@ module "cicd" {
     google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment,
     google_cloud_run_v2_service.mcp,
     module.standalone_harness,
+    time_sleep.wait_propagation,
   ]
 }
 

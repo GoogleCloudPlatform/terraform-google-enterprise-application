@@ -35,3 +35,13 @@ resource "google_project_iam_member" "int_test_iam" {
   role    = "roles/resourcemanager.projectIamAdmin"
   member  = "serviceAccount:${var.sa_email}"
 }
+
+resource "time_sleep" "wait_iam_propagation" {
+  create_duration = "30s"
+
+  depends_on = [
+    google_project_iam_member.int_test_connection_admin,
+    google_project_iam_member.int_test_vpc,
+    google_project_iam_member.int_test_iam,
+  ]
+}

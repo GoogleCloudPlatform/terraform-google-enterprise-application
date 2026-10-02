@@ -86,7 +86,7 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
 		tft.WithVars(vars),
 		tft.WithTFDir("../../../examples/llm-model/standalone-single-project"),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 6, testutils.RetryInterval()),
 	)
 
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes
@@ -205,7 +205,11 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 		pollMeshProvisioning := func(cmd string) func() (bool, error) {
 			return func() (bool, error) {
 				retry := false
-				result := gcloud.Runf(t, cmd)
+				result, err := testutils.RunGcloudJSONE(t, "%s", cmd)
+				if err != nil {
+					t.Logf("Mesh describe failed (%v), will retry", err)
+					return true, nil
+				}
 				if len(result.Array()) < 1 {
 					return true, nil
 				}
@@ -231,7 +235,12 @@ func TestStandaloneSingleProjectLLMModel(t *testing.T) {
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {
 		// removes firewall rules created by the service but not being deleted.
-		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"csm\"", projectID).Array()
+		firewallRules := gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"mcsd\"", projectID).Array()
+		for i := range firewallRules {
+			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
+		}
+
+		firewallRules = gcloud.Runf(t, "compute firewall-rules list  --project %s --filter=\"csm\"", projectID).Array()
 		for i := range firewallRules {
 			gcloud.Runf(t, "compute firewall-rules delete %s --project %s -q", firewallRules[i].Get("name"), projectID)
 		}

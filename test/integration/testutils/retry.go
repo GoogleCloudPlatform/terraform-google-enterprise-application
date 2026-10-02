@@ -14,7 +14,11 @@
 
 package testutils
 
-import "regexp"
+import (
+	"math/rand/v2"
+	"regexp"
+	"time"
+)
 
 var (
 	RetryableTransientErrors = map[string]string{
@@ -27,8 +31,38 @@ var (
 		// {} API has not been used in project {} before or it is disabled.
 		".*API has not been used in project.*": "API not enabled on time",
 
+		// General API enablement propagation
+		".*Error 403.*has not been used in project.*before or it is disabled.*": "API enablement propagation.",
+		".*Error 403.*Access Not Configured.*":                                  "API access configuration propagation.",
+
+		// IAM / Permission propagation errors
+		".*Error 403.*Permission.*denied.*":                                  "IAM permission denied / propagation.",
+		".*Error 403.*The caller does not have permission.*":                 "IAM permission propagation.",
+		".*Error 403.*caller does not have required permission.*":            "IAM permission propagation.",
+		".*Error 403.*does not have.*permission.*":                           "IAM permission propagation.",
+		".*Error 403.*is not authorized to perform this operation.*":         "IAM permission propagation.",
+		".*Error code 7, message: Permission denied.*":                       "IAM permission denied.",
+		".*Error code 7, message: The caller does not have permission.*":     "IAM permission propagation.",
+		".*Permission iam.serviceAccounts.actAs denied on service account.*": "IAM actAs permission propagation.",
+		".*Permission 'resourcemanager.projects.get' denied on resource.*":   "Project IAM permission propagation.",
+		".*Error 403.*roles/iam.serviceAccountTokenCreator.*":                 "IAM service account token creator propagation.",
+		".*Error 403.*roles/iam.serviceAccountUser.*":                         "IAM service account user propagation.",
+		".*does not have storage.objects.*":                                  "Storage IAM permission propagation.",
+		".*Permission 'cloudkms.cryptoKey.*":                                 "Cloud KMS IAM permission propagation.",
+		".*Permission 'artifactregistry.repositories.*":                      "Artifact Registry IAM permission propagation.",
+
+		// Rate limit / Quota / Internal server errors
+		".*rateLimitExceeded.*":               "Rate limit exceeded.",
+		".*Quota exceeded for quota metric.*": "Quota exceeded.",
+		".*Error 429.*":                       "Too Many Requests / Rate limit.",
+		".*Error 500.*":                       "Internal server error.",
+		".*Error 503.*":                       "Service unavailable.",
+		".*connection reset by peer.*":        "Connection reset.",
+		".*TLS handshake timeout.*":           "TLS handshake timeout.",
+		".*i/o timeout.*":                     "I/O timeout.",
+
 		// google_gke_hub_feature - Error: Error waiting to create Feature: Error waiting for Creating Feature: Error code 13, message: an internal error has occurred
-		".*Error waiting for Creating Feature: Error code 13, message: an internal error has occurred*.": "Error creating feature",
+		".*Error waiting for Creating Feature: Error code 13, message: an internal error has occurred.*": "Error creating feature",
 
 		".*Error waiting for Creating Connection: Error code 9, message: Failed to verify authorizer_credential.*": "servicedirectory.networks.access propagation time",
 
@@ -64,7 +98,7 @@ var (
 
 		".*Error waiting for Disabling Shared VPC Resource: The resource.*.is still linked to shared VPC host.*": "Destroy resources usage propagation issues",
 
-		".*Error 400.*Invalid value for field.*resource.networkInterfaces[0].subnetwork.*:.*projects/.*/regions/.*/subnetworks/.*. The referenced subnetwork resource cannot be found.*": "Network propagation",
+		".*Error 400.*Invalid value for field.*resource.networkInterfaces\\[0\\]\\.subnetwork.*:.*projects/.*/regions/.*/subnetworks/.*. The referenced subnetwork resource cannot be found.*": "Network propagation",
 
 		".*Error: Error creating FeatureMembership: Resource already exists - apply blocked by lifecycle params.*": "Duplicated membership request",
 
@@ -75,17 +109,32 @@ var (
 		".*Error waiting for deleting GKE cluster.*": "Error waiting for deleting GKE cluster: Calling fleet operation service DeleteMembership, please ensure fleet service account has access to the project.",
 
 		".*Could not connect to server.*": "Network error.",
+
+		// Real-world transient error patterns
+		".*Error 404.*[Ss]ervice perimeter.*not found.*":     "VPC-SC service perimeter propagation.",
+		".*Error 409.*Too many conflicts.*":                  "Concurrent IAM policy modification conflicts.",
+		".*CONSUMER_INVALID.*":                               "Shared VPC consumer project propagation.",
+		".*Error waiting for Enabling Shared VPC Resource.*": "Shared VPC enablement propagation.",
+		".*Error deleting default network in project.*":      "Default network deletion race during project creation.",
 	}
 
 	RetryableDeploymentErrors = map[string]string{
 		".*context deadline exceeded.*": "Timeout connection.",
 		".*502.*":                       "Bad Gateway",
-		".*Waiting for deployments to stabilize.*":      "Waiting for deployments to stabilize.",
-		".*Insufficient memory.*":                       "Waiting cluster to scale up - memory.",
-		".*Insufficient CPU.*":                          "Waiting cluster to scale up - CPU.",
-		".*didn't match Pod's node affinity/selector.*": "Waiting cluster to scale up - machine/GPU type.",
-		".*FailedScaleUp.*":                             "Waiting cluster to scale up - Resources availability.",
-		".*Error from server \\(AlreadyExists\\).*":     "Resource already exists, waiting stabilize.",
+		".*Waiting for deployments to stabilize.*":                            "Waiting for deployments to stabilize.",
+		".*Insufficient memory.*":                                             "Waiting cluster to scale up - memory.",
+		".*Insufficient CPU.*":                                                "Waiting cluster to scale up - CPU.",
+		".*didn't match Pod's node affinity/selector.*":                       "Waiting cluster to scale up - machine/GPU type.",
+		".*FailedScaleUp.*":                                                   "Waiting cluster to scale up - Resources availability.",
+		".*Error from server \\(AlreadyExists\\).*":                           "Resource already exists, waiting stabilize.",
+		".*Client\\.Timeout exceeded while awaiting headers.*":                "Client timeout awaiting headers.",
+		".*connection refused.*":                                              "Connection refused, waiting stabilize.",
+		".*connection reset by peer.*":                                        "Connection reset by peer.",
+		".*broken pipe.*":                                                     "Broken pipe.",
+		".*TLS handshake timeout.*":                                           "TLS handshake timeout.",
+		".*i/o timeout.*":                                                     "I/O timeout.",
+		".*the server is currently unable to handle the request.*":            "Server currently unable to handle request.",
+		".*the server was unable to return a response in the time allotted.*": "Server timeout.",
 	}
 )
 
@@ -109,4 +158,10 @@ func IsDeploymentRetryableError(errMessage string) (bool, string) {
 	}
 
 	return false, ""
+}
+
+// RetryInterval returns a duration with random jitter between 90s and 150s
+// to prevent concurrent Terraform executions from retrying in lockstep.
+func RetryInterval() time.Duration {
+	return 90*time.Second + time.Duration(rand.IntN(61))*time.Second
 }
