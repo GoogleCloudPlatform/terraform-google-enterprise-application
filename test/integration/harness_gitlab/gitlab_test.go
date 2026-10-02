@@ -16,7 +16,6 @@ package harness_gitlab
 
 import (
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
@@ -42,9 +41,8 @@ func TestGitLab(t *testing.T) {
 
 	gitLab := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(gitLabPath),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 5, testutils.RetryInterval()),
 		tft.WithVars(vars),
-		tft.WithParallelism(100),
 	)
 	gitLab.Test()
 

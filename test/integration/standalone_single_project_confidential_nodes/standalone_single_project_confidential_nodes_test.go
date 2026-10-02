@@ -74,8 +74,7 @@ func TestStandaloneSingleProjectConfidentialNodesExample(t *testing.T) {
 	standaloneSingleProjT := tft.NewTFBlueprintTest(t,
 		tft.WithVars(vars),
 		tft.WithTFDir("../../../examples/standalone_single_project_confidential_nodes"),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-		tft.WithParallelism(100),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 6, testutils.RetryInterval()),
 	)
 
 	// define and write a custom verifier for this test case call the default verify for confirming no additional changes
@@ -203,7 +202,11 @@ func TestStandaloneSingleProjectConfidentialNodesExample(t *testing.T) {
 		pollMeshProvisioning := func(cmd string) func() (bool, error) {
 			return func() (bool, error) {
 				retry := false
-				result := gcloud.Runf(t, cmd)
+				result, err := testutils.RunGcloudJSONE(t, "%s", cmd)
+				if err != nil {
+					t.Logf("Mesh describe failed (%v), will retry", err)
+					return true, nil
+				}
 				if len(result.Array()) < 1 {
 					return true, nil
 				}

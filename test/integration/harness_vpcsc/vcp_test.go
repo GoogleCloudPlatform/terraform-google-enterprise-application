@@ -19,7 +19,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
@@ -79,8 +78,7 @@ func TestVPCSC(t *testing.T) {
 	vpcsc := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(vpcPath),
 		tft.WithVars(vars),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-		tft.WithParallelism(100),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 5, testutils.RetryInterval()),
 	)
 	vpcsc.Test()
 
