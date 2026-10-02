@@ -86,7 +86,11 @@ func TestCymbalShopE2E(t *testing.T) {
 			if err != nil {
 				return "", err
 			}
-			defer resp.Body.Close()
+			defer func() {
+				if err := resp.Body.Close(); err != nil {
+					t.Logf("Error closing response body: %v", err)
+				}
+			}()
 			if resp.StatusCode != http.StatusOK {
 				fmt.Println(resp)
 				return fmt.Sprint(resp.StatusCode), fmt.Errorf("unexpected status code: %d", resp.StatusCode)
