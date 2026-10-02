@@ -8,6 +8,19 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.8.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.7.0...v0.8.0) (2026-10-02)
+
+
+### Features
+
+* add cymbal-shop standalone single-project example and test harness ([#783](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/783)) ([bb63280](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/bb632804aeef9a463a4f639d88c048ea753b7bc5))
+* migrate cymbal-bank standalone single-project example and modernize test harness ([#775](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/775)) ([4254147](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/42541470ce5d4a6b0b1d2eabf2f5dccfc7d2d54d))
+
+
+### Bug Fixes
+
+* enables default verify ([#780](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/780)) ([3c34242](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/3c342421dfe44c360da1d67ef059eb10d3108744))
+
 ## [0.7.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.6.0...v0.7.0) (2026-09-25)
 
 
