@@ -298,6 +298,7 @@ steps:
       ["/bin/bash", "-c", "cft test run TestStandaloneSingleProjectMortgage --stage teardown --verbose"]
     waitFor:
       - ssp-mortgage-verify
+      - deploy-mortgage
     allowFailure: true
 
   - id: ssp-cymbal-bank-init
@@ -352,7 +353,7 @@ steps:
     waitFor:
       - e2e-cymbal-bank-verify
     allowFailure: true
-  
+
   - id: ssp-cymbal-shop-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
