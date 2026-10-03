@@ -44,7 +44,7 @@ func TestSingleProjectSourceMortgage(t *testing.T) {
 	gitlabSecretProject := gitLab.GetStringOutput("gitlab_secret_project")
 
 	appName := "mortgage"
-	serviceName := "agent"
+	serviceName := "mortgage-agent"
 	token, err := testutils.GetSecretFromSecretManager(t, gitlabPersonalTokenSecretName, gitlabSecretProject)
 	if err != nil {
 		t.Fatal(err)

@@ -64,7 +64,7 @@ output "cluster_membership_ids" {
 
 output "gke_agent_sa_email" {
   description = "GSA for mortgage-agent."
-  value       = google_service_account.gsa_mortgage_agent.member
+  value       = google_service_account.gsa_mortgage_agent.email
 }
 
 output "app_ip_addresses" {

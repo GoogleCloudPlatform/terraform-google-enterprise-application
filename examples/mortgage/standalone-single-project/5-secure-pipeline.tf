@@ -25,8 +25,7 @@ locals {
     null
   )
 
-  // review
-  team_name    = "default"
+  team_name    = "mortgage"
   service_name = "mortgage-agent"
 
   target_deploy_parameters = { (local.env) : {
