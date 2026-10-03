@@ -120,6 +120,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"eab-default-example-hello-world",
 		"eab-agent-capital-agent",
 		"eab-llm-model-llamma-model",
+		"eab-mortgage-mortgage-agent",
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
