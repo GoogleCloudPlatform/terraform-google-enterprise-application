@@ -42,11 +42,41 @@ gcloud components list --filter="id=beta OR id=terraform-tools"
     ```
 
 3. Update `global.tfvars` with the specific values for your Google Cloud environment:
+
+   **Helper Tool Configuration:**
    - `eab_code_path`: The full path to your local `terraform-google-enterprise-application` repository.
-   - `code_checkout_path`: The full path to your working `deploy-directory`.
-   - `project_id`: Your Google Cloud project ID.
-   - `region`: Google Cloud region for deployment.
-   - `ncc_config` (optional): Configuration block for connecting the cluster network to a Network Connectivity Center (NCC) Hub.
+   - `code_checkout_path`: The full path to your working `deploy-directory` where repositories will be checked out and initialized.
+
+   **Core GCP & Networking Configuration:**
+   - `project_id`: Your Google Cloud project ID in which to deploy all infrastructure, cluster, and CI/CD resources.
+   - `region`: Google Cloud region for deployments (e.g., `us-central1`).
+   - `workerpool_id`: Cloud Build Private Worker Pool ID (`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`).
+   - `network_id` *(optional)*: Existing VPC Network ID or self-link for private worker pool peering. If omitted, a new network is created.
+   - `subnetwork_self_link` *(optional)*: Existing Subnetwork self-link.
+   - `create_nat` *(optional, bool)*: Enables Cloud NAT creation for Private Worker Pool network (defaults to `true`).
+   - `enables_network_connection_and_peering_routes` *(optional, bool)*: Enables network connection and peering routes (defaults to `true`).
+   - `logging_bucket` *(optional)*: Cloud Storage bucket name for Cloud Build and deployment logs.
+   - `bucket_kms_key` *(optional)*: Customer-managed KMS Key ID to encrypt the logging bucket.
+   - `ncc_config` *(optional)*: Configuration block for connecting the cluster network to a Network Connectivity Center (NCC) Hub.
+
+   **Security & Binary Authorization:**
+   - `attestation_kms_key`: The KMS Key ID to be used for Binary Authorization attestor signatures.
+   - `service_perimeter_name` *(optional)*: VPC Service Controls (VPC-SC) service perimeter name.
+   - `service_perimeter_mode` *(optional)*: VPC-SC perimeter mode (`ENFORCE` or `DRY_RUN`, defaults to `ENFORCE`).
+   - `access_level_name` *(optional)*: Access Level name for identities operating inside an enforced VPC-SC perimeter.
+   - `binary_authorization_image` *(optional)*: Container image URI for Binary Authorization attestor image builder.
+   - `binary_authorization_repository_id` *(optional)*: Artifact Registry repository ID for attestor builder container images.
+
+   **Teams & CI/CD Repository Configuration:**
+   - `teams`: Map of namespace keys to team group email addresses (e.g., `{"cb-frontend" = "frontend-team@example.com", ...}`).
+   - `cloudbuildv2_repository_config`: Configuration block for integrating service repositories with Cloud Build v2:
+     - `repo_type`: Supported types are `CSR` (Cloud Source Repositories), `GITHUBv2`, or `GITLABv2`.
+     - `repositories`: Map of service keys to repository definitions (`repository_name` and `repository_url`).
+     - Credential secret IDs for GitHub App / GitLab personal access tokens and authorizer credentials.
+
+   **Upstream Application Source (Optional Overrides):**
+   - `app_source_repo_url` *(optional)*: Upstream repository URL to clone application source code from. If omitted, the default defined in the example's `variables.tf` is used (e.g., `https://github.com/GoogleCloudPlatform/bank-of-anthos.git` for Cymbal Bank or `https://github.com/GoogleCloudPlatform/microservices-demo.git` for Cymbal Shop).
+   - `app_version` *(optional)*: Upstream release tag or branch to clone and deploy. If omitted, the default defined in the example's `variables.tf` is used (e.g., `"v0.6.9"` for Cymbal Bank or `"v0.10.5"` for Cymbal Shop).
 
 #### Network Connectivity Center (NCC) Configuration
 
@@ -73,6 +103,7 @@ ncc_config = {
 * `spoke_labels`: (map, optional) Key-value pairs for spoke labels.
 * `spoke_exclude_export_ranges`: (list of strings, optional) IP CIDR ranges to exclude from route export.
 * `spoke_include_export_ranges`: (list of strings, optional) IP CIDR ranges to explicitly export.
+
 
 ### Application default credentials
 
