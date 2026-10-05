@@ -247,3 +247,15 @@ variable "ncc_config" {
     error_message = "Invalid NCC configuration. If enable_ncc is TRUE: hub_uri is required."
   }
 }
+
+variable "app_source_repo_url" {
+  description = "Upstream Bank of Anthos repository URL to clone source code from"
+  type        = string
+  default     = "https://github.com/GoogleCloudPlatform/bank-of-anthos.git"
+}
+
+variable "app_version" {
+  description = "Upstream Bank of Anthos release tag or branch to clone and deploy"
+  type        = string
+  default     = "v0.6.9"
+}
