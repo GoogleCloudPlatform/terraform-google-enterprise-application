@@ -84,7 +84,7 @@ The application is a web-based e-commerce app where users can browse items, add 
 
 In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
 
-For more information about the Cymbal Shop application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1). For a standalone single-project sandbox environment, see [`examples/cymbal-shop/standalone-single-project`](/examples/cymbal-shop/standalone-single-project/).
+For more information about the Cymbal Shop application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.5). For a standalone single-project sandbox environment, see [`examples/cymbal-shop/standalone-single-project`](/examples/cymbal-shop/standalone-single-project/).
 
 ### [Multitenant Applications Example](./examples/multitenant-applications)
 
