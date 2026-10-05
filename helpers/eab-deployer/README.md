@@ -121,6 +121,18 @@ Use the `-example` flag to choose another example:
     $HOME/go/bin/eab-deployer -tfvars_file /path/to/global.tfvars -example default-example
     ```
 
+- **Cymbal Bank example:**
+
+    ```bash
+    $HOME/go/bin/eab-deployer -tfvars_file /path/to/global.tfvars -example cymbal-bank
+    ```
+
+- **Cymbal Shop example:**
+
+    ```bash
+    $HOME/go/bin/eab-deployer -tfvars_file /path/to/global.tfvars -example cymbal-shop
+    ```
+
 - **Agent example:**
 
     ```bash
@@ -131,12 +143,6 @@ Use the `-example` flag to choose another example:
 
     ```bash
     $HOME/go/bin/eab-deployer -tfvars_file /path/to/global.tfvars -example llm-model
-    ```
-
-- **Standalone Single Project (top-level):**
-
-    ```bash
-    $HOME/go/bin/eab-deployer -tfvars_file /path/to/global.tfvars -example standalone_single_project
     ```
 
 - **Destroy the deployment:**
