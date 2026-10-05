@@ -56,6 +56,8 @@ type GlobalTFVars struct {
 	NCCConfig                       *NCCConfig                    `hcl:"ncc_config"`
 	Teams                           map[string]string             `hcl:"teams"`
 	CloudbuildV2RepositoryConfig    *CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
+	AppSourceRepoURL                *string                       `hcl:"app_source_repo_url"`
+	AppVersion                      *string                       `hcl:"app_version"`
 	EABCodePath                     string                        `hcl:"eab_code_path"`
 	CodeCheckoutPath                string                        `hcl:"code_checkout_path"`
 }
@@ -94,6 +96,8 @@ type AppInfraOutputs struct {
 	ServiceRepositoryName      map[string]string   `hcl:"service_repository_name"`
 	ServiceRepositoryProjectID map[string]string   `hcl:"service_repository_project_id"`
 	CloudDeployTargetsNames    map[string][]string `hcl:"clouddeploy_targets_names"`
+	AppSourceRepoURL           string              `hcl:"app_source_repo_url"`
+	AppVersion                 string              `hcl:"app_version"`
 }
 
 func GetAppInfraStepOutputs(t testing.TB, standalonePath string) AppInfraOutputs {
@@ -119,10 +123,22 @@ func GetAppInfraStepOutputs(t testing.TB, standalonePath string) AppInfraOutputs
 		_ = json.Unmarshal([]byte(outJSON), &deployTargets)
 	}
 
+	appSourceRepoURL := ""
+	if out, err := terraform.OutputE(t, options, "app_source_repo_url"); err == nil {
+		appSourceRepoURL = out
+	}
+
+	appVersion := ""
+	if out, err := terraform.OutputE(t, options, "app_version"); err == nil {
+		appVersion = out
+	}
+
 	return AppInfraOutputs{
 		ServiceRepositoryName:      repoNames,
 		ServiceRepositoryProjectID: repoProjects,
 		CloudDeployTargetsNames:    deployTargets,
+		AppSourceRepoURL:           appSourceRepoURL,
+		AppVersion:                 appVersion,
 	}
 }
 
