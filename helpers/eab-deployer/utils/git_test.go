@@ -150,3 +150,23 @@ func TestGitClone_NonCSR(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, hasUpstream, "branch 'unit-test' should have a remote")
 }
+
+func TestCloneUpstreamRepo(t *testing.T) {
+	repo := createLocalRepo(t, "upstream-repo")
+	cmdTag := exec.Command("git", "tag", "v1.0.0")
+	cmdTag.Dir = repo
+	err := cmdTag.Run()
+	assert.NoError(t, err)
+
+	destDir := filepath.Join(t.TempDir(), "cloned-upstream")
+
+	// Test cloning tag
+	err = CloneUpstreamRepo(t, repo, "v1.0.0", destDir, logger.Discard)
+	assert.NoError(t, err)
+	assert.DirExists(t, destDir)
+	assert.FileExists(t, filepath.Join(destDir, "README.md"))
+
+	// Test idempotency / cache reuse (calling again on existing directory)
+	err = CloneUpstreamRepo(t, repo, "v1.0.0", destDir, logger.Discard)
+	assert.NoError(t, err)
+}

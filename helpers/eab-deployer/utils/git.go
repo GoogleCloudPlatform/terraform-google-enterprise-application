@@ -75,6 +75,24 @@ func cloneGit(t testing.TB, repositoryUrl, path string, logger *logger.Logger) G
 	}
 }
 
+// CloneUpstreamRepo clones an upstream repository using a shallow clone at the given tag or branch.
+// If the destination directory already exists, it reuses the existing clone.
+func CloneUpstreamRepo(t testing.TB, repoURL, tagOrBranch, destDir string, logger *logger.Logger) error {
+	if _, err := os.Stat(destDir); err == nil {
+		return nil
+	}
+
+	cmd := exec.Command("git", "clone", "--depth", "1", "--branch", tagOrBranch, repoURL, destDir)
+	if logger != nil {
+		fmt.Printf("Cloning upstream repository %s (tag/branch: %s) into %s\n", repoURL, tagOrBranch, destDir)
+	}
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to clone upstream repository %s (%s): %w, output: %s", repoURL, tagOrBranch, err, string(output))
+	}
+	return nil
+}
+
 // GetCurrentBranch gets the current branch in the repository.
 func (g GitRepo) GetCurrentBranch() (string, error) {
 	return g.conf.RunCmdE("branch", "-q", "--show-current")
