@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/gcp"
@@ -35,9 +36,12 @@ const (
 )
 
 func getStandalonePaths(EABPath, checkoutPath, exampleName string) (string, string, error) {
+	normExample := strings.ReplaceAll(exampleName, "_", "-")
 	candidates := []string{
 		filepath.Join("examples", exampleName, "standalone-single-project"),
+		filepath.Join("examples", normExample, "standalone-single-project"),
 		filepath.Join("examples", exampleName),
+		filepath.Join("examples", normExample),
 	}
 
 	for _, relPath := range candidates {
@@ -100,21 +104,6 @@ func DeployInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Common
 	return err
 }
 
-func getAppSourcePath(c CommonConf, exampleName, serviceName string) string {
-	pathsToCheck := []string{
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource", exampleName, serviceName),
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource", serviceName),
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource", exampleName),
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource"),
-	}
-	for _, p := range pathsToCheck {
-		if fi, err := os.Stat(p); err == nil && fi.IsDir() {
-			return p
-		}
-	}
-	return ""
-}
-
 func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 	if tfvars.CloudbuildV2RepositoryConfig == nil {
 		return fmt.Errorf("cloudbuildv2_repository_config is required for DeployAppSourceStage")
@@ -125,6 +114,7 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		return err
 	}
 	outputs := GetAppInfraStepOutputs(t, standaloneDestPath)
+	preparer := GetAppSourcePreparer(c.ExampleName)
 
 	for serviceKey, repository := range tfvars.CloudbuildV2RepositoryConfig.Repositories {
 		err = s.RunStep(fmt.Sprintf("gcp-appsource.%s", serviceKey), func() error {
@@ -150,13 +140,8 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 				return err
 			}
 
-			// Copy App Source code to target repo
-			appSrcDir := getAppSourcePath(c, c.ExampleName, serviceKey)
-			if appSrcDir == "" {
-				return fmt.Errorf("could not find app source path for example %s, service %s", c.ExampleName, serviceKey)
-			}
-
-			err = utils.CopyDirectory(appSrcDir, gitPath)
+			// Prepare and copy App Source code to target repo using the resolved strategy
+			err = preparer.Prepare(t, c, outputs.AppSourceRepoURL, outputs.AppVersion, serviceKey, gitPath)
 			if err != nil {
 				return err
 			}
