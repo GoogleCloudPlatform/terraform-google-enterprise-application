@@ -21,7 +21,7 @@ output "harness_project_ids" {
 
 output "harness_project_numbers" {
   description = "A list of the projects numbers created including seed."
-  value       = merge({ for i, v in module.harness_project : (i) => v.project_number }, { "seed" : module.seed_project.project_number })
+  value       = local.project_numbers
 }
 
 output "seed_project_number" {

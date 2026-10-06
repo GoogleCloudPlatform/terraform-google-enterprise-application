@@ -152,3 +152,14 @@ variable "ncc_config" {
     error_message = "Invalid NCC configuration. If enable_ncc is TRUE: hub_uri is required."
   }
 }
+
+variable "service_account_id" {
+  description = "The service account ID to be used to build the image."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.service_account_id != ""
+    error_message = "service_account_id cannot be empty, only null or a valid value."
+  }
+}

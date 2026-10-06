@@ -99,6 +99,7 @@ module "binary_autz" {
   workerpool_id               = local.workerpool_id
   attestation_repository_name = var.attestation_repository_name
   bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
+  service_account_id          = var.service_account_id
 
   module_dependencies = concat([for s in google_project_service.required_services : s.id],
   var.build_image_module_dependencies)
