@@ -32,6 +32,7 @@ The following resources are created:
 | enable\_multicluster\_discovery | Enables Multicluster discovery. | `bool` | `true` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | fleet\_project\_id | The fleet project ID | `string` | n/a | yes |
+| manage\_binary\_authz\_policy | Whether to manage the Binary Authorization policy resource in fleetscope. Defaults to false when Binary Authorization policy is managed by secure-cicd. | `bool` | `false` | no |
 | namespace\_ids | The fleet namespace IDs with team | `map(string)` | n/a | yes |
 | network\_project\_id | The network project ID | `string` | n/a | yes |
 
