@@ -27,6 +27,8 @@ locals {
   }
 
   teams = distinct(flatten([for i in var.examples_tested : lookup(local.examples_namespaces, i, [])]))
+
+  project_numbers = merge({ for i, v in module.harness_project : (i) => v.project_number }, { "seed" : module.seed_project.project_number })
 }
 
 resource "random_string" "prefix" {

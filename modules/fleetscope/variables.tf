@@ -129,3 +129,9 @@ variable "enable_multicluster_discovery" {
   description = "Enables Multicluster discovery."
   default     = true
 }
+
+variable "manage_binary_authz_policy" {
+  type        = bool
+  description = "Whether to manage the Binary Authorization policy resource in fleetscope. Defaults to false when Binary Authorization policy is managed by secure-cicd."
+  default     = false
+}
