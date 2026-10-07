@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/utils"
 	"github.com/mitchellh/go-testing-interface"
@@ -34,9 +35,9 @@ func GetAppSourcePreparer(exampleName string) AppSourcePreparer {
 	normExample := strings.ReplaceAll(exampleName, "_", "-")
 	switch normExample {
 	case "cymbal-shop":
-		return &CymbalShopPreparer{}
+		return NewCymbalShopPreparer()
 	case "cymbal-bank":
-		return &CymbalBankPreparer{}
+		return NewCymbalBankPreparer()
 	default:
 		return &SelfContainedPreparer{ExampleName: exampleName}
 	}
@@ -47,7 +48,7 @@ type SelfContainedPreparer struct {
 	ExampleName string
 }
 
-func (p *SelfContainedPreparer) Prepare(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, serviceKey, targetGitPath string) error {
+func (p *SelfContainedPreparer) Prepare(t testing.TB, c CommonConf, _, _, serviceKey, targetGitPath string) error {
 	appSrcDir := getAppSourcePath(c, p.ExampleName, serviceKey)
 	if appSrcDir == "" {
 		return fmt.Errorf("could not find app source path for example %s, service %s", p.ExampleName, serviceKey)
@@ -71,24 +72,33 @@ func getAppSourcePath(c CommonConf, exampleName, serviceName string) string {
 }
 
 // CymbalShopPreparer handles cloning microservices-demo and applying local 6-appsource overlays.
-type CymbalShopPreparer struct{}
+type CymbalShopPreparer struct {
+	mu sync.Mutex
+}
 
-func (p *CymbalShopPreparer) Prepare(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, serviceKey, targetGitPath string) error {
+func NewCymbalShopPreparer() *CymbalShopPreparer {
+	return &CymbalShopPreparer{}
+}
+
+func (p *CymbalShopPreparer) Prepare(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, _, targetGitPath string) error {
 	if appSourceRepoURL == "" {
 		return fmt.Errorf("app_source_repo_url is required for cymbal-shop")
 	}
 	if appVersion == "" {
 		return fmt.Errorf("app_version is required for cymbal-shop")
 	}
+
 	cacheDir := filepath.Join(c.CheckoutPath, ".cache", fmt.Sprintf("microservices-demo-%s", appVersion))
+
+	p.mu.Lock()
 	err := utils.CloneUpstreamRepo(t, appSourceRepoURL, appVersion, cacheDir, c.Logger)
+	p.mu.Unlock()
 	if err != nil {
 		return err
 	}
 
 	// Copy upstream microservices-demo base code to target repository
-	err = utils.CopyDirectory(cacheDir, targetGitPath)
-	if err != nil {
+	if err := utils.CopyDirectory(cacheDir, targetGitPath); err != nil {
 		return err
 	}
 
@@ -101,38 +111,54 @@ func (p *CymbalShopPreparer) Prepare(t testing.TB, c CommonConf, appSourceRepoUR
 	return utils.CopyDirectory(appSourceDir, targetGitPath)
 }
 
-// CymbalBankPreparer handles cloning bank-of-anthos, patching shared master overlays, and populating service repos.
-type CymbalBankPreparer struct{}
+// OverlayMapping defines a source-to-destination file or directory overlay rule.
+type OverlayMapping struct {
+	SourceRelPath string
+	TargetRelPath string
+	IsDirectory   bool
+}
 
-func (p *CymbalBankPreparer) Prepare(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, serviceKey, targetGitPath string) error {
+// CymbalBankPreparer handles cloning bank-of-anthos, patching shared master overlays, and populating service repos.
+type CymbalBankPreparer struct {
+	mu sync.Mutex
+}
+
+func NewCymbalBankPreparer() *CymbalBankPreparer {
+	return &CymbalBankPreparer{}
+}
+
+func (p *CymbalBankPreparer) Prepare(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, _, targetGitPath string) error {
 	if appSourceRepoURL == "" {
 		return fmt.Errorf("app_source_repo_url is required for cymbal-bank")
 	}
 	if appVersion == "" {
 		return fmt.Errorf("app_version is required for cymbal-bank")
 	}
+
 	patchedMasterDir := filepath.Join(c.CheckoutPath, ".cache", fmt.Sprintf("bank-of-anthos-patched-%s", appVersion))
-	err := prepareCymbalBankMasterTree(t, c, appSourceRepoURL, appVersion, patchedMasterDir)
+
+	p.mu.Lock()
+	err := p.ensurePatchedMasterTree(t, c, appSourceRepoURL, appVersion, patchedMasterDir)
+	p.mu.Unlock()
 	if err != nil {
 		return err
 	}
+
 	return utils.CopyDirectory(patchedMasterDir, targetGitPath)
 }
 
-func prepareCymbalBankMasterTree(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, patchedMasterDir string) error {
+func (p *CymbalBankPreparer) ensurePatchedMasterTree(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, patchedMasterDir string) error {
 	if _, err := os.Stat(patchedMasterDir); err == nil {
 		return nil
 	}
 
 	cacheDir := filepath.Join(c.CheckoutPath, ".cache", fmt.Sprintf("bank-of-anthos-%s", appVersion))
-	err := utils.CloneUpstreamRepo(t, appSourceRepoURL, appVersion, cacheDir, c.Logger)
-	if err != nil {
+	if err := utils.CloneUpstreamRepo(t, appSourceRepoURL, appVersion, cacheDir, c.Logger); err != nil {
 		return err
 	}
 
 	// Copy base upstream repository to patched master cache
-	err = utils.CopyDirectory(cacheDir, patchedMasterDir)
-	if err != nil {
+	if err := utils.CopyDirectory(cacheDir, patchedMasterDir); err != nil {
 		return err
 	}
 
@@ -141,7 +167,7 @@ func prepareCymbalBankMasterTree(t testing.TB, c CommonConf, appSourceRepoURL, a
 		return fmt.Errorf("cymbal-bank 6-appsource directory not found at %s", appSourceBase)
 	}
 
-	// 1. Clean default components and copy custom components
+	// 1. Clean default components and replace with enterprise blueprint components
 	_ = os.RemoveAll(filepath.Join(patchedMasterDir, "src", "components"))
 	componentsSrc := filepath.Join(appSourceBase, "components")
 	if _, err := os.Stat(componentsSrc); err == nil {
@@ -150,76 +176,64 @@ func prepareCymbalBankMasterTree(t testing.TB, c CommonConf, appSourceRepoURL, a
 		}
 	}
 
-	// 2. Database overlays
-	ledgerDbSrc := filepath.Join(appSourceBase, "ledger-db", "k8s", "overlays")
-	if _, err := os.Stat(ledgerDbSrc); err == nil {
-		if err := utils.CopyDirectory(ledgerDbSrc, filepath.Join(patchedMasterDir, "src", "ledger", "ledger-db", "k8s", "overlays")); err != nil {
-			return err
+	// 2. Declarative overlays for databases, services, cloud build configs, and test harnesses
+	declarativeOverlays := []OverlayMapping{
+		// Database overlays
+		{SourceRelPath: filepath.Join("ledger-db", "k8s", "overlays"), TargetRelPath: filepath.Join("src", "ledger", "ledger-db", "k8s", "overlays"), IsDirectory: true},
+		{SourceRelPath: filepath.Join("accounts-db", "k8s", "overlays"), TargetRelPath: filepath.Join("src", "accounts", "accounts-db", "k8s", "overlays"), IsDirectory: true},
+
+		// Service Skaffold and K8s overlays
+		{SourceRelPath: filepath.Join("frontend", "skaffold.yaml"), TargetRelPath: filepath.Join("src", "frontend", "skaffold.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("frontend", "k8s"), TargetRelPath: filepath.Join("src", "frontend", "k8s"), IsDirectory: true},
+
+		{SourceRelPath: filepath.Join("accounts-contacts", "skaffold.yaml"), TargetRelPath: filepath.Join("src", "accounts", "contacts", "skaffold.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("accounts-contacts", "k8s"), TargetRelPath: filepath.Join("src", "accounts", "contacts", "k8s"), IsDirectory: true},
+
+		{SourceRelPath: filepath.Join("accounts-userservice", "skaffold.yaml"), TargetRelPath: filepath.Join("src", "accounts", "userservice", "skaffold.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("accounts-userservice", "k8s"), TargetRelPath: filepath.Join("src", "accounts", "userservice", "k8s"), IsDirectory: true},
+
+		{SourceRelPath: filepath.Join("ledger-balancereader", "skaffold.yaml"), TargetRelPath: filepath.Join("src", "ledger", "balancereader", "skaffold.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("ledger-balancereader", "k8s"), TargetRelPath: filepath.Join("src", "ledger", "balancereader", "k8s"), IsDirectory: true},
+
+		{SourceRelPath: filepath.Join("ledger-ledgerwriter", "skaffold.yaml"), TargetRelPath: filepath.Join("src", "ledger", "ledgerwriter", "skaffold.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("ledger-ledgerwriter", "k8s"), TargetRelPath: filepath.Join("src", "ledger", "ledgerwriter", "k8s"), IsDirectory: true},
+
+		{SourceRelPath: filepath.Join("ledger-transactionhistory", "skaffold.yaml"), TargetRelPath: filepath.Join("src", "ledger", "transactionhistory", "skaffold.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("ledger-transactionhistory", "k8s"), TargetRelPath: filepath.Join("src", "ledger", "transactionhistory", "k8s"), IsDirectory: true},
+
+		// Team Cloud Build pipeline files
+		{SourceRelPath: filepath.Join("cloudbuild-files", "frontend", "cloudbuild.yaml"), TargetRelPath: filepath.Join("src", "frontend", "cloudbuild.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("cloudbuild-files", "accounts", "cloudbuild.yaml"), TargetRelPath: filepath.Join("src", "accounts", "cloudbuild.yaml"), IsDirectory: false},
+		{SourceRelPath: filepath.Join("cloudbuild-files", "ledger", "cloudbuild.yaml"), TargetRelPath: filepath.Join("src", "ledger", "cloudbuild.yaml"), IsDirectory: false},
+
+		// E2E UI Test Dockerfile
+		{SourceRelPath: filepath.Join("other-overlays", "e2e.Dockerfile"), TargetRelPath: filepath.Join(".github", "workflows", "ui-tests", "Dockerfile"), IsDirectory: false},
+	}
+
+	return applyOverlayMappings(appSourceBase, patchedMasterDir, declarativeOverlays)
+}
+
+func applyOverlayMappings(sourceBase, targetBase string, overlays []OverlayMapping) error {
+	for _, m := range overlays {
+		src := filepath.Join(sourceBase, m.SourceRelPath)
+		dst := filepath.Join(targetBase, m.TargetRelPath)
+
+		if _, err := os.Stat(src); err != nil {
+			continue
 		}
-	}
 
-	accountsDbSrc := filepath.Join(appSourceBase, "accounts-db", "k8s", "overlays")
-	if _, err := os.Stat(accountsDbSrc); err == nil {
-		if err := utils.CopyDirectory(accountsDbSrc, filepath.Join(patchedMasterDir, "src", "accounts", "accounts-db", "k8s", "overlays")); err != nil {
-			return err
-		}
-	}
-
-	// 3. Service-specific Skaffold and K8s overlays
-	serviceOverlayMappings := []struct {
-		appSourceSubdir string
-		targetSubdir    string
-	}{
-		{"frontend", filepath.Join("frontend")},
-		{"accounts-contacts", filepath.Join("accounts", "contacts")},
-		{"accounts-userservice", filepath.Join("accounts", "userservice")},
-		{"ledger-balancereader", filepath.Join("ledger", "balancereader")},
-		{"ledger-ledgerwriter", filepath.Join("ledger", "ledgerwriter")},
-		{"ledger-transactionhistory", filepath.Join("ledger", "transactionhistory")},
-	}
-
-	for _, m := range serviceOverlayMappings {
-		srcSkaffold := filepath.Join(appSourceBase, m.appSourceSubdir, "skaffold.yaml")
-		if _, err := os.Stat(srcSkaffold); err == nil {
-			if err := utils.CopyFile(srcSkaffold, filepath.Join(patchedMasterDir, "src", m.targetSubdir, "skaffold.yaml")); err != nil {
-				return err
+		if m.IsDirectory {
+			if err := utils.CopyDirectory(src, dst); err != nil {
+				return fmt.Errorf("failed copying directory overlay from %s to %s: %w", src, dst, err)
 			}
-		}
-
-		srcK8s := filepath.Join(appSourceBase, m.appSourceSubdir, "k8s")
-		if _, err := os.Stat(srcK8s); err == nil {
-			if err := utils.CopyDirectory(srcK8s, filepath.Join(patchedMasterDir, "src", m.targetSubdir, "k8s")); err != nil {
-				return err
+		} else {
+			if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+				return fmt.Errorf("failed creating parent directory for %s: %w", dst, err)
 			}
-		}
-	}
-
-	// 4. Team Cloud Build configurations
-	teamCloudBuilds := []struct {
-		team   string
-		target string
-	}{
-		{"frontend", filepath.Join("frontend", "cloudbuild.yaml")},
-		{"accounts", filepath.Join("accounts", "cloudbuild.yaml")},
-		{"ledger", filepath.Join("ledger", "cloudbuild.yaml")},
-	}
-
-	for _, tcb := range teamCloudBuilds {
-		srcCB := filepath.Join(appSourceBase, "cloudbuild-files", tcb.team, "cloudbuild.yaml")
-		if _, err := os.Stat(srcCB); err == nil {
-			if err := utils.CopyFile(srcCB, filepath.Join(patchedMasterDir, "src", tcb.target)); err != nil {
-				return err
+			if err := utils.CopyFile(src, dst); err != nil {
+				return fmt.Errorf("failed copying file overlay from %s to %s: %w", src, dst, err)
 			}
 		}
 	}
-
-	// 5. Other overlays (e.g. e2e Dockerfile)
-	e2eDocker := filepath.Join(appSourceBase, "other-overlays", "e2e.Dockerfile")
-	if _, err := os.Stat(e2eDocker); err == nil {
-		targetE2E := filepath.Join(patchedMasterDir, ".github", "workflows", "ui-tests")
-		_ = os.MkdirAll(targetE2E, 0755)
-		_ = utils.CopyFile(e2eDocker, filepath.Join(targetE2E, "Dockerfile"))
-	}
-
 	return nil
 }

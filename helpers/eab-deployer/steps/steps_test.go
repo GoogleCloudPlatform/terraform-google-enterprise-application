@@ -132,3 +132,32 @@ func TestProcessSteps(t *testing.T) {
 	}
 	assert.ElementsMatch(t, expectedSteps, s.ListSteps())
 }
+
+func TestConcurrentSteps(t *testing.T) {
+	s, err := LoadSteps(filepath.Join(t.TempDir(), "concurrent.json"))
+	assert.NoError(t, err)
+
+	const numWorkers = 20
+	done := make(chan bool, numWorkers)
+
+	for i := 0; i < numWorkers; i++ {
+		stepName := fmt.Sprintf("step.%d", i)
+		go func(name string) {
+			_ = s.RunStep(name, func() error {
+				return nil
+			})
+			_ = s.IsStepComplete(name)
+			_ = s.ListSteps()
+			done <- true
+		}(stepName)
+	}
+
+	for i := 0; i < numWorkers; i++ {
+		<-done
+	}
+
+	for i := 0; i < numWorkers; i++ {
+		stepName := fmt.Sprintf("step.%d", i)
+		assert.True(t, s.IsStepComplete(stepName))
+	}
+}

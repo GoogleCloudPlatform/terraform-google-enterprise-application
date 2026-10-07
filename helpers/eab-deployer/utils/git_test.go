@@ -54,15 +54,13 @@ func createLocalRepo(t *testing.T, repo string) string {
 func TestGitCSR(t *testing.T) {
 	remote := "origin"
 	repo := createLocalRepo(t, "my-csr-git-repo")
-	originPath := filepath.Join(t.TempDir(), "my-csr-git-repo-origin")
-	err := CopyDirectory(repo, originPath)
-	assert.NoError(t, err)
+	originPath := createLocalRepo(t, "my-csr-git-repo-origin")
 
 	// Test GitClone with CSR
 	localCSR := GitClone(t, "CSR", "my-csr-git-repo", repo, repo, "", logger.Discard)
 	assert.NotNil(t, localCSR)
 	setMockGitConfig(repo)
-	err = localCSR.AddRemote(remote, originPath)
+	err := localCSR.AddRemote(remote, originPath)
 	assert.NoError(t, err)
 
 	err = localCSR.CheckoutBranch("unit-test")
@@ -113,21 +111,19 @@ func TestGitClone_NonCSR(t *testing.T) {
 	remote := "origin"
 	repoURL := "https://github.com/google/blueprint-test.git"
 	repo := createLocalRepo(t, "my-git-repo")
-	originPath := filepath.Join(t.TempDir(), "my-git-repo-origin")
-	err := CopyDirectory(repo, originPath)
-	assert.NoError(t, err)
+	originPath := createLocalRepo(t, "my-git-repo-origin")
 
-	local := GitClone(t, "GITHUB", "blueprint-test", repoURL, originPath, "", logger.Discard)
+	local := GitClone(t, "GITHUB", "blueprint-test", repoURL, repo, "", logger.Discard)
 	assert.NotNil(t, local)
 	setMockGitConfig(repo)
 
 	// Check if the directory is created
-	if _, err := os.Stat(originPath); errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("Directory not created: %s", originPath)
+	if _, err := os.Stat(repo); errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("Directory not created: %s", repo)
 	}
 
 	assert.NotNil(t, local)
-	err = local.AddRemote(remote, originPath)
+	err := local.AddRemote(remote, originPath)
 	assert.NoError(t, err)
 
 	err = local.CheckoutBranch("unit-test")
