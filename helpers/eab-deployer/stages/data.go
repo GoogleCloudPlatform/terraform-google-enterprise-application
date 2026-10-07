@@ -40,51 +40,51 @@ type CommonConf struct {
 type GlobalTFVars struct {
 	ProjectID                       string                        `hcl:"project_id"`
 	Region                          string                        `hcl:"region"`
-	NetworkID                       *string                       `hcl:"network_id"`
-	SubnetworkSelfLink              *string                       `hcl:"subnetwork_self_link"`
-	WorkerPoolID                    *string                       `hcl:"workerpool_id"`
-	LoggingBucket                   *string                       `hcl:"logging_bucket"`
-	BucketKMSKey                    *string                       `hcl:"bucket_kms_key"`
-	ServicePerimeterName            *string                       `hcl:"service_perimeter_name"`
-	ServicePerimeterMode            *string                       `hcl:"service_perimeter_mode"`
-	AccessLevelName                 *string                       `hcl:"access_level_name"`
-	AttestationKMSKey               *string                       `hcl:"attestation_kms_key"`
-	BinaryAuthorizationImage        *string                       `hcl:"binary_authorization_image"`
-	BinaryAuthorizationRepositoryID *string                       `hcl:"binary_authorization_repository_id"`
-	CreateNat                       *bool                         `hcl:"create_nat"`
-	EnablesNetworkConnection        *bool                         `hcl:"enables_network_connection_and_peering_routes"`
-	NCCConfig                       *NCCConfig                    `hcl:"ncc_config"`
-	Teams                           map[string]string             `hcl:"teams"`
-	CloudbuildV2RepositoryConfig    *CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config"`
-	AppSourceRepoURL                *string                       `hcl:"app_source_repo_url"`
-	AppVersion                      *string                       `hcl:"app_version"`
+	NetworkID                       *string                       `hcl:"network_id,optional"`
+	SubnetworkSelfLink              *string                       `hcl:"subnetwork_self_link,optional"`
+	WorkerPoolID                    *string                       `hcl:"workerpool_id,optional"`
+	LoggingBucket                   *string                       `hcl:"logging_bucket,optional"`
+	BucketKMSKey                    *string                       `hcl:"bucket_kms_key,optional"`
+	ServicePerimeterName            *string                       `hcl:"service_perimeter_name,optional"`
+	ServicePerimeterMode            *string                       `hcl:"service_perimeter_mode,optional"`
+	AccessLevelName                 *string                       `hcl:"access_level_name,optional"`
+	AttestationKMSKey               *string                       `hcl:"attestation_kms_key,optional"`
+	BinaryAuthorizationImage        *string                       `hcl:"binary_authorization_image,optional"`
+	BinaryAuthorizationRepositoryID *string                       `hcl:"binary_authorization_repository_id,optional"`
+	CreateNat                       *bool                         `hcl:"create_nat,optional"`
+	EnablesNetworkConnection        *bool                         `hcl:"enables_network_connection_and_peering_routes,optional"`
+	NCCConfig                       *NCCConfig                    `hcl:"ncc_config,optional"`
+	Teams                           map[string]string             `hcl:"teams,optional"`
+	CloudbuildV2RepositoryConfig    *CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config,optional"`
+	AppSourceRepoURL                *string                       `hcl:"app_source_repo_url,optional"`
+	AppVersion                      *string                       `hcl:"app_version,optional"`
 	EABCodePath                     string                        `hcl:"eab_code_path"`
 	CodeCheckoutPath                string                        `hcl:"code_checkout_path"`
 }
 
 type NCCConfig struct {
-	EnableNCC                *bool             `hcl:"enable_ncc" cty:"enable_ncc"`
-	HubURI                   *string           `hcl:"hub_uri" cty:"hub_uri"`
-	SpokeGroup               *string           `hcl:"spoke_group" cty:"spoke_group"`
-	SpokeName                *string           `hcl:"spoke_name" cty:"spoke_name"`
-	SpokeDescription         *string           `hcl:"spoke_description" cty:"spoke_description"`
-	SpokeLabels              map[string]string `hcl:"spoke_labels" cty:"spoke_labels"`
-	SpokeExcludeExportRanges []string          `hcl:"spoke_exclude_export_ranges" cty:"spoke_exclude_export_ranges"`
-	SpokeIncludeExportRanges []string          `hcl:"spoke_include_export_ranges" cty:"spoke_include_export_ranges"`
+	EnableNCC                *bool             `hcl:"enable_ncc,optional" cty:"enable_ncc"`
+	HubURI                   *string           `hcl:"hub_uri,optional" cty:"hub_uri"`
+	SpokeGroup               *string           `hcl:"spoke_group,optional" cty:"spoke_group"`
+	SpokeName                *string           `hcl:"spoke_name,optional" cty:"spoke_name"`
+	SpokeDescription         *string           `hcl:"spoke_description,optional" cty:"spoke_description"`
+	SpokeLabels              map[string]string `hcl:"spoke_labels,optional" cty:"spoke_labels"`
+	SpokeExcludeExportRanges []string          `hcl:"spoke_exclude_export_ranges,optional" cty:"spoke_exclude_export_ranges"`
+	SpokeIncludeExportRanges []string          `hcl:"spoke_include_export_ranges,optional" cty:"spoke_include_export_ranges"`
 }
 
 type CloudbuildV2RepositoryConfig struct {
 	RepoType                               string                `hcl:"repo_type" cty:"repo_type"`
 	Repositories                           map[string]Repository `hcl:"repositories" cty:"repositories"`
-	GithubSecretID                         *string               `hcl:"github_secret_id" cty:"github_secret_id"`
-	GithubAppIDSecretID                    *string               `hcl:"github_app_id_secret_id" cty:"github_app_id_secret_id"`
-	GitlabReadAuthorizerCredentialSecretID *string               `hcl:"gitlab_read_authorizer_credential_secret_id" cty:"gitlab_read_authorizer_credential_secret_id"`
-	GitlabAuthorizerCredentialSecretID     *string               `hcl:"gitlab_authorizer_credential_secret_id" cty:"gitlab_authorizer_credential_secret_id"`
-	GitlabWebhookSecretID                  *string               `hcl:"gitlab_webhook_secret_id" cty:"gitlab_webhook_secret_id"`
-	GitlabEnterpriseHostURI                *string               `hcl:"gitlab_enterprise_host_uri" cty:"gitlab_enterprise_host_uri"`
-	GitlabEnterpriseServiceDirectory       *string               `hcl:"gitlab_enterprise_service_directory" cty:"gitlab_enterprise_service_directory"`
-	GitlabEnterpriseCACertificate          *string               `hcl:"gitlab_enterprise_ca_certificate" cty:"gitlab_enterprise_ca_certificate"`
-	SecretProjectID                        *string               `hcl:"secret_project_id" cty:"secret_project_id"`
+	GithubSecretID                         *string               `hcl:"github_secret_id,optional" cty:"github_secret_id"`
+	GithubAppIDSecretID                    *string               `hcl:"github_app_id_secret_id,optional" cty:"github_app_id_secret_id"`
+	GitlabReadAuthorizerCredentialSecretID *string               `hcl:"gitlab_read_authorizer_credential_secret_id,optional" cty:"gitlab_read_authorizer_credential_secret_id"`
+	GitlabAuthorizerCredentialSecretID     *string               `hcl:"gitlab_authorizer_credential_secret_id,optional" cty:"gitlab_authorizer_credential_secret_id"`
+	GitlabWebhookSecretID                  *string               `hcl:"gitlab_webhook_secret_id,optional" cty:"gitlab_webhook_secret_id"`
+	GitlabEnterpriseHostURI                *string               `hcl:"gitlab_enterprise_host_uri,optional" cty:"gitlab_enterprise_host_uri"`
+	GitlabEnterpriseServiceDirectory       *string               `hcl:"gitlab_enterprise_service_directory,optional" cty:"gitlab_enterprise_service_directory"`
+	GitlabEnterpriseCACertificate          *string               `hcl:"gitlab_enterprise_ca_certificate,optional" cty:"gitlab_enterprise_ca_certificate"`
+	SecretProjectID                        *string               `hcl:"secret_project_id,optional" cty:"secret_project_id"`
 }
 
 type Repository struct {

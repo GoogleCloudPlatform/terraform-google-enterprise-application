@@ -196,6 +196,11 @@ func DeployAppSourceStage(t testing.TB, s steps.StepManager, tfvars GlobalTFVars
 		return fmt.Errorf("cloudbuildv2_repository_config is required for DeployAppSourceStage")
 	}
 
+	repos := tfvars.CloudbuildV2RepositoryConfig.Repositories
+	if len(repos) == 0 {
+		return nil
+	}
+
 	_, standaloneDestPath, err := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
 	if err != nil {
 		return err
@@ -203,11 +208,6 @@ func DeployAppSourceStage(t testing.TB, s steps.StepManager, tfvars GlobalTFVars
 	outputs := GetAppInfraStepOutputs(t, standaloneDestPath)
 	preparer := GetAppSourcePreparer(c.ExampleName)
 	deployer := NewServiceDeployer(s, tfvars, c, outputs, preparer)
-
-	repos := tfvars.CloudbuildV2RepositoryConfig.Repositories
-	if len(repos) == 0 {
-		return nil
-	}
 
 	if len(repos) == 1 {
 		for serviceKey, repository := range repos {
