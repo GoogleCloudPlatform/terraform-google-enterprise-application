@@ -27,12 +27,25 @@ spec:
         app: capital-agent-server
     spec:
       serviceAccountName: capital-agent-ksa
+      runtimeClassName: gvisor
       containers:
         - name: capital-agent
           image: capital-agent
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           readinessProbe:
             httpGet:
               path: /ready

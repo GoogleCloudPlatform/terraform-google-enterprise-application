@@ -40,6 +40,7 @@ By default, this module assigns the `egress-internet` network tag to all cluster
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
 | network\_tags | Network tags applied to all cluster nodes (static, NAP, Autopilot).<br>- Default "egress-internet" allows Foundation Cloud NAT egress (when NAT is enabled).<br>- Custom lists override the default: include "egress-internet" to preserve NAT access, pass [] to remove tags, or use your custom Foundation egress\_tags value instead. | `list(string)` | <pre>[<br>  "egress-internet"<br>]</pre> | no |
 | org\_id | Organization ID | `string` | n/a | yes |
+| sandbox\_enabled | (Beta) Enable GKE Sandbox. | `bool` | `false` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `null` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 
