@@ -74,10 +74,6 @@ gcloud components list --filter="id=beta OR id=terraform-tools"
      - `repositories`: Map of service keys to repository definitions (`repository_name` and `repository_url`).
      - Credential secret IDs for GitHub App / GitLab personal access tokens and authorizer credentials.
 
-   **Upstream Application Source (Optional Overrides):**
-   - `app_source_repo_url` *(optional)*: Upstream repository URL to clone application source code from. If omitted, the default defined in the example's `variables.tf` is used (e.g., `https://github.com/GoogleCloudPlatform/bank-of-anthos.git` for Cymbal Bank or `https://github.com/GoogleCloudPlatform/microservices-demo.git` for Cymbal Shop).
-   - `app_version` *(optional)*: Upstream release tag or branch to clone and deploy. If omitted, the default defined in the example's `variables.tf` is used (e.g., `"v0.6.9"` for Cymbal Bank or `"v0.10.5"` for Cymbal Shop).
-
 #### Network Connectivity Center (NCC) Configuration
 
 To connect the cluster VPC to an existing Network Connectivity Center Hub via a VPC spoke, configure the `ncc_config` object in `global.tfvars`:

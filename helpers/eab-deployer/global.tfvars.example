@@ -37,13 +37,6 @@ workerpool_id                      = "projects/YOUR_EXISTING_PROJECT_ID/location
 logging_bucket                     = null // Optional logging bucket
 bucket_kms_key                     = null // Optional KMS Key ID
 
-// Application Source Repository & Version (Optional)
-// If omitted, the default values defined in each example's variables.tf will be used:
-// - cymbal-bank: default "https://github.com/GoogleCloudPlatform/bank-of-anthos.git" (tag "v0.6.9")
-// - cymbal-shop: default "https://github.com/GoogleCloudPlatform/microservices-demo.git" (tag "v0.10.5")
-// app_source_repo_url                = "https://github.com/GoogleCloudPlatform/bank-of-anthos.git"
-// app_version                        = "v0.6.9"
-
 
 // Optional Network Configurations (Only applicable to certain examples like default-example, llm-model, agent)
 

@@ -91,10 +91,10 @@ output "service_repository_project_id" {
 
 output "app_source_repo_url" {
   description = "The upstream application repository URL."
-  value       = var.app_source_repo_url
+  value       = "https://github.com/GoogleCloudPlatform/bank-of-anthos.git"
 }
 
 output "app_version" {
   description = "The upstream application version or release tag deployed."
-  value       = var.app_version
+  value       = "v0.6.9"
 }
