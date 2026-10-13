@@ -88,6 +88,7 @@ func CloneUpstreamRepo(t testing.TB, repoURL, tagOrBranch, destDir string, logge
 	}
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		_ = os.RemoveAll(destDir)
 		return fmt.Errorf("failed to clone upstream repository %s (%s): %w, output: %s", repoURL, tagOrBranch, err, string(output))
 	}
 	return nil
