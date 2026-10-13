@@ -147,10 +147,15 @@ func (p *CymbalBankPreparer) Prepare(t testing.TB, c CommonConf, appSourceRepoUR
 	return utils.CopyDirectory(patchedMasterDir, targetGitPath)
 }
 
-func (p *CymbalBankPreparer) ensurePatchedMasterTree(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, patchedMasterDir string) error {
+func (p *CymbalBankPreparer) ensurePatchedMasterTree(t testing.TB, c CommonConf, appSourceRepoURL, appVersion, patchedMasterDir string) (err error) {
 	if _, err := os.Stat(patchedMasterDir); err == nil {
 		return nil
 	}
+	defer func() {
+		if err != nil {
+			_ = os.RemoveAll(patchedMasterDir)
+		}
+	}()
 
 	cacheDir := filepath.Join(c.CheckoutPath, ".cache", fmt.Sprintf("bank-of-anthos-%s", appVersion))
 	if err := utils.CloneUpstreamRepo(t, appSourceRepoURL, appVersion, cacheDir, c.Logger); err != nil {
