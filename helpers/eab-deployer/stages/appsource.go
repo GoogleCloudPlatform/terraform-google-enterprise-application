@@ -39,7 +39,7 @@ func GetAppSourcePreparer(exampleName string) AppSourcePreparer {
 	case "cymbal-bank":
 		return NewCymbalBankPreparer()
 	default:
-		return &SelfContainedPreparer{ExampleName: exampleName}
+		return &SelfContainedPreparer{ExampleName: normExample}
 	}
 }
 
@@ -172,8 +172,9 @@ func (p *CymbalBankPreparer) ensurePatchedMasterTree(t testing.TB, c CommonConf,
 		return fmt.Errorf("cymbal-bank 6-appsource directory not found at %s", appSourceBase)
 	}
 
-	// 1. Clean default components and replace with enterprise blueprint components
+	// 1. Clean default components and frontend k8s manifests before applying enterprise blueprint overlays
 	_ = os.RemoveAll(filepath.Join(patchedMasterDir, "src", "components"))
+	_ = os.RemoveAll(filepath.Join(patchedMasterDir, "src", "frontend", "k8s"))
 	componentsSrc := filepath.Join(appSourceBase, "components")
 	if _, err := os.Stat(componentsSrc); err == nil {
 		if err := utils.CopyDirectory(componentsSrc, filepath.Join(patchedMasterDir, "src", "components")); err != nil {
@@ -215,7 +216,18 @@ func (p *CymbalBankPreparer) ensurePatchedMasterTree(t testing.TB, c CommonConf,
 		{SourceRelPath: filepath.Join("other-overlays", "e2e.Dockerfile"), TargetRelPath: filepath.Join(".github", "workflows", "ui-tests", "Dockerfile"), IsDirectory: false},
 	}
 
-	return applyOverlayMappings(appSourceBase, patchedMasterDir, declarativeOverlays)
+	if err := applyOverlayMappings(appSourceBase, patchedMasterDir, declarativeOverlays); err != nil {
+		return err
+	}
+
+	ingressAssets := filepath.Join(c.EABPath, "test", "integration", "appsource", "assets")
+	if fi, err := os.Stat(ingressAssets); err == nil && fi.IsDir() {
+		if err := utils.CopyDirectory(ingressAssets, filepath.Join(patchedMasterDir, "src", "frontend", "k8s", "overlays", "development")); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func applyOverlayMappings(sourceBase, targetBase string, overlays []OverlayMapping) error {

@@ -79,7 +79,7 @@ func TestPrepareSelfContained(t *testing.T) {
 		ExampleName:  "default-example",
 	}
 
-	preparer := GetAppSourcePreparer("default-example")
+	preparer := GetAppSourcePreparer("default_example")
 	err = preparer.Prepare(t, conf, "", "", "hello-world", targetDir)
 	assert.NoError(t, err)
 	assert.FileExists(t, filepath.Join(targetDir, "main.go"))
@@ -144,11 +144,12 @@ func TestPrepareCymbalBank(t *testing.T) {
 
 	// Create mock upstream repository
 	mockUpstream := createMockGitRepoWithTag(t, "bank-of-anthos", testAppVersion, map[string]string{
-		"README.md":                           "# Bank of Anthos\n",
-		"src/components/old.yaml":             "old-component\n",
-		"src/frontend/Main.java":              "public class Main {}\n",
-		"src/accounts/contacts/Contacts.java": "public class Contacts {}\n",
-		"src/ledger/balancereader/Bal.java":   "public class Bal {}\n",
+		"README.md":                            "# Bank of Anthos\n",
+		"src/components/old.yaml":              "old-component\n",
+		"src/frontend/Main.java":               "public class Main {}\n",
+		"src/frontend/k8s/stale_manifest.yaml": "stale-upstream-manifest\n",
+		"src/accounts/contacts/Contacts.java":  "public class Contacts {}\n",
+		"src/ledger/balancereader/Bal.java":    "public class Bal {}\n",
 	})
 
 	// Pre-populate cache with the mock upstream to avoid real network git clone
@@ -182,6 +183,12 @@ func TestPrepareCymbalBank(t *testing.T) {
 	_ = os.MkdirAll(filepath.Join(bankAppSource, "cloudbuild-files", "accounts"), 0755)
 	_ = os.WriteFile(filepath.Join(bankAppSource, "cloudbuild-files", "accounts", "cloudbuild.yaml"), []byte("accounts-cloudbuild"), 0644)
 
+	// Create mock integration test ingress assets
+	mockIngressAssets := filepath.Join(eabDir, "test", "integration", "appsource", "assets")
+	_ = os.MkdirAll(mockIngressAssets, 0755)
+	_ = os.WriteFile(filepath.Join(mockIngressAssets, "ingress.yaml"), []byte("ingress-asset"), 0644)
+	_ = os.WriteFile(filepath.Join(mockIngressAssets, "kustomization.yaml"), []byte("kustomization-asset"), 0644)
+
 	conf := CommonConf{
 		EABPath:      eabDir,
 		CheckoutPath: checkoutDir,
@@ -198,6 +205,9 @@ func TestPrepareCymbalBank(t *testing.T) {
 	assert.FileExists(t, filepath.Join(targetDir, "src", "frontend", "Main.java"))
 	assert.FileExists(t, filepath.Join(targetDir, "src", "components", "new_component.yaml"))
 	assert.NoFileExists(t, filepath.Join(targetDir, "src", "components", "old.yaml"))
+	assert.NoFileExists(t, filepath.Join(targetDir, "src", "frontend", "k8s", "stale_manifest.yaml"))
+	assert.FileExists(t, filepath.Join(targetDir, "src", "frontend", "k8s", "overlays", "development", "ingress.yaml"))
+	assert.FileExists(t, filepath.Join(targetDir, "src", "frontend", "k8s", "overlays", "development", "kustomization.yaml"))
 	assert.FileExists(t, filepath.Join(targetDir, "src", "ledger", "ledger-db", "k8s", "overlays", "ledger-db.yaml"))
 	assert.FileExists(t, filepath.Join(targetDir, "src", "accounts", "accounts-db", "k8s", "overlays", "accounts-db.yaml"))
 	assert.FileExists(t, filepath.Join(targetDir, "src", "frontend", "skaffold.yaml"))
