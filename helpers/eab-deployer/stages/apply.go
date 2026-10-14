@@ -143,7 +143,10 @@ func (d *ServiceDeployer) Deploy(t testing.TB, serviceKey string, repo Repositor
 		}
 
 		gitPath := filepath.Join(d.Conf.CheckoutPath, repoName)
-		conf := utils.GitClone(t, d.TFVars.CloudbuildV2RepositoryConfig.RepoType, repoName, repo.RepositoryURL, gitPath, repoProjectID, d.Conf.Logger)
+		conf, err := utils.GitClone(t, d.TFVars.CloudbuildV2RepositoryConfig.RepoType, repoName, repo.RepositoryURL, gitPath, repoProjectID, d.Conf.Logger)
+		if err != nil {
+			return err
+		}
 
 		if err := conf.CheckoutBranch("main"); err != nil {
 			return err
@@ -223,11 +226,30 @@ func DeployAppSourceStage(t testing.TB, s steps.StepManager, tfvars GlobalTFVars
 		wg.Add(1)
 		go func(sKey string, repo Repository) {
 			defer wg.Done()
+			completed := false
+			defer func() {
+				if !completed {
+					r := recover()
+					var err error
+					if r != nil {
+						err = fmt.Errorf("service '%s' panicked: %v", sKey, r)
+					} else {
+						err = fmt.Errorf("service '%s' terminated prematurely", sKey)
+					}
+					stepName := fmt.Sprintf("gcp-appsource.%s", sKey)
+					_ = s.FailStep(stepName, err.Error())
+					errMu.Lock()
+					errList = append(errList, err)
+					errMu.Unlock()
+				}
+			}()
+
 			if err := deployer.Deploy(t, sKey, repo); err != nil {
 				errMu.Lock()
 				errList = append(errList, fmt.Errorf("service '%s': %w", sKey, err))
 				errMu.Unlock()
 			}
+			completed = true
 		}(serviceKey, repository)
 	}
 

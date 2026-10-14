@@ -57,10 +57,11 @@ func TestGitCSR(t *testing.T) {
 	originPath := createLocalRepo(t, "my-csr-git-repo-origin")
 
 	// Test GitClone with CSR
-	localCSR := GitClone(t, "CSR", "my-csr-git-repo", repo, repo, "", logger.Discard)
-	assert.NotNil(t, localCSR)
+	localCSR, err := GitClone(t, "CSR", "my-csr-git-repo", repo, repo, "", logger.Discard)
+	assert.NoError(t, err)
+	assert.NotNil(t, localCSR.conf)
 	setMockGitConfig(repo)
-	err := localCSR.AddRemote(remote, originPath)
+	err = localCSR.AddRemote(remote, originPath)
 	assert.NoError(t, err)
 
 	err = localCSR.CheckoutBranch("unit-test")
@@ -83,7 +84,8 @@ func TestGitCSR(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, hasUpstream, "branch 'unit-test' should have a remote")
 
-	origin := cloneCSR(t, "my-csr-git-repo", originPath, "", logger.Discard)
+	origin, err := cloneCSR(t, "my-csr-git-repo", originPath, "", logger.Discard)
+	assert.NoError(t, err)
 	files, err := FindFiles(originPath, "go.mod")
 	assert.NoError(t, err)
 	assert.Len(t, files, 0, "'go.mod' file should not exist on main branch")
@@ -113,8 +115,9 @@ func TestGitClone_NonCSR(t *testing.T) {
 	repo := createLocalRepo(t, "my-git-repo")
 	originPath := createLocalRepo(t, "my-git-repo-origin")
 
-	local := GitClone(t, "GITHUB", "blueprint-test", repoURL, repo, "", logger.Discard)
-	assert.NotNil(t, local)
+	local, err := GitClone(t, "GITHUB", "blueprint-test", repoURL, repo, "", logger.Discard)
+	assert.NoError(t, err)
+	assert.NotNil(t, local.conf)
 	setMockGitConfig(repo)
 
 	// Check if the directory is created
@@ -122,8 +125,8 @@ func TestGitClone_NonCSR(t *testing.T) {
 		t.Fatalf("Directory not created: %s", repo)
 	}
 
-	assert.NotNil(t, local)
-	err := local.AddRemote(remote, originPath)
+	assert.NotNil(t, local.conf)
+	err = local.AddRemote(remote, originPath)
 	assert.NoError(t, err)
 
 	err = local.CheckoutBranch("unit-test")
@@ -165,4 +168,11 @@ func TestCloneUpstreamRepo(t *testing.T) {
 	// Test idempotency / cache reuse (calling again on existing directory)
 	err = CloneUpstreamRepo(t, repo, "v1.0.0", destDir, logger.Discard)
 	assert.NoError(t, err)
+}
+
+func TestGitClone_NonCSR_Failure(t *testing.T) {
+	tempDir := t.TempDir()
+	nonExistentPath := filepath.Join(tempDir, "non-existent")
+	_, err := GitClone(t, "GITHUB", "bad-repo", "https://invalid-url.invalid/repo.git", nonExistentPath, "", logger.Discard)
+	assert.Error(t, err)
 }

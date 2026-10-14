@@ -106,4 +106,27 @@ func TestDeployAppSourceStage_Validation(t *testing.T) {
 		err = DeployAppSourceStage(t, s, tfvars, conf)
 		assert.NoError(t, err)
 	})
+
+	t.Run("records failure and returns error when multiple repositories fail", func(t *testing.T) {
+		standaloneDir := filepath.Join(tempDir, "examples", "default-example", "standalone-single-project")
+		err := os.MkdirAll(standaloneDir, 0755)
+		assert.NoError(t, err)
+
+		tfvars := GlobalTFVars{
+			CloudbuildV2RepositoryConfig: &CloudbuildV2RepositoryConfig{
+				RepoType: "GITHUB",
+				Repositories: map[string]Repository{
+					"svc-a": {RepositoryName: "repo-a", RepositoryURL: "https://invalid.test/a.git"},
+					"svc-b": {RepositoryName: "repo-b", RepositoryURL: "https://invalid.test/b.git"},
+				},
+			},
+		}
+		err = DeployAppSourceStage(t, s, tfvars, conf)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed deploying app source for services")
+		assert.True(t, s.StepExists("gcp-appsource.svc-a"))
+		assert.False(t, s.IsStepComplete("gcp-appsource.svc-a"))
+		assert.True(t, s.StepExists("gcp-appsource.svc-b"))
+		assert.False(t, s.IsStepComplete("gcp-appsource.svc-b"))
+	})
 }
