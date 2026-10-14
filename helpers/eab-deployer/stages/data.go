@@ -56,8 +56,6 @@ type GlobalTFVars struct {
 	NCCConfig                       *NCCConfig                    `hcl:"ncc_config,optional"`
 	Teams                           map[string]string             `hcl:"teams,optional"`
 	CloudbuildV2RepositoryConfig    *CloudbuildV2RepositoryConfig `hcl:"cloudbuildv2_repository_config,optional"`
-	AppSourceRepoURL                *string                       `hcl:"app_source_repo_url,optional"`
-	AppVersion                      *string                       `hcl:"app_version,optional"`
 	EABCodePath                     string                        `hcl:"eab_code_path"`
 	CodeCheckoutPath                string                        `hcl:"code_checkout_path"`
 }

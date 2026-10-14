@@ -54,8 +54,7 @@ project_id         = "my-project-123"
 region             = "us-central1"
 eab_code_path      = "/path/to/eab"
 code_checkout_path = "/path/to/checkout"
-app_source_repo_url = "https://github.com/GoogleCloudPlatform/bank-of-anthos.git"
-app_version        = "v0.6.9"
+attestation_kms_key = "projects/my-project/locations/us-central1/keyRings/my-kr/cryptoKeys/my-key"
 
 teams = {
   "cb-frontend" = "frontend@example.com"
@@ -89,10 +88,8 @@ cloudbuildv2_repository_config = {
 		assert.Equal(t, "us-central1", tfvars.Region)
 		assert.Equal(t, "/path/to/eab", tfvars.EABCodePath)
 		assert.Equal(t, "/path/to/checkout", tfvars.CodeCheckoutPath)
-		assert.NotNil(t, tfvars.AppSourceRepoURL)
-		assert.Equal(t, "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", *tfvars.AppSourceRepoURL)
-		assert.NotNil(t, tfvars.AppVersion)
-		assert.Equal(t, "v0.6.9", *tfvars.AppVersion)
+		assert.NotNil(t, tfvars.AttestationKMSKey)
+		assert.Equal(t, "projects/my-project/locations/us-central1/keyRings/my-kr/cryptoKeys/my-key", *tfvars.AttestationKMSKey)
 		assert.Equal(t, "frontend@example.com", tfvars.Teams["cb-frontend"])
 		assert.NotNil(t, tfvars.CloudbuildV2RepositoryConfig)
 		assert.Equal(t, "CSR", tfvars.CloudbuildV2RepositoryConfig.RepoType)
