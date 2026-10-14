@@ -85,7 +85,7 @@ func CloneUpstreamRepo(t testing.TB, repoURL, tagOrBranch, destDir string, logge
 
 	cmd := exec.Command("git", "clone", "--depth", "1", "--branch", tagOrBranch, repoURL, destDir)
 	if logger != nil {
-		fmt.Printf("Cloning upstream repository %s (tag/branch: %s) into %s\n", repoURL, tagOrBranch, destDir)
+		logger.Logf(t, "Cloning upstream repository %s (tag/branch: %s) into %s", repoURL, tagOrBranch, destDir)
 	}
 	output, err := cmd.CombinedOutput()
 	if err != nil {

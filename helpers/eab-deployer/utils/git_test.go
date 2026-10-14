@@ -15,7 +15,6 @@
 package utils
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -111,23 +110,16 @@ func TestGitCSR(t *testing.T) {
 
 func TestGitClone_NonCSR(t *testing.T) {
 	remote := "origin"
-	repoURL := "https://github.com/google/blueprint-test.git"
-	repo := createLocalRepo(t, "my-git-repo")
 	originPath := createLocalRepo(t, "my-git-repo-origin")
+	destPath := filepath.Join(t.TempDir(), "cloned-repo")
 
-	local, err := GitClone(t, "GITHUB", "blueprint-test", repoURL, repo, "", logger.Discard)
+	local, err := GitClone(t, "GITHUB", "blueprint-test", originPath, destPath, "", logger.Discard)
 	assert.NoError(t, err)
 	assert.NotNil(t, local.conf)
-	setMockGitConfig(repo)
+	setMockGitConfig(destPath)
 
-	// Check if the directory is created
-	if _, err := os.Stat(repo); errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("Directory not created: %s", repo)
-	}
-
-	assert.NotNil(t, local.conf)
-	err = local.AddRemote(remote, originPath)
-	assert.NoError(t, err)
+	// Check if the directory is created by GitClone
+	assert.DirExists(t, destPath)
 
 	err = local.CheckoutBranch("unit-test")
 	assert.NoError(t, err)
@@ -136,7 +128,7 @@ func TestGitClone_NonCSR(t *testing.T) {
 	assert.Equal(t, localBranch, "unit-test", "current branch should be 'unit-test'")
 	assert.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(repo, "go.mod"), []byte("module example.com/test\n"), 0644)
+	err = os.WriteFile(filepath.Join(destPath, "go.mod"), []byte("module example.com/test\n"), 0644)
 	assert.NoError(t, err)
 
 	err = local.CommitFiles("add go mod file")
