@@ -27,11 +27,13 @@ func TestValidateBasicFields(t *testing.T) {
 	eabDir := filepath.Join(tempDir, "eab")
 	_ = os.MkdirAll(eabDir, 0755)
 
+	validKMSKey := "projects/my-test-project/locations/us-central1/keyRings/my-kr/cryptoKeys/my-key"
 	validConfig := GlobalTFVars{
-		ProjectID:        "my-test-project",
-		Region:           "us-central1",
-		EABCodePath:      eabDir,
-		CodeCheckoutPath: tempDir,
+		ProjectID:         "my-test-project",
+		Region:            "us-central1",
+		EABCodePath:       eabDir,
+		CodeCheckoutPath:  tempDir,
+		AttestationKMSKey: &validKMSKey,
 		CloudbuildV2RepositoryConfig: &CloudbuildV2RepositoryConfig{
 			RepoType: "CSR",
 			Repositories: map[string]Repository{
@@ -45,6 +47,26 @@ func TestValidateBasicFields(t *testing.T) {
 
 	t.Run("valid configuration passes", func(t *testing.T) {
 		assert.True(t, ValidateBasicFields(t, validConfig))
+	})
+
+	t.Run("missing attestation_kms_key fails", func(t *testing.T) {
+		cfg := validConfig
+		cfg.AttestationKMSKey = nil
+		assert.False(t, ValidateBasicFields(t, cfg))
+	})
+
+	t.Run("blank attestation_kms_key fails", func(t *testing.T) {
+		cfg := validConfig
+		emptyKey := "   "
+		cfg.AttestationKMSKey = &emptyKey
+		assert.False(t, ValidateBasicFields(t, cfg))
+	})
+
+	t.Run("placeholder attestation_kms_key fails", func(t *testing.T) {
+		cfg := validConfig
+		placeholderKey := "projects/YOUR_EXISTING_PROJECT_ID/locations/us-central1/keyRings/YOUR_KEYRING/cryptoKeys/YOUR_KEY_NAME"
+		cfg.AttestationKMSKey = &placeholderKey
+		assert.False(t, ValidateBasicFields(t, cfg))
 	})
 
 	t.Run("missing project_id fails", func(t *testing.T) {

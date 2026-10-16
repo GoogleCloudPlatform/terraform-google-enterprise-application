@@ -37,7 +37,9 @@ workerpool_id                      = "projects/YOUR_EXISTING_PROJECT_ID/location
 logging_bucket                     = null // Optional logging bucket
 bucket_kms_key                     = null // Optional KMS Key ID
 
+
 // Optional Network Configurations (Only applicable to certain examples like default-example, llm-model, agent)
+
 // create_nat                         = true // Optional: Enables Cloud NAT creation for Private Worker Pool
 // enables_network_connection_and_peering_routes = true // Optional: Enables Network connection and peering routes
 
@@ -65,11 +67,19 @@ binary_authorization_image         = "us-central1-docker.pkg.dev/YOUR_EXISTING_P
 binary_authorization_repository_id = "projects/YOUR_EXISTING_PROJECT_ID/locations/us-central1/repositories/YOUR_REPOSITORY_NAME" // The Artifact Registry location with format projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
 
 // Namespace/Teams (For namespace/group email configuration)
+// For cymbal-bank:
+// teams = {
+//   "cb-frontend" = "your-group@yourdomain.com",
+//   "cb-accounts" = "your-group@yourdomain.com",
+//   "cb-ledger"   = "your-group@yourdomain.com",
+// }
+
 teams = {
   "namespace" = "your-group@yourdomain.com"
 }
 
 // Integration of repositories with Cloud Build v2
+// Default Example:
 cloudbuildv2_repository_config = {
   github_app_id_secret_id                     = null
   github_secret_id                            = null
@@ -88,3 +98,45 @@ cloudbuildv2_repository_config = {
   }
   secret_project_id = null
 }
+
+// Cymbal Shop Repository Config Example:
+// cloudbuildv2_repository_config = {
+//   repo_type = "CSR"
+//   repositories = {
+//     "eab-cymbal-shop-cymbalshop" = {
+//       repository_name = "eab-cymbal-shop-cymbalshop"
+//       repository_url  = ""
+//     }
+//   }
+// }
+
+// Cymbal Bank Repository Config Example:
+// cloudbuildv2_repository_config = {
+//   repo_type = "CSR"
+//   repositories = {
+//     "eab-cymbal-bank-frontend" = {
+//       repository_name = "eab-cymbal-bank-frontend"
+//       repository_url  = ""
+//     }
+//     "eab-cymbal-bank-accounts-contacts" = {
+//       repository_name = "eab-cymbal-bank-accounts-contacts"
+//       repository_url  = ""
+//     }
+//     "eab-cymbal-bank-accounts-userservice" = {
+//       repository_name = "eab-cymbal-bank-accounts-userservice"
+//       repository_url  = ""
+//     }
+//     "eab-cymbal-bank-ledger-balancereader" = {
+//       repository_name = "eab-cymbal-bank-ledger-balancereader"
+//       repository_url  = ""
+//     }
+//     "eab-cymbal-bank-ledger-ledgerwriter" = {
+//       repository_name = "eab-cymbal-bank-ledger-ledgerwriter"
+//       repository_url  = ""
+//     }
+//     "eab-cymbal-bank-ledger-transactionhistory" = {
+//       repository_name = "eab-cymbal-bank-ledger-transactionhistory"
+//       repository_url  = ""
+//     }
+//   }
+// }

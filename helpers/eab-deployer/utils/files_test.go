@@ -48,6 +48,21 @@ func TestCopyDirectory(t *testing.T) {
 	inner := filepath.Join(src, "one", "two", "three", "four")
 	err := os.MkdirAll(inner, 0755)
 	assert.NoError(t, err)
+
+	// create ignored directories and files
+	gitDir := filepath.Join(src, ".git")
+	err = os.MkdirAll(gitDir, 0755)
+	assert.NoError(t, err)
+	_, err = writeTempFile(gitDir, "config", "dummy git config")
+	assert.NoError(t, err)
+
+	tfDir := filepath.Join(src, ".terraform")
+	err = os.MkdirAll(tfDir, 0755)
+	assert.NoError(t, err)
+
+	_, err = writeTempFile(src, ".terraform.lock.hcl", "dummy lock")
+	assert.NoError(t, err)
+
 	// create a sample file
 	filename := "copy_dir_test.txt"
 	fileContent := "test of copy dir func"
@@ -66,6 +81,16 @@ func TestCopyDirectory(t *testing.T) {
 	r, err := os.ReadFile(destFile)
 	assert.NoError(t, err)
 	assert.Equal(t, r, []byte(fileContent), "file content should be the same")
+
+	// verify ignored files/dirs are not copied
+	_, err = os.Stat(filepath.Join(dest, ".git"))
+	assert.True(t, os.IsNotExist(err), ".git should not be copied")
+
+	_, err = os.Stat(filepath.Join(dest, ".terraform"))
+	assert.True(t, os.IsNotExist(err), ".terraform should not be copied")
+
+	_, err = os.Stat(filepath.Join(dest, ".terraform.lock.hcl"))
+	assert.True(t, os.IsNotExist(err), ".terraform.lock.hcl should not be copied")
 }
 
 func TestReplaceStringInFile(t *testing.T) {

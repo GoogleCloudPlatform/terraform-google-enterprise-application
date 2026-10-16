@@ -21,7 +21,8 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 )
 
-func DestroyInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
+// DestroyInfraStage executes the Terraform destroy stage for the standalone single project example.
+func DestroyInfraStage(t testing.TB, s steps.StepManager, tfvars GlobalTFVars, c CommonConf) error {
 	_, destPath, err := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
 	if err != nil {
 		return err

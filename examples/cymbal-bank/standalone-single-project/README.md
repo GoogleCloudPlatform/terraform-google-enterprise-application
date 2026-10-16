@@ -24,6 +24,13 @@ This example creates:
     - IAM permissions with 30s propagation barrier
     - Storage buckets for release artifacts and build logs
 
+## Application Source Code & Upstream Versioning
+
+The Cymbal Bank application consists of 6 microservices (`frontend`, `contacts`, `userservice`, `balancereader`, `ledgerwriter`, `transactionhistory`) whose core business logic originates from the upstream [`bank-of-anthos`](https://github.com/GoogleCloudPlatform/bank-of-anthos) repository.
+
+* **Upstream Release Tag:** Pinned to **`v0.6.9`** to guarantee full compatibility with the local Kustomize overlays, database migrations, and Skaffold pipeline manifests located under `examples/cymbal-bank/6-appsource/cymbal-bank/`.
+* **Output-Driven Contract:** The upstream repository URL and release tag are exposed as declarative outputs in `outputs.tf` (`app_source_repo_url` and `app_version`). Deployment tools (such as `eab-deployer`) and CI test suites dynamically query these outputs to clone and patch the verified application source code.
+
 ## Pre-requisites
 
 This example requires a single project already created. The following APIs will be enabled automatically by `1-harness`:
@@ -212,6 +219,8 @@ Refer to the secret configuration parameters (`gitlab_authorizer_credential_secr
 | acronyms | App Acronyms |
 | app\_certificates | App Certificates |
 | app\_ip\_addresses | App IP Addresses |
+| app\_source\_repo\_url | The upstream application repository URL. |
+| app\_version | The upstream application version or release tag deployed. |
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |

@@ -31,6 +31,12 @@ This example creates:
     - Cloud Deploy Service Account
     - Cloud Storage
 
+## Application Source Code & Upstream Versioning
+
+The Cymbal Shop application consists of 11 microservices (`frontend`, `cartservice`, `productcatalogservice`, `currencyservice`, `paymentservice`, `shippingservice`, `emailservice`, `checkoutservice`, `recommendationservice`, `adservice`, `loadgenerator`) whose core business logic originates from the upstream [`microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo) repository.
+
+* **Upstream Release Tag:** Pinned to **`v0.10.5`** to guarantee full compatibility with the local Kustomize overlays, Skaffold pipeline targets, and service manifests located under `examples/cymbal-shop/6-appsource/cymbal-shop/`.
+* **Output-Driven Contract:** The upstream repository URL and release tag are exposed as declarative outputs in `outputs.tf` (`app_source_repo_url` and `app_version`). Deployment tools (such as `eab-deployer`) and CI test suites dynamically query these outputs to clone and patch the verified application source code.
 
 ## Pre-requisites
 
@@ -455,6 +461,8 @@ You can refer to the [Troubleshooting doc](../../../docs/TROUBLESHOOTING.md).
 | acronyms | App Acronyms |
 | app\_certificates | App Certificates |
 | app\_ip\_addresses | App IP Addresses |
+| app\_source\_repo\_url | The upstream application repository URL. |
+| app\_version | The upstream application version or release tag deployed. |
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | cluster\_membership\_ids | GKE cluster membership IDs |
 | cluster\_project\_id | Cluster Project ID |

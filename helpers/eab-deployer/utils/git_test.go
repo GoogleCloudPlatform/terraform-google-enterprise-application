@@ -15,7 +15,6 @@
 package utils
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -54,13 +53,12 @@ func createLocalRepo(t *testing.T, repo string) string {
 func TestGitCSR(t *testing.T) {
 	remote := "origin"
 	repo := createLocalRepo(t, "my-csr-git-repo")
-	originPath := filepath.Join(t.TempDir(), "my-csr-git-repo-origin")
-	err := CopyDirectory(repo, originPath)
-	assert.NoError(t, err)
+	originPath := createLocalRepo(t, "my-csr-git-repo-origin")
 
 	// Test GitClone with CSR
-	localCSR := GitClone(t, "CSR", "my-csr-git-repo", repo, repo, "", logger.Discard)
-	assert.NotNil(t, localCSR)
+	localCSR, err := GitClone(t, "CSR", "my-csr-git-repo", repo, repo, "", logger.Discard)
+	assert.NoError(t, err)
+	assert.NotNil(t, localCSR.conf)
 	setMockGitConfig(repo)
 	err = localCSR.AddRemote(remote, originPath)
 	assert.NoError(t, err)
@@ -85,7 +83,8 @@ func TestGitCSR(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, hasUpstream, "branch 'unit-test' should have a remote")
 
-	origin := cloneCSR(t, "my-csr-git-repo", originPath, "", logger.Discard)
+	origin, err := cloneCSR(t, "my-csr-git-repo", originPath, "", logger.Discard)
+	assert.NoError(t, err)
 	files, err := FindFiles(originPath, "go.mod")
 	assert.NoError(t, err)
 	assert.Len(t, files, 0, "'go.mod' file should not exist on main branch")
@@ -111,24 +110,16 @@ func TestGitCSR(t *testing.T) {
 
 func TestGitClone_NonCSR(t *testing.T) {
 	remote := "origin"
-	repoURL := "https://github.com/google/blueprint-test.git"
-	repo := createLocalRepo(t, "my-git-repo")
-	originPath := filepath.Join(t.TempDir(), "my-git-repo-origin")
-	err := CopyDirectory(repo, originPath)
+	originPath := createLocalRepo(t, "my-git-repo-origin")
+	destPath := filepath.Join(t.TempDir(), "cloned-repo")
+
+	local, err := GitClone(t, "GITHUB", "blueprint-test", originPath, destPath, "", logger.Discard)
 	assert.NoError(t, err)
+	assert.NotNil(t, local.conf)
+	setMockGitConfig(destPath)
 
-	local := GitClone(t, "GITHUB", "blueprint-test", repoURL, originPath, "", logger.Discard)
-	assert.NotNil(t, local)
-	setMockGitConfig(repo)
-
-	// Check if the directory is created
-	if _, err := os.Stat(originPath); errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("Directory not created: %s", originPath)
-	}
-
-	assert.NotNil(t, local)
-	err = local.AddRemote(remote, originPath)
-	assert.NoError(t, err)
+	// Check if the directory is created by GitClone
+	assert.DirExists(t, destPath)
 
 	err = local.CheckoutBranch("unit-test")
 	assert.NoError(t, err)
@@ -137,7 +128,7 @@ func TestGitClone_NonCSR(t *testing.T) {
 	assert.Equal(t, localBranch, "unit-test", "current branch should be 'unit-test'")
 	assert.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(repo, "go.mod"), []byte("module example.com/test\n"), 0644)
+	err = os.WriteFile(filepath.Join(destPath, "go.mod"), []byte("module example.com/test\n"), 0644)
 	assert.NoError(t, err)
 
 	err = local.CommitFiles("add go mod file")
@@ -149,4 +140,31 @@ func TestGitClone_NonCSR(t *testing.T) {
 	hasUpstream, err := local.HasUpstream("unit-test", remote)
 	assert.NoError(t, err)
 	assert.True(t, hasUpstream, "branch 'unit-test' should have a remote")
+}
+
+func TestCloneUpstreamRepo(t *testing.T) {
+	repo := createLocalRepo(t, "upstream-repo")
+	cmdTag := exec.Command("git", "tag", "v1.0.0")
+	cmdTag.Dir = repo
+	err := cmdTag.Run()
+	assert.NoError(t, err)
+
+	destDir := filepath.Join(t.TempDir(), "cloned-upstream")
+
+	// Test cloning tag
+	err = CloneUpstreamRepo(t, repo, "v1.0.0", destDir, logger.Discard)
+	assert.NoError(t, err)
+	assert.DirExists(t, destDir)
+	assert.FileExists(t, filepath.Join(destDir, "README.md"))
+
+	// Test idempotency / cache reuse (calling again on existing directory)
+	err = CloneUpstreamRepo(t, repo, "v1.0.0", destDir, logger.Discard)
+	assert.NoError(t, err)
+}
+
+func TestGitClone_NonCSR_Failure(t *testing.T) {
+	tempDir := t.TempDir()
+	nonExistentPath := filepath.Join(tempDir, "non-existent")
+	_, err := GitClone(t, "GITHUB", "bad-repo", "https://invalid-url.invalid/repo.git", nonExistentPath, "", logger.Discard)
+	assert.Error(t, err)
 }
