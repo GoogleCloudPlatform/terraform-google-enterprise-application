@@ -381,7 +381,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 1. Copy the contents of this directory to the repository:
 
 ```bash
-cp -r terraform-google-enterprise-application/examples/agent/6-appsource/capital-agent/* eab-agent-capital-agent
+cp -r terraform-google-enterprise-application/examples/agent/6-appsource/capital_agent/* eab-agent-capital-agent
 ```
 
 1. Commit changes
