@@ -57,6 +57,8 @@ func TestSingleProjectSourceCymbalShop(t *testing.T) {
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
+	appSourceRepoURL := standaloneSingleProj.GetStringOutput("app_source_repo_url")
+	appVersion := standaloneSingleProj.GetStringOutput("app_version")
 
 	region := standaloneSingleProj.GetJsonOutput("cluster_regions").Array()[0].String()
 	repoName := fmt.Sprintf("eab-%s-%s", appName, serviceName)
@@ -94,7 +96,7 @@ func TestSingleProjectSourceCymbalShop(t *testing.T) {
 				}
 			}
 
-			gitAppRun("clone", "--branch", "v0.10.5", "https://github.com/GoogleCloudPlatform/microservices-demo.git", tmpDirApp)
+			gitAppRun("clone", "--branch", appVersion, appSourceRepoURL, tmpDirApp)
 			gitAppRun("config", "user.email", "eab-robot@example.com")
 			gitAppRun("config", "user.name", "EAB Robot")
 			gitAppRun("config", "init.defaultBranch", "main")

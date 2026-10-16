@@ -88,3 +88,13 @@ output "service_repository_project_id" {
   description = "The Source Repository project id."
   value       = { for k, cicd in module.cicd : k => cicd.service_repository_project_id }
 }
+
+output "app_source_repo_url" {
+  description = "The upstream application repository URL."
+  value       = "https://github.com/GoogleCloudPlatform/microservices-demo.git"
+}
+
+output "app_version" {
+  description = "The upstream application version or release tag deployed."
+  value       = "v0.10.5"
+}

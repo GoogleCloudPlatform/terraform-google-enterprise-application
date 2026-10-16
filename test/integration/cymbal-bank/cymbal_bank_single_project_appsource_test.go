@@ -62,6 +62,8 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 	env_cluster_membership_ids[envName] = make(map[string][]string, 0)
 	env_cluster_membership_ids[envName]["cluster_membership_ids"] = testutils.GetBptOutputStrSlice(standaloneSingleProj, "cluster_membership_ids")
 	deployTargets := standaloneSingleProj.GetJsonOutput("clouddeploy_targets_names")
+	appSourceRepoURL := standaloneSingleProj.GetStringOutput("app_source_repo_url")
+	appVersion := standaloneSingleProj.GetStringOutput("app_version")
 
 	type ServiceInfos struct {
 		ProjectID   string
@@ -127,7 +129,7 @@ func TestSingleProjectSourceCymbalBank(t *testing.T) {
 					}
 				}
 
-				gitAppRun("clone", "--branch", "v0.6.9", "https://github.com/GoogleCloudPlatform/bank-of-anthos.git", tmpDirApp)
+				gitAppRun("clone", "--branch", appVersion, appSourceRepoURL, tmpDirApp)
 				gitAppRun("config", "user.email", "eab-robot@example.com")
 				gitAppRun("config", "user.name", "EAB Robot")
 				// gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")

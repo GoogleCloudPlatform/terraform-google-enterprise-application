@@ -74,6 +74,10 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) bool {
 		fmt.Println("# Invalid or placeholder value for required input 'code_checkout_path'")
 		valid = false
 	}
+	if g.AttestationKMSKey == nil || isBlankOrPlaceholder(*g.AttestationKMSKey) {
+		fmt.Println("# Invalid or placeholder value for required input 'attestation_kms_key'")
+		valid = false
+	}
 
 	if g.CloudbuildV2RepositoryConfig == nil {
 		fmt.Println("# Error: You must provide `cloudbuildv2_repository_config` in your tfvars file.")
@@ -128,10 +132,6 @@ func ValidateBasicFields(t testing.TB, g GlobalTFVars) bool {
 	}
 	if g.WorkerPoolID != nil && isPlaceholder(*g.WorkerPoolID) {
 		fmt.Println("# Replace placeholder value in optional input 'workerpool_id'")
-		valid = false
-	}
-	if g.AttestationKMSKey != nil && isPlaceholder(*g.AttestationKMSKey) {
-		fmt.Println("# Replace placeholder value in optional input 'attestation_kms_key'")
 		valid = false
 	}
 	if g.BinaryAuthorizationImage != nil && isPlaceholder(*g.BinaryAuthorizationImage) {
