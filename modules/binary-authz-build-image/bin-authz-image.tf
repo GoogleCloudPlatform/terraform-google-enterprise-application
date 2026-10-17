@@ -41,6 +41,15 @@ resource "google_artifact_registry_repository_iam_member" "builder_on_attestatio
   member     = "serviceAccount:${local.service_account_email}"
 }
 
+resource "time_sleep" "wait_iam_propagation" {
+  create_duration = "45s"
+
+  depends_on = [
+    google_artifact_registry_repository.attestation_image,
+    google_artifact_registry_repository_iam_member.builder_on_attestation_repo,
+  ]
+}
+
 module "build_binary_authz_image" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 4.0"
@@ -53,5 +62,5 @@ module "build_binary_authz_image" {
   create_cmd_entrypoint = "bash"
   create_cmd_body       = "${local.cmd_prompt} || ( sleep 45 && ${local.cmd_prompt})"
 
-  module_depends_on = var.module_dependencies
+  module_depends_on = concat([time_sleep.wait_iam_propagation], var.module_dependencies)
 }

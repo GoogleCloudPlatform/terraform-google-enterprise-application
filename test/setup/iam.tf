@@ -136,9 +136,31 @@ resource "google_organization_iam_member" "policyAdmin_role" {
   member   = "serviceAccount:${each.value.email}"
 }
 
+resource "time_sleep" "wait_iam_propagation" {
+  create_duration = "60s"
+
+  depends_on = [
+    google_project_iam_member.int_test_connection_admin,
+    google_folder_iam_member.int_test_roles,
+    google_project_iam_member.int_test,
+    google_organization_iam_member.organizationServiceAgent_role,
+    google_organization_iam_member.organization_xpn_role,
+    google_organization_iam_member.orgPolicyAdmin_role,
+    google_organization_iam_member.policyAdmin_role,
+    google_service_account_iam_member.service_account_token_creator,
+    google_service_account_iam_member.service_account_user,
+    google_billing_account_iam_member.tf_billing_admin,
+    google_project_iam_member.cb_service_agent_role,
+    google_project_iam_member.google_services_usage_consumer,
+    google_project_iam_member.compute_engine_service_agent_role,
+    google_project_iam_member.compute_engine_default_service_agent_role,
+  ]
+}
+
 resource "google_service_account_key" "int_test" {
   for_each           = google_service_account.int_test
   service_account_id = each.value.id
+  depends_on         = [time_sleep.wait_iam_propagation]
 }
 
 resource "google_service_account_iam_member" "service_account_token_creator" {
@@ -177,13 +199,6 @@ resource "google_project_iam_member" "google_services_usage_consumer" {
 }
 
 resource "google_project_iam_member" "compute_engine_service_agent_role" {
-  for_each = module.harness_project
-  project  = each.value.project_id
-  role     = "roles/serviceusage.serviceUsageConsumer"
-  member   = "serviceAccount:service-${each.value.project_number}@compute-system.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "compute_engine_service_usage_role" {
   for_each = module.harness_project
   project  = each.value.project_id
   role     = "roles/serviceusage.serviceUsageConsumer"
