@@ -272,6 +272,8 @@ module "gke-standard" {
 
   identity_namespace = "${local.cluster_project_id}.svc.id.goog"
 
+  sandbox_enabled = var.sandbox_enabled
+
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
 

@@ -67,6 +67,12 @@ variable "cluster_release_channel" {
   default     = "REGULAR"
 }
 
+variable "sandbox_enabled" {
+  type        = bool
+  description = "(Beta) Enable GKE Sandbox."
+  default     = false
+}
+
 # Define Applications
 variable "apps" {
   description = <<-EOF
