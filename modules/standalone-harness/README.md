@@ -43,6 +43,7 @@ module "standalone_harness" {
 | region | Google Cloud region for deployments. | `string` | `"us-central1"` | no |
 | secondary\_ip\_cidr\_range\_01 | Secondary CIDR range 1 for pods/services. | `string` | `"192.168.0.0/18"` | no |
 | secondary\_ip\_cidr\_range\_02 | Secondary CIDR range 2 for pods/services. | `string` | `"192.168.64.0/18"` | no |
+| service\_account\_id | The service account ID to be used to build the image. | `string` | `null` | no |
 | subnet\_ip | Primary subnet CIDR block. | `string` | `"10.1.20.0/24"` | no |
 | vpc\_name | Name of the VPC to create. | `string` | `"eab-cluster"` | no |
 | worker\_range\_ip | The global IP do be reserved for peering. | `string` | `"10.3.0.0"` | no |
