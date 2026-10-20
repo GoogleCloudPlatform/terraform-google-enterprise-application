@@ -112,10 +112,11 @@ def _build_impersonation_factory(target_url: str, target_sa_email: str):
         timeout: httpx.Timeout | None = None,
         auth: httpx.Auth | None = None,
     ) -> httpx.AsyncClient:
+        default_timeout = float(os.getenv("MCP_HTTP_TIMEOUT", "30.0"))
         return httpx.AsyncClient(
             follow_redirects=True,
             headers=headers,
-            timeout=timeout if timeout is not None else httpx.Timeout(5.0),
+            timeout=timeout if timeout is not None else httpx.Timeout(default_timeout),
             auth=auth if auth is not None else auth_handler,
         )
 
