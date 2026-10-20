@@ -18,6 +18,7 @@ package mortgage
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -29,6 +30,13 @@ import (
 )
 
 func TestMortgageMCPs(t *testing.T) {
+	setupOutput := tft.NewTFBlueprintTest(t, tft.WithTFDir("../../setup"))
+	serviceAccount := setupOutput.GetJsonOutput("sa_email").Get("mortgage").String()
+	err := os.Setenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", serviceAccount)
+	if err != nil {
+		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
+	}
+
 	standalone := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../examples/mortgage/standalone-single-project"),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
@@ -39,6 +47,7 @@ func TestMortgageMCPs(t *testing.T) {
 	region := regions[0]
 	containerRegistry := standalone.GetStringOutput("artifact_registry_url")
 	cloudBuildBucket := standalone.GetStringOutput("cloudbuild_bucket")
+	workerPoolID := standalone.GetStringOutput("workerpool_id")
 
 	mcpSourcePath, err := filepath.Abs("../../../examples/mortgage/6-appsource/mcp-cloud-run")
 	if err != nil {
@@ -47,13 +56,19 @@ func TestMortgageMCPs(t *testing.T) {
 
 	standalone.DefineVerify(func(assert *assert.Assertions) {
 		t.Logf("Building all MCP images with Cloud Build...")
+		buildSA := fmt.Sprintf("ci-mortgage-agent@%s.iam.gserviceaccount.com", projectID)
+		buildSAID := fmt.Sprintf("projects/%s/serviceAccounts/%s", projectID, buildSA)
 		cloudBuildConfig := filepath.Join(mcpSourcePath, "cloudbuild.yaml")
-		buildCmd := fmt.Sprintf("builds submit %s --config=%s --substitutions=_CONTAINER_REGISTRY=%s --gcs-source-staging-dir=gs://%s/source --project=%s",
+		buildCmd := fmt.Sprintf("builds submit %s --config=%s --worker-pool=%s --region=%s --substitutions=_CONTAINER_REGISTRY=%s --gcs-source-staging-dir=gs://%s/source --project=%s --impersonate-service-account=%s --service-account=%s",
 			mcpSourcePath,
 			cloudBuildConfig,
+			workerPoolID,
+			region,
 			containerRegistry,
 			cloudBuildBucket,
 			projectID,
+			buildSA,
+			buildSAID,
 		)
 		gcloud.RunCmd(t, buildCmd)
 
@@ -71,12 +86,12 @@ func TestMortgageMCPs(t *testing.T) {
 
 		for _, svcName := range mcpServices {
 			t.Logf("Updating Cloud Run service %s with image %s...", svcName, imageMap[svcName])
-			gcloud.RunCmd(t, fmt.Sprintf("run services update %s --image=%s --project=%s --region=%s", svcName, imageMap[svcName], projectID, region))
+			gcloud.RunCmd(t, fmt.Sprintf("run services update %s --image=%s --project=%s --region=%s --impersonate-service-account=%s", svcName, imageMap[svcName], projectID, region, serviceAccount))
 		}
 
 		for _, svcName := range mcpServices {
 			t.Logf("Checking if Cloud Run service %s is Ready...", svcName)
-			svcOp := gcloud.Runf(t, "run services describe %s --project %s --region %s", svcName, projectID, region)
+			svcOp := gcloud.Runf(t, "run services describe %s --project %s --region %s --impersonate-service-account %s", svcName, projectID, region, serviceAccount)
 			readyCond := svcOp.Get("status.conditions.#(type==\"Ready\").status").String()
 			assert.Equal("True", readyCond, fmt.Sprintf("Cloud Run service %s should be in Ready status", svcName))
 		}

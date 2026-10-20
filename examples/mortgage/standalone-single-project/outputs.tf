@@ -145,3 +145,8 @@ output "mcp_discovered_servers_json" {
     }
   ])
 }
+
+output "workerpool_id" {
+  description = "The Cloud Build Worker Pool ID."
+  value       = module.standalone_harness.workerpool_id
+}

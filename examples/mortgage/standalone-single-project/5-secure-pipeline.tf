@@ -66,6 +66,13 @@ resource "google_project_iam_member" "cloudbuild_builder" {
   member   = "serviceAccount:${each.value.cloudbuild_service_account}"
 }
 
+resource "google_project_iam_member" "cloudbuild_sa_user" {
+  for_each = module.cicd
+  project  = var.project_id
+  role     = "roles/iam.serviceAccountUser"
+  member   = "serviceAccount:${each.value.cloudbuild_service_account}"
+}
+
 module "cicd" {
   source   = "../../../modules/deployment-pipeline"
   for_each = var.cloudbuildv2_repository_config.repositories

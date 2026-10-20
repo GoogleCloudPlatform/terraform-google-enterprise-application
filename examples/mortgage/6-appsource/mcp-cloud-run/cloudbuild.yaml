@@ -59,6 +59,6 @@ substitutions:
   _CONTAINER_REGISTRY: ''
 
 options:
-  logging: GCS_ONLY
+  logging: CLOUD_LOGGING_ONLY
   env:
     - 'DOCKER_CLI_EXPERIMENTAL=enabled'
