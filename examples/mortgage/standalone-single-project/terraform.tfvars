@@ -38,7 +38,9 @@ project_id = "<YOUR-PROJECT-ID>"
 # access_level_name      = "<YOUR-ACCESS-LEVEL-NAME>"
 
 # Defines the GKE Fleet team scope, Kubernetes namespace, and the associated admin group/user email.
-#teams = {"namespace" = "group@example.com"}
+teams = {
+  "mortgage-agent" = "mortgage-agent@yourdomain.com",
+}
 
 # The Cloud KMS asymmetric signing key used by Binary Authorization to sign image attestations.
 # Note: The key purpose must be ASYMMETRIC_SIGN (e.g. RSA_SIGN_PKCS1_4096_SHA512).

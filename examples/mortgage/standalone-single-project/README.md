@@ -4,12 +4,11 @@ This guide demonstrates how to deploy a Mortgage on a Google Kubernetes Engine (
 
 It integrates the following components:
 
-* An ADK mortgage assistant agent deployed to Agent Engine with OpenTelemetry instrumentation
-* Backend MCP servers on Google Kubernetes Engine (GKE) behind an internal Gateway
-* Private Service Connect (PSC) connectivity between Agent Engine and your VPC
-* Agent Gateway for governed agent egress with DLP redaction and MCP authorization
-* Model Armor guardrails for prompt and response screening
-* (Optional) Apigee MCP Discovery Proxy to transcode REST APIs into MCP tools
+* An ADK mortgage assistant agent running on Google Kubernetes Engine (GKE) Autopilot with OpenTelemetry instrumentation
+* Backend Model Context Protocol (MCP) servers (`legacy-dms`, `corporate-email`, `income-verification`) deployed on Cloud Run
+* Secure CI/CD pipelines using Cloud Build and Cloud Deploy
+* Model Armor guardrails for prompt and response screening (if enabled)
+* VPC Service Controls (VPC-SC) perimeters and ingress/egress policies securing communications
 
 **Do not use this example for production deployments, as it lacks robust separation of duties and least-privileged permissions present in the standard multi-stage deployment.**
 
@@ -420,7 +419,7 @@ The Cloud Build pipeline builds the MCP server images, pushes them to Artifact R
 
 1. After the CI build successfully runs, it will automatically trigger the CD pipeline using Cloud Deploy on the same project.
 
-1. Once the CD pipeline successfully runs, you should be able to see a deployment named `openai-app` on your cluster.
+1. Once the CD pipeline successfully runs, you should be able to see a deployment named `mortgage-agent-deployment` on your cluster.
 
 
 ## Troubleshooting

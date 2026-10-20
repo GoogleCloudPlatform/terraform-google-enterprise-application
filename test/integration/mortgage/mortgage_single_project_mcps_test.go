@@ -31,6 +31,7 @@ import (
 func TestMortgageMCPs(t *testing.T) {
 	standalone := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../examples/mortgage/standalone-single-project"),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
 	projectID := standalone.GetStringOutput("cluster_project_id")
@@ -44,12 +45,7 @@ func TestMortgageMCPs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mcpServers := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir(mcpSourcePath),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-	)
-
-	mcpServers.DefineVerify(func(assert *assert.Assertions) {
+	standalone.DefineVerify(func(assert *assert.Assertions) {
 		t.Logf("Building all MCP images with Cloud Build...")
 		cloudBuildConfig := filepath.Join(mcpSourcePath, "cloudbuild.yaml")
 		buildCmd := fmt.Sprintf("builds submit %s --config=%s --substitutions=_CONTAINER_REGISTRY=%s --gcs-source-staging-dir=gs://%s/source --project=%s",
@@ -85,5 +81,5 @@ func TestMortgageMCPs(t *testing.T) {
 			assert.Equal("True", readyCond, fmt.Sprintf("Cloud Run service %s should be in Ready status", svcName))
 		}
 	})
-	mcpServers.Test()
+	standalone.Test()
 }

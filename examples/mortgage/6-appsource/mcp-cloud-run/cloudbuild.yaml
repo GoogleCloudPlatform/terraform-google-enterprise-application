@@ -55,42 +55,8 @@ steps:
       'src/corporate-email'
     ]
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: 'deploy-legacy-dms'
-    entrypoint: 'gcloud'
-    args: [
-      'run', 'services', 'update', 'legacy-dms',
-      '--image=$_CONTAINER_REGISTRY/legacy-dms:latest',
-      '--region=$_REGION',
-      '--project=$PROJECT_ID'
-    ]
-    waitFor: ['build-legacy-dms']
-
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: 'deploy-income-verification'
-    entrypoint: 'gcloud'
-    args: [
-      'run', 'services', 'update', 'income-verification',
-      '--image=$_CONTAINER_REGISTRY/income-verification-api:latest',
-      '--region=$_REGION',
-      '--project=$PROJECT_ID'
-    ]
-    waitFor: ['build-income-verification-api']
-
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: 'deploy-corporate-email'
-    entrypoint: 'gcloud'
-    args: [
-      'run', 'services', 'update', 'corporate-email',
-      '--image=$_CONTAINER_REGISTRY/corporate-email:latest',
-      '--region=$_REGION',
-      '--project=$PROJECT_ID'
-    ]
-    waitFor: ['build-corporate-email']
-
 substitutions:
   _CONTAINER_REGISTRY: ''
-  _REGION: ''
 
 options:
   logging: GCS_ONLY

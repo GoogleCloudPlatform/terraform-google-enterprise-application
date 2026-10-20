@@ -39,8 +39,16 @@ resource "google_storage_bucket" "cloudbuild" {
   name                        = "${var.project_id}-mcp-cloudbuild"
   location                    = var.region
   uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
   force_destroy               = true
   depends_on                  = [google_project_service.apis]
+
+  dynamic "encryption" {
+    for_each = var.bucket_kms_key == null ? [] : [var.bucket_kms_key]
+    content {
+      default_kms_key_name = encryption.value
+    }
+  }
 }
 
 resource "google_service_account" "mcp_runtime" {

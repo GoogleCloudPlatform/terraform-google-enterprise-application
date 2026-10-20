@@ -16,9 +16,7 @@
 
 locals {
   mcp_service_accounts = [
-    "serviceAccount:mcp-legacy-dms@${data.google_project.project.project_id}.iam.gserviceaccount.com",
-    "serviceAccount:mcp-corporate-email@${data.google_project.project.project_id}.iam.gserviceaccount.com",
-    "serviceAccount:mcp-income-verification@${data.google_project.project.project_id}.iam.gserviceaccount.com",
+    for sa in google_service_account.mcp_runtime : sa.member
   ]
 }
 
