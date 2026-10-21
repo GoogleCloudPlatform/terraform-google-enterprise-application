@@ -478,5 +478,6 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | network\_project\_id | Network Project ID |
 | service\_repository\_name | The Source Repository name. |
 | service\_repository\_project\_id | The Source Repository project id. |
+| workerpool\_id | The Cloud Build Worker Pool ID. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
