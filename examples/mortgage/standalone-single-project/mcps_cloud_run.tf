@@ -59,6 +59,32 @@ resource "google_service_account" "mcp_runtime" {
   depends_on   = [google_project_service.apis]
 }
 
+locals {
+  mcp_telemetry_roles = [
+    "roles/telemetry.tracesWriter",
+    "roles/telemetry.metricsWriter",
+  ]
+  mcp_runtime_roles = flatten([
+    for mcp_key, mcp_val in var.mcp_services : [
+      for role in local.mcp_telemetry_roles : {
+        key     = "${mcp_key}-${role}"
+        account = google_service_account.mcp_runtime[mcp_key].member
+        role    = role
+      }
+    ]
+  ])
+}
+
+resource "google_project_iam_member" "mcp_runtime_telemetry" {
+  for_each = {
+    for item in local.mcp_runtime_roles : item.key => item
+  }
+
+  project = var.project_id
+  role    = each.value.role
+  member  = each.value.account
+}
+
 resource "google_service_account" "invoker" {
   project      = var.project_id
   account_id   = "agent-mcp-invoker"

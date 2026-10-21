@@ -32,6 +32,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
     OTLPSpanExporter,
 )
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.starlette import StarletteInstrumentor
 from opentelemetry.resourcedetector.gcp_resource_detector import (
     GoogleCloudResourceDetector,
 )
@@ -98,8 +99,9 @@ def init_telemetry() -> trace.Tracer:
         MeterProvider(resource=resource, metric_readers=[reader])
     )
 
-    # Auto-instrument FastAPI (includes Starlette layer)
+    # Auto-instrument FastAPI and Starlette
     FastAPIInstrumentor().instrument()
+    StarletteInstrumentor().instrument()
 
     return trace.get_tracer(SERVICE_NAME)
 
