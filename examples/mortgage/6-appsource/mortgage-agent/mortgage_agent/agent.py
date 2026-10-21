@@ -116,7 +116,11 @@ def _build_impersonation_factory(target_url: str, target_sa_email: str):
         return httpx.AsyncClient(
             follow_redirects=True,
             headers=headers,
-            timeout=timeout if timeout is not None else httpx.Timeout(default_timeout),
+            timeout=(
+                timeout
+                if timeout is not None
+                else httpx.Timeout(default_timeout)
+            ),
             auth=auth if auth is not None else auth_handler,
         )
 
@@ -148,11 +152,16 @@ _SERVICE_DESCRIPTIONS: dict[str, str] = {
 
 _INSTRUCTION_TEMPLATE = """
 You are a mortgage underwriting assistant.
-You help loan officers process mortgage applications by retrieving documents, verifying income, and communicating results.
+You help loan officers process mortgage applications by retrieving
+documents, verifying income, and communicating results.
 
-You connect to backend systems through an Agent Gateway. The set of available tools is discovered from the Agent Registry at startup and may change between deployments.
+You connect to backend systems through an Agent Gateway. The set of
+available tools is discovered from the Agent Registry at startup and
+may change between deployments.
 
-**Only call tools by the exact names listed below.** Tool names use underscores as separators (e.g. `legacy_dms_search_documents`); never use a colon (`:`), slash, dot, or any other separator.
+**Only call tools by the exact names listed below.** Tool names use
+underscores as separators (e.g. `legacy_dms_search_documents`); never use
+a colon (`:`), slash, dot, or any other separator.
 
 **MCP services discovered from the registry:**
 {mcp_services_doc}
@@ -164,16 +173,24 @@ You connect to backend systems through an Agent Gateway. The set of available to
 4. Summarize your findings clearly for the loan officer.
 
 **Rules:**
-- NEVER fabricate or estimate financial figures. Only report data returned by tools.
+- NEVER fabricate or estimate financial figures. Only report data returned
+  by tools.
 - Always cite which tool/system provided each piece of data.
-- If a tool call fails or returns an error, report the error honestly to the user.
-- **Never invent tool names.** Only call tools whose exact names appear in the MCP services list above or in the utility tools list below. If no listed tool matches your need, tell the user you cannot perform that operation rather than guessing at a name.
+- If a tool call fails or returns an error, report the error honestly to the
+  user.
+- **Never invent tool names.** Only call tools whose exact names appear in
+  the MCP services list above or in the utility tools list below. If no listed
+  tool matches your need, tell the user you cannot perform that operation
+  rather than guessing at a name.
 - Be concise and professional in all responses.
-- When presenting tax return or applicant data, ALWAYS include the SSN field and display its value exactly as returned by the tool (e.g. "[US_SOCIAL_SECURITY_NUMBER]"). Never omit SSN fields.
+- When presenting tax return or applicant data, ALWAYS include the SSN field
+  and display its value exactly as returned by the tool
+  (e.g. "[US_SOCIAL_SECURITY_NUMBER]"). Never omit SSN fields.
 
 You also have utility tools:
 - get_current_time: Returns the current time in any timezone.
-- list_mcp_connections: Shows which MCP servers were discovered from the registry."""
+- list_mcp_connections: Shows which MCP servers were discovered from the
+  registry."""
 
 
 def _render_mcp_services_doc() -> str:
