@@ -51,6 +51,8 @@ locals {
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sqladmin.googleapis.com",
+    "cloudkms.googleapis.com",
+    "sourcerepo.googleapis.com",
     "storage-api.googleapis.com",
     "trafficdirector.googleapis.com",
   ]
@@ -91,12 +93,17 @@ module "private_workerpool" {
   depends_on = [google_project_service.required_services]
 }
 
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 module "binary_autz" {
   source                      = "../binary-authz-build-image"
   project_id                  = var.project_id
   location                    = var.region
   binary_auth_image_version   = "v1.0"
   workerpool_id               = local.workerpool_id
+  service_account_id          = var.service_account_id
   attestation_repository_name = var.attestation_repository_name
   bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 

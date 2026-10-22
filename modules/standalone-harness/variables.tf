@@ -61,6 +61,12 @@ variable "additional_services" {
   default     = []
 }
 
+variable "service_account_id" {
+  type        = string
+  description = "The Service Account ID to be used by Cloud Build when building the Binary Authz attestation image."
+  default     = null
+}
+
 variable "vpc_name" {
   type        = string
   description = "Name of the VPC to create."
