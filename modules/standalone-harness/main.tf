@@ -93,10 +93,6 @@ module "private_workerpool" {
   depends_on = [google_project_service.required_services]
 }
 
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
 module "binary_autz" {
   source                      = "../binary-authz-build-image"
   project_id                  = var.project_id
