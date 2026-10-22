@@ -45,11 +45,11 @@ variable "service_perimeter_name" {
 variable "service_perimeter_mode" {
   description = "(VPC-SC) Service perimeter mode: ENFORCE, DRY_RUN."
   type        = string
-  default     = "ENFORCE"
+  default     = null
 
   validation {
-    condition     = contains(["ENFORCE", "DRY_RUN"], var.service_perimeter_mode)
-    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN."
+    condition     = var.service_perimeter_mode == null || contains(["ENFORCE", "DRY_RUN"], coalesce(var.service_perimeter_mode, "DRY_RUN"))
+    error_message = "The service_perimeter_mode value must be one of: ENFORCE, DRY_RUN, or null."
   }
 }
 
@@ -133,6 +133,7 @@ variable "enables_network_connection_and_peering_routes" {
 variable "attestation_kms_key" {
   type        = string
   description = "The KMS Key ID to be used by attestor."
+  default     = null
 }
 
 variable "cloudbuildv2_repository_config" {

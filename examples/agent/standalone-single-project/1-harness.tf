@@ -32,8 +32,8 @@ module "standalone_harness" {
   private_workerpool_name                       = "wp-eab-cap-agent"
   ncc_config                                    = var.ncc_config
 
-  build_image_module_dependencies = concat([
+  build_image_module_dependencies = var.service_perimeter_name != null ? concat([
     for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],
     [for i in google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment : i.id],
-  )
+  ) : []
 }
