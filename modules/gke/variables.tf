@@ -144,3 +144,14 @@ variable "enable_csi_filestore" {
   type        = bool
   default     = true
 }
+
+variable "network_tags" {
+  description = <<-EOF
+  Network tags applied to all cluster nodes (static, NAP, Autopilot).
+  - Default "egress-internet" allows Foundation Cloud NAT egress (when NAT is enabled).
+  - Custom lists override the default: include "egress-internet" to preserve NAT access, pass [] to remove tags, or use your custom Foundation egress_tags value instead.
+  EOF
+  type        = list(string)
+  default     = ["egress-internet"]
+}
+

@@ -9,6 +9,14 @@ This module creates the following resources:
 - Cloud Armor security policies for application protection
 - Reserved static external IP addresses (frontend-ips) for deployed applications
 
+## Network Tags and Foundation Cloud NAT
+
+By default, this module assigns the `egress-internet` network tag to all cluster nodes (static node pools, NAP auto-provisioned pools, and Autopilot nodes).
+
+- **Internet Egress**: The `egress-internet` tag matches the default firewall rules created by the Enterprise Foundation blueprint to allow outbound internet access through Cloud NAT (when NAT is enabled).
+- **Custom Tags**: Setting a custom list in `network_tags` overrides the default. To add custom tags while retaining Foundation NAT access, explicitly include `"egress-internet"` in the list (e.g. `["egress-internet", "my-custom-tag"]`).
+- **Disabling Tags**: Passing an empty list (`network_tags = []`) removes the tags set by this module from the cluster nodes, blocking outbound internet egress in Foundation environments.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -30,6 +38,7 @@ This module creates the following resources:
 | folder\_id | Folder ID | `string` | n/a | yes |
 | master\_ipv4\_cidr\_blocks | List of IP ranges (One range per cluster) in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. | `list(string)` | <pre>[<br>  "10.11.10.0/28",<br>  "10.11.20.0/28"<br>]</pre> | no |
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
+| network\_tags | Network tags applied to all cluster nodes (static, NAP, Autopilot).<br>- Default "egress-internet" allows Foundation Cloud NAT egress (when NAT is enabled).<br>- Custom lists override the default: include "egress-internet" to preserve NAT access, pass [] to remove tags, or use your custom Foundation egress\_tags value instead. | `list(string)` | <pre>[<br>  "egress-internet"<br>]</pre> | no |
 | org\_id | Organization ID | `string` | n/a | yes |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `null` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |

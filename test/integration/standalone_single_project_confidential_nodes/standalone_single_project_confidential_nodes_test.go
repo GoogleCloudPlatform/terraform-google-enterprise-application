@@ -100,6 +100,9 @@ func TestStandaloneSingleProjectConfidentialNodesExample(t *testing.T) {
 			clusterName := regexp.MustCompile(`\/clusters\/([^\/]*)$`).FindStringSubmatch(membershipOp.Get("endpoint.gkeCluster.resourceLink").String())[1]
 			clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", clusterName, clusterLocation, projectID)
 
+			// Network tags
+			testutils.AssertClusterNetworkTags(assert, clusterOp, clusterType, id, vars)
+
 			// Extract enablePrivateEndpoint flag value
 			enablePrivateEndpoint := clusterOp.Get("privateClusterConfig.enablePrivateEndpoint").Bool()
 			assert.True(enablePrivateEndpoint, "The cluster external endpoint must be private.")

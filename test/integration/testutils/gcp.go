@@ -17,10 +17,36 @@ package testutils
 import (
 	"fmt"
 
-	"github.com/mitchellh/go-testing-interface"
-
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/mitchellh/go-testing-interface"
+	"github.com/stretchr/testify/assert"
+	"github.com/tidwall/gjson"
 )
+
+// AssertClusterNetworkTags verifies that cluster node pools and auto-provisioning config contain expected network tags.
+func AssertClusterNetworkTags(assert *assert.Assertions, clusterOp gjson.Result, clusterType string, clusterID string, vars map[string]interface{}) {
+	expectedTags := []string{"egress-internet"}
+	if tags, exists := vars["network_tags"].([]string); exists {
+		expectedTags = tags
+	}
+
+	var tagLists [][]string
+	if clusterType == "AUTOPILOT" || clusterType == "STANDARD-NAP" {
+		tagLists = append(tagLists, utils.GetResultStrSlice(clusterOp.Get("nodePoolAutoConfig.networkTags.tags").Array()))
+	}
+	for _, pool := range clusterOp.Get("nodePools").Array() {
+		tagLists = append(tagLists, utils.GetResultStrSlice(pool.Get("config.tags").Array()))
+	}
+
+	for _, actual := range tagLists {
+		if len(expectedTags) == 0 {
+			assert.Empty(actual, fmt.Sprintf("Cluster %s should have no network tags", clusterID))
+		} else {
+			assert.Subset(actual, expectedTags, fmt.Sprintf("Cluster %s must contain tags %v", clusterID, expectedTags))
+		}
+	}
+}
 
 // GetOrgACMPolicyID gets the Organization Access Context Manager Policy ID
 func GetOrgACMPolicyID(t testing.TB, orgID string) string {
