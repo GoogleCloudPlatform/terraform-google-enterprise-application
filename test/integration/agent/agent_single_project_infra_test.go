@@ -112,7 +112,7 @@ func TestStandaloneSingleProjectAgentExample(t *testing.T) {
 			clusterOp := gcloud.Runf(t, "container clusters describe %s --location %s --project %s", clusterName, clusterLocation, projectID)
 
 			// Network tags
-			testutils.AssertClusterNetworkTags(assert, clusterOp, clusterType, id, vars)
+			testutils.AssertClusterNetworkTags(assert, clusterOp, clusterType, id, []string{"egress-internet"})
 
 			// Extract enablePrivateEndpoint flag value
 			enablePrivateEndpoint := clusterOp.Get("privateClusterConfig.enablePrivateEndpoint").Bool()
