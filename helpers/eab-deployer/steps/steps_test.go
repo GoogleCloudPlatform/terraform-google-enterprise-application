@@ -16,6 +16,7 @@ package steps
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -131,4 +132,62 @@ func TestProcessSteps(t *testing.T) {
 		"unit DESTROYED",
 	}
 	assert.ElementsMatch(t, expectedSteps, s.ListSteps())
+}
+
+func TestConcurrentSteps(t *testing.T) {
+	s, err := LoadSteps(filepath.Join(t.TempDir(), "concurrent.json"))
+	assert.NoError(t, err)
+
+	const numWorkers = 20
+	done := make(chan bool, numWorkers)
+
+	for i := 0; i < numWorkers; i++ {
+		stepName := fmt.Sprintf("step.%d", i)
+		go func(name string) {
+			_ = s.RunStep(name, func() error {
+				return nil
+			})
+			_ = s.IsStepComplete(name)
+			_ = s.ListSteps()
+			done <- true
+		}(stepName)
+	}
+
+	for i := 0; i < numWorkers; i++ {
+		<-done
+	}
+
+	for i := 0; i < numWorkers; i++ {
+		stepName := fmt.Sprintf("step.%d", i)
+		assert.True(t, s.IsStepComplete(stepName))
+	}
+}
+
+func TestDeleteStepsFile(t *testing.T) {
+	tempFile := filepath.Join(t.TempDir(), "to_delete.json")
+	err := os.WriteFile(tempFile, []byte("{}"), 0644)
+	assert.NoError(t, err)
+
+	err = DeleteStepsFile(tempFile)
+	assert.NoError(t, err)
+	assert.NoFileExists(t, tempFile)
+
+	// Deleting non-existent file returns nil without error
+	err = DeleteStepsFile(tempFile)
+	assert.NoError(t, err)
+}
+
+func TestSaveSteps(t *testing.T) {
+	tempFile := filepath.Join(t.TempDir(), "save_test.json")
+	s, err := LoadSteps(tempFile)
+	assert.NoError(t, err)
+
+	s.Steps["manual"] = Step{Name: "manual", Status: "COMPLETED"}
+	err = s.SaveSteps()
+	assert.NoError(t, err)
+	assert.FileExists(t, tempFile)
+
+	loaded, err := LoadSteps(tempFile)
+	assert.NoError(t, err)
+	assert.True(t, loaded.IsStepComplete("manual"))
 }

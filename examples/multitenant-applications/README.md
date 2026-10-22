@@ -14,7 +14,7 @@ The application is a web-based e-commerce app where users can browse items, add 
 
 In the developer platform, it is deployed into a single namespace/fleet scope (`cymbalshops`). All the 11 microservices that build this application are deployed through a single `admin` project using Cloud Deploy. This means only one `skaffold.yaml` file is required to deploy all services.
 
-For more information about the Cymbal Bank application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.1).
+For more information about the Cymbal Shop application, please visit [microservices-demo repository](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.10.5).
 
 ## Cymbal Bank Example
 
@@ -604,7 +604,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Clone Bank of Anthos repository:
 
     ```bash
-    git clone --branch v0.6.7 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
+    git clone --branch v0.6.9 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
     ```
 
 1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.
@@ -795,7 +795,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Clone the `microservices-demo` repository, it contains the cymbal-shop source code:
 
     ```bash
-    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git cymbal-shop
+    git clone --branch v0.10.5 https://github.com/GoogleCloudPlatform/microservices-demo.git cymbal-shop
     ```
 
 1. Navigate to the repository and create main branch on top of the current version:
@@ -1101,7 +1101,7 @@ All services have common infrastructure under `envs/shared`.
 1. Clone the `microservices-demo` repository, it contains the cymbal-shop source code:
 
     ```bash
-    git clone --branch v0.10.1 https://github.com/GoogleCloudPlatform/microservices-demo.git cymbal-shop
+    git clone --branch v0.10.5 https://github.com/GoogleCloudPlatform/microservices-demo.git cymbal-shop
     ```
 
 1. Navigate to the repository and create main branch on top of the current version:
@@ -1170,7 +1170,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Clone Bank of Anthos repository:
 
     ```bash
-    git clone --branch v0.6.7 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
+    git clone --branch v0.6.9 https://github.com/GoogleCloudPlatform/bank-of-anthos.git
     ```
 
 1. Create `BANK_OF_ANTHOS_PATH` and `APP_SOURCE_DIR_PATH` environment variables.

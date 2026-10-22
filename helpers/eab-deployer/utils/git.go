@@ -16,7 +16,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -32,47 +31,68 @@ type GitRepo struct {
 }
 
 // GitClone clones git repositories, supporting CSR, Github and Gitlab type of source control
-func GitClone(t testing.TB, repositoryType, repositoryName, repositoryURL, path, project string, logger *logger.Logger) GitRepo {
-	conf := GitRepo{}
+func GitClone(t testing.TB, repositoryType, repositoryName, repositoryURL, path, project string, logger *logger.Logger) (GitRepo, error) {
 	if repositoryType != "CSR" {
-		conf = cloneGit(t, repositoryURL, path, logger)
-	} else {
-		conf = cloneCSR(t, repositoryName, path, project, logger)
+		return cloneGit(t, repositoryURL, path, logger)
 	}
-	return conf
+	return cloneCSR(t, repositoryName, path, project, logger)
 }
 
 // cloneCSR clones a Google Cloud Source repository and returns a CmdConfig pointing to the repository.
-func cloneCSR(t testing.TB, name, path, project string, logger *logger.Logger) GitRepo {
+func cloneCSR(t testing.TB, name, path, project string, logger *logger.Logger) (GitRepo, error) {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		gcloud.Runf(t, "source repos clone %s %s --project %s", name, path, project)
+		cmd := fmt.Sprintf("source repos clone %s %s", name, path)
+		if project != "" {
+			cmd = fmt.Sprintf("%s --project %s", cmd, project)
+		}
+		op, err := gcloud.RunCmdE(t, cmd)
+		if err != nil {
+			return GitRepo{}, fmt.Errorf("failed to clone CSR repository %s: %w, output: %s", name, err, op)
+		}
+	} else if err != nil {
+		return GitRepo{}, err
 	}
 	return GitRepo{
 		conf: git.NewCmdConfig(t, git.WithDir(path), git.WithLogger(logger)),
-	}
+	}, nil
 }
 
 // cloneGit clones a Github or Gitlab repository and returns a CmdConfig pointing to the repository.
-func cloneGit(t testing.TB, repositoryUrl, path string, logger *logger.Logger) GitRepo {
+func cloneGit(t testing.TB, repositoryUrl, path string, logger *logger.Logger) (GitRepo, error) {
 	_, err := os.Stat(path)
-
 	if os.IsNotExist(err) {
 		cmd := exec.Command("git", "clone", repositoryUrl, path)
-		fmt.Printf("Executing command %s", cmd)
-		// Run the command and capture its standard output
-		output, err := cmd.Output()
+		output, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Fatalf("Error executing git command: %v", err)
+			return GitRepo{}, fmt.Errorf("failed executing git clone for %s: %w, output: %s", repositoryUrl, err, string(output))
 		}
-		// Convert the output to a string and trim whitespace
-		branchName := strings.TrimSpace(string(output))
-		fmt.Printf("Current Git branch: %s\n", branchName)
+	} else if err != nil {
+		return GitRepo{}, err
 	}
 
 	return GitRepo{
 		conf: git.NewCmdConfig(t, git.WithDir(path), git.WithLogger(logger)),
+	}, nil
+}
+
+// CloneUpstreamRepo clones an upstream repository using a shallow clone at the given tag or branch.
+// If the destination directory already exists, it reuses the existing clone.
+func CloneUpstreamRepo(t testing.TB, repoURL, tagOrBranch, destDir string, logger *logger.Logger) error {
+	if _, err := os.Stat(destDir); err == nil {
+		return nil
 	}
+
+	cmd := exec.Command("git", "clone", "--depth", "1", "--branch", tagOrBranch, repoURL, destDir)
+	if logger != nil {
+		logger.Logf(t, "Cloning upstream repository %s (tag/branch: %s) into %s", repoURL, tagOrBranch, destDir)
+	}
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		_ = os.RemoveAll(destDir)
+		return fmt.Errorf("failed to clone upstream repository %s (%s): %w, output: %s", repoURL, tagOrBranch, err, string(output))
+	}
+	return nil
 }
 
 // GetCurrentBranch gets the current branch in the repository.

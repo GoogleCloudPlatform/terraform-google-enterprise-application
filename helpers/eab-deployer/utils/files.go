@@ -24,6 +24,7 @@ import (
 const (
 	TerraformTempDir  = ".terraform"
 	TerraformLockFile = ".terraform.lock.hcl"
+	GitDir            = ".git"
 )
 
 // CopyFile copies a single file from the src path to the dest path
@@ -60,7 +61,7 @@ func CopyDirectory(src string, dest string) error {
 		return err
 	}
 	for _, f := range files {
-		if f.Name() == TerraformTempDir || f.Name() == TerraformLockFile {
+		if f.Name() == TerraformTempDir || f.Name() == TerraformLockFile || f.Name() == GitDir {
 			continue
 		}
 		if f.IsDir() {

@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/helpers/eab-deployer/gcp"
@@ -35,9 +37,12 @@ const (
 )
 
 func getStandalonePaths(EABPath, checkoutPath, exampleName string) (string, string, error) {
+	normExample := strings.ReplaceAll(exampleName, "_", "-")
 	candidates := []string{
 		filepath.Join("examples", exampleName, "standalone-single-project"),
+		filepath.Join("examples", normExample, "standalone-single-project"),
 		filepath.Join("examples", exampleName),
+		filepath.Join("examples", normExample),
 	}
 
 	for _, relPath := range candidates {
@@ -50,7 +55,8 @@ func getStandalonePaths(EABPath, checkoutPath, exampleName string) (string, stri
 	return "", "", fmt.Errorf("could not find example directory for '%s' in %s", exampleName, EABPath)
 }
 
-func DeployInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
+// DeployInfraStage executes the Terraform provisioning stage for the standalone single project example.
+func DeployInfraStage(t testing.TB, s steps.StepManager, tfvars GlobalTFVars, c CommonConf) error {
 	srcPath, destPath, err := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
 	if err != nil {
 		return err
@@ -85,7 +91,7 @@ func DeployInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Common
 	}
 
 	// Run Terraform Apply
-	err = s.RunStep("gcp-infra.apply", func() error {
+	return s.RunStep("gcp-infra.apply", func() error {
 		options := &terraform.Options{
 			TerraformDir:             destPath,
 			Logger:                   c.Logger,
@@ -97,27 +103,105 @@ func DeployInfraStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Common
 		_, err = terraform.InitAndApplyE(t, options)
 		return err
 	})
-	return err
 }
 
-func getAppSourcePath(c CommonConf, exampleName, serviceName string) string {
-	pathsToCheck := []string{
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource", exampleName, serviceName),
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource", serviceName),
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource", exampleName),
-		filepath.Join(c.EABPath, "examples", exampleName, "6-appsource"),
+// ServiceDeployer encapsulates the deployment pipeline lifecycle for an individual microservice.
+type ServiceDeployer struct {
+	StepManager steps.StepManager
+	TFVars      GlobalTFVars
+	Conf        CommonConf
+	Outputs     AppInfraOutputs
+	Preparer    AppSourcePreparer
+}
+
+func NewServiceDeployer(sm steps.StepManager, tfvars GlobalTFVars, conf CommonConf, outputs AppInfraOutputs, preparer AppSourcePreparer) *ServiceDeployer {
+	return &ServiceDeployer{
+		StepManager: sm,
+		TFVars:      tfvars,
+		Conf:        conf,
+		Outputs:     outputs,
+		Preparer:    preparer,
 	}
-	for _, p := range pathsToCheck {
-		if fi, err := os.Stat(p); err == nil && fi.IsDir() {
-			return p
+}
+
+// Deploy prepares the repository, commits files, pushes to remote, and monitors Cloud Build / Cloud Deploy.
+func (d *ServiceDeployer) Deploy(t testing.TB, serviceKey string, repo Repository) error {
+	stepName := fmt.Sprintf("gcp-appsource.%s", serviceKey)
+	return d.StepManager.RunStep(stepName, func() error {
+		repoName := repo.RepositoryName
+		if repoName == "" {
+			if rName, ok := d.Outputs.ServiceRepositoryName[serviceKey]; ok && rName != "" {
+				repoName = rName
+			} else {
+				repoName = serviceKey
+			}
 		}
-	}
-	return ""
+
+		repoProjectID := d.TFVars.ProjectID
+		if pID, ok := d.Outputs.ServiceRepositoryProjectID[serviceKey]; ok && pID != "" {
+			repoProjectID = pID
+		}
+
+		gitPath := filepath.Join(d.Conf.CheckoutPath, repoName)
+		conf, err := utils.GitClone(t, d.TFVars.CloudbuildV2RepositoryConfig.RepoType, repoName, repo.RepositoryURL, gitPath, repoProjectID, d.Conf.Logger)
+		if err != nil {
+			return err
+		}
+
+		if err := conf.CheckoutBranch("main"); err != nil {
+			return err
+		}
+
+		// Prepare and copy App Source code to target repo using the resolved strategy
+		if err := d.Preparer.Prepare(t, d.Conf, d.Outputs.AppSourceRepoURL, d.Outputs.AppVersion, serviceKey, gitPath); err != nil {
+			return err
+		}
+
+		// Commit and push changes to trigger Cloud Build pipeline
+		commitMsg := fmt.Sprintf("Initialize %s repo for %s", repoName, serviceKey)
+		if err := conf.CommitFiles(commitMsg); err != nil {
+			return err
+		}
+
+		if err := conf.PushBranch("main", "origin"); err != nil {
+			return err
+		}
+
+		commitSha, err := conf.GetCommitSha()
+		if err != nil {
+			return err
+		}
+
+		// Monitor Cloud Build completion
+		buildClient := gcp.NewGCP()
+		if err := buildClient.WaitBuildSuccess(t, repoProjectID, d.TFVars.Region, repoName, commitSha, fmt.Sprintf("Build for %s failed", serviceKey), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries); err != nil {
+			return err
+		}
+
+		// Monitor Cloud Deploy release success if targets are configured
+		if targets, ok := d.Outputs.CloudDeployTargetsNames[serviceKey]; ok && len(targets) > 0 {
+			shortSha := commitSha
+			if len(shortSha) > 7 {
+				shortSha = shortSha[:7]
+			}
+			if err := buildClient.WaitReleaseSuccess(t, repoProjectID, d.TFVars.Region, serviceKey, shortSha, fmt.Sprintf("Cloud Deploy release for %s failed", serviceKey), MaxBuildRetries); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
-func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
+// DeployAppSourceStage orchestrates the application source preparation and deployment across all microservices in parallel.
+func DeployAppSourceStage(t testing.TB, s steps.StepManager, tfvars GlobalTFVars, c CommonConf) error {
 	if tfvars.CloudbuildV2RepositoryConfig == nil {
 		return fmt.Errorf("cloudbuildv2_repository_config is required for DeployAppSourceStage")
+	}
+
+	repos := tfvars.CloudbuildV2RepositoryConfig.Repositories
+	if len(repos) == 0 {
+		return nil
 	}
 
 	_, standaloneDestPath, err := getStandalonePaths(c.EABPath, c.CheckoutPath, c.ExampleName)
@@ -125,81 +209,59 @@ func DeployAppSourceStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		return err
 	}
 	outputs := GetAppInfraStepOutputs(t, standaloneDestPath)
+	preparer := GetAppSourcePreparer(c.ExampleName)
+	deployer := NewServiceDeployer(s, tfvars, c, outputs, preparer)
 
-	for serviceKey, repository := range tfvars.CloudbuildV2RepositoryConfig.Repositories {
-		err = s.RunStep(fmt.Sprintf("gcp-appsource.%s", serviceKey), func() error {
-			repoName := repository.RepositoryName
-			if repoName == "" {
-				if rName, ok := outputs.ServiceRepositoryName[serviceKey]; ok && rName != "" {
-					repoName = rName
-				} else {
-					repoName = serviceKey
-				}
-			}
-
-			repoProjectID := tfvars.ProjectID
-			if pID, ok := outputs.ServiceRepositoryProjectID[serviceKey]; ok && pID != "" {
-				repoProjectID = pID
-			}
-
-			gitPath := filepath.Join(c.CheckoutPath, repoName)
-			conf := utils.GitClone(t, tfvars.CloudbuildV2RepositoryConfig.RepoType, repoName, repository.RepositoryURL, gitPath, repoProjectID, c.Logger)
-
-			err := conf.CheckoutBranch("main")
-			if err != nil {
-				return err
-			}
-
-			// Copy App Source code to target repo
-			appSrcDir := getAppSourcePath(c, c.ExampleName, serviceKey)
-			if appSrcDir == "" {
-				return fmt.Errorf("could not find app source path for example %s, service %s", c.ExampleName, serviceKey)
-			}
-
-			err = utils.CopyDirectory(appSrcDir, gitPath)
-			if err != nil {
-				return err
-			}
-
-			// Commit and push changes to trigger Cloud Build pipeline
-			err = conf.CommitFiles(fmt.Sprintf("Initialize %s repo for %s", repoName, serviceKey))
-			if err != nil {
-				return err
-			}
-
-			err = conf.PushBranch("main", "origin")
-			if err != nil {
-				return err
-			}
-
-			commitSha, err := conf.GetCommitSha()
-			if err != nil {
-				return err
-			}
-
-			// Monitor build success
-			err = gcp.NewGCP().WaitBuildSuccess(t, repoProjectID, tfvars.Region, repoName, commitSha, fmt.Sprintf("Build for %s failed", serviceKey), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
-			if err != nil {
-				return err
-			}
-
-			// Monitor Cloud Deploy release success if targets are configured
-			if targets, ok := outputs.CloudDeployTargetsNames[serviceKey]; ok && len(targets) > 0 {
-				shortSha := commitSha
-				if len(shortSha) > 7 {
-					shortSha = shortSha[:7]
-				}
-				err = gcp.NewGCP().WaitReleaseSuccess(t, repoProjectID, tfvars.Region, serviceKey, shortSha, fmt.Sprintf("Cloud Deploy release for %s failed", serviceKey), MaxBuildRetries)
-				if err != nil {
-					return err
-				}
-			}
-
-			return nil
-		})
-		if err != nil {
-			return err
+	if len(repos) == 1 {
+		for serviceKey, repository := range repos {
+			return deployer.Deploy(t, serviceKey, repository)
 		}
 	}
+
+	var wg sync.WaitGroup
+	var errMu sync.Mutex
+	var errList []error
+
+	for serviceKey, repository := range repos {
+		wg.Add(1)
+		go func(sKey string, repo Repository) {
+			defer wg.Done()
+			completed := false
+			defer func() {
+				if !completed {
+					r := recover()
+					var err error
+					if r != nil {
+						err = fmt.Errorf("service '%s' panicked: %v", sKey, r)
+					} else {
+						err = fmt.Errorf("service '%s' terminated prematurely", sKey)
+					}
+					stepName := fmt.Sprintf("gcp-appsource.%s", sKey)
+					_ = s.FailStep(stepName, err.Error())
+					errMu.Lock()
+					errList = append(errList, err)
+					errMu.Unlock()
+				}
+			}()
+
+			if err := deployer.Deploy(t, sKey, repo); err != nil {
+				errMu.Lock()
+				errList = append(errList, fmt.Errorf("service '%s': %w", sKey, err))
+				errMu.Unlock()
+			}
+			completed = true
+		}(serviceKey, repository)
+	}
+
+	wg.Wait()
+
+	if len(errList) > 0 {
+		var errMsgs []string
+		for _, e := range errList {
+			errMsgs = append(errMsgs, e.Error())
+		}
+		return fmt.Errorf("failed deploying app source for services:\n%s", strings.Join(errMsgs, "\n"))
+	}
+
 	return nil
 }
