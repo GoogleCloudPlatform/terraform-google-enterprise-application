@@ -24,8 +24,7 @@ resource "google_service_account" "binauthz_builder" {
 resource "google_project_iam_member" "binauthz_builder_roles" {
   for_each = var.service_account_id == null ? toset([
     "roles/logging.logWriter",
-    "roles/storage.admin",
-    "roles/artifactregistry.writer"
+    "roles/storage.objectAdmin"
   ]) : []
   project = var.project_id
   role    = each.value
@@ -34,7 +33,7 @@ resource "google_project_iam_member" "binauthz_builder_roles" {
 
 resource "google_project_iam_member" "workerpool_user" {
   count   = var.workerpool_id != null ? 1 : 0
-  project = var.project_id
+  project = local.workerpool_project_id
   role    = "roles/cloudbuild.workerPoolUser"
   member  = "serviceAccount:${local.service_account_email}"
 }
@@ -47,6 +46,7 @@ locals {
     ) : var.service_account_id
   ) : google_service_account.binauthz_builder[0].email
 
+  workerpool_project_id = var.workerpool_id != null ? split("/", var.workerpool_id)[1] : null
   bucket_logs_url       = var.bucket_logs_url != null ? "--gcs-log-dir=${var.bucket_logs_url}" : "--default-buckets-behavior=regional-user-owned-bucket"
   service_account       = "--service-account=${local.service_account_id_to_use}"
   workerpool_id         = var.workerpool_id != null ? "--worker-pool=${var.workerpool_id}" : ""
@@ -67,7 +67,7 @@ resource "google_artifact_registry_repository_iam_member" "builder_on_attestatio
   project    = google_artifact_registry_repository.attestation_image.project
   location   = google_artifact_registry_repository.attestation_image.location
   repository = google_artifact_registry_repository.attestation_image.name
-  role       = "roles/artifactregistry.repoAdmin"
+  role       = "roles/artifactregistry.writer"
   member     = "serviceAccount:${local.service_account_email}"
 }
 
@@ -87,6 +87,7 @@ module "build_binary_authz_image" {
     var.module_dependencies,
     [google_artifact_registry_repository.attestation_image.id],
     [for r in google_project_iam_member.binauthz_builder_roles : r.id],
+    [for r in google_artifact_registry_repository_iam_member.builder_on_attestation_repo : r.id],
     [for r in google_project_iam_member.workerpool_user : r.id]
   )
 }
