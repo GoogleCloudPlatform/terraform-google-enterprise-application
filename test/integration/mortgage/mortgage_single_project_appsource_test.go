@@ -74,16 +74,7 @@ func TestSingleProjectSourceMortgage(t *testing.T) {
 
 		tmpDirApp := t.TempDir()
 
-		vars := map[string]interface{}{
-			"project_id":                 projectID,
-			"region":                     region,
-			"env_cluster_membership_ids": env_cluster_membership_ids,
-			"buckets_force_destroy":      "true",
-		}
-
 		appsource := tft.NewTFBlueprintTest(t,
-			tft.WithTFDir(appSourcePath),
-			tft.WithVars(vars),
 			tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 		)
 
@@ -120,6 +111,7 @@ func TestSingleProjectSourceMortgage(t *testing.T) {
 
 			// replace the placeholder in config-map.yaml before committing
 			newContent := strings.Replace(string(content), "'MCP_SERVERS_PLACEHOLDER'", fmt.Sprintf("%q", mcpDiscoveredJSON), 1)
+			assert.NotEqual(string(content), newContent, "Placeholder 'MCP_SERVERS_PLACEHOLDER' was not found or replaced in config-map.yaml")
 			err = os.WriteFile(configMapPath, []byte(newContent), 0644)
 			if err != nil {
 				t.Fatalf("Failed to update %s: %v", configMapPath, err)
