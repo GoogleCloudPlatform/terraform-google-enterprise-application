@@ -59,8 +59,8 @@ teams = {
 # }
 
 cloudbuildv2_repository_config = {
-  github_secret_id                            = null
-  repo_type                                   = "GITLABv2"
+  github_secret_id = null
+  repo_type        = "GITLABv2"
   repositories = {
     "eab-mortgage-agent" = {
       repository_name = "eab-mortgage-agent"
