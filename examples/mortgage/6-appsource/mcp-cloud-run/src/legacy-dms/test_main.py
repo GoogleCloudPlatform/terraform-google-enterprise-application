@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 # Patch telemetry before importing server to avoid GCP API calls during
 # testing.
 with patch("otel_setup.init_telemetry", return_value=MagicMock()):
-    from server import _get_document, _search_documents
+    from main import _get_document, _search_documents
 
 
 def test_search_by_name_and_doc_type():

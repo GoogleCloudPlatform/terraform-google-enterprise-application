@@ -36,7 +36,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "ruff>=0.8.0",
     "ty>=0.0.1a0",
 ]
@@ -47,8 +47,3 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
-
-[dependency-groups]
-dev = [
-    "pytest==9.0.3",
-]
