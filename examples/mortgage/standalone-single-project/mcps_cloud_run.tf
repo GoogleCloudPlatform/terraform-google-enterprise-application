@@ -171,13 +171,15 @@ resource "google_cloud_run_v2_service_iam_member" "invoker" {
 }
 
 locals {
-  cloudbuild_sas = toset(concat(
-    [
-      "serviceAccount:${module.multitenant_infra.cluster_project_number}@cloudbuild.gserviceaccount.com",
-      "serviceAccount:${module.multitenant_infra.cluster_project_number}-compute@developer.gserviceaccount.com",
-    ],
-    local.sa_cb,
-  ))
+  cloudbuild_sas = merge(
+    {
+      "cloudbuild" = "serviceAccount:${module.multitenant_infra.cluster_project_number}@cloudbuild.gserviceaccount.com"
+      "compute"    = "serviceAccount:${module.multitenant_infra.cluster_project_number}-compute@developer.gserviceaccount.com"
+    },
+    {
+      for k, cicd in module.cicd : "cicd-${k}" => "serviceAccount:${cicd.cloudbuild_service_account}"
+    }
+  )
 }
 
 resource "google_artifact_registry_repository_iam_member" "cloudbuild_writer" {
