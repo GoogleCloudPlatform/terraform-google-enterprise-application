@@ -315,17 +315,24 @@ def _tool_names(server: dict[str, Any]) -> list[str]:
 
 
 def _attach_invoker_auth(toolset, invoker_sa_email: str | None) -> None:
+    if not invoker_sa_email:
+        return
     conn_params = getattr(toolset, "_connection_params", None)
     resolved_url = getattr(conn_params, "url", None)
     if (
-        invoker_sa_email
-        and conn_params is not None
+        conn_params is not None
         and resolved_url
         and hasattr(conn_params, "httpx_client_factory")
     ):
         conn_params.httpx_client_factory = _build_impersonation_factory(
             target_url=resolved_url,
             target_sa_email=invoker_sa_email,
+        )
+    else:
+        logger.warning(
+            "Unable to attach invoker auth for %s to toolset %s",
+            invoker_sa_email,
+            toolset,
         )
 
 
@@ -337,12 +344,25 @@ def _toolset_from_http_url(
     )
     from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 
-    toolset = McpToolset(
-        connection_params=StreamableHTTPConnectionParams(url=url),
+    client_factory = (
+        _build_impersonation_factory(
+            target_url=url,
+            target_sa_email=invoker_sa_email,
+        )
+        if invoker_sa_email
+        else None
+    )
+    conn_params = (
+        StreamableHTTPConnectionParams(
+            url=url, httpx_client_factory=client_factory
+        )
+        if client_factory is not None
+        else StreamableHTTPConnectionParams(url=url)
+    )
+    return McpToolset(
+        connection_params=conn_params,
         tool_name_prefix=prefix,
     )
-    _attach_invoker_auth(toolset, invoker_sa_email)
-    return toolset
 
 
 def _fallback_server_descriptors() -> list[dict[str, Any]]:
