@@ -273,7 +273,6 @@ steps:
       ["/bin/bash", "-c", "cft test run TestMortgageMCPs --stage verify --verbose"]
     waitFor:
       - ssp-mortgage-verify
-    allowFailure: false
 
   - id: deploy-mortgage
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
