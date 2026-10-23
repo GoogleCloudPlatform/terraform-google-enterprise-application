@@ -78,15 +78,10 @@ func TestMortgageMCPs(t *testing.T) {
 			"income-verification",
 		}
 
-		imageMap := map[string]string{
-			"legacy-dms":          fmt.Sprintf("%s/legacy-dms:latest", containerRegistry),
-			"corporate-email":     fmt.Sprintf("%s/corporate-email:latest", containerRegistry),
-			"income-verification": fmt.Sprintf("%s/income-verification-api:latest", containerRegistry),
-		}
-
 		for _, svcName := range mcpServices {
-			t.Logf("Updating Cloud Run service %s with image %s...", svcName, imageMap[svcName])
-			gcloud.RunCmd(t, fmt.Sprintf("run services update %s --image=%s --project=%s --region=%s --impersonate-service-account=%s", svcName, imageMap[svcName], projectID, region, serviceAccount))
+			image := fmt.Sprintf("%s/%s:latest", containerRegistry, svcName)
+			t.Logf("Updating Cloud Run service %s with image %s...", svcName, image)
+			gcloud.RunCmd(t, fmt.Sprintf("run services update %s --image=%s --project=%s --region=%s --impersonate-service-account=%s", svcName, image, projectID, region, serviceAccount))
 		}
 
 		for _, svcName := range mcpServices {

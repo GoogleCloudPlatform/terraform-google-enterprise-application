@@ -30,7 +30,7 @@ locals {
 
   target_deploy_parameters = { (local.env) : {
     "PROJECT_ID"           = var.project_id
-    "MODEL_ID"             = "gemini-3.1-flash-lite"
+    "MODEL_ID"             = var.model_id
     "SERVICE_ACCOUNT"      = google_service_account.gsa_mortgage_agent.email
     "MCP_INVOKER_SA_EMAIL" = google_service_account.invoker.email
     }

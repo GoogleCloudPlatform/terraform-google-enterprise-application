@@ -1,6 +1,6 @@
-# Example: Getting started with Mortgage Example
+# Example: Getting started with the Mortgage Agent Example
 
-This guide demonstrates how to deploy a Mortgage on a Google Kubernetes Engine (GKE) cluster. It is a modified version of the [service-extensions-gke-gateway Example](https://github.com/GoogleCloudPlatform/cloud-networking-solutions/tree/main/demos/service-extensions-gke-gateway) adapted for Scaffold and the Enterprise Application Blueprint.
+This guide demonstrates how to deploy the Mortgage Agent example on a Google Kubernetes Engine (GKE) cluster. It is a modified version of the [service-extensions-gke-gateway Example](https://github.com/GoogleCloudPlatform/cloud-networking-solutions/tree/main/demos/service-extensions-gke-gateway) adapted for Scaffold and the Enterprise Application Blueprint.
 
 It integrates the following components:
 
@@ -41,6 +41,11 @@ This example creates:
     - Cloud Deploy Service Account
     - Cloud Storage
     - Model Armor Template
+- MCP Cloud Run Resources:
+    - Cloud Run v2 Services (`legacy-dms`, `corporate-email`, `income-verification`)
+    - Artifact Registry repository for MCP containers
+    - Cloud Storage staging bucket for MCP Cloud Build
+    - Service Accounts for MCP runtime and Agent invoker impersonation
 
 
 ## Pre-requisites
@@ -181,7 +186,7 @@ To proceed with GitHub as your git provider you will need:
 
    > Note: Default name for the repository is: `eab-mortgage-agent`; If you choose other name for your repository make sure you update `terraform.tfvars` the repository names under `cloudbuildv2_repository_config` variable.
 
-- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your instalarion id can be foundt in [https://github.com/settings/installations](https://github.com/settings/installations).
+- [Install Cloud Build App on Github](https://github.com/apps/google-cloud-build). After the installation, take note of the application id, it will be used later. Your installation id can be found in [https://github.com/settings/installations](https://github.com/settings/installations).
 - [Create Personal Access Token (classic) on Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
    - Grant `repo` and `read:user` (or if app is installed in org use `read:org`)
    - After creating the token in Secret Manager, you will use the secret id in the `terraform.tfvars` file.
@@ -347,11 +352,12 @@ the steps below assume that you are checked out on the same level as `terraform-
    export ARTIFACT_REGISTRY_URL=$(terraform output -raw artifact_registry_url)
    export ENV_NAME=$(terraform output -raw env)
    export MCP_JSON=$(terraform output -raw mcp_discovered_servers_json)
+   export WORKERPOOL_ID=$(terraform output -raw workerpool_id)
    ```
 
 ### Deploy the MCP Images
 
-The Cloud Build pipeline builds the MCP server images, pushes them to Artifact Registry, and updates the Cloud Run services with the new images.
+The Cloud Build pipeline builds the MCP server images and pushes them to Artifact Registry.
 
 1. Enter the `mcp-cloud-run` folder:
 
@@ -366,9 +372,29 @@ The Cloud Build pipeline builds the MCP server images, pushes them to Artifact R
      --config=cloudbuild.yaml \
      --project=$PROJECT_ID \
      --region=$REGION \
+     --worker-pool=$WORKERPOOL_ID \
+     --service-account="projects/$PROJECT_ID/serviceAccounts/ci-mortgage-agent@$PROJECT_ID.iam.gserviceaccount.com" \
      --gcs-source-staging-dir=gs://$CLOUDBUILD_BUCKET/source \
-     --gcs-log-dir=gs://$CLOUDBUILD_BUCKET/logs \
-     --substitutions=_CONTAINER_REGISTRY=$ARTIFACT_REGISTRY_URL,_REGION=$REGION
+     --substitutions=_CONTAINER_REGISTRY=$ARTIFACT_REGISTRY_URL
+   ```
+
+1. Update the Cloud Run services to use the newly built images:
+
+   ```bash
+   gcloud run services update legacy-dms \
+     --image="$ARTIFACT_REGISTRY_URL/legacy-dms:latest" \
+     --project=$PROJECT_ID \
+     --region=$REGION
+
+   gcloud run services update corporate-email \
+     --image="$ARTIFACT_REGISTRY_URL/corporate-email:latest" \
+     --project=$PROJECT_ID \
+     --region=$REGION
+
+   gcloud run services update income-verification \
+     --image="$ARTIFACT_REGISTRY_URL/income-verification:latest" \
+     --project=$PROJECT_ID \
+     --region=$REGION
    ```
 
 ### Deploy the Mortgage Agent
@@ -393,7 +419,7 @@ The Cloud Build pipeline builds the MCP server images, pushes them to Artifact R
     git clone https://gitlab.com/your-group/eab-mortgage-agent.git
     ```
 
-1. Copy the contents of this directory into `eab-mortgage-agent` the repository:
+1. Copy the contents of this directory into the `eab-mortgage-agent` repository:
 
    ```bash
    cp -r terraform-google-enterprise-application/examples/mortgage/6-appsource/mortgage-agent/* eab-mortgage-agent
@@ -442,7 +468,8 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | mcp\_placeholder\_image | The placeholder image to use for MCP services. | `string` | `"us-docker.pkg.dev/cloudrun/container/placeholder"` | no |
-| mcp\_services | Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name AND the URL-mask token (e.g. legacy-dms.<mcp\_internal\_dns\_zone.domain> -> Cloud Run service 'legacy-dms'). | <pre>map(object({<br>    account_id         = string<br>    image              = optional(string)<br>    container_port     = optional(number, 8080)<br>    min_instance_count = optional(number, 0)<br>    max_instance_count = optional(number, 3)<br>    cpu                = optional(string, "1")<br>    memory             = optional(string, "512Mi")<br>  }))</pre> | <pre>{<br>  "corporate-email": {<br>    "account_id": "mcp-corporate-email"<br>  },<br>  "income-verification": {<br>    "account_id": "mcp-income-verification"<br>  },<br>  "legacy-dms": {<br>    "account_id": "mcp-legacy-dms"<br>  }<br>}</pre> | no |
+| mcp\_services | Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name. | <pre>map(object({<br>    account_id         = string<br>    image              = optional(string)<br>    container_port     = optional(number, 8080)<br>    min_instance_count = optional(number, 0)<br>    max_instance_count = optional(number, 3)<br>    cpu                = optional(string, "1")<br>    memory             = optional(string, "512Mi")<br>  }))</pre> | <pre>{<br>  "corporate-email": {<br>    "account_id": "mcp-corporate-email"<br>  },<br>  "income-verification": {<br>    "account_id": "mcp-income-verification"<br>  },<br>  "legacy-dms": {<br>    "account_id": "mcp-legacy-dms"<br>  }<br>}</pre> | no |
+| model\_id | The Gemini model ID to be used by the mortgage agent. | `string` | `"gemini-3.1-flash-lite"` | no |
 | ncc\_config | Configuration block for Google Cloud Network Connectivity Center (NCC) Spokes.<br>- enable\_ncc: (bool) Toggles whether to create a new NCC spoke.<br>- hub\_uri: (string) The URI of an existing Hub. [Required if enable\_ncc is TRUE]<br>- spoke\_group: (string) The NCC group the spoke belongs to (default: "default").<br>- spoke\_name: (string) Name for the main VPC spoke.<br>- spoke\_description: (string) Description for the main VPC spoke.<br>- spoke\_labels: (map) Labels for the main VPC spoke.<br>- spoke\_exclude\_export\_ranges: (set of strings) IP ranges to exclude from route export.<br>- spoke\_include\_export\_ranges: (set of strings) IP ranges to explicitly include in route export. | <pre>object({<br>    enable_ncc                  = optional(bool, false)<br>    hub_uri                     = optional(string)<br>    spoke_group                 = optional(string, "default")<br>    spoke_name                  = optional(string, "vpc-spoke")<br>    spoke_description           = optional(string)<br>    spoke_labels                = optional(map(string))<br>    spoke_exclude_export_ranges = optional(set(string), [])<br>    spoke_include_export_ranges = optional(set(string), [])<br>  })</pre> | `{}` | no |
 | network\_id | The network ID where the private worker pool is going to be peered. If not provided, a new network is going to be created. | `string` | `null` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | `null` | no |

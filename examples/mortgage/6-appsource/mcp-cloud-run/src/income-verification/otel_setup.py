@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""OpenTelemetry initialization for income-verification-api."""
+"""OpenTelemetry initialization for income-verification."""
 
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "income-verification-api")
+SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "income-verification")
 
 
 def _get_channel_credentials() -> grpc.ChannelCredentials:

@@ -229,6 +229,12 @@ variable "ncc_config" {
   }
 }
 
+variable "model_id" {
+  description = "The Gemini model ID to be used by the mortgage agent."
+  type        = string
+  default     = "gemini-3.1-flash-lite"
+}
+
 // MCP Variables
 variable "artifact_registry_id" {
   description = "The Artifact Registry repository ID"
@@ -243,7 +249,7 @@ variable "mcp_placeholder_image" {
 }
 
 variable "mcp_services" {
-  description = "Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name AND the URL-mask token (e.g. legacy-dms.<mcp_internal_dns_zone.domain> -> Cloud Run service 'legacy-dms')."
+  description = "Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name."
   type = map(object({
     account_id         = string
     image              = optional(string)
