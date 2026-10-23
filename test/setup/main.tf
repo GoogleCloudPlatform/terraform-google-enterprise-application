@@ -24,6 +24,7 @@ locals {
     "cymbal-shop"     = ["cymbalshops"],
     "hpc"             = ["hpc-team-a", "hpc-team-b"],
     "htc"             = ["hpc-team-a", "hpc-team-b"],
+    "mortgage"        = ["mortgage-agent"],
   }
 
   teams = distinct(flatten([for i in var.examples_tested : lookup(local.examples_namespaces, i, [])]))
