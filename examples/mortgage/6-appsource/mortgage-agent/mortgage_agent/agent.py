@@ -442,10 +442,10 @@ def _discover_mcp_toolsets() -> list:
     endpoint = os.environ.get("MCP_REGISTRY_ENDPOINT")
     invoker_sa_email = os.environ.get("MCP_INVOKER_SA_EMAIL")
 
-    raw_servers: list[dict[str, Any]] = []
+    raw_servers: list[dict[str, Any]] = _fallback_server_descriptors()
     registry = None
     _ar_module = None
-    if project and location:
+    if not raw_servers and project and location:
         try:
             from google.adk.integrations import agent_registry as _ar_module
             from google.adk.integrations.agent_registry import AgentRegistry
@@ -474,9 +474,6 @@ def _discover_mcp_toolsets() -> list:
                         time.sleep(wait)
             if last_exc is not None:
                 logger.error("Failed to list MCP servers: %s", last_exc)
-
-    if not raw_servers:
-        raw_servers = _fallback_server_descriptors()
 
     toolsets = []
     for server in raw_servers:
