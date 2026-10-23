@@ -171,24 +171,27 @@ resource "google_cloud_run_v2_service_iam_member" "invoker" {
 }
 
 locals {
-  cloudbuild_sas = [
-    "serviceAccount:${module.multitenant_infra.cluster_project_number}@cloudbuild.gserviceaccount.com",
-    "serviceAccount:${module.multitenant_infra.cluster_project_number}-compute@developer.gserviceaccount.com",
-  ]
+  cloudbuild_sas = toset(concat(
+    [
+      "serviceAccount:${module.multitenant_infra.cluster_project_number}@cloudbuild.gserviceaccount.com",
+      "serviceAccount:${module.multitenant_infra.cluster_project_number}-compute@developer.gserviceaccount.com",
+    ],
+    local.sa_cb,
+  ))
 }
 
 resource "google_artifact_registry_repository_iam_member" "cloudbuild_writer" {
-  count      = length(local.cloudbuild_sas)
+  for_each   = local.cloudbuild_sas
   project    = var.project_id
   location   = var.region
   repository = google_artifact_registry_repository.mcp.name
   role       = "roles/artifactregistry.writer"
-  member     = local.cloudbuild_sas[count.index]
+  member     = each.value
 }
 
 resource "google_storage_bucket_iam_member" "cloudbuild_object" {
-  count  = length(local.cloudbuild_sas)
-  bucket = google_storage_bucket.cloudbuild.name
-  role   = "roles/storage.objectAdmin"
-  member = local.cloudbuild_sas[count.index]
+  for_each = local.cloudbuild_sas
+  bucket   = google_storage_bucket.cloudbuild.name
+  role     = "roles/storage.objectAdmin"
+  member   = each.value
 }
