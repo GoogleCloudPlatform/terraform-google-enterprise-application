@@ -592,7 +592,7 @@ wheels = [
 ]
 
 [[package]]
-name = "income-verification-api"
+name = "income-verification"
 version = "1.0.0"
 source = { virtual = "." }
 dependencies = [

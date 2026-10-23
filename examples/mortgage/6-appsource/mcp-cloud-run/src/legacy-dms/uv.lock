@@ -752,11 +752,6 @@ dev = [
     { name = "ty" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "authlib", specifier = "==1.7.2" },
@@ -770,7 +765,7 @@ requires-dist = [
     { name = "opentelemetry-resourcedetector-gcp", specifier = ">=1.7.0a0" },
     { name = "opentelemetry-sdk", specifier = ">=1.25.0" },
     { name = "pygments", specifier = "==2.20.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3" },
     { name = "python-multipart", specifier = "==0.0.32" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.0" },
     { name = "starlette", specifier = ">=1.0.1" },
@@ -778,9 +773,6 @@ requires-dist = [
     { name = "uvicorn", specifier = ">=0.34.0" },
 ]
 provides-extras = ["dev"]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = "==9.0.3" }]
 
 [[package]]
 name = "markdown-it-py"
