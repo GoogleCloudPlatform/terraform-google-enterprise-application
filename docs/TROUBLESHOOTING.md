@@ -538,7 +538,7 @@ Configure an organization policy override allowing external IP allocation specif
 ```bash
 PROJECT_ID="<YOUR_SERVICE_PROJECT_ID>"
 
-gcloud resource-manager org-policies allow compute.vmExternalIpAccess \
+gcloud org-policies allow compute.vmExternalIpAccess \
   projects/${PROJECT_ID}/zones/us-central1-a/instances/eab-vpc-workerpool-cloud-build-nat-vm \
   projects/${PROJECT_ID}/zones/us-central1-b/instances/eab-vpc-workerpool-cloud-build-nat-vm \
   projects/${PROJECT_ID}/zones/us-central1-c/instances/eab-vpc-workerpool-cloud-build-nat-vm \
