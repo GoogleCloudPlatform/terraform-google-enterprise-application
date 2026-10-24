@@ -93,8 +93,7 @@ flowchart TD
 ### Software
 Install the following local dependencies:
 
-- [Google Cloud SDK](https://cloud.google.com/sdk/install) version 480.0.0 or later.
-- [Terraform](https://www.terraform.io/downloads.html) version 1.5.7 or later.
+- [Google Cloud SDK](https://cloud.google.com/sdk/install) version 487.0.0 or later.\n- [Terraform](https://www.terraform.io/downloads.html) version 1.6 or later.
 - [Git](https://git-scm.com/) version 2.28 or later.
 - [jq](https://stedolan.github.io/jq/) version 1.6 or later.
 
@@ -520,7 +519,7 @@ service_perimeter_mode = null
 # Network Connectivity Center (NCC) Configuration (Preferred)
 ncc_config = {
   enable_ncc                  = true
-  hub_uri                     = "projects/INTERCONNECT_PROJECT_ID/locations/global/hubs/HUB_NAME" # or var.NCC_HUB_URI
+  hub_uri                     = "projects/INTERCONNECT_PROJECT_ID/locations/global/hubs/HUB_NAME"
   spoke_group                 = "default"
   spoke_name                  = "vpc-spoke-eab-cluster"
   spoke_description           = "NCC VPC Spoke for EAB GKE Cluster"
@@ -633,11 +632,11 @@ kubectl get pods,gateway,httproute -n capital-agent-production
 GATEWAY_IP=$(kubectl get gateway capital-agent-gw -n capital-agent-production -o jsonpath='{.status.addresses[0].value}')
 
 # Test Health Endpoint
-curl -k "http://${GATEWAY_IP}/health"
+curl "http://${GATEWAY_IP}/health"
 # Expected response: ok (HTTP 200)
 
 # Test Readiness Endpoint
-curl -k "http://${GATEWAY_IP}/ready"
+curl "http://${GATEWAY_IP}/ready"
 # Expected response: ready (HTTP 200)
 ```
 
