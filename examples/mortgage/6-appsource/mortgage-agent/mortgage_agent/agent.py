@@ -386,9 +386,9 @@ def _fallback_server_descriptors() -> list[dict[str, Any]]:
             "name": name,
             "resolved_url": f"https://{name}.{domain}/mcp",
             "tool_name_prefix": _prefix_for(name),
-            "tools": list(tools),
+            "tools": list(tool_names),
         }
-        for name, tools in _KNOWN_MCP_SERVERS
+        for name, tool_names in _KNOWN_MCP_SERVERS
     ]
 
 
