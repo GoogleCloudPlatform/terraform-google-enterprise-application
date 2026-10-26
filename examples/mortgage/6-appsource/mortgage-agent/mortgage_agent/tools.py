@@ -38,7 +38,7 @@ def get_current_time(timezone_name: str = "UTC") -> dict:
             "datetime": now.isoformat(),
             "utc_offset": now.strftime("%z"),
         }
-    except KeyError:
+    except ValueError:
         now = datetime.now(timezone.utc)
         return {
             "timezone": "UTC",
