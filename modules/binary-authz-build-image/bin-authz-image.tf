@@ -24,7 +24,7 @@ resource "google_service_account" "binauthz_builder" {
 resource "google_project_iam_member" "binauthz_builder_roles" {
   for_each = var.service_account_id == null ? toset([
     "roles/logging.logWriter",
-    "roles/storage.objectAdmin"
+    "roles/storage.admin"
   ]) : []
   project = var.project_id
   role    = each.value
