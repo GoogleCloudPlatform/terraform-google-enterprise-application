@@ -99,8 +99,7 @@ def init_telemetry() -> trace.Tracer:
         MeterProvider(resource=resource, metric_readers=[reader])
     )
 
-    # Auto-instrument FastAPI and Starlette
-    FastAPIInstrumentor().instrument()
+    # Auto-instrument Starlette
     StarletteInstrumentor().instrument()
 
     return trace.get_tracer(SERVICE_NAME)
