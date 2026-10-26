@@ -31,13 +31,6 @@ resource "google_project_iam_member" "binauthz_builder_roles" {
   member  = "serviceAccount:${google_service_account.binauthz_builder[0].email}"
 }
 
-resource "google_project_iam_member" "workerpool_user" {
-  count   = var.workerpool_id != null ? 1 : 0
-  project = local.workerpool_project_id
-  role    = "roles/cloudbuild.workerPoolUser"
-  member  = "serviceAccount:${local.service_account_email}"
-}
-
 locals {
   service_account_id_to_use = var.service_account_id != null ? var.service_account_id : google_service_account.binauthz_builder[0].id
   service_account_email = var.service_account_id != null ? (
@@ -46,7 +39,6 @@ locals {
     ) : var.service_account_id
   ) : google_service_account.binauthz_builder[0].email
 
-  workerpool_project_id = var.workerpool_id != null ? split("/", var.workerpool_id)[1] : null
   bucket_logs_url       = var.bucket_logs_url != null ? "--gcs-log-dir=${var.bucket_logs_url}" : "--default-buckets-behavior=regional-user-owned-bucket"
   service_account       = "--service-account=${local.service_account_id_to_use}"
   workerpool_id         = var.workerpool_id != null ? "--worker-pool=${var.workerpool_id}" : ""
@@ -63,7 +55,6 @@ resource "google_artifact_registry_repository" "attestation_image" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "builder_on_attestation_repo" {
-  count      = local.service_account_email != null ? 1 : 0
   project    = google_artifact_registry_repository.attestation_image.project
   location   = google_artifact_registry_repository.attestation_image.location
   repository = google_artifact_registry_repository.attestation_image.name
@@ -87,7 +78,6 @@ module "build_binary_authz_image" {
     var.module_dependencies,
     [google_artifact_registry_repository.attestation_image.id],
     [for r in google_project_iam_member.binauthz_builder_roles : r.id],
-    [for r in google_artifact_registry_repository_iam_member.builder_on_attestation_repo : r.id],
-    [for r in google_project_iam_member.workerpool_user : r.id]
+    [google_artifact_registry_repository_iam_member.builder_on_attestation_repo.id]
   )
 }
