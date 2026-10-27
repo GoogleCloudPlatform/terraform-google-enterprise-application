@@ -53,7 +53,7 @@ func TestValidateStartupScript(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if strings.Contains(logs, "Finished Google Compute Engine Startup Scripts") {
+		if strings.Contains(logs, "Finished running startup scripts.") || strings.Contains(logs, "Finished Google Compute Engine Startup Scripts") {
 			if strings.Contains(logs, "exit status 1") {
 				t.Fatal("ERROR: Startup Script finished with invalid exit status.")
 			}
@@ -120,6 +120,7 @@ func TestBootstrapGitlabVM(t *testing.T) {
 		"eab-default-example-hello-world",
 		"eab-agent-capital-agent",
 		"eab-llm-model-llamma-model",
+		"eab-mortgage-agent",
 	}
 
 	for _, envName := range testutils.EnvNames(t) {
