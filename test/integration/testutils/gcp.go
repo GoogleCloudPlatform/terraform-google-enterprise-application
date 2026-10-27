@@ -31,9 +31,14 @@ func AssertClusterNetworkTags(assert *assert.Assertions, clusterOp gjson.Result,
 		autoConfigTags := utils.GetResultStrSlice(clusterOp.Get("nodePoolAutoConfig.networkTags.tags").Array())
 		assert.Subset(autoConfigTags, expectedTags, fmt.Sprintf("Cluster %s nodePoolAutoConfig should contain network tags %v", clusterID, expectedTags))
 	}
-	for _, pool := range clusterOp.Get("nodePools").Array() {
-		poolTags := utils.GetResultStrSlice(pool.Get("config.tags").Array())
-		assert.Subset(poolTags, expectedTags, fmt.Sprintf("Cluster %s node pool %s should contain network tags %v", clusterID, pool.Get("name").String(), expectedTags))
+
+	if clusterType != "AUTOPILOT" {
+		nodePools := clusterOp.Get("nodePools").Array()
+		assert.NotEmpty(nodePools, fmt.Sprintf("Cluster %s should have at least one node pool", clusterID))
+		for _, pool := range nodePools {
+			poolTags := utils.GetResultStrSlice(pool.Get("config.tags").Array())
+			assert.Subset(poolTags, expectedTags, fmt.Sprintf("Cluster %s node pool %s should contain network tags %v", clusterID, pool.Get("name").String(), expectedTags))
+		}
 	}
 }
 
