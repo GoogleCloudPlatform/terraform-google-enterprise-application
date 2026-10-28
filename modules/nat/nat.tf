@@ -90,6 +90,10 @@ resource "google_compute_router_nat" "cb_nat" {
   nat_ips                            = [google_compute_address.cloud_build_nat[0].self_link]
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 
+  # The NAT VM SNATs the entire private pool behind one IP, so Cloud NAT sees a
+  # single VM. 32768 ports fit within one NAT IP (64,512 usable ports).
+  min_ports_per_vm = 32768
+
   min_ports_per_vm = 32768
 
   subnetwork {
