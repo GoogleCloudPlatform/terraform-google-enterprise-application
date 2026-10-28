@@ -94,8 +94,6 @@ resource "google_compute_router_nat" "cb_nat" {
   # single VM. 32768 ports fit within one NAT IP (64,512 usable ports).
   min_ports_per_vm = 32768
 
-  min_ports_per_vm = 32768
-
   subnetwork {
     name                    = google_compute_subnetwork.nat_subnet.id
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
