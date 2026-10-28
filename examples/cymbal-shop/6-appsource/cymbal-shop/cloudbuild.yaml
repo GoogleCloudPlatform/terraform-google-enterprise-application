@@ -16,7 +16,7 @@ steps:
   - name: gcr.io/cloud-builders/gcloud
     id: download-skaffold-cache
     args: ['storage', 'cp', $_CACHE_URI, '/workspace/cache']
-  - name: gcr.io/k8s-skaffold/skaffold:v2.21.0
+  - name: gcr.io/k8s-skaffold/skaffold:v2.25.0
     entrypoint: 'bash'
     args:
     - '-c'
