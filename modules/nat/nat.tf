@@ -61,9 +61,19 @@ module "firewall_rules" {
   ]
 }
 
+resource "google_compute_address" "cloud_build_nat" {
+  count        = var.create_cloud_nat ? 1 : 0
+  project      = local.network_project_id
+  address_type = "EXTERNAL"
+  name         = "${local.network_name}-cloud-build-nat"
+  network_tier = "PREMIUM"
+  region       = var.region
+}
+
 # Cloud Router
 resource "google_compute_router" "cb_router" {
-  name    = "${local.network_name}-${var.region}-router"
+  count   = var.create_cloud_nat ? 1 : 0
+  name    = "${local.network_name}-${var.region}-cb-router"
   network = var.network_id
   region  = var.region
   project = local.network_project_id
@@ -71,12 +81,16 @@ resource "google_compute_router" "cb_router" {
 
 # Cloud NAT
 resource "google_compute_router_nat" "cb_nat" {
+  count                              = var.create_cloud_nat ? 1 : 0
   project                            = local.network_project_id
-  name                               = "${local.network_name}-${var.region}-nat"
-  router                             = google_compute_router.cb_router.name
-  region                             = google_compute_router.cb_router.region
-  nat_ip_allocate_option             = "AUTO_ONLY"
+  name                               = "${local.network_name}-${var.region}-cb-nat"
+  router                             = google_compute_router.cb_router[0].name
+  region                             = google_compute_router.cb_router[0].region
+  nat_ip_allocate_option             = "MANUAL_ONLY"
+  nat_ips                            = [google_compute_address.cloud_build_nat[0].self_link]
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+
+  min_ports_per_vm = 32768
 
   subnetwork {
     name                    = google_compute_subnetwork.nat_subnet.id
@@ -85,8 +99,11 @@ resource "google_compute_router_nat" "cb_nat" {
 
   log_config {
     enable = true
-    filter = "ALL"
+    filter = "ERRORS_ONLY"
   }
+
+  # On upgrade, the VM must release the address before the NAT can claim it.
+  depends_on = [google_compute_instance.vm_proxy]
 }
 
 resource "google_compute_instance" "vm_proxy" {
@@ -117,11 +134,6 @@ resource "google_compute_instance" "vm_proxy" {
   service_account {
     scopes = ["cloud-platform"]
   }
-
-  depends_on = [
-    google_compute_router_nat.cb_nat,
-    google_compute_subnetwork.nat_subnet
-  ]
 }
 
 #  This route will route packets to the NAT VM
@@ -133,6 +145,8 @@ resource "google_compute_route" "through_nat" {
   network           = local.network_name
   next_hop_instance = google_compute_instance.vm_proxy.id
   priority          = 10
+
+  depends_on = [google_compute_router_nat.cb_nat]
 }
 
 resource "google_compute_route" "through_nat2" {
@@ -142,9 +156,11 @@ resource "google_compute_route" "through_nat2" {
   network           = local.network_name
   next_hop_instance = google_compute_instance.vm_proxy.id
   priority          = 10
+
+  depends_on = [google_compute_router_nat.cb_nat]
 }
 
-# This route allow the NAT VM to reach the internet
+# This route allows the NAT VM to reach the internet through Cloud NAT
 
 resource "google_compute_route" "direct_to_gateway" {
   name             = "${local.network_name}-direct-to-gateway-range-1"
