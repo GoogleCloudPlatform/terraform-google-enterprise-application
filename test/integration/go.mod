@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration
 
-go 1.25.0
+go 1.26
 
 require (
 	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.18.0
