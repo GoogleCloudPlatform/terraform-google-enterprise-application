@@ -22,7 +22,8 @@ locals {
 }
 
 module "app" {
-  source = "../../modules/deployment-pipeline"
+  source  = "GoogleCloudPlatform/enterprise-application/google//modules/deployment-pipeline"
+  version = "~> 0.7"
 
   project_id                 = local.app_admin_project
   region                     = var.region
@@ -54,7 +55,8 @@ module "app" {
 }
 
 module "htc-infra" {
-  source = "../../modules/htc-infra"
+  source  = "GoogleCloudPlatform/enterprise-application/google//modules/htc-infra"
+  version = "~> 0.7"
 
   service_name           = local.service_name
   gke_cluster_names      = local.gke_cluster_names
