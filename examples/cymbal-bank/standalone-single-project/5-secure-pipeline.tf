@@ -93,7 +93,8 @@ resource "time_sleep" "wait_propagation" {
 }
 
 module "cicd" {
-  source   = "../../../modules/deployment-pipeline"
+  source   = "GoogleCloudPlatform/enterprise-application/google//modules/deployment-pipeline"
+  version  = "~> 0.7"
   for_each = var.cloudbuildv2_repository_config.repositories
 
   project_id                 = var.project_id
