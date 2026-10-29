@@ -38,7 +38,7 @@ The following dependencies must be installed on your development system:
 
 - [Docker Engine][docker-engine]
 - [Google Cloud SDK][google-cloud-sdk]
-- [Go (1.21+)][golang] (for running integration tests locally)
+- [Go (1.26+)][golang] (for running integration tests locally)
 - [make][make]
 
 ### Generating Documentation for Inputs and Outputs
