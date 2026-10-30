@@ -46,5 +46,7 @@ module "multitenant_infra" {
   access_level_name      = var.access_level_name
   deletion_protection    = false
 
+  cluster_release_channel = "RAPID"
+
   depends_on = [module.standalone_harness]
 }

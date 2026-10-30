@@ -44,6 +44,10 @@ module "multitenant_infra" {
   service_perimeter_mode = var.service_perimeter_mode
   access_level_name      = var.access_level_name
   deletion_protection    = false
+  agent_sandbox_enabled  = true
+  sandbox_enabled        = true
+
+  cluster_release_channel = "RAPID"
 
   depends_on = [module.standalone_harness]
 }
