@@ -1,7 +1,7 @@
 # Contributing
 
 We'd love to accept your patches and contributions to this project. There are
-just a few small guidelines you need to follow.
+just a few guidelines to follow.
 
 ## Contributor License Agreement
 
@@ -16,116 +16,125 @@ You generally only need to submit a CLA once, so if you've already submitted one
 (even if it was for a different project), you probably don't need to do it
 again.
 
-## Code Reviews
+## Code Reviews and Guidelines
 
 All submissions, including submissions by project members, require review. We
 use GitHub pull requests for this purpose. Consult
 [GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
 information on using pull requests.
 
+We follow standard Google Engineering Practices:
+- [Google Engineering Practices on Writing Good CL Descriptions](https://google.github.io/eng-practices/review/developer/cl-descriptions.html)
+- [Google Engineering Practices on Code Review Speed](https://google.github.io/eng-practices/review/reviewer/speed.html)
+- [Google Developer Documentation Style Guide](https://developers.google.com/style)
+- [Google Cloud Terraform Best Practices](https://cloud.google.com/docs/terraform/best-practices-for-terraform)
+
+> [!NOTE]
+> If you are using AI coding assistants or LLM agents to contribute, refer to [AGENTS.md](./AGENTS.md) for architectural mental models, guardrails, and automated verification procedures.
+
 ## Development
 
-The following dependencies must be installed on the development system:
+The following dependencies must be installed on your development system:
 
 - [Docker Engine][docker-engine]
 - [Google Cloud SDK][google-cloud-sdk]
-- [make]
+- [Go (1.26+)][golang] (for running integration tests locally)
+- [make][make]
 
 ### Generating Documentation for Inputs and Outputs
 
 The Inputs and Outputs tables in the READMEs of the root module,
 submodules, and example modules are automatically generated based on
-the `variables` and `outputs` of the respective modules. These tables
-must be refreshed if the module interfaces are changed.
+the `variables` and `outputs` of the respective modules using `terraform-docs`.
 
 #### Execution
 
-Run `make generate_docs` to generate new Inputs and Outputs tables.
+Run `make generate_docs` (or `make docker_generate_docs`) to generate new Inputs and Outputs tables.
+
+### Linting and Formatting
+
+All Terraform, Shell, Go, and YAML files must be formatted and linted before submission.
+
+#### Execution
+
+Run the lint suite via Docker developer tools:
+```bash
+make docker_test_lint
+```
+
+You can also format files locally:
+```bash
+# Format Terraform files
+terraform fmt -recursive
+
+# Format Go files
+gofmt -s -w helpers/ test/
+```
 
 ### Integration Testing
 
-Integration tests are used to verify the behaviour of the root module,
-submodules, and example modules. Additions, changes, and fixes should
-be accompanied with tests.
+Integration tests are written in Go using [Terratest][terratest] to verify the behaviour of the modules and example scenarios. Additions, changes, and bug fixes should be accompanied by tests.
 
-The integration tests are run using [Kitchen][kitchen],
-[Kitchen-Terraform][kitchen-terraform], and [InSpec][inspec]. These
-tools are packaged within a Docker image for convenience.
+#### Test Environment Setup
 
-The general strategy for these tests is to verify the behaviour of the
-[example modules](./examples/), thus ensuring that the root module,
-submodules, and example modules are all functionally correct.
+Integration tests run against isolated Google Cloud projects. The provisioning harness is defined in the [test/setup/](./test/setup/) directory.
 
-#### Test Environment
-The easiest way to test the module is in an isolated test project. The setup for such a project is defined in [test/setup](./test/setup/) directory.
+To use this setup, you need a Service Account with the following roles on a Folder or Organization:
+- Project Creator (`roles/resourcemanager.projectCreator`)
+- Billing Account User (`roles/billing.user`)
 
-To use this setup, you need a service account with these permissions (on a Folder or Organization):
-- Project Creator
-- Project Billing Manager
+The project hosting the Service Account must have these APIs enabled:
+- Cloud Resource Manager API (`cloudresourcemanager.googleapis.com`)
+- Cloud Billing API (`cloudbilling.googleapis.com`)
+- Service Usage API (`serviceusage.googleapis.com`)
+- Identity and Access Management (IAM) API (`iam.googleapis.com`)
 
-The project that the service account belongs to must have the following APIs enabled (the setup won't
-create any resources on the service account's project):
-- Cloud Resource Manager
-- Cloud Billing
-- Service Usage
-- Identity and Access Management (IAM)
+Export the Service Account key and set the required environment variables:
 
-Export the Service Account credentials to your environment like so:
-
-```
+```bash
 export SERVICE_ACCOUNT_JSON=$(< credentials.json)
-```
-
-You will also need to set a few environment variables:
-```
 export TF_VAR_org_id="your_org_id"
 export TF_VAR_folder_id="your_folder_id"
 export TF_VAR_billing_account="your_billing_account_id"
 ```
 
-With these settings in place, you can prepare a test project using Docker:
-```
+Prepare the test project using Docker:
+```bash
 make docker_test_prepare
 ```
 
-#### Noninteractive Execution
+#### Running Tests via Docker
 
-Run `make docker_test_integration` to test all of the example modules
-noninteractively, using the prepared test project.
+Run the entire integration test suite non-interactively:
+```bash
+make docker_test_integration
+```
 
-#### Interactive Execution
+Or start an interactive shell in the testing container:
+```bash
+make docker_run
+```
 
-1. Run `make docker_run` to start the testing Docker container in
-   interactive mode.
+#### Running Tests Locally with Go
 
-1. Run `kitchen_do create <EXAMPLE_NAME>` to initialize the working
-   directory for an example module.
+You can run individual Terratest suites directly:
 
-1. Run `kitchen_do converge <EXAMPLE_NAME>` to apply the example module.
+```bash
+cd test/integration
+go test -v -run TestDefaultExample ./default-example -timeout 60m
+```
 
-1. Run `kitchen_do verify <EXAMPLE_NAME>` to test the example module.
+#### Cleaning Up Test Resources
 
-1. Run `kitchen_do destroy <EXAMPLE_NAME>` to destroy the example module
-   state.
-
-### Linting and Formatting
-
-Many of the files in the repository can be linted or formatted to
-maintain a standard of quality.
-
-#### Execution
-
-Run `make docker_test_lint`.
+After testing, clean up the test environment:
+```bash
+make docker_test_cleanup
+```
 
 [docker-engine]: https://www.docker.com/products/docker-engine
-[flake8]: http://flake8.pycqa.org/en/latest/
-[gofmt]: https://golang.org/cmd/gofmt/
+[golang]: https://go.dev/
 [google-cloud-sdk]: https://cloud.google.com/sdk/install
-[hadolint]: https://github.com/hadolint/hadolint
-[inspec]: https://inspec.io/
-[kitchen-terraform]: https://github.com/newcontext-oss/kitchen-terraform
-[kitchen]: https://kitchen.ci/
 [make]: https://en.wikipedia.org/wiki/Make_(software)
-[shellcheck]: https://www.shellcheck.net/
-[terraform-docs]: https://github.com/segmentio/terraform-docs
+[terratest]: https://terratest.gruntwork.io/
+[terraform-docs]: https://terraform-docs.io/
 [terraform]: https://terraform.io/
