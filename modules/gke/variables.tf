@@ -73,6 +73,12 @@ variable "sandbox_enabled" {
   default     = false
 }
 
+variable "agent_sandbox_enabled" {
+  type        = bool
+  description = "The status of the Agent Sandbox addon, which isolates untrusted code execution (requires GKE version 1.35.2-gke.1269000 or later)"
+  default     = false
+}
+
 # Define Applications
 variable "apps" {
   description = <<-EOF

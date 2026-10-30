@@ -30,7 +30,7 @@ resource "google_project_iam_member" "compute_sa_roles" {
 # TODO: Define exactly where to apply rbacrolebindings
 module "fleet_app_operator_permissions" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/fleet-app-operator-permissions"
-  version = "~> 36.0"
+  version = "~> 47.0
 
   fleet_project_id = var.cluster_project
   scope_id         = local.namespace
