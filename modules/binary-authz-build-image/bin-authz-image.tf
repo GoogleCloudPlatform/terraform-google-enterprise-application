@@ -32,13 +32,17 @@ resource "google_artifact_registry_repository" "attestation_image" {
   format        = "DOCKER"
 }
 
+data "google_compute_default_service_account" "default" {
+  project = var.project_id
+}
+
 resource "google_artifact_registry_repository_iam_member" "builder_on_attestation_repo" {
-  count      = local.service_account_email != null ? 1 : 0
+  for_each   = local.service_account_email != null ? { "cb_sa" : local.service_account_email } : { "cb_sa" : data.google_compute_default_service_account.default.email }
   project    = google_artifact_registry_repository.attestation_image.project
   location   = google_artifact_registry_repository.attestation_image.location
   repository = google_artifact_registry_repository.attestation_image.name
   role       = "roles/artifactregistry.repoAdmin"
-  member     = "serviceAccount:${local.service_account_email}"
+  member     = "serviceAccount:${each.value}"
 }
 
 module "build_binary_authz_image" {

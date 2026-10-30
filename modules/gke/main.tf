@@ -248,7 +248,7 @@ resource "google_project_iam_member" "model_armor_service_network_extension_role
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 44.1"
+  version = "~> 47.0"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
   name                   = "${local.cluster_prefix}cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
@@ -271,6 +271,10 @@ module "gke-standard" {
   fleet_project = local.cluster_project_id
 
   identity_namespace = "${local.cluster_project_id}.svc.id.goog"
+
+  sandbox_enabled = var.sandbox_enabled
+
+  agent_sandbox_enabled = var.agent_sandbox_enabled
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
@@ -347,7 +351,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 44.1"
+  version = "~> 47.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "${local.cluster_prefix}cluster-${each.value.region}-${var.env}"
@@ -380,6 +384,8 @@ module "gke-autopilot" {
   // Private Cluster Configuration
   enable_private_nodes    = true
   enable_private_endpoint = true
+
+  agent_sandbox_enabled = var.agent_sandbox_enabled
 
   enable_confidential_nodes = var.enable_confidential_nodes
 
