@@ -33,14 +33,14 @@ steps:
       - "TF_VAR_create_cloud_nat=true" # config-sync running on cluster VPC needs to access gitlab
       - 'TF_VAR_examples_tested=["cymbal-bank"]'
     waitFor:
-     - swap-module-refs
+      - swap-module-refs
 
   - id: logging-bucket-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
     waitFor:
-     - swap-module-refs
+      - swap-module-refs
 
   - id: logging-bucket-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"

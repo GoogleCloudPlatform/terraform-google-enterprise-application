@@ -76,7 +76,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     ```bash
     mkdir ./eab-applicationfactory/envs/
     cp -R ./terraform-google-enterprise-application/examples/htc/4-appfactory/envs/* ./eab-applicationfactory/envs/
-    cp -R ./terraform-google-enterprise-application/modules/* ./eab-applicationfactory/modules/
     ```
 
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
@@ -175,10 +174,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    rm -rf $htc_repository/modules
-
     cp -R ../terraform-google-enterprise-application/examples/htc/5-appinfra/htc/* $htc_repository
-    cp -R ../terraform-google-enterprise-application/modules $htc_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $htc_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $htc_repository/
     chmod 755 $htc_repository/tf-wrapper.sh
