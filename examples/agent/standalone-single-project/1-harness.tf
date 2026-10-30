@@ -29,11 +29,12 @@ module "standalone_harness" {
   additional_services                           = ["modelarmor.googleapis.com", "aiplatform.googleapis.com"]
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-cap-agent-binauthz"
+  service_account_name                          = "sa-eab-cap-agent-binauthz"
   private_workerpool_name                       = "wp-eab-cap-agent"
   ncc_config                                    = var.ncc_config
 
-  build_image_module_dependencies = var.service_perimeter_name != null ? concat([
+  build_image_module_dependencies = concat([
     for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],
     [for i in google_access_context_manager_service_perimeter_ingress_policy.private_workerpool_deployment : i.id],
-  ) : []
+  )
 }

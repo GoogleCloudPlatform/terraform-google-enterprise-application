@@ -17,14 +17,14 @@
 resource "google_service_account" "binauthz_builder" {
   count        = var.service_account_id == null ? 1 : 0
   project      = var.project_id
-  account_id   = "sa-binauthz-builder"
+  account_id   = var.service_account_name
   display_name = "Cloud Build Service Account for BinAuthz Attestation Image"
 }
 
 resource "google_project_iam_member" "binauthz_builder_roles" {
   for_each = var.service_account_id == null ? toset([
     "roles/logging.logWriter",
-    "roles/storage.admin"
+    "roles/storage.admin",
   ]) : []
   project = var.project_id
   role    = each.value
@@ -33,16 +33,12 @@ resource "google_project_iam_member" "binauthz_builder_roles" {
 
 locals {
   service_account_id_to_use = var.service_account_id != null ? var.service_account_id : google_service_account.binauthz_builder[0].id
-  service_account_email = var.service_account_id != null ? (
-    can(regex("@", var.service_account_id)) ? (
-      can(regex("/", var.service_account_id)) ? split("/", var.service_account_id)[length(split("/", var.service_account_id)) - 1] : var.service_account_id
-    ) : var.service_account_id
-  ) : google_service_account.binauthz_builder[0].email
+  service_account_email     = var.service_account_id != null ? element(split("/", var.service_account_id), 3) : google_service_account.binauthz_builder[0].email
 
   bucket_logs_url       = var.bucket_logs_url != null ? "--gcs-log-dir=${var.bucket_logs_url}" : "--default-buckets-behavior=regional-user-owned-bucket"
   service_account       = "--service-account=${local.service_account_id_to_use}"
   workerpool_id         = var.workerpool_id != null ? "--worker-pool=${var.workerpool_id}" : ""
-  cmd_prompt            = "gcloud builds submit ${path.module}/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.project_id}  ${local.bucket_logs_url} ${local.workerpool_id} ${local.service_account}"
+  cmd_prompt            = "gcloud builds submit ${path.module}/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.project_id} --region=${var.location} ${local.bucket_logs_url} ${local.workerpool_id} ${local.service_account}"
   binary_auth_image_tag = "${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.attestation_image.name}/binauthz-attestation:${var.binary_auth_image_version}"
 }
 

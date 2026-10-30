@@ -51,8 +51,6 @@ locals {
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudkms.googleapis.com",
-    "sourcerepo.googleapis.com",
     "storage-api.googleapis.com",
     "trafficdirector.googleapis.com",
   ]
@@ -100,6 +98,7 @@ module "binary_autz" {
   binary_auth_image_version   = "v1.0"
   workerpool_id               = local.workerpool_id
   service_account_id          = var.service_account_id
+  service_account_name        = var.service_account_name
   attestation_repository_name = var.attestation_repository_name
   bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 

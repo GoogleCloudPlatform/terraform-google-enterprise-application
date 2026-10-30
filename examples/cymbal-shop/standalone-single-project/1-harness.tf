@@ -28,6 +28,7 @@ module "standalone_harness" {
   additional_services                           = []
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-cs-binauthz"
+  service_account_name                          = "sa-eab-cs-binauthz"
   private_workerpool_name                       = "wp-eab-cymbal-shop"
   ncc_config                                    = var.ncc_config
 

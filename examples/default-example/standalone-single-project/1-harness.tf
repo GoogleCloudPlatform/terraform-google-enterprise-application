@@ -28,6 +28,7 @@ module "standalone_harness" {
   additional_services                           = []
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-hello-world-binauthz"
+  service_account_name                          = "sa-eab-hello-world-binauthz"
   private_workerpool_name                       = "wp-eab-default-example"
   ncc_config                                    = var.ncc_config
 
