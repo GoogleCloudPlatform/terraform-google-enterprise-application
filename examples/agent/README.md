@@ -206,10 +206,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    rm -rf $agent_infra_repo/modules
     cp -R ./terraform-google-enterprise-application/examples/agent/5-appinfra/agent/capital-agent/envs $agent_infra_repo
-    rm -rf $agent_infra_repo/modules
-    cp -R ./terraform-google-enterprise-application/modules $agent_infra_repo
     cp ./terraform-example-foundation/build/cloudbuild-tf-* $agent_infra_repo/
     cp ./terraform-example-foundation/build/tf-wrapper.sh $agent_infra_repo/
     chmod 755 $agent_infra_repo/tf-wrapper.sh
@@ -360,7 +357,6 @@ The specified values above will create a sigle `admin` project for Capital Agent
     ```bash
     APP_INFRA_REPO=$(readlink -f ./terraform-google-enterprise-application/5-appinfra)
     cp -r $APP_INFRA_REPO/../examples/agent/5-appinfra/* $APP_INFRA_REPO/apps/
-    (cd $APP_INFRA_REPO/apps/agent/capital-agent && rm -rf modules && ln -s ../../../modules modules)
     ```
 
     > NOTE: This command must be run on the same level as `terraform-google-enterprise-application` directory.

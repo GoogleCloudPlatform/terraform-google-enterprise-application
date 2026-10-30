@@ -28,7 +28,8 @@ locals {
 }
 
 module "multitenant_infra" {
-  source = "../../../modules/gke"
+  source  = "GoogleCloudPlatform/enterprise-application/google//modules/gke"
+  version = "~> 0.7"
 
   apps                   = local.apps
   cluster_subnetworks    = [for i, j in module.standalone_harness.subnets : j.self_link if !strcontains(i, "proxy")]

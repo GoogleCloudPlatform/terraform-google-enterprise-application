@@ -14,6 +14,11 @@
 
 timeout: 18000s
 steps:
+  - id: swap-module-refs
+    name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+    args: ['module-swapper']
+    waitFor: ['-']
+
   - id: prepare
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
@@ -26,12 +31,15 @@ steps:
       - "TF_VAR_org_id=$_ORG_ID"
       - "TF_VAR_folder_id=$_FOLDER_ID"
       - "TF_VAR_billing_account=$_BILLING_ACCOUNT"
+    waitFor:
+      - swap-module-refs
 
   - id: logging-bucket-init
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"
     args:
       ["/bin/bash", "-c", "cft test run TestLoggingBucket --stage init --verbose"]
-    waitFor: ['-']
+    waitFor:
+      - swap-module-refs
 
   - id: logging-bucket-apply
     name: "gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS"

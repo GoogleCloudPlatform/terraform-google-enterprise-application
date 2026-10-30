@@ -69,12 +69,7 @@ func DeployInfraStage(t testing.TB, s steps.StepManager, tfvars GlobalTFVars, c 
 			return err
 		}
 
-		// Copy Shared Modules and Policy Library so relative paths (../../../modules/...) resolve perfectly
-		err = utils.CopyDirectory(filepath.Join(c.EABPath, "modules"), filepath.Join(c.CheckoutPath, "modules"))
-		if err != nil {
-			return err
-		}
-
+		// Copy Policy Library
 		policySrc := filepath.Join(c.EABPath, "policy-library")
 		if _, err := os.Stat(policySrc); err == nil {
 			err = utils.CopyDirectory(policySrc, filepath.Join(c.CheckoutPath, "policy-library"))

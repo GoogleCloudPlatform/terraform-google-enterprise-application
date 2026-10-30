@@ -15,7 +15,8 @@
  */
 
 module "cluster_network" {
-  source = "../../modules/cluster_network"
+  source  = "GoogleCloudPlatform/enterprise-application/google//modules/cluster_network"
+  version = "~> 0.7"
 
   vpc_name        = "vpc-eab-cluster"
   project_id      = var.project_id

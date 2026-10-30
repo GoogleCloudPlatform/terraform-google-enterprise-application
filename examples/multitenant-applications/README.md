@@ -259,16 +259,7 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    rm -rf $frontend_repository/modules
-    rm -rf $balancereader_repository/modules
-    rm -rf $userservice_repository/modules
-    rm -rf $contacts_repository/modules
-    rm -rf $ledgerwriter_repository/modules
-    rm -rf $transactionhistory_repository/modules
-
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-balancereader/* $balancereader_repository
-    rm -rf $balancereader_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $balancereader_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $balancereader_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $balancereader_repository/
     chmod 755 $balancereader_repository/tf-wrapper.sh
@@ -278,10 +269,7 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
     sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $balancereader_repository/*/*/terraform.tfvars
 
-
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-userservice/* $userservice_repository
-    rm -rf $userservice_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $userservice_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $userservice_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $userservice_repository/
     chmod 755 $userservice_repository/tf-wrapper.sh
@@ -292,8 +280,6 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $userservice_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/frontend/* $frontend_repository
-    rm -rf $frontend_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $frontend_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $frontend_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $frontend_repository/
     chmod 755 $frontend_repository/tf-wrapper.sh
@@ -304,8 +290,6 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $frontend_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-contacts/* $contacts_repository
-    rm -rf $contacts_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $contacts_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
     chmod 755 $contacts_repository/tf-wrapper.sh
@@ -316,8 +300,6 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $contacts_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-ledgerwriter/* $ledgerwriter_repository
-    rm -rf $ledgerwriter_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $ledgerwriter_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $ledgerwriter_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $ledgerwriter_repository/
     chmod 755 $ledgerwriter_repository/tf-wrapper.sh
@@ -328,15 +310,13 @@ At this stage, the CI/CD pipeline and app-specific infrastructure are created, t
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $ledgerwriter_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-transactionhistory/* $transactionhistory_repository
-    rm -rf $transactionhistory_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules $transactionhistory_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $transactionhistory_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $transactionhistory_repository/
     chmod 755 $transactionhistory_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $transactionhistory_repository/policy-library
     rm -rf $transactionhistory_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $transactionhistory_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$transactionhistory_statebucket/" $transactionhistory_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $transactionhistory_repository/*/*/terraform.tfvars
     ```
 
@@ -550,10 +530,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    rm -rf $cymbalshop_infra_repo/modules
     cp -R ./terraform-google-enterprise-application/examples/cymbal-shop/5-appinfra/cymbal-shop/cymbalshop/envs $cymbalshop_infra_repo
-    rm -rf $cymbalshop_infra_repo/modules
-    cp -R ./terraform-google-enterprise-application/modules $cymbalshop_infra_repo
     cp ./terraform-example-foundation/build/cloudbuild-tf-* $cymbalshop_infra_repo/
     cp ./terraform-example-foundation/build/tf-wrapper.sh $cymbalshop_infra_repo/
     chmod 755 $cymbalshop_infra_repo/tf-wrapper.sh
@@ -940,7 +917,6 @@ The namespaces created at 3-fleetscope will be used in the application kubernete
     ```bash
     APP_INFRA_REPO=$(readlink -f ./terraform-google-enterprise-application/5-appinfra)
     cp -r $APP_INFRA_REPO/../examples/cymbal-shop/5-appinfra/* $APP_INFRA_REPO/apps/
-    (cd $APP_INFRA_REPO/apps/cymbal-shop/cymbalshop && rm -rf modules && ln -s ../../../modules modules)
     ```
 
     > NOTE: This command must be run on the same level as `terraform-google-enterprise-application` directory.
@@ -1034,12 +1010,6 @@ The namespaces created at 3-fleetscope will be used in the application kubernete
     ```bash
     APP_INFRA_REPO=$(readlink -f ./terraform-google-enterprise-application/5-appinfra)
     cp -r $APP_INFRA_REPO/../examples/cymbal-bank/5-appinfra/* $APP_INFRA_REPO/apps/
-    ```
-
-1. Adjust the `modules` symbolic links, the command below will adjust the symbolic link for `modules` diretories:
-
-    ```bash
-    find $APP_INFRA_REPO/apps/cymbal-bank -type l -name "modules" -exec sh -c 'rm -f "{}" && ln -s "../../../modules" "{}"' \;
     ```
 
 ###### Apply changes for Each Service under Shared Environment

@@ -259,10 +259,7 @@ This stage will create the CI/CD pipeline for the service, and application speci
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    rm -rf $llm_model_infra_repo/modules
     cp -R ./terraform-google-enterprise-application/examples/llm-model/5-appinfra/llm-model/llamma-model/envs $llm_model_infra_repo
-    rm -rf $llm_model_infra_repo/modules
-    cp -R ./terraform-google-enterprise-application/5-appinfra/modules/ $llm_model_infra_repo
     cp ./terraform-example-foundation/build/cloudbuild-tf-* $llm_model_infra_repo/
     cp ./terraform-example-foundation/build/tf-wrapper.sh $llm_model_infra_repo/
     chmod 755 $llm_model_infra_repo/tf-wrapper.sh
@@ -441,7 +438,6 @@ This stage will setup the application admin project, and infrastructure specific
     ```bash
     APP_INFRA_REPO=$(readlink -f ./terraform-google-enterprise-application/5-appinfra)
     cp -r $APP_INFRA_REPO/../examples/llm-model/5-appinfra/* $APP_INFRA_REPO/apps/
-    (cd $APP_INFRA_REPO/apps/llm-model/llamma-model && rm -rf modules && ln -s ../../../modules modules)
     ```
 
     > NOTE: This command must be run on the same level as `terraform-google-enterprise-application` directory.
