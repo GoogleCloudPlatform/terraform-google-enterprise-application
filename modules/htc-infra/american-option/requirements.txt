@@ -156,7 +156,7 @@ quantlib==1.35 \
     --hash=sha256:e31077867d4ba4d0030e3b36966f6fbcf9b47272040acc4d3c6138f09c966332 \
     --hash=sha256:ec249dc01cba4ab13efe02aa62765aa2238f4be32fdd65119592235d9c4c1889
     # via -r ./requirements.in
-setuptools==75.1.0 \
-    --hash=sha256:35ab7fd3bcd95e6b7fd704e4a1539513edad446c097797f2985e0e4b960772f2 \
-    --hash=sha256:d59a21b17a275fb872a9c3dae73963160ae079f1049ed956880cd7c09b120538
+setuptools==84.1.0 \
+    --hash=sha256:23657205b63d4d31395ab917815247f694aafad28cd21316bf5fd45a51048ea0 \
+    --hash=sha256:5231689c6ac8156cd155cfb98c3fd6fb252c3e7e9bd3d78b64d3c55f132624c9
     # via grpcio-tools
