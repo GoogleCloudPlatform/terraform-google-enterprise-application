@@ -429,6 +429,7 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | network\_id | The network ID where the private worker pool is going to be peered. If not provided, a new network is going to be created. | `string` | `null` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | `null` | no |
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
+| service\_account\_id | The service account ID to be used to build the Binary Authz image. | `string` | `null` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 | teams | A map of string at the format {"namespace" = "groupEmail"} | `map(string)` | n/a | yes |
