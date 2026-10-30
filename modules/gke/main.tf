@@ -338,6 +338,11 @@ module "gke-standard" {
 
   deletion_protection = var.deletion_protection
 
+  // Network tags: applies to static node pools (all) and auto-provisioned pools (NAP)
+  node_pools_tags = {
+    all = var.network_tags
+  }
+  network_tags = var.network_tags
 }
 
 module "gke-autopilot" {
@@ -383,6 +388,9 @@ module "gke-autopilot" {
   deletion_protection = var.deletion_protection
 
   filestore_csi_driver = var.enable_csi_filestore
+
+  // Network tags: applies to all Autopilot managed nodes
+  network_tags = var.network_tags
 
   depends_on = [
     module.eab_cluster_project,
