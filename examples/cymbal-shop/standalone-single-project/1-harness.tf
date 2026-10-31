@@ -23,6 +23,7 @@ module "standalone_harness" {
   workerpool_id                                 = var.workerpool_id
   network_id                                    = var.network_id
   create_nat                                    = var.create_nat
+  create_cloud_nat                              = var.create_cloud_nat
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
   logging_bucket                                = var.logging_bucket
   additional_services                           = []
