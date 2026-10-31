@@ -29,6 +29,7 @@ module "standalone_harness" {
   additional_services                           = ["modelarmor.googleapis.com", "aiplatform.googleapis.com", "iamcredentials.googleapis.com", "telemetry.googleapis.com"]
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-mortgage-binauthz"
+  service_account_name                          = "sa-eab-mortgage-binauthz"
   private_workerpool_name                       = "wp-eab-mortgage"
   ncc_config                                    = var.ncc_config
 

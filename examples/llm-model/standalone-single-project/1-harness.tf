@@ -29,6 +29,7 @@ module "standalone_harness" {
   additional_services                           = ["modelarmor.googleapis.com", "aiplatform.googleapis.com"]
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-llm-model-binauthz"
+  service_account_name                          = "sa-eab-llm-model-binauthz"
   private_workerpool_name                       = "wp-eab-llm-model"
   ncc_config                                    = var.ncc_config
 
