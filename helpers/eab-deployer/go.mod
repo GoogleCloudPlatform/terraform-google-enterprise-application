@@ -57,7 +57,7 @@ require (
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20250828155816-225c06ed5fd9 // indirect
 	github.com/hashicorp/terraform-json v0.27.2 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mattn/go-zglob v0.0.6 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
