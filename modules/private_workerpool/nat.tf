@@ -21,4 +21,5 @@ module "nat" {
   network_id            = local.network_id
   region                = var.region
   nat_proxy_vm_ip_range = local.nat_proxy_vm_ip_range
+  create_cloud_nat      = var.create_cloud_nat
 }

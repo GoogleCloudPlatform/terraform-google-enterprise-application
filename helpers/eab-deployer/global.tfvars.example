@@ -40,7 +40,8 @@ bucket_kms_key                     = null // Optional KMS Key ID
 
 // Optional Network Configurations (Only applicable to certain examples like default-example, llm-model, agent)
 
-// create_nat                         = true // Optional: Enables Cloud NAT creation for Private Worker Pool
+// create_nat                         = true // Optional: Enables NAT VM creation and routing for Private Worker Pool
+// create_cloud_nat                   = true // Optional: Enables Cloud Router and Cloud NAT creation for Private Worker Pool
 // enables_network_connection_and_peering_routes = true // Optional: Enables Network connection and peering routes
 
 // Network Connectivity Center (NCC) Configuration (Optional)
