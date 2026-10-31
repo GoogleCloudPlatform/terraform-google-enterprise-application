@@ -16,7 +16,7 @@ google-adk[a2a,agent-identity]==1.34.0
 fastapi>=0.115.0
 uvicorn>=0.34.0
 pydantic>=2.10.0
-google-cloud-aiplatform>=1.149.0,<1.154.0
+google-cloud-aiplatform>=2.6.0,<2.7.0
 google-auth>=2.30.0
 httpx>=0.28.0
 opentelemetry-instrumentation-google-genai
