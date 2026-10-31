@@ -37,6 +37,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:mortgage/standalone-single-project/v0.6.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:mortgage/standalone-single-project/v0.8.0"
   }
 }

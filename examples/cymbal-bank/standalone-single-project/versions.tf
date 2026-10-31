@@ -38,6 +38,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:cymbal-bank/standalone-single-project/v0.7.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:cymbal-bank/standalone-single-project/v0.8.0"
   }
 }
