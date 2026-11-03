@@ -23,11 +23,11 @@ use GitHub pull requests for this purpose. Consult
 [GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
 information on using pull requests.
 
-We follow standard Google Engineering Practices:
+We follow these guidelines:
 - [Google Engineering Practices on Writing Good CL Descriptions](https://google.github.io/eng-practices/review/developer/cl-descriptions.html)
 - [Google Engineering Practices on Code Review Speed](https://google.github.io/eng-practices/review/reviewer/speed.html)
 - [Google Developer Documentation Style Guide](https://developers.google.com/style)
-- [Google Cloud Terraform Best Practices](https://cloud.google.com/docs/terraform/best-practices-for-terraform)
+- [Google Cloud Terraform Best Practices](https://docs.cloud.google.com/docs/terraform/best-practices/general-style-structure)
 
 > [!NOTE]
 > If you are using AI coding assistants or LLM agents to contribute, refer to [AGENTS.md](./AGENTS.md) for architectural mental models, guardrails, and automated verification procedures.
@@ -40,6 +40,7 @@ The following dependencies must be installed on your development system:
 - [Google Cloud SDK][google-cloud-sdk]
 - [Go (1.26+)][golang] (for running integration tests locally)
 - [make][make]
+- [Terraform][terraform] (for formatting and running integration tests locally)
 
 ### Generating Documentation for Inputs and Outputs
 
