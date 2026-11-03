@@ -43,11 +43,9 @@ crash.log
 **/*.tfvars
 
 credentials.json
-test_script.sh
 
 # tf lock file
-**.terraform**
+.terraform.lock.hcl
 
 # Go multi-module workspace sum
 go.work.sum
-
