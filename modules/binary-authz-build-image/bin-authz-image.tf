@@ -38,7 +38,8 @@ locals {
   bucket_logs_url       = var.bucket_logs_url != null ? "--gcs-log-dir=${var.bucket_logs_url}" : "--default-buckets-behavior=regional-user-owned-bucket"
   service_account       = "--service-account=${local.service_account_id_to_use}"
   workerpool_id         = var.workerpool_id != null ? "--worker-pool=${var.workerpool_id}" : ""
-  cmd_prompt            = "gcloud builds submit ${path.module}/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.project_id} --region=${var.location} ${local.bucket_logs_url} ${local.workerpool_id} ${local.service_account}"
+  build_region          = var.workerpool_id != null ? split("/", var.workerpool_id)[3] : var.location
+  cmd_prompt            = "gcloud builds submit ${path.module}/binauthz-attestation/. --tag ${local.binary_auth_image_tag} --project=${var.project_id} --region=${local.build_region} ${local.bucket_logs_url} ${local.workerpool_id} ${local.service_account}"
   binary_auth_image_tag = "${var.location}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.attestation_image.name}/binauthz-attestation:${var.binary_auth_image_version}"
 }
 
