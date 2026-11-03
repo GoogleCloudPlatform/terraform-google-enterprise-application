@@ -46,6 +46,21 @@ jobs:
         id: download-tfenv
         if: steps.cache-tfenv.outputs.cache-hit != 'true'
         run: git clone --depth=1 --branch ${{ env.TFENV_VERSION }} https://github.com/tfutils/tfenv.git /tmp/.tfenv
+      - id: variables
+        run: |
+          MAKEFILE=$(find . -name Makefile -print -quit)
+          if [ -z "$MAKEFILE" ]; then
+            echo dev-tools=gcr.io/cloud-foundation-cicd/cft/developer-tools:1 >> "$GITHUB_OUTPUT"
+          else
+            VERSION=$(grep "DOCKER_TAG_VERSION_DEVELOPER_TOOLS := " $MAKEFILE | cut -d\  -f3)
+            IMAGE=$(grep "DOCKER_IMAGE_DEVELOPER_TOOLS := " $MAKEFILE | cut -d\  -f3)
+            REGISTRY=$(grep "REGISTRY_URL := " $MAKEFILE | cut -d\  -f3)
+            echo dev-tools=${REGISTRY}/${IMAGE}:${VERSION} >> "$GITHUB_OUTPUT"
+          fi
+      - name: module-swapper
+        run: docker run --rm -v "$GITHUB_WORKSPACE":/workspace "$STEPS_VARIABLES_OUTPUTS_DEV_TOOLS" module-swapper
+        env:
+          STEPS_VARIABLES_OUTPUTS_DEV_TOOLS: ${{ steps.variables.outputs.dev-tools }}
       - name: Run lint-terraform-min-required
         run: |
           set -eou pipefail
