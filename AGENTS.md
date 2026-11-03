@@ -146,7 +146,7 @@ Agents should use the following tools and commands to validate changes:
 terraform fmt -recursive
 
 # Format Go code
-gofmt -s -w helpers/ test/
+gofmt -s -w helpers/ test/ modules/ examples/
 ```
 
 ### 2. Linting & Validation (via Docker Developer Tools)
