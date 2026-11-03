@@ -49,7 +49,7 @@ the `variables` and `outputs` of the respective modules using `terraform-docs`.
 
 #### Execution
 
-Run `make generate_docs` (or `make docker_generate_docs`) to generate new Inputs and Outputs tables.
+Run `make generate_docs` (an alias for `make docker_generate_docs`; requires Docker) to generate new Inputs and Outputs tables.
 
 ### Linting and Formatting
 
