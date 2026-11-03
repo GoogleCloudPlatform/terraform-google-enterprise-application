@@ -44,9 +44,25 @@ locals {
         autoscaling       = true
         location_policy   = "BALANCED"
         max_pods_per_node = 16
+        sandbox_enabled   = false
       }
     ] : []
   }
+
+  sandbox_node_pool = var.sandbox_enabled ? [
+    {
+      name            = "sandbox-node-pool"
+      machine_type    = "e2-standard-4"
+      strategy        = "SURGE"
+      max_surge       = 1
+      max_unavailable = 0
+      autoscaling     = true
+      min_count       = 0
+      max_count       = 10
+      location_policy = "BALANCED"
+      sandbox_enabled = true
+    }
+  ] : []
 }
 
 resource "google_project_service_identity" "compute_sa" {
@@ -318,8 +334,12 @@ module "gke-standard" {
         min_count       = 1
         max_count       = 10
         location_policy = "BALANCED"
+        sandbox_enabled = false
       }
-  ], local.arm_node_pool[each.key])
+    ],
+    local.arm_node_pool[each.key],
+    local.sandbox_node_pool
+  )
 
   depends_on = [
     module.eab_cluster_project,

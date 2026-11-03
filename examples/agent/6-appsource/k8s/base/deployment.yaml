@@ -33,12 +33,6 @@ spec:
         runAsNonRoot: true # Required
         runAsUser: 1000
         fsGroup: 1000 # Grant group access to the volume
-      nodeSelector:
-        sandbox.gke.io/runtime: gvisor # Required
-      tolerations:
-      - key: "sandbox.gke.io/runtime"
-        value: "gvisor"
-        effect: "NoSchedule" # Required
       containers:
         - name: capital-agent
           image: capital-agent
