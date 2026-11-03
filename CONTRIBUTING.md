@@ -54,7 +54,7 @@ Run `make generate_docs` (an alias for `make docker_generate_docs`; requires Doc
 
 ### Linting and Formatting
 
-All Terraform, Shell, Go, and YAML files must be formatted and linted before submission.
+All changes must pass `make docker_test_lint` (Terraform, TFLint, shell, Python, license header, whitespace, and generated-docs checks). CI also runs golangci-lint on the Go code in `test/integration`.
 
 #### Execution
 
