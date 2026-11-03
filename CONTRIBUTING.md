@@ -134,26 +134,30 @@ Run the entire integration test suite non-interactively:
 make docker_test_integration
 ```
 
-Or start an interactive shell in the testing container and run individual tests stage by stage, as CI does. Tests depend on outputs from `test/setup` and the harness tests (`TestLoggingBucket`, `TestGitLab`, `TestVPCSC`), so run them in the order used in `build/int.cloudbuild*.yaml`:  
-***bash
+Or start an interactive shell in the testing container and run individual tests stage by stage, as CI does. Tests depend on outputs from `test/setup` and the harness tests (`TestLoggingBucket`, `TestGitLab`, `TestVPCSC`), so run them in the order used in `build/int.cloudbuild*.yaml`:
+
+``bash
 make docker_run
+```
 
 Inside the container:
+
+```bash
 cft test list
 cft test run TestStandaloneSingleProjectDefaultExample --stage init --verbose
 cft test run TestStandaloneSingleProjectDefaultExample --stage apply --verbose
 cft test run TestStandaloneSingleProjectDefaultExample --stage verify --verbose
 cft test run TestStandaloneSingleProjectDefaultExample --stage teardown --verbose
+```
 
+#### Running Tests Locally with Go
 
-#### Running Tests Locally with Go  
+The tests use the CFT [blueprint test framework](https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/tree/main/infra/blueprint-test), which is built on Terratest. To run a single stage with Go, set `RUN_STAGE`:
 
-The tests use the CFT [blueprint test framework](https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/tree/main/infra/blueprint-test), which is built on Terratest. To run a single stage with Go, set `RUN_STAGE`:  
-
-```bash  
-cd test/integration  
-RUN_STAGE=apply go test -v -run '^TestStandaloneSingleProjectDefaultExample$' ./default-example -timeout 60m  
-
+```bash
+cd test/integration
+RUN_STAGE=apply go test -v -run '^TestStandaloneSingleProjectDefaultExample$' ./default-example -timeout 60m
+```
 
 #### Cleaning Up Test Resources
 
