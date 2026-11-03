@@ -186,7 +186,6 @@ Before completing any task or proposing changes, verify that:
 ## 8. Standards & Reference Links
 
 *   **Google Cloud Terraform Best Practices**:
-    *   [Best practices overview](https://cloud.google.com/docs/terraform/best-practices-for-terraform)
     *   [General style and structure](https://docs.cloud.google.com/docs/terraform/best-practices/general-style-structure)
     *   [Reusable modules](https://docs.cloud.google.com/docs/terraform/best-practices/reusable-modules)
     *   [Root modules](https://docs.cloud.google.com/docs/terraform/best-practices/root-modules)
