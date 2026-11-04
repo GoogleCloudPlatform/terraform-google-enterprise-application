@@ -36,7 +36,13 @@ variable "network_id" {
 }
 
 variable "create_nat" {
-  description = "Enables Cloud NAT creation for Private Worker Pool, disable if your network already has one created."
+  description = "Enables NAT VM creation and routing for Private Worker Pool."
+  type        = bool
+  default     = true
+}
+
+variable "create_cloud_nat" {
+  description = "Whether to create a Cloud Router and Cloud NAT gateway for the NAT VM subnet. Set to false if the network already has a Cloud NAT gateway in this region that covers all subnets."
   type        = bool
   default     = true
 }

@@ -28,3 +28,9 @@ variable "nat_proxy_vm_ip_range" {
   description = "IP Range for NAT proxy machine."
   type        = string
 }
+
+variable "create_cloud_nat" {
+  description = "Whether to create a Cloud Router and Cloud NAT gateway for the NAT VM subnet. Set to false if the network already has a Cloud NAT gateway in this region that covers all subnets."
+  type        = bool
+  default     = true
+}

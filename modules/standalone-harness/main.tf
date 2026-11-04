@@ -77,10 +77,11 @@ module "private_workerpool" {
   source = "../private_workerpool"
   count  = var.workerpool_id == null ? 1 : 0
 
-  project_id = var.project_id
-  region     = var.region
-  network_id = var.network_id
-  create_nat = var.create_nat
+  project_id       = var.project_id
+  region           = var.region
+  network_id       = var.network_id
+  create_nat       = var.create_nat
+  create_cloud_nat = var.create_cloud_nat
 
   private_workerpool_name = var.private_workerpool_name
 

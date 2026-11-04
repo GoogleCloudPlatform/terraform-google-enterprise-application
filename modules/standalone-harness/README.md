@@ -12,7 +12,8 @@ It provisions:
 
 ```hcl
 module "standalone_harness" {
-  source = "../../modules/standalone-harness"
+  source  = "GoogleCloudPlatform/enterprise-application/google//modules/standalone-harness"
+  version = "~> 0.7"
 
   project_id          = var.project_id
   region              = var.region
@@ -31,7 +32,8 @@ module "standalone_harness" {
 | additional\_services | Additional GCP services to enable in the project. | `list(string)` | `[]` | no |
 | attestation\_repository\_name | The Artifact repository name to store the BinAuthz image. | `string` | n/a | yes |
 | build\_image\_module\_dependencies | A list of dependencies to wait for before running the gcloud script | `list(any)` | `[]` | no |
-| create\_nat | Enables Cloud NAT creation for Private Worker Pool. | `bool` | `true` | no |
+| create\_cloud\_nat | Whether to create a Cloud Router and Cloud NAT gateway for the NAT VM subnet. Set to false if the network already has a Cloud NAT gateway in this region that covers all subnets. | `bool` | `true` | no |
+| create\_nat | Enables NAT VM creation and routing for Private Worker Pool. | `bool` | `true` | no |
 | enable\_proxy\_subnet | Enables proxy subnet | `bool` | `false` | no |
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |

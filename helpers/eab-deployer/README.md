@@ -53,7 +53,8 @@ gcloud components list --filter="id=beta OR id=terraform-tools"
    - `workerpool_id`: Cloud Build Private Worker Pool ID (`projects/PROJECT/locations/LOCATION/workerPools/POOL_NAME`).
    - `network_id` *(optional)*: Existing VPC Network ID or self-link for private worker pool peering. If omitted, a new network is created.
    - `subnetwork_self_link` *(optional)*: Existing Subnetwork self-link.
-   - `create_nat` *(optional, bool)*: Enables Cloud NAT creation for Private Worker Pool network (defaults to `true`).
+   - `create_nat` *(optional, bool)*: Enables NAT VM creation and routing for Private Worker Pool network (defaults to `true`).
+   - `create_cloud_nat` *(optional, bool)*: Enables Cloud Router and Cloud NAT creation for Private Worker Pool network (defaults to `true`).
    - `enables_network_connection_and_peering_routes` *(optional, bool)*: Enables network connection and peering routes (defaults to `true`).
    - `logging_bucket` *(optional)*: Cloud Storage bucket name for Cloud Build and deployment logs.
    - `bucket_kms_key` *(optional)*: Customer-managed KMS Key ID to encrypt the logging bucket.

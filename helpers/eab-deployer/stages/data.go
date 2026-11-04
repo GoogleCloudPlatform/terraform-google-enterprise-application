@@ -52,6 +52,7 @@ type GlobalTFVars struct {
 	BinaryAuthorizationImage        *string                       `hcl:"binary_authorization_image,optional"`
 	BinaryAuthorizationRepositoryID *string                       `hcl:"binary_authorization_repository_id,optional"`
 	CreateNat                       *bool                         `hcl:"create_nat,optional"`
+	CreateCloudNat                  *bool                         `hcl:"create_cloud_nat,optional"`
 	EnablesNetworkConnection        *bool                         `hcl:"enables_network_connection_and_peering_routes,optional"`
 	NCCConfig                       *NCCConfig                    `hcl:"ncc_config,optional"`
 	Teams                           map[string]string             `hcl:"teams,optional"`
