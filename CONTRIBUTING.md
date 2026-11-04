@@ -85,26 +85,27 @@ To use this setup, you need:
 
 1. **Google Cloud Organization & Parent Folder**:
     - A Google Cloud Organization ID (`org_id`).
-    - A parent Folder ID (`folder_id`) or organization root under which to provision the sandbox project.
+    - A parent Folder ID (`folder_id`) under which the setup creates a `seed` folder and the test projects.
 
 1. **Billing Account**:
     - An active Google Cloud Billing Account linked to your organization.
 
 1. **Deploying Identity IAM Roles**:
 The user or Service Account executing the deployment requires the following roles:
-    - **Folder / Organization Level**:
+    - **Parent folder (`folder_id`)**:
         - `roles/resourcemanager.folderAdmin`
         - `roles/resourcemanager.projectCreator`
-        - `roles/billing.user` (or `roles/billing.admin` on the billing account)
-        - `roles/compute.xpnAdmin` (if using Shared VPC)
-        - `roles/accesscontextmanager.policyAdmin` (optional, if testing with VPC Service Controls)
+    - **Organization (`org_id`)**:
+        - Permission to set the organization IAM policy (for example, `roles/resourcemanager.organizationAdmin`). The setup grants `organizationAdmin`, `compute.xpnAdmin`, `orgpolicy.policyAdmin`, and `accesscontextmanager.policyAdmin` to the CI service accounts.
+    - **Billing account (`billing_account`)**:
+        - `roles/billing.admin`
     - **Project Level (inside the sandbox project)**:
         - `roles/compute.admin` & `roles/compute.networkAdmin`
         - `roles/iam.serviceAccountAdmin` & `roles/iam.serviceAccountUser`
         - `roles/serviceusage.serviceUsageAdmin`
 
-1. **Team / Namespace Groups**:
-    - A Cloud Identity or Google Workspace group (for example, `team-apps@yourdomain.com`) to assign as the administrative team identity for Kubernetes namespaces and Fleet scopes.
+1. **Google Groups**:
+    - Permission to create groups in your organization's Cloud Identity or Google Workspace domain. The setup creates one group per team for each tested example.
 
 The project hosting the Service Account must have these APIs enabled:
 - Cloud Resource Manager API (`cloudresourcemanager.googleapis.com`)
@@ -120,6 +121,7 @@ export TF_VAR_org_id="your_org_id"
 export TF_VAR_folder_id="your_folder_id"
 export TF_VAR_billing_account="your_billing_account_id"
 export TF_VAR_cloud_build_sa="service_account_email_of_your_credentials"
+export TF_VAR_examples_tested='["default-example"]'
 ```
 
 Prepare the test project using Docker:
@@ -136,7 +138,6 @@ make docker_test_integration
 
 Or start an interactive shell in the testing container and run individual tests stage by stage, as CI does. Tests depend on outputs from `test/setup` and the harness tests (`TestLoggingBucket`, `TestGitLab`, `TestVPCSC`), so run them in the order used in `build/int.cloudbuild*.yaml`:
 
-``bash
 make docker_run
 ```
 
