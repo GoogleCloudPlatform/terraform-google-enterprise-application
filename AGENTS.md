@@ -150,6 +150,7 @@ gofmt -s -w helpers/ test/ modules/ examples/
 ```
 
 ### 2. Linting & Validation (via Docker Developer Tools)
+
 ```bash
 # Execute lint checks (Terraform, Shell, YAML, Go)
 make docker_test_lint
@@ -159,10 +160,11 @@ make docker_generate_docs
 ```
 
 ### 3. Running Integration Tests Locally
+
 ```bash
 # Run specific Terratest integration test
 cd test/integration
-go test -v -run TestDefaultExample ./default-example -timeout 60m
+RUN_STAGE=apply go test -v -run '^TestStandaloneSingleProjectDefaultExample$' ./default-example -timeout 60m
 ```
 
 ---
