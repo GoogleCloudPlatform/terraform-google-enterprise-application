@@ -155,6 +155,14 @@ func TestStandaloneSingleProjectMortgage(t *testing.T) {
 		gsaIamPolicyOp := gcloud.Runf(t, "iam service-accounts get-iam-policy %s --project %s", gkeAgentEmail, projectID)
 		expectedWiMember := fmt.Sprintf("serviceAccount:%s.svc.id.goog[mortgage-agent-%s/mortgage-agent-ksa]", projectID, envName)
 		assert.Contains(gsaIamPolicyOp.String(), expectedWiMember, fmt.Sprintf("GSA %s should have Workload Identity binding for %s", gkeAgentEmail, expectedWiMember))
+
+		// Agent Identity outputs
+		agentTrustDomain := standaloneSingleProjT.GetStringOutput("agent_trust_domain")
+		assert.NotEmpty(agentTrustDomain, "agent_trust_domain output should not be empty")
+
+		agentIdentityPrincipal := standaloneSingleProjT.GetStringOutput("agent_identity_principal")
+		assert.NotEmpty(agentIdentityPrincipal, "agent_identity_principal output should not be empty")
+		assert.Contains(agentIdentityPrincipal, agentTrustDomain, "agent_identity_principal should contain trust domain")
 	})
 
 	standaloneSingleProjT.DefineTeardown(func(assert *assert.Assertions) {

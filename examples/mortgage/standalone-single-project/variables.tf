@@ -25,7 +25,7 @@ variable "organization_id" {
   description = "Organization ID used to build the Agent Identity trust domain. When null, the project's org_id is used when available; otherwise the project-scoped trust domain is used."
   default     = null
   validation {
-    condition     = var.organization_id != ""
+    condition     = var.organization_id == null ? true : var.organization_id != ""
     error_message = "organization_id cannot be empty, only null or a valid value."
   }
 }

@@ -36,7 +36,7 @@ locals {
     ? "agents.global.org-${local.agent_org_id}.system.id.goog"
     : "agents.global.proj-${data.google_project.project.number}.system.id.goog"
   )
-  agent_identity_spiffe = "spiffe://${local.agent_trust_domain}/*"
+  agent_identity_spiffe = "spiffe://${local.agent_trust_domain}/mortgage-agent"
   agent_identity_principal = join("/", [
     "principal://${local.agent_trust_domain}/resources/container/projects",
     module.multitenant_infra.cluster_project_number,
@@ -160,15 +160,13 @@ resource "google_service_account" "gsa_mortgage_agent" {
   display_name = "GSA for mortgage-agent"
 }
 
-resource "google_project_iam_member" "gsa_mortgage_vertex_user" {
+resource "google_project_iam_member" "gsa_mortgage_roles" {
+  for_each = toset([
+    "roles/aiplatform.user",
+    "roles/cloudtrace.agent",
+  ])
   project = var.project_id
-  role    = "roles/aiplatform.user"
-  member  = google_service_account.gsa_mortgage_agent.member
-}
-
-resource "google_project_iam_member" "gsa_mortgage_trace_agent" {
-  project = var.project_id
-  role    = "roles/cloudtrace.agent"
+  role    = each.value
   member  = google_service_account.gsa_mortgage_agent.member
 }
 
@@ -182,17 +180,13 @@ resource "google_service_account_iam_member" "mortgage_wi_binding" {
 
 # Agent Identity IAM (SPIFFE principal). ADC with google-auth >= 2.61 uses this
 # principal when the Pod requests an agent identity and injects certificates.
-resource "google_project_iam_member" "agent_identity_vertex_user" {
+resource "google_project_iam_member" "agent_identity_roles" {
+  for_each = toset([
+    "roles/aiplatform.user",
+    "roles/cloudtrace.agent",
+  ])
   project = var.project_id
-  role    = "roles/aiplatform.user"
-  member  = local.agent_identity_principal
-
-  depends_on = [module.multitenant_infra]
-}
-
-resource "google_project_iam_member" "agent_identity_trace_agent" {
-  project = var.project_id
-  role    = "roles/cloudtrace.agent"
+  role    = each.value
   member  = local.agent_identity_principal
 
   depends_on = [module.multitenant_infra]
