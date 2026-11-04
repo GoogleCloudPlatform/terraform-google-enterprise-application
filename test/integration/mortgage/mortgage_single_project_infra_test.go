@@ -56,9 +56,15 @@ func TestStandaloneSingleProjectMortgage(t *testing.T) {
 		t.Fatalf("failed to set GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: %v", err)
 	}
 
+	orgID := setupOutput.GetStringOutput("org_id")
+	var orgIDVal interface{} = orgID
+	if orgID == "" {
+		orgIDVal = nil
+	}
+
 	vars := map[string]interface{}{
 		"project_id":             projectID,
-		"organization_id":        setupOutput.GetStringOutput("org_id"),
+		"organization_id":        orgIDVal,
 		"service_perimeter_mode": service_perimeter_mode,
 		"service_perimeter_name": service_perimeter_name,
 		"teams":                  setupOutput.GetJsonOutput("teams").String(),
