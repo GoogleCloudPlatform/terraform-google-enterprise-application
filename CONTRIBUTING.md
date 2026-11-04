@@ -132,12 +132,14 @@ make docker_test_prepare
 #### Running Tests via Docker
 
 Run the entire integration test suite non-interactively:
+
 ```bash
 make docker_test_integration
 ```
 
 Or start an interactive shell in the testing container and run individual tests stage by stage, as CI does. Tests depend on outputs from `test/setup` and the harness tests (`TestLoggingBucket`, `TestGitLab`, `TestVPCSC`), so run them in the order used in `build/int.cloudbuild*.yaml`:
 
+```bash
 make docker_run
 ```
 
