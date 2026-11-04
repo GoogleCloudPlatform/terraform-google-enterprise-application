@@ -15,17 +15,21 @@
  */
 
 output "project_id" {
-  value = var.harness_project_ids
+  value      = var.harness_project_ids
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "logging_bucket" {
-  value = { for i, v in module.logging_bucket : (i) => v.name }
+  value      = { for i, v in module.logging_bucket : (i) => v.name }
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "bucket_kms_key" {
-  value = { for i, v in module.kms : (i) => v.keys["bucket"] }
+  value      = { for i, v in module.kms : (i) => v.keys["bucket"] }
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "attestation_kms_key" {
-  value = { for i, v in module.kms_attestor : (i) => v.keys["attestation"] }
+  value      = { for i, v in module.kms_attestor : (i) => v.keys["attestation"] }
+  depends_on = [time_sleep.wait_iam_propagation]
 }

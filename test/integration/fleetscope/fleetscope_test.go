@@ -246,20 +246,13 @@ func TestFleetscope(t *testing.T) {
 						}
 
 						pollConfigSync := func() (bool, error) {
-							retry := false
 							// ensure config-sync resources are present in cluster
 							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 							if err != nil {
-								if !strings.Contains(err.Error(), "Error from server (NotFound): rootsyncs.configsync.gke.io \"root-sync\" not found") &&
-									!strings.Contains(err.Error(), "the server doesn't have a resource type \"rootsyncs\"") {
-									t.Logf("Config-Sync error '%s' \n.", err.Error())
-									return false, err
-								} else {
-									t.Log("Config-Sync not yet installed, will try polling again after sleeping.")
-									retry = true
-								}
+								t.Logf("Config-Sync not yet ready or error '%s', will retry polling.", err.Error())
+								return true, nil
 							}
-							return retry, nil
+							return false, nil
 						}
 
 						utils.Poll(t, pollConfigSync, 20, 40*time.Second)

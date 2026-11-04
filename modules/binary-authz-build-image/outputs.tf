@@ -27,9 +27,11 @@ output "binary_authz_image__repository_name" {
 output "binary_authorization_repository_id" {
   description = "The ID of the Repository where binary attestation image is stored."
   value       = google_artifact_registry_repository.attestation_image.id
+  depends_on  = [module.build_binary_authz_image]
 }
 
 output "binary_authorization_image" {
   description = "Image tag to create attestations."
   value       = local.binary_auth_image_tag
+  depends_on  = [module.build_binary_authz_image]
 }
