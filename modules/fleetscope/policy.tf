@@ -36,6 +36,7 @@ resource "google_gke_hub_feature" "poco_feature" {
         }
         audit_interval_seconds    = 60
         referential_rules_enabled = true
+        mutation_enabled          = false
       }
     }
   }
@@ -60,10 +61,10 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
       install_spec = "INSTALL_SPEC_ENABLED"
       policy_content {
         bundles {
-          bundle_name = "pss-baseline-v2022"
+          bundle_name = "pss-baseline"
         }
         bundles {
-          bundle_name = "policy-essentials-v2022"
+          bundle_name = "policy-essentials"
         }
         template_library {
           installation = "ALL"
@@ -71,6 +72,7 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
       }
       audit_interval_seconds    = 60
       referential_rules_enabled = true
+      mutation_enabled          = false
     }
   }
 
