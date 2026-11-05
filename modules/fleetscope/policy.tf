@@ -21,6 +21,8 @@ resource "google_gke_hub_feature" "poco_feature" {
 
   fleet_default_member_config {
     policycontroller {
+      version = var.policy_controller_version
+
       policy_controller_hub_config {
         install_spec = "INSTALL_SPEC_ENABLED"
         policy_content {
@@ -56,6 +58,8 @@ resource "google_gke_hub_feature_membership" "poco_feature_member" {
   membership_location = regex(local.membership_re, each.value)[1]
 
   policycontroller {
+    version = var.policy_controller_version
+
     policy_controller_hub_config {
       install_spec = "INSTALL_SPEC_ENABLED"
       policy_content {
