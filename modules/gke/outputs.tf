@@ -24,7 +24,7 @@ output "cluster_regions" {
 output "cluster_membership_ids" {
   description = "GKE cluster membership IDs."
   value = [
-    for value in merge(module.gke-standard, module.gke-autopilot) : value.fleet_membership
+    for k, value in data.google_compute_subnetwork.default : "//gkehub.googleapis.com/projects/${local.cluster_project_id}/locations/global/memberships/${local.cluster_prefix}cluster-${value.region}-${var.env}"
   ]
 }
 
@@ -37,9 +37,9 @@ output "cluster_zones" {
 
 output "cluster_names" {
   description = "GKE cluster names."
-  value = flatten([
-    for value in merge(module.gke-standard, module.gke-autopilot) : value.name
-  ])
+  value = [
+    for k, value in data.google_compute_subnetwork.default : "${local.cluster_prefix}cluster-${value.region}-${var.env}"
+  ]
 }
 
 output "cluster_project_id" {

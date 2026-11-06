@@ -21,5 +21,5 @@ output "cluster_service_accounts" {
 
 output "attestor_id" {
   description = "Attestor ID."
-  value       = var.attestation_kms_key != null ? google_binary_authorization_attestor.attestor[0].id : null
+  value       = var.attestation_kms_key != null ? "projects/${var.cluster_project_id}/attestors/gke-attestor" : null
 }
