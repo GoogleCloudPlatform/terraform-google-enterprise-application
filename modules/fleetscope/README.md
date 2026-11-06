@@ -34,6 +34,7 @@ The following resources are created:
 | fleet\_project\_id | The fleet project ID | `string` | n/a | yes |
 | namespace\_ids | The fleet namespace IDs with team | `map(string)` | n/a | yes |
 | network\_project\_id | The network project ID | `string` | n/a | yes |
+| policy\_controller\_version | The version of Policy Controller to install. | `string` | `"1.24.1"` | no |
 
 ## Outputs
 
