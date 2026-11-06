@@ -129,3 +129,9 @@ variable "enable_multicluster_discovery" {
   description = "Enables Multicluster discovery."
   default     = true
 }
+
+variable "policy_controller_version" {
+  type        = string
+  description = "The version of Policy Controller to install."
+  default     = "1.24.1"
+}
