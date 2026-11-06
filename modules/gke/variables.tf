@@ -148,7 +148,7 @@ variable "enable_csi_filestore" {
 variable "kubernetes_version" {
   description = "The Kubernetes version of the masters. If set to 'latest' it will pull latest available version in the selected region."
   type        = string
-  default     = "latest"
+  default     = null
 }
 
 variable "network_tags" {
