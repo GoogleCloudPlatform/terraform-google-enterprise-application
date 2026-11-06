@@ -145,6 +145,12 @@ variable "enable_csi_filestore" {
   default     = true
 }
 
+variable "kubernetes_version" {
+  description = "The Kubernetes version of the masters. If set to 'latest' it will pull latest available version in the selected region."
+  type        = string
+  default     = null
+}
+
 variable "network_tags" {
   description = <<-EOF
   Network tags applied to all cluster nodes (static, NAP, Autopilot).

@@ -20,6 +20,16 @@ variable "project_id" {
   default     = null
 }
 
+variable "organization_id" {
+  type        = string
+  description = "Organization ID used to build the Agent Identity trust domain. When null, the project's org_id is used when available; otherwise the project-scoped trust domain is used."
+  default     = null
+  validation {
+    condition     = var.organization_id == null ? true : can(regex("^[0-9]+$", var.organization_id))
+    error_message = "organization_id must be a numeric string representing a valid Google Cloud Organization ID."
+  }
+}
+
 variable "region" {
   type        = string
   description = "Google Cloud region for deployments"
@@ -255,7 +265,7 @@ variable "mcp_placeholder_image" {
 }
 
 variable "mcp_services" {
-  description = "Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name."
+  description = "Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name AND the URL-mask token (e.g. legacy-dms.<mcp_internal_dns_zone.domain> -> Cloud Run service 'legacy-dms')."
   type = map(object({
     account_id         = string
     image              = optional(string)
@@ -271,3 +281,5 @@ variable "mcp_services" {
     "income-verification" = { account_id = "mcp-income-verification" }
   }
 }
+
+

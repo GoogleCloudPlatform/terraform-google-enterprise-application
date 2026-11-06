@@ -36,6 +36,7 @@ By default, this module assigns the `egress-internet` network tag to all cluster
 | enable\_csi\_gcs\_fuse | Enable the GCS Fuse CSI Driver for HTC example | `bool` | `false` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |
+| kubernetes\_version | The Kubernetes version of the masters. If set to 'latest' it will pull latest available version in the selected region. | `string` | `null` | no |
 | master\_ipv4\_cidr\_blocks | List of IP ranges (One range per cluster) in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. | `list(string)` | <pre>[<br>  "10.11.10.0/28",<br>  "10.11.20.0/28"<br>]</pre> | no |
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
 | network\_tags | Network tags applied to all cluster nodes (static, NAP, Autopilot).<br>- Default "egress-internet" allows Foundation Cloud NAT egress (when NAT is enabled).<br>- Custom lists override the default: include "egress-internet" to preserve NAT access, pass [] to remove tags, or use your custom Foundation egress\_tags value instead. | `list(string)` | <pre>[<br>  "egress-internet"<br>]</pre> | no |

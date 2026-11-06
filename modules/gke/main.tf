@@ -261,6 +261,7 @@ module "gke-standard" {
   subnetwork             = regex(local.subnetworks_re, local.subnets[each.key])[0]
   ip_range_pods          = data.google_compute_subnetwork.default[each.key].secondary_ip_range[0].range_name
   ip_range_services      = data.google_compute_subnetwork.default[each.key].secondary_ip_range[1].range_name
+  kubernetes_version     = var.kubernetes_version
   release_channel        = var.cluster_release_channel
   gateway_api_channel    = "CHANNEL_STANDARD"
 
@@ -360,6 +361,7 @@ module "gke-autopilot" {
   subnetwork          = regex(local.subnetworks_re, local.subnets[each.key])[0]
   ip_range_pods       = each.value.secondary_ip_range[0].range_name
   ip_range_services   = each.value.secondary_ip_range[1].range_name
+  kubernetes_version  = var.kubernetes_version
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
 

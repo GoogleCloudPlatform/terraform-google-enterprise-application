@@ -16,6 +16,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mortgage-agent-deployment
+  labels:
+    # Registers the Deployment in Agent Registry (Agent Platform).
+    registry.gke.io/functional-type: "AGENT"
 spec:
   replicas: 1
   selector:
@@ -25,6 +28,12 @@ spec:
     metadata:
       labels:
         app: mortgage-agent-server
+      annotations:
+        sidecar.istio.io/inject: "false"
+        # Agent Identity (SPIFFE). AGENT_IDENTITY is substituted by Cloud Deploy.
+        iam.gke.io/identity: PLACEHOLDER # from-param: ${AGENT_IDENTITY}
+        iam.gke.io/inject-podcertificates: "true"
+        iam.gke.io/spiffe-identity-type: "agent-identity"
     spec:
       serviceAccountName: mortgage-agent-ksa
       containers:
