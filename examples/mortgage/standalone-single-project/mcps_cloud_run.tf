@@ -39,12 +39,9 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_kms_crypto_key_iam_member" "gcs_kms" {
-  for_each = var.bucket_kms_key != null ? {
-    "encrypt" : "roles/cloudkms.cryptoKeyEncrypter",
-    "decrypt" : "roles/cloudkms.cryptoKeyDecrypter",
-  } : {}
+  count         = var.bucket_kms_key != null ? 1 : 0
   crypto_key_id = var.bucket_kms_key
-  role          = each.value
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = data.google_storage_project_service_account.gcs_account.member
 }
 
