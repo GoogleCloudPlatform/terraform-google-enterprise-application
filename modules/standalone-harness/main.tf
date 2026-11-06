@@ -98,6 +98,8 @@ module "binary_autz" {
   location                    = var.region
   binary_auth_image_version   = "v1.0"
   workerpool_id               = local.workerpool_id
+  service_account_id          = var.service_account_id
+  service_account_name        = var.service_account_name
   attestation_repository_name = var.attestation_repository_name
   bucket_logs_url             = var.logging_bucket != null ? "gs://${var.logging_bucket}" : null
 
