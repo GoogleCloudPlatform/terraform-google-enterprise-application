@@ -8,6 +8,26 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.8.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.7.0...v0.8.0) (2026-11-06)
+
+
+### Features
+
+* add cymbal-shop standalone single-project example and test harness ([#783](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/783)) ([bb63280](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/bb632804aeef9a463a4f639d88c048ea753b7bc5))
+* add default network_tags for Foundation Cloud NAT egress ([#823](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/823)) ([928bc1a](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/928bc1a39d639fc2718b405cb65e84de99db988b))
+* adds cloud nat ([#811](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/811)) ([aa7f5a8](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/aa7f5a8969f66349ad44019bbbcb8464e9a14b38))
+* changes path modules refs to terraform registry ([#831](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/831)) ([6677d89](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/6677d894f7e13390ea7687fbe67113bc4f4a3398))
+* **examples:** add mortgage agent single-project end-to-end example ([#781](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/781)) ([d07b920](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/d07b9206b04cc629d1331793c2cba56f1880e79d))
+* **helper:** add multi-repo microservice deployments for cymbal apps in eab-deployer ([#792](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/792)) ([c6dc606](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/c6dc606f2d6d7be256a71f89f4641bde157c5231))
+* migrate cymbal-bank standalone single-project example and modernize test harness ([#775](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/775)) ([4254147](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/42541470ce5d4a6b0b1d2eabf2f5dccfc7d2d54d))
+
+
+### Bug Fixes
+
+* adds bin authz builder sa ([#810](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/810)) ([feb26fa](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/feb26fa544fe1701351288ab570467dd9af7f2de))
+* enables default verify ([#780](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/780)) ([3c34242](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/3c342421dfe44c360da1d67ef059eb10d3108744))
+* **fleetscope:** pin policy controller version to 1.24.1 ([#844](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/844)) ([1a5431a](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/1a5431a4235b1452fea770c9fcb513ed909bfa3e))
+
 ## [0.7.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.6.0...v0.7.0) (2026-09-25)
 
 
