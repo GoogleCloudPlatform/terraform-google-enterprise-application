@@ -59,12 +59,13 @@ All changes must pass `make docker_test_lint` (Terraform, TFLint, shell, Python,
 
 #### Execution
 
-Run the lint suite via Docker developer tools:
 ```bash
-make docker_test_lint
+# Generate module documentation tables
+make docker_generate_docs
 ```
 
 You can also format files locally:
+
 ```bash
 # Format Terraform files
 terraform fmt -recursive
@@ -73,9 +74,15 @@ terraform fmt -recursive
 gofmt -s -w helpers/ test/ modules/ examples/
 ```
 
+Run the lint suite via Docker developer tools:
+
+```bash
+make docker_test_lint
+```
+
 ### Integration Testing
 
-Integration tests are written in Go using [Terratest][terratest] to verify the behaviour of the modules and example scenarios. Additions, changes, and bug fixes should be accompanied by tests.
+Integration tests are written in Go using [Terratest][terratest] to verify the behavior of the modules and example scenarios. Additions, changes, and bug fixes should be accompanied by tests.
 
 #### Test Environment Setup
 
@@ -91,7 +98,7 @@ To use this setup, you need:
     - An active Google Cloud Billing Account linked to your organization.
 
 1. **Deploying Identity IAM Roles**:
-The user or Service Account executing the deployment requires the following roles:
+    The user or Service Account executing the deployment requires the following roles:
     - **Parent folder (`folder_id`)**:
         - `roles/resourcemanager.folderAdmin`
         - `roles/resourcemanager.projectCreator`
@@ -129,15 +136,7 @@ Prepare the test project using Docker:
 make docker_test_prepare
 ```
 
-#### Running Tests via Docker
-
-Run the entire integration test suite non-interactively:
-
-```bash
-make docker_test_integration
-```
-
-Or start an interactive shell in the testing container and run individual tests stage by stage, as CI does. Tests depend on outputs from `test/setup` and the harness tests (`TestLoggingBucket`, `TestGitLab`, `TestVPCSC`), so run them in the order used in `build/int.cloudbuild*.yaml`:
+Start an interactive shell in the testing container and run individual tests stage by stage, as CI does. Tests depend on outputs from `test/setup` and the harness tests (`TestLoggingBucket`, `TestGitLab`, `TestVPCSC`), so run them in the order used in `build/int.cloudbuild*.yaml`:
 
 ```bash
 make docker_run

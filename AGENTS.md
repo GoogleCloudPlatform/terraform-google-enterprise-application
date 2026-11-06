@@ -151,21 +151,28 @@ gofmt -s -w helpers/ test/ modules/ examples/
 
 ### 2. Linting & Validation (via Docker Developer Tools)
 
-```bash
-# Execute lint checks (Terraform, Shell, YAML, Go)
-make docker_test_lint
+All changes must pass `make docker_test_lint` (Terraform, TFLint, shell, Python, license header, whitespace, and generated-docs checks). CI also runs golangci-lint on the Go code in `test/integration`.
 
+```bash
 # Generate module documentation tables
 make docker_generate_docs
+
+# Run the lint suite via Docker developer tools
+make docker_test_lint
 ```
 
-### 3. Running Integration Tests Locally
+
+# Run the stages in order and always finish with teardown.
+
+
+ **[!NOTE] Requires the test/setup harness (see CONTRIBUTING.md) and creates billable resources.**
 
 ```bash
-# Run specific Terratest integration test
 cd test/integration
+RUN_STAGE=init go test -v -run '^TestStandaloneSingleProjectDefaultExample$' ./default-example -timeout 60m
 RUN_STAGE=apply go test -v -run '^TestStandaloneSingleProjectDefaultExample$' ./default-example -timeout 60m
-```
+RUN_STAGE=verify go test -v -run '^TestStandaloneSingleProjectDefaultExample$' ./default-example -timeout 60m
+RUN_STAGE=teardown go test -v -run '^TestStandaloneSingleProjectDefaultExample$' ./default-example -timeout 60m
 
 ---
 
