@@ -165,7 +165,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     ```bash
     mkdir ./eab-applicationfactory/envs/
     cp -R ./terraform-google-enterprise-application/examples/cymbal-bank/4-appfactory/envs/* ./eab-applicationfactory/envs/
-    cp -R ./terraform-google-enterprise-application/4-appfactory/modules/* ./eab-applicationfactory/modules/
     ```
 
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
@@ -312,16 +311,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    rm -rf $frontend_repository/modules
-    rm -rf $balancereader_repository/modules
-    rm -rf $userservice_repository/modules
-    rm -rf $contacts_repository/modules
-    rm -rf $ledgerwriter_repository/modules
-    rm -rf $transactionhistory_repository/modules
-
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-balancereader/* $balancereader_repository
-    rm -rf $balancereader_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $balancereader_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $balancereader_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $balancereader_repository/
     chmod 755 $balancereader_repository/tf-wrapper.sh
@@ -332,8 +322,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $balancereader_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-userservice/* $userservice_repository
-    rm -rf $userservice_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $userservice_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $userservice_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $userservice_repository/
     chmod 755 $userservice_repository/tf-wrapper.sh
@@ -344,8 +332,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $userservice_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/frontend/* $frontend_repository
-    rm -rf $frontend_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $frontend_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $frontend_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $frontend_repository/
     chmod 755 $frontend_repository/tf-wrapper.sh
@@ -356,8 +342,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $frontend_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-contacts/* $contacts_repository
-    rm -rf $contacts_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $contacts_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
     chmod 755 $contacts_repository/tf-wrapper.sh
@@ -368,8 +352,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $contacts_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-ledgerwriter/* $ledgerwriter_repository
-    rm -rf $ledgerwriter_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $ledgerwriter_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $ledgerwriter_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $ledgerwriter_repository/
     chmod 755 $ledgerwriter_repository/tf-wrapper.sh
@@ -380,15 +362,13 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $ledgerwriter_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-transactionhistory/* $transactionhistory_repository
-    rm -rf $transactionhistory_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $transactionhistory_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $transactionhistory_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $transactionhistory_repository/
     chmod 755 $transactionhistory_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $transactionhistory_repository/policy-library
     rm -rf $transactionhistory_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $transactionhistory_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$transactionhistory_statebucket/" $transactionhistory_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $transactionhistory_repository/*/*/terraform.tfvars
     ```
 
@@ -809,7 +789,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     ```bash
     mkdir -pr ./eab-applicationfactory/envs/
     cp -R ./terraform-google-enterprise-application/examples/cymbal-bank/4-appfactory/envs/* ./eab-applicationfactory/envs/
-    cp -R ./terraform-google-enterprise-application/4-appfactory/modules/* ./eab-applicationfactory/modules/
     ```
 
 1. Use `terraform output` to get the state bucket value from 1-bootstrap output and replace the placeholder in `terraform.tfvars`.
@@ -925,16 +904,7 @@ The steps below assume that you are checked out on the same level as `terraform-
 1. Copy terraform code for each service repository and replace backend bucket:
 
     ```bash
-    rm -rf $frontend_repository/modules
-    rm -rf $balancereader_repository/modules
-    rm -rf $userservice_repository/modules
-    rm -rf $contacts_repository/modules
-    rm -rf $ledgerwriter_repository/modules
-    rm -rf $transactionhistory_repository/modules
-
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-balancereader/* $balancereader_repository
-    rm -rf $balancereader_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $balancereader_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $balancereader_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $balancereader_repository/
     chmod 755 $balancereader_repository/tf-wrapper.sh
@@ -944,10 +914,7 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$balancereader_statebucket/" $balancereader_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $balancereader_repository/*/*/terraform.tfvars
 
-
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-userservice/* $userservice_repository
-    rm -rf $userservice_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $userservice_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $userservice_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $userservice_repository/
     chmod 755 $userservice_repository/tf-wrapper.sh
@@ -958,8 +925,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $userservice_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/frontend/* $frontend_repository
-    rm -rf $frontend_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $frontend_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $frontend_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $frontend_repository/
     chmod 755 $frontend_repository/tf-wrapper.sh
@@ -970,8 +935,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $frontend_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/accounts-contacts/* $contacts_repository
-    rm -rf $contacts_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $contacts_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $contacts_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $contacts_repository/
     chmod 755 $contacts_repository/tf-wrapper.sh
@@ -982,8 +945,6 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $contacts_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-ledgerwriter/* $ledgerwriter_repository
-    rm -rf $ledgerwriter_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $ledgerwriter_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $ledgerwriter_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $ledgerwriter_repository/
     chmod 755 $ledgerwriter_repository/tf-wrapper.sh
@@ -994,15 +955,13 @@ The steps below assume that you are checked out on the same level as `terraform-
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $ledgerwriter_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/cymbal-bank/5-appinfra/cymbal-bank/ledger-transactionhistory/* $transactionhistory_repository
-    rm -rf $transactionhistory_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $transactionhistory_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $transactionhistory_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $transactionhistory_repository/
     chmod 755 $transactionhistory_repository/tf-wrapper.sh
     cp -RT ../terraform-example-foundation/policy-library/ $transactionhistory_repository/policy-library
     rm -rf $transactionhistory_repository/policy-library/policies/constraints/*
     sed -i 's/CLOUDSOURCE/FILESYSTEM/g' $transactionhistory_repository/cloudbuild-tf-*
-    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$ledgerwriter_statebucket/" $ledgerwriter_repository/*/*/backend.tf
+    sed -i'' -e "s/UPDATE_INFRA_REPO_STATE/$transactionhistory_statebucket/" $transactionhistory_repository/*/*/backend.tf
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $transactionhistory_repository/*/*/terraform.tfvars
     ```
 

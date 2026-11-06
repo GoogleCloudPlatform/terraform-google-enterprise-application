@@ -32,7 +32,8 @@ locals {
 }
 
 module "multitenant_infra" {
-  source = "../../modules/gke"
+  source  = "GoogleCloudPlatform/enterprise-application/google//modules/gke"
+  version = "~> 0.7"
 
   apps                   = local.apps
   cluster_subnetworks    = [var.subnetwork_self_link]

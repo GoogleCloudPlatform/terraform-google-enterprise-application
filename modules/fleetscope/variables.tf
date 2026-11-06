@@ -135,3 +135,9 @@ variable "manage_binary_authz_policy" {
   description = "Whether to manage the Binary Authorization policy resource in fleetscope. Defaults to false when Binary Authorization policy is managed by secure-cicd."
   default     = false
 }
+
+variable "policy_controller_version" {
+  type        = string
+  description = "The version of Policy Controller to install."
+  default     = "1.24.1"
+}

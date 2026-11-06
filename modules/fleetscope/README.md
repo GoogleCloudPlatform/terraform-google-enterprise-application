@@ -35,6 +35,7 @@ The following resources are created:
 | manage\_binary\_authz\_policy | Whether to manage the Binary Authorization policy resource in fleetscope. Defaults to false when Binary Authorization policy is managed by secure-cicd. | `bool` | `false` | no |
 | namespace\_ids | The fleet namespace IDs with team | `map(string)` | n/a | yes |
 | network\_project\_id | The network project ID | `string` | n/a | yes |
+| policy\_controller\_version | The version of Policy Controller to install. | `string` | `"1.24.1"` | no |
 
 ## Outputs
 

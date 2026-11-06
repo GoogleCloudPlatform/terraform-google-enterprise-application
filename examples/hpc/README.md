@@ -152,12 +152,7 @@ The steps below assume that you are in a directory containing both the `terrafor
 4.  Copy the Terraform code for each team repository and replace placeholders.
 
     ```bash
-    # Remove existing modules directories
-    rm -rf $hpc_team_a_repository/modules
-    rm -rf $hpc_team_b_repository/modules
     cp -R ../terraform-google-enterprise-application/examples/hpc/5-appinfra/hpc/hpc-team-a/* $hpc_team_a_repository
-    rm -rf $hpc_team_a_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $hpc_team_a_repository
     cp ../../terraform-example-foundation/build/cloudbuild-tf-* $hpc_team_a_repository/
     cp ../../terraform-example-foundation/build/tf-wrapper.sh $hpc_team_a_repository/
     chmod 755 $hpc_team_a_repository/tf-wrapper.sh
@@ -169,8 +164,6 @@ The steps below assume that you are in a directory containing both the `terrafor
     sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" $hpc_team_a_repository/*/*/terraform.tfvars
 
     cp -R ../terraform-google-enterprise-application/examples/hpc/5-appinfra/hpc/hpc-team-b/* $hpc_team_b_repository
-    rm -rf $hpc_team_b_repository/modules
-    cp -R ../terraform-google-enterprise-application/5-appinfra/modules/ $hpc_team_b_repository
     cp ../terraform-example-foundation/build/cloudbuild-tf-* $hpc_team_b_repository/
     cp ../terraform-example-foundation/build/tf-wrapper.sh $hpc_team_b_repository/
     chmod 755 $hpc_team_b_repository/tf-wrapper.sh
