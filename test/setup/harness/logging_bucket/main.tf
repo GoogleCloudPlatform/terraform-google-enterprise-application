@@ -47,6 +47,17 @@ module "logging_bucket" {
   #   }
   # ]
 }
+data "google_compute_default_service_account" "default" {
+  for_each = var.harness_project_ids
+  project  = each.value
+}
+
+resource "google_storage_bucket_iam_member" "compute_sa_logging_storage_admin" {
+  for_each = var.harness_project_ids
+  bucket   = module.logging_bucket[each.key].name
+  role     = "roles/storage.admin"
+  member   = "serviceAccount:${data.google_compute_default_service_account.default[each.key].email}"
+}
 
 resource "google_storage_bucket_iam_member" "logging_storage_admin" {
   for_each = var.harness_project_ids
@@ -76,11 +87,11 @@ module "kms" {
   ]
   set_encrypters_for = ["bucket"]
   encrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa},serviceAccount:${data.google_compute_default_service_account.default[each.key].email}",
   ]
   set_decrypters_for = ["bucket"]
   decrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa},serviceAccount:${data.google_compute_default_service_account.default[each.key].email}",
   ]
   prevent_destroy = false
 }
@@ -104,11 +115,11 @@ module "kms_attestor" {
   ]
   set_encrypters_for = ["attestation"]
   encrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa},serviceAccount:${data.google_compute_default_service_account.default[each.key].email}",
   ]
   set_decrypters_for = ["attestation"]
   decrypters = [
-    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa}",
+    "${data.google_storage_project_service_account.ci_gcs_account[each.key].member},${"serviceAccount:${var.sa_email[each.key]}"},serviceAccount:${var.cloud_build_sa},serviceAccount:${data.google_compute_default_service_account.default[each.key].email}",
   ]
   prevent_destroy = false
 }
