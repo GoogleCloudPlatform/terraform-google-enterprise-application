@@ -16,13 +16,19 @@
 - [Terraform Error acquiring the state lock](#terraform-error-acquiring-the-state-lock)
 - [Terraform deploy fails due to GitLab repositories not found](#terraform-deploy-fails-due-to-gitlab-repositories-not-found)
 - [Cannot assign requested address error in Cloud Shell](#cannot-assign-requested-address-error-in-cloud-shell)
-- [Error: Terraform deploy fails due to GitLab repositories not found](#terraform-deploy-fails-due-to-gitlab-repositories-not-found)
 - [Error: Gitlab pipelines access denied](#gitlab-pipelines-access-denied)
 - [The user does not have permission to access Project or it may not exist](#the-user-does-not-have-permission-to-access-project-or-it-may-not-exist)
 - [Quota 'CPUS_ALL_REGIONS' exceeded](#quota-cpus_all_regions-exceeded)
 - [Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link](#shared-vpc-attachment-destruction-failure-due-to-network-endpoint-group-link)
 - [Network Destruction Failure due to Firewall still using it](#network-destruction-failure-due-to-firewall-still-using-it)
 - [Cloud Source Repositories (CSR) Git Authentication Failure](#cloud-source-repositories-csr-git-authentication-failure)
+- [Compute Engine External IP Restriction on Worker Pool NAT VM (`compute.vmExternalIpAccess`)](#compute-engine-external-ip-restriction-on-worker-pool-nat-vm-computevmexternalipaccess)
+- [Binary Authorization Attestation Step Failure in CI Pipeline](#binary-authorization-attestation-step-failure-in-ci-pipeline)
+- [Cloud Build Service Account Missing Permissions for Artifact Registry and Storage](#cloud-build-service-account-missing-permissions-for-artifact-registry-and-storage)
+- [Interactive Prompt Blocking Automated IAM Binding due to Existing Conditional Policies](#interactive-prompt-blocking-automated-iam-binding-due-to-existing-conditional-policies)
+- [Private GKE Autopilot Cluster Direct kubectl Connectivity Timeout](#private-gke-autopilot-cluster-direct-kubectl-connectivity-timeout)
+- [Workflows Deletion Protection Error During Teardown (`google_workflows_workflow`)](#workflows-deletion-protection-error-during-teardown-google_workflows_workflow)
+- [State Backend Lock / 404 Error During Stage 0 (0-bootstrap) Teardown](#state-backend-lock--404-error-during-stage-0-0-bootstrap-teardown)
 - - -
 
 ### Project quota exceeded
@@ -512,4 +518,239 @@ Choose one of the following approaches:
 
 3. **Use 2nd-gen Repositories (GitHub / GitLab)**:
    In `global.tfvars`, configure `cloudbuildv2_repository_config` to use GitHub (`repo_type = "GITHUBv2"`) or GitLab (`repo_type = "GITLABv2"`).
+
+### Compute Engine External IP Restriction on Worker Pool NAT VM (`compute.vmExternalIpAccess`)
+
+**Error message:**
+
+```text
+Error: Error creating Instance: googleapi: Error 412: Constraint constraints/compute.vmExternalIpAccess violated for projects/PROJECT_ID/zones/ZONE/instances/eab-vpc-workerpool-cloud-build-nat-vm.
+```
+
+**Cause:**
+
+Enterprise Foundation v7 enforces the organizational policy `constraints/compute.vmExternalIpAccess` by default. This policy prohibits Compute Engine instances from obtaining public external IP addresses. When setting `create_nat = true` in EAB standalone or worker pool configurations, a Compute Engine NAT gateway VM is provisioned to provide egress internet access for container builds (fetching PyPI packages, ADK dependencies, etc.), which requires an external IP.
+
+**Solution:**
+
+Configure an organization policy override allowing external IP allocation specifically for the NAT VM across all candidate zones:
+
+```bash
+PROJECT_ID="<YOUR_SERVICE_PROJECT_ID>"
+
+gcloud org-policies allow compute.vmExternalIpAccess \
+  projects/${PROJECT_ID}/zones/us-central1-a/instances/eab-vpc-workerpool-cloud-build-nat-vm \
+  projects/${PROJECT_ID}/zones/us-central1-b/instances/eab-vpc-workerpool-cloud-build-nat-vm \
+  projects/${PROJECT_ID}/zones/us-central1-c/instances/eab-vpc-workerpool-cloud-build-nat-vm \
+  projects/${PROJECT_ID}/zones/us-central1-f/instances/eab-vpc-workerpool-cloud-build-nat-vm \
+  --project=${PROJECT_ID}
+```
+
+---
+
+### Binary Authorization Attestation Step Failure in CI Pipeline
+
+**Error message:**
+
+```text
+Step #3 - "create-attestation": Error: could not find attestor or KMS key
+Step #3 - "create-attestation": Finished step #3 - "create-attestation" with status: ERROR
+ERROR: build step 3 "create-attestation" failed: step exited with non-zero status: 1
+```
+
+**Cause:**
+
+In standalone single-project mode or environments where `attestation_kms_key = null`, no Binary Authorization attestor is provisioned. The standard CI pipeline step attempts to sign the container image using the attestor and fails if it does not exist.
+
+**Solution:**
+
+Add `allowFailure: true` to the `create-attestation` step in `cloudbuild.yaml`:
+
+```yaml
+- id: 'create-attestation'
+  name: '$_BINARY_AUTH_IMAGE'
+  allowFailure: true
+  args:
+    - '--artifact-url'
+    - "$$(cat /workspace/image_url.txt)"
+    - '--attestor'
+    - '$_ATTESTOR_ID'
+    - '--keyversion'
+    - '$_KMS_KEY_VERSION'
+```
+
+---
+
+### Cloud Build Service Account Missing Permissions for Artifact Registry and Storage
+
+**Error message:**
+
+```text
+denied: Permission "artifactregistry.repositories.uploadArtifacts" denied on resource "projects/PROJECT_ID/locations/REGION/repositories/REPOSITORY"
+```
+or
+```text
+AccessDeniedException: 403 Caller does not have storage.objects.create access to bucket ...
+```
+
+**Cause:**
+
+When running builds via Cloud Build private worker pools in existing Foundation service projects, the dedicated team CI service account (`ci-<service-name>@PROJECT_ID.iam.gserviceaccount.com`) or the Cloud Build Service Agent requires explicit IAM roles to push artifacts, write build logs, and invoke Cloud Deploy.
+
+**Solution:**
+
+Grant the necessary roles to the CI Service Account and Cloud Build Service Agent:
+
+```bash
+PROJECT_ID="<YOUR_PROJECT_ID>"
+PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
+
+# Grant Artifact Registry and Logging permissions
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:ci-capital-agent@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/artifactregistry.writer" \
+  --condition=None
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:ci-capital-agent@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/logging.logWriter" \
+  --condition=None
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:ci-capital-agent@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/storage.objectAdmin" \
+  --condition=None
+
+# Allow CI Service Account to impersonate the Deploy Service Account
+gcloud iam service-accounts add-iam-policy-binding \
+  deploy-capital-agent@${PROJECT_ID}.iam.gserviceaccount.com \
+  --member="serviceAccount:ci-capital-agent@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser" \
+  --project=${PROJECT_ID}
+
+# Cloud Build Service Agent permissions
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-cloudbuild.iam.gserviceaccount.com" \
+  --role="roles/storage.admin" \
+  --condition=None
+```
+
+---
+
+### Interactive Prompt Blocking Automated IAM Binding due to Existing Conditional Policies
+
+**Error message:**
+
+```text
+This policy contains conditions.
+[1] Condition: ...
+[2] None
+Which condition would you like to edit?
+```
+
+**Cause:**
+
+Foundation v7 stages (such as `1-org` or `2-environments`) configure conditional IAM policies on projects (e.g. for log view access or monitoring). When running `gcloud projects add-iam-policy-binding` without specifying a condition flag, `gcloud` halts execution with an interactive menu.
+
+**Solution:**
+
+Always append `--condition=None` to `gcloud projects add-iam-policy-binding` commands when executing in non-interactive CI/CD runners or automated scripts:
+
+```bash
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:..." \
+  --role="roles/..." \
+  --condition=None
+```
+
+---
+
+### Private GKE Autopilot Cluster Direct kubectl Connectivity Timeout
+
+**Error message:**
+
+```text
+Unable to connect to the server: dial tcp 172.16.0.2:443: i/o timeout
+```
+
+**Cause:**
+
+In compliance with enterprise security baselines, GKE Autopilot clusters provisioned by EAB have private control plane endpoints enabled and public endpoints disabled. Standard `kubectl` commands executed from outside the VPC cannot route directly to private control plane RFC 1918 addresses.
+
+**Solution:**
+
+Connect securely through Google Cloud Connect Gateway without needing a bastion host or VPN:
+
+```bash
+# Obtain Connect Gateway credentials
+gcloud container fleet memberships get-credentials ag-cluster-us-central1-development \
+  --project=<PROJECT_ID>
+
+# Interact with the cluster via kubectl
+kubectl get pods -A
+```
+
+---
+
+### Workflows Deletion Protection Error During Teardown (`google_workflows_workflow`)
+
+**Error message:**
+
+```text
+Error: cannot destroy workflow without setting deletion_protection=false and running `terraform apply`
+```
+
+**Cause:**
+
+In Google Cloud Provider v6+, the `google_workflows_workflow` resource has `deletion_protection = true` enabled by default. During teardown of Foundation `0-bootstrap`, Terraform rejects destroying the workflow directly.
+
+**Solution:**
+
+Remove the workflow resource from the Terraform state and allow the project deletion to clean up the resource automatically:
+
+```bash
+terraform state rm module.tf_cloud_builder.google_workflows_workflow.builder
+```
+
+---
+
+### State Backend Lock / 404 Error During Stage 0 (0-bootstrap) Teardown
+
+**Error message:**
+
+```text
+Error: Failed to upload state to gs://bkt-prj-b-seed-tfstate-xxxx/terraform/bootstrap/state/default.tfstate: googleapi: Error 404: The specified bucket does not exist., notFound
+Error: Failed to persist state to backend
+Error: Error releasing the state lock
+```
+
+**Cause:**
+
+During `terraform destroy` in Foundation `0-bootstrap`, Terraform deletes the remote state bucket (`bkt-prj-b-seed-tfstate-...`). Because the bucket itself is destroyed before the final state write, Terraform cannot persist the updated state to GCS and writes `errored.tfstate` locally.
+
+**Solution:**
+
+Migrate the state back to a local backend to finish destroying remaining seed resources:
+
+1. Temporarily move or rename `backend.tf`:
+   ```bash
+   mv backend.tf backend.tf.bak
+   ```
+2. Copy `errored.tfstate` as the local state:
+   ```bash
+   cp errored.tfstate terraform.tfstate
+   ```
+3. Remove the remote backend cache file:
+   ```bash
+   rm .terraform/terraform.tfstate
+   ```
+4. Re-initialize Terraform locally:
+   ```bash
+   terraform init
+   ```
+5. Complete the destruction cleanly:
+   ```bash
+   terraform destroy -auto-approve
+   ```
+
 
