@@ -36,7 +36,7 @@ locals {
     ? "agents.global.org-${local.agent_org_id}.system.id.goog"
     : "agents.global.proj-${data.google_project.project.number}.system.id.goog"
   )
-  agent_identity_spiffe = "spiffe://${local.agent_trust_domain}/mortgage-agent"
+  agent_identity_spiffe = "spiffe://${local.agent_trust_domain}/*"
   agent_identity_principal = join("/", [
     "principal://${local.agent_trust_domain}/resources/container/projects",
     module.multitenant_infra.cluster_project_number,
