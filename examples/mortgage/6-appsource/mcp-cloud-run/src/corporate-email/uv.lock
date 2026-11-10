@@ -31,15 +31,35 @@ wheels = [
 
 [[package]]
 name = "anyio"
-version = "4.12.1"
+version = "4.14.2"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version == '3.14.*'",
+    "python_full_version == '3.13.*'",
+    "python_full_version < '3.13'",
+]
 dependencies = [
     { name = "idna" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13' or python_full_version >= '3.15'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/96/f0/5eb65b2bb0d09ac6776f2eb54adee6abe8228ea05b20a5ad0e4945de8aac/anyio-4.12.1.tar.gz", hash = "sha256:41cfcc3a4c85d3f05c932da7c26d0201ac36f72abd4435ba90d0464a3ffed703", size = 228685, upload-time = "2026-01-06T11:45:21.246Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/61/cc/a381afa6efea9f496eff839d4a6a1aed3bfafc7b3ab4b0d1b243a12573dd/anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f", size = 260176, upload-time = "2026-07-12T20:29:07.082Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/38/0e/27be9fdef66e72d64c0cdc3cc2823101b80585f8119b5c112c2e8f5f7dab/anyio-4.12.1-py3-none-any.whl", hash = "sha256:d405828884fc140aa80a3c667b8beed277f1dfedec42ba031bd6ac3db606ab6c", size = 113592, upload-time = "2026-01-06T11:45:19.497Z" },
+    { url = "https://files.pythonhosted.org/packages/da/35/f2287558c17e29fafc8ef3daf819bb9834061cfa43bff8014f7df7f63bdc/anyio-4.14.2-py3-none-any.whl", hash = "sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494", size = 125813, upload-time = "2026-07-12T20:29:05.763Z" },
+]
+
+[[package]]
+name = "anyio"
+version = "4.16.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.15'",
+]
+dependencies = [
+    { name = "idna" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a1/98/7e457a3b014976887a050561955c0b76e1e7e2d6e27b78ecef2ef80518f2/anyio-4.16.0.tar.gz", hash = "sha256:59bb03251907983d1603d27c3087ddb1e93299ea2163adcdba37899a4fb12ffb", size = 310971, upload-time = "2026-11-01T11:20:07.282Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a9/16/7757fb84c819accc7d7e9af5291b261e4abb8627ee040f99e7d35ef2457a/anyio-4.16.0-py3-none-any.whl", hash = "sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026", size = 134521, upload-time = "2026-11-01T11:20:05.59Z" },
 ]
 
 [[package]]
@@ -620,7 +640,8 @@ name = "httpx2"
 version = "2.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "anyio", marker = "sys_platform != 'emscripten'" },
+    { name = "anyio", version = "4.14.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.15' and sys_platform != 'emscripten'" },
+    { name = "anyio", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.15' and sys_platform != 'emscripten'" },
     { name = "httpcore2", marker = "sys_platform != 'emscripten'" },
     { name = "httpx2-jsfetch", marker = "sys_platform == 'emscripten'" },
     { name = "idna" },
@@ -738,7 +759,8 @@ name = "mcp"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "anyio" },
+    { name = "anyio", version = "4.14.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.15'" },
+    { name = "anyio", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.15'" },
     { name = "httpx2" },
     { name = "jsonschema" },
     { name = "mcp-types" },
@@ -1025,7 +1047,8 @@ wheels = [
 [package.optional-dependencies]
 filetree = [
     { name = "aiofile" },
-    { name = "anyio" },
+    { name = "anyio", version = "4.14.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.15'" },
+    { name = "anyio", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.15'" },
 ]
 memory = [
     { name = "cachetools" },
@@ -1461,7 +1484,8 @@ name = "sse-starlette"
 version = "3.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "anyio" },
+    { name = "anyio", version = "4.14.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.15'" },
+    { name = "anyio", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.15'" },
     { name = "starlette" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/14/2f/9223c24f568bb7a0c03d751e609844dce0968f13b39a3f73fbb3a96cd27a/sse_starlette-3.3.3.tar.gz", hash = "sha256:72a95d7575fd5129bd0ae15275ac6432bb35ac542fdebb82889c24bb9f3f4049", size = 32420, upload-time = "2026-03-17T20:05:55.529Z" }
@@ -1474,7 +1498,8 @@ name = "starlette"
 version = "1.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "anyio" },
+    { name = "anyio", version = "4.14.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.15'" },
+    { name = "anyio", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.15'" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/48/bb/3d8757f21e9a53d9035c9eb039a777047139a16bfdbedfc7a58241c3d914/starlette-1.10.0.tar.gz", hash = "sha256:b8399098d4c1e3522734f7235dc79b1fc967f96cf139c81e0fa30479e0685f9b", size = 2734356, upload-time = "2026-10-24T15:04:12.342Z" }
@@ -1572,7 +1597,8 @@ name = "watchfiles"
 version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "anyio" },
+    { name = "anyio", version = "4.14.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.15'" },
+    { name = "anyio", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.15'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c2/c9/8869df9b2a2d6c59d79220a4db37679e74f807c559ffe5265e08b227a210/watchfiles-1.1.1.tar.gz", hash = "sha256:a173cb5c16c4f40ab19cecf48a534c409f7ea983ab8fed0741304a1c0a31b3f2", size = 94440, upload-time = "2025-10-14T15:06:21.08Z" }
 wheels = [
