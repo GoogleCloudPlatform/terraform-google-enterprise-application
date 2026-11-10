@@ -49,7 +49,5 @@ module "multitenant_infra" {
   deletion_protection    = false
   agent_sandbox_enabled  = true
 
-  cluster_release_channel = "RAPID"
-
   depends_on = [module.standalone_harness]
 }
