@@ -36,12 +36,30 @@ spec:
         iam.gke.io/spiffe-identity-type: "agent-identity"
     spec:
       serviceAccountName: mortgage-agent-ksa
+      runtimeClassName: gvisor
+      automountServiceAccountToken: false # Required
+      securityContext:
+        runAsNonRoot: true # Required
+        runAsUser: 1000
+        fsGroup: 1000 # Grant group access to the volume
       containers:
         - name: mortgage-agent
           image: mortgage-agent
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           readinessProbe:
             httpGet:
               path: /ready
