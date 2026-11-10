@@ -165,5 +165,6 @@ variable "network_tags" {
   EOF
   type        = list(string)
   default     = ["egress-internet"]
+  nullable    = false
 }
 
