@@ -28,11 +28,34 @@ locals {
   team_name    = "mortgage"
   service_name = "mortgage-agent"
 
+  # Agent Identity trust domain: org-scoped when an organization is available,
+  # otherwise project-scoped (projects without an organization).
+  agent_org_id = try(coalesce(var.organization_id, data.google_project.project.org_id), "")
+  agent_trust_domain = (
+    local.agent_org_id != ""
+    ? "agents.global.org-${local.agent_org_id}.system.id.goog"
+    : "agents.global.proj-${data.google_project.project.number}.system.id.goog"
+  )
+  agent_identity_spiffe = "spiffe://${local.agent_trust_domain}/*"
+  agent_identity_principal = join("/", [
+    "principal://${local.agent_trust_domain}/resources/container/projects",
+    module.multitenant_infra.cluster_project_number,
+    "locations",
+    var.region,
+    "clusters",
+    module.multitenant_infra.cluster_names[0],
+    "ns",
+    "mortgage-agent-${local.env}",
+    "sa",
+    "mortgage-agent-ksa",
+  ])
+
   target_deploy_parameters = { (local.env) : {
     "PROJECT_ID"           = var.project_id
     "MODEL_ID"             = var.model_id
     "SERVICE_ACCOUNT"      = google_service_account.gsa_mortgage_agent.email
     "MCP_INVOKER_SA_EMAIL" = google_service_account.invoker.email
+    "AGENT_IDENTITY"       = local.agent_identity_spiffe
     }
   }
 }
@@ -137,15 +160,13 @@ resource "google_service_account" "gsa_mortgage_agent" {
   display_name = "GSA for mortgage-agent"
 }
 
-resource "google_project_iam_member" "gsa_mortgage_vertex_user" {
+resource "google_project_iam_member" "gsa_mortgage_roles" {
+  for_each = toset([
+    "roles/aiplatform.user",
+    "roles/cloudtrace.agent",
+  ])
   project = var.project_id
-  role    = "roles/aiplatform.user"
-  member  = google_service_account.gsa_mortgage_agent.member
-}
-
-resource "google_project_iam_member" "gsa_mortgage_trace_agent" {
-  project = var.project_id
-  role    = "roles/cloudtrace.agent"
+  role    = each.value
   member  = google_service_account.gsa_mortgage_agent.member
 }
 
@@ -155,4 +176,26 @@ resource "google_service_account_iam_member" "mortgage_wi_binding" {
   member             = "serviceAccount:${var.project_id}.svc.id.goog[mortgage-agent-${local.env}/mortgage-agent-ksa]"
 
   depends_on = [module.fleetscope_infra]
+}
+
+# Agent Identity IAM (SPIFFE principal). ADC with google-auth >= 2.61 uses this
+# principal when the Pod requests an agent identity and injects certificates.
+resource "google_project_iam_member" "agent_identity_roles" {
+  for_each = toset([
+    "roles/aiplatform.user",
+    "roles/cloudtrace.agent",
+  ])
+  project = var.project_id
+  role    = each.value
+  member  = local.agent_identity_principal
+
+  depends_on = [module.multitenant_infra]
+}
+
+resource "google_service_account_iam_member" "agent_identity_token_creator" {
+  service_account_id = google_service_account.invoker.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = local.agent_identity_principal
+
+  depends_on = [module.multitenant_infra]
 }

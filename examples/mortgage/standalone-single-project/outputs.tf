@@ -67,6 +67,16 @@ output "gke_agent_sa_email" {
   value       = google_service_account.gsa_mortgage_agent.email
 }
 
+output "agent_trust_domain" {
+  description = "Agent Identity SPIFFE trust domain."
+  value       = local.agent_trust_domain
+}
+
+output "agent_identity_principal" {
+  description = "IAM principal identifier for the mortgage-agent Agent Identity."
+  value       = local.agent_identity_principal
+}
+
 output "app_ip_addresses" {
   description = "App IP Addresses"
   value       = module.multitenant_infra.app_ip_addresses

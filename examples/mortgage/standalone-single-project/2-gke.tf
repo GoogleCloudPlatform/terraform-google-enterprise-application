@@ -37,6 +37,8 @@ module "multitenant_infra" {
   cluster_type           = "AUTOPILOT"
   cluster_prefix         = "mt"
   create_cluster_project = false
+  # Agent Identity requires GKE on RAPID release channel.
+  cluster_release_channel = "RAPID"
   # ignore below vars because we are reusing an existing project
   org_id                 = null
   folder_id              = null
@@ -46,8 +48,6 @@ module "multitenant_infra" {
   access_level_name      = var.access_level_name
   deletion_protection    = false
   agent_sandbox_enabled  = true
-
-  cluster_release_channel = "RAPID"
 
   depends_on = [module.standalone_harness]
 }
