@@ -1,6 +1,6 @@
 absl_py
 dynaconf
-kubernetes==32.0.0
+kubernetes==32.0.1
 protobuf
 PyYAML
 tabulate
