@@ -23,6 +23,7 @@ By default, this module assigns the `egress-internet` network tag to all cluster
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | access\_level\_name | (VPC-SC) Access Level full name. When providing this variable, additional identities will be added to the access level, these are required to work within an enforced VPC-SC Perimeter. | `string` | `null` | no |
+| agent\_sandbox\_enabled | The status of the Agent Sandbox addon, which isolates untrusted code execution (requires GKE version 1.35.2-gke.1269000 or later) | `bool` | `false` | no |
 | apps | A map, where the key is the application name, defining the application configurations with the following properties:<br>- **acronym** (Required): A short identifier for the application with a maximum of 3 characters in length.<br>- **ip\_address\_names** (Optional): A list of IP address names associated with the application.<br>- **certificates** (Optional): A map of certificate names to a list of certificate values required by the application. | <pre>map(object({<br>    acronym          = string<br>    ip_address_names = optional(list(string))<br>    certificates     = optional(map(list(string)))<br>  }))</pre> | n/a | yes |
 | billing\_account | The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ | `string` | n/a | yes |
 | cluster\_prefix | A prefix to group clusters, max 2 chars | `string` | `""` | no |
@@ -36,10 +37,12 @@ By default, this module assigns the `egress-internet` network tag to all cluster
 | enable\_csi\_gcs\_fuse | Enable the GCS Fuse CSI Driver for HTC example | `bool` | `false` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | folder\_id | Folder ID | `string` | n/a | yes |
+| kubernetes\_version | The Kubernetes version of the masters. If set to 'latest' it will pull latest available version in the selected region. | `string` | `null` | no |
 | master\_ipv4\_cidr\_blocks | List of IP ranges (One range per cluster) in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. | `list(string)` | <pre>[<br>  "10.11.10.0/28",<br>  "10.11.20.0/28"<br>]</pre> | no |
 | network\_project\_id | Network Project ID | `string` | n/a | yes |
 | network\_tags | Network tags applied to all cluster nodes (static, NAP, Autopilot).<br>- Default "egress-internet" allows Foundation Cloud NAT egress (when NAT is enabled).<br>- Custom lists override the default: include "egress-internet" to preserve NAT access, pass [] to remove tags, or use your custom Foundation egress\_tags value instead. | `list(string)` | <pre>[<br>  "egress-internet"<br>]</pre> | no |
 | org\_id | Organization ID | `string` | n/a | yes |
+| sandbox\_enabled | (Beta) Enable GKE Sandbox. | `bool` | `false` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `null` | no |
 | service\_perimeter\_name | (VPC-SC) Service perimeter name. The created projects in this step will be assigned to this perimeter. | `string` | `null` | no |
 

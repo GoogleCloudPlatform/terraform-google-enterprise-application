@@ -44,9 +44,25 @@ locals {
         autoscaling       = true
         location_policy   = "BALANCED"
         max_pods_per_node = 16
+        sandbox_enabled   = false
       }
     ] : []
   }
+
+  sandbox_node_pool = var.sandbox_enabled ? [
+    {
+      name            = "sandbox-node-pool"
+      machine_type    = "e2-standard-4"
+      strategy        = "SURGE"
+      max_surge       = 1
+      max_unavailable = 0
+      autoscaling     = true
+      min_count       = 0
+      max_count       = 10
+      location_policy = "BALANCED"
+      sandbox_enabled = true
+    }
+  ] : []
 }
 
 resource "google_project_service_identity" "compute_sa" {
@@ -248,7 +264,7 @@ resource "google_project_iam_member" "model_armor_service_network_extension_role
 
 module "gke-standard" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
-  version = "~> 44.1"
+  version = "~> 47.0"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
   name                   = "${local.cluster_prefix}cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
@@ -261,6 +277,7 @@ module "gke-standard" {
   subnetwork             = regex(local.subnetworks_re, local.subnets[each.key])[0]
   ip_range_pods          = data.google_compute_subnetwork.default[each.key].secondary_ip_range[0].range_name
   ip_range_services      = data.google_compute_subnetwork.default[each.key].secondary_ip_range[1].range_name
+  kubernetes_version     = var.kubernetes_version
   release_channel        = var.cluster_release_channel
   gateway_api_channel    = "CHANNEL_STANDARD"
 
@@ -271,6 +288,10 @@ module "gke-standard" {
   fleet_project = local.cluster_project_id
 
   identity_namespace = "${local.cluster_project_id}.svc.id.goog"
+
+  sandbox_enabled = var.sandbox_enabled
+
+  agent_sandbox_enabled = var.agent_sandbox_enabled
 
   monitoring_enable_managed_prometheus = true
   monitoring_enabled_components        = ["SYSTEM_COMPONENTS", "DEPLOYMENT"]
@@ -314,8 +335,12 @@ module "gke-standard" {
         min_count       = 1
         max_count       = 10
         location_policy = "BALANCED"
+        sandbox_enabled = false
       }
-  ], local.arm_node_pool[each.key])
+    ],
+    local.arm_node_pool[each.key],
+    local.sandbox_node_pool
+  )
 
   depends_on = [
     module.eab_cluster_project,
@@ -347,7 +372,7 @@ module "gke-standard" {
 
 module "gke-autopilot" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version = "~> 44.1"
+  version = "~> 47.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
   name     = "${local.cluster_prefix}cluster-${each.value.region}-${var.env}"
@@ -360,6 +385,7 @@ module "gke-autopilot" {
   subnetwork          = regex(local.subnetworks_re, local.subnets[each.key])[0]
   ip_range_pods       = each.value.secondary_ip_range[0].range_name
   ip_range_services   = each.value.secondary_ip_range[1].range_name
+  kubernetes_version  = var.kubernetes_version
   release_channel     = var.cluster_release_channel
   gateway_api_channel = "CHANNEL_STANDARD"
 
@@ -380,6 +406,8 @@ module "gke-autopilot" {
   // Private Cluster Configuration
   enable_private_nodes    = true
   enable_private_endpoint = true
+
+  agent_sandbox_enabled = var.agent_sandbox_enabled
 
   enable_confidential_nodes = var.enable_confidential_nodes
 

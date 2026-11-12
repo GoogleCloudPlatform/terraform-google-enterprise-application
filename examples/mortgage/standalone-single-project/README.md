@@ -5,6 +5,7 @@ This guide demonstrates how to deploy the Mortgage Agent example on a Google Kub
 It integrates the following components:
 
 * An ADK mortgage assistant agent running on Google Kubernetes Engine (GKE) Autopilot with OpenTelemetry instrumentation
+* **Agent Identity (SPIFFE) & Agent Registry**: Cryptographic pod identity for AI workloads, integrated with Google Cloud IAM and Agent Platform without relying solely on static service accounts
 * Backend Model Context Protocol (MCP) servers (`legacy-dms`, `corporate-email`, `income-verification`) deployed on Cloud Run
 * Secure CI/CD pipelines using Cloud Build and Cloud Deploy
 * Model Armor guardrails for prompt and response screening (if enabled)
@@ -21,7 +22,7 @@ This example creates:
         - Network + NAT
     - Binary Authorization attestor image
 - 2-multitenant
-    - GKE cluster(s)
+    - GKE cluster(s) configured with `RAPID` release channel (required for Agent Identity)
     - Cloud Armor
     - App IP addresses (see below for details)
 - 3-Fleetscope
@@ -41,6 +42,7 @@ This example creates:
     - Cloud Deploy Service Account
     - Cloud Storage
     - Model Armor Template
+    - Agent Identity (SPIFFE) Trust Domain and IAM principal bindings (`principal://...`)
 - MCP Cloud Run Resources:
     - Cloud Run v2 Services (`legacy-dms`, `corporate-email`, `income-verification`)
     - Artifact Registry repository for MCP containers
@@ -50,9 +52,13 @@ This example creates:
 
 ## Pre-requisites
 
+> [!NOTE]
+> **Agent Identity Requirements**: Agent Identity requires GKE clusters on the `RAPID` release channel and client libraries using `google-auth >= 2.61.0` for automatic SPIFFE certificate discovery via Application Default Credentials (ADC).
+
 This example requires a single project already created. The following APIs will be enabled:
 
 - `accesscontextmanager.googleapis.com`
+- `agentregistry.googleapis.com`
 - `anthos.googleapis.com`
 - `anthosconfigmanagement.googleapis.com`
 - `apikeys.googleapis.com`
@@ -469,10 +475,11 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | enables\_network\_connection\_and\_peering\_routes | Enables Network connection and peering routes. | `bool` | `true` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | mcp\_placeholder\_image | The placeholder image to use for MCP services. | `string` | `"us-docker.pkg.dev/cloudrun/container/placeholder"` | no |
-| mcp\_services | Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name. | <pre>map(object({<br>    account_id         = string<br>    image              = optional(string)<br>    container_port     = optional(number, 8080)<br>    min_instance_count = optional(number, 0)<br>    max_instance_count = optional(number, 3)<br>    cpu                = optional(string, "1")<br>    memory             = optional(string, "512Mi")<br>  }))</pre> | <pre>{<br>  "corporate-email": {<br>    "account_id": "mcp-corporate-email"<br>  },<br>  "income-verification": {<br>    "account_id": "mcp-income-verification"<br>  },<br>  "legacy-dms": {<br>    "account_id": "mcp-legacy-dms"<br>  }<br>}</pre> | no |
+| mcp\_services | Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name AND the URL-mask token (e.g. legacy-dms.<mcp\_internal\_dns\_zone.domain> -> Cloud Run service 'legacy-dms'). | <pre>map(object({<br>    account_id         = string<br>    image              = optional(string)<br>    container_port     = optional(number, 8080)<br>    min_instance_count = optional(number, 0)<br>    max_instance_count = optional(number, 3)<br>    cpu                = optional(string, "1")<br>    memory             = optional(string, "512Mi")<br>  }))</pre> | <pre>{<br>  "corporate-email": {<br>    "account_id": "mcp-corporate-email"<br>  },<br>  "income-verification": {<br>    "account_id": "mcp-income-verification"<br>  },<br>  "legacy-dms": {<br>    "account_id": "mcp-legacy-dms"<br>  }<br>}</pre> | no |
 | model\_id | The Gemini model ID to be used by the mortgage agent. | `string` | `"gemini-3.1-flash-lite"` | no |
 | ncc\_config | Configuration block for Google Cloud Network Connectivity Center (NCC) Spokes.<br>- enable\_ncc: (bool) Toggles whether to create a new NCC spoke.<br>- hub\_uri: (string) The URI of an existing Hub. [Required if enable\_ncc is TRUE]<br>- spoke\_group: (string) The NCC group the spoke belongs to (default: "default").<br>- spoke\_name: (string) Name for the main VPC spoke.<br>- spoke\_description: (string) Description for the main VPC spoke.<br>- spoke\_labels: (map) Labels for the main VPC spoke.<br>- spoke\_exclude\_export\_ranges: (set of strings) IP ranges to exclude from route export.<br>- spoke\_include\_export\_ranges: (set of strings) IP ranges to explicitly include in route export. | <pre>object({<br>    enable_ncc                  = optional(bool, false)<br>    hub_uri                     = optional(string)<br>    spoke_group                 = optional(string, "default")<br>    spoke_name                  = optional(string, "vpc-spoke")<br>    spoke_description           = optional(string)<br>    spoke_labels                = optional(map(string))<br>    spoke_exclude_export_ranges = optional(set(string), [])<br>    spoke_include_export_ranges = optional(set(string), [])<br>  })</pre> | `{}` | no |
 | network\_id | The network ID where the private worker pool is going to be peered. If not provided, a new network is going to be created. | `string` | `null` | no |
+| organization\_id | Organization ID used to build the Agent Identity trust domain. When null, the project's org\_id is used when available; otherwise the project-scoped trust domain is used. | `string` | `null` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | `null` | no |
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |
 | service\_perimeter\_mode | (VPC-SC) Service perimeter mode: ENFORCE, DRY\_RUN. | `string` | `"ENFORCE"` | no |
@@ -485,7 +492,9 @@ You can refer to the [Troubleshooting doc](docs/TROUBLESHOOTING.md).
 | Name | Description |
 |------|-------------|
 | acronyms | App Acronyms |
+| agent\_identity\_principal | IAM principal identifier for the mortgage-agent Agent Identity. |
 | agent\_mcp\_invoker\_email | Email of the SA agents impersonate when invoking MCP Cloud Run services. |
+| agent\_trust\_domain | Agent Identity SPIFFE trust domain. |
 | app\_certificates | App Certificates |
 | app\_ip\_addresses | App IP Addresses |
 | artifact\_registry\_url | The Artifact Registry repository URL for docker push/pull |

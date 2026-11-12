@@ -67,6 +67,28 @@ variable "additional_services" {
   default     = []
 }
 
+variable "service_account_id" {
+  type        = string
+  description = "The service account ID in the format projects/PROJECT_ID/serviceAccounts/EMAIL to run the Cloud Build job. If null, a service account will be created. A supplied account must already have roles/logging.logWriter and access to the build logs bucket."
+  default     = null
+
+  validation {
+    condition     = var.service_account_id == null || can(regex("^projects/[^/]+/serviceAccounts/[^/]+@[^/]+$", var.service_account_id))
+    error_message = "service_account_id must be null or in the format projects/PROJECT_ID/serviceAccounts/EMAIL."
+  }
+}
+
+variable "service_account_name" {
+  type        = string
+  description = "The name/ID of the service account to create if service_account_id is not provided (must be 6-30 characters)."
+  default     = "sa-binauthz-builder"
+
+  validation {
+    condition     = can(regex("^[a-z]([-a-z0-9]{4,28})[a-z0-9]$", var.service_account_name))
+    error_message = "service_account_name must be 6-30 characters, start with a lowercase letter, and contain only lowercase letters, digits, and hyphens."
+  }
+}
+
 variable "vpc_name" {
   type        = string
   description = "Name of the VPC to create."

@@ -34,6 +34,17 @@ resource "google_artifact_registry_repository" "mcp" {
   depends_on    = [google_project_service.apis]
 }
 
+data "google_storage_project_service_account" "gcs_account" {
+  project = var.project_id
+}
+
+resource "google_kms_crypto_key_iam_member" "gcs_kms" {
+  count         = var.bucket_kms_key != null ? 1 : 0
+  crypto_key_id = var.bucket_kms_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = data.google_storage_project_service_account.gcs_account.member
+}
+
 resource "google_storage_bucket" "cloudbuild" {
   project                     = var.project_id
   name                        = "${var.project_id}-mcp-cloudbuild"
@@ -41,7 +52,7 @@ resource "google_storage_bucket" "cloudbuild" {
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
   force_destroy               = true
-  depends_on                  = [google_project_service.apis]
+  depends_on                  = [google_project_service.apis, google_kms_crypto_key_iam_member.gcs_kms]
 
   dynamic "encryption" {
     for_each = var.bucket_kms_key == null ? [] : [var.bucket_kms_key]

@@ -27,9 +27,10 @@ module "standalone_harness" {
   create_cloud_nat                              = var.create_cloud_nat
   enables_network_connection_and_peering_routes = var.enables_network_connection_and_peering_routes
   logging_bucket                                = var.logging_bucket
-  additional_services                           = ["modelarmor.googleapis.com", "aiplatform.googleapis.com", "iamcredentials.googleapis.com", "telemetry.googleapis.com"]
+  additional_services                           = ["modelarmor.googleapis.com", "aiplatform.googleapis.com", "iamcredentials.googleapis.com", "telemetry.googleapis.com", "agentregistry.googleapis.com"]
   enable_proxy_subnet                           = true
   attestation_repository_name                   = "ar-eab-mortgage-binauthz"
+  service_account_name                          = "sa-eab-mortgage-binauthz"
   private_workerpool_name                       = "wp-eab-mortgage"
   ncc_config                                    = var.ncc_config
 

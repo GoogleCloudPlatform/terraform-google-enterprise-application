@@ -16,6 +16,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mortgage-agent-deployment
+  labels:
+    # Registers the Deployment in Agent Registry (Agent Platform).
+    registry.gke.io/functional-type: "AGENT"
 spec:
   replicas: 1
   selector:
@@ -25,14 +28,38 @@ spec:
     metadata:
       labels:
         app: mortgage-agent-server
+      annotations:
+        sidecar.istio.io/inject: "false"
+        # Agent Identity (SPIFFE). AGENT_IDENTITY is substituted by Cloud Deploy.
+        iam.gke.io/identity: PLACEHOLDER # from-param: ${AGENT_IDENTITY}
+        iam.gke.io/inject-podcertificates: "true"
+        iam.gke.io/spiffe-identity-type: "agent-identity"
     spec:
       serviceAccountName: mortgage-agent-ksa
+      runtimeClassName: gvisor
+      automountServiceAccountToken: false # Required
+      securityContext:
+        runAsNonRoot: true # Required
+        runAsUser: 1000
+        fsGroup: 1000 # Grant group access to the volume
       containers:
         - name: mortgage-agent
           image: mortgage-agent
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           readinessProbe:
             httpGet:
               path: /ready
