@@ -19,7 +19,7 @@ This module creates the following resources:
 | additional\_substitutions | A map of additional substitution variables for Google Cloud Build Trigger Specification. All keys must start with an underscore (\_). | `map(string)` | `{}` | no |
 | app\_build\_trigger\_yaml | Path to the Cloud Build YAML file for the application | `string` | n/a | yes |
 | attestation\_kms\_key | The KMS Key ID to be used by attestor in format projects/PROJECT\_ID/locations/KMS\_KEY\_LOCATION/keyRings/KMS\_KEYRING\_NAME/cryptoKeys/KMS\_KEY\_NAME/cryptoKeyVersions/KMS\_KEY\_VERSION. | `string` | `null` | no |
-| attestor\_id | The attestor name in format projects/PROJECT\_ID/attestors/ATTESTOR\_NAME. | `string` | n/a | yes |
+| attestor\_id | The attestor name in format projects/PROJECT\_ID/attestors/ATTESTOR\_NAME. | `string` | `null` | no |
 | binary\_authorization\_image | The Binary Authorization image to be used to create attestation. | `string` | `null` | no |
 | binary\_authorization\_repository\_id | The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`. | `string` | n/a | yes |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
@@ -45,6 +45,8 @@ This module creates the following resources:
 
 | Name | Description |
 |------|-------------|
+| app\_artifact\_repo | Docker artifact registry repo to store app build images. |
+| cache\_bucket\_name | The name of the storage bucket for cloud build. |
 | cloudbuild\_service\_account | Service Account created to run Cloud Build. |
 | clouddeploy\_targets\_names | Cloud deploy targets names. |
 | service\_repository\_name | The Source Repository name. |

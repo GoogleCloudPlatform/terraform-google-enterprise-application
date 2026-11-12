@@ -224,6 +224,7 @@ variable "attestation_kms_key" {
 variable "attestor_id" {
   type        = string
   description = "The attestor name in format projects/PROJECT_ID/attestors/ATTESTOR_NAME."
+  default     = null
 }
 
 variable "target_deploy_parameters" {

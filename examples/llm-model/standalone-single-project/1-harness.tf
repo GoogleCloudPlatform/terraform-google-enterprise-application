@@ -33,6 +33,7 @@ module "standalone_harness" {
   service_account_name                          = "sa-eab-llm-model-binauthz"
   private_workerpool_name                       = "wp-eab-llm-model"
   ncc_config                                    = var.ncc_config
+  service_account_id                            = var.service_account_id
 
   build_image_module_dependencies = concat([
     for i in google_access_context_manager_service_perimeter_dry_run_ingress_policy.private_workerpool_deployment : i.id],
