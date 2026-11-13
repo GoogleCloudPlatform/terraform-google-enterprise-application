@@ -63,6 +63,12 @@ variable "access_level_name" {
   }
 }
 
+variable "environment" {
+  description = "The environment the single project belongs to"
+  type        = string
+  default     = "development"
+}
+
 variable "workerpool_id" {
   description = <<-EOT
     Specifies the Cloud Build Worker Pool that will be utilized for triggers created in this step.

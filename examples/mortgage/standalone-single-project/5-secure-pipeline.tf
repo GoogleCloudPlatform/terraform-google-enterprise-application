@@ -16,7 +16,7 @@
 
 locals {
 
-  cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
+  cluster_membership_ids = { (var.environment) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
   sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
   secret_project_number = try(
@@ -45,12 +45,12 @@ locals {
     "clusters",
     module.multitenant_infra.cluster_names[0],
     "ns",
-    "mortgage-agent-${local.env}",
+    "mortgage-agent-${var.environment}",
     "sa",
     "mortgage-agent-ksa",
   ])
 
-  target_deploy_parameters = { (local.env) : {
+  target_deploy_parameters = { (var.environment) : {
     "PROJECT_ID"           = var.project_id
     "MODEL_ID"             = var.model_id
     "SERVICE_ACCOUNT"      = google_service_account.gsa_mortgage_agent.email
@@ -173,7 +173,7 @@ resource "google_project_iam_member" "gsa_mortgage_roles" {
 resource "google_service_account_iam_member" "mortgage_wi_binding" {
   service_account_id = google_service_account.gsa_mortgage_agent.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[mortgage-agent-${local.env}/mortgage-agent-ksa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[mortgage-agent-${var.environment}/mortgage-agent-ksa]"
 
   depends_on = [module.fleetscope_infra]
 }

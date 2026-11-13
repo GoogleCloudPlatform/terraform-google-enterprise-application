@@ -15,7 +15,6 @@
  */
 
 locals {
-  env = "development"
   apps = {
     "cymbal-bank" : {
       "ip_address_names" : [
@@ -36,7 +35,7 @@ module "multitenant_infra" {
   apps                   = local.apps
   cluster_subnetworks    = [for i, j in module.standalone_harness.subnets : j.self_link if !strcontains(i, "proxy")]
   network_project_id     = var.project_id
-  env                    = local.env
+  env                    = var.environment
   cluster_type           = "AUTOPILOT"
   cluster_prefix         = "cb"
   create_cluster_project = false

@@ -49,7 +49,7 @@ output "fleet_project_id" {
 
 output "env" {
   description = "Environment"
-  value       = local.env
+  value       = var.environment
 }
 
 output "cluster_regions" {

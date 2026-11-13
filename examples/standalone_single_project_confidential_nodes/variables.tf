@@ -19,6 +19,12 @@ variable "project_id" {
   description = "Google Cloud project ID in which to deploy all example resources"
 }
 
+variable "environment" {
+  description = "The environment the single project belongs to"
+  type        = string
+  default     = "development"
+}
+
 variable "workerpool_network_id" {
   type        = string
   description = "Network id"

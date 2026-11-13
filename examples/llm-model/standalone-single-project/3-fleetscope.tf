@@ -19,7 +19,7 @@ module "fleetscope_infra" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/fleetscope"
   version = "~> 0.7"
 
-  env                         = local.env
+  env                         = var.environment
   cluster_project_id          = module.multitenant_infra.cluster_project_id
   network_project_id          = module.multitenant_infra.network_project_id
   fleet_project_id            = module.multitenant_infra.fleet_project_id

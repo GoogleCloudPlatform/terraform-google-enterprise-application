@@ -19,7 +19,7 @@
 # app_01
 locals {
 
-  cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
+  cluster_membership_ids = { (var.environment) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
   sa_cb                  = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
   secret_project_number = try(
     regex("projects/([^/]*)/", var.cloudbuildv2_repository_config.gitlab_authorizer_credential_secret_id)[0],
@@ -30,7 +30,7 @@ locals {
   team_name    = "agent"
   service_name = "capital-agent"
 
-  target_deploy_parameters = { (local.env) : {
+  target_deploy_parameters = { (var.environment) : {
     "PROJECT_ID"      = module.multitenant_infra.cluster_project_id
     "MODEL_ID"        = "gemini-3.1-flash-lite"
     "SERVICE_ACCOUNT" = google_service_account.gsa_capital_agent.email
@@ -164,7 +164,7 @@ resource "google_project_iam_member" "gsa_trace_agent" {
 resource "google_service_account_iam_member" "wi_binding" {
   service_account_id = google_service_account.gsa_capital_agent.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[capital-agent-${local.env}/capital-agent-ksa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[capital-agent-${var.environment}/capital-agent-ksa]"
 
   depends_on = [module.fleetscope_infra]
 }
