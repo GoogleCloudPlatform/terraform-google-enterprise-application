@@ -30,7 +30,7 @@ locals {
   team_name    = "agent"
   service_name = "capital-agent"
 
-  target_deploy_parameters = { (var.environment) : {
+  target_deploy_parameters = { (var.environment) = {
     "PROJECT_ID"      = module.multitenant_infra.cluster_project_id
     "MODEL_ID"        = "gemini-3.1-flash-lite"
     "SERVICE_ACCOUNT" = google_service_account.gsa_capital_agent.email

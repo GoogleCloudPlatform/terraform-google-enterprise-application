@@ -62,6 +62,10 @@ variable "environment" {
   description = "The environment the single project belongs to"
   type        = string
   default     = "development"
+  validation {
+    condition     = contains(["development", "nonproduction", "production"], var.environment)
+    error_message = "The environment value must be one of: development, nonproduction, production."
+  }
 }
 
 variable "workerpool_id" {
