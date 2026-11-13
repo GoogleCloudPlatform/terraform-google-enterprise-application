@@ -50,7 +50,7 @@ locals {
     "mortgage-agent-ksa",
   ])
 
-  target_deploy_parameters = { (var.environment) : {
+  target_deploy_parameters = { (var.environment) = {
     "PROJECT_ID"           = var.project_id
     "MODEL_ID"             = var.model_id
     "SERVICE_ACCOUNT"      = google_service_account.gsa_mortgage_agent.email

@@ -32,7 +32,7 @@ module "fleetscope_infra" {
   namespace_ids               = var.teams
   cluster_membership_ids      = module.multitenant_infra.cluster_membership_ids
   config_sync_secret_type     = "token"
-  config_sync_repository_url  = "https://gitlab.com/user/config-sync-${var.environment}.git"
+  config_sync_repository_url  = "https://gitlab.example.com/user/config-sync-${var.environment}.git"
   cluster_service_accounts    = values(module.multitenant_infra.cluster_service_accounts)
   disable_istio_on_namespaces = values(var.teams)
   attestation_kms_key         = var.attestation_kms_key
