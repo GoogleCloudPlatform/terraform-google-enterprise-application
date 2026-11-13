@@ -45,6 +45,7 @@ resource "google_artifact_registry_repository_iam_member" "container_member" {
 }
 
 resource "google_artifact_registry_vpcsc_config" "allow_artifact_registry" {
+  count        = var.service_perimeter_name != null ? 1 : 0
   provider     = google-beta
   project      = var.project_id
   location     = var.region
