@@ -83,7 +83,7 @@ resource "google_project_iam_member" "cloudbuild_builder" {
 }
 
 resource "time_sleep" "wait_propagation" {
-  create_duration = "30s"
+  create_duration = "60s"
 
   depends_on = [
     google_project_iam_member.assign_permissions,

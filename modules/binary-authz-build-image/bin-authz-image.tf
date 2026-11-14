@@ -59,6 +59,16 @@ resource "google_artifact_registry_repository_iam_member" "builder_on_attestatio
   member     = "serviceAccount:${local.service_account_email}"
 }
 
+resource "time_sleep" "wait_iam_propagation" {
+  create_duration = "45s"
+
+  depends_on = [
+    google_artifact_registry_repository.attestation_image,
+    google_project_iam_member.binauthz_builder_roles,
+    google_artifact_registry_repository_iam_member.builder_on_attestation_repo,
+  ]
+}
+
 module "build_binary_authz_image" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 4.0"
@@ -75,6 +85,7 @@ module "build_binary_authz_image" {
     var.module_dependencies,
     [google_artifact_registry_repository.attestation_image.id],
     [for r in google_project_iam_member.binauthz_builder_roles : r.id],
-    [google_artifact_registry_repository_iam_member.builder_on_attestation_repo.id]
+    [google_artifact_registry_repository_iam_member.builder_on_attestation_repo.id],
+    [time_sleep.wait_iam_propagation.id],
   )
 }
