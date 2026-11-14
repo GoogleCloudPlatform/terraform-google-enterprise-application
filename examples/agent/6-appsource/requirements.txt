@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-google-adk==1.4.1
-fastapi==0.115.13
-uvicorn==0.34.0
-pydantic==2.11.7
-google-cloud-aiplatform==1.133.0
-google-auth==2.57.0
+google-adk==1.39.1
+fastapi==0.162.2
+uvicorn==0.54.0
+pydantic==2.14.3
+google-cloud-aiplatform==1.165.1
+google-auth==2.62.1
