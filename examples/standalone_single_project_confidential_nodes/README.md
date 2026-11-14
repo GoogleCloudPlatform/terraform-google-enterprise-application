@@ -138,6 +138,7 @@ the steps below assume that you are checked out on the same level as `terraform-
 | binary\_authorization\_image | The Binary Authorization image to be used to create attestation. | `string` | n/a | yes |
 | binary\_authorization\_repository\_id | The Binary Authorization artifact registry where the image to be used to create attestation is stored with format `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`. | `string` | n/a | yes |
 | bucket\_kms\_key | KMS Key id to be used to encrypt bucket. | `string` | `null` | no |
+| environment | The environment the single project belongs to | `string` | `"development"` | no |
 | logging\_bucket | Bucket to store logging. | `string` | `null` | no |
 | project\_id | Google Cloud project ID in which to deploy all example resources | `string` | n/a | yes |
 | region | Google Cloud region for deployments | `string` | `"us-central1"` | no |

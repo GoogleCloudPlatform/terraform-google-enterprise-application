@@ -267,7 +267,7 @@ module "gke-standard" {
   version = "~> 47.0"
 
   for_each               = var.cluster_type != "AUTOPILOT" ? local.subnets : {}
-  name                   = "${local.cluster_prefix}cluster-${data.google_compute_subnetwork.default[each.key].region}-${var.env}"
+  name                   = "${local.cluster_prefix}cluster-${data.google_compute_subnetwork.default[each.key].region}-${substr(var.env, 0, 4)}"
   master_ipv4_cidr_block = local.subnets_to_cidr[each.key]
   project_id             = local.cluster_project_id
   regional               = true
@@ -375,7 +375,7 @@ module "gke-autopilot" {
   version = "~> 47.0"
 
   for_each = var.cluster_type == "AUTOPILOT" ? data.google_compute_subnetwork.default : {}
-  name     = "${local.cluster_prefix}cluster-${each.value.region}-${var.env}"
+  name     = "${local.cluster_prefix}cluster-${each.value.region}-${substr(var.env, 0, 4)}"
 
   project_id          = local.cluster_project_id
   regional            = true
