@@ -19,7 +19,7 @@
 # app_01
 locals {
 
-  cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
+  cluster_membership_ids = { (var.environment) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
   sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
   secret_project_number = try(
@@ -33,11 +33,11 @@ locals {
   team_name        = "default"
   repo_branch      = "main"
 
-  target_deploy_parameters = { (local.env) = {
+  target_deploy_parameters = { (var.environment) = {
     "cluster_project_id"      = var.project_id
     "model_armor_template_id" = module.model_armor_configuration.template.id
     "model_armor_location"    = var.region
-    "env_namespace_id"        = "vllm-model-${local.env}"
+    "env_namespace_id"        = "vllm-model-${var.environment}"
     }
   }
 }
@@ -189,6 +189,6 @@ resource "google_project_iam_member" "gsa_trace_agent" {
 resource "google_service_account_iam_member" "wi_binding" {
   service_account_id = google_service_account.gsa_llamma_model.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[vllm-model-${local.env}/llamma-model-ksa]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[vllm-model-${var.environment}/llamma-model-ksa]"
   depends_on         = [module.fleetscope_infra]
 }

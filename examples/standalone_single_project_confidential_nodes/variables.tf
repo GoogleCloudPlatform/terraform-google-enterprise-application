@@ -19,6 +19,16 @@ variable "project_id" {
   description = "Google Cloud project ID in which to deploy all example resources"
 }
 
+variable "environment" {
+  description = "The environment the single project belongs to"
+  type        = string
+  default     = "development"
+  validation {
+    condition     = contains(["development", "nonproduction", "production"], var.environment)
+    error_message = "The environment value must be one of: development, nonproduction, production."
+  }
+}
+
 variable "workerpool_network_id" {
   type        = string
   description = "Network id"

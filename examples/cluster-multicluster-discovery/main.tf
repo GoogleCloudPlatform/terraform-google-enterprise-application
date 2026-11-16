@@ -15,7 +15,6 @@
  */
 
 locals {
-  env = "development"
   apps = {
     "cymbal-bank" : {
       "ip_address_names" : [
@@ -36,7 +35,7 @@ module "multitenant_infra" {
   apps                   = local.apps
   cluster_subnetworks    = module.cluster_network.subnets_self_links
   network_project_id     = var.project_id
-  env                    = local.env
+  env                    = var.environment
   cluster_type           = "AUTOPILOT"
   create_cluster_project = false
   # ignore below vars because we are reusing an existing project
@@ -53,7 +52,7 @@ module "fleetscope_infra" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/fleetscope"
   version = "~> 0.7"
 
-  env                    = local.env
+  env                    = var.environment
   cluster_project_id     = module.multitenant_infra.cluster_project_id
   network_project_id     = module.multitenant_infra.network_project_id
   fleet_project_id       = module.multitenant_infra.fleet_project_id

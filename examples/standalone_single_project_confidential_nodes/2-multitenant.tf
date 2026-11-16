@@ -17,7 +17,6 @@
 # 2-multitenant
 
 locals {
-  env = "development"
   apps = {
     "cymbal-bank" : {
       "ip_address_names" : [
@@ -38,7 +37,7 @@ module "multitenant_infra" {
   apps                   = local.apps
   cluster_subnetworks    = [var.subnetwork_self_link]
   network_project_id     = var.project_id
-  env                    = local.env
+  env                    = var.environment
   cluster_type           = "AUTOPILOT"
   create_cluster_project = false
   # ignore below vars because we are reusing an existing project

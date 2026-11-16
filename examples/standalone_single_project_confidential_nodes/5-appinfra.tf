@@ -19,7 +19,7 @@
 # app_01
 locals {
 
-  cluster_membership_ids = { (local.env) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
+  cluster_membership_ids = { (var.environment) : { "cluster_membership_ids" : module.multitenant_infra.cluster_membership_ids } }
 
   sa_cb = [for cicd in module.cicd : "serviceAccount:${cicd.cloudbuild_service_account}"]
 
