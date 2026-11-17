@@ -76,7 +76,8 @@ func TestStandaloneSingleProjectCymbalBank(t *testing.T) {
 		"network_id":             gitLab.GetStringOutput("network_id"),
 		"create_nat":             false,
 		"enables_network_connection_and_peering_routes": false,
-		"ncc_config": ncc_config,
+		"ncc_config":         ncc_config,
+		"service_account_id": setupVPCSCOutput.GetTFSetupJsonOutput("sa_id").Get("cymbal-bank").String(),
 	}
 
 	// wire setup output project_id to example var.project_id

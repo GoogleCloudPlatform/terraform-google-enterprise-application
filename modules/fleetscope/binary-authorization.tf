@@ -45,7 +45,7 @@ resource "google_container_analysis_note" "note" {
 }
 
 resource "google_binary_authorization_policy" "policy" {
-  count   = var.attestation_kms_key != null ? 1 : 0
+  count   = var.attestation_kms_key != null && var.manage_binary_authz_policy ? 1 : 0
   project = var.cluster_project_id
   default_admission_rule {
     evaluation_mode         = var.attestation_evaluation_mode

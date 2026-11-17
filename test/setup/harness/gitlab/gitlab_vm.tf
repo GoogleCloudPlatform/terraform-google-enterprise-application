@@ -205,6 +205,14 @@ resource "google_secret_manager_secret" "gitlab_webhook" {
   }
 }
 
+resource "google_secret_manager_secret_iam_member" "gitlab_webhook_iam" {
+  for_each  = var.sa_email
+  secret_id = google_secret_manager_secret.gitlab_webhook.secret_id
+  project   = module.gitlab_project.project_id
+  role      = "roles/secretmanager.editor"
+  member    = "serviceAccount:${each.value}"
+}
+
 resource "random_uuid" "random_webhook_secret" {
 }
 

@@ -155,6 +155,27 @@ resource "google_service_account_iam_member" "service_account_user" {
   member             = "serviceAccount:${var.cloud_build_sa}"
 }
 
+resource "google_service_account_iam_member" "service_account_itself_user" {
+  for_each           = google_service_account.int_test
+  service_account_id = each.value.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = each.value.member
+}
+
+resource "google_service_account_iam_member" "compute_identity_service_account_user" {
+  for_each           = google_service_account.int_test
+  service_account_id = each.value.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${local.project_numbers[each.key]}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_service_account_iam_member" "cb_identity_service_account_user" {
+  for_each           = google_service_account.int_test
+  service_account_id = each.value.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:service-${local.project_numbers[each.key]}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+}
+
 resource "google_billing_account_iam_member" "tf_billing_admin" {
   for_each           = google_service_account.int_test
   billing_account_id = var.billing_account
