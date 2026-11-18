@@ -16,7 +16,7 @@ limitations under the License.
 
 # Deploying Enterprise Application Blueprint on top of Terraform Example Foundation (v7.0.0+ / v8.0)
 
-These instructions explain how to deploy the [Enterprise Application Blueprint](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application) on top of the [Terraform Example Foundation](https://cloud.google.com/architecture/security-foundations/using-example-terraform) version [v7.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v7.0.0) or later (including future v8.0).
+These instructions explain how to deploy the [Enterprise Application Blueprint](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application) on top of the [Terraform Example Foundation](https://cloud.google.com/architecture/security-foundations/using-example-terraform) version [v7.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v7.0.0) and [v8.0.0]()
 
 The deployment of the Blueprint uses the `production` environment of Business Unit 1 of an existing Terraform Example Foundation and deploys the consolidated standalone infrastructure harness (`examples/agent/standalone-single-project`), which provisions:
 
@@ -344,7 +344,7 @@ Apply the shared infrastructure pipeline first to provision the dedicated Cloud 
    ```bash
    cd gcp-projects
    git checkout -b plan || git checkout plan
-   git add modules/base_env/eab_project.tf modules/base_env/outputs.tf outputs.tf
+   git add modules/base_env/eab_project.tf modules/base_env/example_attestation_cmek.tf modules/base_env/outputs.tf */outputs.tf
    git commit -m "feat: add dedicated eab service project with workload APIs and roles"
    git push origin plan
    ```
@@ -587,7 +587,6 @@ module "capital_agent" {
 
   # VPC-SC Governance: Managed exclusively by Foundation
   service_perimeter_name = null
-  service_perimeter_mode = null
 
   # Network Connectivity Center (NCC) Configuration
   ncc_config = {
@@ -649,6 +648,15 @@ module "capital_agent" {
   #   }
   # }
 }
+
+resource "google_project_iam_member" "project_group_user" {
+  for_each = local.app_infra_pipeline_service_accounts
+
+  project = local.shared_vpc_host_project_id
+  role   = "roles/networkconnectivity.groupUser"
+  member = "serviceAccount:${each.value}"
+}
+
 ```
 
 #### A.5. Export EAB Module Outputs (Optional)
@@ -815,7 +823,7 @@ cd eab-agent-capital-agent
 # cd eab-agent-capital-agent
 
 # Copy application source from the blueprint example
-cp -r ../../6-appsource/* .
+cp -r ../terraform-google-enterprise-application/examples/agent/6-appsource/* .
 
 # Commit and push
 git config user.email "terraform-agent@example.com"
@@ -911,7 +919,8 @@ To clean up resources provisioned during this guide:
 ### 1. Destroy Enterprise Application Blueprint
 
 ```bash
-cd terraform-google-enterprise-application/examples/agent/standalone-single-project
+cd bu1-example-app/business_unit_1/production
+terraform init
 terraform destroy -auto-approve
 ```
 
@@ -921,17 +930,17 @@ If tearing down the entire test environment, follow the Foundation teardown sequ
 
 ```bash
 # 1. 4-projects
-cd gcp-projects/business_unit_1/production && terraform destroy -auto-approve
+cd gcp-projects/business_unit_1/production && terraform init && terraform destroy -auto-approve
 
 # 2. 3-networks (or 3-networks-hub-and-spoke)
-cd gcp-networks/envs/production && terraform destroy -auto-approve
+cd gcp-networks/envs/production && terraform init && terraform destroy -auto-approve
 
 # 3. 2-environments
-cd gcp-environments/envs/production && terraform destroy -auto-approve
+cd gcp-environments/envs/production && terraform init && terraform destroy -auto-approve
 
 # 4. 1-org
-cd gcp-org/envs/shared && terraform destroy -auto-approve
+cd gcp-org/envs/shared && terraform init && terraform destroy -auto-approve
 
 # 5. 0-bootstrap
-cd gcp-bootstrap/envs/shared && terraform destroy -auto-approve
+cd gcp-bootstrap/envs/shared && terraform init && terraform destroy -auto-approve
 ```
