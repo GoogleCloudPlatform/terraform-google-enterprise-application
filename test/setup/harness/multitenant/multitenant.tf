@@ -118,6 +118,7 @@ module "vpc_project" {
   billing_account          = var.billing_account
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
+  auto_create_network      = true
 
   disable_services_on_destroy = false
 

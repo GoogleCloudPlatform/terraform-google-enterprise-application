@@ -123,6 +123,7 @@ resource "time_sleep" "wait_iam_propagation" {
   create_duration = "30s"
 
   depends_on = [
+    google_storage_bucket_iam_member.compute_sa_logging_storage_admin,
     google_storage_bucket_iam_member.logging_storage_admin,
     module.kms_attestor,
     module.logging_bucket,

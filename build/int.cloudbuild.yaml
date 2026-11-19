@@ -24,7 +24,7 @@ steps:
       [
         "/bin/bash",
         "-c",
-        "for i in 1 2 3; do bash -c 'source /usr/local/bin/task_helper_functions.sh && prepare_environment' && break; [ \"$i\" -eq 3 ] && exit 1; sleep 60; done",
+        "source /usr/local/bin/task_helper_functions.sh && prepare_environment",
       ]
     env:
       - "TF_VAR_org_id=$_ORG_ID"
