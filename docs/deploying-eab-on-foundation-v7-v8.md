@@ -16,7 +16,7 @@ limitations under the License.
 
 # Deploying Enterprise Application Blueprint on top of Terraform Example Foundation (v7.0.0+ / v8.0)
 
-These instructions explain how to deploy the [Enterprise Application Blueprint](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application) on top of the [Terraform Example Foundation](https://cloud.google.com/architecture/security-foundations/using-example-terraform) version [v7.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v7.0.0) and [v8.0.0]()
+These instructions explain how to deploy the [Enterprise Application Blueprint](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application) on top of the [Terraform Example Foundation](https://cloud.google.com/architecture/security-foundations/using-example-terraform) version [v7.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v7.0.0) and [v8.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v8.0.0).
 
 The deployment of the Blueprint uses the `production` environment of Business Unit 1 of an existing Terraform Example Foundation and deploys the consolidated standalone infrastructure harness (`examples/agent/standalone-single-project`), which provisions:
 
@@ -35,7 +35,8 @@ The following Foundation infrastructure will be created or reused:
 - The Business Unit 1 service project (`prj-p-bu1-sample-eab-xxxx`) created in Foundation step `4-projects`.
 - All organization policies, IAM service account role bindings, APIs, and VPC-SC perimeter ingress/egress rules are **100% managed declaratively by the Foundation steps**. **No manual `gcloud` commands are required.**
 
-__[!WARNING] This is an example, should not be used as production environment.__
+> [!WARNING]
+> This guide deploys the consolidated standalone single-project harness (`examples/agent/standalone-single-project`) for evaluation and PoC purposes. It uses broad service account permissions, default `ALWAYS_ALLOW` Binary Authorization, and HTTP-only Gateway. For production environments, use the multi-stage deployment model (Stages `4-appfactory`, `5-appinfra`, and `6-appsource`) along with hardening options such as `REQUIRE_ATTESTATION`, TLS Gateway certificates, and `prevent_destroy = true`.
 
 ---
 
@@ -198,6 +199,8 @@ module "eab_project" {
       "roles/cloudkms.admin",
       "roles/serviceusage.serviceUsageAdmin",
       "roles/networkconnectivity.admin",
+      "roles/certificatemanager.owner",
+      "roles/dns.admin",
       "roles/storage.admin",
       "roles/viewer",
     ]
@@ -214,6 +217,9 @@ module "eab_project" {
     "multiclusterservicediscovery.googleapis.com",
     "trafficdirector.googleapis.com",
     "networkconnectivity.googleapis.com",
+    "networkservices.googleapis.com",
+    "modelarmor.googleapis.com",
+    "certificatemanager.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudbuild.googleapis.com",
     "artifactregistry.googleapis.com",
@@ -248,12 +254,25 @@ module "eab_project" {
   business_code     = var.business_code
 }
 
-resource "google_project_iam_member" "project_group_user" {
+locals {
+  # Extract the NCC Hub project ID from the Hub URI
+  interconnect_project_id = split("/", local.ncc_hub_uri)[1]
+}
+
+resource "google_project_iam_member" "ncc_hub_user" {
   for_each = local.app_infra_pipeline_service_accounts
 
-  project = local.shared_vpc_host_project_id
-  role   = "roles/networkconnectivity.groupUser"
-  member = "serviceAccount:${each.value}"
+  project = local.interconnect_project_id
+  role    = "roles/networkconnectivity.hubUser"
+  member  = "serviceAccount:${each.value}"
+}
+
+resource "google_project_iam_member" "ncc_group_user" {
+  for_each = local.app_infra_pipeline_service_accounts
+
+  project = local.interconnect_project_id
+  role    = "roles/networkconnectivity.groupUser"
+  member  = "serviceAccount:${each.value}"
 }
 ```
 
@@ -271,6 +290,18 @@ output "eab_project_number" {
   description = "EAB service project number."
   value       = module.eab_project.project_number
 }
+
+# (Foundation v7.0.0 only): In Foundation v8.0.0+, ncc_hub_uri and ncc_spoke_group are exported natively.
+# Add these two outputs only when deploying on top of Foundation v7.0.0:
+output "ncc_hub_uri" {
+  description = "NCC Hub URI from networks remote state."
+  value       = local.ncc_hub_uri
+}
+
+output "ncc_spoke_group" {
+  description = "NCC Spoke group URI."
+  value       = local.ncc_spoke_group
+}
 ```
 
 And in `gcp-projects/business_unit_1/production/outputs.tf` (and `development/outputs.tf`, `nonproduction/outputs.tf`):
@@ -284,6 +315,17 @@ output "eab_project" {
 output "eab_project_number" {
   description = "EAB service project number."
   value       = module.env.eab_project_number
+}
+
+# (Foundation v7.0.0 only): In Foundation v8.0.0+, these are exported natively.
+output "ncc_hub_uri" {
+  description = "NCC Hub URI from environment module."
+  value       = module.env.ncc_hub_uri
+}
+
+output "ncc_spoke_group" {
+  description = "NCC Spoke group URI."
+  value       = module.env.ncc_spoke_group
 }
 ```
 
@@ -304,7 +346,7 @@ module "kms_attestation" {
   source  = "terraform-google-modules/kms/google"
   version = "~> 4.1"
 
-  project_id          = local.kms_project_id # or module.eab_project.project_id
+  project_id          = module.eab_project.project_id # or local.kms_project_id
   keyring             = "kms-attestation-ring-${var.env}"
   location            = var.location_kms
   keys                = ["attestation-key"]
@@ -313,13 +355,16 @@ module "kms_attestation" {
   key_rotation_period = null
   prevent_destroy     = false
 
-  # Grant Cloud KMS Admin to the application CI/CD Service Accounts so Terraform can read the key version during plan/apply
+  # Grant roles/owner on the key to the application CI/CD Service Accounts so Terraform can manage and read the key version during plan/apply
   set_owners_for = ["attestation-key"]
   owners = [
     for sa in values(local.app_infra_pipeline_service_accounts) : "serviceAccount:${sa}"
   ]
 }
 ```
+
+> [!NOTE]
+> If you choose to host the attestation key in the Foundation central KMS project (`local.kms_project_id`) rather than the service project (`module.eab_project.project_id`), make sure to include the numeric ID of your KMS project under `to.resources` in the Step 2.1 VPC-SC ingress rule.
 
 Export the key in `gcp-projects/modules/base_env/outputs.tf`:
 
@@ -349,7 +394,7 @@ Apply the shared infrastructure pipeline first to provision the dedicated Cloud 
    ```bash
    cd gcp-projects
    git checkout -b plan || git checkout plan
-   git add modules/base_env/eab_project.tf modules/base_env/example_attestation_cmek.tf modules/base_env/outputs.tf */outputs.tf
+   git add modules/base_env/eab_project.tf modules/base_env/example_attestation_cmek.tf modules/base_env/outputs.tf */*outputs.tf
    git commit -m "feat: add dedicated eab service project with workload APIs and roles"
    git push origin plan
    ```
@@ -392,9 +437,9 @@ echo "EAB Service Project Number: ${SERVICE_PROJECT_NUMBER}"
 
 ## Step 2: `1-org` — Configure Workload VPC-SC Ingress & Egress Rules
 
-All VPC Service Controls perimeter configurations should be governed exclusively by the Foundation in `1-org`.
+All VPC Service Controls perimeter configurations should be governed exclusively by the Foundation in `1-org`. The Enterprise Application Blueprint (EAB) skips Access Context Manager resource provisioning when `service_perimeter_name = null`.
 
-When VPC Service Controls are enforced in the Foundation perimeter (`enforce_vpcsc = true`), declare the required ingress and egress rules for Cloud Build Private Worker Pools and Cloud Deploy in `gcp-org/envs/shared/terraform.tfvars`, using the `SERVICE_PROJECT_NUMBER` obtained in Step 1.5.
+When VPC Service Controls are enforced in the Foundation perimeter (`enforce_vpcsc = true`), declare the required ingress and egress rules for Cloud Build Private Worker Pools and Cloud Deploy in `gcp-org/envs/shared/terraform.tfvars`, using the `SERVICE_PROJECT_NUMBER` obtained in Step 1.5. (If configuring 2nd-gen repositories with GitHub or GitLab, also ensure egress rules permit access to `secretmanager.googleapis.com` for token retrieval).
 
 ### 2.1. Update `gcp-org/envs/shared/terraform.tfvars`
 
@@ -630,8 +675,8 @@ module "capital_agent" {
   # Option 2: GitHub (GITHUBv2)
   # cloudbuildv2_repository_config = {
   #   repo_type               = "GITHUBv2"
-  #   github_secret_id        = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-pat/versions/latest"
-  #   github_app_id_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-app-id/versions/latest"
+  #   github_secret_id        = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-pat"
+  #   github_app_id_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-app-id"
   #   repositories = {
   #     "eab-agent-capital-agent" = {
   #       repository_name = "eab-agent-capital-agent"
@@ -643,9 +688,9 @@ module "capital_agent" {
   # Option 3: GitLab (GITLABv2)
   # cloudbuildv2_repository_config = {
   #   repo_type                                   = "GITLABv2"
-  #   gitlab_read_authorizer_credential_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-read-token/versions/latest"
-  #   gitlab_authorizer_credential_secret_id      = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-authorizer-token/versions/latest"
-  #   gitlab_webhook_secret_id                    = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-webhook/versions/latest"
+  #   gitlab_read_authorizer_credential_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-read-token"
+  #   gitlab_authorizer_credential_secret_id      = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-authorizer-token"
+  #   gitlab_webhook_secret_id                    = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-webhook"
   #   repositories = {
   #     "eab-agent-capital-agent" = {
   #       repository_name = "eab-agent-capital-agent"
@@ -727,8 +772,8 @@ project_id  = "SERVICE_PROJECT_ID"
 region      = "us-central1"
 environment = "production"
 
-# Optional: Binary Authorization Attestation KMS Key (created in Foundation Step 1.3)
-# attestation_kms_key = "projects/KMS_PROJECT_ID/locations/us-central1/keyRings/kms-attestation-ring-production/cryptoKeys/attestation-key"
+# Binary Authorization Attestation KMS Key (created in Foundation Step 1.3 or explicitly null)
+attestation_kms_key = null # or "projects/KMS_PROJECT_ID/locations/us-central1/keyRings/kms-attestation-ring-production/cryptoKeys/attestation-key"
 
 # VPC-SC Governance: Managed exclusively by Foundation
 service_perimeter_name = null
@@ -916,30 +961,53 @@ To clean up resources provisioned during this guide:
 
 ### 1. Destroy Enterprise Application Blueprint
 
-Revert the changes done in `bu1-example-app`, `gcp-projects`, `gcp-org` and re-apply the terraform
+Depending on the deployment approach used:
+
+#### Option A: Module instantiation in `bu1-example-app` (Approach A)
+Destroy only the Blueprint workload module without affecting other applications:
+
+```bash
+terraform -chdir=bu1-example-app/business_unit_1/production destroy -target=module.capital_agent -auto-approve
+```
+
+Alternatively, remove the `module "capital_agent"` block from `bu1-example-app/business_unit_1/production/main.tf` and run `terraform apply`.
+
+#### Option B: Standalone Root Deployment (Approach B)
+Destroy the standalone single-project harness:
+
+```bash
+terraform -chdir=examples/agent/standalone-single-project destroy -auto-approve
+```
+
+---
 
 ### 2. Destroy Foundation Projects & Networking (Optional)
 
-If you use the helper to deploy it, you can run:
+If you used the `foundation-deployer` helper tool:
 
 ```bash
 $HOME/go/bin/foundation-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
 ```
 
-If tearing down the entire test environment, follow the Foundation teardown sequence in reverse:
+If tearing down the entire test environment manually with Terraform, execute the destruction sequence in reverse order:
 
 ```bash
 # 1. 4-projects
 terraform -chdir=gcp-projects/business_unit_1/production init && terraform -chdir=gcp-projects/business_unit_1/production destroy -auto-approve
+terraform -chdir=gcp-projects/business_unit_1/shared init && terraform -chdir=gcp-projects/business_unit_1/shared destroy -auto-approve
 
 # 2. 3-networks (or 3-networks-hub-and-spoke)
 terraform -chdir=gcp-networks/envs/production init && terraform -chdir=gcp-networks/envs/production destroy -auto-approve
-
 terraform -chdir=gcp-networks/envs/shared init && terraform -chdir=gcp-networks/envs/shared destroy -auto-approve
 
 # 3. 2-environments
 terraform -chdir=gcp-environments/envs/production init && terraform -chdir=gcp-environments/envs/production destroy -auto-approve
+```
 
+> [!CAUTION]
+> Destroying `1-org` and `0-bootstrap` tears down organization-wide policies, IAM permissions, VPC-SC access perimeters, and the seed state bucket. Only run these steps if you are completely decommissioning the test environment.
+
+```bash
 # 4. 1-org
 terraform -chdir=gcp-org/envs/shared init && terraform -chdir=gcp-org/envs/shared destroy -auto-approve
 
