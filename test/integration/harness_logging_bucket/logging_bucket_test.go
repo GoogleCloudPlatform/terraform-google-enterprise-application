@@ -16,7 +16,6 @@ package harness_logging_bucket
 
 import (
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-application/test/integration/testutils"
@@ -27,8 +26,7 @@ func TestLoggingBucket(t *testing.T) {
 
 	loggingBucket := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(loggingBucketPath),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
-		tft.WithParallelism(100),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 5, testutils.RetryInterval()),
 	)
 	loggingBucket.Test()
 }

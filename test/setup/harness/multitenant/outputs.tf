@@ -23,18 +23,22 @@ output "envs" {
     network_self_link  = vpc.network_self_link,
     subnets_self_links = [for sub in vpc.subnets_self_links : sub if strcontains(sub, "subnetworks/eab")],
   } }
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "network_project_number" {
-  value = [for value in module.vpc_project : value.project_number]
+  value      = [for value in module.vpc_project : value.project_number]
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "network_project_id" {
-  value = [for value in module.vpc_project : value.project_id]
+  value      = [for value in module.vpc_project : value.project_id]
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "common_folder_id" {
-  value = module.folder_common.ids["common"]
+  value      = module.folder_common.ids["common"]
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "org_id" {

@@ -41,7 +41,7 @@ module "gitlab_project" {
   deletion_policy          = "DELETE"
   default_service_account  = "KEEP"
 
-  auto_create_network = false
+  auto_create_network = true
 
   activate_apis = [
     "cloudbilling.googleapis.com",

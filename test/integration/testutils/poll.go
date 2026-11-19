@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -155,4 +156,27 @@ func extractTargetStrings(targets any) []string {
 	default:
 		return []string{}
 	}
+}
+
+// RunGcloudJSONE executes a gcloud command formatted with args, parses the output as JSON,
+// and returns (gjson.Result, error) without calling t.Fatal on command failure or invalid JSON.
+func RunGcloudJSONE(t testing.TB, cmd string, args ...any) (gjson.Result, error) {
+	formattedCmd := cmd
+	if len(args) > 0 {
+		formattedCmd = fmt.Sprintf(cmd, args...)
+	}
+	var op string
+	var err error
+	if strings.Contains(formattedCmd, "--format") {
+		op, err = gcloud.RunCmdE(t, formattedCmd, gcloud.WithCommonArgs([]string{}))
+	} else {
+		op, err = gcloud.RunCmdE(t, formattedCmd)
+	}
+	if err != nil {
+		return gjson.Result{}, err
+	}
+	if !gjson.Valid(op) {
+		return gjson.Result{}, fmt.Errorf("invalid json output: %s", op)
+	}
+	return gjson.Parse(op), nil
 }
