@@ -33,7 +33,7 @@ func getLogs(t *testing.T) (string, error) {
 		Command: "kubectl",
 		Args:    args,
 	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+	return shell.RunCommandContextAndGetStdOutE(t, t.Context(), &kubectlCmd)
 }
 
 func TestHelloWorldSingleProjectE2E(t *testing.T) {
