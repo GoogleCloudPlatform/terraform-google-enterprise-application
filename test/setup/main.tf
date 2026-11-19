@@ -106,14 +106,11 @@ module "seed_project" {
     "trafficdirector.googleapis.com",
   ]
 
+  # GCE default SA roles (roles/compute.networkAdmin, roles/compute.admin) are
+  # bound in iam.tf after compute.googleapis.com finishes enabling because
+  # project-factory's data.google_compute_default_service_account does not wait
+  # for google_project_service when auto_create_network = true.
   activate_api_identities = [
-    {
-      api = "compute.googleapis.com",
-      roles = [
-        "roles/compute.networkAdmin",
-        "roles/compute.admin"
-      ]
-    },
     {
       api = "cloudbuild.googleapis.com",
       roles = [
@@ -219,14 +216,11 @@ module "harness_project" {
     "trafficdirector.googleapis.com",
   ]
 
+  # GCE default SA roles (roles/compute.networkAdmin, roles/compute.admin) are
+  # bound in iam.tf after compute.googleapis.com finishes enabling because
+  # project-factory's data.google_compute_default_service_account does not wait
+  # for google_project_service when auto_create_network = true.
   activate_api_identities = [
-    {
-      api = "compute.googleapis.com",
-      roles = [
-        "roles/compute.networkAdmin",
-        "roles/compute.admin"
-      ]
-    },
     {
       api = "cloudbuild.googleapis.com",
       roles = [

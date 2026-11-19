@@ -71,6 +71,17 @@ locals {
       }
     ]
   ])
+
+  compute_default_sa_role_bindings = flatten([
+    for proj_key, proj in merge(module.harness_project, { "seed" : module.seed_project }) : [
+      for role in ["roles/compute.networkAdmin", "roles/compute.admin"] : {
+        key            = "${proj_key}-${replace(role, "/", "-")}"
+        project_id     = proj.project_id
+        project_number = proj.project_number
+        role           = role
+      }
+    ]
+  ])
 }
 
 resource "google_service_account" "int_test" {
@@ -171,6 +182,7 @@ resource "time_sleep" "wait_iam_propagation" {
     google_project_iam_member.google_services_usage_consumer,
     google_project_iam_member.compute_engine_service_agent_role,
     google_project_iam_member.compute_engine_default_service_agent_role,
+    google_project_iam_member.compute_engine_default_sa_roles,
   ]
 }
 
@@ -222,9 +234,30 @@ resource "google_project_iam_member" "compute_engine_service_agent_role" {
   member   = "serviceAccount:service-${each.value.project_number}@compute-system.iam.gserviceaccount.com"
 }
 
+resource "time_sleep" "wait_compute_api_propagation" {
+  create_duration = "30s"
+
+  depends_on = [
+    module.seed_project,
+    module.harness_project,
+  ]
+}
+
+resource "google_project_iam_member" "compute_engine_default_sa_roles" {
+  for_each = {
+    for binding in local.compute_default_sa_role_bindings : binding.key => binding
+  }
+
+  project    = each.value.project_id
+  role       = each.value.role
+  member     = "serviceAccount:${each.value.project_number}-compute@developer.gserviceaccount.com"
+  depends_on = [time_sleep.wait_compute_api_propagation]
+}
+
 resource "google_project_iam_member" "compute_engine_default_service_agent_role" {
-  for_each = module.harness_project
-  project  = each.value.project_id
-  role     = "roles/compute.serviceAgent"
-  member   = "serviceAccount:${each.value.project_number}-compute@developer.gserviceaccount.com"
+  for_each   = module.harness_project
+  project    = each.value.project_id
+  role       = "roles/compute.serviceAgent"
+  member     = "serviceAccount:${each.value.project_number}-compute@developer.gserviceaccount.com"
+  depends_on = [time_sleep.wait_compute_api_propagation]
 }
