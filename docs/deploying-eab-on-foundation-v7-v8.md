@@ -22,7 +22,7 @@ The deployment of the Blueprint uses the `production` environment of Business Un
 
 - A standalone infrastructure harness combining network, cluster, fleet, and secure CI/CD resources in a single step (without requiring separate multi-stage `4-appfactory` and `5-appinfra` pipelines),
 - A private Google Kubernetes Engine (GKE) Autopilot cluster registered with GKE Fleet, Anthos Service Mesh (ASM), Policy Controller, and Gateway API,
-- Dedicated **Network Connectivity Center (NCC) Spokes** connecting the cluster and worker pool VPCs to the Foundation's centralized enterprise Hub network (**preferred and recommended architecture**),
+- Dedicated **Network Connectivity Center (NCC) Spokes** connecting the cluster VPC to the Foundation's centralized enterprise Hub network (**preferred and recommended architecture**),
 - A dedicated Cloud Build Private Worker Pool connected to an isolated VPC with Google Cloud NAT and internal proxy routing for secure external dependency downloads (fully compliant with `constraints/compute.vmExternalIpAccess`),
 - Artifact Registry repositories with Binary Authorization attestations and Cloud KMS CMEK encryption,
 - Cloud Deploy delivery pipelines and Cloud Source Repositories (CSR) for CI/CD automation,
@@ -34,6 +34,8 @@ The following Foundation infrastructure will be created or reused:
 - The **Network Connectivity Center (NCC) Hub** (`projects/<INTERCONNECT_PROJECT_ID>/locations/global/hubs/ncc-hub-...`) hosted in the centralized Interconnect / Hub project.
 - The Business Unit 1 service project (`prj-p-bu1-sample-eab-xxxx`) created in Foundation step `4-projects`.
 - All organization policies, IAM service account role bindings, APIs, and VPC-SC perimeter ingress/egress rules are **100% managed declaratively by the Foundation steps**. **No manual `gcloud` commands are required.**
+
+__[!WARNING] This is an example, should not be used as production environment.__
 
 ---
 
@@ -52,7 +54,7 @@ flowchart TD
     subgraph EAB["Enterprise Application Blueprint (EAB)"]
         SPOKE["NCC VPC Spoke\n(vpc-spoke-eab-cluster)"]
         CLUSTER_VPC["Cluster VPC\n(vpc-cap-agent-cluster)"]
-        GKE["Private GKE Autopilot Cluster\n(ag-cluster-us-central1-dev)"]
+        GKE["Private GKE Autopilot Cluster\n(ag-cluster-us-central1-prod)"]
         WP_VPC["Workerpool VPC\n(eab-vpc-workerpool)"]
         WP["Cloud Build\nPrivate Worker Pool"]
 
@@ -202,6 +204,7 @@ module "eab_project" {
   }
 
   activate_apis = [
+    "aiplatform.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
     "gkehub.googleapis.com",
@@ -243,6 +246,14 @@ module "eab_project" {
   primary_contact   = "example@example.com"
   secondary_contact = "example2@example.com"
   business_code     = var.business_code
+}
+
+resource "google_project_iam_member" "project_group_user" {
+  for_each = local.app_infra_pipeline_service_accounts
+
+  project = local.shared_vpc_host_project_id
+  role   = "roles/networkconnectivity.groupUser"
+  member = "serviceAccount:${each.value}"
 }
 ```
 
@@ -305,12 +316,6 @@ module "kms_attestation" {
   # Grant Cloud KMS Admin to the application CI/CD Service Accounts so Terraform can read the key version during plan/apply
   set_owners_for = ["attestation-key"]
   owners = [
-    for sa in values(local.app_infra_pipeline_service_accounts) : "serviceAccount:${sa}"
-  ]
-
-  # Grant sign / verify permissions (roles/cloudkms.signerVerifier for asymmetric signing keys)
-  set_decrypters_for = ["attestation-key"]
-  decrypters = [
     for sa in values(local.app_infra_pipeline_service_accounts) : "serviceAccount:${sa}"
   ]
 }
@@ -387,7 +392,7 @@ echo "EAB Service Project Number: ${SERVICE_PROJECT_NUMBER}"
 
 ## Step 2: `1-org` — Configure Workload VPC-SC Ingress & Egress Rules
 
-All VPC Service Controls perimeter configurations are governed exclusively by the Foundation in `1-org`. The Enterprise Application Blueprint (EAB) does not declare or provision Access Context Manager resources (`google_access_context_manager_*`).
+All VPC Service Controls perimeter configurations should be governed exclusively by the Foundation in `1-org`.
 
 When VPC Service Controls are enforced in the Foundation perimeter (`enforce_vpcsc = true`), declare the required ingress and egress rules for Cloud Build Private Worker Pools and Cloud Deploy in `gcp-org/envs/shared/terraform.tfvars`, using the `SERVICE_PROJECT_NUMBER` obtained in Step 1.5.
 
@@ -449,7 +454,7 @@ ingress_policies_map = {
 ```
 
 > [!NOTE]
-> Replace `SERVICE_PROJECT_NUMBER` with the numeric ID of your target service project retrieved in Step 1.5 (e.g., `468623595471`).
+> Replace `SERVICE_PROJECT_NUMBER` with the numeric ID of your target service project retrieved in Step 1.5 (e.g., `123456789012`).
 
 ### 2.2. Commit and Apply `1-org`
 
@@ -572,6 +577,7 @@ git checkout -b plan || git checkout plan
 # Copy EAB into the repository's modules directory
 mkdir -p modules/eab-capital-agent
 cp -RT ../terraform-google-enterprise-application/examples/agent/standalone-single-project/ modules/eab-capital-agent/
+rm modules/eab-capital-agent/provider.tf modules/eab-capital-agent/terraform.tfvars
 ```
 
 #### A.4. Instantiate EAB Module in `business_unit_1/production/main.tf`
@@ -602,7 +608,7 @@ module "capital_agent" {
   environment = local.environment
 
   # Binary Authorization Attestation KMS Key (created in Foundation Step 1.3)
-  attestation_kms_key = try(data.terraform_remote_state.projects_env.outputs.attestation_kms_key, null)
+  attestation_kms_key = data.terraform_remote_state.projects_env.outputs.attestation_kms_key
 
   teams = {
     "capital-agent" = "corp_it_admin@example.com"
@@ -648,15 +654,6 @@ module "capital_agent" {
   #   }
   # }
 }
-
-resource "google_project_iam_member" "project_group_user" {
-  for_each = local.app_infra_pipeline_service_accounts
-
-  project = local.shared_vpc_host_project_id
-  role   = "roles/networkconnectivity.groupUser"
-  member = "serviceAccount:${each.value}"
-}
-
 ```
 
 #### A.5. Export EAB Module Outputs (Optional)
@@ -735,7 +732,6 @@ environment = "production"
 
 # VPC-SC Governance: Managed exclusively by Foundation
 service_perimeter_name = null
-service_perimeter_mode = null
 
 # Network Connectivity Center (NCC) Configuration (Preferred)
 ncc_config = {
@@ -788,7 +784,7 @@ acronyms = {
 }
 cluster_project_id = "prj-p-bu1-sample-eab-xxxx"
 cluster_type = "AUTOPILOT"
-env = "development"
+env = "production"
 fleet_project_id = "prj-p-bu1-sample-eab-xxxx"
 network_project_id = "prj-p-bu1-sample-eab-xxxx"
 service_repository_name = {
@@ -813,6 +809,7 @@ Clone the application source repository provisioned by EAB according to your VCS
 # Option 1: Cloud Source Repositories (CSR)
 gcloud source repos clone eab-agent-capital-agent --project=${SERVICE_PROJECT_ID}
 cd eab-agent-capital-agent
+git checkout -b main
 
 # Option 2: GitHub (if using GITHUBv2)
 # git clone git@github.com:<GITHUB_ORG>/eab-agent-capital-agent.git
@@ -831,6 +828,7 @@ git config user.name "Terraform Automation"
 git add .
 git commit -m "feat: initial commit for capital-agent service"
 git push origin main
+cd ../
 ```
 
 ### 4.2. Monitor Cloud Build and Cloud Deploy
@@ -918,29 +916,33 @@ To clean up resources provisioned during this guide:
 
 ### 1. Destroy Enterprise Application Blueprint
 
-```bash
-cd bu1-example-app/business_unit_1/production
-terraform init
-terraform destroy -auto-approve
-```
+Revert the changes done in `bu1-example-app`, `gcp-projects`, `gcp-org` and re-apply the terraform
 
 ### 2. Destroy Foundation Projects & Networking (Optional)
+
+If you use the helper to deploy it, you can run:
+
+```bash
+$HOME/go/bin/foundation-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
+```
 
 If tearing down the entire test environment, follow the Foundation teardown sequence in reverse:
 
 ```bash
 # 1. 4-projects
-cd gcp-projects/business_unit_1/production && terraform init && terraform destroy -auto-approve
+terraform -chdir=gcp-projects/business_unit_1/production init && terraform -chdir=gcp-projects/business_unit_1/production destroy -auto-approve
 
 # 2. 3-networks (or 3-networks-hub-and-spoke)
-cd gcp-networks/envs/production && terraform init && terraform destroy -auto-approve
+terraform -chdir=gcp-networks/envs/production init && terraform -chdir=gcp-networks/envs/production destroy -auto-approve
+
+terraform -chdir=gcp-networks/envs/shared init && terraform -chdir=gcp-networks/envs/shared destroy -auto-approve
 
 # 3. 2-environments
-cd gcp-environments/envs/production && terraform init && terraform destroy -auto-approve
+terraform -chdir=gcp-environments/envs/production init && terraform -chdir=gcp-environments/envs/production destroy -auto-approve
 
 # 4. 1-org
-cd gcp-org/envs/shared && terraform init && terraform destroy -auto-approve
+terraform -chdir=gcp-org/envs/shared init && terraform -chdir=gcp-org/envs/shared destroy -auto-approve
 
 # 5. 0-bootstrap
-cd gcp-bootstrap/envs/shared && terraform init && terraform destroy -auto-approve
+terraform -chdir=gcp-bootstrap/envs/shared init && terraform -chdir=gcp-bootstrap/envs/shared destroy -auto-approve
 ```
