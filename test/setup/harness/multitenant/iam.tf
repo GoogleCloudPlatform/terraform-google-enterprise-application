@@ -43,5 +43,8 @@ resource "time_sleep" "wait_iam_propagation" {
     google_project_iam_member.int_test_connection_admin,
     google_project_iam_member.int_test_vpc,
     google_project_iam_member.int_test_iam,
+    google_folder_iam_member.folder_iam,
+    google_folder_iam_member.common_folder_iam,
+    google_folder_iam_member.networ_folder_iam,
   ]
 }

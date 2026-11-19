@@ -37,7 +37,8 @@ output "network_project_id" {
 }
 
 output "common_folder_id" {
-  value = module.folder_common.ids["common"]
+  value      = module.folder_common.ids["common"]
+  depends_on = [time_sleep.wait_iam_propagation]
 }
 
 output "org_id" {

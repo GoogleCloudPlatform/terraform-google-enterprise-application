@@ -115,7 +115,6 @@ var (
 		".*Error 409.*Too many conflicts.*":                  "Concurrent IAM policy modification conflicts.",
 		".*CONSUMER_INVALID.*":                               "Shared VPC consumer project propagation.",
 		".*Error waiting for Enabling Shared VPC Resource.*": "Shared VPC enablement propagation.",
-		".*Error deleting default network in project.*":      "Default network deletion race during project creation.",
 	}
 
 	RetryableDeploymentErrors = map[string]string{
