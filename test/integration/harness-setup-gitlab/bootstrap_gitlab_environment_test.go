@@ -35,7 +35,7 @@ func readLogsFromVm(t *testing.T, instanceName string, instanceZone string, inst
 		Command: "gcloud",
 		Args:    args,
 	}
-	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
+	return shell.RunCommandContextAndGetStdOutE(t, t.Context(), &gcloudCmd)
 }
 
 func TestValidateStartupScript(t *testing.T) {
@@ -130,11 +130,11 @@ func TestBootstrapGitlabVM(t *testing.T) {
 
 	for _, repo := range repos {
 		p := &gitlab.CreateProjectOptions{
-			Name:                 gitlab.Ptr(repo),
-			Description:          gitlab.Ptr("Test Repo"),
-			InitializeWithReadme: gitlab.Ptr(true),
-			Visibility:           gitlab.Ptr(gitlab.PrivateVisibility),
-			DefaultBranch:        gitlab.Ptr("master"),
+			Name:                 new(repo),
+			Description:          new("Test Repo"),
+			InitializeWithReadme: new(true),
+			Visibility:           new(gitlab.PrivateVisibility),
+			DefaultBranch:        new("master"),
 		}
 		project, _, err := git.Projects.CreateProject(p)
 		if err != nil {

@@ -227,7 +227,7 @@ func TestMultitenant(t *testing.T) {
 				// Validate App Ip Addresses exist and are external
 				for _, appName := range testutils.AppNames {
 					// TODO: Update to use https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/pull/2356 when released.
-					ipAddresses := gjson.Parse(terraform.OutputJson(t, multitenant.GetTFOptions(), "app_ip_addresses")).Get(appName)
+					ipAddresses := gjson.Parse(terraform.OutputJSONContext(t, t.Context(), multitenant.GetTFOptions(), "app_ip_addresses")).Get(appName)
 					ipAddresses.ForEach(func(key, value gjson.Result) bool {
 						ipOp := gcloud.Run(t, fmt.Sprintf("compute addresses describe %s --project %s --global", key, clusterProjectID))
 						assert.Equal("EXTERNAL", ipOp.Get("addressType").String(), "External IP type should be EXTERNAL.")
