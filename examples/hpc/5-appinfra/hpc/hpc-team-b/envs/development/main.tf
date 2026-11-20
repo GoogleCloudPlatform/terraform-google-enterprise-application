@@ -25,7 +25,7 @@ locals {
 
 module "provision-monte-carlo-infra" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/hpc-monte-carlo-infra"
-  version = "~> 0.7"
+  version = "~> 0.8"
 
   infra_project            = local.app_project_id
   cluster_project          = local.cluster_project_id

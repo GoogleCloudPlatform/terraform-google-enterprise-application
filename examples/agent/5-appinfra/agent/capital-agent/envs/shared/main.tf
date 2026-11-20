@@ -30,7 +30,7 @@ locals {
 
 module "app" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/deployment-pipeline"
-  version = "~> 0.7"
+  version = "~> 0.8"
 
   project_id                 = local.app_admin_project
   region                     = var.region

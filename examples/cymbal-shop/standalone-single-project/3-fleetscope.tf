@@ -22,7 +22,7 @@ locals {
 
 module "fleetscope_infra" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/fleetscope"
-  version = "~> 0.7"
+  version = "~> 0.8"
 
   env                         = var.environment
   cluster_project_id          = local.cluster_project_id
