@@ -63,7 +63,7 @@ resource "google_project_iam_member" "cloudbuild_builder" {
 
 module "cicd" {
   source   = "GoogleCloudPlatform/enterprise-application/google//modules/deployment-pipeline"
-  version  = "~> 0.7"
+  version  = "~> 0.8"
   for_each = var.cloudbuildv2_repository_config.repositories
 
   project_id                 = var.project_id

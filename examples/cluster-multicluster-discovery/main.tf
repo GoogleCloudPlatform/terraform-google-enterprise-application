@@ -30,7 +30,7 @@ locals {
 
 module "multitenant_infra" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/gke"
-  version = "~> 0.7"
+  version = "~> 0.8"
 
   apps                   = local.apps
   cluster_subnetworks    = module.cluster_network.subnets_self_links
@@ -50,7 +50,7 @@ module "multitenant_infra" {
 
 module "fleetscope_infra" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/fleetscope"
-  version = "~> 0.7"
+  version = "~> 0.8"
 
   env                    = var.environment
   cluster_project_id     = module.multitenant_infra.cluster_project_id
