@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.24 AS bld
+FROM golang:1.25 AS bld
 
 # Fetch Dependencies
 WORKDIR /build/go
