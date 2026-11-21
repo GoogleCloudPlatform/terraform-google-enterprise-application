@@ -15,14 +15,13 @@
 - [Billing quota exceeded](#billing-quota-exceeded)
 - [Terraform Error acquiring the state lock](#terraform-error-acquiring-the-state-lock)
 - [Terraform deploy fails due to GitLab repositories not found](#terraform-deploy-fails-due-to-gitlab-repositories-not-found)
-- [Cannot assign requested address error in Cloud Shell](#cannot-assign-requested-address-error-in-cloud-shell)
-- [Error: Terraform deploy fails due to GitLab repositories not found](#terraform-deploy-fails-due-to-gitlab-repositories-not-found)
 - [Error: Gitlab pipelines access denied](#gitlab-pipelines-access-denied)
 - [The user does not have permission to access Project or it may not exist](#the-user-does-not-have-permission-to-access-project-or-it-may-not-exist)
 - [Quota 'CPUS_ALL_REGIONS' exceeded](#quota-cpus_all_regions-exceeded)
 - [Shared VPC Attachment Destruction Failure due to Network Endpoint Group Link](#shared-vpc-attachment-destruction-failure-due-to-network-endpoint-group-link)
 - [Network Destruction Failure due to Firewall still using it](#network-destruction-failure-due-to-firewall-still-using-it)
 - [Cloud Source Repositories (CSR) Git Authentication Failure](#cloud-source-repositories-csr-git-authentication-failure)
+- [Private GKE Autopilot Cluster Direct kubectl Connectivity Timeout](#private-gke-autopilot-cluster-direct-kubectl-connectivity-timeout)
 - - -
 
 ### Project quota exceeded
@@ -513,3 +512,28 @@ Choose one of the following approaches:
 3. **Use 2nd-gen Repositories (GitHub / GitLab)**:
    In `global.tfvars`, configure `cloudbuildv2_repository_config` to use GitHub (`repo_type = "GITHUBv2"`) or GitLab (`repo_type = "GITLABv2"`).
 
+
+### Private GKE Autopilot Cluster Direct kubectl Connectivity Timeout
+
+**Error message:**
+
+```text
+Unable to connect to the server: dial tcp 172.16.0.2:443: i/o timeout
+```
+
+**Cause:**
+
+In compliance with enterprise security baselines, GKE Autopilot clusters provisioned by EAB have private control plane endpoints enabled and public endpoints disabled. Standard `kubectl` commands executed from outside the VPC cannot route directly to private control plane RFC 1918 addresses.
+
+**Solution:**
+
+Connect securely through Google Cloud Connect Gateway without needing a bastion host or VPN:
+
+```bash
+# Obtain Connect Gateway credentials
+gcloud container fleet memberships get-credentials ag-cluster-us-central1-development \
+  --project=<PROJECT_ID>
+
+# Interact with the cluster via kubectl
+kubectl get pods -A
+```
