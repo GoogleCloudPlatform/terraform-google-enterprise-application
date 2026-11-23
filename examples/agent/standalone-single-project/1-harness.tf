@@ -17,7 +17,7 @@
 
 module "standalone_harness" {
   source  = "GoogleCloudPlatform/enterprise-application/google//modules/standalone-harness"
-  version = "~> 0.7"
+  version = "~> 0.8"
 
   project_id                                    = var.project_id
   vpc_name                                      = "cap-agent-cluster"
