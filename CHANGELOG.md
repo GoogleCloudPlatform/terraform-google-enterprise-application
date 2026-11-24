@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 This changelog is generated automatically based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
+## [0.8.1](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.8.0...v0.8.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* resolve sources of CI flakiness and IAM propagation issues ([#740](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/issues/740)) ([9fcaaa6](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/commit/9fcaaa69cb8acdc59ba7ebd721db7cef01ecec43))
+
 ## [0.8.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/compare/v0.7.0...v0.8.0) (2026-11-17)
 
 
