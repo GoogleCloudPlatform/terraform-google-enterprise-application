@@ -5,11 +5,11 @@ toolchain go1.24.1
 
 require (
 	cloud.google.com/go/compute/metadata v0.5.2
-	cloud.google.com/go/pubsub v1.44.0
+	cloud.google.com/go/pubsub/v2 v2.9.0
 	cloud.google.com/go/storage v1.44.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.2
 	github.com/bufbuild/protocompile v0.14.1
-	github.com/jhump/protoreflect v1.17.0
+	github.com/jhump/protoreflect/v2 v2.0.1
 	github.com/spf13/cobra v1.8.1
 	go.opencensus.io v0.24.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.30.0
