@@ -24,28 +24,28 @@ grpcio==1.70.0
     #   grpcio-status
 grpcio-status==1.70.0
     # via google-api-core
-idna==3.10
+idna==3.15
     # via requests
 proto-plus==1.26.0
     # via
     #   google-api-core
     #   google-cloud-parallelstore
-protobuf==6.30.0
+protobuf==6.33.5
     # via
     #   google-api-core
     #   google-cloud-parallelstore
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-pyasn1==0.6.1
+pyasn1==0.6.5
     # via
     #   pyasn1-modules
     #   rsa
 pyasn1-modules==0.4.1
     # via google-auth
-requests==2.32.4
+requests==2.33.0
     # via google-api-core
 rsa==4.9
     # via google-auth
-urllib3==2.5.0
+urllib3==2.8.0
     # via requests
