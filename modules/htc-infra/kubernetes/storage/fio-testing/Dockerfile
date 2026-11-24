@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # Install FIO and supporting tools
 RUN apt-get update && \
