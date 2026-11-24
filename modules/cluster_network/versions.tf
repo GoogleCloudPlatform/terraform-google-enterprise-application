@@ -36,6 +36,6 @@ terraform {
     }
   }
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-application:cluster-network/v0.8.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-application:cluster-network/v0.8.1"
   }
 }
