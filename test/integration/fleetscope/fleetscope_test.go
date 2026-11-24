@@ -138,7 +138,7 @@ func TestFleetscope(t *testing.T) {
 
 				pollNamespaces := func() (bool, error) {
 					// get kubectl namespaces and store them on currentClusterNamespaces slice
-					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "ns", "-o", "json")
+					output, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "get", "ns", "-o", "json")
 					if err != nil {
 						t.Logf("Error getting namespaces: %v, will retry", err)
 						return true, nil
@@ -249,7 +249,7 @@ func TestFleetscope(t *testing.T) {
 
 						pollConfigSync := func() (bool, error) {
 							// ensure config-sync resources are present in cluster
-							_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+							_, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 							if err != nil {
 								t.Logf("Config-Sync not yet ready or error '%s', will retry polling.", err.Error())
 								return true, nil
@@ -354,7 +354,7 @@ func TestFleetscope(t *testing.T) {
 				for count := 0; count < 10; count++ {
 
 					// validate no errors in config sync
-					output, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
+					output, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "get", "rootsyncs.configsync.gke.io", "-n", "config-management-system", "root-sync", "-o", "jsonpath='{.status}'")
 					if err != nil {
 						t.Logf("Error querying rootsyncs (%v), will retry in 60s", err)
 						time.Sleep(60 * time.Second)

@@ -141,7 +141,7 @@ func GetSecretFromSecretManager(t *testing.T, secretName string, secretProject s
 		Args:    args,
 		Logger:  logger.Discard,
 	}
-	return shell.RunCommandAndGetStdOutE(t, gcloudCmd)
+	return shell.RunCommandContextAndGetStdOutE(t, t.Context(), &gcloudCmd)
 }
 
 // Will connect to GKE private cluster using connect gateway, this allows running kubectl commands
