@@ -377,11 +377,11 @@ output "attestation_kms_key" {
 }
 ```
 
-### 1.4. Add `serviceusage.googleapis.com` to infra pipeline project
+### 1.4. Add required APIs to infra pipeline project
 
-Add the following api `serviceusage.googleapis.com` to the file `gcp-projects/modules/app_infra_pipeline_cb/main.tf` as a value of `activate_apis` variable for `app_infra_cloudbuild_project` module :
+Add the following apis to the file `gcp-projects/modules/app_infra_pipeline_cb/main.tf` as a value of `activate_apis` variable for `app_infra_cloudbuild_project` module :
 
-```bash
+```hcl
   activate_apis = compact([
     "cloudbuild.googleapis.com",
     "sourcerepo.googleapis.com",
@@ -390,6 +390,7 @@ Add the following api `serviceusage.googleapis.com` to the file `gcp-projects/mo
     "artifactregistry.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
+    "binaryauthorization.googleapis.com",
     var.enable_confidential_space ? "confidentialcomputing.googleapis.com" : ""
   ])
 ```
