@@ -254,15 +254,10 @@ module "eab_project" {
   business_code     = var.business_code
 }
 
-locals {
-  # Extract the NCC Hub project ID from the Hub URI
-  interconnect_project_id = split("/", local.ncc_hub_uri)[1]
-}
-
 resource "google_project_iam_member" "ncc_hub_user" {
   for_each = local.app_infra_pipeline_service_accounts
 
-  project = local.interconnect_project_id
+  project = local.shared_vpc_host_project_id
   role    = "roles/networkconnectivity.hubUser"
   member  = "serviceAccount:${each.value}"
 }
@@ -270,7 +265,7 @@ resource "google_project_iam_member" "ncc_hub_user" {
 resource "google_project_iam_member" "ncc_group_user" {
   for_each = local.app_infra_pipeline_service_accounts
 
-  project = local.interconnect_project_id
+  project = local.shared_vpc_host_project_id
   role    = "roles/networkconnectivity.groupUser"
   member  = "serviceAccount:${each.value}"
 }
@@ -291,16 +286,15 @@ output "eab_project_number" {
   value       = module.eab_project.project_number
 }
 
-# (Foundation v7.0.0 only): In Foundation v8.0.0+, ncc_hub_uri and ncc_spoke_group are exported natively.
-# Add these two outputs only when deploying on top of Foundation v7.0.0:
+# For Foundation v7.0.0 parity with v8.0.0 (export NCC Hub details from networks remote state):
 output "ncc_hub_uri" {
   description = "NCC Hub URI from networks remote state."
-  value       = local.ncc_hub_uri
+  value       = data.terraform_remote_state.networks_env.outputs.ncc_hub_uri
 }
 
 output "ncc_spoke_group" {
   description = "NCC Spoke group URI."
-  value       = local.ncc_spoke_group
+  value       = data.terraform_remote_state.networks_env.outputs.ncc_spoke_group
 }
 ```
 
@@ -317,9 +311,8 @@ output "eab_project_number" {
   value       = module.env.eab_project_number
 }
 
-# (Foundation v7.0.0 only): In Foundation v8.0.0+, these are exported natively.
 output "ncc_hub_uri" {
-  description = "NCC Hub URI from environment module."
+  description = "NCC Hub URI."
   value       = module.env.ncc_hub_uri
 }
 
@@ -384,7 +377,24 @@ output "attestation_kms_key" {
 }
 ```
 
-### 1.4. Commit and Apply `4-projects` (Shared Pipeline & Production Service Projects)
+### 1.4. Add `serviceusage.googleapis.com` to infra pipeline project
+
+Add the following api `serviceusage.googleapis.com` to the file `gcp-projects/modules/app_infra_pipeline_cb/main.tf` as a value of `activate_apis` variable for `app_infra_cloudbuild_project` module :
+
+```bash
+  activate_apis = compact([
+    "cloudbuild.googleapis.com",
+    "sourcerepo.googleapis.com",
+    "cloudkms.googleapis.com",
+    "iam.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "serviceusage.googleapis.com",
+    var.enable_confidential_space ? "confidentialcomputing.googleapis.com" : ""
+  ])
+```
+
+### 1.5. Commit and Apply `4-projects` (Shared Pipeline & Production Service Projects)
 
 Apply the shared infrastructure pipeline first to provision the dedicated Cloud Source Repositories, Cloud Build triggers, and state buckets, followed by the service project:
 
@@ -422,7 +432,7 @@ terraform plan
 terraform apply
 ```
 
-### 1.5. Retrieve EAB Service Project Number
+### 1.6. Retrieve EAB Service Project Number
 
 Initialize Terraform in the production environment and retrieve the newly provisioned service project number to be used in Step 2 for VPC Service Controls:
 
@@ -675,8 +685,8 @@ module "capital_agent" {
   # Option 2: GitHub (GITHUBv2)
   # cloudbuildv2_repository_config = {
   #   repo_type               = "GITHUBv2"
-  #   github_secret_id        = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-pat"
-  #   github_app_id_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-app-id"
+  #   github_secret_id        = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-pat/versions/latest"
+  #   github_app_id_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/github-app-id/versions/latest"
   #   repositories = {
   #     "eab-agent-capital-agent" = {
   #       repository_name = "eab-agent-capital-agent"
@@ -688,9 +698,9 @@ module "capital_agent" {
   # Option 3: GitLab (GITLABv2)
   # cloudbuildv2_repository_config = {
   #   repo_type                                   = "GITLABv2"
-  #   gitlab_read_authorizer_credential_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-read-token"
-  #   gitlab_authorizer_credential_secret_id      = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-authorizer-token"
-  #   gitlab_webhook_secret_id                    = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-webhook"
+  #   gitlab_read_authorizer_credential_secret_id = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-read-token/versions/latest"
+  #   gitlab_authorizer_credential_secret_id      = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-authorizer-token/versions/latest"
+  #   gitlab_webhook_secret_id                    = "projects/${data.terraform_remote_state.projects_env.outputs.eab_project_number}/secrets/gitlab-webhook/versions/latest"
   #   repositories = {
   #     "eab-agent-capital-agent" = {
   #       repository_name = "eab-agent-capital-agent"
@@ -772,8 +782,8 @@ project_id  = "SERVICE_PROJECT_ID"
 region      = "us-central1"
 environment = "production"
 
-# Binary Authorization Attestation KMS Key (created in Foundation Step 1.3 or explicitly null)
-attestation_kms_key = null # or "projects/KMS_PROJECT_ID/locations/us-central1/keyRings/kms-attestation-ring-production/cryptoKeys/attestation-key"
+# Optional: Binary Authorization Attestation KMS Key (created in Foundation Step 1.3)
+# attestation_kms_key = "projects/KMS_PROJECT_ID/locations/us-central1/keyRings/kms-attestation-ring-production/cryptoKeys/attestation-key"
 
 # VPC-SC Governance: Managed exclusively by Foundation
 service_perimeter_name = null
@@ -961,53 +971,30 @@ To clean up resources provisioned during this guide:
 
 ### 1. Destroy Enterprise Application Blueprint
 
-Depending on the deployment approach used:
-
-#### Option A: Module instantiation in `bu1-example-app` (Approach A)
-Destroy only the Blueprint workload module without affecting other applications:
-
-```bash
-terraform -chdir=bu1-example-app/business_unit_1/production destroy -target=module.capital_agent -auto-approve
-```
-
-Alternatively, remove the `module "capital_agent"` block from `bu1-example-app/business_unit_1/production/main.tf` and run `terraform apply`.
-
-#### Option B: Standalone Root Deployment (Approach B)
-Destroy the standalone single-project harness:
-
-```bash
-terraform -chdir=examples/agent/standalone-single-project destroy -auto-approve
-```
-
----
+Revert the changes done in `bu1-example-app`, `gcp-projects`, `gcp-org` and re-apply the terraform
 
 ### 2. Destroy Foundation Projects & Networking (Optional)
 
-If you used the `foundation-deployer` helper tool:
+If you use the helper to deploy it, you can run:
 
 ```bash
 $HOME/go/bin/foundation-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
 ```
 
-If tearing down the entire test environment manually with Terraform, execute the destruction sequence in reverse order:
+If tearing down the entire test environment, follow the Foundation teardown sequence in reverse:
 
 ```bash
 # 1. 4-projects
 terraform -chdir=gcp-projects/business_unit_1/production init && terraform -chdir=gcp-projects/business_unit_1/production destroy -auto-approve
-terraform -chdir=gcp-projects/business_unit_1/shared init && terraform -chdir=gcp-projects/business_unit_1/shared destroy -auto-approve
 
 # 2. 3-networks (or 3-networks-hub-and-spoke)
 terraform -chdir=gcp-networks/envs/production init && terraform -chdir=gcp-networks/envs/production destroy -auto-approve
+
 terraform -chdir=gcp-networks/envs/shared init && terraform -chdir=gcp-networks/envs/shared destroy -auto-approve
 
 # 3. 2-environments
 terraform -chdir=gcp-environments/envs/production init && terraform -chdir=gcp-environments/envs/production destroy -auto-approve
-```
 
-> [!CAUTION]
-> Destroying `1-org` and `0-bootstrap` tears down organization-wide policies, IAM permissions, VPC-SC access perimeters, and the seed state bucket. Only run these steps if you are completely decommissioning the test environment.
-
-```bash
 # 4. 1-org
 terraform -chdir=gcp-org/envs/shared init && terraform -chdir=gcp-org/envs/shared destroy -auto-approve
 
