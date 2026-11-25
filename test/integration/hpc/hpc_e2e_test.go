@@ -31,7 +31,7 @@ import (
 const AI_ON_GKE_GIT_TAG = "v1.10"
 
 func createKueueResources(t *testing.T, options *k8s.KubectlOptions) (string, error) {
-	return k8s.RunKubectlAndGetOutputE(t, options, "apply", "-f", "../../../examples/hpc/6-appsource/manifests/kueue-resources.yaml")
+	return k8s.RunKubectlAndGetOutputContextE(t, t.Context(), options, "apply", "-f", "../../../examples/hpc/6-appsource/manifests/kueue-resources.yaml")
 }
 
 func setupClusterToolkitInTmpDirectory(t *testing.T) {
@@ -39,7 +39,7 @@ func setupClusterToolkitInTmpDirectory(t *testing.T) {
 		Command: "git",
 		Args:    []string{"clone", "--branch", "v1.88.0", "https://github.com/GoogleCloudPlatform/cluster-toolkit.git", "/tmp/cluster-toolkit"},
 	}
-	_, err := shell.RunCommandAndGetStdOutE(t, gitCmd)
+	_, err := shell.RunCommandContextAndGetStdOutE(t, t.Context(), &gitCmd)
 	if err != nil {
 		fmt.Println("Error cloning repository:", err)
 		return
@@ -52,7 +52,7 @@ func setupClusterToolkitInTmpDirectory(t *testing.T) {
 		WorkingDir: "/tmp/cluster-toolkit",
 	}
 
-	_, err = shell.RunCommandAndGetStdOutE(t, makeCmd)
+	_, err = shell.RunCommandContextAndGetStdOutE(t, t.Context(), &makeCmd)
 	if err != nil {
 		fmt.Println("Error running make:", err)
 		return
@@ -74,7 +74,7 @@ func deployClusterToolkitBlueprint(t *testing.T, projectID string, clusterName s
 		},
 	}
 
-	_, err := shell.RunCommandAndGetStdOutE(t, cmd)
+	_, err := shell.RunCommandContextAndGetStdOutE(t, t.Context(), &cmd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func getNotebookBucketUrl(t *testing.T) string {
 			"gcs_bucket_path_data_bucket",
 		},
 	}
-	output, err := shell.RunCommandAndGetStdOutE(t, cmd)
+	output, err := shell.RunCommandContextAndGetStdOutE(t, t.Context(), &cmd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func runBatchJobs(t *testing.T) {
 			"-m", "venv", "/tmp/monte-carlo-simulation",
 		},
 	}
-	_, err := shell.RunCommandAndGetStdOutE(t, venvCmd)
+	_, err := shell.RunCommandContextAndGetStdOutE(t, t.Context(), &venvCmd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func runBatchJobs(t *testing.T) {
 			"requirements.txt",
 		},
 	}
-	_, err = shell.RunCommandAndGetStdOutE(t, pipCmd)
+	_, err = shell.RunCommandContextAndGetStdOutE(t, t.Context(), &pipCmd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +139,7 @@ func runBatchJobs(t *testing.T) {
 			"gke_batch.py", "--create_job",
 		},
 	}
-	_, err = shell.RunCommandAndGetStdOutE(t, createBatchJobs)
+	_, err = shell.RunCommandContextAndGetStdOutE(t, t.Context(), &createBatchJobs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +158,7 @@ func runDownloadDataScript(t *testing.T, infraProjectTeamB string) {
 			"-m", "venv", "/tmp/download-data",
 		},
 	}
-	_, err := shell.RunCommandAndGetStdOutE(t, venvCmd)
+	_, err := shell.RunCommandContextAndGetStdOutE(t, t.Context(), &venvCmd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func runDownloadDataScript(t *testing.T, infraProjectTeamB string) {
 			"download_data_requirements.txt",
 		},
 	}
-	_, err = shell.RunCommandAndGetStdOutE(t, pipCmd)
+	_, err = shell.RunCommandContextAndGetStdOutE(t, t.Context(), &pipCmd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,7 +185,7 @@ func runDownloadDataScript(t *testing.T, infraProjectTeamB string) {
 			"download_data.py", fmt.Sprintf("--bucket_name=%s", stocksBucketName),
 		},
 	}
-	_, err = shell.RunCommandAndGetStdOutE(t, downloadDataCmd)
+	_, err = shell.RunCommandContextAndGetStdOutE(t, t.Context(), &downloadDataCmd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +211,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 
 	t.Run("hpc-monte-carlo-simulation Test", func(t *testing.T) {
 		t.Parallel()
-		_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
+		_, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -233,7 +233,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 
 		t.Log("Validating Batch Jobs:")
 		for count := 0; count < 30; count++ {
-			jobsOutput, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "jobs", "-n", "hpc-team-b-development", "-o", "json")
+			jobsOutput, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "get", "jobs", "-n", "hpc-team-b-development", "-o", "json")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -247,7 +247,7 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 
 	t.Run("hpc-ai-training Test", func(t *testing.T) {
 		t.Parallel()
-		_, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
+		_, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "wait", "deploy/kueue-controller-manager", "-n", "kueue-system", "--for=condition=available", "--timeout=5m")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -295,13 +295,13 @@ func TestHPCMonteCarloE2E(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = k8s.RunKubectlAndGetOutputE(t, k8sOpts, "apply", "-f", manifestFullPath, "-n", "hpc-team-a-development")
+		_, err = k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "apply", "-f", manifestFullPath, "-n", "hpc-team-a-development")
 		if err != nil {
 			t.Fatal(err)
 		}
 		// validate job finished
 		for count := 0; count < 30; count++ {
-			jobsOutput, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "-n", "hpc-team-a-development", "logs", "jobs/mnist-training-job", "-c", "tensorflow")
+			jobsOutput, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "-n", "hpc-team-a-development", "logs", "jobs/mnist-training-job", "-c", "tensorflow")
 			if err != nil {
 				t.Log(err)
 			}

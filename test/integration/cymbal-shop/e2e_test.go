@@ -46,7 +46,7 @@ func getServiceIpAddress(t *testing.T, serviceName string, namespace string) (st
 			"-o", "jsonpath={.status.loadBalancer.ingress[0].ip}",
 		},
 	}
-	return shell.RunCommandAndGetStdOutE(t, kubectlCmd)
+	return shell.RunCommandContextAndGetStdOutE(t, t.Context(), &kubectlCmd)
 }
 
 func TestCymbalShopE2E(t *testing.T) {
@@ -97,8 +97,9 @@ func TestCymbalShopE2E(t *testing.T) {
 			}
 			return fmt.Sprint(resp.StatusCode), nil
 		}
-		statusCode, err := retry.DoWithRetryE(
+		statusCode, err := retry.DoWithRetryContextE(
 			t,
+			t.Context(),
 			fmt.Sprintf("Checking: %s", ipAddress),
 			maxRetries,
 			sleepBetweenRetries,
