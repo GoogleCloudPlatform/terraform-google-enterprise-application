@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/risk-and-research-blueprints/examples/risk
 go 1.24
 
 require (
-	cloud.google.com/go/compute/metadata v0.6.0
-	cloud.google.com/go/storage v1.50.0
-	github.com/schollz/progressbar/v3 v3.16.1
-	github.com/spf13/cobra v1.8.1
-	google.golang.org/api v0.215.0
+	cloud.google.com/go/compute/metadata v0.10.0
+	cloud.google.com/go/storage v1.71.0
+	github.com/schollz/progressbar/v3 v3.19.1
+	github.com/spf13/cobra v1.10.2
+	google.golang.org/api v0.316.0
 	google.golang.org/grpc v1.68.1
-	google.golang.org/protobuf v1.36.4
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
