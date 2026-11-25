@@ -49,6 +49,7 @@ module "alloydb" {
     instance_id        = "cluster-${var.db_region}-instance1-psc-${var.env}",
     require_connectors = false
     ssl_mode           = "ENCRYPTED_ONLY"
+    machine_cpu_count  = 2
   }
 
   read_pool_instance = [
@@ -57,6 +58,7 @@ module "alloydb" {
       display_name       = "cluster-${var.db_region}-r1-psc-${var.env}"
       require_connectors = false
       ssl_mode           = "ENCRYPTED_ONLY"
+      machine_cpu_count  = 2
     }
   ]
 

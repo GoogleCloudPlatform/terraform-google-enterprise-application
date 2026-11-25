@@ -741,7 +741,7 @@ dev = [
 requires-dist = [
     { name = "authlib", specifier = "==1.9.8" },
     { name = "cryptography", specifier = "==50.0.2" },
-    { name = "fastmcp", specifier = "==4.2.1" },
+    { name = "fastmcp", specifier = ">=4.2.1,<5" },
     { name = "google-auth", specifier = ">=2.0.0" },
     { name = "grpcio", specifier = ">=1.60.0" },
     { name = "opentelemetry-api", specifier = ">=1.25.0" },
