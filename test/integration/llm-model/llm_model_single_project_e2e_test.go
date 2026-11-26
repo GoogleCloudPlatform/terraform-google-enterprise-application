@@ -64,7 +64,7 @@ func TestLLMModelSingleProjectE2E(t *testing.T) {
 			testutils.ConnectToFleet(t, clusterName, clusterLocation, clusterProjectId)
 			k8sOpts := k8s.NewKubectlOptions(fmt.Sprintf("connectgateway_%s_%s_%s", clusterProjectId, clusterLocation, clusterName), "", "")
 
-			ipAddress, err := k8s.RunKubectlAndGetOutputE(t, k8sOpts, "get", "gateway/llamma-model-gw", "-o", "jsonpath={.status.addresses[0].value}", "-n", namespace)
+			ipAddress, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), k8sOpts, "get", "gateway/llamma-model-gw", "-o", "jsonpath={.status.addresses[0].value}", "-n", namespace)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -101,8 +101,9 @@ func TestLLMModelSingleProjectE2E(t *testing.T) {
 				}
 				return fmt.Sprint(resp.StatusCode), err
 			}
-			statusCode, err := retry.DoWithRetryE(
+			statusCode, err := retry.DoWithRetryContextE(
 				t,
+				t.Context(),
 				fmt.Sprintf("Checking: %s", ipAddress),
 				maxRetries,
 				sleepBetweenRetries,
@@ -183,8 +184,9 @@ func TestLLMModelSingleProjectE2E(t *testing.T) {
 			}
 
 			// 5. Execute the Retry Loop
-			responseBody, err := retry.DoWithRetryE(
+			responseBody, err := retry.DoWithRetryContextE(
 				t,
+				t.Context(),
 				fmt.Sprintf("Waiting for valid LLM response from %s", modelURL),
 				maxRetries,
 				sleepBetweenRetries,

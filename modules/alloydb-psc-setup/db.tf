@@ -32,7 +32,7 @@ resource "google_project_service" "alloydb_api" {
 
 module "alloydb" {
   source  = "GoogleCloudPlatform/alloy-db/google"
-  version = "~> 8.1"
+  version = "~> 9.0"
 
   cluster_id = "cluster-${var.db_region}-psc-${var.env}"
   location   = var.db_region
@@ -49,6 +49,7 @@ module "alloydb" {
     instance_id        = "cluster-${var.db_region}-instance1-psc-${var.env}",
     require_connectors = false
     ssl_mode           = "ENCRYPTED_ONLY"
+    machine_cpu_count  = 2
   }
 
   read_pool_instance = [
@@ -57,6 +58,7 @@ module "alloydb" {
       display_name       = "cluster-${var.db_region}-r1-psc-${var.env}"
       require_connectors = false
       ssl_mode           = "ENCRYPTED_ONLY"
+      machine_cpu_count  = 2
     }
   ]
 

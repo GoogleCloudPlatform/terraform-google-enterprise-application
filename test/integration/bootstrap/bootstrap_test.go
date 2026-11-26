@@ -101,7 +101,7 @@ func TestBootstrap(t *testing.T) {
 				require.NoError(t, err3)
 			}
 
-			terraform.Init(t, tempOptions)
+			terraform.InitContext(t, t.Context(), tempOptions)
 		})
 
 	bootstrap.DefineVerify(func(assert *assert.Assertions) {
@@ -195,7 +195,7 @@ func TestBootstrap(t *testing.T) {
 			require.NoError(t, err3)
 		}
 
-		terraform.Init(t, tempOptions)
+		terraform.InitContext(t, t.Context(), tempOptions)
 		bootstrap.DefaultTeardown(assert)
 	})
 

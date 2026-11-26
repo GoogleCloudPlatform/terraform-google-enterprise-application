@@ -74,8 +74,9 @@ func TestAppE2ECymbalShopSingleProject(t *testing.T) {
 			}
 			return fmt.Sprint(resp.StatusCode), nil
 		}
-		statusCode, err := retry.DoWithRetryE(
+		statusCode, err := retry.DoWithRetryContextE(
 			t,
+			t.Context(),
 			fmt.Sprintf("Checking: %s", ipAddress),
 			maxRetries,
 			sleepBetweenRetries,
