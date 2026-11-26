@@ -136,7 +136,7 @@ module "cicd" {
 
 module "model_armor_configuration" {
   source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 9.0"
+  version = "~> 7.3"
 
   template_id = "ma-${local.application_name}-${local.service_name}"
   location    = var.region
